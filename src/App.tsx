@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type {
   AccentPalette,
   AppLanguage,
@@ -10,7 +10,7 @@ import type {
   ThemeDepth,
 } from './types';
 
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -115,7 +115,9 @@ type Messages = {
   moduleStorage: string;
 };
 
-const translations: Record<AppLanguage, Messages> = {
+type BaseLanguage = 'zh' | 'ja' | 'en' | 'ru';
+
+const translations: Record<BaseLanguage, Messages> = {
   zh: {
   appTitle: 'Original Character Maker',
   appSubtitle: '自定义 OC 角色中控台',
@@ -136,7 +138,7 @@ const translations: Record<AppLanguage, Messages> = {
     privacyNote: '本网站所有信息均在本地保存，不会上传你的角色社卡、个人信息或 API 私钥。',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
     metricModules: '4 个功能入口',
-    metricLanguages: '4 种界面语言',
+    metricLanguages: '界面语言',
     metricStorage: '本地保存',
     featureFace: '捏脸',
     featureStyle: '转画风',
@@ -196,10 +198,10 @@ const translations: Record<AppLanguage, Messages> = {
     apiEffectiveCustom: '当前优先使用你填写的自定义 API 地址。',
     apiPrivacy: '本网站所有信息均在本地保存，不会上传任何角色社卡、个人信息或私钥。',
     announcementTitle: '公告',
-  announcementDescription: '0.2.0 版本完成了主页与设置面板的第二轮重构，并补齐了入口图标和动效细节。',
-  announcementList1: '主页进一步贴近 Character Workflow Agent 的布局比例，整体 UI 缩小并统一了卡片节奏。',
-  announcementList2: '接口模式切换支持显隐配置区，语言按钮改为各语言自己的原生写法。',
-  announcementList3: '入口弹窗改为图标卡片，设置与弹窗补齐开关渐显和按钮按压动画。',
+    announcementDescription: '0.2.1 版本把捏脸编辑器切成 VRoid 风格三栏结构，并正式补上历史公告面板。',
+    announcementList1: '捏脸页现在是左侧资产栏、中间透明画布、右侧参数栏，上方同时加入工具栏。',
+    announcementList2: '返回首页前会判断当前项目是否保存，未保存时弹出更明确的提醒弹窗。',
+    announcementList3: '公告页扩展为当前版本 + 历史版本列表，并补齐 0.1.0 到 0.2.0 的记录。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     profileLinkLabel: 'GitHub 主页',
@@ -237,7 +239,7 @@ const translations: Record<AppLanguage, Messages> = {
     privacyNote: 'このサイトの情報はすべてローカル保存です。キャラ資料、個人情報、API キーはアップロードしません。',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
     metricModules: '4 つの入口',
-    metricLanguages: '4 言語対応',
+    metricLanguages: '言語対応',
     metricStorage: 'ローカル保存',
     featureFace: '捏脸',
     featureStyle: '画風変換',
@@ -297,10 +299,10 @@ const translations: Record<AppLanguage, Messages> = {
     apiEffectiveCustom: '現在は入力されたカスタム API を優先します。',
     apiPrivacy: 'このサイトの情報はすべてローカル保存です。',
     announcementTitle: 'お知らせ',
-    announcementDescription: '0.2.0 ではホームと設定 UI をさらに整理し、入口カードとアニメーションを刷新しました。',
-    announcementList1: 'ホーム比率を調整し、Workflow Agent に近いレイアウトへ寄せました。',
-    announcementList2: '言語表示を各言語のネイティブ表記に統一し、API 設定の表示条件も改善しました。',
-    announcementList3: '入口カードを番号からアイコンに変更し、開閉フェードと押下アニメーションを追加しました。',
+    announcementDescription: '0.2.1 では顔編集ページを VRoid 風の 3 カラム構成に作り替え、履歴公告も正式に整理しました。',
+    announcementList1: '顔編集ページは左アセット欄・中央の透明キャンバス・右パラメータ欄の構成になりました。',
+    announcementList2: 'ホームへ戻る前に保存状態を確認し、未保存ならより明確な警告モーダルを表示します。',
+    announcementList3: '公告タブを現行バージョンと履歴一覧の二段構成に拡張し、0.1.0 からの履歴を補いました。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     profileLinkLabel: 'GitHub プロフィール',
@@ -338,7 +340,7 @@ const translations: Record<AppLanguage, Messages> = {
     privacyNote: 'Everything on this site stays local. No OC sheets, personal data, or API secrets are uploaded.',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
     metricModules: '4 feature entries',
-    metricLanguages: '4 interface languages',
+    metricLanguages: 'Interface languages',
     metricStorage: 'Local storage',
     featureFace: 'Face Maker',
     featureStyle: 'Style Transfer',
@@ -398,10 +400,10 @@ const translations: Record<AppLanguage, Messages> = {
     apiEffectiveCustom: 'The app currently prioritizes your custom API endpoint.',
     apiPrivacy: 'Everything stays local in this browser.',
     announcementTitle: 'Announcement',
-    announcementDescription: 'Version 0.2.0 refines the homepage proportions, settings flow, and modal interaction polish.',
-    announcementList1: 'The homepage now sits closer to the Character Workflow Agent layout and uses a more compact visual scale.',
-    announcementList2: 'Language buttons now use native labels, and API fields hide when the built-in mode is selected.',
-    announcementList3: 'Entry tiles now use custom icons instead of numbers, with full fade and press animations.',
+    announcementDescription: 'Version 0.2.1 reshapes the face maker into a VRoid-style three-panel editor and formalizes the history feed.',
+    announcementList1: 'The face maker now uses a left asset rail, a central transparent stage, and a right parameter panel with a top toolbar.',
+    announcementList2: 'Returning home now checks whether the draft is saved and warns more clearly when edits are still unsaved.',
+    announcementList3: 'The announcement tab now includes the current release plus a historical changelog back to version 0.1.0.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     profileLinkLabel: 'GitHub profile',
@@ -439,7 +441,7 @@ const translations: Record<AppLanguage, Messages> = {
     privacyNote: 'Вся информация хранится локально. Данные персонажа, личная информация и API-ключи не загружаются.',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
     metricModules: '4 входа',
-    metricLanguages: '4 языка',
+    metricLanguages: 'Языков интерфейса',
     metricStorage: 'Локальное хранение',
     featureFace: 'Редактор лица',
     featureStyle: 'Перенос стиля',
@@ -499,10 +501,10 @@ const translations: Record<AppLanguage, Messages> = {
     apiEffectiveCustom: 'Сейчас приоритет у вашего адреса API.',
     apiPrivacy: 'Всё остаётся локально в браузере.',
     announcementTitle: 'Объявление',
-    announcementDescription: 'Версия 0.2.0 дорабатывает пропорции главной страницы, настройки и анимацию входов.',
-    announcementList1: 'Главная страница стала компактнее и ближе по структуре к Character Workflow Agent.',
-    announcementList2: 'Кнопки языков переведены в нативные подписи, а поля API скрываются во встроенном режиме.',
-    announcementList3: 'Нумерация входов заменена на иконки, добавлены анимации открытия, закрытия и нажатия.',
+    announcementDescription: 'Версия 0.2.1 переводит редактор лица в VRoid-подобную трёхпанельную схему и оформляет историю объявлений.',
+    announcementList1: 'Редактор лица теперь состоит из левой панели ассетов, центральной прозрачной сцены и правой панели параметров.',
+    announcementList2: 'Перед возвратом на главную теперь проверяется сохранённость черновика и показывается более явное предупреждение.',
+    announcementList3: 'Во вкладке объявлений появился текущий релиз и полный список истории, начиная с версии 0.1.0.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     profileLinkLabel: 'GitHub профиль',
@@ -525,7 +527,7 @@ const translations: Record<AppLanguage, Messages> = {
 const paletteOptions: Array<{
   value: AccentPalette;
   swatch: string;
-  label: Record<AppLanguage, string>;
+  label: Record<BaseLanguage, string>;
 }> = [
   { value: 'ocean', swatch: '#4da3ff', label: { zh: '海蓝', ja: 'オーシャン', en: 'Ocean', ru: 'Океан' } },
   { value: 'emerald', swatch: '#45d08d', label: { zh: '翡翠', ja: 'エメラルド', en: 'Emerald', ru: 'Изумруд' } },
@@ -533,6 +535,10 @@ const paletteOptions: Array<{
   { value: 'rose', swatch: '#f36a9d', label: { zh: '玫瑰', ja: 'ローズ', en: 'Rose', ru: 'Роза' } },
   { value: 'violet', swatch: '#9370ff', label: { zh: '紫藤', ja: 'バイオレット', en: 'Violet', ru: 'Фиалка' } },
   { value: 'slate', swatch: '#9bb2c9', label: { zh: '石墨', ja: 'スレート', en: 'Slate', ru: 'Сланец' } },
+  { value: 'crimson', swatch: '#ef476f', label: { zh: '绯红', ja: 'クリムゾン', en: 'Crimson', ru: 'Кармин' } },
+  { value: 'teal', swatch: '#22c1c3', label: { zh: '湖青', ja: 'ティール', en: 'Teal', ru: 'Тил' } },
+  { value: 'gold', swatch: '#e3b341', label: { zh: '鎏金', ja: 'ゴールド', en: 'Gold', ru: 'Золото' } },
+  { value: 'cyan', swatch: '#5bc0eb', label: { zh: '青空', ja: 'シアン', en: 'Cyan', ru: 'Циан' } },
 ];
 
 const languageOptions: Array<{
@@ -543,13 +549,138 @@ const languageOptions: Array<{
   { value: 'ja', label: '日本語' },
   { value: 'en', label: 'English' },
   { value: 'ru', label: 'Русский' },
+  { value: 'ko', label: '한국어' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'es', label: 'Español' },
+  { value: 'it', label: 'Italiano' },
+  { value: 'pt', label: 'Português' },
 ];
+
+const fontPresetOptions: Array<{ value: FontPreset; label: string }> = [
+  { value: 'sans', label: '系统无衬线' },
+  { value: 'serif', label: '系统衬线' },
+  { value: 'mono', label: '等宽字' },
+  { value: 'heiti', label: '黑体' },
+  { value: 'songti', label: '宋体' },
+  { value: 'kaiti', label: '楷体' },
+  { value: 'georgia', label: 'Georgia' },
+  { value: 'times', label: 'Times' },
+  { value: 'verdana', label: 'Verdana' },
+  { value: 'fira', label: 'Fira Sans' },
+  { value: 'custom', label: '自定义字体' },
+];
+
+const translationAliases: Record<AppLanguage, BaseLanguage> = {
+  zh: 'zh',
+  ja: 'ja',
+  en: 'en',
+  ru: 'ru',
+  ko: 'en',
+  fr: 'en',
+  de: 'en',
+  es: 'en',
+  it: 'en',
+  pt: 'en',
+};
+
+const announcementHistory = [
+  {
+    version: '0.2.1',
+    date: '2026-04-12',
+    title: '0.2.1 捏脸编辑器壳与公告历史',
+    summary: '新增 VRoid 风格捏脸编辑器布局、返回确认弹窗、10 语言、10 字体与历史公告面板。',
+    details: [
+      '捏脸页改成左侧资产面板、中间透明画布、右侧参数面板，并加入顶部工具栏。',
+      '返回首页前会检测当前草稿是否保存，未保存时弹出更明确的提醒。',
+      '公告页扩展为当前公告 + 历史公告列表，并补齐 0.1.0 到 0.2.0 的版本记录。',
+    ],
+  },
+  {
+    version: '0.2.0',
+    date: '2026-04-12',
+    title: '0.2.0 紧凑化 UI 与入口动效',
+    summary: '压缩主页面比例、入口弹窗改图标、补全按钮高亮和渐显动画。',
+    details: [
+      '主页整体缩放并贴近 Character Workflow Agent 的布局比例。',
+      '入口弹窗从编号卡片改成了图标卡片，交互反馈更清晰。',
+      '设置面板的打开关闭动画和按钮按压动画一起补齐。',
+    ],
+  },
+  {
+    version: '0.1.5',
+    date: '2026-04-11',
+    title: '0.1.5 主页结构细化',
+    summary: '开始和设置按钮迁移到主操作区，并继续梳理首页卡片结构。',
+    details: [
+      '首页的动作区与信息区分开，功能入口更集中。',
+      '调整文案结构，减少开发者视角的占位表述。',
+      '为后续工作流卡片和设置页联动打基础。',
+    ],
+  },
+  {
+    version: '0.1.4',
+    date: '2026-04-11',
+    title: '0.1.4 主题同步整理',
+    summary: 'paper2gal 主题和默认主题的变量重新同步，设置页同步修正。',
+    details: [
+      'paper2gal 主题开启后锁定主色和明暗模式。',
+      '整理了主题变量，避免主页和设置页不同步。',
+      '给后续扩展更多配色留了结构空间。',
+    ],
+  },
+  {
+    version: '0.1.3',
+    date: '2026-04-10',
+    title: '0.1.3 设置页与入口弹窗',
+    summary: '项目设置、功能入口弹窗和基础多语言切换已经接通。',
+    details: [
+      '设置页建立样式、语言、接口、公告和关于五个分区。',
+      '开始按钮打开功能入口弹窗，形成站点一级导航。',
+      '本地保存的设置状态已经接入浏览器存储。',
+    ],
+  },
+  {
+    version: '0.1.2',
+    date: '2026-04-10',
+    title: '0.1.2 首页主题与动效底座',
+    summary: '补上暗色基底、玻璃卡片、基础渐显动效和站点背景氛围。',
+    details: [
+      '站点整体视觉方向确定为深色创作工作台。',
+      '加入渐显动画和卡片阴影，为后续交互动效准备底座。',
+      '开始整理按钮、卡片和标题的统一节奏。',
+    ],
+  },
+  {
+    version: '0.1.1',
+    date: '2026-04-09',
+    title: '0.1.1 首页与流程入口初版',
+    summary: '主页、开始流程和设置面板的第一版框架完成。',
+    details: [
+      '首页形成主面板和功能入口的基础结构。',
+      '开始流程弹窗建立了捏脸、转画风和生成系列素材的主入口。',
+      '站点开始具备作为 OC 创作入口页的基本形态。',
+    ],
+  },
+  {
+    version: '0.1.0',
+    date: '2026-04-09',
+    title: '0.1.0 项目起步',
+    summary: '项目初始化完成，前端工程、路由壳和基础资源组织开始落地。',
+    details: [
+      'Vite + React + TypeScript 的前端底座建立。',
+      '确定以本地保存和角色创作中控台为核心方向。',
+      '开始规划捏脸、转画风与系列素材生成三条主线。',
+    ],
+  },
+] as const;
 
 const defaultSettings: SettingsState = {
   stylePreset: 'default',
   depth: 'deep',
   accent: 'ocean',
   language: 'zh',
+  customFontFamily: '',
   interfaceMode: 'builtin',
   apiBaseUrl: '',
   apiKey: '',
@@ -568,7 +699,13 @@ function App() {
 
     try {
       const parsed = JSON.parse(saved) as Partial<SettingsState>;
-      setSettings({ ...defaultSettings, ...parsed });
+      const nextSettings = { ...defaultSettings, ...parsed };
+
+      if ((nextSettings as { fontPreset?: string }).fontPreset === 'rounded') {
+        nextSettings.fontPreset = 'sans';
+      }
+
+      setSettings(nextSettings);
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
     }
@@ -579,7 +716,8 @@ function App() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
-  const messages = translations[settings.language];
+  const resolvedLanguage = translationAliases[settings.language];
+  const messages = translations[resolvedLanguage];
   const effectivePreset = settings.stylePreset;
   const effectiveDepth: ThemeDepth = effectivePreset === 'paper2gal' ? 'light' : settings.depth;
   const effectiveAccent: AccentPalette = effectivePreset === 'paper2gal' ? 'rose' : settings.accent;
@@ -591,6 +729,10 @@ function App() {
     `accent-${effectiveAccent}`,
     `font-${settings.fontPreset}`,
   ].join(' ');
+  const appStyle =
+    settings.fontPreset === 'custom' && settings.customFontFamily
+      ? ({ ['--custom-font-family' as string]: settings.customFontFamily } as CSSProperties)
+      : undefined;
 
   function updateSettings(patch: Partial<SettingsState>) {
     setSettings((current) => ({ ...current, ...patch }));
@@ -602,7 +744,7 @@ function App() {
   }
 
   return (
-    <div className={appClassName}>
+    <div className={appClassName} style={appStyle}>
       <div className="app-background">
         <div className="orb orb-left" />
         <div className="orb orb-right" />
@@ -614,6 +756,12 @@ function App() {
           messages={messages}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenStart={() => setModalStep('root')}
+        />
+      ) : screen === 'face-maker' ? (
+        <FaceMakerPage
+          messages={messages}
+          onBack={() => setScreen('home')}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
       ) : (
         <FeaturePage
@@ -686,7 +834,7 @@ function HomeScreen({
               <span>{messages.metricModules}</span>
             </div>
             <div className="metric-box">
-              <strong>4</strong>
+              <strong>{languageOptions.length}</strong>
               <span>{messages.metricLanguages}</span>
             </div>
             <div className="metric-box">
@@ -699,18 +847,28 @@ function HomeScreen({
         <article className="home-card workflow-card fade-up delay-3">
           <h2>{messages.workflowTitle}</h2>
           <p>{messages.workflowDescription}</p>
-          <div className="workflow-list">
-            <div className="workflow-item">
+          <div className="workflow-list horizontal">
+            <div className="workflow-item compact">
               <ActionIcon kind="face-maker" />
               <span>{messages.featureFace}</span>
             </div>
-            <div className="workflow-item">
+            <div className="workflow-item compact">
               <ActionIcon kind="style-transfer" />
               <span>{messages.featureStyle}</span>
             </div>
-            <div className="workflow-item">
+            <div className="workflow-item compact">
               <ActionIcon kind="series" />
               <span>{messages.featureSeries}</span>
+            </div>
+          </div>
+
+          <div className="upload-shell">
+            <span className="upload-label">角色图片</span>
+            <div className="upload-row">
+              <button className="secondary-button upload-button" type="button">
+                选择文件
+              </button>
+              <span className="upload-description">{messages.workflowFormats}</span>
             </div>
           </div>
 
@@ -742,6 +900,264 @@ function HomeScreen({
         <p>{messages.footerNote}</p>
       </footer>
     </main>
+  );
+}
+
+function FaceMakerPage({
+  messages,
+  onBack,
+  onOpenSettings,
+}: {
+  messages: Messages;
+  onBack: () => void;
+  onOpenSettings: () => void;
+}) {
+  const initialDraft = {
+    hair: 'air-bob',
+    eyes: 'soft-round',
+    accessory: 'none',
+    headScale: 52,
+    eyeScale: 48,
+    mouthCurve: 56,
+    tilt: 0,
+  };
+
+  const [draft, setDraft] = useState(initialDraft);
+  const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(initialDraft));
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const isDirty = JSON.stringify(draft) !== savedSnapshot;
+
+  const assetGroups = [
+    {
+      title: '发型资产',
+      key: 'hair' as const,
+      items: [
+        { value: 'air-bob', label: '空气波波' },
+        { value: 'long-straight', label: '直长发' },
+        { value: 'twin-tail', label: '双马尾' },
+        { value: 'wolf-cut', label: '狼尾层次' },
+      ],
+    },
+    {
+      title: '眼型资产',
+      key: 'eyes' as const,
+      items: [
+        { value: 'soft-round', label: '圆润眼' },
+        { value: 'sharp', label: '上挑眼' },
+        { value: 'sleepy', label: '慵懒眼' },
+        { value: 'idol', label: '偶像眼' },
+      ],
+    },
+    {
+      title: '配件资产',
+      key: 'accessory' as const,
+      items: [
+        { value: 'none', label: '无配件' },
+        { value: 'glasses', label: '眼镜' },
+        { value: 'ribbon', label: '发饰' },
+        { value: 'scar', label: '伤痕' },
+      ],
+    },
+  ];
+
+  function updateDraft<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
+    setDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  function saveDraft() {
+    setSavedSnapshot(JSON.stringify(draft));
+  }
+
+  function resetDraft() {
+    setDraft(initialDraft);
+  }
+
+  function confirmBack() {
+    setIsConfirmOpen(true);
+  }
+
+  const headScale = draft.headScale / 100;
+  const eyeScale = draft.eyeScale / 50;
+  const mouthCurve = (draft.mouthCurve - 50) / 10;
+
+  return (
+    <main className="feature-shell face-editor-shell">
+      <header className="feature-header fade-up delay-1">
+        <button className="secondary-button small-button" type="button" onClick={confirmBack}>
+          {messages.backHome}
+        </button>
+        <div className="feature-header-meta">
+          <span>{isDirty ? '未保存' : '已保存'}</span>
+          <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
+            {messages.openSettings}
+          </button>
+        </div>
+      </header>
+
+      <section className="editor-workbench fade-up delay-2">
+        <div className="editor-toolbar">
+          <div className="editor-toolbar-copy">
+            <p className="section-label">{messages.appSubtitle}</p>
+            <h2>{messages.pageFaceTitle}</h2>
+          </div>
+          <div className="editor-toolbar-actions">
+            <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? '你还没保存' : '当前内容已保存'}</span>
+            <button className="secondary-button small-button" type="button" onClick={resetDraft}>
+              重置
+            </button>
+            <button className="secondary-button small-button" type="button" onClick={saveDraft}>
+              保存草稿
+            </button>
+            <button className="primary-button small-button" type="button">
+              导出
+            </button>
+          </div>
+        </div>
+
+        <div className="editor-layout">
+          <aside className="editor-side editor-assets">
+            {assetGroups.map((group) => (
+              <section key={group.title} className="editor-panel-block">
+                <h3>{group.title}</h3>
+                <div className="asset-grid">
+                  {group.items.map((item) => (
+                    <button
+                      key={item.value}
+                      className={`asset-card ${draft[group.key] === item.value ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => updateDraft(group.key, item.value)}
+                    >
+                      <span className="asset-thumb" />
+                      <strong>{item.label}</strong>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </aside>
+
+          <section className="editor-stage-shell">
+            <div className="stage-toolbar">
+              <span>工作画板</span>
+              <div className="stage-toolbar-actions">
+                <button className="tool-dot active" type="button" aria-label="Preview mode" />
+                <button className="tool-dot" type="button" aria-label="Reference mode" />
+                <button className="tool-dot" type="button" aria-label="Overlay mode" />
+              </div>
+            </div>
+            <div className="editor-stage">
+              <div className="checkerboard-layer" />
+              <div className="character-stage" style={{ transform: `rotate(${draft.tilt}deg)` }}>
+                <div className={`hair-shape ${draft.hair}`} />
+                <div className="head-shape" style={{ transform: `scale(${headScale})` }}>
+                  <div className={`eye-pair ${draft.eyes}`} style={{ transform: `scale(${eyeScale})` }}>
+                    <span />
+                    <span />
+                  </div>
+                  <div className="mouth-line" style={{ borderRadius: `${8 + mouthCurve * 2}px` }} />
+                </div>
+                {draft.accessory !== 'none' && <div className={`accessory-chip ${draft.accessory}`} />}
+              </div>
+            </div>
+          </section>
+
+          <aside className="editor-side editor-controls">
+            <section className="editor-panel-block">
+              <h3>参数调整</h3>
+              <label className="slider-row">
+                <span>头部比例</span>
+                <input type="range" min="40" max="70" value={draft.headScale} onChange={(event) => updateDraft('headScale', Number(event.target.value))} />
+              </label>
+              <label className="slider-row">
+                <span>眼睛大小</span>
+                <input type="range" min="38" max="62" value={draft.eyeScale} onChange={(event) => updateDraft('eyeScale', Number(event.target.value))} />
+              </label>
+              <label className="slider-row">
+                <span>嘴角弧度</span>
+                <input type="range" min="40" max="64" value={draft.mouthCurve} onChange={(event) => updateDraft('mouthCurve', Number(event.target.value))} />
+              </label>
+              <label className="slider-row">
+                <span>整体倾角</span>
+                <input type="range" min="-10" max="10" value={draft.tilt} onChange={(event) => updateDraft('tilt', Number(event.target.value))} />
+              </label>
+            </section>
+
+            <section className="editor-panel-block">
+              <h3>项目状态</h3>
+              <div className="status-stack">
+                <div className="status-card-mini">
+                  <strong>{draft.hair}</strong>
+                  <span>当前发型</span>
+                </div>
+                <div className="status-card-mini">
+                  <strong>{draft.eyes}</strong>
+                  <span>当前眼型</span>
+                </div>
+                <div className="status-card-mini">
+                  <strong>{draft.accessory}</strong>
+                  <span>当前配件</span>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <footer className="face-editor-footer fade-up delay-3">
+        <div className="notice-banner">{messages.privacyNote}</div>
+      </footer>
+
+      {isConfirmOpen && (
+        <ConfirmReturnModal
+          isDirty={isDirty}
+          onCancel={() => setIsConfirmOpen(false)}
+          onConfirm={onBack}
+        />
+      )}
+    </main>
+  );
+}
+
+function ConfirmReturnModal({
+  isDirty,
+  onCancel,
+  onConfirm,
+}: {
+  isDirty: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const [isClosing, setIsClosing] = useState(false);
+
+  function requestClose() {
+    setIsClosing(true);
+    window.setTimeout(onCancel, MODAL_CLOSE_MS);
+  }
+
+  function confirmLeave() {
+    setIsClosing(true);
+    window.setTimeout(onConfirm, MODAL_CLOSE_MS);
+  }
+
+  return (
+    <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
+      <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+          ×
+        </button>
+        <p className="section-label">返回提醒</p>
+        <h2>确定返回首页吗？</h2>
+        <p className="modal-description">{isDirty ? '你还没保存当前捏脸项目，返回后未保存的调整不会保留。' : '当前内容已经保存，返回首页后可以稍后再继续编辑。'}</p>
+        <div className="confirm-actions">
+          <button className="secondary-button" type="button" onClick={requestClose}>
+            继续编辑
+          </button>
+          <button className="primary-button" type="button" onClick={confirmLeave}>
+            确认返回
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -918,7 +1334,7 @@ function StartModal({
           {isSeriesStep ? messages.startModalSeriesDescription : messages.startModalDescription}
         </p>
 
-        <div className="action-grid">
+        <div className={`action-grid ${isSeriesStep ? 'series-grid' : 'root-grid'}`}>
           {!isSeriesStep ? (
             <>
               <button className="action-tile" type="button" onClick={() => onSelect('face-maker')}>
@@ -971,7 +1387,11 @@ function SettingsModal({
 }) {
   const [tab, setTab] = useState<SettingsTab>('style');
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedAnnouncementVersion, setSelectedAnnouncementVersion] = useState<
+    (typeof announcementHistory)[number]['version']
+  >(announcementHistory[0].version);
   const styleLocked = settings.stylePreset === 'paper2gal';
+  const resolvedLanguage = translationAliases[settings.language];
   const effectiveEndpoint =
     settings.interfaceMode === 'custom' && settings.apiBaseUrl
       ? settings.apiBaseUrl
@@ -987,11 +1407,8 @@ function SettingsModal({
     { key: 'about', label: messages.tabAbout },
   ];
 
-  const currentFontOptions = [
-    { value: 'sans' as const, label: messages.fontSans },
-    { value: 'rounded' as const, label: messages.fontRounded },
-    { value: 'serif' as const, label: messages.fontSerif },
-  ];
+  const selectedAnnouncement =
+    announcementHistory.find((item) => item.version === selectedAnnouncementVersion) ?? announcementHistory[0];
 
   function requestClose() {
     setIsClosing(true);
@@ -1070,15 +1487,15 @@ function SettingsModal({
                   <h3>{messages.accentTitle}</h3>
                   <div className="palette-grid">
                     {paletteOptions.map((item) => (
-                      <button
-                        key={item.value}
-                        className={`palette-chip ${settings.accent === item.value ? 'active' : ''}`}
-                        type="button"
-                        disabled={styleLocked}
-                        onClick={() => onUpdate({ accent: item.value })}
-                      >
+                    <button
+                      key={item.value}
+                      className={`palette-chip ${settings.accent === item.value ? 'active' : ''}`}
+                      type="button"
+                      disabled={styleLocked}
+                      onClick={() => onUpdate({ accent: item.value })}
+                    >
                         <span className="palette-dot" style={{ backgroundColor: item.swatch }} />
-                        {item.label[settings.language]}
+                        {item.label[resolvedLanguage]}
                       </button>
                     ))}
                   </div>
@@ -1087,7 +1504,7 @@ function SettingsModal({
                 <section className="settings-section">
                   <h3>{messages.fontTitle}</h3>
                   <div className="palette-grid">
-                    {currentFontOptions.map((item) => (
+                    {fontPresetOptions.map((item) => (
                       <button
                         key={item.value}
                         className={`palette-chip ${settings.fontPreset === item.value ? 'active' : ''}`}
@@ -1098,6 +1515,17 @@ function SettingsModal({
                       </button>
                     ))}
                   </div>
+                  {settings.fontPreset === 'custom' && (
+                    <div className="custom-font-shell">
+                      <input
+                        className="settings-input"
+                        type="text"
+                        placeholder="输入页面字体名称，例如: LXGW WenKai"
+                        value={settings.customFontFamily}
+                        onChange={(event) => onUpdate({ customFontFamily: event.target.value })}
+                      />
+                    </div>
+                  )}
                 </section>
 
                 {styleLocked && (
@@ -1187,15 +1615,29 @@ function SettingsModal({
             )}
 
             {tab === 'announcement' && (
-              <section className="settings-section">
-                <h3>{messages.announcementTitle}</h3>
-                <p>{messages.announcementDescription}</p>
-                <div className="announcement-card">
-                  <strong>{VERSION}</strong>
+              <section className="settings-section announcement-shell">
+                <div className="announcement-list">
+                  {announcementHistory.map((item) => (
+                    <button
+                      key={item.version}
+                      className={`announcement-entry ${selectedAnnouncement.version === item.version ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => setSelectedAnnouncementVersion(item.version)}
+                    >
+                      <span>{item.date}</span>
+                      <strong>{item.version}</strong>
+                      <p>{item.summary}</p>
+                    </button>
+                  ))}
+                </div>
+                <div className="announcement-detail">
+                  <span>{selectedAnnouncement.date}</span>
+                  <h3>{selectedAnnouncement.title}</h3>
+                  <p>{selectedAnnouncement.summary}</p>
                   <ul>
-                    <li>{messages.announcementList1}</li>
-                    <li>{messages.announcementList2}</li>
-                    <li>{messages.announcementList3}</li>
+                    {selectedAnnouncement.details.map((detail) => (
+                      <li key={detail}>{detail}</li>
+                    ))}
                   </ul>
                 </div>
               </section>
