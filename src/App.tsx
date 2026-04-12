@@ -3,31 +3,41 @@ import type {
   AccentPalette,
   AppLanguage,
   FeatureScreen,
+  FontPreset,
   SettingsState,
   SettingsTab,
   StartModalStep,
   ThemeDepth,
 } from './types';
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 const STORAGE_KEY = 'oc-maker.settings';
 
 type Messages = {
   appTitle: string;
+  appSubtitle: string;
   versionLabel: string;
-  heroEyebrow: string;
-  heroTitle: string;
-  heroDescription: string;
+  overviewTitle: string;
+  overviewDescription: string;
+  workflowTitle: string;
+  workflowDescription: string;
+  workflowHint: string;
   startButton: string;
   settingsButton: string;
-  statusTitle: string;
-  statusDescription: string;
-  featureCards: [string, string, string];
-  featureLabelFace: string;
-  featureLabelStyle: string;
-  featureLabelSeries: string;
-  localOnlyNote: string;
+  progressTitle: string;
+  progressDescription: string;
+  outputTitle: string;
+  outputDescription: string;
+  privacyNote: string;
   footerNote: string;
+  metricModules: string;
+  metricLanguages: string;
+  metricStorage: string;
+  featureFace: string;
+  featureStyle: string;
+  featureSeries: string;
+  featurePrompt: string;
+  featurePaper: string;
   backHome: string;
   openSettings: string;
   comingSoon: string;
@@ -62,6 +72,10 @@ type Messages = {
   accentTitle: string;
   styleLockedTitle: string;
   styleLockedDescription: string;
+  fontTitle: string;
+  fontSans: string;
+  fontRounded: string;
+  fontSerif: string;
   languageTitle: string;
   apiModeTitle: string;
   builtinMode: string;
@@ -102,34 +116,43 @@ type Messages = {
 const translations: Record<AppLanguage, Messages> = {
   zh: {
     appTitle: 'Original Character Maker',
+    appSubtitle: '自定义 OC 角色中控台',
     versionLabel: '版本',
-    heroEyebrow: '自定义 OC 角色中控台',
-    heroTitle: '先把角色世界的入口搭起来',
-    heroDescription:
-      '主页、开始流程、设置面板和四个主要功能入口已经规划进同一套框架里，先把网站骨架做稳，后面再逐个填功能。',
+    overviewTitle: '角色创作入口',
+    overviewDescription:
+      '把捏脸、转画风、角色 Prompt / LLM / TTS 封装与 paper2gal 素材生成统一到同一个入口页里，进入后就能按分支继续创作。',
+    workflowTitle: '开始新的工作流',
+    workflowDescription: '从这里进入功能分支，再选择捏脸、转画风或生成系列素材。',
+    workflowHint: '进入入口页后，可以继续选择对应的创作流程。',
     startButton: '开始',
     settingsButton: '设置',
-    statusTitle: '当前阶段',
-    statusDescription: '0.1.0 框架版已经就位，接下来可以继续补捏脸编辑器、转画风流程和系列素材工作流。',
-    featureCards: ['捏脸编辑器框架', '转画风入口占位', '生成系列素材流程'],
-    featureLabelFace: '捏脸',
-    featureLabelStyle: '转画风',
-    featureLabelSeries: '生成系列素材',
-    localOnlyNote: '本网站所有信息均在本地保存，不会上传，不会窃取你的角色社卡、个人信息或 API 私钥。',
-    footerNote: '所有设置都会保存在本地浏览器中，后续可以继续接入角色工作流与素材管线。',
+    progressTitle: '工作流进度',
+    progressDescription: '还没有开始任何工作流。进入对应入口后，进度和任务日志会显示在这里。',
+    outputTitle: '阶段输出',
+    outputDescription: '暂无输出。后续在捏脸、转画风和素材生成流程里的中间结果都会放到这里。',
+    privacyNote: '本网站所有信息均在本地保存，不会上传你的角色社卡、个人信息或 API 私钥。',
+    footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    metricModules: '4 个功能入口',
+    metricLanguages: '4 种界面语言',
+    metricStorage: '本地保存',
+    featureFace: '捏脸',
+    featureStyle: '转画风',
+    featureSeries: '生成系列素材',
+    featurePrompt: '角色 Prompt + LLM / TTS',
+    featurePaper: 'paper2gal 图片素材',
     backHome: '返回首页',
     openSettings: '打开设置',
-    comingSoon: '功能占位',
-    preparedModules: '已预留模块',
-    placeholderTodo: '下一步建议',
-    placeholderCanvas: '角色预览区与控制面板',
-    placeholderSettings: '对应模块设置与入口联动',
-    placeholderPipeline: '后续接入真实工作流与接口',
-    placeholderHint: '当前页面先作为骨架页面存在，方便我们继续往里填具体功能。',
-    startModalTitle: '开始新的工作流',
-    startModalDescription: '先选择你现在要进入的功能入口，页面框架已经准备好。',
+    comingSoon: '功能页面框架',
+    preparedModules: '已准备模块',
+    placeholderTodo: '下一步',
+    placeholderCanvas: '主工作区画布与预览',
+    placeholderSettings: '参数面板与模块设置',
+    placeholderPipeline: '任务队列、接口调用与输出区',
+    placeholderHint: '当前页面保留了完整结构，后续可直接进入对应功能。',
+    startModalTitle: '选择功能入口',
+    startModalDescription: '先进入你现在要使用的功能分支。',
     startModalSeriesTitle: '生成系列素材',
-    startModalSeriesDescription: '这里先拆成两个子入口，后面分别接入你的工作流实现。',
+    startModalSeriesDescription: '这里分成两个子入口，分别进入对应的素材流程。',
     actionFace: '捏脸',
     actionStyle: '转画风',
     actionSeries: '生成系列素材',
@@ -150,7 +173,11 @@ const translations: Record<AppLanguage, Messages> = {
     themeDeep: '深色',
     accentTitle: '配色样式',
     styleLockedTitle: 'paper2gal 样式已锁定',
-    styleLockedDescription: '启用官方样式后，会固定粉白条纹背景与品牌色，不再允许调整深浅和其他配色。',
+    styleLockedDescription: '启用官方样式后，会固定背景、主色和深浅模式，不再允许调整其他配色。',
+    fontTitle: '字体',
+    fontSans: '默认无衬线',
+    fontRounded: '圆角标题风格',
+    fontSerif: '衬线风格',
     languageTitle: '界面语言',
     apiModeTitle: '接口模式',
     builtinMode: '使用内置模型',
@@ -159,29 +186,29 @@ const translations: Record<AppLanguage, Messages> = {
     apiBasePlaceholder: 'https://your-api.example.com',
     apiKeyTitle: 'API Key',
     apiKeyPlaceholder: '填写你自己的 API Key',
-    apiHelp: '可以先保留为空，后续接入生成工作流时再启用。所有配置仅保存在当前浏览器本地。',
+    apiHelp: '所有接口配置只保存在当前浏览器本地。',
     apiHint: '静态页面只会读取这里填写的地址和密钥，不会主动上传其他角色信息。',
     apiEffectiveTitle: '当前生效地址',
-    apiEffectiveBuiltin: '当前正在使用内置模型占位配置，后续可替换为本地或远程服务。',
-    apiEffectiveCustom: '当前将优先使用你填写的自定义 API 地址。',
+    apiEffectiveBuiltin: '当前使用内置模型占位配置，后续可替换为你自己的本地或远程服务。',
+    apiEffectiveCustom: '当前优先使用你填写的自定义 API 地址。',
     apiPrivacy: '本网站所有信息均在本地保存，不会上传任何角色社卡、个人信息或私钥。',
     announcementTitle: '公告',
-    announcementDescription: '目前是 0.1.0 起步版本，重点先把站点外壳、导航和配置体系搭起来。',
-    announcementList1: '已完成 homepage 主面板、开始弹窗与设置面板框架。',
-    announcementList2: '已预留捏脸、转画风、角色 Prompt/LLM/TTS、paper2gal 四个功能入口。',
-    announcementList3: '后续将逐步接入真实编辑器、接口调用和 Character Workflow 仓库联动。',
+    announcementDescription: '0.1.1 版本完成了首页重排、样式同步和基础交互动效整理。',
+    announcementList1: '首页布局改为顶栏、双列主体和底部双卡结构，开始与设置按钮已移入右侧主操作区。',
+    announcementList2: '修正了设置面板与 paper2gal 主题不同步的问题，并新增字体设置。',
+    announcementList3: '补充了渐显动画，清理了站内自述型文案，统一调整为面向用户的产品文案。',
     aboutTitle: '关于',
-    aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理捏脸、画风转换和系列素材生成。',
+    aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     profileLinkLabel: 'GitHub 主页',
     repoLinkLabel: '仓库地址',
     pageFaceTitle: '捏脸编辑器',
-    pageFaceDescription: '这里先放编辑器页面框架，后续可以继续接入脸型、五官、发型、配色和导出逻辑。',
+    pageFaceDescription: '这里会放角色编辑器的主画布、部位切换、颜色控制和导出逻辑。',
     pageStyleTitle: '转画风',
-    pageStyleDescription: '这里先保留画风转换的页面框架，后续可以继续补模型选择、输入输出和任务进度。',
+    pageStyleDescription: '这里会放画风转换的输入输出、参数控制、任务状态与结果预览。',
     pagePromptTitle: '角色 Prompt + LLM / TTS 封装',
-    pagePromptDescription: '这里先作为脚本与配置的壳子，后续接入角色 Prompt 生成、LLM 调用与语音封装。',
+    pagePromptDescription: '这里会放角色资料、Prompt 模板、LLM 请求和语音封装配置。',
     pagePaperTitle: 'paper2gal 图片素材生成',
-    pagePaperDescription: '这里先保留 paper2gal 的入口页，后续再把图片素材生成流程嵌进来。',
+    pagePaperDescription: '这里会放 paper2gal 图片素材生成流程和后续的仓库联动入口。',
     moduleCanvas: '主工作区画布',
     modulePanel: '右侧参数 / 功能面板',
     modulePipeline: '任务队列与输出结果区',
@@ -189,41 +216,49 @@ const translations: Record<AppLanguage, Messages> = {
   },
   ja: {
     appTitle: 'Original Character Maker',
+    appSubtitle: 'OC キャラクター統合ハブ',
     versionLabel: 'バージョン',
-    heroEyebrow: 'OC キャラクター制作ハブ',
-    heroTitle: 'まずは世界観の入口を作る',
-    heroDescription:
-      'ホーム、開始フロー、設定パネル、4 つの主要機能入口を同じフレームにまとめ、まずはサイトの骨組みを安定させます。',
+    overviewTitle: 'キャラクター制作入口',
+    overviewDescription:
+      '顔編集、画風変換、Prompt / LLM / TTS ラッパー、paper2gal 素材生成を 1 つの入口ページにまとめています。',
+    workflowTitle: '新しいワークフローを開始',
+    workflowDescription: 'まず入口ページから機能分岐に入り、その後に各フローへ進めます。',
+    workflowHint: '現時点ではサイト骨組みと入口整理を優先しています。',
     startButton: '開始',
     settingsButton: '設定',
-    statusTitle: '現在の段階',
-    statusDescription: '0.1.0 のフレーム版を用意しました。次は顔編集、画風変換、シリーズ素材ワークフローを順に追加できます。',
-    featureCards: ['顔編集フレーム', '画風変換入口', 'シリーズ素材ワークフロー'],
-    featureLabelFace: '捏脸',
-    featureLabelStyle: '画風変換',
-    featureLabelSeries: 'シリーズ素材生成',
-    localOnlyNote:
-      'このサイトの情報はすべてローカル保存です。キャラクター設定、個人情報、API キーを勝手に送信することはありません。',
-    footerNote: '設定はブラウザのローカルに保存されます。後からキャラクターワークフローと素材パイプラインを接続できます。',
+    progressTitle: 'ワークフロー進捗',
+    progressDescription: 'まだワークフローは開始されていません。開始後に進捗とログがここへ表示されます。',
+    outputTitle: '段階出力',
+    outputDescription: '現在は出力がありません。今後の中間結果や完成物はここに集約されます。',
+    privacyNote: 'このサイトの情報はすべてローカル保存です。キャラ資料、個人情報、API キーはアップロードしません。',
+    footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    metricModules: '4 つの入口',
+    metricLanguages: '4 言語対応',
+    metricStorage: 'ローカル保存',
+    featureFace: '捏脸',
+    featureStyle: '画風変換',
+    featureSeries: 'シリーズ素材生成',
+    featurePrompt: 'Prompt + LLM / TTS',
+    featurePaper: 'paper2gal 素材',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
-    comingSoon: 'プレースホルダー',
-    preparedModules: '用意済みモジュール',
-    placeholderTodo: '次のおすすめ',
-    placeholderCanvas: 'キャラクタープレビューと操作パネル',
-    placeholderSettings: 'モジュール設定と入口の連携',
-    placeholderPipeline: '実際のワークフローと API の接続',
-    placeholderHint: 'このページは今は骨組みです。ここから具体的な機能を追加していけます。',
-    startModalTitle: '新しいワークフローを開始',
-    startModalDescription: 'まずは入る機能を選んでください。ページの骨組みはすでに準備できています。',
+    comingSoon: '機能ページの骨組み',
+    preparedModules: '準備済みモジュール',
+    placeholderTodo: '次のステップ',
+    placeholderCanvas: 'メインキャンバスとプレビュー',
+    placeholderSettings: 'パラメータパネルと設定連動',
+    placeholderPipeline: 'タスクキュー、API、出力領域',
+    placeholderHint: '現在はページ構造を先に確保しています。',
+    startModalTitle: '機能入口を選択',
+    startModalDescription: 'まず利用したい分岐を選んでください。',
     startModalSeriesTitle: 'シリーズ素材生成',
-    startModalSeriesDescription: 'ここでは 2 つのサブ入口に分け、後からそれぞれのワークフローを接続できます。',
+    startModalSeriesDescription: 'ここではさらに 2 つの子入口へ分けています。',
     actionFace: '捏脸',
     actionStyle: '画風変換',
     actionSeries: 'シリーズ素材生成',
-    actionPromptSuite: 'キャラ Prompt + LLM / TTS ラッパー',
-    actionPaper2Gal: 'paper2gal 画像素材生成',
-    actionBack: '前に戻る',
+    actionPromptSuite: 'Prompt + LLM / TTS ラッパー',
+    actionPaper2Gal: 'paper2gal 素材生成',
+    actionBack: '戻る',
     settingsTitle: 'プロジェクト設定',
     tabStyle: 'スタイル',
     tabLanguage: '言語',
@@ -236,81 +271,92 @@ const translations: Record<AppLanguage, Messages> = {
     themeModeTitle: 'モード',
     themeLight: 'ライト',
     themeDeep: 'ダーク',
-    accentTitle: 'カラーパレット',
-    styleLockedTitle: 'paper2gal スタイルは固定されています',
-    styleLockedDescription:
-      '公式スタイルを有効化すると、ピンク系ストライプ背景とブランドカラーに固定され、明暗や他の配色は変更できません。',
+    accentTitle: '配色',
+    styleLockedTitle: 'paper2gal スタイル固定',
+    styleLockedDescription: '公式スタイルを有効化すると背景、主色、明暗モードが固定されます。',
+    fontTitle: 'フォント',
+    fontSans: '標準サンセリフ',
+    fontRounded: '丸みタイトル',
+    fontSerif: 'セリフ体',
     languageTitle: '表示言語',
     apiModeTitle: 'API モード',
-    builtinMode: '内蔵モデルを使う',
+    builtinMode: '内蔵モデル',
     customApiMode: 'カスタム API',
     apiBaseTitle: 'API URL',
     apiBasePlaceholder: 'https://your-api.example.com',
     apiKeyTitle: 'API Key',
     apiKeyPlaceholder: '自分の API Key を入力',
-    apiHelp: '今は空欄でも構いません。後から生成ワークフロー接続時に有効化できます。設定はブラウザ内にのみ保存されます。',
-    apiHint: '静的ページはここで指定した URL とキーだけを読み取り、他のキャラクター情報は送信しません。',
+    apiHelp: 'すべての設定は現在のブラウザにだけ保存されます。',
+    apiHint: 'ここで設定した URL とキーのみを読み取り、他のデータは送信しません。',
     apiEffectiveTitle: '現在の有効先',
-    apiEffectiveBuiltin: '現在は内蔵モデル用のプレースホルダー設定を使用中です。後でローカルまたはリモートサービスに差し替えられます。',
-    apiEffectiveCustom: '現在は入力されたカスタム API URL を優先して使用します。',
-    apiPrivacy: 'このサイトの情報はすべてローカル保存です。キャラクター資料、個人情報、秘密鍵はアップロードされません。',
+    apiEffectiveBuiltin: '現在は内蔵プレースホルダー設定を使用しています。',
+    apiEffectiveCustom: '現在は入力されたカスタム API を優先します。',
+    apiPrivacy: 'このサイトの情報はすべてローカル保存です。',
     announcementTitle: 'お知らせ',
-    announcementDescription: '現在は 0.1.0 の立ち上げ版で、サイト外殻、ナビゲーション、設定体系の構築を優先しています。',
-    announcementList1: 'homepage、開始モーダル、設定モーダルのフレームを作成しました。',
-    announcementList2: '顔編集、画風変換、Prompt/LLM/TTS、paper2gal の 4 入口を確保しました。',
-    announcementList3: '今後は実際のエディタ、API 呼び出し、Character Workflow 連携を段階的に追加します。',
+    announcementDescription: '0.1.1 ではホーム再設計、テーマ同期、基本アニメーションを整えました。',
+    announcementList1: '開始ボタンと設定ボタンを右側の主操作カードへ移動しました。',
+    announcementList2: 'paper2gal テーマと設定パネルの見た目を同期しました。',
+    announcementList3: '文言を整理し、字体切替とフェード演出を追加しました。',
     aboutTitle: '情報',
-    aboutDescription: 'このプロジェクトは OC 制作の統合入口として、顔編集、画風変換、シリーズ素材生成をまとめて扱います。',
+    aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     profileLinkLabel: 'GitHub プロフィール',
     repoLinkLabel: 'リポジトリ',
     pageFaceTitle: '顔編集',
-    pageFaceDescription: 'ここには今後、顔型、パーツ、髪型、配色、書き出しなどの編集ロジックを接続できます。',
+    pageFaceDescription: 'ここには顔編集ワークスペースを配置します。',
     pageStyleTitle: '画風変換',
-    pageStyleDescription: 'ここには今後、モデル選択、入出力、タスク進行管理などの UI を追加できます。',
-    pagePromptTitle: 'キャラ Prompt + LLM / TTS',
-    pagePromptDescription: 'ここには今後、キャラ Prompt 生成、LLM 呼び出し、音声封装を接続できます。',
-    pagePaperTitle: 'paper2gal 画像素材生成',
-    pagePaperDescription: 'ここには今後、paper2gal の画像素材生成フローを組み込めます。',
-    moduleCanvas: 'メインワークスペース',
-    modulePanel: '右側パラメータ / 機能パネル',
-    modulePipeline: 'タスクキューと出力結果',
-    moduleStorage: 'ローカル設定と履歴',
+    pageStyleDescription: 'ここには画風変換フローを配置します。',
+    pagePromptTitle: 'Prompt + LLM / TTS',
+    pagePromptDescription: 'ここには Prompt 生成と音声封装を配置します。',
+    pagePaperTitle: 'paper2gal 素材生成',
+    pagePaperDescription: 'ここには paper2gal 画像素材フローを配置します。',
+    moduleCanvas: 'メイン作業領域',
+    modulePanel: '右側パネル',
+    modulePipeline: 'タスクと出力',
+    moduleStorage: 'ローカル保存と履歴',
   },
   en: {
     appTitle: 'Original Character Maker',
+    appSubtitle: 'Custom OC control center',
     versionLabel: 'Version',
-    heroEyebrow: 'Custom OC creation hub',
-    heroTitle: 'Build the front door to the character world first',
-    heroDescription:
-      'The homepage, launch flow, settings panel, and four major feature entries now live in one shared shell so we can fill in the real tools step by step.',
+    overviewTitle: 'Character creation entry',
+    overviewDescription:
+      'Face making, style transfer, prompt tooling, and paper2gal asset generation are grouped into one entry page for a cleaner workflow.',
+    workflowTitle: 'Start a new workflow',
+    workflowDescription: 'Enter through the main entry page first, then branch into the actual tool you want to use.',
+    workflowHint: 'This release focuses on the shell, layout, and navigation structure.',
     startButton: 'Start',
     settingsButton: 'Settings',
-    statusTitle: 'Current phase',
-    statusDescription: 'The 0.1.0 shell is in place. Next we can layer in the face editor, style transfer flow, and series asset workflow.',
-    featureCards: ['Face maker scaffold', 'Style transfer entry', 'Series asset workflow'],
-    featureLabelFace: 'Face Maker',
-    featureLabelStyle: 'Style Transfer',
-    featureLabelSeries: 'Series Assets',
-    localOnlyNote:
-      'Everything on this site stays local. We do not upload or steal your OC cards, personal information, or API secrets.',
-    footerNote: 'All settings are stored in your local browser and can later be connected to your character workflow and asset pipeline.',
+    progressTitle: 'Workflow progress',
+    progressDescription: 'No workflow has started yet. Progress logs will appear here after you enter a tool.',
+    outputTitle: 'Stage outputs',
+    outputDescription: 'No output yet. Future intermediate and final assets will be shown here.',
+    privacyNote: 'Everything on this site stays local. No OC sheets, personal data, or API secrets are uploaded.',
+    footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    metricModules: '4 feature entries',
+    metricLanguages: '4 interface languages',
+    metricStorage: 'Local storage',
+    featureFace: 'Face Maker',
+    featureStyle: 'Style Transfer',
+    featureSeries: 'Series Assets',
+    featurePrompt: 'Prompt + LLM / TTS',
+    featurePaper: 'paper2gal Assets',
     backHome: 'Back home',
     openSettings: 'Open settings',
-    comingSoon: 'Feature scaffold',
+    comingSoon: 'Feature shell',
     preparedModules: 'Prepared modules',
-    placeholderTodo: 'Suggested next step',
-    placeholderCanvas: 'Character preview and control panel',
-    placeholderSettings: 'Module settings and entry wiring',
-    placeholderPipeline: 'Real workflow and API integration',
-    placeholderHint: 'This page is intentionally a scaffold for now so we can keep filling it with actual functionality.',
-    startModalTitle: 'Start a new workflow',
-    startModalDescription: 'Choose the area you want to enter first. The page shells are already prepared.',
+    placeholderTodo: 'Next steps',
+    placeholderCanvas: 'Main workspace canvas and preview',
+    placeholderSettings: 'Parameter panel and module settings',
+    placeholderPipeline: 'Task queue, API calls, and outputs',
+    placeholderHint: 'This page currently reserves the layout structure for the real tool.',
+    startModalTitle: 'Choose an entry',
+    startModalDescription: 'Select the branch you want to enter first.',
     startModalSeriesTitle: 'Generate series assets',
-    startModalSeriesDescription: 'This branch is split into two sub-entries first so we can wire each workflow later.',
+    startModalSeriesDescription: 'This branch is split into two child entries for later integration.',
     actionFace: 'Face Maker',
     actionStyle: 'Style Transfer',
     actionSeries: 'Generate Series Assets',
-    actionPromptSuite: 'Character Prompt + LLM / TTS Wrapper',
+    actionPromptSuite: 'Character Prompt + LLM / TTS',
     actionPaper2Gal: 'paper2gal Asset Generation',
     actionBack: 'Back',
     settingsTitle: 'Project Settings',
@@ -326,81 +372,92 @@ const translations: Record<AppLanguage, Messages> = {
     themeLight: 'Light',
     themeDeep: 'Deep',
     accentTitle: 'Accent palette',
-    styleLockedTitle: 'paper2gal style is locked',
-    styleLockedDescription:
-      'When the official paper2gal style is enabled, the striped pink background and brand color are fixed, so depth and other palettes cannot be changed.',
+    styleLockedTitle: 'paper2gal style locked',
+    styleLockedDescription: 'The official paper2gal preset locks the background, primary color, and depth mode.',
+    fontTitle: 'Font',
+    fontSans: 'Sans',
+    fontRounded: 'Rounded',
+    fontSerif: 'Serif',
     languageTitle: 'Interface language',
     apiModeTitle: 'Interface mode',
-    builtinMode: 'Use built-in model',
+    builtinMode: 'Built-in model',
     customApiMode: 'Custom API',
     apiBaseTitle: 'API endpoint',
     apiBasePlaceholder: 'https://your-api.example.com',
     apiKeyTitle: 'API key',
-    apiKeyPlaceholder: 'Enter your own API key',
-    apiHelp: 'You can leave this empty for now and connect it later. Everything is stored only in the current browser.',
-    apiHint: 'The static page only reads the address and key configured here. It does not upload other character data by itself.',
-    apiEffectiveTitle: 'Current effective endpoint',
-    apiEffectiveBuiltin: 'The shell is currently using a built-in placeholder configuration that can later be replaced by a local or remote service.',
-    apiEffectiveCustom: 'The app will currently prioritize the custom API endpoint you entered.',
-    apiPrivacy: 'All information stays local to this site and browser. No OC sheets, personal data, or secrets are uploaded automatically.',
+    apiKeyPlaceholder: 'Enter your API key',
+    apiHelp: 'All interface settings stay in the current browser only.',
+    apiHint: 'The static page reads only the address and key configured here.',
+    apiEffectiveTitle: 'Current endpoint',
+    apiEffectiveBuiltin: 'The app is using the built-in placeholder configuration right now.',
+    apiEffectiveCustom: 'The app currently prioritizes your custom API endpoint.',
+    apiPrivacy: 'Everything stays local in this browser.',
     announcementTitle: 'Announcement',
-    announcementDescription: 'This is the 0.1.0 starter build focused on the site shell, navigation, and configuration system.',
-    announcementList1: 'Homepage main panel, launch modal, and settings shell are complete.',
-    announcementList2: 'Face maker, style transfer, prompt/LLM/TTS, and paper2gal entries are reserved.',
-    announcementList3: 'The next passes will connect the real editor, API calls, and Character Workflow repository integration.',
+    announcementDescription: 'Version 0.1.1 refreshes the homepage layout, theme sync, and entrance flow polish.',
+    announcementList1: 'Start and settings were moved into the main action area on the right.',
+    announcementList2: 'paper2gal theme styling now syncs across the site and settings modal.',
+    announcementList3: 'Font switching and fade-in transitions were added, and internal-sounding copy was removed.',
     aboutTitle: 'About',
-    aboutDescription: 'This project will act as the unified entry for your OC creation flow, covering face making, style transfer, and series asset generation.',
+    aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     profileLinkLabel: 'GitHub profile',
     repoLinkLabel: 'Repository',
     pageFaceTitle: 'Face Maker',
-    pageFaceDescription: 'This page is ready to host the future editor for face shape, features, hairstyle, palettes, and export.',
+    pageFaceDescription: 'This page will host the face editor workspace.',
     pageStyleTitle: 'Style Transfer',
-    pageStyleDescription: 'This page is reserved for the future style transfer flow, model options, inputs, outputs, and task progress.',
-    pagePromptTitle: 'Character Prompt + LLM / TTS Wrapper',
-    pagePromptDescription: 'This page is ready for future prompt generation, LLM calls, and voice packaging.',
+    pageStyleDescription: 'This page will host the style transfer workflow.',
+    pagePromptTitle: 'Prompt + LLM / TTS',
+    pagePromptDescription: 'This page will host prompt and voice tooling.',
     pagePaperTitle: 'paper2gal Asset Generation',
-    pagePaperDescription: 'This page is reserved for the future paper2gal image asset generation workflow.',
-    moduleCanvas: 'Main workspace canvas',
-    modulePanel: 'Right-side controls and tools',
-    modulePipeline: 'Task queue and output results',
+    pagePaperDescription: 'This page will host the paper2gal asset workflow.',
+    moduleCanvas: 'Main workspace',
+    modulePanel: 'Control panel',
+    modulePipeline: 'Task queue and outputs',
     moduleStorage: 'Local settings and history',
   },
   ru: {
     appTitle: 'Original Character Maker',
+    appSubtitle: 'Центр управления OC',
     versionLabel: 'Версия',
-    heroEyebrow: 'Центр создания OC',
-    heroTitle: 'Сначала построим вход в мир персонажа',
-    heroDescription:
-      'Главная страница, стартовый поток, панель настроек и четыре основных входа уже собраны в единую оболочку, чтобы затем спокойно наполнять её функциями.',
+    overviewTitle: 'Точка входа в создание персонажа',
+    overviewDescription:
+      'Редактор лица, перенос стиля, prompt-инструменты и paper2gal собраны на одной входной странице.',
+    workflowTitle: 'Запустить новый workflow',
+    workflowDescription: 'Сначала выберите входной раздел, а потом переходите в нужный инструмент.',
+    workflowHint: 'Сейчас акцент сделан на каркасе сайта и маршрутах входа.',
     startButton: 'Старт',
     settingsButton: 'Настройки',
-    statusTitle: 'Текущий этап',
-    statusDescription: 'Оболочка 0.1.0 уже готова. Дальше можно по шагам добавлять редактор лица, перенос стиля и поток серийных материалов.',
-    featureCards: ['Каркас редактора лица', 'Вход переноса стиля', 'Поток серийных материалов'],
-    featureLabelFace: 'Редактор лица',
-    featureLabelStyle: 'Перенос стиля',
-    featureLabelSeries: 'Серийные материалы',
-    localOnlyNote:
-      'Вся информация на сайте хранится локально. Мы не загружаем и не крадём карточки персонажей, личные данные или API-ключи.',
-    footerNote: 'Все настройки сохраняются в локальном браузере и позже могут быть связаны с character workflow и пайплайном материалов.',
+    progressTitle: 'Прогресс workflow',
+    progressDescription: 'Workflow ещё не запускался. После входа логи и прогресс появятся здесь.',
+    outputTitle: 'Промежуточные результаты',
+    outputDescription: 'Пока результатов нет. Будущие материалы будут отображаться здесь.',
+    privacyNote: 'Вся информация хранится локально. Данные персонажа, личная информация и API-ключи не загружаются.',
+    footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    metricModules: '4 входа',
+    metricLanguages: '4 языка',
+    metricStorage: 'Локальное хранение',
+    featureFace: 'Редактор лица',
+    featureStyle: 'Перенос стиля',
+    featureSeries: 'Серийные материалы',
+    featurePrompt: 'Prompt + LLM / TTS',
+    featurePaper: 'paper2gal материалы',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
-    comingSoon: 'Каркас функции',
+    comingSoon: 'Каркас страницы',
     preparedModules: 'Подготовленные модули',
-    placeholderTodo: 'Следующий шаг',
-    placeholderCanvas: 'Превью персонажа и панель управления',
-    placeholderSettings: 'Настройки модуля и связка входов',
-    placeholderPipeline: 'Подключение реального workflow и API',
-    placeholderHint: 'Пока это каркас страницы, чтобы нам было удобно постепенно добавлять реальные возможности.',
-    startModalTitle: 'Запустить новый workflow',
-    startModalDescription: 'Сначала выберите нужный вход. Каркасы страниц уже подготовлены.',
-    startModalSeriesTitle: 'Генерация серии материалов',
-    startModalSeriesDescription: 'Эта ветка сначала разделена на два под-входа, чтобы потом отдельно подключить каждый workflow.',
+    placeholderTodo: 'Следующее',
+    placeholderCanvas: 'Основное полотно и превью',
+    placeholderSettings: 'Панель параметров и настройки',
+    placeholderPipeline: 'Очередь задач, API и вывод',
+    placeholderHint: 'Сейчас страница сохраняет структуру для будущего инструмента.',
+    startModalTitle: 'Выберите вход',
+    startModalDescription: 'Сначала выберите нужную ветку.',
+    startModalSeriesTitle: 'Генерация серии',
+    startModalSeriesDescription: 'Эта ветка разделена на два под-входа.',
     actionFace: 'Редактор лица',
     actionStyle: 'Перенос стиля',
     actionSeries: 'Генерация серии',
-    actionPromptSuite: 'Character Prompt + LLM / TTS',
-    actionPaper2Gal: 'paper2gal генерация материалов',
+    actionPromptSuite: 'Prompt + LLM / TTS',
+    actionPaper2Gal: 'paper2gal генерация',
     actionBack: 'Назад',
     settingsTitle: 'Настройки проекта',
     tabStyle: 'Стиль',
@@ -410,48 +467,51 @@ const translations: Record<AppLanguage, Messages> = {
     tabAbout: 'О проекте',
     stylePresetTitle: 'Пресет стиля',
     stylePresetDefault: 'По умолчанию',
-    stylePresetPaper2Gal: 'Официальный paper2gal',
+    stylePresetPaper2Gal: 'paper2gal',
     themeModeTitle: 'Режим',
     themeLight: 'Светлый',
     themeDeep: 'Тёмный',
     accentTitle: 'Палитра',
     styleLockedTitle: 'Стиль paper2gal зафиксирован',
-    styleLockedDescription:
-      'При включении официального стиля paper2gal розово-белый полосатый фон и фирменный цвет фиксируются, поэтому глубину и другие палитры менять нельзя.',
+    styleLockedDescription: 'Официальный paper2gal фиксирует фон, основной цвет и режим глубины.',
+    fontTitle: 'Шрифт',
+    fontSans: 'Sans',
+    fontRounded: 'Rounded',
+    fontSerif: 'Serif',
     languageTitle: 'Язык интерфейса',
-    apiModeTitle: 'Режим интерфейса',
-    builtinMode: 'Использовать встроенную модель',
+    apiModeTitle: 'Режим API',
+    builtinMode: 'Встроенная модель',
     customApiMode: 'Свой API',
     apiBaseTitle: 'Адрес API',
     apiBasePlaceholder: 'https://your-api.example.com',
     apiKeyTitle: 'API-ключ',
-    apiKeyPlaceholder: 'Введите свой API-ключ',
-    apiHelp: 'Пока можно оставить пустым и включить позже. Всё хранится только в текущем браузере.',
-    apiHint: 'Статическая страница читает только адрес и ключ, указанные здесь, и не отправляет другие данные персонажа сама по себе.',
-    apiEffectiveTitle: 'Текущий активный адрес',
-    apiEffectiveBuiltin: 'Сейчас используется встроенная заглушка, которую позже можно заменить локальным или удалённым сервисом.',
-    apiEffectiveCustom: 'Сейчас приложение будет использовать указанный вами адрес пользовательского API.',
-    apiPrivacy: 'Вся информация остаётся локально в браузере. Карточки OC, личные данные и секреты автоматически не загружаются.',
+    apiKeyPlaceholder: 'Введите API-ключ',
+    apiHelp: 'Все настройки сохраняются только в текущем браузере.',
+    apiHint: 'Страница читает только адрес и ключ, указанные здесь.',
+    apiEffectiveTitle: 'Текущий адрес',
+    apiEffectiveBuiltin: 'Сейчас используется встроенная заглушка.',
+    apiEffectiveCustom: 'Сейчас приоритет у вашего адреса API.',
+    apiPrivacy: 'Всё остаётся локально в браузере.',
     announcementTitle: 'Объявление',
-    announcementDescription: 'Сейчас это стартовая версия 0.1.0, где основной упор сделан на оболочку сайта, навигацию и систему настроек.',
-    announcementList1: 'Готовы главная панель, стартовое модальное окно и оболочка настроек.',
-    announcementList2: 'Зарезервированы входы для face maker, style transfer, Prompt/LLM/TTS и paper2gal.',
-    announcementList3: 'Следующие итерации подключат реальный редактор, вызовы API и интеграцию с Character Workflow.',
+    announcementDescription: 'Версия 0.1.1 обновила главную страницу, синхронизацию тем и базовые анимации.',
+    announcementList1: 'Кнопки старта и настроек перенесены в основную правую карточку.',
+    announcementList2: 'Тема paper2gal синхронизирована с панелью настроек.',
+    announcementList3: 'Добавлены смена шрифта и плавные появления элементов.',
     aboutTitle: 'О проекте',
-    aboutDescription: 'Этот проект станет единым входом для твоего процесса создания OC: редактор лица, перенос стиля и генерация серийных материалов.',
-    profileLinkLabel: 'Профиль GitHub',
+    aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
+    profileLinkLabel: 'GitHub профиль',
     repoLinkLabel: 'Репозиторий',
     pageFaceTitle: 'Редактор лица',
-    pageFaceDescription: 'Эта страница уже готова под будущий редактор формы лица, черт, причёски, палитр и экспорта.',
+    pageFaceDescription: 'Здесь будет рабочее пространство редактора лица.',
     pageStyleTitle: 'Перенос стиля',
-    pageStyleDescription: 'Эта страница оставлена под будущий workflow переноса стиля, выбора моделей, входов, выходов и прогресса задач.',
-    pagePromptTitle: 'Character Prompt + LLM / TTS',
-    pagePromptDescription: 'Эта страница готова под будущую генерацию промптов, вызовы LLM и голосовую упаковку.',
-    pagePaperTitle: 'paper2gal генерация материалов',
-    pagePaperDescription: 'Эта страница зарезервирована под будущий workflow генерации материалов paper2gal.',
-    moduleCanvas: 'Главное рабочее полотно',
-    modulePanel: 'Правая панель инструментов',
-    modulePipeline: 'Очередь задач и результаты',
+    pageStyleDescription: 'Здесь будет размещён workflow переноса стиля.',
+    pagePromptTitle: 'Prompt + LLM / TTS',
+    pagePromptDescription: 'Здесь будут prompt и голосовые инструменты.',
+    pagePaperTitle: 'paper2gal генерация',
+    pagePaperDescription: 'Здесь будет workflow генерации материалов paper2gal.',
+    moduleCanvas: 'Основное рабочее поле',
+    modulePanel: 'Панель управления',
+    modulePipeline: 'Очередь задач и вывод',
     moduleStorage: 'Локальные настройки и история',
   },
 };
@@ -461,58 +521,22 @@ const paletteOptions: Array<{
   swatch: string;
   label: Record<AppLanguage, string>;
 }> = [
-  {
-    value: 'ocean',
-    swatch: '#4da3ff',
-    label: { zh: '海蓝', ja: 'オーシャン', en: 'Ocean', ru: 'Океан' },
-  },
-  {
-    value: 'emerald',
-    swatch: '#45d08d',
-    label: { zh: '翡翠', ja: 'エメラルド', en: 'Emerald', ru: 'Изумруд' },
-  },
-  {
-    value: 'amber',
-    swatch: '#f5b94f',
-    label: { zh: '琥珀', ja: 'アンバー', en: 'Amber', ru: 'Янтарь' },
-  },
-  {
-    value: 'rose',
-    swatch: '#f36a9d',
-    label: { zh: '玫瑰', ja: 'ローズ', en: 'Rose', ru: 'Роза' },
-  },
-  {
-    value: 'violet',
-    swatch: '#9370ff',
-    label: { zh: '紫藤', ja: 'バイオレット', en: 'Violet', ru: 'Фиалка' },
-  },
-  {
-    value: 'slate',
-    swatch: '#9bb2c9',
-    label: { zh: '石墨', ja: 'スレート', en: 'Slate', ru: 'Сланец' },
-  },
+  { value: 'ocean', swatch: '#4da3ff', label: { zh: '海蓝', ja: 'オーシャン', en: 'Ocean', ru: 'Океан' } },
+  { value: 'emerald', swatch: '#45d08d', label: { zh: '翡翠', ja: 'エメラルド', en: 'Emerald', ru: 'Изумруд' } },
+  { value: 'amber', swatch: '#f5b94f', label: { zh: '琥珀', ja: 'アンバー', en: 'Amber', ru: 'Янтарь' } },
+  { value: 'rose', swatch: '#f36a9d', label: { zh: '玫瑰', ja: 'ローズ', en: 'Rose', ru: 'Роза' } },
+  { value: 'violet', swatch: '#9370ff', label: { zh: '紫藤', ja: 'バイオレット', en: 'Violet', ru: 'Фиалка' } },
+  { value: 'slate', swatch: '#9bb2c9', label: { zh: '石墨', ja: 'スレート', en: 'Slate', ru: 'Сланец' } },
 ];
 
 const languageOptions: Array<{
   value: AppLanguage;
   label: Record<AppLanguage, string>;
 }> = [
-  {
-    value: 'zh',
-    label: { zh: '中文', ja: '中国語', en: 'Chinese', ru: 'Китайский' },
-  },
-  {
-    value: 'ja',
-    label: { zh: '日文', ja: '日本語', en: 'Japanese', ru: 'Японский' },
-  },
-  {
-    value: 'en',
-    label: { zh: '英文', ja: '英語', en: 'English', ru: 'Английский' },
-  },
-  {
-    value: 'ru',
-    label: { zh: '俄文', ja: 'ロシア語', en: 'Russian', ru: 'Русский' },
-  },
+  { value: 'zh', label: { zh: '中文', ja: '中国語', en: 'Chinese', ru: 'Китайский' } },
+  { value: 'ja', label: { zh: '日文', ja: '日本語', en: 'Japanese', ru: 'Японский' } },
+  { value: 'en', label: { zh: '英文', ja: '英語', en: 'English', ru: 'Английский' } },
+  { value: 'ru', label: { zh: '俄文', ja: 'ロシア語', en: 'Russian', ru: 'Русский' } },
 ];
 
 const defaultSettings: SettingsState = {
@@ -523,6 +547,7 @@ const defaultSettings: SettingsState = {
   interfaceMode: 'builtin',
   apiBaseUrl: '',
   apiKey: '',
+  fontPreset: 'sans',
 };
 
 function App() {
@@ -533,9 +558,7 @@ function App() {
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      return;
-    }
+    if (!saved) return;
 
     try {
       const parsed = JSON.parse(saved) as Partial<SettingsState>;
@@ -545,28 +568,26 @@ function App() {
     }
   }, []);
 
+  // Keep UI preferences local-only so the shell behaves like a desktop-style tool launcher.
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
   const messages = translations[settings.language];
   const effectivePreset = settings.stylePreset;
-  const effectiveDepth: ThemeDepth = settings.stylePreset === 'paper2gal' ? 'light' : settings.depth;
-  const effectiveAccent: AccentPalette = settings.stylePreset === 'paper2gal' ? 'rose' : settings.accent;
+  const effectiveDepth: ThemeDepth = effectivePreset === 'paper2gal' ? 'light' : settings.depth;
+  const effectiveAccent: AccentPalette = effectivePreset === 'paper2gal' ? 'rose' : settings.accent;
 
   const appClassName = [
     'app-shell',
     `preset-${effectivePreset}`,
     `depth-${effectiveDepth}`,
     `accent-${effectiveAccent}`,
+    `font-${settings.fontPreset}`,
   ].join(' ');
 
   function updateSettings(patch: Partial<SettingsState>) {
     setSettings((current) => ({ ...current, ...patch }));
-  }
-
-  function openSeriesModal() {
-    setModalStep('series');
   }
 
   function navigateTo(nextScreen: Exclude<FeatureScreen, 'home'>) {
@@ -604,7 +625,7 @@ function App() {
           messages={messages}
           onClose={() => setModalStep(null)}
           onBack={() => setModalStep('root')}
-          onOpenSeries={openSeriesModal}
+          onOpenSeries={() => setModalStep('series')}
           onSelect={navigateTo}
         />
       )}
@@ -630,63 +651,87 @@ function HomeScreen({
   onOpenSettings: () => void;
   onOpenStart: () => void;
 }) {
+  const features = [
+    messages.featureFace,
+    messages.featureStyle,
+    messages.featureSeries,
+    messages.featurePrompt,
+    messages.featurePaper,
+  ];
+
   return (
     <main className="home-shell">
-      <section className="hero-panel">
-        <div className="hero-topline">
-          <div>
-            <p className="eyebrow">{messages.heroEyebrow}</p>
-            <h1>{messages.appTitle}</h1>
-          </div>
-          <div className="version-pill">
-            <span>{messages.versionLabel}</span>
-            <strong>{VERSION}</strong>
-          </div>
+      <section className="top-banner fade-up delay-1">
+        <div className="top-banner-copy">
+          <h1>{messages.appTitle}</h1>
+          <p>{messages.appSubtitle}</p>
         </div>
-
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <h2>{messages.heroTitle}</h2>
-            <p>{messages.heroDescription}</p>
-            <div className="hero-actions">
-              <button className="primary-button" type="button" onClick={onOpenStart}>
-                {messages.startButton}
-              </button>
-              <button className="secondary-button" type="button" onClick={onOpenSettings}>
-                {messages.settingsButton}
-              </button>
-            </div>
-          </div>
-
-          <div className="hero-preview">
-            <div className="preview-card preview-card-main">
-              <span>{messages.featureLabelFace}</span>
-              <strong>{messages.featureCards[0]}</strong>
-            </div>
-            <div className="preview-card preview-card-sub">
-              <span>{messages.featureLabelStyle}</span>
-              <strong>{messages.featureCards[1]}</strong>
-            </div>
-            <div className="preview-card preview-card-sub">
-              <span>{messages.featureLabelSeries}</span>
-              <strong>{messages.featureCards[2]}</strong>
-            </div>
-          </div>
+        <div className="version-pill">
+          <span>{messages.versionLabel}</span>
+          <strong>{VERSION}</strong>
         </div>
       </section>
 
-      <section className="status-strip">
-        <div className="status-card">
-          <p className="section-label">{messages.statusTitle}</p>
-          <p>{messages.statusDescription}</p>
-        </div>
-        <div className="status-card note-card">
-          <p className="section-label">Local First</p>
-          <p>{messages.localOnlyNote}</p>
-        </div>
+      <section className="home-grid">
+        <article className="home-card overview-card fade-up delay-2">
+          <h2>{messages.overviewTitle}</h2>
+          <p>{messages.overviewDescription}</p>
+
+          <div className="metrics-row">
+            <div className="metric-box">
+              <strong>4</strong>
+              <span>{messages.metricModules}</span>
+            </div>
+            <div className="metric-box">
+              <strong>4</strong>
+              <span>{messages.metricLanguages}</span>
+            </div>
+            <div className="metric-box">
+              <strong>Local</strong>
+              <span>{messages.metricStorage}</span>
+            </div>
+          </div>
+        </article>
+
+        <article className="home-card workflow-card fade-up delay-3">
+          <h2>{messages.workflowTitle}</h2>
+          <p>{messages.workflowDescription}</p>
+
+          <div className="feature-pill-row">
+            {features.map((feature) => (
+              <span key={feature} className="feature-pill">
+                {feature}
+              </span>
+            ))}
+          </div>
+
+          <div className="workflow-actions">
+            <button className="primary-button giant-button" type="button" onClick={onOpenStart}>
+              {messages.startButton}
+            </button>
+            <button className="secondary-button giant-button" type="button" onClick={onOpenSettings}>
+              {messages.settingsButton}
+            </button>
+          </div>
+
+          <p className="workflow-hint">{messages.workflowHint}</p>
+        </article>
       </section>
 
-      <footer className="home-footer">
+      <section className="home-grid lower-grid">
+        <article className="home-card fade-up delay-4">
+          <h2>{messages.progressTitle}</h2>
+          <p>{messages.progressDescription}</p>
+        </article>
+
+        <article className="home-card fade-up delay-5">
+          <h2>{messages.outputTitle}</h2>
+          <p>{messages.outputDescription}</p>
+        </article>
+      </section>
+
+      <footer className="home-footer fade-up delay-6">
+        <p>{messages.privacyNote}</p>
         <p>{messages.footerNote}</p>
       </footer>
     </main>
@@ -710,7 +755,7 @@ function FeaturePage({
 
   return (
     <main className="feature-shell">
-      <header className="feature-header">
+      <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={onBack}>
           {messages.backHome}
         </button>
@@ -723,14 +768,14 @@ function FeaturePage({
       </header>
 
       <section className="feature-main">
-        <div className="feature-intro-card">
-          <p className="eyebrow">{messages.appTitle}</p>
+        <div className="feature-intro-card fade-up delay-2">
+          <p className="section-label">{messages.appSubtitle}</p>
           <h2>{details.title}</h2>
           <p>{details.description}</p>
           <div className="language-badge">{language.toUpperCase()}</div>
         </div>
 
-        <div className="feature-layout-card">
+        <div className="feature-layout-card fade-up delay-3">
           <div className="feature-layout-grid">
             <div className="layout-column workspace-column">
               <div className="layout-card tall-card">
@@ -753,7 +798,7 @@ function FeaturePage({
       </section>
 
       <section className="feature-bottom-grid">
-        <article className="info-panel">
+        <article className="info-panel fade-up delay-4">
           <h3>{messages.preparedModules}</h3>
           <ul>
             <li>{messages.placeholderCanvas}</li>
@@ -762,7 +807,7 @@ function FeaturePage({
           </ul>
         </article>
 
-        <article className="info-panel">
+        <article className="info-panel fade-up delay-5">
           <h3>{messages.placeholderTodo}</h3>
           <ul>
             <li>{messages.placeholderPipeline}</li>
@@ -772,7 +817,7 @@ function FeaturePage({
         </article>
       </section>
 
-      <p className="feature-hint">{messages.placeholderHint}</p>
+      <p className="feature-hint fade-up delay-6">{messages.placeholderHint}</p>
     </main>
   );
 }
@@ -793,18 +838,19 @@ function StartModal({
   onSelect: (screen: Exclude<FeatureScreen, 'home'>) => void;
 }) {
   const isSeriesStep = step === 'series';
-  const title = isSeriesStep ? messages.startModalSeriesTitle : messages.startModalTitle;
-  const description = isSeriesStep ? messages.startModalSeriesDescription : messages.startModalDescription;
 
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
-      <section className="modal-card action-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <section className="modal-card action-modal fade-up delay-1" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={onClose} aria-label="Close">
           ×
         </button>
-        <p className="eyebrow">{messages.appTitle}</p>
-        <h2>{title}</h2>
-        <p className="modal-description">{description}</p>
+
+        <p className="section-label">{messages.appSubtitle}</p>
+        <h2>{isSeriesStep ? messages.startModalSeriesTitle : messages.startModalTitle}</h2>
+        <p className="modal-description">
+          {isSeriesStep ? messages.startModalSeriesDescription : messages.startModalDescription}
+        </p>
 
         <div className="action-grid">
           {!isSeriesStep ? (
@@ -874,9 +920,15 @@ function SettingsModal({
     { key: 'about', label: messages.tabAbout },
   ];
 
+  const currentFontOptions = [
+    { value: 'sans' as const, label: messages.fontSans },
+    { value: 'rounded' as const, label: messages.fontRounded },
+    { value: 'serif' as const, label: messages.fontSerif },
+  ];
+
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
-      <section className="modal-card settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <section className="modal-card settings-modal fade-up delay-1" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={onClose} aria-label="Close">
           ×
         </button>
@@ -955,6 +1007,22 @@ function SettingsModal({
                       >
                         <span className="palette-dot" style={{ backgroundColor: item.swatch }} />
                         {item.label[settings.language]}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.fontTitle}</h3>
+                  <div className="palette-grid">
+                    {currentFontOptions.map((item) => (
+                      <button
+                        key={item.value}
+                        className={`palette-chip ${settings.fontPreset === item.value ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => onUpdate({ fontPreset: item.value })}
+                      >
+                        {item.label}
                       </button>
                     ))}
                   </div>
@@ -1088,7 +1156,7 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         panelTitle: 'Face / Hair / Palette',
         pipelineTitle: 'Presets / Export',
         todoOne: '补角色图层、部位分类和颜色系统',
-        todoTwo: '补随机生成、重置和导出 PNG',
+        todoTwo: '补随机生成、重置与导出 PNG',
       };
     case 'style-transfer':
       return {
@@ -1098,7 +1166,7 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         panelTitle: 'Model / Prompt / Seed',
         pipelineTitle: 'Queue / History',
         todoOne: '补输入图片、模型选择和参数面板',
-        todoTwo: '补任务状态、结果预览和下载',
+        todoTwo: '补任务状态、结果预览与下载',
       };
     case 'prompt-suite':
       return {
@@ -1107,8 +1175,8 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         workspaceTitle: 'Prompt Workspace',
         panelTitle: 'LLM / TTS Config',
         pipelineTitle: 'Generated Assets',
-        todoOne: '补角色资料输入、Prompt 模板和导出',
-        todoTwo: '补 LLM/TTS 服务封装与本地保存',
+        todoOne: '补角色资料、Prompt 模板和导出逻辑',
+        todoTwo: '补 LLM / TTS 服务封装与本地保存',
       };
     case 'paper2gal':
       return {
