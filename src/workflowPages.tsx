@@ -1463,12 +1463,27 @@ async function copyRemoteAsset(url: string, settings: SettingsState) {
   }
 }
 
-async function downloadRemoteFile(url: string, fileName: string, settings: SettingsState) {
-  const response = await fetch(toPaperAssetUrl(settings, url), {
+async function downloadRemoteFile(url: string, fileName: string, settings: SettingsState, copy: UiCopySet['paper']) {
+  const requestUrl = toPaperAssetUrl(settings, url);
+  if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
+    throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
+  }
+
+  const response = await fetch(requestUrl, {
     headers: buildApiHeaders(settings),
   });
   if (!response.ok) {
-    throw new Error(`Download failed with status ${response.status}.`);
+    const payload = await parseJsonResponse(response);
+    throw new Error(
+      buildPaperApiErrorMessage({
+        response,
+        payload,
+        requestUrl,
+        settings,
+        copy,
+        fallback: copy.networkFetchError,
+      }),
+    );
   }
 
   const blob = await response.blob();
@@ -1480,12 +1495,27 @@ async function downloadRemoteFile(url: string, fileName: string, settings: Setti
   URL.revokeObjectURL(objectUrl);
 }
 
-async function downloadPaperArchive(workflowId: string, settings: SettingsState) {
-  const response = await fetch(buildApiUrl(settings, `/api/workflows/${workflowId}/download`), {
+async function downloadPaperArchive(workflowId: string, settings: SettingsState, copy: UiCopySet['paper']) {
+  const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/download`);
+  if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
+    throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
+  }
+
+  const response = await fetch(requestUrl, {
     headers: buildApiHeaders(settings),
   });
   if (!response.ok) {
-    throw new Error(`Archive download failed with status ${response.status}.`);
+    const payload = await parseJsonResponse(response);
+    throw new Error(
+      buildPaperApiErrorMessage({
+        response,
+        payload,
+        requestUrl,
+        settings,
+        copy,
+        fallback: copy.networkFetchError,
+      }),
+    );
   }
 
   const blob = await response.blob();
@@ -2972,7 +3002,7 @@ export function Paper2GalPage({
     }
 
     try {
-      await downloadPaperArchive(workflow.id, settings);
+      await downloadPaperArchive(workflow.id, settings, paper);
     } catch (error) {
       setMessage({
         type: 'error',
@@ -2983,7 +3013,7 @@ export function Paper2GalPage({
 
   async function handleDownloadAsset(url: string, fileName: string) {
     try {
-      await downloadRemoteFile(url, fileName, settings);
+      await downloadRemoteFile(url, fileName, settings, paper);
     } catch (error) {
       setMessage({
         type: 'error',
