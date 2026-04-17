@@ -124,6 +124,7 @@ type UiCopySet = {
   copyJson: string;
   downloadJson: string;
   copyResult: string;
+  copied: string;
   downloadResult: string;
   copyError: string;
   downloadError: string;
@@ -309,6 +310,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     copyJson: '复制 JSON',
     downloadJson: '下载 JSON',
     copyResult: '复制结果',
+    copied: '已复制',
     downloadResult: '下载结果',
     copyError: '复制错误',
     downloadError: '下载错误',
@@ -476,6 +478,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     copyJson: 'JSON をコピー',
     downloadJson: 'JSON を保存',
     copyResult: '結果をコピー',
+    copied: 'コピー済み',
     downloadResult: '結果を保存',
     copyError: 'エラーをコピー',
     downloadError: 'エラーを保存',
@@ -643,6 +646,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     copyJson: 'Copy JSON',
     downloadJson: 'Download JSON',
     copyResult: 'Copy result',
+    copied: 'Copied',
     downloadResult: 'Download result',
     copyError: 'Copy error',
     downloadError: 'Download error',
@@ -810,6 +814,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     copyJson: 'Скопировать JSON',
     downloadJson: 'Скачать JSON',
     copyResult: 'Скопировать результат',
+    copied: 'Скопировано',
     downloadResult: 'Скачать результат',
     copyError: 'Скопировать ошибку',
     downloadError: 'Скачать ошибку',
@@ -1032,6 +1037,7 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     ...uiCopy.en,
     dirty: '저장 안 됨',
     clean: '저장됨',
+    copied: '복사됨',
     continueEdit: '계속 편집',
     confirmReturnTitle: '홈으로 돌아갈까요?',
     confirmReturnDirty: '아직 저장되지 않은 내용이 있습니다. 지금 돌아가면 현재 초안이 유지되지 않습니다.',
@@ -1078,6 +1084,7 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     ...uiCopy.en,
     dirty: 'Non enregistré',
     clean: 'Enregistré',
+    copied: 'Copié',
     continueEdit: 'Continuer',
     confirmReturnTitle: 'Retourner à l’accueil ?',
     confirmReturnDirty: 'Cette page contient encore des changements non enregistrés.',
@@ -1095,6 +1102,7 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     ...uiCopy.en,
     dirty: 'Nicht gespeichert',
     clean: 'Gespeichert',
+    copied: 'Kopiert',
     continueEdit: 'Weiter bearbeiten',
     confirmReturnTitle: 'Zur Startseite zurückkehren?',
     confirmReturnDirty: 'Diese Seite hat noch nicht gespeicherte Änderungen.',
@@ -1112,6 +1120,7 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     ...uiCopy.en,
     dirty: 'Sin guardar',
     clean: 'Guardado',
+    copied: 'Copiado',
     continueEdit: 'Seguir editando',
     confirmReturnTitle: '¿Volver al inicio?',
     confirmReturnDirty: 'Esta página todavía tiene cambios sin guardar.',
@@ -1129,6 +1138,7 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     ...uiCopy.en,
     dirty: 'Non salvato',
     clean: 'Salvato',
+    copied: 'Copiato',
     continueEdit: 'Continua a modificare',
     confirmReturnTitle: 'Tornare alla home?',
     confirmReturnDirty: 'Questa pagina ha ancora modifiche non salvate.',
@@ -1146,6 +1156,7 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     ...uiCopy.en,
     dirty: 'Não salvo',
     clean: 'Salvo',
+    copied: 'Copiado',
     continueEdit: 'Continuar editando',
     confirmReturnTitle: 'Voltar para a página inicial?',
     confirmReturnDirty: 'Esta página ainda tem alterações não salvas.',
@@ -1964,7 +1975,6 @@ export function StyleTransferPage({
           {backHome}
         </button>
         <div className="feature-header-meta">
-          <span>{isDirty ? copy.dirty : copy.clean}</span>
           <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
             {openSettings}
           </button>
@@ -2438,7 +2448,6 @@ export function PromptSuitePage({
           {backHome}
         </button>
         <div className="feature-header-meta">
-          <span>{isDirty ? copy.dirty : copy.clean}</span>
           <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
             {openSettings}
           </button>
@@ -3039,7 +3048,6 @@ export function Paper2GalPage({
           {backHome}
         </button>
         <div className="feature-header-meta">
-          <span>{isDirty ? copy.dirty : copy.clean}</span>
           <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
             {openSettings}
           </button>
@@ -3320,7 +3328,7 @@ export function Paper2GalPage({
                             {paper.downloadFile}
                           </button>
                           <button className="secondary-button small-button" type="button" onClick={() => handleCopyAsset(card.url, copyKey)}>
-                            {copiedActionKey === copyKey ? copy.copyResult : paper.copyAsset}
+                            {copiedActionKey === copyKey ? copy.copied : paper.copyAsset}
                           </button>
                         </div>
                       </article>
