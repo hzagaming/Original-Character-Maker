@@ -7,13 +7,15 @@ import type {
   FontPreset,
   SettingsState,
   SettingsTab,
+  ShortcutAction,
+  ShortcutMap,
   StartModalStep,
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage } from './workflowPages';
 
-const VERSION = '0.3.4';
+const VERSION = '0.3.5';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -66,6 +68,7 @@ type Messages = {
   tabStyle: string;
   tabLanguage: string;
   tabApi: string;
+  tabShortcuts: string;
   tabAnnouncement: string;
   tabAbout: string;
   stylePresetTitle: string;
@@ -103,6 +106,10 @@ type Messages = {
   apiEffectiveBuiltin: string;
   apiEffectiveCustom: string;
   apiPrivacy: string;
+  shortcutsTitle: string;
+  shortcutsHint: string;
+  shortcutsReset: string;
+  shortcutsExperimental: string;
   announcementTitle: string;
   announcementHistoryButton: string;
   announcementDescription: string;
@@ -111,6 +118,7 @@ type Messages = {
   announcementList3: string;
   aboutTitle: string;
   aboutDescription: string;
+  paperSiteLabel: string;
   profileLinkLabel: string;
   repoLinkLabel: string;
   pageFaceTitle: string;
@@ -180,6 +188,7 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: '样式',
     tabLanguage: '语言',
     tabApi: '接口',
+    tabShortcuts: '快捷键',
     tabAnnouncement: '公告',
     tabAbout: '关于',
     stylePresetTitle: '样式预设',
@@ -218,22 +227,27 @@ const translations: Record<BaseLanguage, Messages> = {
     apiEffectiveBuiltin: '当前优先使用 Plato 预设通道，本地开发时会优先回落到 localhost:3001。',
     apiEffectiveCustom: '当前优先使用你填写的工作流后端根地址。',
     apiPrivacy: '本网站所有信息均在本地保存，不会上传任何角色社卡、个人信息或私钥。',
+    shortcutsTitle: '编辑器快捷键',
+    shortcutsHint: '这里可以直接改 OC 设卡编辑器的快捷键组合，修改后会立刻写入本地设置。',
+    shortcutsReset: '恢复默认快捷键',
+    shortcutsExperimental: '自定义快捷键属于实验性设置，请避免与浏览器或系统保留快捷键冲突。',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.3.4 重点整理 paper2gal 工作台的信息布局，把结果与调试收进右侧栏，并让返回首页确认弹窗脱离工作区独立显示。',
-    announcementList1: 'paper2gal 的结果资产、结果清单、最近错误和调试 JSON 统一整理到右侧信息栏，阅读路径更清晰。',
-    announcementList2: '含代码框的结果 / 错误 / 调试面板默认折叠，只有最近错误会在失败时自动展开，减少页面噪音。',
-    announcementList3: '所有返回首页确认弹窗现在都通过全局层独立居中显示，不再受工作台面板裁切或缩放影响。',
+    announcementDescription: '0.3.5 补全了 0.3.3.0 到 0.3.3.2 的公告链路，并继续整理关于页入口、设卡编辑器工具栏和快捷键设置。',
+    announcementList1: '公告页补齐 0.3.3.0、0.3.3.1、0.3.3.2、0.3.4 的历史版本，列表默认只显示版本入口，右侧再展开详细更新信息。',
+    announcementList2: '关于页新增 paper2gal 官方站点入口，并把作者和 GitHub 仓库链接文案统一整理。',
+    announcementList3: 'OC 设卡编辑器继续扩展：工具栏支持折叠、自定义字体、自定义插入、更多字体和快捷键设置。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
-    profileLinkLabel: 'GitHub 主页',
-    repoLinkLabel: '仓库地址',
+    paperSiteLabel: '前往 paper2gal',
+    profileLinkLabel: '作者',
+    repoLinkLabel: 'GitHub 仓库',
     pageFaceTitle: '捏脸编辑器',
     pageFaceDescription: '左侧管理部件资产，中间预览角色画布，右侧调整参数并处理保存与导出。',
     pageStyleTitle: '转画风',
     pageStyleDescription: '上传角色图像、调整 AI 参数、查看任务进度，并导出结果、错误包和调试 JSON。',
-    pagePromptTitle: '角色 Prompt + LLM / TTS 封装',
-    pagePromptDescription: '在富文本编辑器中整理世界观与角色设定，并在下方配置 LLM 与 TTS 封装参数。',
+    pagePromptTitle: 'OC 设卡编辑',
+    pagePromptDescription: '在富文本编辑器中整理世界观、角色设卡和封装输入，并在下方配置 LLM 与 TTS 封装参数。',
     pagePaperTitle: 'paper2gal 图片素材生成',
     pagePaperDescription: '接入 p2g-character-workflow 的 paper2gal 流程，负责上传角色图、轮询工作流进度、查看结果资产与下载调试包。',
     moduleCanvas: '主工作区画布',
@@ -291,6 +305,7 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: 'スタイル',
     tabLanguage: '言語',
     tabApi: 'API',
+    tabShortcuts: 'ショートカット',
     tabAnnouncement: 'お知らせ',
     tabAbout: '情報',
     stylePresetTitle: 'スタイルプリセット',
@@ -329,22 +344,27 @@ const translations: Record<BaseLanguage, Messages> = {
     apiEffectiveBuiltin: '現在は Plato プリセット通道を優先し、ローカル開発では localhost:3001 を優先します。',
     apiEffectiveCustom: '現在は入力された workflow backend ルート URL を優先します。',
     apiPrivacy: 'このサイトの情報はすべてローカル保存です。',
+    shortcutsTitle: 'エディタショートカット',
+    shortcutsHint: 'ここでは OC 設定エディタ用ショートカットを直接編集でき、変更はすぐローカル設定へ保存されます。',
+    shortcutsReset: '既定ショートカットに戻す',
+    shortcutsExperimental: 'カスタムショートカットは実験的機能です。ブラウザや OS の予約ショートカットとの衝突に注意してください。',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.3.4 では paper2gal ワークベンチの情報整理を進め、結果とデバッグを右側カラムへ集約し、ホームへ戻る確認モーダルも独立表示に改めました。',
-    announcementList1: 'paper2gal の成果物、結果マニフェスト、最新エラー、デバッグ JSON を右側情報欄にまとめ、読みやすさを改善しました。',
-    announcementList2: 'コードブロック付きの結果 / エラー / デバッグ面は初期状態で折りたたまれ、エラー時のみ詳細が自動で展開されます。',
-    announcementList3: 'ホームへ戻る確認モーダルはすべてグローバルレイヤーで中央表示され、ワークベンチのパネル配置や拡大率の影響を受けなくなりました。',
+    announcementDescription: '0.3.5 では 0.3.3.0 から 0.3.3.2 までの告知履歴を補完し、情報ページ入口・OC 設定エディタ・ショートカット設定をさらに整理しました。',
+    announcementList1: '告知一覧は 0.3.3.0 / 0.3.3.1 / 0.3.3.2 / 0.3.4 を含む形に補完され、一覧ではバージョン入口だけを見せて右側に詳細を展開します。',
+    announcementList2: 'About ページには paper2gal 公式サイト入口を追加し、作者リンクと GitHub リポジトリ表記も整理しました。',
+    announcementList3: 'OC 設定エディタは折りたたみ式ツールバー、カスタムフォント、カスタム挿入、追加フォント群、ショートカット設定に対応しました。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
-    profileLinkLabel: 'GitHub プロフィール',
-    repoLinkLabel: 'リポジトリ',
+    paperSiteLabel: 'paper2gal へ移動',
+    profileLinkLabel: '作者',
+    repoLinkLabel: 'GitHub リポジトリ',
     pageFaceTitle: '顔編集',
     pageFaceDescription: '左側でパーツ資産を管理し、中央でキャラを確認し、右側で調整と保存 / 書き出しを行います。',
     pageStyleTitle: '画風変換',
     pageStyleDescription: '画像入力、AI パラメータ、進捗ログ、結果、エラー JSON をまとめて扱う画風変換ワークベンチです。',
-    pagePromptTitle: 'Prompt + LLM / TTS',
-    pagePromptDescription: 'リッチテキストで世界観と設定を編集し、その下で LLM / TTS 封装を管理します。',
+    pagePromptTitle: 'OC 設定エディタ',
+    pagePromptDescription: 'リッチテキストで世界観やキャラクター設定を整理し、その下で LLM / TTS 封装を管理します。',
     pagePaperTitle: 'paper2gal 素材生成',
     pagePaperDescription: 'p2g-character-workflow の paper2gal パイプラインに接続し、キャラクター画像のアップロード、進捗同期、成果物確認、デバッグパックの取得を行います。',
     moduleCanvas: 'メイン作業領域',
@@ -402,6 +422,7 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: 'Style',
     tabLanguage: 'Language',
     tabApi: 'API',
+    tabShortcuts: 'Shortcuts',
     tabAnnouncement: 'Announcement',
     tabAbout: 'About',
     stylePresetTitle: 'Style preset',
@@ -440,22 +461,27 @@ const translations: Record<BaseLanguage, Messages> = {
     apiEffectiveBuiltin: 'The app currently prioritizes the Plato preset channel and falls back to localhost:3001 during local development.',
     apiEffectiveCustom: 'The app currently prioritizes your workflow backend root.',
     apiPrivacy: 'Everything stays local in this browser.',
+    shortcutsTitle: 'Editor shortcuts',
+    shortcutsHint: 'Customize the OC card editor shortcuts here. Changes are saved to local settings immediately.',
+    shortcutsReset: 'Reset to default shortcuts',
+    shortcutsExperimental: 'Custom shortcuts are experimental. Avoid combinations that conflict with browser or system-reserved commands.',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.3.4 reorganizes the paper2gal workbench so results and debugging live in the right-side column, while the return-home confirmation is now rendered as a true global modal.',
-    announcementList1: 'paper2gal assets, result manifests, recent errors, and debug JSON are now grouped in the right information rail for a clearer reading flow.',
-    announcementList2: 'Panels that contain code blocks stay collapsed by default, and only the recent-error block auto-expands when a step actually fails.',
-    announcementList3: 'Every return-home confirmation now opens in a centered global layer instead of being visually trapped inside the current workbench panel.',
+    announcementDescription: 'Version 0.3.5 fills the missing 0.3.3.0 to 0.3.3.2 announcement chain and keeps refining the about links, OC card editor toolbar, and shortcut settings.',
+    announcementList1: 'The announcement archive now includes 0.3.3.0, 0.3.3.1, 0.3.3.2, and 0.3.4, with a compact version-only list that expands details on the right.',
+    announcementList2: 'The About page now includes a paper2gal website entry, while the author link and GitHub repository label were cleaned up.',
+    announcementList3: 'The OC card editor keeps growing with collapsible toolbar groups, custom fonts, custom insert tools, a much larger font list, and editable shortcuts.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
-    profileLinkLabel: 'GitHub profile',
-    repoLinkLabel: 'Repository',
+    paperSiteLabel: 'Open paper2gal',
+    profileLinkLabel: 'Author',
+    repoLinkLabel: 'GitHub repository',
     pageFaceTitle: 'Face Maker',
     pageFaceDescription: 'Manage modular assets on the left, preview the character in the middle, and adjust controls plus export actions on the right.',
     pageStyleTitle: 'Style Transfer',
     pageStyleDescription: 'Upload an image, tune AI parameters, monitor the run, and export result, error, and debug payloads from one workbench.',
-    pagePromptTitle: 'Prompt + LLM / TTS',
-    pagePromptDescription: 'Edit the OC world sheet in a rich-text workspace, then configure the LLM and TTS wrappers underneath.',
+    pagePromptTitle: 'OC Card Editor',
+    pagePromptDescription: 'Edit world lore, character cards, and wrapper inputs in a rich-text workspace, then configure the LLM and TTS layers underneath.',
     pagePaperTitle: 'paper2gal Asset Generation',
     pagePaperDescription: 'Connects to the p2g-character-workflow paper2gal pipeline for character upload, workflow polling, output review, and debug-package download.',
     moduleCanvas: 'Main workspace',
@@ -513,6 +539,7 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: 'Стиль',
     tabLanguage: 'Язык',
     tabApi: 'API',
+    tabShortcuts: 'Шорткаты',
     tabAnnouncement: 'Объявление',
     tabAbout: 'О проекте',
     stylePresetTitle: 'Пресет стиля',
@@ -551,22 +578,27 @@ const translations: Record<BaseLanguage, Messages> = {
     apiEffectiveBuiltin: 'Сейчас приложение предпочитает предустановленный канал Plato и локально использует fallback на localhost:3001.',
     apiEffectiveCustom: 'Сейчас приоритет у корневого адреса workflow backend, который вы указали.',
     apiPrivacy: 'Всё остаётся локально в браузере.',
+    shortcutsTitle: 'Горячие клавиши редактора',
+    shortcutsHint: 'Здесь можно настроить сочетания клавиш для редактора карточек OC. Изменения сразу сохраняются локально.',
+    shortcutsReset: 'Сбросить шорткаты',
+    shortcutsExperimental: 'Пользовательские шорткаты являются экспериментальной функцией. Избегайте конфликтов с системными и браузерными сочетаниями.',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.3.4 перестраивает информационный блок paper2gal: результаты и debug собраны в правой колонке, а подтверждение возврата на главную стало отдельным глобальным модальным окном.',
-    announcementList1: 'Результаты, manifest, последние ошибки и debug JSON paper2gal теперь собраны в одном правом информационном блоке и читаются заметно проще.',
-    announcementList2: 'Панели с кодовыми блоками по умолчанию свернуты, а блок с последней ошибкой раскрывается автоматически только при реальном сбое шага.',
-    announcementList3: 'Все подтверждения возврата на главную теперь рендерятся в отдельном глобальном слое по центру экрана и не зависят от панели текущего workbench.',
+    announcementDescription: 'Версия 0.3.5 дополняет цепочку объявлений 0.3.3.0–0.3.3.2 и продолжает дорабатывать раздел About, редактор карточек OC и настройки горячих клавиш.',
+    announcementList1: 'Архив объявлений теперь содержит 0.3.3.0, 0.3.3.1, 0.3.3.2 и 0.3.4, а список слева показывает компактные входы по версиям с деталями справа.',
+    announcementList2: 'В разделе About добавлена ссылка на сайт paper2gal, а подписи для автора и GitHub-репозитория приведены к более понятному виду.',
+    announcementList3: 'Редактор карточек OC получил складывающиеся группы тулбара, пользовательские шрифты, пользовательские вставки, расширенный список шрифтов и настраиваемые шорткаты.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
-    profileLinkLabel: 'GitHub профиль',
-    repoLinkLabel: 'Репозиторий',
+    paperSiteLabel: 'Открыть paper2gal',
+    profileLinkLabel: 'Автор',
+    repoLinkLabel: 'GitHub репозиторий',
     pageFaceTitle: 'Редактор лица',
     pageFaceDescription: 'Слева управляются ассеты, по центру — холст персонажа, справа — параметры, сохранение и экспорт.',
     pageStyleTitle: 'Перенос стиля',
     pageStyleDescription: 'Загружайте изображение, настраивайте AI-параметры, следите за прогрессом и выгружайте результат, ошибки и debug JSON.',
-    pagePromptTitle: 'Prompt + LLM / TTS',
-    pagePromptDescription: 'Редактируйте мир и карточки OC в rich-text редакторе, а ниже настраивайте LLM и TTS-обёртки.',
+    pagePromptTitle: 'Редактор карточек OC',
+    pagePromptDescription: 'Редактируйте мир, карточки персонажей и входные данные для обёрток в rich-text редакторе, а ниже настраивайте LLM и TTS.',
     pagePaperTitle: 'paper2gal генерация',
     pagePaperDescription: 'Подключает paper2gal pipeline из p2g-character-workflow: загрузка изображения персонажа, polling workflow, просмотр результатов и скачивание debug-пакета.',
     moduleCanvas: 'Основное рабочее поле',
@@ -624,6 +656,41 @@ const fontPresetOptions: Array<{ value: FontPreset; label: string }> = [
   { value: 'custom', label: '自定义字体' },
 ];
 
+const defaultShortcutMap: ShortcutMap = {
+  saveDocument: 'Ctrl+S',
+  bold: 'Ctrl+B',
+  italic: 'Ctrl+I',
+  underline: 'Ctrl+U',
+  strikeThrough: 'Ctrl+Shift+S',
+  subscript: 'Ctrl+.',
+  superscript: 'Ctrl+Shift+.',
+  blockquote: 'Ctrl+Shift+Q',
+  heading1: 'Ctrl+Alt+1',
+  heading2: 'Ctrl+Alt+2',
+  heading3: 'Ctrl+Alt+3',
+  heading4: 'Ctrl+Alt+4',
+  heading5: 'Ctrl+Alt+5',
+  heading6: 'Ctrl+Alt+6',
+  unorderedList: 'Ctrl+Shift+7',
+  orderedList: 'Ctrl+Shift+8',
+  justifyLeft: 'Ctrl+Alt+L',
+  justifyCenter: 'Ctrl+Alt+E',
+  justifyRight: 'Ctrl+Alt+R',
+  justifyFull: 'Ctrl+Alt+J',
+  indent: 'Tab',
+  outdent: 'Shift+Tab',
+  insertLink: 'Ctrl+K',
+  insertTable: 'Ctrl+Alt+T',
+  insertHr: 'Ctrl+Alt+H',
+  insertCodeBlock: 'Ctrl+Alt+C',
+  insertImage: 'Ctrl+Alt+I',
+  clearHighlight: 'Ctrl+Shift+H',
+  undo: 'Ctrl+Z',
+  redo: 'Ctrl+Shift+Z',
+  selectAll: 'Ctrl+A',
+  clearFormat: 'Ctrl+\\',
+};
+
 const translationAliases: Record<AppLanguage, BaseLanguage> = {
   zh: 'zh',
   ja: 'ja',
@@ -635,6 +702,145 @@ const translationAliases: Record<AppLanguage, BaseLanguage> = {
   es: 'en',
   it: 'en',
   pt: 'en',
+};
+
+const shortcutLabels: Record<BaseLanguage, Record<ShortcutAction, string>> = {
+  zh: {
+    saveDocument: '保存文档',
+    bold: '加粗',
+    italic: '斜体',
+    underline: '下划线',
+    strikeThrough: '删除线',
+    subscript: '下标',
+    superscript: '上标',
+    blockquote: '引用块',
+    heading1: '一级标题',
+    heading2: '二级标题',
+    heading3: '三级标题',
+    heading4: '四级标题',
+    heading5: '五级标题',
+    heading6: '六级标题',
+    unorderedList: '无序列表',
+    orderedList: '有序列表',
+    justifyLeft: '左对齐',
+    justifyCenter: '居中',
+    justifyRight: '右对齐',
+    justifyFull: '两端对齐',
+    indent: '增加缩进',
+    outdent: '减少缩进',
+    insertLink: '插入链接',
+    insertTable: '插入表格',
+    insertHr: '插入分割线',
+    insertCodeBlock: '插入代码块',
+    insertImage: '插入图片',
+    clearHighlight: '清除高亮',
+    undo: '撤销',
+    redo: '重做',
+    selectAll: '全选',
+    clearFormat: '清除格式',
+  },
+  ja: {
+    saveDocument: '文書を保存',
+    bold: '太字',
+    italic: '斜体',
+    underline: '下線',
+    strikeThrough: '取り消し線',
+    subscript: '下付き',
+    superscript: '上付き',
+    blockquote: '引用ブロック',
+    heading1: '見出し 1',
+    heading2: '見出し 2',
+    heading3: '見出し 3',
+    heading4: '見出し 4',
+    heading5: '見出し 5',
+    heading6: '見出し 6',
+    unorderedList: '箇条書き',
+    orderedList: '番号付きリスト',
+    justifyLeft: '左揃え',
+    justifyCenter: '中央揃え',
+    justifyRight: '右揃え',
+    justifyFull: '両端揃え',
+    indent: 'インデント',
+    outdent: '逆インデント',
+    insertLink: 'リンクを挿入',
+    insertTable: '表を挿入',
+    insertHr: '区切り線を挿入',
+    insertCodeBlock: 'コードブロックを挿入',
+    insertImage: '画像を挿入',
+    clearHighlight: 'ハイライト解除',
+    undo: '元に戻す',
+    redo: 'やり直し',
+    selectAll: 'すべて選択',
+    clearFormat: '書式をクリア',
+  },
+  en: {
+    saveDocument: 'Save document',
+    bold: 'Bold',
+    italic: 'Italic',
+    underline: 'Underline',
+    strikeThrough: 'Strikethrough',
+    subscript: 'Subscript',
+    superscript: 'Superscript',
+    blockquote: 'Blockquote',
+    heading1: 'Heading 1',
+    heading2: 'Heading 2',
+    heading3: 'Heading 3',
+    heading4: 'Heading 4',
+    heading5: 'Heading 5',
+    heading6: 'Heading 6',
+    unorderedList: 'Unordered list',
+    orderedList: 'Ordered list',
+    justifyLeft: 'Align left',
+    justifyCenter: 'Align center',
+    justifyRight: 'Align right',
+    justifyFull: 'Justify',
+    indent: 'Indent',
+    outdent: 'Outdent',
+    insertLink: 'Insert link',
+    insertTable: 'Insert table',
+    insertHr: 'Insert divider',
+    insertCodeBlock: 'Insert code block',
+    insertImage: 'Insert image',
+    clearHighlight: 'Clear highlight',
+    undo: 'Undo',
+    redo: 'Redo',
+    selectAll: 'Select all',
+    clearFormat: 'Clear formatting',
+  },
+  ru: {
+    saveDocument: 'Сохранить документ',
+    bold: 'Полужирный',
+    italic: 'Курсив',
+    underline: 'Подчеркнуть',
+    strikeThrough: 'Зачеркнуть',
+    subscript: 'Нижний индекс',
+    superscript: 'Верхний индекс',
+    blockquote: 'Цитата',
+    heading1: 'Заголовок 1',
+    heading2: 'Заголовок 2',
+    heading3: 'Заголовок 3',
+    heading4: 'Заголовок 4',
+    heading5: 'Заголовок 5',
+    heading6: 'Заголовок 6',
+    unorderedList: 'Маркированный список',
+    orderedList: 'Нумерованный список',
+    justifyLeft: 'По левому краю',
+    justifyCenter: 'По центру',
+    justifyRight: 'По правому краю',
+    justifyFull: 'По ширине',
+    indent: 'Увеличить отступ',
+    outdent: 'Уменьшить отступ',
+    insertLink: 'Вставить ссылку',
+    insertTable: 'Вставить таблицу',
+    insertHr: 'Вставить разделитель',
+    insertCodeBlock: 'Вставить код-блок',
+    insertImage: 'Вставить изображение',
+    clearHighlight: 'Снять подсветку',
+    undo: 'Отменить',
+    redo: 'Повторить',
+    selectAll: 'Выделить все',
+    clearFormat: 'Очистить формат',
+  },
 };
 
 const localizedMessages: Record<AppLanguage, Messages> = {
@@ -662,13 +868,13 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: '설정 열기',
     announcementTitle: '공지',
     announcementHistoryButton: '이전 공지 보기',
-    announcementDescription: '0.3.4에서는 paper2gal 작업대의 정보 구성을 다시 정리해 결과와 디버그를 오른쪽 정보 영역으로 모으고, 홈 복귀 확인을 전역 모달로 분리했습니다.',
-    announcementList1: 'paper2gal 결과 자산, manifest, 최근 오류, debug JSON이 오른쪽 정보 레일에 모여 읽기 흐름이 더 분명해졌습니다.',
-    announcementList2: '코드 블록이 포함된 결과 / 오류 / 디버그 패널은 기본적으로 접혀 있고, 실제 오류가 날 때만 최근 오류 패널이 자동으로 펼쳐집니다.',
-    announcementList3: '홈으로 돌아가기 확인창은 이제 전역 레이어 중앙에 표시되어 현재 작업대 패널 안에 갇히지 않습니다.',
+    announcementDescription: '0.3.5에서는 0.3.3.0부터 0.3.3.2까지의 공지 이력을 보강하고, About 링크와 OC 설정 에디터, 단축키 설정을 계속 다듬었습니다.',
+    announcementList1: '공지 보관함에 0.3.3.0, 0.3.3.1, 0.3.3.2, 0.3.4가 모두 포함되며, 목록은 버전 중심으로 간결하게 표시되고 오른쪽에 상세가 펼쳐집니다.',
+    announcementList2: 'About 영역에 paper2gal 공식 사이트 버튼을 추가하고, 작성자와 GitHub 저장소 라벨도 정리했습니다.',
+    announcementList3: 'OC 설정 에디터에는 접이식 툴바 그룹, 사용자 정의 글꼴, 사용자 정의 삽입, 더 많은 글꼴 목록, 조절 가능한 단축키가 추가되었습니다.',
     pageFaceTitle: '페이스 메이커',
     pageStyleTitle: '스타일 변환',
-    pagePromptTitle: '캐릭터 Prompt + LLM / TTS',
+    pagePromptTitle: 'OC 설정 에디터',
     pagePaperTitle: 'paper2gal 자산 생성',
   },
   fr: {
@@ -691,13 +897,13 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Ouvrir les paramètres',
     announcementTitle: 'Annonce',
     announcementHistoryButton: 'Voir les annonces passées',
-    announcementDescription: 'La version 0.3.4 réorganise le workbench paper2gal : résultats et debug passent dans la colonne de droite, et la confirmation de retour à l’accueil devient une vraie modale globale.',
-    announcementList1: 'Les assets paper2gal, le manifest, les erreurs récentes et le debug JSON sont maintenant regroupés dans le rail d’information droit.',
-    announcementList2: 'Les panneaux avec blocs de code restent repliés par défaut, et seul le panneau d’erreur récente s’ouvre automatiquement en cas d’échec réel.',
-    announcementList3: 'Toutes les confirmations de retour à l’accueil s’affichent désormais au centre dans un calque global indépendant du workbench courant.',
+    announcementDescription: 'La version 0.3.5 complète enfin la chaîne d’annonces 0.3.3.0 à 0.3.3.2 et poursuit les améliorations de la page About, de l’éditeur de fiches OC et des raccourcis.',
+    announcementList1: 'L’archive inclut maintenant 0.3.3.0, 0.3.3.1, 0.3.3.2 et 0.3.4 avec une liste compacte centrée sur les versions et les détails affichés à droite.',
+    announcementList2: 'La page About gagne un bouton vers le site paper2gal, et les libellés auteur / dépôt GitHub ont été harmonisés.',
+    announcementList3: 'L’éditeur de fiches OC reçoit des groupes d’outils repliables, des polices personnalisées, des insertions personnalisées, davantage de polices et des raccourcis configurables.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transfert de style',
-    pagePromptTitle: 'Character Prompt + LLM / TTS',
+    pagePromptTitle: 'Éditeur de fiches OC',
     pagePaperTitle: 'Génération d’assets paper2gal',
   },
   de: {
@@ -720,13 +926,13 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Einstellungen öffnen',
     announcementTitle: 'Ankündigung',
     announcementHistoryButton: 'Frühere Ankündigungen ansehen',
-    announcementDescription: 'Version 0.3.4 ordnet die paper2gal-Workbench neu: Ergebnisse und Debug liegen jetzt in der rechten Spalte, und die Rückkehr-zur-Startseite-Bestätigung ist ein eigenständiges globales Modal.',
-    announcementList1: 'paper2gal-Assets, Manifest, letzte Fehler und Debug-JSON sind nun im rechten Informationsbereich gebündelt und dadurch leichter lesbar.',
-    announcementList2: 'Panels mit Code-Blöcken bleiben standardmäßig eingeklappt; nur das aktuelle Fehler-Panel öffnet sich automatisch bei einem echten Fehlschlag.',
-    announcementList3: 'Alle Rückkehr-zur-Startseite-Bestätigungen erscheinen jetzt zentriert in einer globalen Ebene und nicht mehr innerhalb des aktuellen Workbench-Panels.',
+    announcementDescription: 'Version 0.3.5 ergänzt endlich die fehlende Ankündigungskette 0.3.3.0 bis 0.3.3.2 und erweitert weiterhin About-Seite, OC-Karteneditor und Shortcut-Einstellungen.',
+    announcementList1: 'Das Archiv enthält nun 0.3.3.0, 0.3.3.1, 0.3.3.2 und 0.3.4 mit einer kompakten versionsbasierten Liste und Detailansicht auf der rechten Seite.',
+    announcementList2: 'Die About-Seite hat jetzt einen paper2gal-Webseitenbutton, und die Beschriftungen für Autor und GitHub-Repository wurden vereinheitlicht.',
+    announcementList3: 'Der OC-Karteneditor unterstützt jetzt einklappbare Toolbar-Gruppen, benutzerdefinierte Schriftarten, benutzerdefinierte Einfügewerkzeuge, eine größere Font-Liste und bearbeitbare Shortcuts.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Stiltransfer',
-    pagePromptTitle: 'Character Prompt + LLM / TTS',
+    pagePromptTitle: 'OC-Karteneditor',
     pagePaperTitle: 'paper2gal-Asset-Generierung',
   },
   es: {
@@ -749,13 +955,13 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Abrir configuración',
     announcementTitle: 'Anuncio',
     announcementHistoryButton: 'Ver anuncios anteriores',
-    announcementDescription: 'La versión 0.3.4 reorganiza el workbench de paper2gal: resultados y debug pasan a la columna derecha, y la confirmación para volver al inicio ahora es un modal global real.',
-    announcementList1: 'Los assets de paper2gal, el manifest, los errores recientes y el debug JSON ahora se agrupan en el panel derecho para que la lectura sea más clara.',
-    announcementList2: 'Los paneles con bloques de código quedan plegados por defecto y solo el bloque del error reciente se abre automáticamente cuando falla un paso.',
-    announcementList3: 'Todas las confirmaciones de vuelta al inicio se muestran centradas en una capa global independiente del panel del workbench actual.',
+    announcementDescription: 'La versión 0.3.5 completa por fin la cadena de anuncios 0.3.3.0 a 0.3.3.2 y sigue mejorando la página About, el editor de fichas OC y la configuración de atajos.',
+    announcementList1: 'El archivo de anuncios ahora incluye 0.3.3.0, 0.3.3.1, 0.3.3.2 y 0.3.4 con una lista compacta centrada en versiones y el detalle a la derecha.',
+    announcementList2: 'La página About incorpora un botón hacia paper2gal, y también se ordenaron las etiquetas de autor y repositorio de GitHub.',
+    announcementList3: 'El editor de fichas OC ahora tiene grupos plegables en la barra, fuentes personalizadas, inserciones personalizadas, más tipografías y atajos editables.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transferencia de estilo',
-    pagePromptTitle: 'Character Prompt + LLM / TTS',
+    pagePromptTitle: 'Editor de fichas OC',
     pagePaperTitle: 'Generación de assets paper2gal',
   },
   it: {
@@ -778,13 +984,13 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Apri impostazioni',
     announcementTitle: 'Annuncio',
     announcementHistoryButton: 'Vedi annunci precedenti',
-    announcementDescription: 'La versione 0.3.4 riorganizza il workbench paper2gal: risultati e debug passano nella colonna destra e la conferma di ritorno alla home diventa una vera modale globale.',
-    announcementList1: 'Asset paper2gal, manifest, errori recenti e debug JSON sono ora raccolti nella barra informativa destra per una lettura più chiara.',
-    announcementList2: 'I pannelli che contengono blocchi di codice restano chiusi per impostazione predefinita e solo il pannello dell’errore recente si apre automaticamente quando un passaggio fallisce.',
-    announcementList3: 'Tutte le conferme di ritorno alla home ora compaiono centrate in un livello globale indipendente dal workbench corrente.',
+    announcementDescription: 'La versione 0.3.5 completa la catena di annunci mancante da 0.3.3.0 a 0.3.3.2 e continua a migliorare la pagina About, l’editor delle schede OC e le scorciatoie.',
+    announcementList1: 'L’archivio ora include 0.3.3.0, 0.3.3.1, 0.3.3.2 e 0.3.4 con una lista compatta centrata sulle versioni e i dettagli sul lato destro.',
+    announcementList2: 'La pagina About ora ha anche un pulsante per il sito paper2gal, e le etichette per autore e repository GitHub sono state riordinate.',
+    announcementList3: 'L’editor delle schede OC supporta gruppi toolbar pieghevoli, font personalizzati, inserimenti personalizzati, più font e scorciatoie modificabili.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Style transfer',
-    pagePromptTitle: 'Character Prompt + LLM / TTS',
+    pagePromptTitle: 'Editor schede OC',
     pagePaperTitle: 'Generazione asset paper2gal',
   },
   pt: {
@@ -807,18 +1013,29 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Abrir configurações',
     announcementTitle: 'Aviso',
     announcementHistoryButton: 'Ver avisos anteriores',
-    announcementDescription: 'A versão 0.3.4 reorganiza o workbench do paper2gal: resultados e debug ficam na coluna direita, e a confirmação para voltar à página inicial agora é um modal global de verdade.',
-    announcementList1: 'Assets do paper2gal, manifest, erros recentes e debug JSON agora ficam agrupados no trilho de informação da direita para uma leitura mais clara.',
-    announcementList2: 'Os painéis com blocos de código ficam recolhidos por padrão, e só o painel de erro recente abre automaticamente quando uma etapa realmente falha.',
-    announcementList3: 'Todas as confirmações de volta para a página inicial agora aparecem centralizadas em uma camada global independente do workbench atual.',
+    announcementDescription: 'A versão 0.3.5 completa a cadeia de anúncios 0.3.3.0 a 0.3.3.2 e continua refinando a página About, o editor de fichas OC e as configurações de atalhos.',
+    announcementList1: 'O arquivo agora inclui 0.3.3.0, 0.3.3.1, 0.3.3.2 e 0.3.4 com uma lista compacta focada em versões e detalhes exibidos à direita.',
+    announcementList2: 'A página About ganhou um botão para o site paper2gal, e os rótulos de autor e repositório do GitHub foram reorganizados.',
+    announcementList3: 'O editor de fichas OC agora tem grupos recolhíveis na barra, fontes personalizadas, inserções personalizadas, mais tipografias e atalhos editáveis.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transferência de estilo',
-    pagePromptTitle: 'Character Prompt + LLM / TTS',
+    pagePromptTitle: 'Editor de fichas OC',
     pagePaperTitle: 'Geração de assets paper2gal',
   },
 };
 
 const announcementHistory = [
+  {
+    version: '0.3.5',
+    date: '2026-04-18',
+    title: '0.3.5 公告补全、关于页入口与设卡编辑器升级',
+    summary: '补全 0.3.3.0 到 0.3.3.2 的公告链路，并继续升级 OC 设卡编辑器、关于页入口和快捷键设置。',
+    details: [
+      '公告面板补齐 0.3.3.0、0.3.3.1、0.3.3.2、0.3.4 等历史版本，并把列表改成默认收起的版本入口样式。',
+      '关于页新增 paper2gal 官方站点入口，作者和 GitHub 仓库链接文案同步整理。',
+      'OC 设卡编辑器继续升级：工具栏可折叠、字体和插入工具扩展、自定义字体与自定义插入弹窗、快捷键设置页一并补上。',
+    ],
+  },
   {
     version: '0.3.4',
     date: '2026-04-18',
@@ -853,9 +1070,9 @@ const announcementHistory = [
     ],
   },
   {
-    version: '0.3.3',
+    version: '0.3.3.0',
     date: '2026-04-15',
-    title: '0.3.3 paper2gal API 诊断与错误可读性修复',
+    title: '0.3.3.0 paper2gal API 诊断与错误可读性修复',
     summary: 'paper2gal 现在能识别错误的模型接口地址，并把后端错误对象展开成可读说明，而不是只显示 [object Object]。',
     details: [
       'paper2gal 会在启动前检查当前 API 地址是否看起来像 /v1/chat/completions 这类模型接口，并明确提示这里需要的是工作流后端根地址。',
@@ -1024,6 +1241,7 @@ const defaultSettings: SettingsState = {
   apiBaseUrl: '',
   apiKey: '',
   fontPreset: 'sans',
+  shortcutMap: defaultShortcutMap,
 };
 
 function loadInitialSettings(): SettingsState {
@@ -1056,6 +1274,10 @@ function loadInitialSettings(): SettingsState {
       nextSettings.contrast = defaultSettings.contrast;
     }
 
+    nextSettings.shortcutMap = {
+      ...defaultShortcutMap,
+      ...(parsed.shortcutMap ?? {}),
+    };
     nextSettings.contrast = Math.min(130, Math.max(80, Math.round(nextSettings.contrast)));
     return nextSettings;
   } catch {
@@ -1948,9 +2170,12 @@ function SettingsModal({
     { key: 'style', label: messages.tabStyle },
     { key: 'language', label: messages.tabLanguage },
     { key: 'api', label: messages.tabApi },
+    { key: 'shortcuts', label: messages.tabShortcuts },
     { key: 'announcement', label: messages.tabAnnouncement },
     { key: 'about', label: messages.tabAbout },
   ];
+
+  const shortcutLabelsForLanguage = shortcutLabels[resolvedLanguage];
 
   const selectedAnnouncement =
     announcementHistory.find((item) => item.version === selectedAnnouncementVersion) ?? announcementHistory[0];
@@ -2227,6 +2452,39 @@ function SettingsModal({
               </>
             )}
 
+            {tab === 'shortcuts' && (
+              <section className="settings-section">
+                <h3>{messages.shortcutsTitle}</h3>
+                <p className="muted-copy">{messages.shortcutsHint}</p>
+                <div className="shortcut-grid">
+                  {Object.entries(settings.shortcutMap).map(([action, value]) => (
+                    <label key={action} className="shortcut-row">
+                      <span>{shortcutLabelsForLanguage[action as ShortcutAction]}</span>
+                      <input
+                        className="settings-input"
+                        type="text"
+                        value={value}
+                        onChange={(event) =>
+                          onUpdate({
+                            shortcutMap: {
+                              ...settings.shortcutMap,
+                              [action]: event.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+                <div className="tool-actions-row">
+                  <button className="secondary-button" type="button" onClick={() => onUpdate({ shortcutMap: defaultShortcutMap })}>
+                    {messages.shortcutsReset}
+                  </button>
+                </div>
+                <p className="tiny-copy settings-warning">{messages.shortcutsExperimental}</p>
+              </section>
+            )}
+
             {tab === 'announcement' && (
               <section className="settings-section announcement-shell">
                 <div className="announcement-list">
@@ -2237,9 +2495,8 @@ function SettingsModal({
                       type="button"
                       onClick={() => setSelectedAnnouncementVersion(item.version)}
                     >
-                      <span>{item.date}</span>
                       <strong>{item.version}</strong>
-                      <p>{item.summary}</p>
+                      <em className="announcement-entry-arrow">{selectedAnnouncement.version === item.version ? '−' : '+'}</em>
                     </button>
                   ))}
                 </div>
@@ -2266,6 +2523,9 @@ function SettingsModal({
                   </a>
                   <a href="https://github.com/hzagaming/Original-Character-Maker" rel="noreferrer" target="_blank">
                     {messages.repoLinkLabel}
+                  </a>
+                  <a href="https://paper2gal.com" rel="noreferrer" target="_blank">
+                    {messages.paperSiteLabel}
                   </a>
                 </div>
               </section>

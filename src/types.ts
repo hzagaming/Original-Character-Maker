@@ -28,8 +28,43 @@ export type FontPreset =
 export type InterfaceMode = 'builtin' | 'custom';
 export type ApiPreset = 'plato';
 export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal';
-export type SettingsTab = 'style' | 'language' | 'api' | 'announcement' | 'about';
+export type SettingsTab = 'style' | 'language' | 'api' | 'shortcuts' | 'announcement' | 'about';
 export type StartModalStep = 'root' | null;
+export type ShortcutAction =
+  | 'saveDocument'
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strikeThrough'
+  | 'subscript'
+  | 'superscript'
+  | 'blockquote'
+  | 'heading1'
+  | 'heading2'
+  | 'heading3'
+  | 'heading4'
+  | 'heading5'
+  | 'heading6'
+  | 'unorderedList'
+  | 'orderedList'
+  | 'justifyLeft'
+  | 'justifyCenter'
+  | 'justifyRight'
+  | 'justifyFull'
+  | 'indent'
+  | 'outdent'
+  | 'insertLink'
+  | 'insertTable'
+  | 'insertHr'
+  | 'insertCodeBlock'
+  | 'insertImage'
+  | 'clearHighlight'
+  | 'undo'
+  | 'redo'
+  | 'selectAll'
+  | 'clearFormat';
+
+export type ShortcutMap = Record<ShortcutAction, string>;
 
 export interface SettingsState {
   stylePreset: StylePreset;
@@ -44,4 +79,5 @@ export interface SettingsState {
   apiPreset: ApiPreset;
   apiBaseUrl: string;
   apiKey: string;
+  shortcutMap: ShortcutMap;
 }

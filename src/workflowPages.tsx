@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
-import type { AppLanguage, SettingsState } from './types';
+import type { AppLanguage, SettingsState, ShortcutAction } from './types';
 
 type SharedPageProps = {
   appSubtitle: string;
@@ -218,7 +218,24 @@ type UiCopySet = {
     blockStyle: string;
     textColor: string;
     highlightColor: string;
+    clearHighlight: string;
     lineHeight: string;
+    customFontButton: string;
+    customFontTitle: string;
+    customFontName: string;
+    customFontStack: string;
+    customFontApply: string;
+    customInsertButton: string;
+    customInsertTitle: string;
+    customInsertKind: string;
+    customInsertPayload: string;
+    customInsertApply: string;
+    customInsertCallout: string;
+    customInsertDetails: string;
+    customInsertImage: string;
+    customInsertBadge: string;
+    customInsertHtml: string;
+    experimentalNote: string;
     ttsPitch: string;
     ttsVolume: string;
     ttsSampleRate: string;
@@ -384,7 +401,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       successMessage: '风格转换成功完成，输出元数据和调试包已经生成。',
     },
     prompt: {
-      contentTitle: 'OC 文档编辑器',
+      contentTitle: 'OC 设卡编辑',
       templatesTitle: '快速模板',
       worldTemplate: 'OC 世界观',
       cardTemplate: '角色设卡',
@@ -407,7 +424,24 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       blockStyle: '段落样式',
       textColor: '文字颜色',
       highlightColor: '高亮颜色',
+      clearHighlight: '清除高亮',
       lineHeight: '行距',
+      customFontButton: '自定义字体',
+      customFontTitle: '添加自定义字体',
+      customFontName: '字体名称',
+      customFontStack: '字体栈 / CSS 字体名',
+      customFontApply: '应用字体',
+      customInsertButton: '自定义插入',
+      customInsertTitle: '添加自定义插入块',
+      customInsertKind: '插入类型',
+      customInsertPayload: '插入内容',
+      customInsertApply: '插入到文档',
+      customInsertCallout: '提示块',
+      customInsertDetails: '折叠详情',
+      customInsertImage: '图片链接',
+      customInsertBadge: '标签块',
+      customInsertHtml: '自定义 HTML',
+      experimentalNote: '自定义文本是试验性设置，请谨慎操作，可能会造成字体无法导出或无法识别的情况。',
       ttsPitch: '音高',
       ttsVolume: '音量',
       ttsSampleRate: '采样率',
@@ -555,7 +589,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       successMessage: '画風変換が正常に完了し、出力メタデータとデバッグパックを生成しました。',
     },
     prompt: {
-      contentTitle: 'OC ドキュメントエディタ',
+      contentTitle: 'OC 設定エディタ',
       templatesTitle: 'クイックテンプレート',
       worldTemplate: 'OC 世界観',
       cardTemplate: 'キャラ設定表',
@@ -578,7 +612,24 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       blockStyle: '段落スタイル',
       textColor: '文字色',
       highlightColor: 'ハイライト',
+      clearHighlight: 'ハイライト解除',
       lineHeight: '行間',
+      customFontButton: 'カスタムフォント',
+      customFontTitle: 'カスタムフォントを追加',
+      customFontName: 'フォント名',
+      customFontStack: 'フォントスタック / CSS フォント名',
+      customFontApply: 'フォントを適用',
+      customInsertButton: 'カスタム挿入',
+      customInsertTitle: 'カスタム挿入ブロックを追加',
+      customInsertKind: '挿入タイプ',
+      customInsertPayload: '挿入内容',
+      customInsertApply: '文書へ挿入',
+      customInsertCallout: 'コールアウト',
+      customInsertDetails: '折りたたみ詳細',
+      customInsertImage: '画像リンク',
+      customInsertBadge: 'バッジ',
+      customInsertHtml: 'カスタム HTML',
+      experimentalNote: 'カスタム文字設定は実験的機能です。慎重に利用してください。フォントが書き出せない、認識されない場合があります。',
       ttsPitch: 'ピッチ',
       ttsVolume: '音量',
       ttsSampleRate: 'サンプルレート',
@@ -726,7 +777,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       successMessage: 'Style transfer completed successfully and generated both result metadata and a debug package.',
     },
     prompt: {
-      contentTitle: 'OC document editor',
+      contentTitle: 'OC card editor',
       templatesTitle: 'Quick templates',
       worldTemplate: 'OC world bible',
       cardTemplate: 'Character sheet',
@@ -749,7 +800,24 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       blockStyle: 'Block style',
       textColor: 'Text color',
       highlightColor: 'Highlight',
+      clearHighlight: 'Clear highlight',
       lineHeight: 'Line height',
+      customFontButton: 'Custom font',
+      customFontTitle: 'Add custom font',
+      customFontName: 'Font label',
+      customFontStack: 'Font stack / CSS family',
+      customFontApply: 'Apply font',
+      customInsertButton: 'Custom insert',
+      customInsertTitle: 'Add custom insert block',
+      customInsertKind: 'Insert type',
+      customInsertPayload: 'Insert payload',
+      customInsertApply: 'Insert into document',
+      customInsertCallout: 'Callout',
+      customInsertDetails: 'Details block',
+      customInsertImage: 'Image link',
+      customInsertBadge: 'Badge',
+      customInsertHtml: 'Custom HTML',
+      experimentalNote: 'Custom text settings are experimental. Use them carefully: some fonts may fail to export or render consistently.',
       ttsPitch: 'Pitch',
       ttsVolume: 'Volume',
       ttsSampleRate: 'Sample rate',
@@ -897,7 +965,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       successMessage: 'Перенос стиля завершился успешно и сформировал метаданные результата вместе с debug-пакетом.',
     },
     prompt: {
-      contentTitle: 'Редактор документов OC',
+      contentTitle: 'Редактор карточек OC',
       templatesTitle: 'Быстрые шаблоны',
       worldTemplate: 'Библия мира OC',
       cardTemplate: 'Карточка персонажа',
@@ -920,7 +988,24 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       blockStyle: 'Стиль блока',
       textColor: 'Цвет текста',
       highlightColor: 'Подсветка',
+      clearHighlight: 'Снять подсветку',
       lineHeight: 'Межстрочный интервал',
+      customFontButton: 'Свой шрифт',
+      customFontTitle: 'Добавить свой шрифт',
+      customFontName: 'Название шрифта',
+      customFontStack: 'Стек шрифтов / CSS family',
+      customFontApply: 'Применить шрифт',
+      customInsertButton: 'Своя вставка',
+      customInsertTitle: 'Добавить пользовательский блок',
+      customInsertKind: 'Тип вставки',
+      customInsertPayload: 'Содержимое вставки',
+      customInsertApply: 'Вставить в документ',
+      customInsertCallout: 'Выделенный блок',
+      customInsertDetails: 'Сворачиваемый блок',
+      customInsertImage: 'Ссылка на изображение',
+      customInsertBadge: 'Бейдж',
+      customInsertHtml: 'Свой HTML',
+      experimentalNote: 'Пользовательские текстовые настройки являются экспериментальными. Используйте их осторожно: некоторые шрифты могут не экспортироваться или не распознаваться.',
       ttsPitch: 'Высота тона',
       ttsVolume: 'Громкость',
       ttsSampleRate: 'Частота дискретизации',
@@ -1085,7 +1170,7 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     },
     prompt: {
       ...uiCopy.en.prompt,
-      contentTitle: 'OC 문서 편집기',
+      contentTitle: 'OC 설정 에디터',
       templatesTitle: '빠른 템플릿',
     },
     paper: {
@@ -1113,6 +1198,10 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     resultsTitle: 'Résultats et debug',
     logsTitle: 'Journaux détaillés',
     errorTitle: 'Erreur détaillée',
+    prompt: {
+      ...uiCopy.en.prompt,
+      contentTitle: 'Éditeur de fiches OC',
+    },
   },
   de: {
     ...uiCopy.en,
@@ -1131,6 +1220,10 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     resultsTitle: 'Ergebnisse und Debug',
     logsTitle: 'Detaillierte Logs',
     errorTitle: 'Fehlerdetails',
+    prompt: {
+      ...uiCopy.en.prompt,
+      contentTitle: 'OC-Karteneditor',
+    },
   },
   es: {
     ...uiCopy.en,
@@ -1149,6 +1242,10 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     resultsTitle: 'Resultados y depuración',
     logsTitle: 'Registros detallados',
     errorTitle: 'Detalles del error',
+    prompt: {
+      ...uiCopy.en.prompt,
+      contentTitle: 'Editor de fichas OC',
+    },
   },
   it: {
     ...uiCopy.en,
@@ -1167,6 +1264,10 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     resultsTitle: 'Risultati e debug',
     logsTitle: 'Log dettagliati',
     errorTitle: 'Dettagli errore',
+    prompt: {
+      ...uiCopy.en.prompt,
+      contentTitle: 'Editor schede OC',
+    },
   },
   pt: {
     ...uiCopy.en,
@@ -1185,6 +1286,10 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
     resultsTitle: 'Resultados e depuração',
     logsTitle: 'Logs detalhados',
     errorTitle: 'Detalhes do erro',
+    prompt: {
+      ...uiCopy.en.prompt,
+      contentTitle: 'Editor de fichas OC',
+    },
   },
 };
 
@@ -1808,6 +1913,156 @@ function CollapsibleCodePanel({
   );
 }
 
+type ToolbarGroupKey = 'font' | 'style' | 'paragraph' | 'insert' | 'history';
+type CustomInsertKind = 'callout' | 'details' | 'image' | 'badge' | 'html';
+type EditorFontOption = { value: string; label: string; custom?: boolean };
+
+const editorFontOptionsBase: EditorFontOption[] = [
+  { value: "'Noto Sans SC', 'PingFang SC', sans-serif", label: 'Noto Sans SC' },
+  { value: "'PingFang SC', 'Helvetica Neue', sans-serif", label: 'PingFang SC' },
+  { value: "'Source Han Sans SC', 'Noto Sans SC', sans-serif", label: 'Source Han Sans' },
+  { value: "'HarmonyOS Sans SC', 'Noto Sans SC', sans-serif", label: 'HarmonyOS Sans' },
+  { value: "'IBM Plex Sans', 'Noto Sans', sans-serif", label: 'IBM Plex Sans' },
+  { value: "'Inter', 'Segoe UI', sans-serif", label: 'Inter' },
+  { value: "'DM Sans', 'Inter', sans-serif", label: 'DM Sans' },
+  { value: "'Manrope', 'Inter', sans-serif", label: 'Manrope' },
+  { value: "'Outfit', 'Inter', sans-serif", label: 'Outfit' },
+  { value: "'Plus Jakarta Sans', 'Inter', sans-serif", label: 'Plus Jakarta Sans' },
+  { value: "'Space Grotesk', 'Inter', sans-serif", label: 'Space Grotesk' },
+  { value: "'Sora', 'Inter', sans-serif", label: 'Sora' },
+  { value: "'Alegreya Sans', 'Noto Sans', sans-serif", label: 'Alegreya Sans' },
+  { value: "'Nunito Sans', 'Noto Sans', sans-serif", label: 'Nunito Sans' },
+  { value: "'Noto Serif SC', 'Songti SC', serif", label: 'Noto Serif SC' },
+  { value: "'Songti SC', 'Noto Serif SC', serif", label: 'Songti SC' },
+  { value: "'Source Han Serif SC', 'Noto Serif SC', serif", label: 'Source Han Serif' },
+  { value: "'Baskerville', 'Georgia', serif", label: 'Baskerville' },
+  { value: "'Cormorant Garamond', 'Times New Roman', serif", label: 'Cormorant Garamond' },
+  { value: "'Playfair Display', 'Georgia', serif", label: 'Playfair Display' },
+  { value: "'Merriweather', 'Georgia', serif", label: 'Merriweather' },
+  { value: "'Libre Baskerville', 'Georgia', serif", label: 'Libre Baskerville' },
+  { value: "'EB Garamond', 'Times New Roman', serif", label: 'EB Garamond' },
+  { value: "'LXGW WenKai', 'Kaiti SC', serif", label: 'LXGW WenKai' },
+  { value: "'Kaiti SC', 'STKaiti', serif", label: 'KaiTi' },
+  { value: "'ZCOOL XiaoWei', 'Kaiti SC', serif", label: 'ZCOOL XiaoWei' },
+  { value: "'Ma Shan Zheng', 'KaiTi', cursive", label: 'Ma Shan Zheng' },
+  { value: "'Zhi Mang Xing', cursive", label: 'Zhi Mang Xing' },
+  { value: "'JetBrains Mono', 'SFMono-Regular', monospace", label: 'JetBrains Mono' },
+  { value: "'IBM Plex Mono', 'JetBrains Mono', monospace", label: 'IBM Plex Mono' },
+  { value: "'Fira Code', 'JetBrains Mono', monospace", label: 'Fira Code' },
+  { value: "'Space Mono', 'JetBrains Mono', monospace", label: 'Space Mono' },
+];
+
+const editorFontSizePresets = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '40px', '48px', '64px'];
+const editorLineHeightPresets = ['1', '1.15', '1.3', '1.5', '1.7', '2', '2.4', '3'];
+const editorBlockStylePresets = [
+  { value: 'p', label: 'P' },
+  { value: 'h1', label: 'H1' },
+  { value: 'h2', label: 'H2' },
+  { value: 'h3', label: 'H3' },
+  { value: 'h4', label: 'H4' },
+  { value: 'h5', label: 'H5' },
+  { value: 'h6', label: 'H6' },
+  { value: 'blockquote', label: 'Quote' },
+  { value: 'pre', label: 'Pre' },
+];
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeFontSizeInput(value: string) {
+  const numeric = Number.parseFloat(String(value).replace(/px/gi, '').trim());
+  const safe = Number.isFinite(numeric) ? Math.min(200, Math.max(5, numeric)) : 16;
+  return `${Math.round(safe)}px`;
+}
+
+function normalizeLineHeightInput(value: string) {
+  const numeric = Number.parseFloat(String(value).trim());
+  const safe = Number.isFinite(numeric) ? Math.min(4, Math.max(0.8, numeric)) : 1.7;
+  return String(Number(safe.toFixed(2)));
+}
+
+function normalizeShortcutKeyName(key: string) {
+  const lowered = key.toLowerCase();
+  if (lowered === ' ') return 'space';
+  if (lowered === 'esc') return 'escape';
+  return lowered;
+}
+
+function matchesShortcut(event: ReactKeyboardEvent<HTMLElement>, shortcut: string) {
+  const tokens = shortcut
+    .split('+')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  const modifierTokens = new Set(['ctrl', 'control', 'cmd', 'command', 'meta', 'mod', 'shift', 'alt', 'option']);
+  const wantsCtrl = tokens.some((token) => ['ctrl', 'control', 'mod'].includes(token));
+  const wantsMeta = tokens.some((token) => ['cmd', 'command', 'meta'].includes(token));
+  const wantsShift = tokens.includes('shift');
+  const wantsAlt = tokens.some((token) => ['alt', 'option'].includes(token));
+  const keyToken = tokens.find((token) => !modifierTokens.has(token)) ?? '';
+  const ctrlLikePressed = event.ctrlKey || event.metaKey;
+
+  if (Boolean(wantsCtrl || wantsMeta) !== ctrlLikePressed) return false;
+  if (wantsMeta && !event.metaKey) return false;
+  if (wantsShift !== event.shiftKey) return false;
+  if (wantsAlt !== event.altKey) return false;
+  if (!keyToken) return true;
+
+  return normalizeShortcutKeyName(event.key) === keyToken;
+}
+
+function EditorExperimentalModal({
+  title,
+  note,
+  onClose,
+  children,
+}: {
+  title: string;
+  note: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  const [isClosing, setIsClosing] = useState(false);
+
+  function requestClose() {
+    setIsClosing(true);
+    window.setTimeout(onClose, 220);
+  }
+
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
+      <section
+        className={`modal-card modal-surface editor-experimental-modal ${isClosing ? 'closing' : 'opening'}`}
+        role="dialog"
+        aria-modal="true"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+          ×
+        </button>
+        <h2>{title}</h2>
+        {children}
+        <p className="tiny-copy editor-modal-note">{note}</p>
+      </section>
+    </div>,
+    document.body,
+  );
+}
+
 export function StyleTransferPage({
   appSubtitle,
   backHome,
@@ -2278,10 +2533,20 @@ export function PromptSuitePage({
   const editorRef = useRef<HTMLDivElement>(null);
   const referenceAudioInputRef = useRef<HTMLInputElement>(null);
   const templates = localizedPromptTemplates[language];
+  const defaultToolbarState = {
+    fontFamily: "'Noto Sans SC', 'PingFang SC', sans-serif",
+    fontSize: '16px',
+    blockStyle: 'p',
+    textColor: '#eef4fb',
+    highlightColor: '#4f9df7',
+    lineHeight: '1.7',
+  };
   const [persistedState] = useState(() =>
     readLocalState(PROMPT_SUITE_STORAGE_KEY, {
       selectedTemplate: templates[0].key,
       documentHtml: templates[0].html,
+      toolbarState: defaultToolbarState,
+      customFonts: [] as EditorFontOption[],
       llmConfig: {
         model: 'gpt-5.4',
         temperature: 0.7,
@@ -2303,8 +2568,20 @@ export function PromptSuitePage({
       savedSnapshot: '',
     }),
   );
+  const persistedCustomFonts = Array.isArray(persistedState.customFonts)
+    ? persistedState.customFonts.filter(
+        (item): item is EditorFontOption =>
+          typeof item === 'object' &&
+          item !== null &&
+          'label' in item &&
+          'value' in item &&
+          typeof item.label === 'string' &&
+          typeof item.value === 'string',
+      )
+    : [];
   const [selectedTemplate, setSelectedTemplate] = useState<string>(persistedState.selectedTemplate);
   const [documentHtml, setDocumentHtml] = useState<string>(persistedState.documentHtml);
+  const [customFonts, setCustomFonts] = useState<EditorFontOption[]>(persistedCustomFonts);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [llmConfig, setLlmConfig] = useState(persistedState.llmConfig);
   const [ttsConfig, setTtsConfig] = useState(() => {
@@ -2332,16 +2609,27 @@ export function PromptSuitePage({
       referenceClipName: savedTts.referenceClipName ?? '',
     };
   });
-  const [toolbarState, setToolbarState] = useState({
-    fontFamily: "'Noto Sans SC', 'PingFang SC', sans-serif",
-    fontSize: '16px',
-    blockStyle: 'p',
-    textColor: '#eef4fb',
-    highlightColor: '#4f9df7',
-    lineHeight: '1.7',
+  const [toolbarState, setToolbarState] = useState(() => ({ ...defaultToolbarState, ...(persistedState.toolbarState ?? {}) }));
+  const [toolbarOpen, setToolbarOpen] = useState<Record<ToolbarGroupKey, boolean>>({
+    font: true,
+    style: true,
+    paragraph: false,
+    insert: false,
+    history: false,
   });
-  const currentSnapshot = JSON.stringify({ documentHtml, llmConfig, ttsConfig, selectedTemplate });
-  const [savedSnapshot, setSavedSnapshot] = useState(persistedState.savedSnapshot || currentSnapshot);
+  const [isCustomFontOpen, setIsCustomFontOpen] = useState(false);
+  const [customFontDraft, setCustomFontDraft] = useState({ label: '', stack: '' });
+  const [isCustomInsertOpen, setIsCustomInsertOpen] = useState(false);
+  const [customInsertDraft, setCustomInsertDraft] = useState<{ kind: CustomInsertKind; payload: string }>({
+    kind: 'callout',
+    payload: '',
+  });
+  const currentSnapshot = JSON.stringify({ documentHtml, llmConfig, ttsConfig, selectedTemplate, customFonts, toolbarState });
+  const initialSavedSnapshot =
+    typeof persistedState.savedSnapshot === 'string' && persistedState.savedSnapshot.includes('"toolbarState"')
+      ? persistedState.savedSnapshot
+      : currentSnapshot;
+  const [savedSnapshot, setSavedSnapshot] = useState(initialSavedSnapshot);
   const isDirty = currentSnapshot !== savedSnapshot;
   useBeforeUnloadGuard(isDirty);
 
@@ -2349,11 +2637,13 @@ export function PromptSuitePage({
     writeLocalState(PROMPT_SUITE_STORAGE_KEY, {
       selectedTemplate,
       documentHtml,
+      toolbarState,
+      customFonts,
       llmConfig,
       ttsConfig,
       savedSnapshot,
     });
-  }, [documentHtml, llmConfig, savedSnapshot, selectedTemplate, ttsConfig]);
+  }, [customFonts, documentHtml, llmConfig, savedSnapshot, selectedTemplate, toolbarState, ttsConfig]);
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== documentHtml) {
@@ -2361,18 +2651,45 @@ export function PromptSuitePage({
     }
   }, [documentHtml]);
 
+  const fontFamilyOptions = useMemo(() => [...editorFontOptionsBase, ...customFonts], [customFonts]);
+  const customInsertOptions = useMemo(
+    () => [
+      { value: 'callout' as const, label: promptCopy.customInsertCallout },
+      { value: 'details' as const, label: promptCopy.customInsertDetails },
+      { value: 'image' as const, label: promptCopy.customInsertImage },
+      { value: 'badge' as const, label: promptCopy.customInsertBadge },
+      { value: 'html' as const, label: promptCopy.customInsertHtml },
+    ],
+    [promptCopy.customInsertBadge, promptCopy.customInsertCallout, promptCopy.customInsertDetails, promptCopy.customInsertHtml, promptCopy.customInsertImage],
+  );
+  const toolbarSections: Array<{ key: ToolbarGroupKey; label: string }> = [
+    { key: 'font', label: copy.toolbarFontGroup },
+    { key: 'style', label: copy.toolbarStyleGroup },
+    { key: 'paragraph', label: copy.toolbarParagraphGroup },
+    { key: 'insert', label: copy.toolbarInsertGroup },
+    { key: 'history', label: copy.toolbarHistoryGroup },
+  ];
+
   function syncEditor() {
     setDocumentHtml(editorRef.current?.innerHTML ?? '');
   }
 
-  function executeCommand(command: string, value?: string) {
+  function focusEditor() {
     editorRef.current?.focus();
+  }
+
+  function executeCommand(command: string, value?: string) {
+    focusEditor();
     document.execCommand(command, false, value);
     syncEditor();
   }
 
+  function insertHtml(html: string) {
+    executeCommand('insertHTML', html);
+  }
+
   function applySelectionStyle(style: Partial<CSSStyleDeclaration>) {
-    editorRef.current?.focus();
+    focusEditor();
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
 
@@ -2396,7 +2713,7 @@ export function PromptSuitePage({
   }
 
   function applyCurrentBlockStyle(style: Partial<CSSStyleDeclaration>) {
-    editorRef.current?.focus();
+    focusEditor();
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
@@ -2404,7 +2721,7 @@ export function PromptSuitePage({
     while (node && node !== editorRef.current) {
       if (
         node instanceof HTMLElement &&
-        ['P', 'DIV', 'LI', 'H1', 'H2', 'H3', 'BLOCKQUOTE', 'PRE'].includes(node.tagName)
+        ['P', 'DIV', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'PRE'].includes(node.tagName)
       ) {
         const target = node as HTMLElement;
         Object.entries(style).forEach(([key, value]) => {
@@ -2429,16 +2746,84 @@ export function PromptSuitePage({
   }
 
   function insertLink() {
-    const url = window.prompt('Paste a link URL');
-    if (!url) return;
-    executeCommand('createLink', url);
+    const selectedText = window.getSelection()?.toString().trim() || 'Link';
+    insertHtml(`<a href="https://example.com" target="_blank" rel="noreferrer">${escapeHtml(selectedText)}</a>`);
   }
 
   function insertTable() {
-    executeCommand(
-      'insertHTML',
+    insertHtml(
       '<table><tr><th>字段</th><th>内容</th></tr><tr><td>条目 A</td><td>在这里填写描述</td></tr><tr><td>条目 B</td><td>继续填写内容</td></tr></table>',
     );
+  }
+
+  function insertInlineCode() {
+    const selectedText = window.getSelection()?.toString().trim() || 'inline-code';
+    insertHtml(`<code>${escapeHtml(selectedText)}</code>`);
+  }
+
+  function insertCalloutBlock() {
+    insertHtml(`<aside class="editor-callout"><strong>Callout</strong><p>${escapeHtml('在这里填写强调说明。')}</p></aside>`);
+  }
+
+  function insertDetailsBlock() {
+    insertHtml(`<details><summary>点击展开</summary><p>${escapeHtml('在这里填写折叠内容。')}</p></details>`);
+  }
+
+  function insertBadgeBlock() {
+    const selectedText = window.getSelection()?.toString().trim() || 'Tag';
+    insertHtml(`<p><span class="editor-badge">${escapeHtml(selectedText)}</span></p>`);
+  }
+
+  function insertImageBlock() {
+    insertHtml('<figure><img src="https://placehold.co/800x480/png" alt="custom asset" /><figcaption>Image caption</figcaption></figure>');
+  }
+
+  function applyCustomInsert() {
+    const payload = customInsertDraft.payload.trim();
+    const safePayload = escapeHtml(payload || '请填写自定义内容');
+    let html = '';
+
+    switch (customInsertDraft.kind) {
+      case 'callout':
+        html = `<aside class="editor-callout"><strong>Callout</strong><p>${safePayload}</p></aside>`;
+        break;
+      case 'details':
+        html = `<details><summary>点击展开</summary><p>${safePayload}</p></details>`;
+        break;
+      case 'image':
+        html = `<figure><img src="${payload || 'https://placehold.co/800x480/png'}" alt="custom asset" /><figcaption>${safePayload}</figcaption></figure>`;
+        break;
+      case 'badge':
+        html = `<p><span class="editor-badge">${safePayload}</span></p>`;
+        break;
+      case 'html':
+        html = payload || '<div class="editor-callout"><p>Custom HTML</p></div>';
+        break;
+    }
+
+    insertHtml(html);
+    setIsCustomInsertOpen(false);
+    setCustomInsertDraft({ kind: 'callout', payload: '' });
+  }
+
+  function applyCustomFont() {
+    const fontStack = customFontDraft.stack.trim();
+    if (!fontStack) return;
+
+    const nextOption = {
+      label: customFontDraft.label.trim() || fontStack,
+      value: fontStack,
+      custom: true,
+    };
+
+    setCustomFonts((current) => {
+      const withoutDuplicate = current.filter((item) => item.value !== nextOption.value);
+      return [...withoutDuplicate, nextOption];
+    });
+    setToolbarState((current) => ({ ...current, fontFamily: nextOption.value }));
+    applySelectionStyle({ fontFamily: nextOption.value });
+    setCustomFontDraft({ label: '', stack: '' });
+    setIsCustomFontOpen(false);
   }
 
   function handleFontFamilyChange(value: string) {
@@ -2447,8 +2832,9 @@ export function PromptSuitePage({
   }
 
   function handleFontSizeChange(value: string) {
-    setToolbarState((current) => ({ ...current, fontSize: value }));
-    applySelectionStyle({ fontSize: value });
+    const nextValue = normalizeFontSizeInput(value);
+    setToolbarState((current) => ({ ...current, fontSize: nextValue }));
+    applySelectionStyle({ fontSize: nextValue });
   }
 
   function handleBlockStyleChange(value: string) {
@@ -2458,7 +2844,11 @@ export function PromptSuitePage({
       h1: '<h1>',
       h2: '<h2>',
       h3: '<h3>',
+      h4: '<h4>',
+      h5: '<h5>',
+      h6: '<h6>',
       blockquote: '<blockquote>',
+      pre: '<pre>',
     };
     executeCommand('formatBlock', blockMap[value] ?? '<p>');
   }
@@ -2473,9 +2863,14 @@ export function PromptSuitePage({
     applySelectionStyle({ backgroundColor: value });
   }
 
+  function clearHighlight() {
+    applySelectionStyle({ backgroundColor: 'transparent' });
+  }
+
   function handleLineHeightChange(value: string) {
-    setToolbarState((current) => ({ ...current, lineHeight: value }));
-    applyCurrentBlockStyle({ lineHeight: value });
+    const nextValue = normalizeLineHeightInput(value);
+    setToolbarState((current) => ({ ...current, lineHeight: nextValue }));
+    applyCurrentBlockStyle({ lineHeight: nextValue });
   }
 
   function handleReferenceAudioChange(event: ChangeEvent<HTMLInputElement>) {
@@ -2489,6 +2884,118 @@ export function PromptSuitePage({
     setSavedSnapshot(currentSnapshot);
   }
 
+  function triggerEditorAction(action: ShortcutAction) {
+    switch (action) {
+      case 'saveDocument':
+        saveDraft();
+        return;
+      case 'bold':
+        executeCommand('bold');
+        return;
+      case 'italic':
+        executeCommand('italic');
+        return;
+      case 'underline':
+        executeCommand('underline');
+        return;
+      case 'strikeThrough':
+        executeCommand('strikeThrough');
+        return;
+      case 'subscript':
+        executeCommand('subscript');
+        return;
+      case 'superscript':
+        executeCommand('superscript');
+        return;
+      case 'blockquote':
+        handleBlockStyleChange('blockquote');
+        return;
+      case 'heading1':
+        handleBlockStyleChange('h1');
+        return;
+      case 'heading2':
+        handleBlockStyleChange('h2');
+        return;
+      case 'heading3':
+        handleBlockStyleChange('h3');
+        return;
+      case 'heading4':
+        handleBlockStyleChange('h4');
+        return;
+      case 'heading5':
+        handleBlockStyleChange('h5');
+        return;
+      case 'heading6':
+        handleBlockStyleChange('h6');
+        return;
+      case 'unorderedList':
+        executeCommand('insertUnorderedList');
+        return;
+      case 'orderedList':
+        executeCommand('insertOrderedList');
+        return;
+      case 'justifyLeft':
+        executeCommand('justifyLeft');
+        return;
+      case 'justifyCenter':
+        executeCommand('justifyCenter');
+        return;
+      case 'justifyRight':
+        executeCommand('justifyRight');
+        return;
+      case 'justifyFull':
+        executeCommand('justifyFull');
+        return;
+      case 'indent':
+        executeCommand('indent');
+        return;
+      case 'outdent':
+        executeCommand('outdent');
+        return;
+      case 'insertLink':
+        insertLink();
+        return;
+      case 'insertTable':
+        insertTable();
+        return;
+      case 'insertHr':
+        executeCommand('insertHorizontalRule');
+        return;
+      case 'insertCodeBlock':
+        insertHtml('<pre><code>// code block</code></pre>');
+        return;
+      case 'insertImage':
+        insertImageBlock();
+        return;
+      case 'clearHighlight':
+        clearHighlight();
+        return;
+      case 'undo':
+        executeCommand('undo');
+        return;
+      case 'redo':
+        executeCommand('redo');
+        return;
+      case 'selectAll':
+        executeCommand('selectAll');
+        return;
+      case 'clearFormat':
+        executeCommand('removeFormat');
+        return;
+    }
+  }
+
+  function handleEditorKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    const shortcutEntries = Object.entries(settings.shortcutMap) as Array<[ShortcutAction, string]>;
+    for (const [action, combo] of shortcutEntries) {
+      if (matchesShortcut(event, combo)) {
+        event.preventDefault();
+        triggerEditorAction(action);
+        return;
+      }
+    }
+  }
+
   const plainText = useMemo(() => {
     const parser = new DOMParser();
     return parser.parseFromString(documentHtml, 'text/html').body.innerText;
@@ -2500,28 +3007,14 @@ export function PromptSuitePage({
       selectedTemplate,
       documentHtml,
       plainText,
+      toolbarState,
+      customFonts,
       llmConfig,
       ttsConfig,
     },
     null,
     2,
   );
-  const fontFamilyOptions = [
-    { value: "'Noto Sans SC', 'PingFang SC', sans-serif", label: 'Noto Sans' },
-    { value: "'Songti SC', 'Noto Serif SC', serif", label: 'Songti Serif' },
-    { value: "'LXGW WenKai', 'Kaiti SC', serif", label: 'WenKai / Kai' },
-    { value: "'JetBrains Mono', monospace", label: 'JetBrains Mono' },
-    { value: "'Georgia', serif", label: 'Georgia' },
-  ];
-  const fontSizeOptions = ['12px', '14px', '16px', '18px', '22px', '28px', '36px'];
-  const blockStyleOptions = [
-    { value: 'p', label: 'P' },
-    { value: 'h1', label: 'H1' },
-    { value: 'h2', label: 'H2' },
-    { value: 'h3', label: 'H3' },
-    { value: 'blockquote', label: 'Quote' },
-  ];
-  const lineHeightOptions = ['1.4', '1.6', '1.7', '1.9', '2.1'];
 
   return (
     <main className="feature-shell tool-page-shell">
@@ -2573,93 +3066,143 @@ export function PromptSuitePage({
           <div className="editor-toolbar-ribbon grouped-toolbar">
             <span className="editor-toolbar-label">{copy.editorToolbar}</span>
             <div className="editor-toolbar-sections">
-              <div className="toolbar-group">
-                <span className="toolbar-group-title">{copy.toolbarFontGroup}</span>
-                <div className="toolbar-group-controls">
-                  <select className="toolbar-select" value={toolbarState.fontFamily} onChange={(event) => handleFontFamilyChange(event.target.value)}>
-                    {fontFamilyOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select className="toolbar-select compact" value={toolbarState.fontSize} onChange={(event) => handleFontSizeChange(event.target.value)}>
-                    {fontSizeOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  <select className="toolbar-select compact" value={toolbarState.blockStyle} onChange={(event) => handleBlockStyleChange(event.target.value)}>
-                    {blockStyleOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select className="toolbar-select compact" value={toolbarState.lineHeight} onChange={(event) => handleLineHeightChange(event.target.value)}>
-                    {lineHeightOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              {toolbarSections.map((section) => (
+                <div key={section.key} className={`toolbar-group ${toolbarOpen[section.key] ? 'expanded' : 'collapsed'}`}>
+                  <button className="toolbar-group-header" type="button" onClick={() => setToolbarOpen((current) => ({ ...current, [section.key]: !current[section.key] }))}>
+                    <span className="toolbar-group-title">{section.label}</span>
+                    <span className="toolbar-group-state">{toolbarOpen[section.key] ? copy.hideDetails : copy.showDetails}</span>
+                  </button>
 
-              <div className="toolbar-group">
-                <span className="toolbar-group-title">{copy.toolbarStyleGroup}</span>
-                <div className="toolbar-group-controls">
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('bold')}>B</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('italic')}>I</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('underline')}>U</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('strikeThrough')}>S</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('subscript')}>Sub</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('superscript')}>Sup</button>
-                  <label className="toolbar-color">
-                    <span>{promptCopy.textColor}</span>
-                    <input type="color" value={toolbarState.textColor} onChange={(event) => handleTextColorChange(event.target.value)} />
-                  </label>
-                  <label className="toolbar-color">
-                    <span>{promptCopy.highlightColor}</span>
-                    <input type="color" value={toolbarState.highlightColor} onChange={(event) => handleHighlightChange(event.target.value)} />
-                  </label>
-                </div>
-              </div>
+                  {toolbarOpen[section.key] ? (
+                    <div className="toolbar-group-controls">
+                      {section.key === 'font' ? (
+                        <div className="toolbar-grid toolbar-grid-wide">
+                          <label className="toolbar-field">
+                            <span>{promptCopy.fontFamily}</span>
+                            <select className="toolbar-select" value={toolbarState.fontFamily} onChange={(event) => handleFontFamilyChange(event.target.value)}>
+                              {fontFamilyOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <button className="toolbar-button toolbar-button-highlight" type="button" onClick={() => setIsCustomFontOpen(true)}>
+                            {promptCopy.customFontButton}
+                          </button>
+                          <label className="toolbar-field">
+                            <span>{promptCopy.fontSize}</span>
+                            <input
+                              className="toolbar-input compact"
+                              list="editor-font-size-presets"
+                              value={toolbarState.fontSize}
+                              onChange={(event) => setToolbarState((current) => ({ ...current, fontSize: event.target.value }))}
+                              onBlur={(event) => handleFontSizeChange(event.target.value)}
+                              onDoubleClick={(event) => event.currentTarget.select()}
+                            />
+                          </label>
+                          <label className="toolbar-field">
+                            <span>{promptCopy.blockStyle}</span>
+                            <select className="toolbar-select compact" value={toolbarState.blockStyle} onChange={(event) => handleBlockStyleChange(event.target.value)}>
+                              {editorBlockStylePresets.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="toolbar-field">
+                            <span>{promptCopy.lineHeight}</span>
+                            <input
+                              className="toolbar-input compact"
+                              list="editor-line-height-presets"
+                              value={toolbarState.lineHeight}
+                              onChange={(event) => setToolbarState((current) => ({ ...current, lineHeight: event.target.value }))}
+                              onBlur={(event) => handleLineHeightChange(event.target.value)}
+                              onDoubleClick={(event) => event.currentTarget.select()}
+                            />
+                          </label>
+                        </div>
+                      ) : null}
 
-              <div className="toolbar-group">
-                <span className="toolbar-group-title">{copy.toolbarParagraphGroup}</span>
-                <div className="toolbar-group-controls">
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyLeft')}>L</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyCenter')}>C</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyRight')}>R</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyFull')}>J</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('insertUnorderedList')}>UL</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('insertOrderedList')}>OL</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('outdent')}>Out</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('indent')}>In</button>
-                </div>
-              </div>
+                      {section.key === 'style' ? (
+                        <div className="toolbar-group-controls">
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('bold')}>B</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('italic')}>I</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('underline')}>U</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('strikeThrough')}>S</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('subscript')}>Sub</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('superscript')}>Sup</button>
+                          <button className="toolbar-button" type="button" onClick={insertInlineCode}>Code</button>
+                          <label className="toolbar-color">
+                            <span>{promptCopy.textColor}</span>
+                            <input type="color" value={toolbarState.textColor} onChange={(event) => handleTextColorChange(event.target.value)} />
+                          </label>
+                          <label className="toolbar-color">
+                            <span>{promptCopy.highlightColor}</span>
+                            <input type="color" value={toolbarState.highlightColor} onChange={(event) => handleHighlightChange(event.target.value)} />
+                          </label>
+                          <button className="toolbar-button" type="button" onClick={clearHighlight}>
+                            {promptCopy.clearHighlight}
+                          </button>
+                        </div>
+                      ) : null}
 
-              <div className="toolbar-group">
-                <span className="toolbar-group-title">{copy.toolbarInsertGroup}</span>
-                <div className="toolbar-group-controls">
-                  <button className="toolbar-button" type="button" onClick={insertLink}>Link</button>
-                  <button className="toolbar-button" type="button" onClick={insertTable}>Table</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('insertHorizontalRule')}>HR</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('formatBlock', '<blockquote>')}>Quote</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('removeFormat')}>Clear</button>
-                </div>
-              </div>
+                      {section.key === 'paragraph' ? (
+                        <div className="toolbar-group-controls">
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyLeft')}>L</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyCenter')}>C</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyRight')}>R</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyFull')}>J</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('insertUnorderedList')}>UL</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('insertOrderedList')}>OL</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('outdent')}>Out</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('indent')}>In</button>
+                          <button className="toolbar-button" type="button" onClick={() => handleBlockStyleChange('blockquote')}>Quote</button>
+                          <button className="toolbar-button" type="button" onClick={() => handleBlockStyleChange('pre')}>Pre</button>
+                        </div>
+                      ) : null}
 
-              <div className="toolbar-group">
-                <span className="toolbar-group-title">{copy.toolbarHistoryGroup}</span>
-                <div className="toolbar-group-controls">
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('undo')}>↺</button>
-                  <button className="toolbar-button" type="button" onClick={() => executeCommand('redo')}>↻</button>
+                      {section.key === 'insert' ? (
+                        <div className="toolbar-group-controls">
+                          <button className="toolbar-button" type="button" onClick={insertLink}>Link</button>
+                          <button className="toolbar-button" type="button" onClick={insertTable}>Table</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('insertHorizontalRule')}>HR</button>
+                          <button className="toolbar-button" type="button" onClick={insertCalloutBlock}>Callout</button>
+                          <button className="toolbar-button" type="button" onClick={insertDetailsBlock}>Details</button>
+                          <button className="toolbar-button" type="button" onClick={insertBadgeBlock}>Badge</button>
+                          <button className="toolbar-button" type="button" onClick={insertImageBlock}>Image</button>
+                          <button className="toolbar-button" type="button" onClick={() => insertHtml('<pre><code>// code block</code></pre>')}>Code block</button>
+                          <button className="toolbar-button toolbar-button-highlight" type="button" onClick={() => setIsCustomInsertOpen(true)}>
+                            {promptCopy.customInsertButton}
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {section.key === 'history' ? (
+                        <div className="toolbar-group-controls">
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('undo')}>↺</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('redo')}>↻</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('selectAll')}>All</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('removeFormat')}>Clear</button>
+                          <button className="toolbar-button" type="button" onClick={saveDraft}>{copy.saveDocument}</button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
-              </div>
+              ))}
             </div>
+            <datalist id="editor-font-size-presets">
+              {editorFontSizePresets.map((option) => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
+            <datalist id="editor-line-height-presets">
+              {editorLineHeightPresets.map((option) => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
           </div>
           <div className="template-ribbon">
             <span className="editor-toolbar-label">{copy.promptTemplates}</span>
@@ -2682,6 +3225,7 @@ export function PromptSuitePage({
             contentEditable
             suppressContentEditableWarning
             onInput={syncEditor}
+            onKeyDown={handleEditorKeyDown}
             dangerouslySetInnerHTML={{ __html: documentHtml }}
           />
         </section>
@@ -2792,15 +3336,22 @@ export function PromptSuitePage({
             <h3>{copy.exportTitle}</h3>
             <p>{promptCopy.editorReady}</p>
             <p className="muted-copy">{promptCopy.packageHint}</p>
-            <div className="code-block">{exportJson}</div>
-            <div className="mini-action-row">
-              <button className="secondary-button small-button" type="button" onClick={() => copyText(exportJson)}>
-                {copy.copyJson}
-              </button>
-              <button className="secondary-button small-button" type="button" onClick={() => downloadText('oc-wrapper-pack.json', exportJson, 'application/json')}>
-                {copy.downloadJson}
-              </button>
-            </div>
+            <CollapsibleCodePanel
+              title={copy.exportTitle}
+              description={promptCopy.packageHint}
+              code={exportJson}
+              copy={copy}
+              actions={
+                <>
+                  <button className="secondary-button small-button" type="button" onClick={() => copyText(exportJson)}>
+                    {copy.copyJson}
+                  </button>
+                  <button className="secondary-button small-button" type="button" onClick={() => downloadText('oc-wrapper-pack.json', exportJson, 'application/json')}>
+                    {copy.downloadJson}
+                  </button>
+                </>
+              }
+            />
           </section>
         </div>
       </section>
@@ -2808,6 +3359,75 @@ export function PromptSuitePage({
       <footer className="home-footer fade-up delay-3">
         <div className="notice-banner">{privacyNote}</div>
       </footer>
+
+      {isCustomFontOpen ? (
+        <EditorExperimentalModal title={promptCopy.customFontTitle} note={promptCopy.experimentalNote} onClose={() => setIsCustomFontOpen(false)}>
+          <div className="form-grid">
+            <label className="field">
+              <span>{promptCopy.customFontName}</span>
+              <input
+                className="settings-input"
+                type="text"
+                value={customFontDraft.label}
+                onChange={(event) => setCustomFontDraft((current) => ({ ...current, label: event.target.value }))}
+              />
+            </label>
+            <label className="field">
+              <span>{promptCopy.customFontStack}</span>
+              <textarea
+                className="settings-textarea compact"
+                value={customFontDraft.stack}
+                onChange={(event) => setCustomFontDraft((current) => ({ ...current, stack: event.target.value }))}
+              />
+            </label>
+          </div>
+          <div className="confirm-actions">
+            <button className="secondary-button" type="button" onClick={() => setIsCustomFontOpen(false)}>
+              {copy.continueEdit}
+            </button>
+            <button className="primary-button" type="button" onClick={applyCustomFont}>
+              {promptCopy.customFontApply}
+            </button>
+          </div>
+        </EditorExperimentalModal>
+      ) : null}
+
+      {isCustomInsertOpen ? (
+        <EditorExperimentalModal title={promptCopy.customInsertTitle} note={promptCopy.experimentalNote} onClose={() => setIsCustomInsertOpen(false)}>
+          <div className="form-grid">
+            <label className="field">
+              <span>{promptCopy.customInsertKind}</span>
+              <select
+                className="settings-input tool-select"
+                value={customInsertDraft.kind}
+                onChange={(event) => setCustomInsertDraft((current) => ({ ...current, kind: event.target.value as CustomInsertKind }))}
+              >
+                {customInsertOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>{promptCopy.customInsertPayload}</span>
+              <textarea
+                className="settings-textarea"
+                value={customInsertDraft.payload}
+                onChange={(event) => setCustomInsertDraft((current) => ({ ...current, payload: event.target.value }))}
+              />
+            </label>
+          </div>
+          <div className="confirm-actions">
+            <button className="secondary-button" type="button" onClick={() => setIsCustomInsertOpen(false)}>
+              {copy.continueEdit}
+            </button>
+            <button className="primary-button" type="button" onClick={applyCustomInsert}>
+              {promptCopy.customInsertApply}
+            </button>
+          </div>
+        </EditorExperimentalModal>
+      ) : null}
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
     </main>
