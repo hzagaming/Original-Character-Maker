@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
 import type { AppLanguage, SettingsState } from './types';
 
@@ -130,6 +131,8 @@ type UiCopySet = {
   downloadError: string;
   copyDebug: string;
   downloadDebug: string;
+  showDetails: string;
+  hideDetails: string;
   copyText: string;
   downloadHtml: string;
   exportPack: string;
@@ -141,6 +144,7 @@ type UiCopySet = {
   logsTitle: string;
   debugTitle: string;
   errorTitle: string;
+  noRecentError: string;
   statusIdle: string;
   statusRunning: string;
   statusSuccess: string;
@@ -316,6 +320,8 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     downloadError: '下载错误',
     copyDebug: '复制调试 JSON',
     downloadDebug: '下载调试 JSON',
+    showDetails: '展开详情',
+    hideDetails: '收起详情',
     copyText: '复制文本',
     downloadHtml: '下载 HTML',
     exportPack: '导出封装包',
@@ -327,6 +333,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     logsTitle: '详细日志',
     debugTitle: '调试 JSON',
     errorTitle: '错误信息',
+    noRecentError: '当前没有新的错误。只有在步骤失败时，错误详情才会自动展开。',
     statusIdle: '待机',
     statusRunning: '运行中',
     statusSuccess: '完成',
@@ -484,6 +491,8 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     downloadError: 'エラーを保存',
     copyDebug: 'デバッグ JSON をコピー',
     downloadDebug: 'デバッグ JSON を保存',
+    showDetails: '詳細を開く',
+    hideDetails: '詳細を閉じる',
     copyText: 'テキストをコピー',
     downloadHtml: 'HTML を保存',
     exportPack: '封装パックを書き出す',
@@ -495,6 +504,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     logsTitle: '詳細ログ',
     debugTitle: 'デバッグ JSON',
     errorTitle: 'エラー情報',
+    noRecentError: '現在は新しいエラーがありません。ステップ失敗時のみエラー詳細が自動展開されます。',
     statusIdle: '待機中',
     statusRunning: '実行中',
     statusSuccess: '完了',
@@ -652,6 +662,8 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     downloadError: 'Download error',
     copyDebug: 'Copy debug JSON',
     downloadDebug: 'Download debug JSON',
+    showDetails: 'Show details',
+    hideDetails: 'Hide details',
     copyText: 'Copy text',
     downloadHtml: 'Download HTML',
     exportPack: 'Export package',
@@ -663,6 +675,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     logsTitle: 'Detailed logs',
     debugTitle: 'Debug JSON',
     errorTitle: 'Error details',
+    noRecentError: 'No recent errors. Detailed error data expands automatically only when a step fails.',
     statusIdle: 'Idle',
     statusRunning: 'Running',
     statusSuccess: 'Success',
@@ -820,6 +833,8 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     downloadError: 'Скачать ошибку',
     copyDebug: 'Скопировать debug JSON',
     downloadDebug: 'Скачать debug JSON',
+    showDetails: 'Показать детали',
+    hideDetails: 'Скрыть детали',
     copyText: 'Скопировать текст',
     downloadHtml: 'Скачать HTML',
     exportPack: 'Экспортировать пакет',
@@ -831,6 +846,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     logsTitle: 'Подробные логи',
     debugTitle: 'Debug JSON',
     errorTitle: 'Информация об ошибке',
+    noRecentError: 'Сейчас новых ошибок нет. Подробный блок ошибки автоматически раскроется только при сбое шага.',
     statusIdle: 'Ожидание',
     statusRunning: 'Выполняется',
     statusSuccess: 'Готово',
@@ -1713,7 +1729,11 @@ function ConfirmReturnModal({
     window.setTimeout(onConfirm, 220);
   }
 
-  return (
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section
         className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`}
@@ -1736,7 +1756,55 @@ function ConfirmReturnModal({
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
+  );
+}
+
+function CollapsibleCodePanel({
+  title,
+  description,
+  code,
+  actions,
+  copy,
+  defaultOpen = false,
+  tone = 'default',
+  autoOpenSignal,
+}: {
+  title: string;
+  description: string;
+  code: string;
+  actions?: ReactNode;
+  copy: UiCopySet;
+  defaultOpen?: boolean;
+  tone?: 'default' | 'error';
+  autoOpenSignal?: string | null;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    if (autoOpenSignal) {
+      setIsOpen(true);
+    }
+  }, [autoOpenSignal]);
+
+  return (
+    <article className={`result-panel collapsible-panel ${tone === 'error' ? 'error' : ''} ${isOpen ? 'open' : 'collapsed'}`}>
+      <button className="collapsible-toggle" type="button" onClick={() => setIsOpen((current) => !current)} aria-expanded={isOpen}>
+        <div className="collapsible-copy">
+          <strong>{title}</strong>
+          <p>{description}</p>
+        </div>
+        <span className="collapsible-state">{isOpen ? copy.hideDetails : copy.showDetails}</span>
+      </button>
+
+      {isOpen ? (
+        <div className="collapsible-body">
+          <div className="code-block">{code}</div>
+          {actions ? <div className="mini-action-row">{actions}</div> : null}
+        </div>
+      ) : null}
+    </article>
   );
 }
 
@@ -2123,47 +2191,61 @@ export function StyleTransferPage({
               <span className="card-caption">{copy.resultsTitle}</span>
               <h3>{copy.resultsTitle}</h3>
               <div className="result-grid">
-                <article className="result-panel">
-                  <strong>{transfer.outputTitle}</strong>
-                  <p>{result ? transfer.resultReady : transfer.waitingResult}</p>
-                  <div className="code-block">{resultJson}</div>
-                  <div className="mini-action-row">
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(resultJson)}>
-                      {copy.copyResult}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-result.json', resultJson, 'application/json')}>
-                      {copy.downloadResult}
-                    </button>
-                  </div>
-                </article>
+                <CollapsibleCodePanel
+                  title={transfer.outputTitle}
+                  description={result ? transfer.resultReady : transfer.waitingResult}
+                  code={resultJson}
+                  copy={copy}
+                  actions={
+                    <>
+                      <button className="secondary-button small-button" type="button" onClick={() => copyText(resultJson)}>
+                        {copy.copyResult}
+                      </button>
+                      <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-result.json', resultJson, 'application/json')}>
+                        {copy.downloadResult}
+                      </button>
+                    </>
+                  }
+                />
 
-                <article className={`result-panel ${error ? 'error' : ''}`}>
-                  <strong>{copy.errorTitle}</strong>
-                  <p>{error ? error.message : 'No error has been raised in the current session.'}</p>
-                  <div className="code-block">{errorJson}</div>
-                  <div className="mini-action-row">
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(errorJson)}>
-                      {copy.copyError}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-error.json', errorJson, 'application/json')}>
-                      {copy.downloadError}
-                    </button>
-                  </div>
-                </article>
+                <CollapsibleCodePanel
+                  title={copy.errorTitle}
+                  description={error ? error.message : copy.noRecentError}
+                  code={errorJson}
+                  copy={copy}
+                  tone={error ? 'error' : 'default'}
+                  defaultOpen={Boolean(error)}
+                  autoOpenSignal={error?.message ?? null}
+                  actions={
+                    error ? (
+                      <>
+                        <button className="secondary-button small-button" type="button" onClick={() => copyText(errorJson)}>
+                          {copy.copyError}
+                        </button>
+                        <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-error.json', errorJson, 'application/json')}>
+                          {copy.downloadError}
+                        </button>
+                      </>
+                    ) : null
+                  }
+                />
 
-                <article className="result-panel">
-                  <strong>{copy.debugTitle}</strong>
-                  <p>Queue trace, parameter snapshot, logs, result payload, and the latest error package are bundled here.</p>
-                  <div className="code-block">{debugJson}</div>
-                  <div className="mini-action-row">
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(debugJson)}>
-                      {copy.copyDebug}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-debug.json', debugJson, 'application/json')}>
-                      {copy.downloadDebug}
-                    </button>
-                  </div>
-                </article>
+                <CollapsibleCodePanel
+                  title={copy.debugTitle}
+                  description="Queue trace, parameter snapshot, logs, result payload, and the latest error package are bundled here."
+                  code={debugJson}
+                  copy={copy}
+                  actions={
+                    <>
+                      <button className="secondary-button small-button" type="button" onClick={() => copyText(debugJson)}>
+                        {copy.copyDebug}
+                      </button>
+                      <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-debug.json', debugJson, 'application/json')}>
+                        {copy.downloadDebug}
+                      </button>
+                    </>
+                  }
+                />
               </div>
             </section>
           </div>
@@ -2917,6 +2999,7 @@ export function Paper2GalPage({
       return parts.join(' | ');
     }).join('\n');
   }, [paper.idleMessage, stepLabels, workflow]);
+  const workflowLogLines = useMemo(() => workflowLogText.split('\n').filter(Boolean), [workflowLogText]);
 
   const apiBaseIssue = detectWorkflowApiBaseIssue(getEffectiveApiBase(settings));
   const readableErrorMessage =
@@ -3207,13 +3290,23 @@ export function Paper2GalPage({
                     </button>
                   </div>
                 </div>
+                {workflowLogLines.length > 0 ? (
+                  workflowLogLines.map((line, index) => (
+                    <div key={`${workflow?.id ?? 'paper'}-${index}`} className="log-entry debug">
+                      <p>{line}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="log-empty">{paper.idleMessage}</div>
+                )}
               </div>
-            </section>
+              <div className="tool-card-divider" />
 
-            <section className="tool-card">
-              <span className="card-caption">{paper.resultsTitle}</span>
-              <h3>{paper.resultsTitle}</h3>
-              <p className="muted-copy">{paper.outputsHint}</p>
+              <div className="tool-card-section">
+                <span className="card-caption">{paper.resultsTitle}</span>
+                <h3>{paper.resultsTitle}</h3>
+                <p className="muted-copy">{paper.outputsHint}</p>
+              </div>
 
               {workflow?.outputs?.providers && (
                 <div className="paper-provider-row">
@@ -3264,50 +3357,6 @@ export function Paper2GalPage({
                 </div>
               )}
 
-              <div className="result-grid paper-result-grid">
-                <article className="result-panel">
-                  <strong>{paper.manifestTitle}</strong>
-                  <p>{paper.resultSummary}</p>
-                  <div className="code-block">{resultJson}</div>
-                  <div className="mini-action-row">
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(resultJson)}>
-                      {copy.copyResult}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-result.json', resultJson, 'application/json')}>
-                      {copy.downloadResult}
-                    </button>
-                  </div>
-                </article>
-
-                <article className={`result-panel ${readableErrorMessage ? 'error' : ''}`}>
-                  <strong>{paper.latestError}</strong>
-                  <p>{readableErrorMessage || paper.noOutputs}</p>
-                  <div className="code-block">{errorJson}</div>
-                  <div className="mini-action-row">
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(errorJson)}>
-                      {copy.copyError}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-error.json', errorJson, 'application/json')}>
-                      {copy.downloadError}
-                    </button>
-                  </div>
-                </article>
-
-                <article className="result-panel">
-                  <strong>{copy.debugTitle}</strong>
-                  <p>{paper.debugSummary}</p>
-                  <div className="code-block">{debugJson}</div>
-                  <div className="mini-action-row">
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(debugJson)}>
-                      {copy.copyDebug}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-debug.json', debugJson, 'application/json')}>
-                      {copy.downloadDebug}
-                    </button>
-                  </div>
-                </article>
-              </div>
-
               {outputCards.length === 0 ? (
                 <div className="log-empty">{paper.noOutputs}</div>
               ) : (
@@ -3336,6 +3385,64 @@ export function Paper2GalPage({
                   })}
                 </div>
               )}
+
+              <div className="result-grid paper-result-grid">
+                <CollapsibleCodePanel
+                  title={paper.manifestTitle}
+                  description={paper.resultSummary}
+                  code={resultJson}
+                  copy={copy}
+                  actions={
+                    <>
+                      <button className="secondary-button small-button" type="button" onClick={() => copyText(resultJson)}>
+                        {copy.copyResult}
+                      </button>
+                      <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-result.json', resultJson, 'application/json')}>
+                        {copy.downloadResult}
+                      </button>
+                    </>
+                  }
+                />
+
+                <CollapsibleCodePanel
+                  title={paper.latestError}
+                  description={readableErrorMessage || copy.noRecentError}
+                  code={errorJson}
+                  copy={copy}
+                  tone={readableErrorMessage ? 'error' : 'default'}
+                  defaultOpen={Boolean(readableErrorMessage)}
+                  autoOpenSignal={readableErrorMessage}
+                  actions={
+                    readableErrorMessage ? (
+                      <>
+                        <button className="secondary-button small-button" type="button" onClick={() => copyText(errorJson)}>
+                          {copy.copyError}
+                        </button>
+                        <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-error.json', errorJson, 'application/json')}>
+                          {copy.downloadError}
+                        </button>
+                      </>
+                    ) : null
+                  }
+                />
+
+                <CollapsibleCodePanel
+                  title={copy.debugTitle}
+                  description={paper.debugSummary}
+                  code={debugJson}
+                  copy={copy}
+                  actions={
+                    <>
+                      <button className="secondary-button small-button" type="button" onClick={() => copyText(debugJson)}>
+                        {copy.copyDebug}
+                      </button>
+                      <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-debug.json', debugJson, 'application/json')}>
+                        {copy.downloadDebug}
+                      </button>
+                    </>
+                  }
+                />
+              </div>
             </section>
           </div>
         </div>

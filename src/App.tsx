@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import type {
   AccentPalette,
   AppLanguage,
@@ -12,7 +13,7 @@ import type {
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage } from './workflowPages';
 
-const VERSION = '0.3.3.2';
+const VERSION = '0.3.4';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -219,10 +220,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: '本网站所有信息均在本地保存，不会上传任何角色社卡、个人信息或私钥。',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.3.3.2 做了一轮前端 UI/UX 回归整理，重点清理工作台头部的重复状态信息，并修正资源复制后的按钮反馈。',
-    announcementList1: '捏脸、转画风、Prompt / TTS 和 paper2gal 页顶部不再重复显示两次保存状态，界面信息密度更干净。',
-    announcementList2: 'paper2gal 结果卡片里点击复制后，按钮会显示更准确的“已复制”反馈，不再误用别的模块文案。',
-    announcementList3: '重新构建并检查了当前版本号、公告面板、工作台交互和前端样式一致性，保持现有主题和多语言结构同步。',
+    announcementDescription: '0.3.4 重点整理 paper2gal 工作台的信息布局，把结果与调试收进右侧栏，并让返回首页确认弹窗脱离工作区独立显示。',
+    announcementList1: 'paper2gal 的结果资产、结果清单、最近错误和调试 JSON 统一整理到右侧信息栏，阅读路径更清晰。',
+    announcementList2: '含代码框的结果 / 错误 / 调试面板默认折叠，只有最近错误会在失败时自动展开，减少页面噪音。',
+    announcementList3: '所有返回首页确认弹窗现在都通过全局层独立居中显示，不再受工作台面板裁切或缩放影响。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     profileLinkLabel: 'GitHub 主页',
@@ -330,10 +331,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: 'このサイトの情報はすべてローカル保存です。',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.3.3.2 ではフロントエンドの UI/UX をもう一度整理し、ワークベンチ上部の重複状態表示とコピー後の文言を見直しました。',
-    announcementList1: 'Face / Style / Prompt / paper2gal 各ページ上部で保存状態が二重表示されていたため、情報を一か所へ整理しました。',
-    announcementList2: 'paper2gal の結果カードでコピー後に表示される文言を「コピー済み」へ修正し、他モジュール由来の違和感ある文言を解消しました。',
-    announcementList3: '現行バージョン表示、お知らせ、ワークベンチ操作、スタイル整合性も再確認し、既存テーマと多言語構成を維持しています。',
+    announcementDescription: '0.3.4 では paper2gal ワークベンチの情報整理を進め、結果とデバッグを右側カラムへ集約し、ホームへ戻る確認モーダルも独立表示に改めました。',
+    announcementList1: 'paper2gal の成果物、結果マニフェスト、最新エラー、デバッグ JSON を右側情報欄にまとめ、読みやすさを改善しました。',
+    announcementList2: 'コードブロック付きの結果 / エラー / デバッグ面は初期状態で折りたたまれ、エラー時のみ詳細が自動で展開されます。',
+    announcementList3: 'ホームへ戻る確認モーダルはすべてグローバルレイヤーで中央表示され、ワークベンチのパネル配置や拡大率の影響を受けなくなりました。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     profileLinkLabel: 'GitHub プロフィール',
@@ -441,10 +442,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: 'Everything stays local in this browser.',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.3.3.2 adds a UI/UX cleanup pass across the frontend, mainly trimming duplicate status noise in workbench headers and fixing copy feedback on paper2gal asset cards.',
-    announcementList1: 'Face Maker, Style Transfer, Prompt / TTS, and paper2gal no longer show the saved state twice in the top header area.',
-    announcementList2: 'After copying a paper2gal asset, the button now shows a proper “Copied” confirmation instead of reusing an unrelated result-copy label.',
-    announcementList3: 'The current version label, announcement panel, workbench interactions, and style consistency were rechecked so the existing theme and language structure remain aligned.',
+    announcementDescription: 'Version 0.3.4 reorganizes the paper2gal workbench so results and debugging live in the right-side column, while the return-home confirmation is now rendered as a true global modal.',
+    announcementList1: 'paper2gal assets, result manifests, recent errors, and debug JSON are now grouped in the right information rail for a clearer reading flow.',
+    announcementList2: 'Panels that contain code blocks stay collapsed by default, and only the recent-error block auto-expands when a step actually fails.',
+    announcementList3: 'Every return-home confirmation now opens in a centered global layer instead of being visually trapped inside the current workbench panel.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     profileLinkLabel: 'GitHub profile',
@@ -552,10 +553,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: 'Всё остаётся локально в браузере.',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.3.3.2 добавляет ещё один проход по UI/UX: мы убрали лишний шум в заголовках рабочих страниц и исправили реакцию кнопки копирования в paper2gal.',
-    announcementList1: 'В Face Maker, Style Transfer, Prompt / TTS и paper2gal статус сохранения больше не дублируется дважды в верхней части страницы.',
-    announcementList2: 'После копирования ресурса в paper2gal кнопка теперь показывает корректное подтверждение «Скопировано», а не чужую подпись из другого блока.',
-    announcementList3: 'Дополнительно ещё раз проверены номер версии, панель объявлений, взаимодействия рабочих страниц и визуальная согласованность темы.',
+    announcementDescription: 'Версия 0.3.4 перестраивает информационный блок paper2gal: результаты и debug собраны в правой колонке, а подтверждение возврата на главную стало отдельным глобальным модальным окном.',
+    announcementList1: 'Результаты, manifest, последние ошибки и debug JSON paper2gal теперь собраны в одном правом информационном блоке и читаются заметно проще.',
+    announcementList2: 'Панели с кодовыми блоками по умолчанию свернуты, а блок с последней ошибкой раскрывается автоматически только при реальном сбое шага.',
+    announcementList3: 'Все подтверждения возврата на главную теперь рендерятся в отдельном глобальном слое по центру экрана и не зависят от панели текущего workbench.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     profileLinkLabel: 'GitHub профиль',
@@ -661,10 +662,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: '설정 열기',
     announcementTitle: '공지',
     announcementHistoryButton: '이전 공지 보기',
-    announcementDescription: '0.3.3.2에서는 프런트엔드 UI/UX를 한 번 더 다듬어 작업대 상단의 중복 상태 표시와 paper2gal 복사 피드백을 정리했습니다.',
-    announcementList1: '페이스 메이커, 스타일 변환, Prompt / TTS, paper2gal 상단에서 저장 상태가 두 번 보이던 문제를 정리했습니다.',
-    announcementList2: 'paper2gal 결과 카드에서 복사 후 버튼 문구가 이제 정확한 “복사됨” 피드백으로 표시됩니다.',
-    announcementList3: '버전 표기, 공지 패널, 작업대 상호작용, 스타일 일관성도 다시 점검해 현재 테마와 다국어 구조를 유지했습니다.',
+    announcementDescription: '0.3.4에서는 paper2gal 작업대의 정보 구성을 다시 정리해 결과와 디버그를 오른쪽 정보 영역으로 모으고, 홈 복귀 확인을 전역 모달로 분리했습니다.',
+    announcementList1: 'paper2gal 결과 자산, manifest, 최근 오류, debug JSON이 오른쪽 정보 레일에 모여 읽기 흐름이 더 분명해졌습니다.',
+    announcementList2: '코드 블록이 포함된 결과 / 오류 / 디버그 패널은 기본적으로 접혀 있고, 실제 오류가 날 때만 최근 오류 패널이 자동으로 펼쳐집니다.',
+    announcementList3: '홈으로 돌아가기 확인창은 이제 전역 레이어 중앙에 표시되어 현재 작업대 패널 안에 갇히지 않습니다.',
     pageFaceTitle: '페이스 메이커',
     pageStyleTitle: '스타일 변환',
     pagePromptTitle: '캐릭터 Prompt + LLM / TTS',
@@ -690,10 +691,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Ouvrir les paramètres',
     announcementTitle: 'Annonce',
     announcementHistoryButton: 'Voir les annonces passées',
-    announcementDescription: 'La version 0.3.3.2 ajoute un passage de nettoyage UI/UX côté frontend, surtout pour retirer les statuts dupliqués dans les en-têtes et corriger le retour visuel après copie.',
-    announcementList1: 'Les pages Face Maker, Style Transfer, Prompt / TTS et paper2gal n’affichent plus deux fois le statut de sauvegarde en haut de l’interface.',
-    announcementList2: 'Après une copie dans les cartes de résultats paper2gal, le bouton montre maintenant un vrai état « Copied » au lieu d’un libellé recyclé.',
-    announcementList3: 'Le numéro de version, le panneau d’annonce, les interactions des workbenches et la cohérence visuelle ont aussi été revérifiés.',
+    announcementDescription: 'La version 0.3.4 réorganise le workbench paper2gal : résultats et debug passent dans la colonne de droite, et la confirmation de retour à l’accueil devient une vraie modale globale.',
+    announcementList1: 'Les assets paper2gal, le manifest, les erreurs récentes et le debug JSON sont maintenant regroupés dans le rail d’information droit.',
+    announcementList2: 'Les panneaux avec blocs de code restent repliés par défaut, et seul le panneau d’erreur récente s’ouvre automatiquement en cas d’échec réel.',
+    announcementList3: 'Toutes les confirmations de retour à l’accueil s’affichent désormais au centre dans un calque global indépendant du workbench courant.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transfert de style',
     pagePromptTitle: 'Character Prompt + LLM / TTS',
@@ -719,10 +720,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Einstellungen öffnen',
     announcementTitle: 'Ankündigung',
     announcementHistoryButton: 'Frühere Ankündigungen ansehen',
-    announcementDescription: 'Version 0.3.3.2 ergänzt einen UI/UX-Feinschliff im Frontend, vor allem bei doppelten Statusanzeigen in den Workbench-Kopfzeilen und beim Copy-Feedback in paper2gal.',
-    announcementList1: 'Face Maker, Style Transfer, Prompt / TTS und paper2gal zeigen den Speicherstatus oben nicht länger doppelt an.',
-    announcementList2: 'Nach dem Kopieren eines paper2gal-Assets zeigt die Schaltfläche jetzt korrekt „Copied“ statt einer unpassenden Beschriftung aus einem anderen Bereich.',
-    announcementList3: 'Versionsanzeige, Ankündigungsbereich, Workbench-Interaktionen und visuelle Konsistenz wurden zusätzlich erneut geprüft.',
+    announcementDescription: 'Version 0.3.4 ordnet die paper2gal-Workbench neu: Ergebnisse und Debug liegen jetzt in der rechten Spalte, und die Rückkehr-zur-Startseite-Bestätigung ist ein eigenständiges globales Modal.',
+    announcementList1: 'paper2gal-Assets, Manifest, letzte Fehler und Debug-JSON sind nun im rechten Informationsbereich gebündelt und dadurch leichter lesbar.',
+    announcementList2: 'Panels mit Code-Blöcken bleiben standardmäßig eingeklappt; nur das aktuelle Fehler-Panel öffnet sich automatisch bei einem echten Fehlschlag.',
+    announcementList3: 'Alle Rückkehr-zur-Startseite-Bestätigungen erscheinen jetzt zentriert in einer globalen Ebene und nicht mehr innerhalb des aktuellen Workbench-Panels.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Stiltransfer',
     pagePromptTitle: 'Character Prompt + LLM / TTS',
@@ -748,10 +749,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Abrir configuración',
     announcementTitle: 'Anuncio',
     announcementHistoryButton: 'Ver anuncios anteriores',
-    announcementDescription: 'La versión 0.3.3.2 añade una pasada de limpieza UI/UX en el frontend, centrada en quitar estados duplicados en los encabezados y mejorar el feedback de copia en paper2gal.',
-    announcementList1: 'Face Maker, Style Transfer, Prompt / TTS y paper2gal ya no muestran dos veces el estado de guardado en la parte superior.',
-    announcementList2: 'Después de copiar un recurso en paper2gal, el botón ahora muestra una confirmación correcta de “Copied” en lugar de una etiqueta reciclada.',
-    announcementList3: 'También se volvió a revisar el número de versión, el panel de anuncios, las interacciones de los workbenches y la consistencia visual.',
+    announcementDescription: 'La versión 0.3.4 reorganiza el workbench de paper2gal: resultados y debug pasan a la columna derecha, y la confirmación para volver al inicio ahora es un modal global real.',
+    announcementList1: 'Los assets de paper2gal, el manifest, los errores recientes y el debug JSON ahora se agrupan en el panel derecho para que la lectura sea más clara.',
+    announcementList2: 'Los paneles con bloques de código quedan plegados por defecto y solo el bloque del error reciente se abre automáticamente cuando falla un paso.',
+    announcementList3: 'Todas las confirmaciones de vuelta al inicio se muestran centradas en una capa global independiente del panel del workbench actual.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transferencia de estilo',
     pagePromptTitle: 'Character Prompt + LLM / TTS',
@@ -777,10 +778,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Apri impostazioni',
     announcementTitle: 'Annuncio',
     announcementHistoryButton: 'Vedi annunci precedenti',
-    announcementDescription: 'La versione 0.3.3.2 aggiunge un passaggio di pulizia UI/UX sul frontend, soprattutto per rimuovere gli stati duplicati nelle intestazioni e migliorare il feedback di copia in paper2gal.',
-    announcementList1: 'Face Maker, Style Transfer, Prompt / TTS e paper2gal non mostrano più due volte lo stato di salvataggio nella parte alta.',
-    announcementList2: 'Dopo la copia di una risorsa in paper2gal, il pulsante ora mostra un feedback corretto di “Copied” invece di un’etichetta riutilizzata da un altro blocco.',
-    announcementList3: 'Sono stati ricontrollati anche numero versione, pannello annunci, interazioni dei workbench e coerenza visiva.',
+    announcementDescription: 'La versione 0.3.4 riorganizza il workbench paper2gal: risultati e debug passano nella colonna destra e la conferma di ritorno alla home diventa una vera modale globale.',
+    announcementList1: 'Asset paper2gal, manifest, errori recenti e debug JSON sono ora raccolti nella barra informativa destra per una lettura più chiara.',
+    announcementList2: 'I pannelli che contengono blocchi di codice restano chiusi per impostazione predefinita e solo il pannello dell’errore recente si apre automaticamente quando un passaggio fallisce.',
+    announcementList3: 'Tutte le conferme di ritorno alla home ora compaiono centrate in un livello globale indipendente dal workbench corrente.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Style transfer',
     pagePromptTitle: 'Character Prompt + LLM / TTS',
@@ -806,10 +807,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Abrir configurações',
     announcementTitle: 'Aviso',
     announcementHistoryButton: 'Ver avisos anteriores',
-    announcementDescription: 'A versão 0.3.3.2 adiciona uma passada de limpeza UI/UX no frontend, focando em remover estados duplicados nos cabeçalhos e melhorar o feedback de cópia no paper2gal.',
-    announcementList1: 'Face Maker, Style Transfer, Prompt / TTS e paper2gal não mostram mais o estado de salvamento duas vezes no topo.',
-    announcementList2: 'Depois de copiar um recurso no paper2gal, o botão agora mostra um feedback correto de “Copied” em vez de reutilizar um rótulo de outro bloco.',
-    announcementList3: 'O número da versão, o painel de anúncios, as interações dos workbenches e a consistência visual também foram revisados novamente.',
+    announcementDescription: 'A versão 0.3.4 reorganiza o workbench do paper2gal: resultados e debug ficam na coluna direita, e a confirmação para voltar à página inicial agora é um modal global de verdade.',
+    announcementList1: 'Assets do paper2gal, manifest, erros recentes e debug JSON agora ficam agrupados no trilho de informação da direita para uma leitura mais clara.',
+    announcementList2: 'Os painéis com blocos de código ficam recolhidos por padrão, e só o painel de erro recente abre automaticamente quando uma etapa realmente falha.',
+    announcementList3: 'Todas as confirmações de volta para a página inicial agora aparecem centralizadas em uma camada global independente do workbench atual.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transferência de estilo',
     pagePromptTitle: 'Character Prompt + LLM / TTS',
@@ -818,6 +819,17 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '0.3.4',
+    date: '2026-04-18',
+    title: '0.3.4 paper2gal 侧栏重排与全局确认弹窗',
+    summary: '重新整理 paper2gal 的右侧信息栏，让结果与调试更聚焦，同时把返回首页确认弹窗提升到全局层。',
+    details: [
+      'paper2gal 的结果资产、结果清单、最近错误与调试 JSON 全部收进右侧信息栏，避免输出信息分散在页面下半段。',
+      '包含代码框的结果 / 错误 / 调试面板默认折叠，仅在步骤失败时自动展开最近错误，页面信息更清爽、更容易快速定位。',
+      '返回首页确认弹窗改为通过全局层独立渲染，不再受工作台面板尺寸、缩放比例和局部容器裁切影响。',
+    ],
+  },
   {
     version: '0.3.3.2',
     date: '2026-04-17',
@@ -1693,7 +1705,11 @@ function ConfirmReturnModal({
     window.setTimeout(onConfirm, MODAL_CLOSE_MS);
   }
 
-  return (
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
@@ -1711,7 +1727,8 @@ function ConfirmReturnModal({
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

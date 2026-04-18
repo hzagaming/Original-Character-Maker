@@ -1,12 +1,14 @@
 {
   "name": "original-character-maker",
   "private": true,
-  "version": "0.3.3.2",
+  "version": "0.3.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server:install": "cd server && npm install",
+    "server:dev": "cd server && node src/index.js"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -857,6 +857,17 @@ a {
   padding: 20px;
 }
 
+.tool-card-divider {
+  height: 1px;
+  margin: 22px 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+.tool-card-section {
+  display: grid;
+  gap: 10px;
+}
+
 .tool-card h3 {
   margin: 0;
   font-size: 1.4rem;
@@ -1199,6 +1210,47 @@ a {
   line-height: 1.66;
 }
 
+.collapsible-panel {
+  gap: 0;
+  overflow: hidden;
+}
+
+.collapsible-toggle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.collapsible-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.collapsible-state {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 32px;
+}
+
+.collapsible-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
 .code-block {
   margin: 0;
   padding: 14px;
@@ -1378,6 +1430,7 @@ a {
 }
 
 .paper-result-grid {
+  margin-top: 18px;
   margin-bottom: 16px;
 }
 
@@ -2027,7 +2080,7 @@ a {
   justify-content: center;
   padding: 20px;
   overflow: auto;
-  z-index: 140;
+  z-index: 420;
   background: rgba(5, 10, 16, 0.54);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
