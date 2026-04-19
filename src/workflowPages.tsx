@@ -136,6 +136,10 @@ type UiCopySet = {
   saveConfig: string;
   saveDocument: string;
   reset: string;
+  refreshWorkspace: string;
+  refreshWorkspaceTitle: string;
+  refreshWorkspaceDescription: string;
+  refreshWorkspaceConfirm: string;
   copyJson: string;
   downloadJson: string;
   copyResult: string;
@@ -336,16 +340,11 @@ const PAPER_POLL_INTERVAL_MS = 1000;
 
 function createDefaultPaperPromptOverrides(): PaperPromptOverrides {
   return {
-    thinking:
-      '保持与参考图完全相同的单人角色身份与全部视觉特征不变：发型、发色、耳朵、脸型、五官、瞳色、肤色、服装、配饰、体型、姿势、手持物、线稿风格、上色方式和整体配色都必须一致。只把表情改成“思考中”，眼神专注、眉眼轻微收拢、嘴部克制自然，不要改变头部朝向，不要改变动作，不要新增其他人物或背景剧情。',
-    surprise:
-      '保持与参考图完全相同的单人角色身份与全部视觉特征不变：发型、发色、耳朵、脸型、五官、瞳色、肤色、服装、配饰、体型、姿势、手持物、线稿风格、上色方式和整体配色都必须一致。只把表情改成“轻微惊讶”，眼睛微微睁大、眉毛自然上扬、嘴巴轻微张开即可，不要夸张，不要改变动作、服装、镜头和画风。',
-    angry:
-      '保持与参考图完全相同的单人角色身份与全部视觉特征不变：发型、发色、耳朵、脸型、五官、瞳色、肤色、服装、配饰、体型、姿势、手持物、线稿风格、上色方式和整体配色都必须一致。只把表情改成“轻微不高兴 / 小生气”，皱眉微冷、嘴角轻收，不要暴怒，不要龇牙咧嘴，不要咆哮，不要扭曲五官，不要改变姿势和镜头。',
-    cg01:
-      '保持与参考图完全相同的单人角色身份与全部视觉特征不变：发型、发色、耳朵、脸型、五官、瞳色、肤色、服装、配饰、体型、手持物、线稿风格、上色方式和整体配色都必须一致。请为这个角色自行构思一个贴合人物气质与设定的随机原创单人 CG 场景，由你自己编一个合理场景；可以补充环境、光线和少量道具，但绝对不能改角色设定，不能换装，不能增加其他人物。',
-    cg02:
-      '保持与参考图完全相同的单人角色身份与全部视觉特征不变：发型、发色、耳朵、脸型、五官、瞳色、肤色、服装、配饰、体型、手持物、线稿风格、上色方式和整体配色都必须一致。请再为这个角色自行构思另一个与上一张不同的随机原创单人 CG 场景，由你自己编一个新的合理场景；场景氛围和地点要有变化，但角色本身绝对不能变，不能新增其他人物。',
+    thinking: '不改人物的任何特征和动作，只修改人物的表情到思考表情，其他地方均不变',
+    surprise: '不改人物的任何特征和动作，只修改人物的表情到惊讶表情，其他地方均不变',
+    angry: '不改人物的任何特征和动作，只修改人物的表情到微微生气表情，其他地方均不变',
+    cg01: '自行构思一个柔和的结束cg场景，场景地点为随机，只允许修改人物的动作和表情，角色本身绝对不能变，不能新增其他人物',
+    cg02: '自行构思一个柔和的结束cg场景，场景地点为随机，只允许修改人物的动作和表情，角色本身绝对不能变，不能新增其他人物',
   };
 }
 
@@ -375,6 +374,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     saveConfig: '保存配置',
     saveDocument: '保存文档',
     reset: '重置',
+    refreshWorkspace: '重刷',
+    refreshWorkspaceTitle: '确定重刷当前页面吗？',
+    refreshWorkspaceDescription: '这会清空当前页面的输入、结果和暂存内容，让页面回到初始状态。',
+    refreshWorkspaceConfirm: '确认重刷',
     copyJson: '复制 JSON',
     downloadJson: '下载 JSON',
     copyResult: '复制结果',
@@ -580,6 +583,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     saveConfig: '設定を保存',
     saveDocument: '文書を保存',
     reset: 'リセット',
+    refreshWorkspace: '再初期化',
+    refreshWorkspaceTitle: '現在のページをリセットしますか？',
+    refreshWorkspaceDescription: 'このページの入力、結果、ローカル一時状態を消去して、初期状態に戻します。',
+    refreshWorkspaceConfirm: 'リセットする',
     copyJson: 'JSON をコピー',
     downloadJson: 'JSON を保存',
     copyResult: '結果をコピー',
@@ -785,6 +792,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     saveConfig: 'Save config',
     saveDocument: 'Save document',
     reset: 'Reset',
+    refreshWorkspace: 'Refresh',
+    refreshWorkspaceTitle: 'Reset this workspace?',
+    refreshWorkspaceDescription: 'This clears the current input, result, and temporary saved state for this page so it goes back to its initial state.',
+    refreshWorkspaceConfirm: 'Reset now',
     copyJson: 'Copy JSON',
     downloadJson: 'Download JSON',
     copyResult: 'Copy result',
@@ -990,6 +1001,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     saveConfig: 'Сохранить конфиг',
     saveDocument: 'Сохранить документ',
     reset: 'Сбросить',
+    refreshWorkspace: 'Сбросить страницу',
+    refreshWorkspaceTitle: 'Сбросить текущую страницу?',
+    refreshWorkspaceDescription: 'Это очистит текущие входные данные, результаты и временно сохранённое локальное состояние страницы, вернув её к начальному виду.',
+    refreshWorkspaceConfirm: 'Сбросить сейчас',
     copyJson: 'Скопировать JSON',
     downloadJson: 'Скачать JSON',
     copyResult: 'Скопировать результат',
@@ -2421,6 +2436,7 @@ export function StyleTransferPage({
   const [error, setError] = useState<TransferError | null>(null);
   const [runNonce, setRunNonce] = useState(0);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
   const [config, setConfig] = useState({ ...defaultConfig, ...persistedState.config });
   const statusLabelKey = getStatusLabelKey(status);
 
@@ -2582,6 +2598,31 @@ export function StyleTransferPage({
     setLogs((current) => [...current, { time: timestamp(), level: 'success', text: 'Current style-transfer configuration saved locally.' }]);
   }
 
+  function resetWorkspaceView() {
+    if (inputPreviewUrl) {
+      URL.revokeObjectURL(inputPreviewUrl);
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    const nextConfig = { ...defaultConfig };
+    const nextSnapshot = JSON.stringify({ inputFileName: '', config: nextConfig });
+
+    setIsResetOpen(false);
+    setInputFileName('');
+    setInputPreviewUrl('');
+    setStatus('idle');
+    setProgress(0);
+    setLogs([]);
+    setResult(null);
+    setError(null);
+    setRunNonce(0);
+    setConfig(nextConfig);
+    setSavedSnapshot(nextSnapshot);
+  }
+
   const configJson = JSON.stringify({ tool: 'style-transfer', inputFileName, config }, null, 2);
   const logsText = logs.map((entry) => `[${entry.time}] [${entry.level.toUpperCase()}] ${entry.text}`).join('\n');
   const resultJson = JSON.stringify(result ?? { state: 'waiting' }, null, 2);
@@ -2623,6 +2664,9 @@ export function StyleTransferPage({
           </div>
           <div className="tool-header-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
+            <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>
+              {copy.refreshWorkspace}
+            </button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
               {copy.saveConfig}
             </button>
@@ -2822,6 +2866,16 @@ export function StyleTransferPage({
       </footer>
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
+      {isResetOpen ? (
+        <ConfirmActionModal
+          title={copy.refreshWorkspaceTitle}
+          description={copy.refreshWorkspaceDescription}
+          cancelLabel={copy.continueEdit}
+          confirmLabel={copy.refreshWorkspaceConfirm}
+          onCancel={() => setIsResetOpen(false)}
+          onConfirm={resetWorkspaceView}
+        />
+      ) : null}
     </main>
   );
 }
@@ -2843,6 +2897,7 @@ export function PromptSuitePage({
   const editorRef = useRef<HTMLDivElement>(null);
   const referenceAudioInputRef = useRef<HTMLInputElement>(null);
   const templates = localizedPromptTemplates[language];
+  const initialTemplate = templates[0];
   const defaultToolbarState = {
     fontFamily: "'Noto Sans SC', 'PingFang SC', sans-serif",
     fontSize: '16px',
@@ -2851,30 +2906,32 @@ export function PromptSuitePage({
     highlightColor: '#4f9df7',
     lineHeight: '1.7',
   };
+  const initialLlmConfig = {
+    model: 'gpt-5.4',
+    temperature: 0.7,
+    topP: 0.92,
+    maxTokens: 2048,
+    systemNote: 'Keep the OC packet concise, coherent, and easy to hand off to downstream art or voice pipelines.',
+  };
+  const initialTtsConfig = {
+    pitch: 0,
+    volume: 96,
+    sampleRate: 48000,
+    referenceClipName: '',
+    voice: 'Hanazora',
+    language,
+    rate: 1,
+    emotion: 'calm-dramatic',
+    format: 'wav',
+  };
   const [persistedState] = useState(() =>
     readLocalState(PROMPT_SUITE_STORAGE_KEY, {
-      selectedTemplate: templates[0].key,
-      documentHtml: templates[0].html,
+      selectedTemplate: initialTemplate.key,
+      documentHtml: initialTemplate.html,
       toolbarState: defaultToolbarState,
       customFonts: [] as EditorFontOption[],
-      llmConfig: {
-        model: 'gpt-5.4',
-        temperature: 0.7,
-        topP: 0.92,
-        maxTokens: 2048,
-        systemNote: 'Keep the OC packet concise, coherent, and easy to hand off to downstream art or voice pipelines.',
-      },
-      ttsConfig: {
-        pitch: 0,
-        volume: 96,
-        sampleRate: 48000,
-        referenceClipName: '',
-        voice: 'Hanazora',
-        language,
-        rate: 1,
-        emotion: 'calm-dramatic',
-        format: 'wav',
-      },
+      llmConfig: initialLlmConfig,
+      ttsConfig: initialTtsConfig,
       savedSnapshot: '',
     }),
   );
@@ -2893,8 +2950,9 @@ export function PromptSuitePage({
   const [documentHtml, setDocumentHtml] = useState<string>(persistedState.documentHtml);
   const [customFonts, setCustomFonts] = useState<EditorFontOption[]>(persistedCustomFonts);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
-  const [llmConfig, setLlmConfig] = useState(persistedState.llmConfig);
+  const [llmConfig, setLlmConfig] = useState({ ...initialLlmConfig, ...persistedState.llmConfig });
   const [ttsConfig, setTtsConfig] = useState(() => {
     const savedTts = persistedState.ttsConfig as Partial<{
       voice: string;
@@ -2909,15 +2967,15 @@ export function PromptSuitePage({
     }>;
 
     return {
-      voice: savedTts.voice ?? 'Hanazora',
-      language: savedTts.language ?? language,
-      rate: savedTts.rate ?? 1,
-      emotion: savedTts.emotion ?? 'calm-dramatic',
-      format: savedTts.format ?? 'wav',
-      pitch: savedTts.pitch ?? 0,
-      volume: savedTts.volume ?? 96,
-      sampleRate: savedTts.sampleRate ?? 48000,
-      referenceClipName: savedTts.referenceClipName ?? '',
+      voice: savedTts.voice ?? initialTtsConfig.voice,
+      language: savedTts.language ?? initialTtsConfig.language,
+      rate: savedTts.rate ?? initialTtsConfig.rate,
+      emotion: savedTts.emotion ?? initialTtsConfig.emotion,
+      format: savedTts.format ?? initialTtsConfig.format,
+      pitch: savedTts.pitch ?? initialTtsConfig.pitch,
+      volume: savedTts.volume ?? initialTtsConfig.volume,
+      sampleRate: savedTts.sampleRate ?? initialTtsConfig.sampleRate,
+      referenceClipName: savedTts.referenceClipName ?? initialTtsConfig.referenceClipName,
     };
   });
   const [toolbarState, setToolbarState] = useState(() => ({ ...defaultToolbarState, ...(persistedState.toolbarState ?? {}) }));
@@ -3195,6 +3253,38 @@ export function PromptSuitePage({
     setSavedSnapshot(currentSnapshot);
   }
 
+  function resetWorkspaceView() {
+    const nextToolbarState = { ...defaultToolbarState };
+    const nextLlmConfig = { ...initialLlmConfig };
+    const nextTtsConfig = { ...initialTtsConfig };
+    const nextSnapshot = JSON.stringify({
+      documentHtml: initialTemplate.html,
+      llmConfig: nextLlmConfig,
+      ttsConfig: nextTtsConfig,
+      selectedTemplate: initialTemplate.key,
+      customFonts: [],
+      toolbarState: nextToolbarState,
+    });
+
+    setIsResetOpen(false);
+    setSelectedTemplate(initialTemplate.key);
+    setDocumentHtml(initialTemplate.html);
+    setCustomFonts([]);
+    setToolbarState(nextToolbarState);
+    setToolbarOpen({
+      font: true,
+      style: true,
+      paragraph: false,
+      insert: false,
+      history: false,
+    });
+    setCustomFontDraft({ label: '', stack: '' });
+    setCustomInsertDraft({ kind: 'callout', payload: '' });
+    setLlmConfig(nextLlmConfig);
+    setTtsConfig(nextTtsConfig);
+    setSavedSnapshot(nextSnapshot);
+  }
+
   function triggerEditorAction(action: ShortcutAction) {
     switch (action) {
       case 'saveDocument':
@@ -3367,6 +3457,9 @@ export function PromptSuitePage({
           </div>
           <div className="tool-header-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
+            <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>
+              {copy.refreshWorkspace}
+            </button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
               {copy.saveDocument}
             </button>
@@ -3773,6 +3866,16 @@ export function PromptSuitePage({
       ) : null}
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
+      {isResetOpen ? (
+        <ConfirmActionModal
+          title={copy.refreshWorkspaceTitle}
+          description={copy.refreshWorkspaceDescription}
+          cancelLabel={copy.continueEdit}
+          confirmLabel={copy.refreshWorkspaceConfirm}
+          onCancel={() => setIsResetOpen(false)}
+          onConfirm={resetWorkspaceView}
+        />
+      ) : null}
     </main>
   );
 }

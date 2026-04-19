@@ -15,7 +15,7 @@ import type {
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage } from './workflowPages';
 
-const VERSION = '0.3.6';
+const VERSION = '0.3.6.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -1026,6 +1026,17 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.3.6.1',
+    date: '2026-04-19',
+    title: '0.3.6.1 paper2gal Prompt 回调与模块重刷补齐',
+    summary: '把 paper2gal 默认 Prompt 改成最新指定文案，并给捏脸、转画风、Prompt / TTS 页面补上统一的重刷入口。',
+    details: [
+      'paper2gal 的默认表情 Prompt 与 CG Prompt 改成最新指定版本，前端默认值和后端实际编译逻辑保持一致。',
+      '捏脸、转画风、Prompt / TTS 页面顶部都新增“重刷”按钮，并统一接入确认弹窗，执行后会清空当前页面的参数和临时结果。',
+      '主页、公告面板和版本号同步更新到 0.3.6.1，方便直接确认当前补丁是否已经生效。',
+    ],
+  },
+  {
     version: '0.3.6',
     date: '2026-04-19',
     title: '0.3.6 paper2gal 顺序执行、单结果重做与 rembg 切换',
@@ -1539,6 +1550,9 @@ type FaceMakerCopy = {
   unsavedWarning: string;
   savedWarning: string;
   reset: string;
+  refreshWorkspaceTitle: string;
+  refreshWorkspaceDescription: string;
+  refreshWorkspaceConfirm: string;
   saveDraft: string;
   export: string;
   workboard: string;
@@ -1567,7 +1581,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     unsaved: '未保存',
     unsavedWarning: '你还没保存',
     savedWarning: '当前内容已保存',
-    reset: '重置',
+    reset: '重刷',
+    refreshWorkspaceTitle: '确定重刷当前捏脸页面吗？',
+    refreshWorkspaceDescription: '这会清空当前捏脸参数和暂存状态，让页面回到最初默认值。',
+    refreshWorkspaceConfirm: '确认重刷',
     saveDraft: '保存草稿',
     export: '导出',
     workboard: '工作画板',
@@ -1594,7 +1611,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     unsaved: '未保存',
     unsavedWarning: 'まだ保存していません',
     savedWarning: '現在の内容は保存済みです',
-    reset: 'リセット',
+    reset: '再初期化',
+    refreshWorkspaceTitle: '現在の顔メイクページをリセットしますか？',
+    refreshWorkspaceDescription: '現在の顔メイク設定と一時状態を消去して、初期値へ戻します。',
+    refreshWorkspaceConfirm: 'リセットする',
     saveDraft: '下書きを保存',
     export: '書き出し',
     workboard: '作業ボード',
@@ -1621,7 +1641,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     unsaved: 'Unsaved',
     unsavedWarning: 'Unsaved changes',
     savedWarning: 'Everything is saved',
-    reset: 'Reset',
+    reset: 'Refresh',
+    refreshWorkspaceTitle: 'Reset the current face-maker page?',
+    refreshWorkspaceDescription: 'This clears the current face-maker parameters and temporary state so the page goes back to its default values.',
+    refreshWorkspaceConfirm: 'Reset now',
     saveDraft: 'Save draft',
     export: 'Export',
     workboard: 'Workbench',
@@ -1648,7 +1671,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     unsaved: 'Не сохранено',
     unsavedWarning: 'Есть несохранённые изменения',
     savedWarning: 'Текущий черновик сохранён',
-    reset: 'Сбросить',
+    reset: 'Сбросить страницу',
+    refreshWorkspaceTitle: 'Сбросить текущую страницу face-maker?',
+    refreshWorkspaceDescription: 'Это очистит текущие параметры face-maker и временное состояние, вернув страницу к значениям по умолчанию.',
+    refreshWorkspaceConfirm: 'Сбросить сейчас',
     saveDraft: 'Сохранить черновик',
     export: 'Экспорт',
     workboard: 'Рабочее поле',
@@ -1710,6 +1736,7 @@ function FaceMakerPage({
   const [draft, setDraft] = useState(initialDraft);
   const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(initialDraft));
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
   const isDirty = JSON.stringify(draft) !== savedSnapshot;
 
   useEffect(() => {
@@ -1767,6 +1794,8 @@ function FaceMakerPage({
 
   function resetDraft() {
     setDraft(initialDraft);
+    setSavedSnapshot(JSON.stringify(initialDraft));
+    setIsResetOpen(false);
   }
 
   function confirmBack() {
@@ -1798,7 +1827,7 @@ function FaceMakerPage({
           </div>
           <div className="editor-toolbar-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.unsavedWarning : copy.savedWarning}</span>
-            <button className="secondary-button small-button" type="button" onClick={resetDraft}>
+            <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>
               {copy.reset}
             </button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
@@ -1911,6 +1940,16 @@ function FaceMakerPage({
           onConfirm={onBack}
         />
       )}
+      {isResetOpen ? (
+        <ActionConfirmModal
+          title={copy.refreshWorkspaceTitle}
+          description={copy.refreshWorkspaceDescription}
+          cancelLabel={copy.continueEdit}
+          confirmLabel={copy.refreshWorkspaceConfirm}
+          onCancel={() => setIsResetOpen(false)}
+          onConfirm={resetDraft}
+        />
+      ) : null}
     </main>
   );
 }
@@ -1957,6 +1996,60 @@ function ConfirmReturnModal({
           </button>
           <button className="primary-button" type="button" onClick={confirmLeave}>
             {copy.confirmReturn}
+          </button>
+        </div>
+      </section>
+    </div>,
+    document.body,
+  );
+}
+
+function ActionConfirmModal({
+  title,
+  description,
+  cancelLabel,
+  confirmLabel,
+  onCancel,
+  onConfirm,
+}: {
+  title: string;
+  description: string;
+  cancelLabel: string;
+  confirmLabel: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const [isClosing, setIsClosing] = useState(false);
+
+  function requestClose() {
+    setIsClosing(true);
+    window.setTimeout(onCancel, MODAL_CLOSE_MS);
+  }
+
+  function requestConfirm() {
+    setIsClosing(true);
+    window.setTimeout(onConfirm, MODAL_CLOSE_MS);
+  }
+
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
+      <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+          ×
+        </button>
+        <p className="section-label">{title}</p>
+        <h2>{title}</h2>
+        <p className="modal-description">{description}</p>
+        <div className="confirm-actions">
+          <button className="secondary-button" type="button" onClick={requestClose}>
+            {cancelLabel}
+          </button>
+          <button className="primary-button" type="button" onClick={requestConfirm}>
+            {confirmLabel}
           </button>
         </div>
       </section>

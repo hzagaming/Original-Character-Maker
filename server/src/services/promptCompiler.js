@@ -1,9 +1,9 @@
 const { CORE_IDENTITY_LOCKS, FORBIDDEN_DRIFT_RULES } = require("./characterProfile");
 
 const EXPRESSION_DETAILS = {
-  thinking: "生成思考表情，眼神专注、眉眼微收、嘴部克制，高清。",
-  surprise: "生成惊讶表情，眼睛微睁、眉毛上扬、嘴巴自然张开，高清。",
-  angry: "生成轻微生气表情，皱眉微冷、嘴角收紧，不要龇牙咧嘴，高清。"
+  thinking: "不改人物的任何特征和动作，只修改人物的表情到思考表情，其他地方均不变",
+  surprise: "不改人物的任何特征和动作，只修改人物的表情到惊讶表情，其他地方均不变",
+  angry: "不改人物的任何特征和动作，只修改人物的表情到微微生气表情，其他地方均不变"
 };
 
 const CG_SCENE_POOL = [
@@ -231,27 +231,11 @@ function compileExpressionPrompt(profile, expressionName) {
     throw new Error(`Unsupported expression prompt: ${expressionName}`);
   }
 
-  return [
-    buildConsistencyRequirements(profile),
-    "只允许改变表情，不允许改变镜头、姿势、头部朝向、服装、配饰、发丝走向、手势和角色气质。",
-    detail,
-    "保持角色识别度第一，不要把角色画成另一个人。",
-    buildNegativePrompt(profile)
-  ].join(" ");
+  return detail;
 }
 
 function compileCgPrompt(profile, slotIndex) {
-  const sceneStrategy = profile?.scene_design?.strategy || "场景贴合角色";
-  return [
-    buildConsistencyRequirements(profile),
-    `${sceneStrategy}，请为角色自行构思一个随机但合理的原创单人 CG 场景，由模型自己编一个贴合角色身份与气质的场景。`,
-    slotIndex === 0
-      ? "第一张 CG 优先偏角色日常或安静氛围，角色必须清晰可辨。"
-      : "第二张 CG 必须与第一张场景明显不同，但仍然是同一角色、同一套设定。",
-    "可以增加环境、光线和少量道具，但绝对不能改变角色任何核心特征，也不能新增其他人物。",
-    "16:9横屏，尽量高清。",
-    buildNegativePrompt(profile)
-  ].join(" ");
+  return "自行构思一个柔和的结束cg场景，场景地点为随机，只允许修改人物的动作和表情，角色本身绝对不能变，不能新增其他人物";
 }
 
 function pickRandomScenes(count) {
