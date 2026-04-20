@@ -1751,7 +1751,7 @@ async function copyRemoteAsset(url: string, settings: SettingsState) {
   }
 
   try {
-    const response = await fetch(toPaperAssetUrl(settings, url), {
+    const response = await fetchWithTimeout(toPaperAssetUrl(settings, url), {
       headers: buildApiHeaders(settings),
     });
     if (!response.ok) {
@@ -1777,7 +1777,7 @@ async function downloadRemoteFile(url: string, fileName: string, settings: Setti
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
   }
 
-  const response = await fetch(requestUrl, {
+  const response = await fetchWithTimeout(requestUrl, {
     headers: buildApiHeaders(settings),
   });
   if (!response.ok) {
@@ -1809,7 +1809,7 @@ async function downloadPaperArchive(workflowId: string, settings: SettingsState,
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
   }
 
-  const response = await fetch(requestUrl, {
+  const response = await fetchWithTimeout(requestUrl, {
     headers: buildApiHeaders(settings),
   });
   if (!response.ok) {
@@ -1969,6 +1969,17 @@ function normalizePaperPromptOverrides(overrides: PaperPromptOverrides): PaperPr
   };
 }
 
+async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const id = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(input, { ...init, signal: controller.signal });
+    return response;
+  } finally {
+    window.clearTimeout(id);
+  }
+}
+
 async function startPaperWorkflowRequest(
   file: File,
   promptOverrides: PaperPromptOverrides,
@@ -1990,11 +2001,11 @@ async function startPaperWorkflowRequest(
   formData.append('promptOverrides', JSON.stringify(normalizePaperPromptOverrides(promptOverrides)));
   formData.append('aiConcurrencyEnabled', String(aiConcurrencyEnabled));
 
-  const response = await fetch(requestUrl, {
+  const response = await fetchWithTimeout(requestUrl, {
     method: 'POST',
     body: formData,
     headers: buildApiHeaders(settings),
-  });
+  }, 60000);
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
@@ -2030,7 +2041,7 @@ async function redoPaperWorkflowStepRequest(
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
   }
 
-  const response = await fetch(requestUrl, {
+  const response = await fetchWithTimeout(requestUrl, {
     method: 'POST',
     headers: buildApiHeaders(settings, {
       'Content-Type': 'application/json',
@@ -2040,7 +2051,7 @@ async function redoPaperWorkflowStepRequest(
       promptOverrides: normalizePaperPromptOverrides(promptOverrides),
       aiConcurrencyEnabled,
     }),
-  });
+  }, 60000);
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
@@ -2069,7 +2080,7 @@ async function fetchPaperWorkflowRequest(workflowId: string, settings: SettingsS
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
   }
 
-  const response = await fetch(requestUrl, {
+  const response = await fetchWithTimeout(requestUrl, {
     headers: buildApiHeaders(settings),
   });
   const payload = await parseJsonResponse(response);
@@ -2389,6 +2400,9 @@ const editorBlockStylePresets = [
   { value: 'pre', label: 'Pre' },
 ];
 
+const PLACEHOLDER_IMAGE =
+  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDgwIiB2aWV3Qm94PSIwIDAgODAwIDQ4MCI+PHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI0ODAiIGZpbGw9IiUyM2UwZTBlMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iJTIzOTk5Ij5QbGFjZWhvbGRlcjwvdGV4dD48L3N2Zz4=';
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, '&amp;')
@@ -2396,6 +2410,78 @@ function escapeHtml(value: string) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+const SANITIZE_ALLOWED_TAGS = new Set([
+  'p', 'br', 'span', 'div', 'b', 'strong', 'i', 'em', 'u', 's', 'strike', 'del',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'ul', 'ol', 'li', 'blockquote',
+  'pre', 'code', 'img', 'figure', 'figcaption', 'hr', 'details', 'summary',
+  'aside', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
+]);
+
+const SANITIZE_ALLOWED_ATTRS: Record<string, Set<string>> = {
+  '*': new Set(['class', 'title']),
+  a: new Set(['href', 'target', 'rel']),
+  img: new Set(['src', 'alt']),
+};
+
+function sanitizeHtml(raw: string): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(raw, 'text/html');
+
+  function walk(node: Node): Node | null {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return document.createTextNode(node.textContent || '');
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return null;
+    }
+
+    const el = node as Element;
+    const tag = el.tagName.toLowerCase();
+
+    if (!SANITIZE_ALLOWED_TAGS.has(tag)) {
+      const fragment = document.createDocumentFragment();
+      el.childNodes.forEach((child) => {
+        const cleaned = walk(child);
+        if (cleaned) fragment.appendChild(cleaned);
+      });
+      return fragment;
+    }
+
+    const clean = document.createElement(tag);
+    const allowedAttrs = new Set([
+      ...(SANITIZE_ALLOWED_ATTRS['*'] || []),
+      ...(SANITIZE_ALLOWED_ATTRS[tag] || []),
+    ]);
+
+    Array.from(el.attributes).forEach((attr) => {
+      const name = attr.name.toLowerCase();
+      if (!allowedAttrs.has(name)) return;
+      if (name.startsWith('on')) return;
+      let value = attr.value;
+      if ((name === 'href' || name === 'src') && /^javascript:/i.test(value)) return;
+      clean.setAttribute(name, value);
+    });
+
+    el.childNodes.forEach((child) => {
+      const cleaned = walk(child);
+      if (cleaned) clean.appendChild(cleaned);
+    });
+
+    return clean;
+  }
+
+  const fragment = document.createDocumentFragment();
+  Array.from(doc.body.childNodes).forEach((child) => {
+    const cleaned = walk(child);
+    if (cleaned) fragment.appendChild(cleaned);
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(fragment);
+  return wrapper.innerHTML;
 }
 
 function normalizeFontSizeInput(value: string) {
@@ -3114,7 +3200,7 @@ export function PromptSuitePage({
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== documentHtml) {
-      editorRef.current.innerHTML = documentHtml;
+      editorRef.current.innerHTML = sanitizeHtml(documentHtml);
     }
   }, [documentHtml]);
 
@@ -3242,7 +3328,7 @@ export function PromptSuitePage({
   }
 
   function insertImageBlock() {
-    insertHtml('<figure><img src="https://placehold.co/800x480/png" alt="custom asset" /><figcaption>Image caption</figcaption></figure>');
+    insertHtml(`<figure><img src="${PLACEHOLDER_IMAGE}" alt="custom asset" /><figcaption>Image caption</figcaption></figure>`);
   }
 
   function applyCustomInsert() {
@@ -3258,7 +3344,7 @@ export function PromptSuitePage({
         html = `<details><summary>点击展开</summary><p>${safePayload}</p></details>`;
         break;
       case 'image':
-        html = `<figure><img src="${payload || 'https://placehold.co/800x480/png'}" alt="custom asset" /><figcaption>${safePayload}</figcaption></figure>`;
+        html = `<figure><img src="${payload || PLACEHOLDER_IMAGE}" alt="custom asset" /><figcaption>${safePayload}</figcaption></figure>`;
         break;
       case 'badge':
         html = `<p><span class="editor-badge">${safePayload}</span></p>`;
@@ -3745,7 +3831,7 @@ export function PromptSuitePage({
             suppressContentEditableWarning
             onInput={syncEditor}
             onKeyDown={handleEditorKeyDown}
-            dangerouslySetInnerHTML={{ __html: documentHtml }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(documentHtml) }}
           />
         </section>
 
