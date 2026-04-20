@@ -31,11 +31,12 @@ export function defaultLocalApiBase(): string {
     return '';
   }
 
-  if (port === '3001') {
+  if (port === '3002' || port === '3001') {
     return origin;
   }
 
-  return 'http://localhost:3001';
+  // Prefer the workflow backend dev port.
+  return 'http://localhost:3002';
 }
 
 export function getPresetApiBase(settings: Pick<SettingsState, 'apiPreset'>): string {

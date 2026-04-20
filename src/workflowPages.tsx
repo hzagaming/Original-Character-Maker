@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
+import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
 import type { AppLanguage, SettingsState, ShortcutAction } from './types';
 
 type SharedPageProps = {
@@ -2090,6 +2091,58 @@ async function fetchPaperWorkflowRequest(workflowId: string, settings: SettingsS
   return payload as PaperWorkflow;
 }
 
+async function uploadFrontendCutout(options: {
+  workflowId: string;
+  expressionName: ExpressionName;
+  sourceUrl: string;
+  settings: SettingsState;
+  copy: UiCopySet['paper'];
+}) {
+  const { workflowId, expressionName, sourceUrl, settings, copy } = options;
+
+  if (requiresHostedApiBase(settings)) {
+    throw new Error(copy.hostedApiRequired);
+  }
+
+  const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/cutouts/${expressionName}`);
+  if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
+    throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
+  }
+
+  const resolvedSourceUrl = sourceUrl.startsWith('/') ? buildApiUrl(settings, sourceUrl) : sourceUrl;
+  const imageResponse = await fetch(resolvedSourceUrl, { credentials: 'omit' });
+  if (!imageResponse.ok) {
+    throw new Error(`Failed to fetch source image for cutout: ${imageResponse.status}`);
+  }
+  const sourceBlob = await imageResponse.blob();
+  const cutoutBlob = await generateCutoutPngBlob(sourceBlob, buildApiUrl(settings, '/api/cutout-assets/v1/'));
+
+  const form = new FormData();
+  form.append('image', cutoutBlob, `expression-${expressionName}-cutout.png`);
+
+  const response = await fetch(requestUrl, {
+    method: 'POST',
+    headers: buildApiHeaders(settings),
+    body: form,
+  });
+  const payload = await parseJsonResponse(response);
+
+  if (!response.ok) {
+    throw new Error(
+      buildPaperApiErrorMessage({
+        response,
+        payload,
+        requestUrl,
+        settings,
+        copy,
+        fallback: copy.networkFetchError,
+      }),
+    );
+  }
+
+  return payload.workflow as PaperWorkflow;
+}
+
 function getStatusLabelKey(status: TransferStatus): StatusLabelKey {
   switch (status) {
     case 'idle':
@@ -4119,6 +4172,64 @@ export function Paper2GalPage({
     workflow?.id,
     workflow?.status,
   ]);
+
+  const cutoutUploadInFlight = useRef(new Set<string>());
+  useEffect(() => {
+    if (!workflow?.id || !workflow.outputs) {
+      return;
+    }
+
+    if (workflow.outputs.providers?.remove_background !== 'frontend') {
+      return;
+    }
+
+    const workflowId = workflow.id;
+    const expressions = workflow.outputs.expressions || {};
+    const cutouts = workflow.outputs.expression_cutouts || {};
+    const expressionNames: ExpressionName[] = ['thinking', 'surprise', 'angry'];
+
+    let disposed = false;
+    async function run() {
+      for (const name of expressionNames) {
+        const sourceUrl = expressions[name];
+        const existingCutout = cutouts[name];
+        if (!sourceUrl || existingCutout) {
+          continue;
+        }
+
+        const key = `${workflowId}:${name}`;
+        if (cutoutUploadInFlight.current.has(key)) {
+          continue;
+        }
+
+        cutoutUploadInFlight.current.add(key);
+        try {
+          const next = await uploadFrontendCutout({
+            workflowId,
+            expressionName: name,
+            sourceUrl,
+            settings,
+            copy: paper,
+          });
+
+          if (disposed) return;
+          setWorkflow(next);
+        } catch (error) {
+          cutoutUploadInFlight.current.delete(key);
+          if (disposed) return;
+          setMessage({
+            type: 'error',
+            text: normalizeFetchError(error, paper.networkFetchError),
+          });
+        }
+      }
+    }
+
+    run();
+    return () => {
+      disposed = true;
+    };
+  }, [paper, settings, workflow?.id, workflow?.outputs]);
 
   const progress = useMemo(() => {
     if (isSubmitting && !workflow) {

@@ -17,9 +17,9 @@ const {
   platoRemoveBackground
 } = require("../adapters/platoImageAdapter");
 const {
-  isRembgConfigured,
-  rembgRemoveBackground
-} = require("../adapters/rembgAdapter");
+  aliyunRemoveBackground,
+  isAliyunImageSegConfigured
+} = require("../adapters/aliyunImageSegAdapter");
 
 function getMimeTypeFromPath(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -82,17 +82,17 @@ function withMockFallback(primaryProvider, primaryRunner, mockRunner, config) {
 }
 
 function getBackgroundRemovalRunner(config) {
-  if (config.bgRemovalProvider === "rembg" && isRembgConfigured(config)) {
-    return {
-      provider: "rembg",
-      run: rembgRemoveBackground
-    };
-  }
-
   if (config.bgRemovalProvider === "plato" && isPlatoConfigured(config)) {
     return {
       provider: "plato",
       run: platoRemoveBackground
+    };
+  }
+
+  if (config.bgRemovalProvider === "aliyun" && isAliyunImageSegConfigured(config)) {
+    return {
+      provider: "aliyun",
+      run: aliyunRemoveBackground
     };
   }
 
