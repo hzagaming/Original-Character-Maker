@@ -270,7 +270,7 @@ async function runExpressionGeneration(runtime, expressionName) {
   return {
     outputPath: expressionResult.output_path,
     mimeType: getMimeTypeFromPath(expressionResult.output_path),
-    remoteUrl: expressionResult.debug?.image_url || null
+    remoteUrl: getExpressionRemoteUrlFromWorkflow(workflowId, runtime.config, expressionName)
   };
 }
 
@@ -506,10 +506,11 @@ async function executeWorkflow(workflowId, config) {
     });
 
     await asyncPool(expressionTasks, getAiTaskConcurrency(workflow, config));
-    for (const expressionName of Object.keys(EXPRESSION_STEP_MAP)) {
+    const cutoutTasks = Object.keys(EXPRESSION_STEP_MAP).map((expressionName) => async () => {
       const artifact = successfulExpressionArtifacts[expressionName] || null;
-      await runCutoutGeneration(runtime, expressionName, artifact);
-    }
+      return runCutoutGeneration(runtime, expressionName, artifact);
+    });
+    await asyncPool(cutoutTasks, getAiTaskConcurrency(workflow, config));
 
     const cgTasks = CG_STEP_CONFIG.map(([, _outputName], index) => async () => runCgGeneration(runtime, index));
     await asyncPool(cgTasks, getAiTaskConcurrency(workflow, config));
