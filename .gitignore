@@ -1,8 +1,11 @@
 node_modules/
 server/node_modules/
+.DS_Store
+**/.DS_Store
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
 .env
 .venv/
 tmp/
+dist/
