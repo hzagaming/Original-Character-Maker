@@ -99,13 +99,34 @@ function getExpressionArtifactFromUrl(outputDir, outputUrl) {
   };
 }
 
-function getExpressionRemoteUrlFromWorkflow(workflowId, expressionName) {
-  const workflow = getWorkflow(workflowId);
-  const stepName = EXPRESSION_STEP_MAP[expressionName];
-  return workflow?.steps?.[stepName]?.debug?.image_url || null;
+function toAbsoluteWorkflowAssetUrl(config, outputUrl) {
+  const normalized = String(outputUrl || "").trim();
+  if (!normalized) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  if (!config.publicAppBaseUrl) {
+    return null;
+  }
+
+  return `${config.publicAppBaseUrl}${normalized.startsWith("/") ? normalized : `/${normalized}`}`;
 }
 
-function getExpressionArtifactFromWorkflow(workflowId, outputDir, expressionName) {
+function getExpressionRemoteUrlFromWorkflow(workflowId, config, expressionName) {
+  const workflow = getWorkflow(workflowId);
+  const outputUrl = workflow?.outputs?.expressions?.[expressionName] || null;
+  return (
+    toAbsoluteWorkflowAssetUrl(config, outputUrl) ||
+    workflow?.steps?.[EXPRESSION_STEP_MAP[expressionName]]?.debug?.image_url ||
+    null
+  );
+}
+
+function getExpressionArtifactFromWorkflow(workflowId, config, outputDir, expressionName) {
   const workflow = getWorkflow(workflowId);
   const outputUrl = workflow?.outputs?.expressions?.[expressionName];
   const artifact = getExpressionArtifactFromUrl(outputDir, outputUrl);
@@ -115,7 +136,7 @@ function getExpressionArtifactFromWorkflow(workflowId, outputDir, expressionName
 
   return {
     ...artifact,
-    remoteUrl: getExpressionRemoteUrlFromWorkflow(workflowId, expressionName)
+    remoteUrl: getExpressionRemoteUrlFromWorkflow(workflowId, config, expressionName)
   };
 }
 
@@ -298,7 +319,7 @@ async function runCgGeneration(runtime, index) {
 async function runCutoutGeneration(runtime, expressionName, artifact = null) {
   const { workflowId, bgRemovalRunner, outputDir, characterProfile, promptPack } = runtime;
   const stepName = CUTOUT_STEP_MAP[expressionName];
-  const sourceArtifact = artifact || getExpressionArtifactFromWorkflow(workflowId, outputDir, expressionName);
+  const sourceArtifact = artifact || getExpressionArtifactFromWorkflow(workflowId, runtime.config, outputDir, expressionName);
 
   if (!sourceArtifact?.outputPath) {
     await skipStep(

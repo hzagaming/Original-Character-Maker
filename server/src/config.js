@@ -22,10 +22,33 @@ function parseStringList(value) {
     .filter(Boolean);
 }
 
+function parsePublicBaseUrl(value, corsOrigin) {
+  const explicit = String(value || "").trim().replace(/\/+$/, "");
+  if (/^https?:\/\//i.test(explicit)) {
+    return explicit;
+  }
+
+  const corsCandidate = String(corsOrigin || "").trim().replace(/\/+$/, "");
+  if (/^https?:\/\//i.test(corsCandidate) && !corsCandidate.includes(",")) {
+    return corsCandidate;
+  }
+
+  return "";
+}
+
+const corsOrigin = process.env.CORS_ORIGIN || "*";
+
 module.exports = {
   projectRoot,
   port: parseInteger(process.env.PORT, 3001),
-  corsOrigin: process.env.CORS_ORIGIN || "*",
+  corsOrigin,
+  publicAppBaseUrl: parsePublicBaseUrl(
+    process.env.PUBLIC_APP_BASE_URL ||
+      process.env.PUBLIC_BASE_URL ||
+      process.env.APP_BASE_URL ||
+      "https://p2g-workflow.zeabur.app",
+    corsOrigin
+  ),
   cutoutAssetBaseUrl:
     (process.env.CUTOUT_ASSET_BASE_URL || "https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist").replace(/\/+$/, ""),
   maxUploadSizeBytes: parseInteger(process.env.MAX_UPLOAD_SIZE_BYTES, 10 * 1024 * 1024),
