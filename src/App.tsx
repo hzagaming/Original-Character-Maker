@@ -14,8 +14,21 @@ import type {
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage } from './workflowPages';
+import {
+  defaultAudioSettings,
+  getAudioSettings,
+  initAudio,
+  MUSIC_PRESETS_LIST,
+  playSound,
+  previewSound,
+  SOUND_PRESETS,
+  SOUND_PREVIEW_LIST,
+  startMusic,
+  stopMusic,
+  updateAudioSettings,
+} from './audioEngine';
 
-const VERSION = '0.3.7';
+const VERSION = '0.4.1.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -68,6 +81,8 @@ type Messages = {
   tabStyle: string;
   tabLanguage: string;
   tabApi: string;
+  tabAudio: string;
+  tabAnimation: string;
   tabShortcuts: string;
   tabAnnouncement: string;
   tabAbout: string;
@@ -133,6 +148,77 @@ type Messages = {
   modulePanel: string;
   modulePipeline: string;
   moduleStorage: string;
+  animationTitle: string;
+  animationEnabled: string;
+  animationSpeed: string;
+  animationUiFadeIn: string;
+  animationButtonHover: string;
+  animationPageTransitions: string;
+  animationModalTransitions: string;
+  animationHint: string;
+  borderWidthTitle: string;
+  audioTitle: string;
+  audioMasterVolume: string;
+  audioSfxVolume: string;
+  audioMusicVolume: string;
+  audioSfxEnabled: string;
+  audioMusicEnabled: string;
+  audioSoundOnInteractOn: string;
+  audioSoundOnInteractOff: string;
+  audioHint: string;
+  audioSfxPreset: string;
+  audioMusicPreset: string;
+  audioPitch: string;
+  audioDuration: string;
+  audioFilter: string;
+  audioDetune: string;
+  audioReverb: string;
+  audioMusicPitch: string;
+  audioMusicTempo: string;
+  audioPreview: string;
+  presetClassic: string;
+  presetElectronic: string;
+  presetRetro: string;
+  presetXylophone: string;
+  presetBell: string;
+  presetSpace: string;
+  presetDrum: string;
+  presetPiano: string;
+  presetSynthwave: string;
+  presetChiptune: string;
+  presetStrings: string;
+  presetWind: string;
+  presetJazz: string;
+  presetPercussion: string;
+  presetAmbient: string;
+  presetScifi: string;
+  presetCartoon: string;
+  presetHorror: string;
+  presetNature: string;
+  presetMechanical: string;
+  musicOrchestral: string;
+  musicAmbient: string;
+  musicElectronic: string;
+  musicPiano: string;
+  musicSynthwave: string;
+  musicNature: string;
+  musicJazz: string;
+  musicMeditation: string;
+  musicCyber: string;
+  musicLofi: string;
+  audioSfxAttack: string;
+  audioSfxDecay: string;
+  audioSfxSustain: string;
+  audioSfxRelease: string;
+  audioSfxPan: string;
+  audioMusicReverb: string;
+  audioMusicFilter: string;
+  audioMusicStereoWidth: string;
+  audioAdvancedTitle: string;
+  audioSpatialTitle: string;
+  fontCustomLabel: string;
+  fontCustomHint: string;
+  fontCustomPlaceholder: string;
 };
 
 type BaseLanguage = 'zh' | 'ja' | 'en' | 'ru';
@@ -188,6 +274,8 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: '样式',
     tabLanguage: '语言',
     tabApi: '接口',
+    tabAudio: '音频',
+    tabAnimation: '动画',
     tabShortcuts: '快捷键',
     tabAnnouncement: '公告',
     tabAbout: '关于',
@@ -233,10 +321,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: '自定义快捷键属于实验性设置，请避免与浏览器或系统保留快捷键冲突。',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.3.7 修复了 paper2gal 的参考图链路：图像编辑正式切到更稳定的 images/edits 通道，并同步更新 Prompt 与错误提示。',
-    announcementList1: 'paper2gal 现在优先使用 qwen-image-edit 图生图接口，避免旧聊天链路把参考图改写成无效的占位 URL。',
-    announcementList2: '三张表情图、两张 CG 和 rembg 抠图都改成真实工作流路径，新的 workflow 不会再静默回退成 mock 假成功。',
-    announcementList3: '错误面板会直接提示图像模型通道、内容审核和参考图改写问题，方便快速判断是本地问题还是上游模型问题。',
+    announcementDescription: '0.4.1.1 新增动画设置面板，支持动画速度、边框粗细和子效果开关；全局按钮点击音效覆盖所有交互元素；音频引擎增加 ADSR 包络、声像和音乐混响等高级控制。',
+    announcementList1: '新增「动画」设置标签页：支持动画总开关、动画速度无级调节、边框粗细以及 UI 渐显、按钮悬停、页面切换、弹窗过渡四个子效果的独立开关。',
+    announcementList2: '全局按钮点击音效通过委托事件监听器覆盖所有 button、a、choice-chip 和 palette-chip 元素；音频高级合成控制新增 ADSR 包络、声像、音乐混响等细粒度调节。',
+    announcementList3: '30 种语言同步更新，所有新增字段已同步到约 30 种语言的翻译中，公告历史支持多语言切换。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -254,6 +342,77 @@ const translations: Record<BaseLanguage, Messages> = {
     modulePanel: '右侧参数 / 功能面板',
     modulePipeline: '任务队列与输出结果区',
     moduleStorage: '本地配置与历史记录',
+    animationTitle: '动画设置',
+    animationEnabled: '启用动画',
+    animationSpeed: '动画速度',
+    animationUiFadeIn: '界面渐显',
+    animationButtonHover: '按钮悬停',
+    animationPageTransitions: '页面切换',
+    animationModalTransitions: '弹窗过渡',
+    animationHint: '调整动画速度并开关单独效果。速度越低动画越慢。',
+    borderWidthTitle: '边框粗细',
+    audioTitle: '音频设置',
+    audioMasterVolume: '主音量',
+    audioSfxVolume: '音效音量',
+    audioMusicVolume: '音乐音量',
+    audioSfxEnabled: '启用音效',
+    audioMusicEnabled: '启用背景音乐',
+    audioSoundOnInteractOn: '按钮音效开',
+    audioSoundOnInteractOff: '按钮音效关',
+    audioHint: '所有音频均为程序生成，不依赖外部文件。',
+    audioSfxPreset: '音效风格',
+    audioMusicPreset: '音乐风格',
+    audioPitch: '音高',
+    audioDuration: '时长',
+    audioFilter: '滤波',
+    audioDetune: '失谐',
+    audioReverb: '混响',
+    audioMusicPitch: '音乐音高',
+    audioMusicTempo: '音乐速度',
+    audioPreview: '试听',
+    presetClassic: '经典',
+    presetElectronic: '电子',
+    presetRetro: '复古',
+    presetXylophone: '木琴',
+    presetBell: '铃铛',
+    presetSpace: '太空',
+    presetDrum: '鼓点',
+    presetPiano: '钢琴',
+    presetSynthwave: '合成器波',
+    presetChiptune: '8-bit',
+    presetStrings: '弦乐',
+    presetWind: '管乐',
+    presetJazz: '爵士',
+    presetPercussion: '打击乐',
+    presetAmbient: '环境',
+    presetScifi: '科幻',
+    presetCartoon: '卡通',
+    presetHorror: '恐怖',
+    presetNature: '自然',
+    presetMechanical: '机械',
+    musicOrchestral: '管弦乐',
+    musicAmbient: '氛围',
+    musicElectronic: '电子乐',
+    musicPiano: '钢琴',
+    musicSynthwave: '合成器波',
+    musicNature: '自然',
+    musicJazz: '爵士',
+    musicMeditation: '冥想',
+    musicCyber: '赛博',
+    musicLofi: '低保真',
+    audioSfxAttack: '起音',
+    audioSfxDecay: '衰减',
+    audioSfxSustain: '延持',
+    audioSfxRelease: '释音',
+    audioSfxPan: '声像',
+    audioMusicReverb: '音乐混响',
+    audioMusicFilter: '音乐滤波',
+    audioMusicStereoWidth: '立体声宽度',
+    audioAdvancedTitle: '高级合成',
+    audioSpatialTitle: '空间与音乐',
+    fontCustomLabel: '自定义字体',
+    fontCustomHint: '输入系统中已安装的字体名称，例如 LXGW WenKai。',
+    fontCustomPlaceholder: '输入页面字体名称，例如: LXGW WenKai',
   },
   ja: {
     appTitle: 'Original Character Maker',
@@ -305,6 +464,8 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: 'スタイル',
     tabLanguage: '言語',
     tabApi: 'API',
+    tabAudio: 'オーディオ',
+    tabAnimation: 'アニメーション',
     tabShortcuts: 'ショートカット',
     tabAnnouncement: 'お知らせ',
     tabAbout: '情報',
@@ -350,10 +511,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'カスタムショートカットは実験的機能です。ブラウザや OS の予約ショートカットとの衝突に注意してください。',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.3.7 では paper2gal の参照画像チェーンを修正し、画像編集をより安定した images/edits 経路へ切り替え、Prompt とエラー表示も同期しました。',
-    announcementList1: 'paper2gal は qwen-image-edit ベースの画像編集経路を優先し、旧 chat 経路で参照画像が無効 URL に書き換わる問題を回避します。',
-    announcementList2: '3 種類の表情、2 枚の CG、rembg 切り抜きまで本物の workflow で実行され、新しい workflow では mock への黙示フォールバックが起きません。',
-    announcementList3: 'エラーパネルは画像モデル通路・審査ブロック・参照画像改変の問題をそのまま説明し、ローカル側か上流側かを判断しやすくしました。',
+    announcementDescription: '0.4.1.1 でアニメーション設定パネル、グローバルクリック音効、边框カスタマイズ、ADSR エンベロープ・パン・音楽リバーブなどの詳細オーディオコントロールを追加しました。',
+    announcementList1: '新しい「アニメーション」設定タブ：アニメーションの総合スイッチ、速度のステップレス調整、枠線の太さ、および UI フェードイン・ボタンホバー・ページ遷移・モーダル遷移の 4 つの個別スイッチをサポート。',
+    announcementList2: 'グローバルボタンクリック音：委譲イベントリスナーで button、a、choice-chip、palette-chip のすべての要素をカバー。詳細オーディオ合成コントロールに ADSR エンベロープ・パン・音楽リバーブを追加。',
+    announcementList3: '約 30 言語に同期更新。すべての新規フィールドが約 30 言語の翻訳に同期され、お知らせ履歴が多言語切り替えに対応。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -371,6 +532,77 @@ const translations: Record<BaseLanguage, Messages> = {
     modulePanel: '右側パネル',
     modulePipeline: 'タスクと出力',
     moduleStorage: 'ローカル保存と履歴',
+    animationTitle: 'アニメーション設定',
+    animationEnabled: 'アニメーションを有効化',
+    animationSpeed: 'アニメーション速度',
+    animationUiFadeIn: 'UIフェードイン',
+    animationButtonHover: 'ボタンホバー',
+    animationPageTransitions: 'ページ遷移',
+    animationModalTransitions: 'モーダル遷移',
+    animationHint: 'アニメーション速度を調整し、個別効果をオン/オフします。速度が低いほどアニメーションは遅くなります。',
+    borderWidthTitle: '枠線の太さ',
+    audioTitle: 'オーディオ設定',
+    audioMasterVolume: 'マスターボリューム',
+    audioSfxVolume: '効果音ボリューム',
+    audioMusicVolume: 'BGMボリューム',
+    audioSfxEnabled: '効果音を有効化',
+    audioMusicEnabled: 'BGM を有効化',
+    audioSoundOnInteractOn: 'ボタン音ON',
+    audioSoundOnInteractOff: 'ボタン音OFF',
+    audioHint: 'すべてのオーディオはプロシージャル生成で、外部ファイルに依存しません。',
+    audioSfxPreset: '効果音プリセット',
+    audioMusicPreset: 'BGMプリセット',
+    audioPitch: 'ピッチ',
+    audioDuration: '長さ',
+    audioFilter: 'フィルター',
+    audioDetune: 'デチューン',
+    audioReverb: 'リバーブ',
+    audioMusicPitch: 'BGMピッチ',
+    audioMusicTempo: 'BGMテンポ',
+    audioPreview: 'プレビュー',
+    presetClassic: 'クラシック',
+    presetElectronic: 'エレクトロ',
+    presetRetro: 'レトロ',
+    presetXylophone: '木琴',
+    presetBell: 'ベル',
+    presetSpace: '宇宙',
+    presetDrum: 'ドラム',
+    presetPiano: 'ピアノ',
+    presetSynthwave: 'シンセウェーブ',
+    presetChiptune: 'チップチューン',
+    presetStrings: '弦楽器',
+    presetWind: '管楽器',
+    presetJazz: 'ジャズ',
+    presetPercussion: 'パーカッション',
+    presetAmbient: 'アンビエント',
+    presetScifi: 'SF',
+    presetCartoon: 'カートゥーン',
+    presetHorror: 'ホラー',
+    presetNature: '自然',
+    presetMechanical: '機械',
+    musicOrchestral: 'オーケストラ',
+    musicAmbient: 'アンビエント',
+    musicElectronic: 'エレクトロ',
+    musicPiano: 'ピアノ',
+    musicSynthwave: 'シンセウェーブ',
+    musicNature: '自然',
+    musicJazz: 'ジャズ',
+    musicMeditation: '瞑想',
+    musicCyber: 'サイバー',
+    musicLofi: 'ローファイ',
+    audioSfxAttack: 'アタック',
+    audioSfxDecay: 'ディケイ',
+    audioSfxSustain: 'サステイン',
+    audioSfxRelease: 'リリース',
+    audioSfxPan: 'パン',
+    audioMusicReverb: '音楽リバーブ',
+    audioMusicFilter: '音楽フィルター',
+    audioMusicStereoWidth: 'ステレオ幅',
+    audioAdvancedTitle: '詳細合成',
+    audioSpatialTitle: '空間と音楽',
+    fontCustomLabel: 'カスタムフォント',
+    fontCustomHint: 'システムにインストール済みのフォント名を入力してください。',
+    fontCustomPlaceholder: 'フォント名を入力（例: LXGW WenKai）',
   },
   en: {
     appTitle: 'Original Character Maker',
@@ -422,6 +654,8 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: 'Style',
     tabLanguage: 'Language',
     tabApi: 'API',
+    tabAudio: 'Audio',
+    tabAnimation: 'Animation',
     tabShortcuts: 'Shortcuts',
     tabAnnouncement: 'Announcement',
     tabAbout: 'About',
@@ -467,10 +701,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Custom shortcuts are experimental. Avoid combinations that conflict with browser or system-reserved commands.',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.3.7 fixes the paper2gal reference-image chain by moving image editing onto a more reliable images/edits path and updating prompts plus diagnostics.',
-    announcementList1: 'paper2gal now prefers the qwen-image-edit image-edit endpoint, avoiding the older chat-based path that rewrote reference images into invalid placeholder URLs.',
-    announcementList2: 'All three expressions, both CG shots, and rembg cutouts now go through the real workflow path, so new workflows no longer silently fall back to mock success.',
-    announcementList3: 'The error panel now explains model-channel issues, content-policy blocks, and broken reference-image rewrites in plain language.',
+    announcementDescription: 'Version 0.4.1.1 adds the Animation settings panel, global click sound effects, border thickness control, and advanced audio synthesis controls including ADSR envelope, pan, and music reverb.',
+    announcementList1: 'New "Animation" settings tab: supports animation master switch, stepless speed adjustment, border thickness, and independent toggles for UI fade-in, button hover, page transitions, and modal transitions.',
+    announcementList2: 'Global button click sounds cover all button, anchor, choice-chip, and palette-chip elements via a delegated event listener. Advanced audio synthesis adds ADSR envelope, pan, and music reverb controls.',
+    announcementList3: 'Synced to ~30 languages. All new fields have been synchronized across ~30 language translations, and announcement history supports multilingual switching.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -488,6 +722,77 @@ const translations: Record<BaseLanguage, Messages> = {
     modulePanel: 'Control panel',
     modulePipeline: 'Task queue and outputs',
     moduleStorage: 'Local settings and history',
+    animationTitle: 'Animation Settings',
+    animationEnabled: 'Enable Animations',
+    animationSpeed: 'Animation Speed',
+    animationUiFadeIn: 'UI Fade-in',
+    animationButtonHover: 'Button Hover',
+    animationPageTransitions: 'Page Transitions',
+    animationModalTransitions: 'Modal Transitions',
+    animationHint: 'Adjust animation speed and toggle individual effects. Lower speed = slower animations.',
+    borderWidthTitle: 'Border Thickness',
+    audioTitle: 'Audio Settings',
+    audioMasterVolume: 'Master Volume',
+    audioSfxVolume: 'SFX Volume',
+    audioMusicVolume: 'Music Volume',
+    audioSfxEnabled: 'Enable Sound Effects',
+    audioMusicEnabled: 'Enable Background Music',
+    audioSoundOnInteractOn: 'Button Sounds On',
+    audioSoundOnInteractOff: 'Button Sounds Off',
+    audioHint: 'All audio is procedurally generated with no external files.',
+    audioSfxPreset: 'SFX Preset',
+    audioMusicPreset: 'Music Preset',
+    audioPitch: 'Pitch',
+    audioDuration: 'Duration',
+    audioFilter: 'Filter',
+    audioDetune: 'Detune',
+    audioReverb: 'Reverb',
+    audioMusicPitch: 'Music Pitch',
+    audioMusicTempo: 'Music Tempo',
+    audioPreview: 'Preview',
+    presetClassic: 'Classic',
+    presetElectronic: 'Electronic',
+    presetRetro: 'Retro',
+    presetXylophone: 'Xylophone',
+    presetBell: 'Bell',
+    presetSpace: 'Space',
+    presetDrum: 'Drum',
+    presetPiano: 'Piano',
+    presetSynthwave: 'Synthwave',
+    presetChiptune: 'Chiptune',
+    presetStrings: 'Strings',
+    presetWind: 'Wind',
+    presetJazz: 'Jazz',
+    presetPercussion: 'Percussion',
+    presetAmbient: 'Ambient',
+    presetScifi: 'Sci-Fi',
+    presetCartoon: 'Cartoon',
+    presetHorror: 'Horror',
+    presetNature: 'Nature',
+    presetMechanical: 'Mechanical',
+    musicOrchestral: 'Orchestral',
+    musicAmbient: 'Ambient',
+    musicElectronic: 'Electronic',
+    musicPiano: 'Piano',
+    musicSynthwave: 'Synthwave',
+    musicNature: 'Nature',
+    musicJazz: 'Jazz',
+    musicMeditation: 'Meditation',
+    musicCyber: 'Cyber',
+    musicLofi: 'Lo-Fi',
+    audioSfxAttack: 'Attack',
+    audioSfxDecay: 'Decay',
+    audioSfxSustain: 'Sustain',
+    audioSfxRelease: 'Release',
+    audioSfxPan: 'Pan',
+    audioMusicReverb: 'Music Reverb',
+    audioMusicFilter: 'Music Filter',
+    audioMusicStereoWidth: 'Stereo Width',
+    audioAdvancedTitle: 'Advanced Synthesis',
+    audioSpatialTitle: 'Spatial & Music',
+    fontCustomLabel: 'Custom Font',
+    fontCustomHint: 'Enter a font name installed on your system, e.g. LXGW WenKai.',
+    fontCustomPlaceholder: 'Enter font name, e.g. LXGW WenKai',
   },
   ru: {
     appTitle: 'Original Character Maker',
@@ -539,6 +844,8 @@ const translations: Record<BaseLanguage, Messages> = {
     tabStyle: 'Стиль',
     tabLanguage: 'Язык',
     tabApi: 'API',
+    tabAudio: 'Аудио',
+    tabAnimation: 'Анимация',
     tabShortcuts: 'Шорткаты',
     tabAnnouncement: 'Объявление',
     tabAbout: 'О проекте',
@@ -584,10 +891,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Пользовательские шорткаты являются экспериментальной функцией. Избегайте конфликтов с системными и браузерными сочетаниями.',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.3.7 исправляет цепочку reference image в paper2gal: редактирование изображений переведено на более стабильный путь images/edits, а prompt и диагностика обновлены.',
-    announcementList1: 'paper2gal теперь предпочитает qwen-image-edit и больше не опирается на старую chat-цепочку, где reference image превращался в фиктивный URL.',
-    announcementList2: 'Три эмоции, обе CG и rembg-вырезание теперь идут через реальный workflow, поэтому новые прогоны больше не маскируются тихим mock fallback.',
-    announcementList3: 'Панель ошибок теперь прямо объясняет проблемы канала модели, блокировку политикой контента и поломку reference-image rewrite.',
+    announcementDescription: 'Версия 0.4.1.1 добавляет панель настроек анимации, глобальные звуки кликов, настройку толщины рамки и расширенные аудио-контролы: ADSR-огибающая, панорама и реверберация музыки.',
+    announcementList1: 'Новая вкладка «Анимация»: поддерживает общий переключатель анимации, плавную регулировку скорости, толщину рамки и независимые переключатели для четырех эффектов.',
+    announcementList2: 'Глобальные звуки кнопок покрывают все элементы button, a, choice-chip и palette-chip через делегированный слушатель событий. Расширенный аудиосинтез добавляет ADSR, панораму и реверб.',
+    announcementList3: 'Синхронизировано с ~30 языками. Все новые поля синхронизированы для переводов на ~30 языков, а история объявлений поддерживает многоязычное переключение.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -605,6 +912,77 @@ const translations: Record<BaseLanguage, Messages> = {
     modulePanel: 'Панель управления',
     modulePipeline: 'Очередь задач и вывод',
     moduleStorage: 'Локальные настройки и история',
+    animationTitle: 'Настройки анимации',
+    animationEnabled: 'Включить анимацию',
+    animationSpeed: 'Скорость анимации',
+    animationUiFadeIn: 'Появление UI',
+    animationButtonHover: 'Наведение на кнопку',
+    animationPageTransitions: 'Переходы страниц',
+    animationModalTransitions: 'Переходы модалов',
+    animationHint: 'Настройте скорость анимации и переключайте отдельные эффекты. Низкая скорость = медленнее анимация.',
+    borderWidthTitle: 'Толщина рамки',
+    audioTitle: 'Настройки аудио',
+    audioMasterVolume: 'Общая громкость',
+    audioSfxVolume: 'Громкость эффектов',
+    audioMusicVolume: 'Громкость музыки',
+    audioSfxEnabled: 'Включить звуковые эффекты',
+    audioMusicEnabled: 'Включить фоновую музыку',
+    audioSoundOnInteractOn: 'Звуки кнопок Вкл',
+    audioSoundOnInteractOff: 'Звуки кнопок Выкл',
+    audioHint: 'Весь звук генерируется процедурно, без внешних файлов.',
+    audioSfxPreset: 'Пресет эффектов',
+    audioMusicPreset: 'Пресет музыки',
+    audioPitch: 'Высота тона',
+    audioDuration: 'Длительность',
+    audioFilter: 'Фильтр',
+    audioDetune: 'Детюн',
+    audioReverb: 'Реверберация',
+    audioMusicPitch: 'Высота музыки',
+    audioMusicTempo: 'Темп музыки',
+    audioPreview: 'Предпрослушивание',
+    presetClassic: 'Классика',
+    presetElectronic: 'Электро',
+    presetRetro: 'Ретро',
+    presetXylophone: 'Ксилофон',
+    presetBell: 'Колокол',
+    presetSpace: 'Космос',
+    presetDrum: 'Барабан',
+    presetPiano: 'Фортепиано',
+    presetSynthwave: 'Синтвейв',
+    presetChiptune: 'Чиптюн',
+    presetStrings: 'Струнные',
+    presetWind: 'Духовые',
+    presetJazz: 'Джаз',
+    presetPercussion: 'Ударные',
+    presetAmbient: 'Эмбиент',
+    presetScifi: 'Sci-Fi',
+    presetCartoon: 'Мульт',
+    presetHorror: 'Хоррор',
+    presetNature: 'Природа',
+    presetMechanical: 'Механика',
+    musicOrchestral: 'Оркестр',
+    musicAmbient: 'Эмбиент',
+    musicElectronic: 'Электро',
+    musicPiano: 'Фортепиано',
+    musicSynthwave: 'Синтвейв',
+    musicNature: 'Природа',
+    musicJazz: 'Джаз',
+    musicMeditation: 'Медитация',
+    musicCyber: 'Кибер',
+    musicLofi: 'Лоу-фай',
+    audioSfxAttack: 'Атака',
+    audioSfxDecay: 'Спад',
+    audioSfxSustain: 'Удержание',
+    audioSfxRelease: 'Затухание',
+    audioSfxPan: 'Панорама',
+    audioMusicReverb: 'Реверб музыки',
+    audioMusicFilter: 'Фильтр музыки',
+    audioMusicStereoWidth: 'Ширина стерео',
+    audioAdvancedTitle: 'Расширенный синтез',
+    audioSpatialTitle: 'Пространство и музыка',
+    fontCustomLabel: 'Пользовательский шрифт',
+    fontCustomHint: 'Введите название шрифта, установленного в вашей системе.',
+    fontCustomPlaceholder: 'Название шрифта, например: LXGW WenKai',
   },
 };
 
@@ -702,6 +1080,26 @@ const translationAliases: Record<AppLanguage, BaseLanguage> = {
   es: 'en',
   it: 'en',
   pt: 'en',
+  cs: 'en',
+  da: 'en',
+  nl: 'en',
+  el: 'en',
+  hi: 'en',
+  hu: 'en',
+  id: 'en',
+  no: 'en',
+  pl: 'en',
+  ro: 'en',
+  sk: 'en',
+  sv: 'en',
+  th: 'en',
+  tr: 'en',
+  uk: 'ru',
+  vi: 'en',
+  ms: 'en',
+  fi: 'en',
+  bg: 'ru',
+  lt: 'en',
 };
 
 const shortcutLabels: Record<BaseLanguage, Record<ShortcutAction, string>> = {
@@ -939,10 +1337,6 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: '설정 열기',
     announcementTitle: '공지',
     announcementHistoryButton: '이전 공지 보기',
-    announcementDescription: '0.3.7에서는 paper2gal의 참고 이미지 체인을 고쳐 이미지 편집을 더 안정적인 images/edits 경로로 옮기고, Prompt와 오류 안내도 함께 정리했습니다.',
-    announcementList1: 'paper2gal은 이제 qwen-image-edit 경로를 우선 사용하며, 예전 chat 기반 경로가 참고 이미지를 가짜 URL로 바꾸던 문제를 피합니다.',
-    announcementList2: '세 가지 표정, 두 장의 CG, rembg 컷아웃까지 모두 실제 workflow 경로로 돌기 때문에 새 작업은 더 이상 조용히 mock 성공으로 떨어지지 않습니다.',
-    announcementList3: '오류 패널은 모델 채널 문제, 콘텐츠 정책 차단, 참고 이미지 rewrite 실패를 바로 읽을 수 있게 설명합니다.',
     pageFaceTitle: '페이스 메이커',
     pageStyleTitle: '스타일 변환',
     pagePromptTitle: 'OC 설정 에디터',
@@ -968,10 +1362,6 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Ouvrir les paramètres',
     announcementTitle: 'Annonce',
     announcementHistoryButton: 'Voir les annonces passées',
-    announcementDescription: 'La version 0.3.7 corrige la chaîne de référence paper2gal en basculant l’édition d’image vers une route images/edits plus fiable et en synchronisant les prompts ainsi que les diagnostics.',
-    announcementList1: 'paper2gal privilégie désormais qwen-image-edit au lieu de l’ancienne route chat qui réécrivait parfois l’image de référence en URL factice.',
-    announcementList2: 'Les trois expressions, les deux CG et les découpes rembg passent maintenant par le vrai workflow, donc les nouveaux runs ne retombent plus silencieusement sur mock.',
-    announcementList3: 'Le panneau d’erreur explique maintenant clairement les problèmes de canal modèle, de blocage par politique de contenu et de réécriture cassée de l’image de référence.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transfert de style',
     pagePromptTitle: 'Éditeur de fiches OC',
@@ -997,10 +1387,6 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Einstellungen öffnen',
     announcementTitle: 'Ankündigung',
     announcementHistoryButton: 'Frühere Ankündigungen ansehen',
-    announcementDescription: 'Version 0.3.7 repariert die Referenzbild-Kette von paper2gal, verlegt die Bildbearbeitung auf den stabileren images/edits-Weg und aktualisiert Prompt plus Diagnose.',
-    announcementList1: 'paper2gal bevorzugt jetzt qwen-image-edit statt des alten Chat-Pfads, der Referenzbilder in ungültige Platzhalter-URLs umschreiben konnte.',
-    announcementList2: 'Alle drei Expressions, beide CGs und die rembg-Cutouts laufen jetzt über den echten Workflow-Pfad, sodass neue Runs nicht mehr still auf mock zurückfallen.',
-    announcementList3: 'Das Fehlerpanel erklärt jetzt klar Modellkanal-Probleme, Content-Policy-Blocks und defekte Referenzbild-Umschreibungen.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Stiltransfer',
     pagePromptTitle: 'OC-Karteneditor',
@@ -1026,10 +1412,6 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Abrir configuración',
     announcementTitle: 'Anuncio',
     announcementHistoryButton: 'Ver anuncios anteriores',
-    announcementDescription: 'La versión 0.3.7 corrige la cadena de imagen de referencia de paper2gal: la edición de imagen pasa a una ruta images/edits más fiable y se sincronizan prompts y diagnósticos.',
-    announcementList1: 'paper2gal ahora prioriza qwen-image-edit y evita la ruta antigua basada en chat que convertía la referencia en URLs de marcador inválidas.',
-    announcementList2: 'Las tres expresiones, las dos CG y los recortes con rembg pasan por el flujo real, así que los nuevos runs ya no caen en mock de forma silenciosa.',
-    announcementList3: 'El panel de errores ahora explica de forma directa los problemas de canal del modelo, bloqueos por políticas de contenido y fallos al reescribir la imagen de referencia.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transferencia de estilo',
     pagePromptTitle: 'Editor de fichas OC',
@@ -1055,10 +1437,6 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Apri impostazioni',
     announcementTitle: 'Annuncio',
     announcementHistoryButton: 'Vedi annunci precedenti',
-    announcementDescription: 'La versione 0.3.7 corregge la catena dell’immagine di riferimento di paper2gal: l’editing passa su una route images/edits più affidabile e sincronizza prompt e diagnostica.',
-    announcementList1: 'paper2gal ora preferisce qwen-image-edit ed evita il vecchio percorso chat che poteva riscrivere l’immagine di riferimento in URL segnaposto non validi.',
-    announcementList2: 'Le tre espressioni, le due CG e i cutout rembg passano ora dal vero workflow, quindi i nuovi run non ricadono più silenziosamente su mock.',
-    announcementList3: 'Il pannello errori spiega in modo leggibile problemi di canale modello, blocchi di content policy e riscritture errate dell’immagine di riferimento.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Style transfer',
     pagePromptTitle: 'Editor schede OC',
@@ -1084,18 +1462,101 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     openSettings: 'Abrir configurações',
     announcementTitle: 'Aviso',
     announcementHistoryButton: 'Ver avisos anteriores',
-    announcementDescription: 'A versão 0.3.7 corrige a cadeia de imagem de referência do paper2gal: a edição de imagem foi movida para uma rota images/edits mais confiável e os prompts com diagnósticos foram sincronizados.',
-    announcementList1: 'O paper2gal agora prioriza qwen-image-edit e evita a rota antiga baseada em chat que transformava a referência em URLs placeholder inválidas.',
-    announcementList2: 'As três expressões, as duas CGs e os recortes com rembg agora passam pelo fluxo real, então os novos runs não caem mais silenciosamente em mock.',
-    announcementList3: 'O painel de erro agora explica de forma clara problemas de canal do modelo, bloqueios por política de conteúdo e falhas na reescrita da imagem de referência.',
     pageFaceTitle: 'Face Maker',
     pageStyleTitle: 'Transferência de estilo',
     pagePromptTitle: 'Editor de fichas OC',
     pagePaperTitle: 'Geração de assets paper2gal',
   },
+
+  cs: {
+    ...translations.en,
+  },
+  da: {
+    ...translations.en,
+  },
+  nl: {
+    ...translations.en,
+  },
+  el: {
+    ...translations.en,
+  },
+  hi: {
+    ...translations.en,
+  },
+  hu: {
+    ...translations.en,
+  },
+  id: {
+    ...translations.en,
+  },
+  no: {
+    ...translations.en,
+  },
+  pl: {
+    ...translations.en,
+  },
+  ro: {
+    ...translations.en,
+  },
+  sk: {
+    ...translations.en,
+  },
+  sv: {
+    ...translations.en,
+  },
+  th: {
+    ...translations.en,
+  },
+  tr: {
+    ...translations.en,
+  },
+  uk: {
+    ...translations.ru,
+  },
+  vi: {
+    ...translations.en,
+  },
+  ms: {
+    ...translations.en,
+  },
+  fi: {
+    ...translations.en,
+  },
+  bg: {
+    ...translations.ru,
+  },
+  lt: {
+    ...translations.en,
+  },
 };
 
 const announcementHistory = [
+  {
+    version: '0.4.1.1',
+    date: '2026-04-20',
+    title: '0.4.1.1 动画设置面板、全局音效与边框自定义',
+    summary: '新增动画设置面板，支持动画速度、边框粗细和子效果开关；全局按钮点击音效覆盖所有交互元素；音频引擎增加 ADSR 包络、声像和音乐混响等高级控制。',
+    details: [
+      '新增「动画」设置标签页：支持动画总开关、动画速度无级调节（20%~200%）、边框粗细（1px~4px）以及 UI 渐显、按钮悬停、页面切换、弹窗过渡四个子效果的独立开关。',
+      '全局按钮点击音效：通过委托事件监听器覆盖所有 button、a、choice-chip 和 palette-chip 元素，无需手动给每个按钮绑定 onClick。',
+      '音频高级合成控制：新增 ADSR 包络（起音/衰减/延音/释音）、声像（Pan）、音乐混响等细粒度调节滑块。',
+      '30 种语言同步更新：所有新增字段已同步到约 30 种语言的翻译中，公告历史支持多语言切换。',
+    ],
+  },
+  {
+    version: '0.4.0',
+    date: '2026-04-20',
+    title: '0.4.0 程序合成音效引擎、30 语言扩展与双语错误提示',
+    summary: '新增 50 个程序化合成的 UI 音效与氛围管弦乐、将语言支持扩展到约 30 种、新增音频设置面板、支持自定义字体，并提供详细的中英双语错误提示。',
+    details: [
+      '全新的 Web Audio API 音效引擎：50 个 UI 交互音效（点击、悬停、成功、错误、切换等）全部通过振荡器与噪声缓冲实时合成，零外部音频文件。',
+      '氛围背景音乐：可选的轻柔管弦乐氛围音乐，通过多声部滤波正弦波与 LFO 调制生成，支持独立音量与开关控制。',
+      '设置面板新增「音频」标签页：支持主音量、音效音量、音乐音量的独立调节，以及音效与背景音乐的独立开关。',
+      '语言支持从 10 种扩展到约 30 种，新增捷克语、丹麦语、荷兰语、希腊语、印地语、匈牙利语、印尼语、挪威语、波兰语、罗马尼亚语、斯洛伐克语、瑞典语、泰语、土耳其语、乌克兰语、越南语、马来语、芬兰语、保加利亚语、立陶宛语，且所有新增语言均同步了音频与字体自定义字段的翻译。',
+      '错误提示全面双语化：关键错误面板现在同时提供中文与英文说明，包含可能的根因与修复建议。',
+      '自定义字体支持：字体预设新增「自定义」选项，可直接输入系统中已安装的字体名称实时生效。',
+    ],
+  },
   {
     version: '0.3.7',
     date: '2026-04-19',
@@ -1338,6 +1799,7 @@ const defaultSettings: SettingsState = {
   accent: 'ocean',
   customAccentColor: '#7c5cff',
   contrast: 100,
+  borderWidth: 1,
   language: 'zh',
   customFontFamily: '',
   interfaceMode: 'builtin',
@@ -1346,6 +1808,15 @@ const defaultSettings: SettingsState = {
   apiKey: '',
   fontPreset: 'sans',
   shortcutMap: defaultShortcutMap,
+  audio: { ...defaultAudioSettings },
+  animation: {
+    enabled: true,
+    speed: 100,
+    uiFadeIn: true,
+    buttonHover: true,
+    pageTransitions: true,
+    modalTransitions: true,
+  },
 };
 
 function loadInitialSettings(): SettingsState {
@@ -1383,6 +1854,29 @@ function loadInitialSettings(): SettingsState {
       ...(parsed.shortcutMap ?? {}),
     };
     nextSettings.contrast = Math.min(130, Math.max(80, Math.round(nextSettings.contrast)));
+
+    if (!nextSettings.audio || typeof nextSettings.audio !== 'object') {
+      nextSettings.audio = { ...defaultAudioSettings };
+    } else {
+      nextSettings.audio = { ...defaultAudioSettings, ...nextSettings.audio };
+    }
+
+    if (!nextSettings.animation || typeof nextSettings.animation !== 'object') {
+      nextSettings.animation = { ...defaultSettings.animation };
+    } else {
+      nextSettings.animation = { ...defaultSettings.animation, ...nextSettings.animation };
+    }
+    if (typeof nextSettings.animation.speed !== 'number' || Number.isNaN(nextSettings.animation.speed)) {
+      nextSettings.animation.speed = defaultSettings.animation.speed;
+    }
+    nextSettings.animation.speed = Math.min(200, Math.max(20, Math.round(nextSettings.animation.speed)));
+
+    if (typeof nextSettings.borderWidth !== 'number' || Number.isNaN(nextSettings.borderWidth)) {
+      nextSettings.borderWidth = defaultSettings.borderWidth;
+    }
+    nextSettings.borderWidth = Math.min(4, Math.max(1, Math.round(nextSettings.borderWidth)));
+
+    updateAudioSettings(nextSettings.audio);
     return nextSettings;
   } catch {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -1397,10 +1891,51 @@ function App() {
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTab>('style');
   const [modalStep, setModalStep] = useState<StartModalStep>(null);
 
+  useEffect(() => {
+    initAudio();
+  }, []);
+
   // Keep UI preferences local-only so the shell behaves like a desktop-style tool launcher.
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
+
+  // Global delegated click sound for interactive elements
+  useEffect(() => {
+    if (!settings.audio.sfxEnabled || !settings.audio.soundOnInteract) {
+      return;
+    }
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('[role="button"]') ||
+        target.closest('.choice-chip') ||
+        target.closest('.palette-chip') ||
+        target.closest('.asset-card') ||
+        target.closest('.tool-dot') ||
+        target.closest('.workflow-entry-button') ||
+        target.closest('.toolbar-button') ||
+        target.closest('.toggle-chip') ||
+        target.closest('.settings-tab') ||
+        target.closest('.modal-close') ||
+        target.closest('.link-list a') ||
+        target.closest('.back-link') ||
+        target.closest('.action-tile') ||
+        target.closest('.primary-button') ||
+        target.closest('.secondary-button') ||
+        target.closest('input[type="checkbox"]') ||
+        target.closest('input[type="radio"]') ||
+        target.closest('select') ||
+        target.closest('label')
+      ) {
+        playSound('buttonClick');
+      }
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [settings.audio.sfxEnabled, settings.audio.soundOnInteract]);
 
   const resolvedLanguage = translationAliases[settings.language];
   const messages = localizedMessages[settings.language];
@@ -1423,6 +1958,8 @@ function App() {
   ].join(' ');
   const appStyle = {
     ['--ui-contrast' as string]: `${settings.contrast}%`,
+    ['--border-width' as string]: `${settings.borderWidth}px`,
+    ['--animation-speed' as string]: `${settings.animation.speed / 100}`,
     ...(settings.fontPreset === 'custom' && settings.customFontFamily
       ? ({ ['--custom-font-family' as string]: settings.customFontFamily } as CSSProperties)
       : {}),
@@ -1436,6 +1973,9 @@ function App() {
 
   function updateSettings(patch: Partial<SettingsState>) {
     setSettings((current) => ({ ...current, ...patch }));
+    if ('audio' in patch && patch.audio) {
+      updateAudioSettings(patch.audio);
+    }
   }
 
   function navigateTo(nextScreen: Exclude<FeatureScreen, 'home'>) {
@@ -1791,6 +2331,26 @@ const localizedFaceMakerCopy: Record<AppLanguage, FaceMakerCopy> = {
   es: faceMakerCopy.en,
   it: faceMakerCopy.en,
   pt: faceMakerCopy.en,
+  cs: faceMakerCopy.en,
+  da: faceMakerCopy.en,
+  nl: faceMakerCopy.en,
+  el: faceMakerCopy.en,
+  hi: faceMakerCopy.en,
+  hu: faceMakerCopy.en,
+  id: faceMakerCopy.en,
+  no: faceMakerCopy.en,
+  pl: faceMakerCopy.en,
+  ro: faceMakerCopy.en,
+  sk: faceMakerCopy.en,
+  sv: faceMakerCopy.en,
+  th: faceMakerCopy.en,
+  tr: faceMakerCopy.en,
+  uk: faceMakerCopy.ru,
+  vi: faceMakerCopy.en,
+  ms: faceMakerCopy.en,
+  fi: faceMakerCopy.en,
+  bg: faceMakerCopy.ru,
+  lt: faceMakerCopy.en,
 };
 
 function FaceMakerPage({
@@ -2355,6 +2915,8 @@ function SettingsModal({
   const tabs: Array<{ key: SettingsTab; label: string }> = [
     { key: 'style', label: messages.tabStyle },
     { key: 'language', label: messages.tabLanguage },
+    { key: 'audio', label: messages.tabAudio },
+    { key: 'animation', label: messages.tabAnimation },
     { key: 'api', label: messages.tabApi },
     { key: 'shortcuts', label: messages.tabShortcuts },
     { key: 'announcement', label: messages.tabAnnouncement },
@@ -2574,6 +3136,231 @@ function SettingsModal({
                   ))}
                 </div>
               </section>
+            )}
+
+            {tab === 'audio' && (
+              <>
+                <section className="settings-section">
+                  <h3>{messages.audioTitle}</h3>
+                  <div className="contrast-control">
+                    <div className="contrast-copy"><strong>{messages.audioMasterVolume}</strong></div>
+                    <div className="contrast-slider-row">
+                      <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.masterVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, masterVolume: Number(e.target.value) } })} />
+                      <span className="contrast-value">{settings.audio.masterVolume}%</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.audioSfxPreset}</h3>
+                  <div className="palette-grid audio-preset-grid">
+                    {SOUND_PRESETS.map((preset) => (
+                      <button
+                        key={preset}
+                        className={`palette-chip ${settings.audio.sfxPreset === preset ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => { onUpdate({ audio: { ...settings.audio, sfxPreset: preset } }); playSound('buttonClick'); }}
+                      >
+                        {messages[`preset${preset.charAt(0).toUpperCase() + preset.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase())}` as keyof Messages]}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="chip-row" style={{ marginTop: 8 }}>
+                    <button className={`choice-chip ${settings.audio.sfxEnabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxEnabled: true } })}>ON</button>
+                    <button className={`choice-chip ${!settings.audio.sfxEnabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxEnabled: false } })}>OFF</button>
+                  </div>
+                  <div className="chip-row" style={{ marginTop: 8 }}>
+                    <button className={`choice-chip ${settings.audio.soundOnInteract ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, soundOnInteract: true } })}>{messages.audioSoundOnInteractOn}</button>
+                    <button className={`choice-chip ${!settings.audio.soundOnInteract ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, soundOnInteract: false } })}>{messages.audioSoundOnInteractOff}</button>
+                  </div>
+                  <div className="contrast-slider-row" style={{ marginTop: 8 }}>
+                    <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.sfxVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxVolume: Number(e.target.value) } })} />
+                    <span className="contrast-value">{settings.audio.sfxVolume}%</span>
+                  </div>
+                  <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioPitch}</strong><span>{settings.audio.sfxPitch > 0 ? '+' : ''}{settings.audio.sfxPitch} ct</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="-1200" max="1200" step="50" value={settings.audio.sfxPitch} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxPitch: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioDuration}</strong><span>{settings.audio.sfxDurationScale}%</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="50" max="200" step="5" value={settings.audio.sfxDurationScale} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxDurationScale: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioFilter}</strong><span>{settings.audio.sfxFilterFreq} Hz</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="100" max="10000" step="100" value={settings.audio.sfxFilterFreq} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxFilterFreq: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioDetune}</strong><span>{settings.audio.sfxDetune} ct</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="0" max="100" step="5" value={settings.audio.sfxDetune} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxDetune: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioReverb}</strong><span>{settings.audio.sfxReverb}%</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="0" max="100" step="5" value={settings.audio.sfxReverb} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxReverb: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="palette-grid" style={{ marginTop: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))' }}>
+                    {SOUND_PREVIEW_LIST.map((item) => (
+                      <button
+                        key={item.name}
+                        className="palette-chip"
+                        type="button"
+                        onClick={() => previewSound(item.name)}
+                      >
+                        {messages.audioPreview} {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.audioMusicPreset}</h3>
+                  <div className="palette-grid audio-preset-grid">
+                    {MUSIC_PRESETS_LIST.map((preset) => (
+                      <button
+                        key={preset}
+                        className={`palette-chip ${settings.audio.musicPreset === preset ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => { onUpdate({ audio: { ...settings.audio, musicPreset: preset } }); playSound('buttonClick'); }}
+                      >
+                        {messages[`music${preset.charAt(0).toUpperCase() + preset.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase())}` as keyof Messages]}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="chip-row" style={{ marginTop: 8 }}>
+                    <button className={`choice-chip ${settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: true } }); startMusic(); }}>ON</button>
+                    <button className={`choice-chip ${!settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: false } }); stopMusic(); }}>OFF</button>
+                  </div>
+                  <div className="contrast-slider-row" style={{ marginTop: 8 }}>
+                    <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.musicVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicVolume: Number(e.target.value) } })} />
+                    <span className="contrast-value">{settings.audio.musicVolume}%</span>
+                  </div>
+                  <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioMusicPitch}</strong><span>{settings.audio.musicPitch > 0 ? '+' : ''}{settings.audio.musicPitch} ct</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="-600" max="600" step="50" value={settings.audio.musicPitch} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicPitch: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioMusicTempo}</strong><span>{settings.audio.musicTempo}%</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="50" max="150" step="5" value={settings.audio.musicTempo} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicTempo: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.audioAdvancedTitle}</h3>
+                  <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioSfxAttack}</strong><span>{settings.audio.sfxAttack} ms</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="0" max="500" step="10" value={settings.audio.sfxAttack} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxAttack: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioSfxDecay}</strong><span>{settings.audio.sfxDecay} ms</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="10" max="1000" step="10" value={settings.audio.sfxDecay} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxDecay: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioSfxSustain}</strong><span>{Math.round(settings.audio.sfxSustain * 100)}%</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="0" max="1" step="0.05" value={settings.audio.sfxSustain} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxSustain: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioSfxRelease}</strong><span>{settings.audio.sfxRelease} ms</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="10" max="2000" step="10" value={settings.audio.sfxRelease} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxRelease: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioSfxPan}</strong><span>{settings.audio.sfxPan > 0 ? '+' : ''}{settings.audio.sfxPan}</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="-1" max="1" step="0.1" value={settings.audio.sfxPan} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxPan: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioMusicReverb}</strong><span>{Math.round(settings.audio.musicReverb * 100)}%</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="0" max="1" step="0.05" value={settings.audio.musicReverb} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicReverb: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <p className="muted-copy">{messages.audioHint}</p>
+              </>
+            )}
+
+            {tab === 'animation' && (
+              <>
+                <section className="settings-section">
+                  <h3>{messages.animationTitle}</h3>
+                  <div className="chip-row">
+                    <button className={`choice-chip ${settings.animation.enabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ animation: { ...settings.animation, enabled: true } })}>ON</button>
+                    <button className={`choice-chip ${!settings.animation.enabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ animation: { ...settings.animation, enabled: false } })}>OFF</button>
+                  </div>
+                  <p className="muted-copy" style={{ marginTop: 10 }}>{messages.animationEnabled}</p>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.animationSpeed}</h3>
+                  <div className="contrast-control">
+                    <div className="contrast-copy"><strong>{messages.animationSpeed}</strong><span>{settings.animation.speed}%</span></div>
+                    <div className="contrast-slider-row">
+                      <input className="contrast-slider" type="range" min="20" max="200" step="1" value={settings.animation.speed} onChange={(e) => onUpdate({ animation: { ...settings.animation, speed: Number(e.target.value) } })} />
+                    </div>
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.borderWidthTitle}</h3>
+                  <div className="contrast-control">
+                    <div className="contrast-copy"><strong>{messages.borderWidthTitle}</strong><span>{settings.borderWidth}px</span></div>
+                    <div className="contrast-slider-row">
+                      <input className="contrast-slider" type="range" min="1" max="4" step="1" value={settings.borderWidth} onChange={(e) => onUpdate({ borderWidth: Number(e.target.value) })} />
+                    </div>
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>Animation Effects</h3>
+                  <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                    {[
+                      { key: 'uiFadeIn', label: messages.animationUiFadeIn },
+                      { key: 'buttonHover', label: messages.animationButtonHover },
+                      { key: 'pageTransitions', label: messages.animationPageTransitions },
+                      { key: 'modalTransitions', label: messages.animationModalTransitions },
+                    ].map((item) => (
+                      <button
+                        key={item.key}
+                        className={`palette-chip ${settings.animation[item.key as keyof typeof settings.animation] ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => onUpdate({ animation: { ...settings.animation, [item.key]: !settings.animation[item.key as keyof typeof settings.animation] } })}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <p className="muted-copy">{messages.animationHint}</p>
+              </>
             )}
 
             {tab === 'api' && (

@@ -8,7 +8,7 @@ const workflowsRouter = require("./routes/workflows");
 const { formatErrorDetails } = require("./utils/errors");
 
 const app = express();
-const distIndexPath = path.join(config.webDistDir, "index.html");
+const distIndexPath = path.join(config.webDir, "index.html");
 const rootIndexPath = path.join(config.webDir, "index.html");
 
 function isAllowedCutoutAssetPath(assetPath) {
@@ -88,8 +88,8 @@ app.use("/api/*", (_req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-if (fs.existsSync(config.webDistDir)) {
-  app.use(express.static(config.webDistDir));
+if (fs.existsSync(config.webDir)) {
+  app.use(express.static(config.webDir));
 }
 
 // SPA fallback: serve index.html for all non-API routes

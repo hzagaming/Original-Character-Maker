@@ -44,6 +44,8 @@ a {
   --accent-soft: rgba(var(--accent-rgb), 0.14);
   --accent-soft-strong: rgba(var(--accent-rgb), 0.26);
   --ui-contrast: 100%;
+  --border-width: 1px;
+  --animation-speed: 1;
   --bg: #09131f;
   --bg-soft: #0b1623;
   --panel: rgba(15, 30, 45, 0.92);
@@ -265,7 +267,7 @@ a {
 .editor-stage-shell,
 .modal-card,
 .settings-section {
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: var(--panel);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
@@ -317,7 +319,7 @@ a {
   min-height: 60px;
   padding: 0 20px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: var(--panel-soft);
   color: var(--text-secondary);
   flex-shrink: 0;
@@ -441,7 +443,7 @@ a {
   min-height: 98px;
   padding: 16px 18px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -485,7 +487,7 @@ a {
   min-height: 108px;
   padding: 18px 16px;
   border-radius: 22px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   flex-direction: column;
   align-items: flex-start;
@@ -538,7 +540,7 @@ a {
   min-height: 40px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
   font-size: 0.92rem;
@@ -736,7 +738,7 @@ a {
   min-height: 144px;
   padding: 22px;
   border-radius: 24px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -911,7 +913,7 @@ a {
   place-items: center;
   overflow: hidden;
   border-radius: 22px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background:
     linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%) 0 0 / 28px 28px,
     linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%) 0 0 / 28px 28px,
@@ -1002,7 +1004,7 @@ a {
 .range-field {
   padding: 14px 16px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -1037,7 +1039,7 @@ a {
   min-height: 48px;
   padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
 }
@@ -1073,7 +1075,7 @@ a {
   min-height: 42px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
 }
@@ -1098,7 +1100,7 @@ a {
   height: 12px;
   margin-top: 12px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1143,7 +1145,7 @@ a {
 .log-empty,
 .code-block {
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1192,7 +1194,7 @@ a {
   gap: 10px;
   padding: 16px;
   border-radius: 22px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -1238,7 +1240,7 @@ a {
   min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
   font-size: 0.86rem;
@@ -1270,7 +1272,7 @@ a {
   margin-bottom: 18px;
   padding: 14px 16px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1313,7 +1315,7 @@ a {
   gap: 10px;
   padding: 14px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -1370,7 +1372,7 @@ a {
 
 .paper-debug-panel {
   border-radius: 16px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.02);
   padding: 10px 12px;
 }
@@ -1399,7 +1401,7 @@ a {
 .paper-debug-row code {
   padding: 8px 10px;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
   font-size: 0.82rem;
@@ -1420,7 +1422,7 @@ a {
   min-height: 36px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
 }
@@ -1445,7 +1447,7 @@ a {
   gap: 12px;
   padding: 14px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -1466,7 +1468,7 @@ a {
   aspect-ratio: 4 / 3;
   object-fit: contain;
   border-radius: 16px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background:
     linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%) 0 0 / 22px 22px,
     linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%) 0 0 / 22px 22px,
@@ -1503,7 +1505,7 @@ a {
   gap: 10px;
   padding: 14px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -1570,7 +1572,7 @@ a {
   min-height: 42px;
   padding: 0 14px;
   border-radius: 14px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   transition:
@@ -1585,7 +1587,7 @@ a {
   min-width: 138px;
   padding: 0 14px;
   border-radius: 14px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   outline: none;
@@ -1602,7 +1604,7 @@ a {
   min-height: 42px;
   padding: 0 12px;
   border-radius: 14px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
 }
@@ -1636,7 +1638,7 @@ a {
   min-height: 360px;
   padding: 18px;
   border-radius: 24px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   outline: none;
   line-height: 1.76;
@@ -1666,7 +1668,7 @@ a {
 .rich-editor-surface th,
 .rich-editor-surface td {
   padding: 8px 10px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
 }
 
 .rich-editor-surface figure,
@@ -1707,7 +1709,7 @@ a {
   min-width: 132px;
   padding: 0 14px;
   border-radius: 14px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   outline: none;
@@ -1758,7 +1760,7 @@ a {
   margin-bottom: 18px;
   padding: 16px;
   border-radius: 22px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.028);
 }
 
@@ -1769,7 +1771,7 @@ a {
   align-items: center;
   padding: 14px 16px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -1819,7 +1821,7 @@ a {
   min-height: 42px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
 }
@@ -1882,7 +1884,7 @@ a {
   min-height: 74px;
   padding: 12px 14px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   text-align: left;
@@ -1949,7 +1951,7 @@ a {
   flex: 1;
   overflow: hidden;
   border-radius: 26px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
     rgba(0, 0, 0, 0.08);
@@ -2212,7 +2214,7 @@ a {
   min-height: 74px;
   padding: 14px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -2282,7 +2284,7 @@ a {
   width: 56px;
   height: 56px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   font-size: 1.9rem;
@@ -2326,7 +2328,7 @@ a {
   min-height: 92px;
   padding: 0 22px;
   border-radius: 22px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
 }
@@ -2402,7 +2404,7 @@ a {
   min-height: 70px;
   padding: 0 24px;
   border-radius: 22px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.02);
   color: var(--text-main);
   text-align: left;
@@ -2424,7 +2426,7 @@ a {
   min-height: 64px;
   padding: 0 20px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
 }
@@ -2447,7 +2449,7 @@ a {
   min-height: 66px;
   padding: 0 16px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   display: inline-flex;
@@ -2469,7 +2471,7 @@ a {
   min-height: 68px;
   padding: 0 20px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   outline: none;
@@ -2479,7 +2481,7 @@ a {
   width: 100%;
   padding: 18px 20px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   outline: none;
@@ -2509,7 +2511,7 @@ a {
   height: 68px;
   padding: 6px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -2517,7 +2519,7 @@ a {
   margin-top: 16px;
   padding: 14px 16px;
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -2552,7 +2554,7 @@ a {
   justify-content: center;
   min-height: 40px;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   font-size: 0.94rem;
@@ -2600,7 +2602,7 @@ a {
   gap: 2px;
   padding: 16px 18px;
   border-radius: 22px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
   text-align: left;
@@ -2642,7 +2644,7 @@ a {
   min-height: 100%;
   padding: 22px;
   border-radius: 24px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -2668,7 +2670,7 @@ a {
   min-height: 52px;
   padding: 0 18px;
   border-radius: 16px;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   text-decoration: none;
 }
@@ -2681,31 +2683,31 @@ a {
 
 .fade-up {
   opacity: 0;
-  animation: fadeUp 620ms ease forwards;
+  animation: fadeUp calc(620ms * var(--animation-speed)) ease forwards;
 }
 
 .delay-1 {
-  animation-delay: 60ms;
+  animation-delay: calc(60ms * var(--animation-speed));
 }
 
 .delay-2 {
-  animation-delay: 140ms;
+  animation-delay: calc(140ms * var(--animation-speed));
 }
 
 .delay-3 {
-  animation-delay: 220ms;
+  animation-delay: calc(220ms * var(--animation-speed));
 }
 
 .delay-4 {
-  animation-delay: 300ms;
+  animation-delay: calc(300ms * var(--animation-speed));
 }
 
 .delay-5 {
-  animation-delay: 380ms;
+  animation-delay: calc(380ms * var(--animation-speed));
 }
 
 .delay-6 {
-  animation-delay: 460ms;
+  animation-delay: calc(460ms * var(--animation-speed));
 }
 
 @keyframes fadeUp {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
+import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
+import { playSound } from './audioEngine';
 import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
 import type { AppLanguage, SettingsState, ShortcutAction } from './types';
 
@@ -1468,6 +1469,26 @@ const localizedUiCopy: Record<AppLanguage, UiCopySet> = {
       contentTitle: 'Editor de fichas OC',
     },
   },
+  cs: uiCopy.en,
+  da: uiCopy.en,
+  nl: uiCopy.en,
+  el: uiCopy.en,
+  hi: uiCopy.en,
+  hu: uiCopy.en,
+  id: uiCopy.en,
+  no: uiCopy.en,
+  pl: uiCopy.en,
+  ro: uiCopy.en,
+  sk: uiCopy.en,
+  sv: uiCopy.en,
+  th: uiCopy.en,
+  tr: uiCopy.en,
+  uk: uiCopy.ru,
+  vi: uiCopy.en,
+  ms: uiCopy.en,
+  fi: uiCopy.en,
+  bg: uiCopy.ru,
+  lt: uiCopy.en,
 };
 
 const localizedPromptTemplates: Record<AppLanguage, (typeof promptTemplates)[BaseLanguage]> = {
@@ -1481,6 +1502,26 @@ const localizedPromptTemplates: Record<AppLanguage, (typeof promptTemplates)[Bas
   es: promptTemplates.en,
   it: promptTemplates.en,
   pt: promptTemplates.en,
+  cs: promptTemplates.en,
+  da: promptTemplates.en,
+  nl: promptTemplates.en,
+  el: promptTemplates.en,
+  hi: promptTemplates.en,
+  hu: promptTemplates.en,
+  id: promptTemplates.en,
+  no: promptTemplates.en,
+  pl: promptTemplates.en,
+  ro: promptTemplates.en,
+  sk: promptTemplates.en,
+  sv: promptTemplates.en,
+  th: promptTemplates.en,
+  tr: promptTemplates.en,
+  uk: promptTemplates.ru,
+  vi: promptTemplates.en,
+  ms: promptTemplates.en,
+  fi: promptTemplates.en,
+  bg: promptTemplates.ru,
+  lt: promptTemplates.en,
 };
 
 const ttsLanguageOptions: Array<{ value: AppLanguage; label: string }> = [
@@ -2890,7 +2931,7 @@ export function StyleTransferPage({
           {backHome}
         </button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenSettings(); }}>
             {openSettings}
           </button>
         </div>
@@ -3683,7 +3724,7 @@ export function PromptSuitePage({
           {backHome}
         </button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenSettings(); }}>
             {openSettings}
           </button>
         </div>
@@ -4644,7 +4685,7 @@ export function Paper2GalPage({
           {backHome}
         </button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenSettings(); }}>
             {openSettings}
           </button>
         </div>
