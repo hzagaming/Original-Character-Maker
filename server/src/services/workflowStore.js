@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 const config = require("../config");
 
 const store = new Map();
+const MAX_STORE_SIZE = 100;
 
 const WORKFLOW_STEPS = [
   "validate_input",
@@ -124,7 +125,18 @@ function touch(workflow) {
   return workflow;
 }
 
+function evictOldestIfNeeded() {
+  if (store.size <= MAX_STORE_SIZE) {
+    return;
+  }
+  const oldestKey = store.keys().next().value;
+  if (oldestKey) {
+    store.delete(oldestKey);
+  }
+}
+
 function createWorkflow({ sourceImage, promptOverrides = null, executionOptions = null }) {
+  evictOldestIfNeeded();
   const id = `wf_${uuidv4().replace(/-/g, "").slice(0, 12)}`;
   const timestamp = nowIso();
 

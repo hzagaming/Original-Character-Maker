@@ -79,8 +79,8 @@ router.post("/", upload.single("image"), async (req, res, next) => {
     const workflow = createWorkflow({ sourceImage, promptOverrides, executionOptions });
 
     setImmediate(() => {
-      executeWorkflow(workflow.id, config).catch((error) => {
-        console.error(`[workflow:${workflow.id}] pipeline execution failed`, error);
+      executeWorkflow(workflow.id, config).catch((_error) => {
+        // Error is already persisted in workflow state; no need to log here
       });
     });
 
@@ -130,8 +130,8 @@ router.post("/:id/rerun", express.json(), async (req, res, next) => {
     setWorkflowStatus(workflow.id, "running", targetStep, null, null);
 
     setImmediate(() => {
-      rerunWorkflowStep(workflow.id, targetStep, config).catch((error) => {
-        console.error(`[workflow:${workflow.id}] workflow rerun failed`, error);
+      rerunWorkflowStep(workflow.id, targetStep, config).catch((_error) => {
+        // Error is already persisted in workflow state; no need to log here
       });
     });
 

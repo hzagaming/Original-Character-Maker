@@ -92,6 +92,7 @@ if (fs.existsSync(config.webDistDir)) {
   app.use(express.static(config.webDistDir));
 }
 
+// SPA fallback: serve index.html for all non-API routes
 app.get("*", (req, res, next) => {
   if (!shouldServeSpaShell(req)) {
     return res.status(404).json({
@@ -137,7 +138,7 @@ app.use((error, _req, res, _next) => {
     method: _req.method
   });
 
-  if (statusCode >= 500) {
+  if (statusCode >= 500 && process.env.NODE_ENV === "development") {
     console.error(error);
   }
 
