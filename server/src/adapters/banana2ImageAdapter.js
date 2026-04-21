@@ -6,7 +6,7 @@ function isBanana2Configured(config) {
 }
 
 function normalizeBaseUrl(baseUrl) {
-  return baseUrl.replace(/\/+$/, "");
+  return baseUrl.replace(/\/+$/, "").replace(/\/v1(?:beta)?$/, "");
 }
 
 function getOutputExtension(mimeType) {

@@ -8,6 +8,9 @@
     "start": "node src/index.js"
   },
   "dependencies": {
+    "@alicloud/imageseg20191230": "^4.0.1",
+    "@alicloud/openapi-client": "^0.4.15",
+    "@alicloud/tea-util": "^1.4.11",
     "archiver": "^7.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

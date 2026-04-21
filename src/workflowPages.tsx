@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
+import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
+import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
 import type { AppLanguage, SettingsState, ShortcutAction } from './types';
 
 type SharedPageProps = {
@@ -569,7 +570,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: '重做当前结果',
       redoCurrentResult: '重做当前结果',
       workflowConcurrency: '工作流并发',
-      workflowConcurrencyHint: '默认按顺序一个一个生成。开启后，只让 AI 生成步骤并发，抠图仍然按顺序执行。',
+      workflowConcurrencyHint: '默认开启表达图、CG 和抠图并行。关闭后会按顺序一个一个生成。',
       expressionCount: '表情版本数',
       cgCount: 'CG 场景数',
       needCutout: '最后执行抠图',
@@ -778,7 +779,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: '結果を再生成',
       redoCurrentResult: 'この結果を再生成',
       workflowConcurrency: 'workflow 並列実行',
-      workflowConcurrencyHint: '既定では順番に 1 つずつ生成します。オンにすると AI 生成だけを並列化し、切り抜きは順番のままです。',
+      workflowConcurrencyHint: '既定では表情、CG、切り抜きを並列実行します。オフにすると 1 つずつ順番に生成します。',
       expressionCount: '表情バージョン数',
       cgCount: 'CG シーン数',
       needCutout: '最後に切り抜き',
@@ -987,7 +988,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: 'Redo this result',
       redoCurrentResult: 'Redo this result',
       workflowConcurrency: 'Workflow concurrency',
-      workflowConcurrencyHint: 'By default the workflow runs one step at a time. When enabled, only the AI generation steps run in parallel; cutout still stays sequential.',
+      workflowConcurrencyHint: 'Expressions, CG, and cutout run in parallel by default. Turn it off to run one step at a time.',
       expressionCount: 'Expression variants',
       cgCount: 'CG scene count',
       needCutout: 'Run cutout at the end',
@@ -1196,7 +1197,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: 'Переделать результат',
       redoCurrentResult: 'Переделать этот результат',
       workflowConcurrency: 'Параллельный workflow',
-      workflowConcurrencyHint: 'По умолчанию workflow идет строго по шагам. Если включить, параллельно пойдут только AI-генерации, а вырезание останется последовательным.',
+      workflowConcurrencyHint: 'По умолчанию выражения, CG и вырезание идут параллельно. Если выключить, workflow пойдет строго по шагам.',
       expressionCount: 'Число эмоций',
       cgCount: 'Количество CG-сцен',
       needCutout: 'Вырезать фон в конце',
@@ -2103,6 +2104,58 @@ async function fetchPaperWorkflowRequest(workflowId: string, settings: SettingsS
   }
 
   return payload as PaperWorkflow;
+}
+
+async function uploadFrontendCutout(options: {
+  workflowId: string;
+  expressionName: ExpressionName;
+  sourceUrl: string;
+  settings: SettingsState;
+  copy: UiCopySet['paper'];
+}) {
+  const { workflowId, expressionName, sourceUrl, settings, copy } = options;
+
+  if (requiresHostedApiBase(settings)) {
+    throw new Error(copy.hostedApiRequired);
+  }
+
+  const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/cutouts/${expressionName}`);
+  if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
+    throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
+  }
+
+  const resolvedSourceUrl = sourceUrl.startsWith('/') ? buildApiUrl(settings, sourceUrl) : sourceUrl;
+  const imageResponse = await fetch(resolvedSourceUrl, { credentials: 'omit' });
+  if (!imageResponse.ok) {
+    throw new Error(`Failed to fetch source image for cutout: ${imageResponse.status}`);
+  }
+  const sourceBlob = await imageResponse.blob();
+  const cutoutBlob = await generateCutoutPngBlob(sourceBlob, buildApiUrl(settings, '/api/cutout-assets/v1/'));
+
+  const form = new FormData();
+  form.append('image', cutoutBlob, `expression-${expressionName}-cutout.png`);
+
+  const response = await fetch(requestUrl, {
+    method: 'POST',
+    headers: buildApiHeaders(settings),
+    body: form,
+  });
+  const payload = await parseJsonResponse(response);
+
+  if (!response.ok) {
+    throw new Error(
+      buildPaperApiErrorMessage({
+        response,
+        payload,
+        requestUrl,
+        settings,
+        copy,
+        fallback: copy.networkFetchError,
+      }),
+    );
+  }
+
+  return payload.workflow as PaperWorkflow;
 }
 
 function getStatusLabelKey(status: TransferStatus): StatusLabelKey {
@@ -4092,7 +4145,7 @@ export function Paper2GalPage({
       inputFileName: '',
       workflow: null as PaperWorkflow | null,
       message: { type: 'info' as PaperMessageType, text: paper.idleMessage },
-      aiConcurrencyEnabled: false,
+      aiConcurrencyEnabled: true,
       promptOverrides: createDefaultPaperPromptOverrides(),
       savedSnapshot: '',
     }),
@@ -4209,6 +4262,64 @@ export function Paper2GalPage({
     workflow?.id,
     workflow?.status,
   ]);
+
+  const cutoutUploadInFlight = useRef(new Set<string>());
+  useEffect(() => {
+    if (!workflow?.id || !workflow.outputs) {
+      return;
+    }
+
+    if (workflow.outputs.providers?.remove_background !== 'frontend') {
+      return;
+    }
+
+    const workflowId = workflow.id;
+    const expressions = workflow.outputs.expressions || {};
+    const cutouts = workflow.outputs.expression_cutouts || {};
+    const expressionNames: ExpressionName[] = ['thinking', 'surprise', 'angry'];
+
+    let disposed = false;
+    async function run() {
+      for (const name of expressionNames) {
+        const sourceUrl = expressions[name];
+        const existingCutout = cutouts[name];
+        if (!sourceUrl || existingCutout) {
+          continue;
+        }
+
+        const key = `${workflowId}:${name}`;
+        if (cutoutUploadInFlight.current.has(key)) {
+          continue;
+        }
+
+        cutoutUploadInFlight.current.add(key);
+        try {
+          const next = await uploadFrontendCutout({
+            workflowId,
+            expressionName: name,
+            sourceUrl,
+            settings,
+            copy: paper,
+          });
+
+          if (disposed) return;
+          setWorkflow(next);
+        } catch (error) {
+          cutoutUploadInFlight.current.delete(key);
+          if (disposed) return;
+          setMessage({
+            type: 'error',
+            text: normalizeFetchError(error, paper.networkFetchError),
+          });
+        }
+      }
+    }
+
+    run();
+    return () => {
+      disposed = true;
+    };
+  }, [paper, settings, workflow?.id, workflow?.outputs]);
 
   const progress = useMemo(() => {
     if (isSubmitting && !workflow) {
@@ -4388,7 +4499,7 @@ export function Paper2GalPage({
     setInputPreviewUrl('');
     setInputFileName('');
     setWorkflow(null);
-    setAiConcurrencyEnabled(false);
+    setAiConcurrencyEnabled(true);
     setPromptOverrides(createDefaultPaperPromptOverrides());
     setMessage({ type: 'info', text: paper.idleMessage });
 
@@ -4396,7 +4507,7 @@ export function Paper2GalPage({
       inputFileName: '',
       workflowId: '',
       workflowStatus: 'idle',
-      aiConcurrencyEnabled: false,
+      aiConcurrencyEnabled: true,
       promptOverrides: createDefaultPaperPromptOverrides(),
     });
     setSavedSnapshot(nextSnapshot);

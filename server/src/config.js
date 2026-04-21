@@ -4,7 +4,6 @@ const dotenv = require("dotenv");
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const projectRoot = path.resolve(__dirname, "../..");
-const isWindows = process.platform === "win32";
 
 function resolvePath(value, fallback) {
   const raw = value || fallback;
@@ -23,27 +22,50 @@ function parseStringList(value) {
     .filter(Boolean);
 }
 
+function parsePublicBaseUrl(value, corsOrigin) {
+  const explicit = String(value || "").trim().replace(/\/+$/, "");
+  if (/^https?:\/\//i.test(explicit)) {
+    return explicit;
+  }
+
+  const corsCandidate = String(corsOrigin || "").trim().replace(/\/+$/, "");
+  if (/^https?:\/\//i.test(corsCandidate) && !corsCandidate.includes(",")) {
+    return corsCandidate;
+  }
+
+  return "";
+}
+
+const corsOrigin = process.env.CORS_ORIGIN || "*";
+
 module.exports = {
   projectRoot,
   port: parseInteger(process.env.PORT, 3001),
-  corsOrigin: process.env.CORS_ORIGIN || "*",
+  corsOrigin,
+  publicAppBaseUrl: parsePublicBaseUrl(
+    process.env.PUBLIC_APP_BASE_URL ||
+      process.env.PUBLIC_BASE_URL ||
+      process.env.APP_BASE_URL ||
+      "https://p2g-workflow.zeabur.app",
+    corsOrigin
+  ),
+  cutoutAssetBaseUrl:
+    (process.env.CUTOUT_ASSET_BASE_URL || "https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist").replace(/\/+$/, ""),
   maxUploadSizeBytes: parseInteger(process.env.MAX_UPLOAD_SIZE_BYTES, 10 * 1024 * 1024),
   minImageWidth: parseInteger(process.env.MIN_IMAGE_WIDTH, 256),
   minImageHeight: parseInteger(process.env.MIN_IMAGE_HEIGHT, 256),
   imageGenConcurrency: parseInteger(process.env.IMAGE_GEN_CONCURRENCY, 2),
-  rembgConcurrency: parseInteger(process.env.REMBG_CONCURRENCY, 1),
   pipelineMode: process.env.PIPELINE_MODE || "mock",
-  bgRemovalProvider: process.env.BG_REMOVAL_PROVIDER || "rembg",
+  bgRemovalProvider: process.env.BG_REMOVAL_PROVIDER || "frontend",
+  aliyunAccessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID || process.env.ALIYUN_ACCESS_KEY_ID || "",
+  aliyunAccessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET || process.env.ALIYUN_ACCESS_KEY_SECRET || "",
+  aliyunImageSegEndpoint: process.env.ALIYUN_IMAGESEG_ENDPOINT || "imageseg.cn-shanghai.aliyuncs.com",
+  aliyunImageSegRegionId: process.env.ALIYUN_IMAGESEG_REGION_ID || "cn-shanghai",
+  aliyunImageSegAction: process.env.ALIYUN_IMAGESEG_ACTION || "SegmentCommonImage",
+  aliyunImageSegReturnForm: process.env.ALIYUN_IMAGESEG_RETURN_FORM || "",
+  aliyunImageSegTimeoutMs: parseInteger(process.env.ALIYUN_IMAGESEG_TIMEOUT_MS, 120000),
   expressionProvider: process.env.EXPRESSION_PROVIDER || "mock",
   cgProvider: process.env.CG_PROVIDER || "mock",
-  rembgPythonPath:
-    process.env.REMBG_PYTHON_PATH ||
-    (isWindows ? path.resolve(projectRoot, ".venv/Scripts/python.exe") : path.resolve(projectRoot, ".venv/bin/python")),
-  rembgScriptPath:
-    process.env.REMBG_SCRIPT_PATH || path.resolve(projectRoot, "server/scripts/rembg_remove.py"),
-  rembgModel: process.env.REMBG_MODEL || "isnet-anime",
-  rembgTimeoutMs: parseInteger(process.env.REMBG_TIMEOUT_MS, 180000),
-  rembgMinCoverageRatio: Number.parseFloat(process.env.REMBG_MIN_COVERAGE_RATIO || "0.01"),
   platoApiKey: process.env.PLATO_API_KEY || "",
   platoBaseUrl: process.env.PLATO_BASE_URL || "https://api.bltcy.ai/v1",
   platoModel: process.env.PLATO_MODEL || "gemini-3.1-flash-image-preview",

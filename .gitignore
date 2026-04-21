@@ -6,6 +6,8 @@ server/node_modules/
 vite.config.js
 vite.config.d.ts
 .env
+.~.env
 .venv/
 tmp/
 dist/
+*.log

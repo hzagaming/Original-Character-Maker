@@ -21,7 +21,7 @@ const WORKFLOW_STEPS = [
 
 function defaultExecutionOptions() {
   return {
-    ai_concurrency_enabled: false
+    ai_concurrency_enabled: true
   };
 }
 

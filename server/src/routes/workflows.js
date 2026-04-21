@@ -11,11 +11,14 @@ const { validateUploadedFile } = require("../services/fileValidation");
 const {
   createWorkflow,
   getWorkflow,
+  markStepStatus,
+  mergeWorkflowOutputs,
   resetWorkflowStep,
   setWorkflowStatus,
   updateWorkflow
 } = require("../services/workflowStore");
 const { executeWorkflow, rerunWorkflowStep } = require("../pipeline/executeWorkflow");
+const { writeWorkflowSnapshots } = require("../services/workflowArtifacts");
 
 const router = express.Router();
 
@@ -183,6 +186,58 @@ router.get("/:id/download", async (req, res, next) => {
     archive.directory(workflowOutputDir, false);
     await archive.finalize();
   } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/:id/cutouts/:expression", upload.single("image"), async (req, res, next) => {
+  try {
+    const workflow = getWorkflow(req.params.id);
+    if (!workflow) {
+      throw new AppError("Workflow not found.", 404);
+    }
+
+    const expressionName = String(req.params.expression || "").trim();
+    if (!["thinking", "surprise", "angry"].includes(expressionName)) {
+      throw new AppError("Unsupported expression cutout name.", 400, { expression: expressionName });
+    }
+
+    if (!req.file?.path) {
+      throw new AppError("No cutout uploaded. Please provide one image file in field 'image'.", 400);
+    }
+
+    const workflowOutputDir = path.join(config.outputDir, workflow.id);
+    await fs.mkdir(workflowOutputDir, { recursive: true });
+
+    const destinationName = `expression-${expressionName}-cutout.png`;
+    const destinationPath = path.join(workflowOutputDir, destinationName);
+    await fs.rename(req.file.path, destinationPath);
+
+    const outputUrl = `/outputs/${workflow.id}/${destinationName}`;
+    mergeWorkflowOutputs(workflow.id, {
+      expression_cutouts: {
+        [expressionName]: outputUrl
+      },
+      providers: {
+        remove_background: "frontend"
+      }
+    });
+
+    const stepName = `cutout_expression_${expressionName}`;
+    markStepStatus(workflow.id, stepName, "success", null, {
+      provider: "frontend",
+      output_url: outputUrl
+    });
+
+    await writeWorkflowSnapshots(workflow.id, workflowOutputDir, null, null);
+    res.json({
+      status: "ok",
+      workflow: getWorkflow(workflow.id)
+    });
+  } catch (error) {
+    if (req.file?.path) {
+      await fs.rm(req.file.path, { force: true }).catch(() => null);
+    }
     next(error);
   }
 });

@@ -105,7 +105,7 @@ export function defaultLocalApiBase(): string {
     return '';
   }
 
-  const { hostname, origin, port } = location;
+  const { hostname, origin, port, protocol } = location;
   if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
     return '';
   }
@@ -120,7 +120,8 @@ export function defaultLocalApiBase(): string {
     return origin;
   }
 
-  return 'http://localhost:3001';
+  // Prefer the workflow backend dev port.
+  return `${protocol}//${hostname}:3001`;
 }
 
 export function getPresetApiBase(settings: Pick<SettingsState, 'apiPreset'>): string {
