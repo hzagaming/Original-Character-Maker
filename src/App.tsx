@@ -5,6 +5,7 @@ import type {
   AppLanguage,
   FeatureScreen,
   FontPreset,
+  SavedStylePreset,
   SettingsState,
   SettingsTab,
   ShortcutAction,
@@ -28,7 +29,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.4.1.1';
+const VERSION = '0.4.2.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -206,6 +207,36 @@ type Messages = {
   musicMeditation: string;
   musicCyber: string;
   musicLofi: string;
+  musicRock: string;
+  musicBlues: string;
+  musicFolk: string;
+  musicReggae: string;
+  musicFunk: string;
+  musicSoul: string;
+  musicGospel: string;
+  musicCountry: string;
+  musicCeltic: string;
+  musicOriental: string;
+  musicTribal: string;
+  musicSpace: string;
+  musicUnderwater: string;
+  musicRain: string;
+  musicWindchime: string;
+  musicFireplace: string;
+  musicNight: string;
+  musicSunrise: string;
+  musicDreamy: string;
+  musicEnergetic: string;
+  musicBattle: string;
+  musicAdventure: string;
+  musicMystery: string;
+  musicRomantic: string;
+  musicNostalgic: string;
+  musicHopeful: string;
+  musicEpic: string;
+  musicChill: string;
+  musicStudy: string;
+  musicFocus: string;
   audioSfxAttack: string;
   audioSfxDecay: string;
   audioSfxSustain: string;
@@ -219,6 +250,84 @@ type Messages = {
   fontCustomLabel: string;
   fontCustomHint: string;
   fontCustomPlaceholder: string;
+  // v0.4.2 new tabs
+  tabPerformance: string;
+  tabOthers: string;
+  // Audio reset & custom
+  audioResetSfx: string;
+  audioResetMusic: string;
+  audioResetAdvanced: string;
+  audioCustomSfx: string;
+  audioCustomMusic: string;
+  audioUploadFile: string;
+  audioRemoveCustom: string;
+  audioCustomActive: string;
+  // Animation
+  animationReset: string;
+  animationEffectsTitle: string;
+  // Performance
+  performanceTitle: string;
+  performanceReduceAnimations: string;
+  performanceDisableGlass: string;
+  performanceLowResPreview: string;
+  performanceLazyLoad: string;
+  performanceDisableParticles: string;
+  performanceAggressiveCache: string;
+  performanceDevMode: string;
+  performanceImageQuality: string;
+  performanceImageQualityLow: string;
+  performanceImageQualityMedium: string;
+  performanceImageQualityHigh: string;
+  performanceMaxConcurrent: string;
+  performanceReset: string;
+  performanceHint: string;
+  // API channels
+  apiChannel1: string;
+  apiChannel2: string;
+  apiChannel3: string;
+  apiClearChannel: string;
+  apiConfirmClear: string;
+  apiConfirmClearAgain: string;
+  // Others
+  othersTitle: string;
+  othersTooltips: string;
+  othersConfirmDestructive: string;
+  othersKeyboardHints: string;
+  othersSmoothScroll: string;
+  othersNotificationSound: string;
+  othersAutoSave: string;
+  othersDateFormat: string;
+  othersDateFormatIso: string;
+  othersDateFormatLocale: string;
+  othersDateFormatFriendly: string;
+  othersShowClock: string;
+  othersStatusBar: string;
+  othersHighContrastFocus: string;
+  othersResetAll: string;
+  othersRestoreDefaults: string;
+  othersConfirmReset: string;
+  othersConfirmResetAgain: string;
+  othersConfirmRestore: string;
+  othersConfirmRestoreAgain: string;
+  othersHint: string;
+  othersLanguageSettings: string;
+  othersLanguageMissing: string;
+  // Style presets
+  styleSavePreset: string;
+  stylePreset1: string;
+  stylePreset2: string;
+  stylePresetName: string;
+  stylePresetSaved: string;
+  stylePresetSame: string;
+  stylePresetUse: string;
+  styleResetDefaults: string;
+  // Confirm dialog
+  confirmYes: string;
+  confirmNo: string;
+  confirmCancel: string;
+  // Toggles
+  toggleOn: string;
+  toggleOff: string;
 };
 
 type BaseLanguage = 'zh' | 'ja' | 'en' | 'ru';
@@ -321,10 +430,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: '自定义快捷键属于实验性设置，请避免与浏览器或系统保留快捷键冲突。',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.4.1.1 新增动画设置面板，支持动画速度、边框粗细和子效果开关；全局按钮点击音效覆盖所有交互元素；音频引擎增加 ADSR 包络、声像和音乐混响等高级控制。',
-    announcementList1: '新增「动画」设置标签页：支持动画总开关、动画速度无级调节、边框粗细以及 UI 渐显、按钮悬停、页面切换、弹窗过渡四个子效果的独立开关。',
-    announcementList2: '全局按钮点击音效通过委托事件监听器覆盖所有 button、a、choice-chip 和 palette-chip 元素；音频高级合成控制新增 ADSR 包络、声像、音乐混响等细粒度调节。',
-    announcementList3: '30 种语言同步更新，所有新增字段已同步到约 30 种语言的翻译中，公告历史支持多语言切换。',
+    announcementDescription: '0.4.2.1 全按钮音效覆盖、40 种 BGM 预设与性能设置功能化。',
+    announcementList1: '全局音效全覆盖，背景音乐引擎 v5 升级至 40 种风格预设并采用前瞻式精准调度。',
+    announcementList2: '性能设置各项选项真正生效：减少动画禁用 CSS 动画、禁用毛玻璃移除 backdrop-filter、开发者模式显示实时调试面板。',
+    announcementList3: '30 种语言同步更新，40 个 BGM 预设名称已同步到 4 种基础语言翻译中。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -400,6 +509,36 @@ const translations: Record<BaseLanguage, Messages> = {
     musicMeditation: '冥想',
     musicCyber: '赛博',
     musicLofi: '低保真',
+    musicRock: '摇滚',
+    musicBlues: '蓝调',
+    musicFolk: '民谣',
+    musicReggae: '雷鬼',
+    musicFunk: '放克',
+    musicSoul: '灵魂乐',
+    musicGospel: '福音',
+    musicCountry: '乡村',
+    musicCeltic: '凯尔特',
+    musicOriental: '东方',
+    musicTribal: '部落',
+    musicSpace: '太空',
+    musicUnderwater: '水下',
+    musicRain: '雨声',
+    musicWindchime: '风铃',
+    musicFireplace: '壁炉',
+    musicNight: '夜晚',
+    musicSunrise: '日出',
+    musicDreamy: '梦幻',
+    musicEnergetic: '活力',
+    musicBattle: '战斗',
+    musicAdventure: '冒险',
+    musicMystery: '神秘',
+    musicRomantic: '浪漫',
+    musicNostalgic: '怀旧',
+    musicHopeful: '希望',
+    musicEpic: '史诗',
+    musicChill: '放松',
+    musicStudy: '学习',
+    musicFocus: '专注',
     audioSfxAttack: '起音',
     audioSfxDecay: '衰减',
     audioSfxSustain: '延持',
@@ -413,6 +552,75 @@ const translations: Record<BaseLanguage, Messages> = {
     fontCustomLabel: '自定义字体',
     fontCustomHint: '输入系统中已安装的字体名称，例如 LXGW WenKai。',
     fontCustomPlaceholder: '输入页面字体名称，例如: LXGW WenKai',
+    tabPerformance: '性能',
+    tabOthers: '其他',
+    audioResetSfx: '恢复音效默认',
+    audioResetMusic: '恢复音乐默认',
+    audioResetAdvanced: '恢复高级默认',
+    audioCustomSfx: '自定义音效',
+    audioCustomMusic: '自定义音乐',
+    audioUploadFile: '上传音频文件',
+    audioRemoveCustom: '移除自定义',
+    audioCustomActive: '已启用自定义',
+    animationReset: '恢复动画默认',
+    animationEffectsTitle: '动画效果',
+    performanceTitle: '性能与质量',
+    performanceReduceAnimations: '减少动画效果',
+    performanceDisableGlass: '禁用毛玻璃效果',
+    performanceLowResPreview: '低分辨率预览',
+    performanceLazyLoad: '延迟加载模块',
+    performanceDisableParticles: '禁用粒子效果',
+    performanceAggressiveCache: '激进缓存策略',
+    performanceDevMode: '开发者调试模式',
+    performanceImageQuality: '图像预览质量',
+    performanceImageQualityLow: '低',
+    performanceImageQualityMedium: '中',
+    performanceImageQualityHigh: '高',
+    performanceMaxConcurrent: '最大并发请求',
+    performanceReset: '恢复性能默认',
+    performanceHint: '关闭部分视觉效果可以提升低配置设备的流畅度。',
+    apiChannel1: '自定义 API 通道 1',
+    apiChannel2: '自定义 API 通道 2',
+    apiChannel3: '自定义 API 通道 3',
+    apiClearChannel: '清除此 API',
+    apiConfirmClear: '确定要清除此 API 配置吗？',
+    apiConfirmClearAgain: '请再次确认：此操作不可撤销，是否继续清除？',
+    othersTitle: '其他设置',
+    othersTooltips: '显示工具提示',
+    othersConfirmDestructive: '破坏性操作二次确认',
+    othersKeyboardHints: '显示键盘快捷键提示',
+    othersSmoothScroll: '平滑滚动',
+    othersNotificationSound: '通知声音',
+    othersAutoSave: '自动保存间隔（分钟，0 为关闭）',
+    othersDateFormat: '日期格式',
+    othersDateFormatIso: 'ISO',
+    othersDateFormatLocale: '本地',
+    othersDateFormatFriendly: '友好',
+    othersShowClock: '显示时钟',
+    othersStatusBar: '启用状态栏',
+    othersHighContrastFocus: '高对比度焦点框',
+    othersResetAll: '全部重刷',
+    othersRestoreDefaults: '恢复全部默认设置',
+    othersConfirmReset: '确定要重刷所有设置吗？此操作会清空当前所有配置。',
+    othersConfirmResetAgain: '请再次确认：全部重刷后所有自定义设置将丢失，是否继续？',
+    othersConfirmRestore: '确定要恢复全部默认设置吗？',
+    othersConfirmRestoreAgain: '请再次确认：恢复默认后所有自定义设置将被覆盖，是否继续？',
+    othersHint: '这些设置影响全局行为。',
+    othersLanguageSettings: '语言设置',
+    othersLanguageMissing: '如果没有你的母语，你可以在「关于」页点击作者按钮前往 GitHub 提交 Issue 或联系作者。',
+    styleSavePreset: '保存当前样式为预设',
+    stylePreset1: '预设 1',
+    stylePreset2: '预设 2',
+    stylePresetName: '预设名称',
+    stylePresetSaved: '预设已保存',
+    stylePresetSame: '当前样式与已有预设相同，无需保存。',
+    stylePresetUse: '使用此预设',
+    styleResetDefaults: '恢复样式默认',
+    confirmYes: '确认',
+    confirmNo: '取消',
+    confirmCancel: '取消',
+    toggleOn: '开',
+    toggleOff: '关',
   },
   ja: {
     appTitle: 'Original Character Maker',
@@ -511,10 +719,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'カスタムショートカットは実験的機能です。ブラウザや OS の予約ショートカットとの衝突に注意してください。',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.4.1.1 でアニメーション設定パネル、グローバルクリック音効、边框カスタマイズ、ADSR エンベロープ・パン・音楽リバーブなどの詳細オーディオコントロールを追加しました。',
-    announcementList1: '新しい「アニメーション」設定タブ：アニメーションの総合スイッチ、速度のステップレス調整、枠線の太さ、および UI フェードイン・ボタンホバー・ページ遷移・モーダル遷移の 4 つの個別スイッチをサポート。',
-    announcementList2: 'グローバルボタンクリック音：委譲イベントリスナーで button、a、choice-chip、palette-chip のすべての要素をカバー。詳細オーディオ合成コントロールに ADSR エンベロープ・パン・音楽リバーブを追加。',
-    announcementList3: '約 30 言語に同期更新。すべての新規フィールドが約 30 言語の翻訳に同期され、お知らせ履歴が多言語切り替えに対応。',
+    announcementDescription: '0.4.2.1 全ボタンSEカバー、40種BGMプリセットとパフォーマンス設定の機能化。',
+    announcementList1: 'グローバルSEフルカバー、BGMエンジンv5は40種のプリセットとルックアヘッド精密スケジューリングを採用。',
+    announcementList2: 'パフォーマンス設定が実際に機能：アニメーション削減でCSSアニメーション無効化、ガラス効果無効化でbackdrop-filter削除、開発者モードでリアルタイムデバッグパネル表示。',
+    announcementList3: '約30言語に同期更新。40個のBGMプリセット名が4つの基礎言語翻訳に同期。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -590,6 +798,36 @@ const translations: Record<BaseLanguage, Messages> = {
     musicMeditation: '瞑想',
     musicCyber: 'サイバー',
     musicLofi: 'ローファイ',
+    musicRock: 'ロック',
+    musicBlues: 'ブルース',
+    musicFolk: 'フォーク',
+    musicReggae: 'レゲエ',
+    musicFunk: 'ファンク',
+    musicSoul: 'ソウル',
+    musicGospel: 'ゴスペル',
+    musicCountry: 'カントリー',
+    musicCeltic: 'ケルト',
+    musicOriental: 'オリエンタル',
+    musicTribal: 'トライバル',
+    musicSpace: '宇宙',
+    musicUnderwater: '水中',
+    musicRain: '雨',
+    musicWindchime: '風鈴',
+    musicFireplace: '暖炉',
+    musicNight: '夜',
+    musicSunrise: '日の出',
+    musicDreamy: '夢幻',
+    musicEnergetic: 'エネルギー',
+    musicBattle: '戦闘',
+    musicAdventure: '冒険',
+    musicMystery: 'ミステリー',
+    musicRomantic: 'ロマンチック',
+    musicNostalgic: 'ノスタルジア',
+    musicHopeful: '希望',
+    musicEpic: 'エピック',
+    musicChill: 'チル',
+    musicStudy: '勉強',
+    musicFocus: '集中',
     audioSfxAttack: 'アタック',
     audioSfxDecay: 'ディケイ',
     audioSfxSustain: 'サステイン',
@@ -603,6 +841,75 @@ const translations: Record<BaseLanguage, Messages> = {
     fontCustomLabel: 'カスタムフォント',
     fontCustomHint: 'システムにインストール済みのフォント名を入力してください。',
     fontCustomPlaceholder: 'フォント名を入力（例: LXGW WenKai）',
+    tabPerformance: 'パフォーマンス',
+    tabOthers: 'その他',
+    audioResetSfx: 'SEをデフォルトに戻す',
+    audioResetMusic: 'BGMをデフォルトに戻す',
+    audioResetAdvanced: '詳細設定をデフォルトに戻す',
+    audioCustomSfx: 'カスタムSE',
+    audioCustomMusic: 'カスタムBGM',
+    audioUploadFile: '音声ファイルをアップロード',
+    audioRemoveCustom: 'カスタムを削除',
+    audioCustomActive: 'カスタム有効',
+    animationReset: 'アニメーションをデフォルトに戻す',
+    animationEffectsTitle: 'アニメーション効果',
+    performanceTitle: 'パフォーマンスと品質',
+    performanceReduceAnimations: 'アニメーションを減らす',
+    performanceDisableGlass: 'ガラス効果を無効化',
+    performanceLowResPreview: '低解像度プレビュー',
+    performanceLazyLoad: 'モジュールの遅延読み込み',
+    performanceDisableParticles: 'パーティクルを無効化',
+    performanceAggressiveCache: '積極的なキャッシュ',
+    performanceDevMode: '開発者デバッグモード',
+    performanceImageQuality: '画像プレビュー品質',
+    performanceImageQualityLow: '低',
+    performanceImageQualityMedium: '中',
+    performanceImageQualityHigh: '高',
+    performanceMaxConcurrent: '最大同時リクエスト数',
+    performanceReset: 'パフォーマンス設定をデフォルトに戻す',
+    performanceHint: '一部の視覚効果を無効にすると、低スペック端末での動作が軽快になります。',
+    apiChannel1: 'カスタムAPIチャンネル1',
+    apiChannel2: 'カスタムAPIチャンネル2',
+    apiChannel3: 'カスタムAPIチャンネル3',
+    apiClearChannel: 'このAPIをクリア',
+    apiConfirmClear: 'このAPI設定をクリアしますか？',
+    apiConfirmClearAgain: '再度確認：この操作は取り消せません。クリアを続行しますか？',
+    othersTitle: 'その他の設定',
+    othersTooltips: 'ツールチップを表示',
+    othersConfirmDestructive: '破壊的操作の二重確認',
+    othersKeyboardHints: 'キーボードショートカットヒントを表示',
+    othersSmoothScroll: 'スムーズスクロール',
+    othersNotificationSound: '通知音',
+    othersAutoSave: '自動保存間隔（分、0で無効）',
+    othersDateFormat: '日付形式',
+    othersDateFormatIso: 'ISO',
+    othersDateFormatLocale: 'ローカル',
+    othersDateFormatFriendly: 'フレンドリー',
+    othersShowClock: '時計を表示',
+    othersStatusBar: 'ステータスバーを有効化',
+    othersHighContrastFocus: '高コントラストフォーカス',
+    othersResetAll: 'すべてリセット',
+    othersRestoreDefaults: 'すべてデフォルトに戻す',
+    othersConfirmReset: 'すべての設定をリセットしますか？現在のすべての設定が消去されます。',
+    othersConfirmResetAgain: '再度確認：すべてリセットするとカスタム設定が失われます。続行しますか？',
+    othersConfirmRestore: 'すべての設定をデフォルトに戻しますか？',
+    othersConfirmRestoreAgain: '再度確認：デフォルトに戻すとカスタム設定が上書きされます。続行しますか？',
+    othersHint: 'これらの設定はグローバル動作に影響します。',
+    othersLanguageSettings: '言語設定',
+    othersLanguageMissing: '母語が見つからない場合は、「情報」ページで作者ボタンをクリックしてGitHubでIssueを提出するか、作者に連絡してください。',
+    styleSavePreset: '現在のスタイルをプリセットとして保存',
+    stylePreset1: 'プリセット1',
+    stylePreset2: 'プリセット2',
+    stylePresetName: 'プリセット名',
+    stylePresetSaved: 'プリセットを保存しました',
+    stylePresetSame: '現在のスタイルは既存のプリセットと同じです。',
+    stylePresetUse: 'このプリセットを使用',
+    styleResetDefaults: 'スタイルをデフォルトに戻す',
+    confirmYes: '確認',
+    confirmNo: 'キャンセル',
+    confirmCancel: 'キャンセル',
+    toggleOn: 'ON',
+    toggleOff: 'OFF',
   },
   en: {
     appTitle: 'Original Character Maker',
@@ -701,10 +1008,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Custom shortcuts are experimental. Avoid combinations that conflict with browser or system-reserved commands.',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.4.1.1 adds the Animation settings panel, global click sound effects, border thickness control, and advanced audio synthesis controls including ADSR envelope, pan, and music reverb.',
-    announcementList1: 'New "Animation" settings tab: supports animation master switch, stepless speed adjustment, border thickness, and independent toggles for UI fade-in, button hover, page transitions, and modal transitions.',
-    announcementList2: 'Global button click sounds cover all button, anchor, choice-chip, and palette-chip elements via a delegated event listener. Advanced audio synthesis adds ADSR envelope, pan, and music reverb controls.',
-    announcementList3: 'Synced to ~30 languages. All new fields have been synchronized across ~30 language translations, and announcement history supports multilingual switching.',
+    announcementDescription: 'Version 0.4.2.1: full button sound coverage, 40 BGM presets and performance settings functionalized.',
+    announcementList1: 'Global sound effects fully cover all interactions; BGM engine v5 upgrades to 40 presets with lookahead precision scheduling.',
+    announcementList2: 'Performance settings now actually work: reduce animations disables CSS animations, disable glassmorphism removes backdrop-filter, dev mode shows real-time debug panel.',
+    announcementList3: 'Synced to ~30 languages. 40 BGM preset names synchronized across 4 base language translations.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -780,6 +1087,36 @@ const translations: Record<BaseLanguage, Messages> = {
     musicMeditation: 'Meditation',
     musicCyber: 'Cyber',
     musicLofi: 'Lo-Fi',
+    musicRock: 'Rock',
+    musicBlues: 'Blues',
+    musicFolk: 'Folk',
+    musicReggae: 'Reggae',
+    musicFunk: 'Funk',
+    musicSoul: 'Soul',
+    musicGospel: 'Gospel',
+    musicCountry: 'Country',
+    musicCeltic: 'Celtic',
+    musicOriental: 'Oriental',
+    musicTribal: 'Tribal',
+    musicSpace: 'Space',
+    musicUnderwater: 'Underwater',
+    musicRain: 'Rain',
+    musicWindchime: 'Wind Chime',
+    musicFireplace: 'Fireplace',
+    musicNight: 'Night',
+    musicSunrise: 'Sunrise',
+    musicDreamy: 'Dreamy',
+    musicEnergetic: 'Energetic',
+    musicBattle: 'Battle',
+    musicAdventure: 'Adventure',
+    musicMystery: 'Mystery',
+    musicRomantic: 'Romantic',
+    musicNostalgic: 'Nostalgic',
+    musicHopeful: 'Hopeful',
+    musicEpic: 'Epic',
+    musicChill: 'Chill',
+    musicStudy: 'Study',
+    musicFocus: 'Focus',
     audioSfxAttack: 'Attack',
     audioSfxDecay: 'Decay',
     audioSfxSustain: 'Sustain',
@@ -793,6 +1130,75 @@ const translations: Record<BaseLanguage, Messages> = {
     fontCustomLabel: 'Custom Font',
     fontCustomHint: 'Enter a font name installed on your system, e.g. LXGW WenKai.',
     fontCustomPlaceholder: 'Enter font name, e.g. LXGW WenKai',
+    tabPerformance: 'Performance',
+    tabOthers: 'Others',
+    audioResetSfx: 'Reset SFX to Default',
+    audioResetMusic: 'Reset Music to Default',
+    audioResetAdvanced: 'Reset Advanced to Default',
+    audioCustomSfx: 'Custom SFX',
+    audioCustomMusic: 'Custom Music',
+    audioUploadFile: 'Upload Audio File',
+    audioRemoveCustom: 'Remove Custom',
+    audioCustomActive: 'Custom Active',
+    animationReset: 'Reset Animation to Default',
+    animationEffectsTitle: 'Animation Effects',
+    performanceTitle: 'Performance & Quality',
+    performanceReduceAnimations: 'Reduce Animations',
+    performanceDisableGlass: 'Disable Glassmorphism',
+    performanceLowResPreview: 'Low-Resolution Previews',
+    performanceLazyLoad: 'Lazy Load Modules',
+    performanceDisableParticles: 'Disable Particles',
+    performanceAggressiveCache: 'Aggressive Caching',
+    performanceDevMode: 'Developer Debug Mode',
+    performanceImageQuality: 'Image Preview Quality',
+    performanceImageQualityLow: 'Low',
+    performanceImageQualityMedium: 'Medium',
+    performanceImageQualityHigh: 'High',
+    performanceMaxConcurrent: 'Max Concurrent Requests',
+    performanceReset: 'Reset Performance Defaults',
+    performanceHint: 'Disabling some visual effects can improve performance on lower-end devices.',
+    apiChannel1: 'Custom API Channel 1',
+    apiChannel2: 'Custom API Channel 2',
+    apiChannel3: 'Custom API Channel 3',
+    apiClearChannel: 'Clear This API',
+    apiConfirmClear: 'Are you sure you want to clear this API configuration?',
+    apiConfirmClearAgain: 'Please confirm again: this action cannot be undone. Continue to clear?',
+    othersTitle: 'Other Settings',
+    othersTooltips: 'Show Tooltips',
+    othersConfirmDestructive: 'Double-Confirm Destructive Actions',
+    othersKeyboardHints: 'Show Keyboard Shortcut Hints',
+    othersSmoothScroll: 'Smooth Scrolling',
+    othersNotificationSound: 'Notification Sounds',
+    othersAutoSave: 'Auto-Save Interval (minutes, 0 = off)',
+    othersDateFormat: 'Date Format',
+    othersDateFormatIso: 'ISO',
+    othersDateFormatLocale: 'Locale',
+    othersDateFormatFriendly: 'Friendly',
+    othersShowClock: 'Show Clock',
+    othersStatusBar: 'Enable Status Bar',
+    othersHighContrastFocus: 'High-Contrast Focus Ring',
+    othersResetAll: 'Reset All',
+    othersRestoreDefaults: 'Restore All Defaults',
+    othersConfirmReset: 'Are you sure you want to reset all settings? This will clear all current configurations.',
+    othersConfirmResetAgain: 'Please confirm again: all custom settings will be lost after reset. Continue?',
+    othersConfirmRestore: 'Are you sure you want to restore all settings to default?',
+    othersConfirmRestoreAgain: 'Please confirm again: all custom settings will be overwritten. Continue?',
+    othersHint: 'These settings affect global behavior.',
+    othersLanguageSettings: 'Language Settings',
+    othersLanguageMissing: 'If your native language is missing, you can click the author button on the About page to go to GitHub and submit an issue or contact the author.',
+    styleSavePreset: 'Save Current Style as Preset',
+    stylePreset1: 'Preset 1',
+    stylePreset2: 'Preset 2',
+    stylePresetName: 'Preset Name',
+    stylePresetSaved: 'Preset Saved',
+    stylePresetSame: 'Current style is identical to an existing preset.',
+    stylePresetUse: 'Use This Preset',
+    styleResetDefaults: 'Reset Style Defaults',
+    confirmYes: 'Yes',
+    confirmNo: 'No',
+    confirmCancel: 'Cancel',
+    toggleOn: 'ON',
+    toggleOff: 'OFF',
   },
   ru: {
     appTitle: 'Original Character Maker',
@@ -891,10 +1297,10 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Пользовательские шорткаты являются экспериментальной функцией. Избегайте конфликтов с системными и браузерными сочетаниями.',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.4.1.1 добавляет панель настроек анимации, глобальные звуки кликов, настройку толщины рамки и расширенные аудио-контролы: ADSR-огибающая, панорама и реверберация музыки.',
-    announcementList1: 'Новая вкладка «Анимация»: поддерживает общий переключатель анимации, плавную регулировку скорости, толщину рамки и независимые переключатели для четырех эффектов.',
-    announcementList2: 'Глобальные звуки кнопок покрывают все элементы button, a, choice-chip и palette-chip через делегированный слушатель событий. Расширенный аудиосинтез добавляет ADSR, панораму и реверб.',
-    announcementList3: 'Синхронизировано с ~30 языками. Все новые поля синхронизированы для переводов на ~30 языков, а история объявлений поддерживает многоязычное переключение.',
+    announcementDescription: 'Версия 0.4.2.1: полное покрытие звуками всех кнопок, 40 пресетов BGM и функционализация настроек производительности.',
+    announcementList1: 'Глобальные звуковые эффекты полностью покрывают все взаимодействия; движок BGM v5 обновлён до 40 пресетов с точным планированием lookahead.',
+    announcementList2: 'Настройки производительности теперь реально работают: уменьшение анимации отключает CSS-анимации, отключение стеклянного эффекта удаляет backdrop-filter, режим разработчика показывает панель отладки в реальном времени.',
+    announcementList3: 'Синхронизировано с ~30 языками. 40 названий пресетов BGM синхронизированы для 4 базовых языков перевода.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -970,6 +1376,36 @@ const translations: Record<BaseLanguage, Messages> = {
     musicMeditation: 'Медитация',
     musicCyber: 'Кибер',
     musicLofi: 'Лоу-фай',
+    musicRock: 'Рок',
+    musicBlues: 'Блюз',
+    musicFolk: 'Фолк',
+    musicReggae: 'Регги',
+    musicFunk: 'Фанк',
+    musicSoul: 'Соул',
+    musicGospel: 'Госпел',
+    musicCountry: 'Кантри',
+    musicCeltic: 'Кельтская',
+    musicOriental: 'Восточная',
+    musicTribal: 'Трайбл',
+    musicSpace: 'Космос',
+    musicUnderwater: 'Под водой',
+    musicRain: 'Дождь',
+    musicWindchime: 'Колокольчики',
+    musicFireplace: 'Камин',
+    musicNight: 'Ночь',
+    musicSunrise: 'Рассвет',
+    musicDreamy: 'Мечтательная',
+    musicEnergetic: 'Энергичная',
+    musicBattle: 'Битва',
+    musicAdventure: 'Приключение',
+    musicMystery: 'Тайна',
+    musicRomantic: 'Романтика',
+    musicNostalgic: 'Ностальгия',
+    musicHopeful: 'Надежда',
+    musicEpic: 'Эпика',
+    musicChill: 'Чилл',
+    musicStudy: 'Учёба',
+    musicFocus: 'Фокус',
     audioSfxAttack: 'Атака',
     audioSfxDecay: 'Спад',
     audioSfxSustain: 'Удержание',
@@ -983,6 +1419,75 @@ const translations: Record<BaseLanguage, Messages> = {
     fontCustomLabel: 'Пользовательский шрифт',
     fontCustomHint: 'Введите название шрифта, установленного в вашей системе.',
     fontCustomPlaceholder: 'Название шрифта, например: LXGW WenKai',
+    tabPerformance: 'Производительность',
+    tabOthers: 'Другое',
+    audioResetSfx: 'Сбросить SFX по умолчанию',
+    audioResetMusic: 'Сбросить музыку по умолчанию',
+    audioResetAdvanced: 'Сбросить расширенные настройки',
+    audioCustomSfx: 'Пользовательские SFX',
+    audioCustomMusic: 'Пользовательская музыка',
+    audioUploadFile: 'Загрузить аудиофайл',
+    audioRemoveCustom: 'Удалить пользовательское',
+    audioCustomActive: 'Пользовательское активно',
+    animationReset: 'Сбросить анимацию по умолчанию',
+    animationEffectsTitle: 'Эффекты анимации',
+    performanceTitle: 'Производительность и качество',
+    performanceReduceAnimations: 'Уменьшить анимацию',
+    performanceDisableGlass: 'Отключить стеклянный эффект',
+    performanceLowResPreview: 'Предпросмотр низкого разрешения',
+    performanceLazyLoad: 'Ленивая загрузка модулей',
+    performanceDisableParticles: 'Отключить частицы',
+    performanceAggressiveCache: 'Агрессивное кеширование',
+    performanceDevMode: 'Режим отладки разработчика',
+    performanceImageQuality: 'Качество предпросмотра изображений',
+    performanceImageQualityLow: 'Низкое',
+    performanceImageQualityMedium: 'Среднее',
+    performanceImageQualityHigh: 'Высокое',
+    performanceMaxConcurrent: 'Макс. одновременных запросов',
+    performanceReset: 'Сбросить настройки производительности',
+    performanceHint: 'Отключение некоторых визуальных эффектов может улучшить производительность на слабых устройствах.',
+    apiChannel1: 'Пользовательский API канал 1',
+    apiChannel2: 'Пользовательский API канал 2',
+    apiChannel3: 'Пользовательский API канал 3',
+    apiClearChannel: 'Очистить этот API',
+    apiConfirmClear: 'Вы уверены, что хотите очистить эту конфигурацию API?',
+    apiConfirmClearAgain: 'Пожалуйста, подтвердите ещё раз: это действие нельзя отменить. Продолжить очистку?',
+    othersTitle: 'Другие настройки',
+    othersTooltips: 'Показывать подсказки',
+    othersConfirmDestructive: 'Двойное подтверждение разрушительных действий',
+    othersKeyboardHints: 'Показывать подсказки горячих клавиш',
+    othersSmoothScroll: 'Плавная прокрутка',
+    othersNotificationSound: 'Звук уведомлений',
+    othersAutoSave: 'Интервал автосохранения (мин, 0 = выкл)',
+    othersDateFormat: 'Формат даты',
+    othersDateFormatIso: 'ISO',
+    othersDateFormatLocale: 'Локальный',
+    othersDateFormatFriendly: 'Дружелюбный',
+    othersShowClock: 'Показывать часы',
+    othersStatusBar: 'Включить строку состояния',
+    othersHighContrastFocus: 'Высококонтрастное выделение фокуса',
+    othersResetAll: 'Сбросить всё',
+    othersRestoreDefaults: 'Восстановить все настройки по умолчанию',
+    othersConfirmReset: 'Вы уверены, что хотите сбросить все настройки? Это удалит все текущие конфигурации.',
+    othersConfirmResetAgain: 'Пожалуйста, подтвердите ещё раз: все пользовательские настройки будут потеряны. Продолжить?',
+    othersConfirmRestore: 'Вы уверены, что хотите восстановить все настройки по умолчанию?',
+    othersConfirmRestoreAgain: 'Пожалуйста, подтвердите ещё раз: все пользовательские настройки будут перезаписаны. Продолжить?',
+    othersHint: 'Эти настройки влияют на глобальное поведение.',
+    othersLanguageSettings: 'Настройки языка',
+    othersLanguageMissing: 'Если вашего родного языка нет, вы можете нажать кнопку автора на странице «О проекте», чтобы перейти на GitHub и отправить issue или связаться с автором.',
+    styleSavePreset: 'Сохранить текущий стиль как пресет',
+    stylePreset1: 'Пресет 1',
+    stylePreset2: 'Пресет 2',
+    stylePresetName: 'Название пресета',
+    stylePresetSaved: 'Пресет сохранён',
+    stylePresetSame: 'Текущий стиль идентичен существующему пресету.',
+    stylePresetUse: 'Использовать этот пресет',
+    styleResetDefaults: 'Сбросить стиль по умолчанию',
+    confirmYes: 'Да',
+    confirmNo: 'Нет',
+    confirmCancel: 'Отмена',
+    toggleOn: 'ВКЛ',
+    toggleOff: 'ВЫКЛ',
   },
 };
 
@@ -1532,6 +2037,34 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.4.2.1',
+    date: '2026-04-20',
+    title: '0.4.2.1 全按钮音效覆盖、40 种 BGM 预设与性能设置功能化',
+    summary: '全局交互音效实现真正全覆盖，背景音乐引擎升级至 v5 并扩展至 40 种风格预设，性能设置各项选项现已真正生效。',
+    details: [
+      '全局音效全覆盖：所有按钮、链接、切换开关、滑块、复选框、选择框、标签页和弹窗按钮均触发对应音效（确认/关闭/切换/滑动等），不再有静音交互。',
+      '背景音乐引擎 v5：采用 Web Audio API 前瞻式调度（lookahead scheduling），实现毫秒级精准的音符时序；新增 30 种风格预设，总计 40 种（摇滚、蓝调、民谣、雷鬼、放克、灵魂乐、福音、乡村、凯尔特、东方、部落、太空、水下、雨声、风铃、壁炉、夜晚、日出、梦幻、活力、战斗、冒险、神秘、浪漫、怀旧、希望、史诗、放松、学习、专注）。',
+      '性能设置功能化：「减少动画」会强制禁用所有 CSS 动画与过渡；「禁用毛玻璃」会移除所有 backdrop-filter；「低分辨率预览」会降级图像渲染；「开发者模式」会在界面右下角显示实时调试面板，展示版本、语言、预设、音效、API 等全部运行状态。',
+      '30 种语言同步更新：新增 30 个 BGM 预设名称已同步到 4 种基础语言翻译中。',
+    ],
+  },
+  {
+    version: '0.4.2',
+    date: '2026-04-20',
+    title: '0.4.2 音乐引擎重写、性能与其他设置、API 多通道与样式预设保存',
+    summary: '全面重写背景音乐引擎，新增「性能」与「其他」设置标签页，支持 3 个自定义 API 通道与双次确认清除，音频支持自定义文件上传，样式预设支持保存与加载，动画与音频各区域新增恢复默认按钮。',
+    details: [
+      '背景音乐引擎 v4 全面重写：新增打击乐节奏层、更丰富的和弦进行、立体声像分布和低音线，所有 10 种风格预设音质大幅提升。',
+      '新增「性能」设置标签页：提供减少动画、禁用毛玻璃、低分辨率预览、延迟加载、禁用粒子、激进缓存、开发者模式、图像预览质量和最大并发请求数等选项。',
+      '新增「其他」设置标签页：包含语言设置提示、工具提示、二次确认、键盘快捷键提示、平滑滚动、通知声音、自动保存间隔、日期格式、时钟、状态栏、高对比度焦点等选项，以及「全部重刷」和「恢复全部默认」双次确认按钮。',
+      'API 设置扩展为 3 个自定义通道：每个通道独立配置 baseUrl 和 apiKey，支持带双次确认的快速清除按钮。',
+      '音频支持自定义文件上传：音效和音乐均可上传本地音频文件，上传后可通过开关启用或禁用自定义音频。',
+      '样式预设保存功能：支持将当前样式保存为「预设 1」或「预设 2」，可自定义命名，保存时检测重复并提示。',
+      '音频和动画各区域新增「恢复默认」按钮，动画效果标题由硬编码英文改为本地化文本。',
+      '30 种语言同步更新，所有新增字段已同步到 4 种基础语言翻译中。',
+    ],
+  },
+  {
     version: '0.4.1.1',
     date: '2026-04-20',
     title: '0.4.1.1 动画设置面板、全局音效与边框自定义',
@@ -1806,6 +2339,10 @@ const defaultSettings: SettingsState = {
   apiPreset: 'plato',
   apiBaseUrl: '',
   apiKey: '',
+  apiBaseUrl2: '',
+  apiKey2: '',
+  apiBaseUrl3: '',
+  apiKey3: '',
   fontPreset: 'sans',
   shortcutMap: defaultShortcutMap,
   audio: { ...defaultAudioSettings },
@@ -1817,6 +2354,30 @@ const defaultSettings: SettingsState = {
     pageTransitions: true,
     modalTransitions: true,
   },
+  performance: {
+    reduceAnimations: false,
+    disableGlassmorphism: false,
+    lowResolutionPreviews: false,
+    lazyLoadModules: false,
+    disableParticles: false,
+    aggressiveCaching: false,
+    devMode: false,
+    imagePreviewQuality: 'high',
+    maxConcurrentRequests: 4,
+  },
+  others: {
+    showTooltips: true,
+    confirmDestructiveActions: true,
+    showKeyboardHints: true,
+    smoothScroll: true,
+    enableNotificationSound: true,
+    autoSaveInterval: 0,
+    dateFormat: 'locale',
+    showClock: false,
+    enableStatusBar: false,
+    highContrastFocus: false,
+  },
+  savedPresets: [null, null],
 };
 
 function loadInitialSettings(): SettingsState {
@@ -1837,8 +2398,14 @@ function loadInitialSettings(): SettingsState {
       nextSettings.fontPreset = 'sans';
     }
 
-    if (nextSettings.apiPreset !== 'plato') {
+    const validApiPresets = ['plato', 'custom1', 'custom2', 'custom3'];
+    if (!validApiPresets.includes(nextSettings.apiPreset)) {
       nextSettings.apiPreset = 'plato';
+    }
+
+    const validStylePresets = ['default', 'paper2gal', 'preset1', 'preset2'];
+    if (!validStylePresets.includes(nextSettings.stylePreset)) {
+      nextSettings.stylePreset = defaultSettings.stylePreset;
     }
 
     if (!/^#[0-9a-fA-F]{6}$/.test(nextSettings.customAccentColor)) {
@@ -1871,10 +2438,34 @@ function loadInitialSettings(): SettingsState {
     }
     nextSettings.animation.speed = Math.min(200, Math.max(20, Math.round(nextSettings.animation.speed)));
 
+    if (!nextSettings.performance || typeof nextSettings.performance !== 'object') {
+      nextSettings.performance = { ...defaultSettings.performance };
+    } else {
+      nextSettings.performance = { ...defaultSettings.performance, ...nextSettings.performance };
+    }
+
+    if (!nextSettings.others || typeof nextSettings.others !== 'object') {
+      nextSettings.others = { ...defaultSettings.others };
+    } else {
+      nextSettings.others = { ...defaultSettings.others, ...nextSettings.others };
+    }
+
+    if (!Array.isArray(nextSettings.savedPresets) || nextSettings.savedPresets.length !== 2) {
+      nextSettings.savedPresets = [null, null];
+    }
+
     if (typeof nextSettings.borderWidth !== 'number' || Number.isNaN(nextSettings.borderWidth)) {
       nextSettings.borderWidth = defaultSettings.borderWidth;
     }
     nextSettings.borderWidth = Math.min(4, Math.max(1, Math.round(nextSettings.borderWidth)));
+
+    // API channels fallback
+    if (typeof nextSettings.apiBaseUrl !== 'string') nextSettings.apiBaseUrl = '';
+    if (typeof nextSettings.apiKey !== 'string') nextSettings.apiKey = '';
+    if (typeof nextSettings.apiBaseUrl2 !== 'string') nextSettings.apiBaseUrl2 = '';
+    if (typeof nextSettings.apiKey2 !== 'string') nextSettings.apiKey2 = '';
+    if (typeof nextSettings.apiBaseUrl3 !== 'string') nextSettings.apiBaseUrl3 = '';
+    if (typeof nextSettings.apiKey3 !== 'string') nextSettings.apiKey3 = '';
 
     updateAudioSettings(nextSettings.audio);
     return nextSettings;
@@ -1900,36 +2491,38 @@ function App() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
-  // Global delegated click sound for interactive elements
+  // Global delegated click sound for ALL interactive elements
   useEffect(() => {
     if (!settings.audio.sfxEnabled || !settings.audio.soundOnInteract) {
       return;
     }
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (
-        target.closest('button') ||
-        target.closest('a') ||
-        target.closest('[role="button"]') ||
-        target.closest('.choice-chip') ||
-        target.closest('.palette-chip') ||
-        target.closest('.asset-card') ||
-        target.closest('.tool-dot') ||
-        target.closest('.workflow-entry-button') ||
-        target.closest('.toolbar-button') ||
-        target.closest('.toggle-chip') ||
-        target.closest('.settings-tab') ||
-        target.closest('.modal-close') ||
-        target.closest('.link-list a') ||
-        target.closest('.back-link') ||
-        target.closest('.action-tile') ||
-        target.closest('.primary-button') ||
-        target.closest('.secondary-button') ||
-        target.closest('input[type="checkbox"]') ||
-        target.closest('input[type="radio"]') ||
-        target.closest('select') ||
-        target.closest('label')
-      ) {
+      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], select, label, textarea, .announcement-entry');
+      if (!el) return;
+
+      // Determine appropriate sound based on element type and context
+      const isClose = el.classList.contains('modal-close') || (el as HTMLElement).getAttribute('aria-label') === 'Close';
+      const isToggleOn = el.classList.contains('active') && (el.classList.contains('choice-chip') || el.classList.contains('palette-chip'));
+      const isBack = el.classList.contains('back-link') || (el as HTMLElement).textContent?.includes('返回');
+      const isConfirm = el.classList.contains('primary-button');
+      const isSlider = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'range';
+      const isCheckbox = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'checkbox';
+
+      if (isClose) {
+        playSound('modalClose');
+      } else if (isSlider) {
+        playSound('sliderChange');
+      } else if (isCheckbox) {
+        const cb = el as HTMLInputElement;
+        playSound(cb.checked ? 'toggleOn' : 'toggleOff');
+      } else if (isBack) {
+        playSound('back');
+      } else if (isConfirm) {
+        playSound('confirm');
+      } else if (isToggleOn) {
+        playSound('toggleOn');
+      } else {
         playSound('buttonClick');
       }
     };
@@ -1955,7 +2548,11 @@ function App() {
     `depth-${effectiveDepth}`,
     `accent-${effectiveAccent}`,
     `font-${settings.fontPreset}`,
-  ].join(' ');
+    settings.performance.reduceAnimations ? 'perf-no-anim' : '',
+    settings.performance.disableGlassmorphism ? 'perf-no-glass' : '',
+    settings.performance.devMode ? 'perf-dev-mode' : '',
+    settings.performance.lowResolutionPreviews ? 'perf-low-res' : '',
+  ].filter(Boolean).join(' ');
   const appStyle = {
     ['--ui-contrast' as string]: `${settings.contrast}%`,
     ['--border-width' as string]: `${settings.borderWidth}px`,
@@ -2069,6 +2666,25 @@ function App() {
           onClose={() => setIsSettingsOpen(false)}
           onUpdate={updateSettings}
         />
+      )}
+
+      {/* Dev Mode Debug Overlay */}
+      {settings.performance.devMode && (
+        <div style={{
+          position: 'fixed', bottom: 8, left: 8, right: 8, maxHeight: 180,
+          background: 'rgba(0,0,0,0.85)', color: '#0f0', fontFamily: 'monospace',
+          fontSize: 11, padding: 10, borderRadius: 6, zIndex: 9998,
+          overflow: 'auto', lineHeight: 1.5, border: '1px solid #0f0',
+        }}>
+          <strong style={{ color: '#ff0' }}>DEV MODE</strong>
+          <div>ver: {VERSION} | lang: {settings.language} | preset: {settings.stylePreset}</div>
+          <div>depth: {settings.depth} | accent: {settings.accent} | font: {settings.fontPreset}</div>
+          <div>contrast: {settings.contrast}% | border: {settings.borderWidth}px | anim: {settings.animation.speed}%</div>
+          <div>sfx: {settings.audio.sfxPreset} | music: {settings.audio.musicPreset} | vol: {settings.audio.masterVolume}%</div>
+          <div>perf: reduceAnim={settings.performance.reduceAnimations ? 'Y' : 'N'} noGlass={settings.performance.disableGlassmorphism ? 'Y' : 'N'} lowRes={settings.performance.lowResolutionPreviews ? 'Y' : 'N'}</div>
+          <div>api: {settings.interfaceMode} | endpoint: {effectiveApiEndpoint || 'none'}</div>
+          <div>savedPresets: [{settings.savedPresets[0]?.name ?? '-'}, {settings.savedPresets[1]?.name ?? '-'}]</div>
+        </div>
       )}
     </div>
   );
@@ -2917,8 +3533,10 @@ function SettingsModal({
     { key: 'language', label: messages.tabLanguage },
     { key: 'audio', label: messages.tabAudio },
     { key: 'animation', label: messages.tabAnimation },
+    { key: 'performance', label: messages.tabPerformance },
     { key: 'api', label: messages.tabApi },
     { key: 'shortcuts', label: messages.tabShortcuts },
+    { key: 'others', label: messages.tabOthers },
     { key: 'announcement', label: messages.tabAnnouncement },
     { key: 'about', label: messages.tabAbout },
   ];
@@ -2928,6 +3546,22 @@ function SettingsModal({
   const shortcutEntries = Object.entries(settings.shortcutMap) as Array<[ShortcutAction, string]>;
   const [shortcutBuilderAction, setShortcutBuilderAction] = useState<ShortcutAction>('saveDocument');
   const [shortcutBuilderValue, setShortcutBuilderValue] = useState('');
+
+  // Confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    step: 1 | 2;
+    onConfirm: () => void;
+  }>({ open: false, title: '', message: '', step: 1, onConfirm: () => {} });
+
+  // Preset save dialog state
+  const [presetDialog, setPresetDialog] = useState<{
+    open: boolean;
+    slot: 0 | 1;
+    name: string;
+  }>({ open: false, slot: 0, name: '' });
 
   const selectedAnnouncement =
     announcementHistory.find((item) => item.version === selectedAnnouncementVersion) ?? announcementHistory[0];
@@ -2953,6 +3587,125 @@ function SettingsModal({
         [shortcutBuilderAction]: nextValue,
       },
     });
+  }
+
+  function openConfirm(title: string, message: string, onConfirm: () => void) {
+    setConfirmDialog({ open: true, title, message, step: 1, onConfirm });
+  }
+
+  function handleConfirmStep() {
+    if (confirmDialog.step === 1) {
+      const secondMessage = confirmDialog.title.includes(messages.apiClearChannel)
+        ? messages.apiConfirmClearAgain
+        : confirmDialog.title.includes(messages.othersResetAll)
+        ? messages.othersConfirmResetAgain
+        : messages.othersConfirmRestoreAgain;
+      setConfirmDialog((d) => ({ ...d, step: 2, message: secondMessage }));
+    } else {
+      setConfirmDialog((d) => ({ ...d, open: false }));
+      confirmDialog.onConfirm();
+    }
+  }
+
+  function handleUploadAudio(type: 'sfx' | 'music', file: File) {
+    if (!file.type.startsWith('audio/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      if (type === 'sfx') {
+        onUpdate({
+          audio: {
+            ...settings.audio,
+            useCustomSfx: true,
+            customSfxDataUrl: dataUrl,
+            customSfxName: file.name,
+          },
+        });
+        import('./audioEngine').then((m) => m.setCustomSfx(dataUrl));
+      } else {
+        onUpdate({
+          audio: {
+            ...settings.audio,
+            useCustomMusic: true,
+            customMusicDataUrl: dataUrl,
+            customMusicName: file.name,
+          },
+        });
+        import('./audioEngine').then((m) => m.setCustomMusic(dataUrl));
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleRemoveCustomAudio(type: 'sfx' | 'music') {
+    if (type === 'sfx') {
+      onUpdate({
+        audio: {
+          ...settings.audio,
+          useCustomSfx: false,
+          customSfxDataUrl: null,
+          customSfxName: '',
+        },
+      });
+      import('./audioEngine').then((m) => m.setCustomSfx(null));
+    } else {
+      onUpdate({
+        audio: {
+          ...settings.audio,
+          useCustomMusic: false,
+          customMusicDataUrl: null,
+          customMusicName: '',
+        },
+      });
+      import('./audioEngine').then((m) => m.setCustomMusic(null));
+    }
+  }
+
+  function savePresetSlot(slot: 0 | 1, name: string) {
+    const preset: SavedStylePreset = {
+      name: name || (slot === 0 ? messages.stylePreset1 : messages.stylePreset2),
+      stylePreset: settings.stylePreset,
+      depth: settings.depth,
+      accent: settings.accent,
+      customAccentColor: settings.customAccentColor,
+      contrast: settings.contrast,
+      borderWidth: settings.borderWidth,
+      fontPreset: settings.fontPreset,
+      customFontFamily: settings.customFontFamily,
+    };
+    const nextPresets: [SavedStylePreset | null, SavedStylePreset | null] = [...settings.savedPresets];
+    nextPresets[slot] = preset;
+    onUpdate({ savedPresets: nextPresets });
+    setPresetDialog({ open: false, slot: 0, name: '' });
+  }
+
+  function loadPresetSlot(slot: 0 | 1) {
+    const preset = settings.savedPresets[slot];
+    if (!preset) return;
+    onUpdate({
+      stylePreset: slot === 0 ? 'preset1' : 'preset2',
+      depth: preset.depth,
+      accent: preset.accent,
+      customAccentColor: preset.customAccentColor,
+      contrast: preset.contrast,
+      borderWidth: preset.borderWidth,
+      fontPreset: preset.fontPreset,
+      customFontFamily: preset.customFontFamily,
+    });
+  }
+
+  function isPresetSameAsCurrent(slot: 0 | 1): boolean {
+    const preset = settings.savedPresets[slot];
+    if (!preset) return false;
+    return (
+      preset.depth === settings.depth &&
+      preset.accent === settings.accent &&
+      preset.customAccentColor === settings.customAccentColor &&
+      preset.contrast === settings.contrast &&
+      preset.borderWidth === settings.borderWidth &&
+      preset.fontPreset === settings.fontPreset &&
+      preset.customFontFamily === settings.customFontFamily
+    );
   }
 
   return (
@@ -2998,6 +3751,18 @@ function SettingsModal({
                     >
                       {messages.stylePresetPaper2Gal}
                     </button>
+                    {settings.savedPresets.map((preset, slot) => (
+                      preset && (
+                        <button
+                          key={slot}
+                          className={`choice-chip ${settings.stylePreset === `preset${slot + 1}` as StylePreset ? 'active' : ''}`}
+                          type="button"
+                          onClick={() => loadPresetSlot(slot as 0 | 1)}
+                        >
+                          {preset.name}
+                        </button>
+                      )
+                    ))}
                   </div>
                 </section>
 
@@ -3117,6 +3882,32 @@ function SettingsModal({
                     <p>{messages.styleLockedDescription}</p>
                   </section>
                 )}
+
+                <section className="settings-section">
+                  <h3>{messages.styleSavePreset}</h3>
+                  <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                    {[0, 1].map((slot) => {
+                      const preset = settings.savedPresets[slot];
+                      const isSame = isPresetSameAsCurrent(slot);
+                      return (
+                        <button
+                          key={slot}
+                          className="palette-chip"
+                          type="button"
+                          style={preset ? {} : { opacity: 0.5 }}
+                          onClick={() => preset ? loadPresetSlot(slot as 0 | 1) : setPresetDialog({ open: true, slot: slot as 0 | 1, name: '' })}
+                        >
+                          {preset ? `${messages.stylePresetUse}: ${preset.name}` : (slot === 0 ? messages.stylePreset1 : messages.stylePreset2)}
+                          {isSame && <span className="tiny-copy" style={{ marginLeft: 6 }}>✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="tool-actions-row" style={{ marginTop: 8 }}>
+                    <button className="secondary-button" type="button" onClick={() => setPresetDialog({ open: true, slot: 0, name: '' })}>{messages.styleSavePreset}</button>
+                    <button className="secondary-button" type="button" onClick={() => onUpdate({ stylePreset: defaultSettings.stylePreset, depth: defaultSettings.depth, accent: defaultSettings.accent, customAccentColor: defaultSettings.customAccentColor, contrast: defaultSettings.contrast, borderWidth: defaultSettings.borderWidth, fontPreset: defaultSettings.fontPreset, customFontFamily: defaultSettings.customFontFamily })}>{messages.styleResetDefaults}</button>
+                  </div>
+                </section>
               </>
             )}
 
@@ -3135,6 +3926,7 @@ function SettingsModal({
                     </button>
                   ))}
                 </div>
+                <p className="muted-copy" style={{ marginTop: 12 }}>{messages.othersLanguageMissing}</p>
               </section>
             )}
 
@@ -3166,8 +3958,8 @@ function SettingsModal({
                     ))}
                   </div>
                   <div className="chip-row" style={{ marginTop: 8 }}>
-                    <button className={`choice-chip ${settings.audio.sfxEnabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxEnabled: true } })}>ON</button>
-                    <button className={`choice-chip ${!settings.audio.sfxEnabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxEnabled: false } })}>OFF</button>
+                    <button className={`choice-chip ${settings.audio.sfxEnabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxEnabled: true } })}>{messages.toggleOn}</button>
+                    <button className={`choice-chip ${!settings.audio.sfxEnabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxEnabled: false } })}>{messages.toggleOff}</button>
                   </div>
                   <div className="chip-row" style={{ marginTop: 8 }}>
                     <button className={`choice-chip ${settings.audio.soundOnInteract ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, soundOnInteract: true } })}>{messages.audioSoundOnInteractOn}</button>
@@ -3221,6 +4013,9 @@ function SettingsModal({
                       </button>
                     ))}
                   </div>
+                  <div className="tool-actions-row" style={{ marginTop: 12 }}>
+                    <button className="secondary-button" type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxPreset: defaultAudioSettings.sfxPreset, sfxEnabled: defaultAudioSettings.sfxEnabled, sfxVolume: defaultAudioSettings.sfxVolume, sfxPitch: defaultAudioSettings.sfxPitch, sfxDurationScale: defaultAudioSettings.sfxDurationScale, sfxFilterFreq: defaultAudioSettings.sfxFilterFreq, sfxDetune: defaultAudioSettings.sfxDetune, sfxReverb: defaultAudioSettings.sfxReverb, sfxAttack: defaultAudioSettings.sfxAttack, sfxDecay: defaultAudioSettings.sfxDecay, sfxSustain: defaultAudioSettings.sfxSustain, sfxRelease: defaultAudioSettings.sfxRelease, sfxPan: defaultAudioSettings.sfxPan } })}>{messages.audioResetSfx}</button>
+                  </div>
                 </section>
 
                 <section className="settings-section">
@@ -3238,8 +4033,8 @@ function SettingsModal({
                     ))}
                   </div>
                   <div className="chip-row" style={{ marginTop: 8 }}>
-                    <button className={`choice-chip ${settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: true } }); startMusic(); }}>ON</button>
-                    <button className={`choice-chip ${!settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: false } }); stopMusic(); }}>OFF</button>
+                    <button className={`choice-chip ${settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: true } }); startMusic(); }}>{messages.toggleOn}</button>
+                    <button className={`choice-chip ${!settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: false } }); stopMusic(); }}>{messages.toggleOff}</button>
                   </div>
                   <div className="contrast-slider-row" style={{ marginTop: 8 }}>
                     <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.musicVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicVolume: Number(e.target.value) } })} />
@@ -3259,6 +4054,53 @@ function SettingsModal({
                       </div>
                     </div>
                   </div>
+                  <div className="tool-actions-row" style={{ marginTop: 12 }}>
+                    <button className="secondary-button" type="button" onClick={() => onUpdate({ audio: { ...settings.audio, musicPreset: defaultAudioSettings.musicPreset, musicEnabled: defaultAudioSettings.musicEnabled, musicVolume: defaultAudioSettings.musicVolume, musicPitch: defaultAudioSettings.musicPitch, musicTempo: defaultAudioSettings.musicTempo, musicReverb: defaultAudioSettings.musicReverb, musicFilter: defaultAudioSettings.musicFilter, musicStereoWidth: defaultAudioSettings.musicStereoWidth } })}>{messages.audioResetMusic}</button>
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.audioCustomSfx}</h3>
+                  <div className="chip-row">
+                    <label className="primary-button" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadAudio('sfx', f); }} />
+                      {messages.audioUploadFile}
+                    </label>
+                    {settings.audio.customSfxName && (
+                      <span className="muted-copy" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {settings.audio.customSfxName}
+                        <button className="secondary-button" type="button" onClick={() => handleRemoveCustomAudio('sfx')}>{messages.audioRemoveCustom}</button>
+                      </span>
+                    )}
+                  </div>
+                  {settings.audio.customSfxDataUrl && (
+                    <div className="chip-row" style={{ marginTop: 8 }}>
+                      <button className={`choice-chip ${settings.audio.useCustomSfx ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, useCustomSfx: true } })}>{messages.audioCustomActive}</button>
+                      <button className={`choice-chip ${!settings.audio.useCustomSfx ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, useCustomSfx: false } })}>{messages.toggleOff}</button>
+                    </div>
+                  )}
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.audioCustomMusic}</h3>
+                  <div className="chip-row">
+                    <label className="primary-button" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadAudio('music', f); }} />
+                      {messages.audioUploadFile}
+                    </label>
+                    {settings.audio.customMusicName && (
+                      <span className="muted-copy" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {settings.audio.customMusicName}
+                        <button className="secondary-button" type="button" onClick={() => handleRemoveCustomAudio('music')}>{messages.audioRemoveCustom}</button>
+                      </span>
+                    )}
+                  </div>
+                  {settings.audio.customMusicDataUrl && (
+                    <div className="chip-row" style={{ marginTop: 8 }}>
+                      <button className={`choice-chip ${settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: true } }); startMusic(); }}>{messages.audioCustomActive}</button>
+                      <button className={`choice-chip ${!settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: false } }); stopMusic(); }}>{messages.toggleOff}</button>
+                    </div>
+                  )}
                 </section>
 
                 <section className="settings-section">
@@ -3301,6 +4143,9 @@ function SettingsModal({
                       </div>
                     </div>
                   </div>
+                  <div className="tool-actions-row" style={{ marginTop: 12 }}>
+                    <button className="secondary-button" type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxAttack: defaultAudioSettings.sfxAttack, sfxDecay: defaultAudioSettings.sfxDecay, sfxSustain: defaultAudioSettings.sfxSustain, sfxRelease: defaultAudioSettings.sfxRelease, sfxPan: defaultAudioSettings.sfxPan, musicReverb: defaultAudioSettings.musicReverb } })}>{messages.audioResetAdvanced}</button>
+                  </div>
                 </section>
 
                 <p className="muted-copy">{messages.audioHint}</p>
@@ -3312,8 +4157,8 @@ function SettingsModal({
                 <section className="settings-section">
                   <h3>{messages.animationTitle}</h3>
                   <div className="chip-row">
-                    <button className={`choice-chip ${settings.animation.enabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ animation: { ...settings.animation, enabled: true } })}>ON</button>
-                    <button className={`choice-chip ${!settings.animation.enabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ animation: { ...settings.animation, enabled: false } })}>OFF</button>
+                    <button className={`choice-chip ${settings.animation.enabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ animation: { ...settings.animation, enabled: true } })}>{messages.toggleOn}</button>
+                    <button className={`choice-chip ${!settings.animation.enabled ? 'active' : ''}`} type="button" onClick={() => onUpdate({ animation: { ...settings.animation, enabled: false } })}>{messages.toggleOff}</button>
                   </div>
                   <p className="muted-copy" style={{ marginTop: 10 }}>{messages.animationEnabled}</p>
                 </section>
@@ -3339,7 +4184,7 @@ function SettingsModal({
                 </section>
 
                 <section className="settings-section">
-                  <h3>Animation Effects</h3>
+                  <h3>{messages.animationEffectsTitle}</h3>
                   <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
                     {[
                       { key: 'uiFadeIn', label: messages.animationUiFadeIn },
@@ -3358,6 +4203,10 @@ function SettingsModal({
                     ))}
                   </div>
                 </section>
+
+                <div className="tool-actions-row">
+                  <button className="secondary-button" type="button" onClick={() => onUpdate({ animation: { ...defaultSettings.animation } })}>{messages.animationReset}</button>
+                </div>
 
                 <p className="muted-copy">{messages.animationHint}</p>
               </>
@@ -3403,32 +4252,40 @@ function SettingsModal({
                   </section>
                 ) : (
                   <>
-                    <section className="settings-section">
-                      <h3>{messages.apiBaseTitle}</h3>
-                      <input
-                        className="settings-input"
-                        type="url"
-                        placeholder={messages.apiBasePlaceholder}
-                        value={settings.apiBaseUrl}
-                        onChange={(event) => onUpdate({ apiBaseUrl: event.target.value })}
-                      />
-                      {apiEndpointIssue === 'direct-model-endpoint' && (
-                        <p className="tiny-copy settings-warning">{messages.apiModelEndpointWarning}</p>
-                      )}
-                    </section>
-
-                    <section className="settings-section">
-                      <h3>{messages.apiKeyTitle}</h3>
-                      <input
-                        className="settings-input"
-                        type="password"
-                        placeholder={messages.apiKeyPlaceholder}
-                        value={settings.apiKey}
-                        onChange={(event) => onUpdate({ apiKey: event.target.value })}
-                      />
-                      <p className="muted-copy">{messages.apiHelp}</p>
-                      <p className="muted-copy">{messages.apiHint}</p>
-                    </section>
+                    {[1, 2, 3].map((ch) => {
+                      const baseUrlKey = ch === 1 ? 'apiBaseUrl' : ch === 2 ? 'apiBaseUrl2' : 'apiBaseUrl3';
+                      const apiKeyKey = ch === 1 ? 'apiKey' : ch === 2 ? 'apiKey2' : 'apiKey3';
+                      const title = ch === 1 ? messages.apiChannel1 : ch === 2 ? messages.apiChannel2 : messages.apiChannel3;
+                      return (
+                        <section className="settings-section" key={ch}>
+                          <h3>{title}</h3>
+                          <input
+                            className="settings-input"
+                            type="url"
+                            placeholder={messages.apiBasePlaceholder}
+                            value={settings[baseUrlKey as keyof SettingsState] as string}
+                            onChange={(event) => onUpdate({ [baseUrlKey]: event.target.value })}
+                          />
+                          <input
+                            className="settings-input"
+                            style={{ marginTop: 8 }}
+                            type="password"
+                            placeholder={messages.apiKeyPlaceholder}
+                            value={settings[apiKeyKey as keyof SettingsState] as string}
+                            onChange={(event) => onUpdate({ [apiKeyKey]: event.target.value })}
+                          />
+                          <div className="tool-actions-row" style={{ marginTop: 8 }}>
+                            <button
+                              className="secondary-button"
+                              type="button"
+                              onClick={() => openConfirm(title, messages.apiConfirmClear, () => onUpdate({ [baseUrlKey]: '', [apiKeyKey]: '' }))}
+                            >
+                              {messages.apiClearChannel}
+                            </button>
+                          </div>
+                        </section>
+                      );
+                    })}
                   </>
                 )}
 
@@ -3440,6 +4297,65 @@ function SettingsModal({
                   {hostedApiRequired && <p className="tiny-copy settings-warning">{messages.apiPresetUnavailable}</p>}
                   <p className="tiny-copy">{messages.apiPrivacy}</p>
                 </section>
+              </>
+            )}
+
+            {tab === 'performance' && (
+              <>
+                <section className="settings-section">
+                  <h3>{messages.performanceTitle}</h3>
+                  <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                    {[
+                      { key: 'reduceAnimations', label: messages.performanceReduceAnimations },
+                      { key: 'disableGlassmorphism', label: messages.performanceDisableGlass },
+                      { key: 'lowResolutionPreviews', label: messages.performanceLowResPreview },
+                      { key: 'lazyLoadModules', label: messages.performanceLazyLoad },
+                      { key: 'disableParticles', label: messages.performanceDisableParticles },
+                      { key: 'aggressiveCaching', label: messages.performanceAggressiveCache },
+                      { key: 'devMode', label: messages.performanceDevMode },
+                    ].map((item) => (
+                      <button
+                        key={item.key}
+                        className={`palette-chip ${settings.performance[item.key as keyof typeof settings.performance] ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => onUpdate({ performance: { ...settings.performance, [item.key]: !settings.performance[item.key as keyof typeof settings.performance] } })}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.performanceImageQuality}</h3>
+                  <div className="chip-row">
+                    {(['low', 'medium', 'high'] as const).map((q) => (
+                      <button
+                        key={q}
+                        className={`choice-chip ${settings.performance.imagePreviewQuality === q ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => onUpdate({ performance: { ...settings.performance, imagePreviewQuality: q } })}
+                      >
+                        {messages[`performanceImageQuality${q.charAt(0).toUpperCase() + q.slice(1)}` as keyof Messages]}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.performanceMaxConcurrent}</h3>
+                  <div className="contrast-control">
+                    <div className="contrast-copy"><strong>{settings.performance.maxConcurrentRequests}</strong></div>
+                    <div className="contrast-slider-row">
+                      <input className="contrast-slider" type="range" min="1" max="10" step="1" value={settings.performance.maxConcurrentRequests} onChange={(e) => onUpdate({ performance: { ...settings.performance, maxConcurrentRequests: Number(e.target.value) } })} />
+                    </div>
+                  </div>
+                </section>
+
+                <div className="tool-actions-row">
+                  <button className="secondary-button" type="button" onClick={() => onUpdate({ performance: { ...defaultSettings.performance } })}>{messages.performanceReset}</button>
+                </div>
+                <p className="muted-copy">{messages.performanceHint}</p>
               </>
             )}
 
@@ -3522,6 +4438,99 @@ function SettingsModal({
               </section>
             )}
 
+            {tab === 'others' && (
+              <>
+                <section className="settings-section">
+                  <h3>{messages.othersLanguageSettings}</h3>
+                  <p className="muted-copy">{messages.othersLanguageMissing}</p>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.othersTitle}</h3>
+                  <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                    {[
+                      { key: 'showTooltips', label: messages.othersTooltips },
+                      { key: 'confirmDestructiveActions', label: messages.othersConfirmDestructive },
+                      { key: 'showKeyboardHints', label: messages.othersKeyboardHints },
+                      { key: 'smoothScroll', label: messages.othersSmoothScroll },
+                      { key: 'enableNotificationSound', label: messages.othersNotificationSound },
+                      { key: 'showClock', label: messages.othersShowClock },
+                      { key: 'enableStatusBar', label: messages.othersStatusBar },
+                      { key: 'highContrastFocus', label: messages.othersHighContrastFocus },
+                    ].map((item) => (
+                      <button
+                        key={item.key}
+                        className={`palette-chip ${settings.others[item.key as keyof typeof settings.others] ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => onUpdate({ others: { ...settings.others, [item.key]: !settings.others[item.key as keyof typeof settings.others] } })}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.othersDateFormat}</h3>
+                  <div className="chip-row">
+                    {(['iso', 'locale', 'friendly'] as const).map((f) => (
+                      <button
+                        key={f}
+                        className={`choice-chip ${settings.others.dateFormat === f ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => onUpdate({ others: { ...settings.others, dateFormat: f } })}
+                      >
+                        {messages[`othersDateFormat${f.charAt(0).toUpperCase() + f.slice(1)}` as keyof Messages]}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.othersAutoSave}</h3>
+                  <div className="contrast-control">
+                    <div className="contrast-copy"><strong>{settings.others.autoSaveInterval === 0 ? 'OFF' : `${settings.others.autoSaveInterval} min`}</strong></div>
+                    <div className="contrast-slider-row">
+                      <input className="contrast-slider" type="range" min="0" max="30" step="1" value={settings.others.autoSaveInterval} onChange={(e) => onUpdate({ others: { ...settings.others, autoSaveInterval: Number(e.target.value) } })} />
+                    </div>
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.othersResetAll}</h3>
+                  <div className="tool-actions-row">
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => openConfirm(messages.othersResetAll, messages.othersConfirmReset, () => {
+                        window.localStorage.removeItem(STORAGE_KEY);
+                        window.location.reload();
+                      })}
+                    >
+                      {messages.othersResetAll}
+                    </button>
+                  </div>
+                </section>
+
+                <section className="settings-section">
+                  <h3>{messages.othersRestoreDefaults}</h3>
+                  <div className="tool-actions-row">
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => openConfirm(messages.othersRestoreDefaults, messages.othersConfirmRestore, () => {
+                        onUpdate({ ...defaultSettings });
+                      })}
+                    >
+                      {messages.othersRestoreDefaults}
+                    </button>
+                  </div>
+                </section>
+
+                <p className="muted-copy">{messages.othersHint}</p>
+              </>
+            )}
+
             {tab === 'announcement' && (
               <section className="settings-section announcement-shell">
                 <div className="announcement-list">
@@ -3566,6 +4575,62 @@ function SettingsModal({
                   </a>
                 </div>
               </section>
+            )}
+
+            {/* Confirm Dialog */}
+            {confirmDialog.open && (
+              <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, zIndex: 100 }} role="presentation" onClick={() => setConfirmDialog((d) => ({ ...d, open: false }))}>
+                <section className="modal-card modal-surface" style={{ maxWidth: 420, margin: 'auto', position: 'relative', top: '30%' }} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+                  <h3 style={{ marginBottom: 12 }}>{confirmDialog.title}</h3>
+                  <p className="muted-copy" style={{ marginBottom: 20 }}>
+                    {confirmDialog.message}
+                  </p>
+                  <div className="tool-actions-row">
+                    <button className="primary-button" type="button" onClick={handleConfirmStep}>{messages.confirmYes}</button>
+                    <button className="secondary-button" type="button" onClick={() => setConfirmDialog((d) => ({ ...d, open: false }))}>{messages.confirmNo}</button>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* Preset Save Dialog */}
+            {presetDialog.open && (
+              <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, zIndex: 100 }} role="presentation" onClick={() => setPresetDialog({ open: false, slot: 0, name: '' })}>
+                <section className="modal-card modal-surface" style={{ maxWidth: 420, margin: 'auto', position: 'relative', top: '30%' }} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+                  <h3 style={{ marginBottom: 12 }}>{messages.styleSavePreset}</h3>
+                  <p className="muted-copy" style={{ marginBottom: 12 }}>
+                    {presetDialog.slot === 0 ? messages.stylePreset1 : messages.stylePreset2}
+                  </p>
+                  <input
+                    className="settings-input"
+                    type="text"
+                    placeholder={messages.stylePresetName}
+                    value={presetDialog.name}
+                    onChange={(e) => setPresetDialog((d) => ({ ...d, name: e.target.value }))}
+                    autoFocus
+                  />
+                  <div className="tool-actions-row" style={{ marginTop: 16 }}>
+                    <button
+                      className="primary-button"
+                      type="button"
+                      onClick={() => {
+                        if (isPresetSameAsCurrent(presetDialog.slot as 0 | 1)) {
+                          alert(messages.stylePresetSame);
+                          return;
+                        }
+                        savePresetSlot(presetDialog.slot as 0 | 1, presetDialog.name);
+                      }}
+                    >
+                      {messages.confirmYes}
+                    </button>
+                    <button className="secondary-button" type="button" onClick={() => setPresetDialog({ open: false, slot: 0, name: '' })}>{messages.confirmCancel}</button>
+                  </div>
+                  <div className="chip-row" style={{ marginTop: 8 }}>
+                    <button className={`choice-chip ${presetDialog.slot === 0 ? 'active' : ''}`} type="button" onClick={() => setPresetDialog((d) => ({ ...d, slot: 0 }))}>{messages.stylePreset1}</button>
+                    <button className={`choice-chip ${presetDialog.slot === 1 ? 'active' : ''}`} type="button" onClick={() => setPresetDialog((d) => ({ ...d, slot: 1 }))}>{messages.stylePreset2}</button>
+                  </div>
+                </section>
+              </div>
             )}
           </div>
         </div>

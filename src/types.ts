@@ -1,4 +1,4 @@
-export type StylePreset = 'default' | 'paper2gal';
+export type StylePreset = 'default' | 'paper2gal' | 'preset1' | 'preset2';
 export type ThemeDepth = 'light' | 'deep';
 export type AccentPalette =
   | 'ocean'
@@ -59,10 +59,10 @@ export type FontPreset =
   | 'custom';
 
 export type InterfaceMode = 'builtin' | 'custom';
-export type ApiPreset = 'plato';
+export type ApiPreset = 'plato' | 'custom1' | 'custom2' | 'custom3';
 
 export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal';
-export type SettingsTab = 'style' | 'language' | 'audio' | 'animation' | 'api' | 'shortcuts' | 'announcement' | 'about';
+export type SettingsTab = 'style' | 'language' | 'audio' | 'animation' | 'performance' | 'api' | 'shortcuts' | 'others' | 'announcement' | 'about';
 export type StartModalStep = 'root' | null;
 
 export type ShortcutAction =
@@ -109,7 +109,13 @@ export type SoundPreset =
 
 export type MusicPreset =
   | 'orchestral' | 'ambient' | 'electronic' | 'piano' | 'synthwave'
-  | 'nature' | 'jazz' | 'meditation' | 'cyber' | 'lofi';
+  | 'nature' | 'jazz' | 'meditation' | 'cyber' | 'lofi'
+  | 'rock' | 'blues' | 'folk' | 'reggae' | 'funk'
+  | 'soul' | 'gospel' | 'country' | 'celtic' | 'oriental'
+  | 'tribal' | 'space' | 'underwater' | 'rain' | 'windchime'
+  | 'fireplace' | 'night' | 'sunrise' | 'dreamy' | 'energetic'
+  | 'battle' | 'adventure' | 'mystery' | 'romantic' | 'nostalgic'
+  | 'hopeful' | 'epic' | 'chill' | 'study' | 'focus';
 
 export interface AudioSettings {
   masterVolume: number;
@@ -136,6 +142,13 @@ export interface AudioSettings {
   musicReverb: number;
   musicFilter: number;
   musicStereoWidth: number;
+  // custom audio files
+  useCustomSfx: boolean;
+  useCustomMusic: boolean;
+  customSfxDataUrl: string | null;
+  customMusicDataUrl: string | null;
+  customSfxName: string;
+  customMusicName: string;
 }
 
 export interface AnimationSettings {
@@ -145,6 +158,43 @@ export interface AnimationSettings {
   buttonHover: boolean;
   pageTransitions: boolean;
   modalTransitions: boolean;
+}
+
+export interface PerformanceSettings {
+  reduceAnimations: boolean;
+  disableGlassmorphism: boolean;
+  lowResolutionPreviews: boolean;
+  lazyLoadModules: boolean;
+  disableParticles: boolean;
+  aggressiveCaching: boolean;
+  devMode: boolean;
+  imagePreviewQuality: 'low' | 'medium' | 'high';
+  maxConcurrentRequests: number;
+}
+
+export interface OtherSettings {
+  showTooltips: boolean;
+  confirmDestructiveActions: boolean;
+  showKeyboardHints: boolean;
+  smoothScroll: boolean;
+  enableNotificationSound: boolean;
+  autoSaveInterval: number; // minutes, 0 = off
+  dateFormat: 'iso' | 'locale' | 'friendly';
+  showClock: boolean;
+  enableStatusBar: boolean;
+  highContrastFocus: boolean;
+}
+
+export interface SavedStylePreset {
+  name: string;
+  stylePreset: StylePreset;
+  depth: ThemeDepth;
+  accent: AccentPalette;
+  customAccentColor: string;
+  contrast: number;
+  borderWidth: number;
+  fontPreset: FontPreset;
+  customFontFamily: string;
 }
 
 export interface SettingsState {
@@ -161,7 +211,14 @@ export interface SettingsState {
   apiPreset: ApiPreset;
   apiBaseUrl: string;
   apiKey: string;
+  apiBaseUrl2: string;
+  apiKey2: string;
+  apiBaseUrl3: string;
+  apiKey3: string;
   shortcutMap: ShortcutMap;
   audio: AudioSettings;
   animation: AnimationSettings;
+  performance: PerformanceSettings;
+  others: OtherSettings;
+  savedPresets: [SavedStylePreset | null, SavedStylePreset | null];
 }

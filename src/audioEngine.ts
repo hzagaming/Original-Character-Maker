@@ -75,6 +75,12 @@ export const defaultAudioSettings: AudioSettings = {
   musicReverb: 30,
   musicFilter: 5000,
   musicStereoWidth: 80,
+  useCustomSfx: false,
+  useCustomMusic: false,
+  customSfxDataUrl: null,
+  customMusicDataUrl: null,
+  customSfxName: '',
+  customMusicName: '',
 };
 
 // ─── Preset synthesis parameters ───
@@ -152,14 +158,18 @@ function applyVolumes() {
   masterGain.gain.setValueAtTime(m, ctx!.currentTime);
   sfxGain.gain.setValueAtTime(currentSettings.sfxEnabled ? (currentSettings.sfxVolume / 100) * m : 0, ctx!.currentTime);
   musicGain.gain.setValueAtTime(currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * m : 0, ctx!.currentTime);
+  if (customSfxAudio) customSfxAudio.volume = (currentSettings.sfxVolume / 100) * m;
+  if (customMusicAudio) customMusicAudio.volume = (currentSettings.musicVolume / 100) * m;
 }
 
 export function updateAudioSettings(next: Partial<AudioSettings>) {
   const wasMusicOn = currentSettings.musicEnabled;
   const oldMusicPreset = currentSettings.musicPreset;
+  const oldUseCustomMusic = currentSettings.useCustomMusic;
   currentSettings = { ...currentSettings, ...next };
   applyVolumes();
-  if (currentSettings.musicEnabled && (!wasMusicOn || oldMusicPreset !== currentSettings.musicPreset)) {
+  const musicChanged = oldMusicPreset !== currentSettings.musicPreset || oldUseCustomMusic !== currentSettings.useCustomMusic;
+  if (currentSettings.musicEnabled && (!wasMusicOn || musicChanged)) {
     stopMusic();
     startMusic();
   } else if (!currentSettings.musicEnabled && wasMusicOn) {
@@ -402,6 +412,11 @@ const EVENTS: Record<SoundName, () => void> = {
 export function playSound(name: SoundName) {
   try {
     if (!currentSettings.sfxEnabled) return;
+    if (currentSettings.useCustomSfx && customSfxAudio) {
+      customSfxAudio.currentTime = 0;
+      customSfxAudio.play().catch(() => {});
+      return;
+    }
     EVENTS[name]?.();
   } catch {
     // ignore audio errors
@@ -412,12 +427,41 @@ export function previewSound(name: SoundName) {
   playSound(name);
 }
 
-// ─── Background music engine v3 ───
-// Sequenced generative music with chord progressions, arpeggios and rhythm.
+// ─── Custom audio file support ───
+let customSfxAudio: HTMLAudioElement | null = null;
+let customMusicAudio: HTMLAudioElement | null = null;
 
-const SEMITONES = [0, 2, 4, 5, 7, 9, 11]; // major scale
+export function setCustomSfx(dataUrl: string | null) {
+  if (customSfxAudio) { customSfxAudio.pause(); customSfxAudio = null; }
+  if (dataUrl) {
+    customSfxAudio = new Audio(dataUrl);
+    customSfxAudio.volume = (currentSettings.sfxVolume / 100) * (currentSettings.masterVolume / 100);
+  }
+}
+
+export function setCustomMusic(dataUrl: string | null) {
+  if (customMusicAudio) { customMusicAudio.pause(); customMusicAudio = null; }
+  if (dataUrl) {
+    customMusicAudio = new Audio(dataUrl);
+    customMusicAudio.loop = true;
+    customMusicAudio.volume = (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100);
+  }
+}
+
+// ─── Background music engine v5 ───
+// Lookahead-scheduled generative music with 40 diverse presets.
+
+const SEMITONES = [0, 2, 4, 5, 7, 9, 11];
 const MINOR_SEMITONES = [0, 2, 3, 5, 7, 8, 10];
 const PENTATONIC = [0, 2, 4, 7, 9];
+const DORIAN = [0, 2, 3, 5, 7, 9, 10];
+const LYDIAN = [0, 2, 4, 6, 7, 9, 11];
+const PHRYGIAN = [0, 1, 3, 5, 7, 8, 10];
+const MIXOLYDIAN = [0, 2, 4, 5, 7, 9, 10];
+const BLUES_SCALE = [0, 3, 5, 6, 7, 10];
+const WHOLE_TONE = [0, 2, 4, 6, 8, 10];
+const HARMONIC_MINOR = [0, 2, 3, 5, 7, 8, 11];
+const JAPANESE = [0, 1, 5, 7, 8];
 
 function mtof(midi: number) {
   return 440 * Math.pow(2, (midi - 69) / 12);
@@ -429,125 +473,293 @@ function scaleFreq(rootMidi: number, degree: number, scale: number[]) {
   return mtof(rootMidi + octaves * 12 + scale[idx]);
 }
 
+interface DrumPattern {
+  kick: number[];
+  snare: number[];
+  hihat: number[];
+}
+
 interface MusicPresetData {
   rootMidi: number;
   scale: number[];
-  progression: number[]; // scale degrees for chords
+  progression: number[];
   bpm: number;
   voices: OscillatorType[];
-  pattern: number[]; // arpeggio pattern (voice indices)
-  density: number; // notes per beat
+  voiceMix: number[];
+  pattern: number[];
+  density: number;
   filterFreq: number;
   reverbMix: number;
+  bassOctave: number;
+  hasDrums: boolean;
+  drumPattern?: DrumPattern;
+  arpSpeed: number;
+  chordSpread: number[];
+  chordDensity: number; // how many bars per chord
+}
+
+const DRUM_PATTERNS: Record<string, DrumPattern> = {
+  basic: { kick: [0], snare: [2], hihat: [0, 1, 2, 3] },
+  rock: { kick: [0, 2], snare: [1, 3], hihat: [0, 1, 2, 3] },
+  funk: { kick: [0, 1, 2, 3], snare: [1, 3], hihat: [0, 1, 2, 3] },
+  halfTime: { kick: [0], snare: [2], hihat: [0, 2] },
+  fourOnFloor: { kick: [0, 1, 2, 3], snare: [1, 3], hihat: [0, 1, 2, 3] },
+  jazzBrush: { kick: [0, 2], snare: [1, 3], hihat: [0, 1, 2, 3] },
+  slow: { kick: [0], snare: [2], hihat: [0, 2] },
+  sparse: { kick: [0], snare: [], hihat: [0, 2] },
+  electronic: { kick: [0, 1, 2, 3], snare: [1, 3], hihat: [0, 1, 2, 3] },
+  none: { kick: [], snare: [], hihat: [] },
+};
+
+function makePreset(p: Partial<MusicPresetData> & Pick<MusicPresetData, 'rootMidi' | 'scale' | 'progression' | 'bpm' | 'voices' | 'voiceMix' | 'pattern' | 'density' | 'filterFreq' | 'reverbMix' | 'bassOctave' | 'hasDrums' | 'arpSpeed' | 'chordSpread' | 'chordDensity'>): MusicPresetData {
+  return {
+    drumPattern: p.hasDrums ? DRUM_PATTERNS.basic : DRUM_PATTERNS.none,
+    ...p,
+  };
 }
 
 const MUSIC_PRESETS: Record<MusicPreset, MusicPresetData> = {
-  orchestral: { rootMidi: 48, scale: SEMITONES, progression: [0, 4, 5, 3], bpm: 72, voices: ['sine', 'triangle', 'sine'], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 2, filterFreq: 2500, reverbMix: 0.4 },
-  ambient:    { rootMidi: 45, scale: MINOR_SEMITONES, progression: [0, 3, 5, 4], bpm: 60, voices: ['sine', 'sine', 'triangle'], pattern: [0, 2, 1, 2], density: 1, filterFreq: 1800, reverbMix: 0.6 },
-  electronic: { rootMidi: 50, scale: MINOR_SEMITONES, progression: [0, 5, 3, 4], bpm: 120, voices: ['sawtooth', 'square', 'sawtooth'], pattern: [0, 1, 0, 2, 1, 0, 2, 1], density: 4, filterFreq: 4000, reverbMix: 0.25 },
-  piano:      { rootMidi: 52, scale: SEMITONES, progression: [0, 5, 3, 4], bpm: 80, voices: ['triangle', 'sine', 'triangle'], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 2, filterFreq: 3500, reverbMix: 0.35 },
-  synthwave:  { rootMidi: 49, scale: MINOR_SEMITONES, progression: [0, 3, 5, 4], bpm: 100, voices: ['sawtooth', 'square', 'sawtooth'], pattern: [0, 2, 0, 1, 2, 0, 1, 2], density: 3, filterFreq: 3200, reverbMix: 0.3 },
-  nature:     { rootMidi: 47, scale: PENTATONIC, progression: [0, 2, 4, 1], bpm: 65, voices: ['sine', 'triangle', 'sine'], pattern: [0, 1, 2, 1, 0, 2, 1, 0], density: 2, filterFreq: 2200, reverbMix: 0.5 },
-  jazz:       { rootMidi: 51, scale: SEMITONES, progression: [0, 3, 4, 1], bpm: 90, voices: ['triangle', 'sine', 'triangle'], pattern: [0, 1, 2, 1, 0, 2, 1, 2], density: 2, filterFreq: 2800, reverbMix: 0.4 },
-  meditation: { rootMidi: 43, scale: PENTATONIC, progression: [0, 2, 4, 2], bpm: 50, voices: ['sine', 'sine', 'sine'], pattern: [0, 1, 2, 1], density: 1, filterFreq: 1500, reverbMix: 0.7 },
-  cyber:      { rootMidi: 46, scale: MINOR_SEMITONES, progression: [0, 5, 3, 6], bpm: 128, voices: ['square', 'sawtooth', 'square'], pattern: [0, 1, 0, 2, 1, 0, 2, 0], density: 4, filterFreq: 4500, reverbMix: 0.2 },
-  lofi:       { rootMidi: 48, scale: MINOR_SEMITONES, progression: [0, 3, 5, 4], bpm: 70, voices: ['sine', 'triangle', 'sine'], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 2, filterFreq: 2000, reverbMix: 0.55 },
+  orchestral: makePreset({ rootMidi: 48, scale: SEMITONES, progression: [0, 4, 5, 3], bpm: 68, voices: ['triangle', 'sine', 'sine'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 4, filterFreq: 2800, reverbMix: 0.45, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 7], chordDensity: 2 }),
+  ambient: makePreset({ rootMidi: 44, scale: MINOR_SEMITONES, progression: [0, 3, 5, 2], bpm: 56, voices: ['sine', 'sine', 'triangle'], voiceMix: [0.45, 0.35, 0.25], pattern: [0, 2, 1, 2], density: 2, filterFreq: 2000, reverbMix: 0.65, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  electronic: makePreset({ rootMidi: 50, scale: MINOR_SEMITONES, progression: [0, 5, 3, 4], bpm: 118, voices: ['sawtooth', 'square', 'sawtooth'], voiceMix: [0.5, 0.35, 0.35], pattern: [0, 1, 0, 2, 1, 0, 2, 1], density: 4, filterFreq: 4200, reverbMix: 0.25, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.fourOnFloor, arpSpeed: 1, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  piano: makePreset({ rootMidi: 52, scale: SEMITONES, progression: [0, 5, 3, 4], bpm: 76, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.3, 0.3], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 3800, reverbMix: 0.35, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 7], chordDensity: 2 }),
+  synthwave: makePreset({ rootMidi: 49, scale: MINOR_SEMITONES, progression: [0, 3, 5, 4], bpm: 96, voices: ['sawtooth', 'square', 'sawtooth'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 2, 0, 1, 2, 0, 1, 2], density: 4, filterFreq: 3400, reverbMix: 0.3, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.fourOnFloor, arpSpeed: 1, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  nature: makePreset({ rootMidi: 47, scale: PENTATONIC, progression: [0, 2, 4, 1], bpm: 62, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.45, 0.35, 0.25], pattern: [0, 1, 2, 1, 0, 2, 1, 0], density: 2, filterFreq: 2400, reverbMix: 0.55, bassOctave: 1, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  jazz: makePreset({ rootMidi: 51, scale: SEMITONES, progression: [0, 3, 4, 1], bpm: 88, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.3, 0.3], pattern: [0, 1, 2, 1, 0, 2, 1, 2], density: 4, filterFreq: 3000, reverbMix: 0.4, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.jazzBrush, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  meditation: makePreset({ rootMidi: 42, scale: PENTATONIC, progression: [0, 2, 4, 2], bpm: 48, voices: ['sine', 'sine', 'sine'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 1, 2, 1], density: 2, filterFreq: 1600, reverbMix: 0.75, bassOctave: 1, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  cyber: makePreset({ rootMidi: 46, scale: MINOR_SEMITONES, progression: [0, 5, 3, 6], bpm: 126, voices: ['square', 'sawtooth', 'square'], voiceMix: [0.5, 0.35, 0.35], pattern: [0, 1, 0, 2, 1, 0, 2, 0], density: 4, filterFreq: 4600, reverbMix: 0.2, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.electronic, arpSpeed: 1, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  lofi: makePreset({ rootMidi: 48, scale: DORIAN, progression: [0, 3, 5, 4], bpm: 68, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.45, 0.35, 0.25], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 4, filterFreq: 2200, reverbMix: 0.55, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  rock: makePreset({ rootMidi: 45, scale: MINOR_SEMITONES, progression: [0, 3, 5, 4, 5, 3, 4, 0], bpm: 112, voices: ['sawtooth', 'square', 'sawtooth'], voiceMix: [0.5, 0.3, 0.3], pattern: [0, 1, 0, 2], density: 4, filterFreq: 4000, reverbMix: 0.3, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.rock, arpSpeed: 1, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  blues: makePreset({ rootMidi: 47, scale: BLUES_SCALE, progression: [0, 3, 4, 3], bpm: 82, voices: ['triangle', 'sawtooth', 'triangle'], voiceMix: [0.5, 0.3, 0.25], pattern: [0, 1, 2, 1, 0, 1, 2, 0], density: 4, filterFreq: 2800, reverbMix: 0.35, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 5], chordDensity: 2 }),
+  folk: makePreset({ rootMidi: 50, scale: MIXOLYDIAN, progression: [0, 3, 4, 0], bpm: 90, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.3, 0.3], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 3200, reverbMix: 0.4, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.basic, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  reggae: makePreset({ rootMidi: 46, scale: MINOR_SEMITONES, progression: [0, 5, 3, 4], bpm: 78, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.45, 0.35, 0.25], pattern: [0, 2, 1, 2], density: 4, filterFreq: 2600, reverbMix: 0.45, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.halfTime, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  funk: makePreset({ rootMidi: 48, scale: DORIAN, progression: [0, 3, 4, 3], bpm: 104, voices: ['sawtooth', 'square', 'sawtooth'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 0, 2, 1, 0, 2, 1], density: 4, filterFreq: 3800, reverbMix: 0.3, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.funk, arpSpeed: 1, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  soul: makePreset({ rootMidi: 49, scale: PENTATONIC, progression: [0, 3, 4, 0], bpm: 86, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.5, 0.3, 0.3], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 4, filterFreq: 3000, reverbMix: 0.4, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  gospel: makePreset({ rootMidi: 47, scale: SEMITONES, progression: [0, 4, 5, 3, 4, 5, 3, 0], bpm: 72, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 2800, reverbMix: 0.5, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 7], chordDensity: 1 }),
+  country: makePreset({ rootMidi: 50, scale: MIXOLYDIAN, progression: [0, 4, 5, 3], bpm: 92, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.3, 0.25], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 3200, reverbMix: 0.35, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.basic, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  celtic: makePreset({ rootMidi: 49, scale: DORIAN, progression: [0, 3, 4, 0, 3, 5, 4, 0], bpm: 84, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.3, 0.3], pattern: [0, 1, 2, 1, 0, 2, 1, 0], density: 4, filterFreq: 3000, reverbMix: 0.45, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.basic, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 1 }),
+  oriental: makePreset({ rootMidi: 48, scale: JAPANESE, progression: [0, 2, 3, 1], bpm: 70, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.45, 0.35, 0.25], pattern: [0, 1, 2, 1], density: 2, filterFreq: 2400, reverbMix: 0.55, bassOctave: 1, hasDrums: true, drumPattern: DRUM_PATTERNS.sparse, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  tribal: makePreset({ rootMidi: 44, scale: PENTATONIC, progression: [0, 2, 4, 1, 0, 2, 1, 4], bpm: 88, voices: ['triangle', 'sawtooth', 'triangle'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 1, 0, 2, 1, 2], density: 4, filterFreq: 2200, reverbMix: 0.35, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.rock, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  space: makePreset({ rootMidi: 45, scale: WHOLE_TONE, progression: [0, 2, 4, 1], bpm: 60, voices: ['sine', 'sine', 'sine'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 2, 1, 2, 0, 1, 2, 1], density: 2, filterFreq: 1800, reverbMix: 0.7, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  underwater: makePreset({ rootMidi: 46, scale: DORIAN, progression: [0, 3, 5, 2], bpm: 54, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 1, 2, 1], density: 2, filterFreq: 1600, reverbMix: 0.65, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  rain: makePreset({ rootMidi: 47, scale: MINOR_SEMITONES, progression: [0, 3, 5, 4, 3, 5, 4, 0], bpm: 50, voices: ['sine', 'sine', 'triangle'], voiceMix: [0.35, 0.3, 0.25], pattern: [0, 2, 1, 2], density: 2, filterFreq: 2000, reverbMix: 0.6, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  windchime: makePreset({ rootMidi: 52, scale: PENTATONIC, progression: [0, 2, 4, 1, 0, 4, 2, 1], bpm: 58, voices: ['sine', 'sine', 'sine'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 4000, reverbMix: 0.7, bassOctave: 1, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  fireplace: makePreset({ rootMidi: 43, scale: BLUES_SCALE, progression: [0, 3, 4, 3], bpm: 52, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 1, 2, 1], density: 2, filterFreq: 1500, reverbMix: 0.5, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4, 5], chordDensity: 2 }),
+  night: makePreset({ rootMidi: 46, scale: MINOR_SEMITONES, progression: [0, 5, 3, 4], bpm: 56, voices: ['sine', 'sine', 'triangle'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 2, 1, 2], density: 2, filterFreq: 1800, reverbMix: 0.6, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  sunrise: makePreset({ rootMidi: 50, scale: LYDIAN, progression: [0, 4, 5, 3, 0, 5, 3, 4], bpm: 72, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 4, filterFreq: 3000, reverbMix: 0.45, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 7], chordDensity: 1 }),
+  dreamy: makePreset({ rootMidi: 48, scale: WHOLE_TONE, progression: [0, 2, 4, 1], bpm: 64, voices: ['sine', 'sine', 'sine'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 1, 2, 1, 0, 2, 1, 0], density: 2, filterFreq: 2000, reverbMix: 0.65, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  energetic: makePreset({ rootMidi: 50, scale: SEMITONES, progression: [0, 4, 5, 3, 4, 0, 5, 3], bpm: 128, voices: ['sawtooth', 'square', 'sawtooth'], voiceMix: [0.5, 0.35, 0.35], pattern: [0, 1, 0, 2, 1, 0, 2, 1], density: 4, filterFreq: 4400, reverbMix: 0.25, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.fourOnFloor, arpSpeed: 1, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  battle: makePreset({ rootMidi: 45, scale: PHRYGIAN, progression: [0, 3, 2, 5, 0, 2, 3, 5], bpm: 110, voices: ['sawtooth', 'square', 'sawtooth'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 3600, reverbMix: 0.3, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.rock, arpSpeed: 1, chordSpread: [0, 2, 4], chordDensity: 1 }),
+  adventure: makePreset({ rootMidi: 49, scale: MIXOLYDIAN, progression: [0, 4, 3, 5, 0, 3, 4, 5], bpm: 100, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 1, 0, 2, 1, 2], density: 4, filterFreq: 3200, reverbMix: 0.35, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.rock, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 1 }),
+  mystery: makePreset({ rootMidi: 46, scale: HARMONIC_MINOR, progression: [0, 3, 4, 2], bpm: 76, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.45, 0.3, 0.25], pattern: [0, 2, 1, 2, 0, 1, 2, 1], density: 4, filterFreq: 2400, reverbMix: 0.5, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.sparse, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  romantic: makePreset({ rootMidi: 50, scale: SEMITONES, progression: [0, 4, 5, 3, 0, 5, 3, 4], bpm: 70, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 4, filterFreq: 2800, reverbMix: 0.45, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 7], chordDensity: 1 }),
+  nostalgic: makePreset({ rootMidi: 48, scale: DORIAN, progression: [0, 3, 5, 4, 3, 0, 5, 3], bpm: 66, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.3, 0.3], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 2600, reverbMix: 0.5, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  hopeful: makePreset({ rootMidi: 52, scale: LYDIAN, progression: [0, 4, 5, 3, 0, 4, 3, 5], bpm: 80, voices: ['triangle', 'sine', 'triangle'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 4, filterFreq: 3000, reverbMix: 0.4, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.basic, arpSpeed: 2, chordSpread: [0, 2, 4, 7], chordDensity: 1 }),
+  epic: makePreset({ rootMidi: 44, scale: MINOR_SEMITONES, progression: [0, 3, 4, 5, 0, 4, 3, 5], bpm: 92, voices: ['triangle', 'sawtooth', 'triangle'], voiceMix: [0.5, 0.35, 0.3], pattern: [0, 1, 2, 0, 1, 2, 1, 0], density: 4, filterFreq: 3200, reverbMix: 0.5, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.rock, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 1 }),
+  chill: makePreset({ rootMidi: 47, scale: DORIAN, progression: [0, 3, 5, 4], bpm: 74, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.45, 0.35, 0.25], pattern: [0, 1, 2, 1, 0, 2, 1, 0], density: 4, filterFreq: 2200, reverbMix: 0.55, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4, 6], chordDensity: 2 }),
+  study: makePreset({ rootMidi: 49, scale: SEMITONES, progression: [0, 5, 3, 4], bpm: 76, voices: ['sine', 'triangle', 'sine'], voiceMix: [0.45, 0.35, 0.25], pattern: [0, 1, 2, 1, 0, 1, 2, 1], density: 4, filterFreq: 2600, reverbMix: 0.5, bassOctave: 2, hasDrums: true, drumPattern: DRUM_PATTERNS.slow, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
+  focus: makePreset({ rootMidi: 46, scale: PENTATONIC, progression: [0, 2, 4, 1], bpm: 68, voices: ['sine', 'sine', 'triangle'], voiceMix: [0.4, 0.3, 0.25], pattern: [0, 1, 2, 1], density: 2, filterFreq: 2000, reverbMix: 0.6, bassOctave: 2, hasDrums: false, arpSpeed: 2, chordSpread: [0, 2, 4], chordDensity: 2 }),
 };
 
-let musicInterval: ReturnType<typeof setInterval> | null = null;
-let musicBeat = 0;
+// ─── Lookahead scheduler ───
+let musicScheduleTimer: ReturnType<typeof setInterval> | null = null;
+let nextNoteTime = 0;
+let scheduleBeat = 0;
+const LOOKAHEAD_S = 0.15;
+const SCHEDULE_INTERVAL_MS = 25;
 
-function playMusicNote(freq: number, voice: OscillatorType, duration: number, volume: number, filterFreq: number) {
+function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, duration: number, volume: number, filterFreq: number, stereoPan = 0) {
   try {
-    const c = ensureContext();
-    const t = c.currentTime;
-    const osc = c.createOscillator();
-    osc.type = voice;
-    osc.frequency.value = freq;
+    const c = ctx!;
+    const osc1 = c.createOscillator();
+    osc1.type = voice;
+    osc1.frequency.value = freq;
+    const osc2 = c.createOscillator();
+    osc2.type = voice === 'sine' ? 'triangle' : 'sine';
+    osc2.frequency.value = freq * 2;
+    osc2.detune.value = 8;
 
     const gain = c.createGain();
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(volume, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(volume * 0.3, t + duration * 0.7);
-    gain.gain.linearRampToValueAtTime(0, t + duration);
+    gain.gain.setValueAtTime(0, when);
+    const peakVol = volume * 0.9;
+    gain.gain.linearRampToValueAtTime(peakVol, when + 0.03);
+    gain.gain.exponentialRampToValueAtTime(peakVol * 0.2, when + duration * 0.7);
+    gain.gain.linearRampToValueAtTime(0, when + duration);
 
     const filter = c.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.value = filterFreq;
-    filter.Q.value = 0.8;
+    filter.Q.value = 0.7;
 
-    osc.connect(filter);
+    const panner = c.createStereoPanner ? c.createStereoPanner() : null;
+    if (panner) panner.pan.value = stereoPan;
+
+    osc1.connect(filter);
+    osc2.connect(filter);
     filter.connect(gain);
-    gain.connect(musicGain!);
+    const output: AudioNode = panner || gain;
+    if (panner) { gain.connect(panner); }
+    output.connect(musicGain!);
 
-    osc.start(t);
-    osc.stop(t + duration + 0.05);
-
-    setTimeout(() => {
-      try { osc.disconnect(); gain.disconnect(); filter.disconnect(); } catch { /* ignore */ }
-    }, (duration + 0.1) * 1000);
+    osc1.start(when);
+    osc2.start(when);
+    osc1.stop(when + duration + 0.05);
+    osc2.stop(when + duration + 0.05);
   } catch { /* ignore */ }
 }
 
-function playMusicChord(rootFreq: number, scale: number[], voice: OscillatorType, duration: number, volume: number, filterFreq: number) {
-  // Play triad: root, third, fifth
-  const thirdIdx = 2;
-  const fifthIdx = 4;
-  const thirdRatio = Math.pow(2, scale[thirdIdx % scale.length] / 12);
-  const fifthRatio = Math.pow(2, scale[fifthIdx % scale.length] / 12);
-  playMusicNote(rootFreq, voice, duration, volume * 0.5, filterFreq);
-  playMusicNote(rootFreq * thirdRatio, voice, duration, volume * 0.35, filterFreq);
-  playMusicNote(rootFreq * fifthRatio, voice, duration, volume * 0.35, filterFreq);
+function scheduleMusicChord(when: number, rootFreq: number, scale: number[], voice: OscillatorType, duration: number, volume: number, filterFreq: number, spread: number[]) {
+  spread.forEach((deg, i) => {
+    const ratio = Math.pow(2, scale[deg % scale.length] / 12) * (1 + Math.floor(deg / scale.length));
+    const v = volume * (1 - i * 0.08) * 0.5;
+    scheduleMusicNote(when, rootFreq * ratio, voice, duration, v, filterFreq, (i - 1) * 0.2);
+  });
+}
+
+function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: number) {
+  try {
+    const c = ctx!;
+    if (type === 'kick') {
+      const osc = c.createOscillator();
+      osc.frequency.setValueAtTime(150, when);
+      osc.frequency.exponentialRampToValueAtTime(40, when + 0.12);
+      const gain = c.createGain();
+      gain.gain.setValueAtTime(volume * 0.7, when);
+      gain.gain.exponentialRampToValueAtTime(0.001, when + 0.15);
+      osc.connect(gain);
+      gain.connect(musicGain!);
+      osc.start(when);
+      osc.stop(when + 0.16);
+    } else if (type === 'snare') {
+      const bufferSize = Math.floor(c.sampleRate * 0.1);
+      const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+      const noise = c.createBufferSource();
+      noise.buffer = buffer;
+      const filter = c.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 800;
+      const gain = c.createGain();
+      gain.gain.setValueAtTime(volume * 0.35, when);
+      gain.gain.exponentialRampToValueAtTime(0.001, when + 0.1);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(musicGain!);
+      noise.start(when);
+      noise.stop(when + 0.12);
+    } else if (type === 'hihat') {
+      const bufferSize = Math.floor(c.sampleRate * 0.03);
+      const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+      const noise = c.createBufferSource();
+      noise.buffer = buffer;
+      const filter = c.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 6000;
+      const gain = c.createGain();
+      gain.gain.setValueAtTime(volume * 0.15, when);
+      gain.gain.exponentialRampToValueAtTime(0.001, when + 0.03);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(musicGain!);
+      noise.start(when);
+      noise.stop(when + 0.04);
+    }
+  } catch { /* ignore */ }
+}
+
+function scheduleTick(when: number, preset: MusicPresetData, pitchRatio: number, volume: number) {
+  const ticksPerBar = preset.density * 4;
+  const chordIdx = Math.floor(scheduleBeat / ticksPerBar / preset.chordDensity) % preset.progression.length;
+  const chordDegree = preset.progression[chordIdx];
+  const rootFreq = scaleFreq(preset.rootMidi, chordDegree, preset.scale) * pitchRatio;
+  const patIdx = scheduleBeat % preset.pattern.length;
+  const voiceIdx = preset.pattern[patIdx];
+  const voice = preset.voices[voiceIdx % preset.voices.length];
+  const voiceVol = preset.voiceMix[voiceIdx % preset.voiceMix.length];
+  const beatInBar = scheduleBeat % ticksPerBar;
+
+  // Bass on downbeats
+  if (scheduleBeat % preset.density === 0) {
+    const bassFreq = scaleFreq(preset.rootMidi - preset.bassOctave * 12, chordDegree, preset.scale) * pitchRatio;
+    scheduleMusicNote(when, bassFreq, 'triangle', 0.8, volume * 0.7, preset.filterFreq * 0.5);
+  }
+
+  // Chord on bar start
+  if (beatInBar === 0) {
+    scheduleMusicChord(when, rootFreq, preset.scale, voice, 1.8, volume * voiceVol, preset.filterFreq * 0.7, preset.chordSpread);
+  }
+
+  // Arpeggio
+  if (scheduleBeat % preset.arpSpeed === 0) {
+    const arpDegree = (scheduleBeat % 7);
+    const arpOctave = 1 + Math.floor(arpDegree / preset.scale.length);
+    const arpFreq = scaleFreq(preset.rootMidi, chordDegree + arpDegree, preset.scale) * pitchRatio * arpOctave;
+    scheduleMusicNote(when, arpFreq, voice, 0.5, volume * 0.45, preset.filterFreq, ((arpDegree % 3) - 1) * 0.3);
+  }
+
+  // Occasional high sparkle
+  if (scheduleBeat % 13 === 5) {
+    const sparkleFreq = scaleFreq(preset.rootMidi, chordDegree + 7, preset.scale) * pitchRatio * 2;
+    scheduleMusicNote(when, sparkleFreq, 'sine', 1.2, volume * 0.18, preset.filterFreq * 1.6, 0.4);
+  }
+
+  // Percussion with pattern
+  if (preset.hasDrums && preset.drumPattern) {
+    const dp = preset.drumPattern;
+    const beatPos = beatInBar / preset.density;
+    if (dp.kick.includes(beatPos)) scheduleDrum(when, 'kick', volume);
+    if (dp.snare.includes(beatPos)) scheduleDrum(when, 'snare', volume * 0.6);
+    if (dp.hihat.includes(beatPos)) scheduleDrum(when, 'hihat', volume * 0.35);
+  }
+
+  scheduleBeat++;
 }
 
 export function startMusic() {
   try {
-    if (musicInterval) return;
+    ensureContext();
+    if (musicScheduleTimer) return;
+    if (currentSettings.useCustomMusic && customMusicAudio) {
+      customMusicAudio.currentTime = 0;
+      customMusicAudio.volume = (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100);
+      customMusicAudio.play().catch(() => {});
+      return;
+    }
     const preset = MUSIC_PRESETS[currentSettings.musicPreset];
     const tempoRatio = currentSettings.musicTempo / 100;
     const pitchRatio = Math.pow(2, currentSettings.musicPitch / 1200);
     const bpm = preset.bpm * tempoRatio;
-    const beatMs = 60000 / bpm / preset.density;
-    const volume = (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100) * 0.12;
+    const beatDuration = 60 / bpm / preset.density;
+    const volume = (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100) * 0.1;
 
-    musicBeat = 0;
-    musicInterval = setInterval(() => {
+    scheduleBeat = 0;
+    nextNoteTime = ctx!.currentTime + 0.05;
+
+    musicScheduleTimer = setInterval(() => {
       try {
-        const chordIdx = Math.floor(musicBeat / 8) % preset.progression.length;
-        const chordDegree = preset.progression[chordIdx];
-        const rootFreq = scaleFreq(preset.rootMidi, chordDegree, preset.scale) * pitchRatio;
-        const patIdx = musicBeat % preset.pattern.length;
-        const voiceIdx = preset.pattern[patIdx];
-        const voice = preset.voices[voiceIdx % preset.voices.length];
-
-        if (musicBeat % 8 === 0) {
-          // Bass / chord on downbeat
-          playMusicChord(rootFreq / 2, preset.scale, voice, 1.2, volume, preset.filterFreq * 0.6);
+        while (nextNoteTime < ctx!.currentTime + LOOKAHEAD_S) {
+          scheduleTick(nextNoteTime, preset, pitchRatio, volume);
+          nextNoteTime += beatDuration;
         }
-        if (musicBeat % 2 === 0) {
-          // Arpeggio note
-          const arpDegree = (musicBeat % 5);
-          const arpFreq = scaleFreq(preset.rootMidi, chordDegree + arpDegree, preset.scale) * pitchRatio * (1 + Math.floor(arpDegree / preset.scale.length));
-          playMusicNote(arpFreq, voice, 0.6, volume * 0.7, preset.filterFreq);
-        }
-        // Occasional high sparkle
-        if (musicBeat % 7 === 3) {
-          const sparkleFreq = scaleFreq(preset.rootMidi, chordDegree + 7, preset.scale) * pitchRatio * 2;
-          playMusicNote(sparkleFreq, 'sine', 0.8, volume * 0.25, preset.filterFreq * 1.5);
-        }
-
-        musicBeat++;
       } catch { /* ignore */ }
-    }, beatMs);
+    }, SCHEDULE_INTERVAL_MS);
   } catch { /* ignore */ }
 }
 
 export function stopMusic() {
-  if (musicInterval) {
-    clearInterval(musicInterval);
-    musicInterval = null;
+  if (customMusicAudio) {
+    customMusicAudio.pause();
+    customMusicAudio.currentTime = 0;
   }
-  musicBeat = 0;
+  if (musicScheduleTimer) {
+    clearInterval(musicScheduleTimer);
+    musicScheduleTimer = null;
+  }
+  scheduleBeat = 0;
+  nextNoteTime = 0;
 }
 
 export function initAudio() {
@@ -564,6 +776,12 @@ export const SOUND_PRESETS: SoundPreset[] = [
 export const MUSIC_PRESETS_LIST: MusicPreset[] = [
   'orchestral', 'ambient', 'electronic', 'piano', 'synthwave',
   'nature', 'jazz', 'meditation', 'cyber', 'lofi',
+  'rock', 'blues', 'folk', 'reggae', 'funk',
+  'soul', 'gospel', 'country', 'celtic', 'oriental',
+  'tribal', 'space', 'underwater', 'rain', 'windchime',
+  'fireplace', 'night', 'sunrise', 'dreamy', 'energetic',
+  'battle', 'adventure', 'mystery', 'romantic', 'nostalgic',
+  'hopeful', 'epic', 'chill', 'study', 'focus',
 ];
 
 export const SOUND_PREVIEW_LIST: { name: SoundName; label: string }[] = [

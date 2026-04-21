@@ -2965,3 +2965,43 @@ a {
     bottom: 46px;
   }
 }
+
+/* ─── Performance settings overrides ─── */
+.perf-no-anim *,
+.perf-no-anim *::before,
+.perf-no-anim *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.perf-no-glass .modal-backdrop,
+.perf-no-glass .modal-card,
+.perf-no-glass .settings-section,
+.perf-no-glass .editor-panel-block,
+.perf-no-glass .layout-card,
+.perf-no-glass .stage-toolbar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--panel) !important;
+}
+
+.perf-low-res img,
+.perf-low-res canvas {
+  image-rendering: auto;
+}
+
+.perf-dev-mode::after {
+  content: 'DEV';
+  position: fixed;
+  top: 6px;
+  right: 6px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  z-index: 9999;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}

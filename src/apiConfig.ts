@@ -137,9 +137,13 @@ export function getPresetApiBase(settings: Pick<SettingsState, 'apiPreset'>): st
   return '';
 }
 
-export function getEffectiveApiBase(settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset'>): string {
+export function getEffectiveApiBase(
+  settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset' | 'apiBaseUrl2' | 'apiBaseUrl3'>,
+  channel: 1 | 2 | 3 = 1,
+): string {
   if (settings.interfaceMode === 'custom') {
-    return (settings.apiBaseUrl || '').trim().replace(/\/+$/, '');
+    const url = channel === 1 ? settings.apiBaseUrl : channel === 2 ? settings.apiBaseUrl2 : settings.apiBaseUrl3;
+    return (url || '').trim().replace(/\/+$/, '');
   }
 
   return getPresetApiBase(settings);
@@ -187,11 +191,15 @@ export function isHostedStaticEnvironment(): boolean {
   return isGithubPages || isAliyunOSS || isAliyunCDN;
 }
 
-export function requiresHostedApiBase(settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset'>): boolean {
+export function requiresHostedApiBase(settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset' | 'apiBaseUrl2' | 'apiBaseUrl3'>): boolean {
   return isHostedStaticEnvironment() && !getEffectiveApiBase(settings);
 }
 
-export function buildApiUrl(settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset'>, pathname: string): string {
+export function buildApiUrl(
+  settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset' | 'apiBaseUrl2' | 'apiBaseUrl3'>,
+  pathname: string,
+  channel: 1 | 2 | 3 = 1,
+): string {
   if (!pathname) {
     return '';
   }
@@ -200,7 +208,7 @@ export function buildApiUrl(settings: Pick<SettingsState, 'interfaceMode' | 'api
     return pathname;
   }
 
-  const base = getEffectiveApiBase(settings);
+  const base = getEffectiveApiBase(settings, channel);
   if (!base) {
     return pathname;
   }
@@ -209,16 +217,22 @@ export function buildApiUrl(settings: Pick<SettingsState, 'interfaceMode' | 'api
 }
 
 export function buildApiHeaders(
-  settings: Pick<SettingsState, 'interfaceMode' | 'apiKey'>,
+  settings: Pick<SettingsState, 'interfaceMode' | 'apiKey' | 'apiKey2' | 'apiKey3'>,
   headers: HeadersInit = {},
+  channel: 1 | 2 | 3 = 1,
 ): HeadersInit {
-  if (settings.interfaceMode !== 'custom' || !settings.apiKey.trim()) {
+  if (settings.interfaceMode !== 'custom') {
+    return headers;
+  }
+
+  const key = channel === 1 ? settings.apiKey : channel === 2 ? settings.apiKey2 : settings.apiKey3;
+  if (!key || !key.trim()) {
     return headers;
   }
 
   return {
     ...headers,
-    Authorization: `Bearer ${settings.apiKey.trim()}`,
-    'X-API-Key': settings.apiKey.trim(),
+    Authorization: `Bearer ${key.trim()}`,
+    'X-API-Key': key.trim(),
   };
 }
