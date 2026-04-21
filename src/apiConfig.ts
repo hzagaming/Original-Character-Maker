@@ -2,11 +2,15 @@ import type { SettingsState } from './types';
 
 export type WorkflowApiBaseIssue = 'direct-model-endpoint' | '';
 
+const PROBE_PORTS = [3000, 3001, 8080, 5000, 9000];
+const PROBE_TIMEOUT_MS = 800;
+let _probedBase = '';
+let _probePromise: Promise<string> | null = null;
+
 function getLocation() {
   if (typeof window === 'undefined') {
     return null;
   }
-
   return window.location;
 }
 
@@ -15,9 +19,84 @@ export function readQueryApiBase(key: string): string {
   if (!location) {
     return '';
   }
-
   const params = new URLSearchParams(location.search);
   return (params.get(key) || '').trim();
+}
+
+async function probePort(port: number): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+    const response = await fetch(`http://localhost:${port}/api/health`, {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (response.ok) {
+      return `http://localhost:${port}`;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function doProbe(): Promise<string> {
+  if (_probedBase) {
+    return _probedBase;
+  }
+
+  const location = getLocation();
+  const hostname = location?.hostname || '';
+  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    return '';
+  }
+
+  // 1. URL query param 优先
+  const queryPort = readQueryApiBase('apiPort');
+  if (queryPort && /^\d+$/.test(queryPort)) {
+    _probedBase = `http://localhost:${queryPort}`;
+    return _probedBase;
+  }
+  const queryBase = readQueryApiBase('apiBase');
+  if (queryBase) {
+    _probedBase = queryBase.replace(/\/+$/, '');
+    return _probedBase;
+  }
+
+  // 2. 如果前端本身就跑在常用后端端口上
+  const currentPort = location?.port || '';
+  if (PROBE_PORTS.includes(Number(currentPort))) {
+    _probedBase = location!.origin;
+    return _probedBase;
+  }
+
+  // 3. 并发探测常用端口
+  const probes = PROBE_PORTS.map(async (port) => {
+    const base = await probePort(port);
+    return base ? { port, base } : null;
+  });
+  const results = await Promise.all(probes);
+  const hit = results.find((r): r is { port: number; base: string } => r !== null);
+
+  if (hit) {
+    _probedBase = hit.base;
+    return _probedBase;
+  }
+
+  // 4. fallback 3001
+  _probedBase = 'http://localhost:3001';
+  return _probedBase;
+}
+
+export async function ensureLocalApiProbed(): Promise<string> {
+  if (_probedBase) {
+    return _probedBase;
+  }
+  if (!_probePromise) {
+    _probePromise = doProbe();
+  }
+  return _probePromise;
 }
 
 export function defaultLocalApiBase(): string {
@@ -31,19 +110,13 @@ export function defaultLocalApiBase(): string {
     return '';
   }
 
-  // 支持通过 URL query param 指定后端端口，例如 ?apiPort=3000
-  const queryPort = readQueryApiBase('apiPort');
-  if (queryPort && /^\d+$/.test(queryPort)) {
-    return `http://localhost:${queryPort}`;
+  // 如果已经探测过，直接返回
+  if (_probedBase) {
+    return _probedBase;
   }
 
-  // 支持通过 URL query param 指定完整后端地址，例如 ?apiBase=http://localhost:3000
-  const queryBase = readQueryApiBase('apiBase');
-  if (queryBase) {
-    return queryBase.replace(/\/+$/, '');
-  }
-
-  if (port === '3001') {
+  // 如果前端本身就跑在常用后端端口上
+  if (PROBE_PORTS.includes(Number(port))) {
     return origin;
   }
 
@@ -64,11 +137,11 @@ export function getPresetApiBase(settings: Pick<SettingsState, 'apiPreset'>): st
 }
 
 export function getEffectiveApiBase(settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset'>): string {
-  if (settings.interfaceMode === 'builtin') {
-    return getPresetApiBase(settings);
+  if (settings.interfaceMode === 'custom') {
+    return (settings.apiBaseUrl || '').trim().replace(/\/+$/, '');
   }
 
-  return (settings.apiBaseUrl || '').trim().replace(/\/+$/, '');
+  return getPresetApiBase(settings);
 }
 
 export function detectWorkflowApiBaseIssue(apiBase: string): WorkflowApiBaseIssue {
@@ -80,16 +153,16 @@ export function detectWorkflowApiBaseIssue(apiBase: string): WorkflowApiBaseIssu
   const lower = trimmed.toLowerCase();
 
   const directEndpointPatterns = [
-    /\/v\d+\/chat\/completions(?:[/?#]|$)/,
-    /\/chat\/completions(?:[/?#]|$)/,
-    /\/v\d+\/responses(?:[/?#]|$)/,
-    /\/responses(?:[/?#]|$)/,
-    /\/v\d+\/audio\/speech(?:[/?#]|$)/,
-    /\/audio\/speech(?:[/?#]|$)/,
-    /\/v\d+\/embeddings(?:[/?#]|$)/,
-    /\/embeddings(?:[/?#]|$)/,
-    /\/v\d+\/images(?:[/?#]|$)/,
-    /\/images(?:[/?#]|$)/,
+    /\/v\d+\/chat\/completions(?:[\/?#]|$)/,
+    /\/chat\/completions(?:[\/?#]|$)/,
+    /\/v\d+\/responses(?:[\/?#]|$)/,
+    /\/responses(?:[\/?#]|$)/,
+    /\/v\d+\/audio\/speech(?:[\/?#]|$)/,
+    /\/audio\/speech(?:[\/?#]|$)/,
+    /\/v\d+\/embeddings(?:[\/?#]|$)/,
+    /\/embeddings(?:[\/?#]|$)/,
+    /\/v\d+\/images(?:[\/?#]|$)/,
+    /\/images(?:[\/?#]|$)/,
   ];
 
   if (directEndpointPatterns.some((pattern) => pattern.test(lower))) {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
+import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
 import type { AppLanguage, SettingsState, ShortcutAction } from './types';
 
 type SharedPageProps = {
@@ -1804,6 +1804,7 @@ async function downloadRemoteFile(url: string, fileName: string, settings: Setti
 }
 
 async function downloadPaperArchive(workflowId: string, settings: SettingsState, copy: UiCopySet['paper']) {
+  await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/download`);
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
@@ -1991,6 +1992,7 @@ async function startPaperWorkflowRequest(
     throw new Error(copy.hostedApiRequired);
   }
 
+  await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, '/api/workflows');
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
@@ -2036,6 +2038,7 @@ async function redoPaperWorkflowStepRequest(
     throw new Error(copy.hostedApiRequired);
   }
 
+  await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/rerun`);
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
@@ -2075,6 +2078,7 @@ async function fetchPaperWorkflowRequest(workflowId: string, settings: SettingsS
     throw new Error(copy.hostedApiRequired);
   }
 
+  await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}`);
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
