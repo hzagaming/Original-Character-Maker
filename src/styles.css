@@ -2974,6 +2974,19 @@ a {
   transition: none !important;
 }
 
+/* Elements that start invisible and rely on animation to appear must be forced visible */
+.perf-no-anim .fade-up {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Modals also rely on keyframe animations for entrance; ensure they stay usable */
+.perf-no-anim .modal-backdrop,
+.perf-no-anim .modal-surface {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 .perf-no-glass .modal-backdrop,
 .perf-no-glass .modal-card,
 .perf-no-glass .settings-section,
