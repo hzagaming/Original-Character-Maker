@@ -3013,18 +3013,4 @@ a {
   image-rendering: pixelated;
 }
 
-.perf-dev-mode::after {
-  content: 'DEV';
-  position: fixed;
-  top: 6px;
-  right: 6px;
-  background: #e74c3c;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 3px;
-  z-index: 9999;
-  pointer-events: none;
-  letter-spacing: 0.5px;
-}
+

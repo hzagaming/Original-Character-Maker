@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react';
+import DevModePanel from './DevModePanel';
 import { createPortal } from 'react-dom';
 import type {
   AccentPalette,
@@ -2726,23 +2727,13 @@ function App() {
         />
       )}
 
-      {/* Dev Mode Debug Overlay */}
       {settings.performance.devMode && (
-        <div style={{
-          position: 'fixed', bottom: 8, left: 8, right: 8, maxHeight: 180,
-          background: 'rgba(0,0,0,0.85)', color: '#0f0', fontFamily: 'monospace',
-          fontSize: 11, padding: 10, borderRadius: 6, zIndex: 9998,
-          overflow: 'auto', lineHeight: 1.5, border: '1px solid #0f0',
-        }}>
-          <strong style={{ color: '#ff0' }}>DEV MODE</strong>
-          <div>ver: {VERSION} | lang: {settings.language} | preset: {settings.stylePreset}</div>
-          <div>depth: {settings.depth} | accent: {settings.accent} | font: {settings.fontPreset}</div>
-          <div>contrast: {settings.contrast}% | border: {settings.borderWidth}px | anim: {settings.animation.speed}%</div>
-          <div>sfx: {settings.audio.sfxPreset} | music: {settings.audio.musicPreset} | vol: {settings.audio.masterVolume}%</div>
-          <div>perf: reduceAnim={settings.performance.reduceAnimations ? 'Y' : 'N'} noGlass={settings.performance.disableGlassmorphism ? 'Y' : 'N'} lowRes={settings.performance.lowResolutionPreviews ? 'Y' : 'N'}</div>
-          <div>api: {settings.interfaceMode} | endpoint: {effectiveApiEndpoint || 'none'}</div>
-          <div>savedPresets: [{settings.savedPresets[0]?.name ?? '-'}, {settings.savedPresets[1]?.name ?? '-'}]</div>
-        </div>
+        <DevModePanel
+          version={VERSION}
+          settings={settings}
+          effectiveApiEndpoint={effectiveApiEndpoint}
+          screen={screen}
+        />
       )}
     </div>
   );

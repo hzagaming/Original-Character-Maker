@@ -2160,6 +2160,7 @@ async function uploadFrontendCutout(options: {
     throw new Error(copy.hostedApiRequired);
   }
 
+  await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/cutouts/${expressionName}`);
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
