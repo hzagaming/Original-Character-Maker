@@ -1056,6 +1056,67 @@ a {
   box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0.16);
 }
 
+/* ─── Switch toggle rows (performance settings etc.) ─── */
+.switch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 8px;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  min-height: 48px;
+}
+
+.switch-row:last-child {
+  border-bottom: none;
+}
+
+.switch-label {
+  font-size: 14px;
+  color: var(--text-main);
+  padding-right: 16px;
+}
+
+.switch-track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background 180ms ease;
+  flex-shrink: 0;
+  border: none;
+  padding: 0;
+}
+
+.switch-track.active {
+  background: var(--accent-solid);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  transition: transform 180ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.switch-track.active .switch-thumb {
+  transform: translateX(20px);
+}
+
 .tool-actions-row,
 .mini-action-row,
 .editor-toolbar-grid,

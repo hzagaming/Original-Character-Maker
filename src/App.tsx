@@ -4359,7 +4359,7 @@ function SettingsModal({
               <>
                 <section className="settings-section">
                   <h3>{messages.performanceTitle}</h3>
-                  <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                  <div className="switch-list">
                     {[
                       { key: 'reduceAnimations', label: messages.performanceReduceAnimations },
                       { key: 'disableGlassmorphism', label: messages.performanceDisableGlass },
@@ -4369,14 +4369,17 @@ function SettingsModal({
                       { key: 'aggressiveCaching', label: messages.performanceAggressiveCache },
                       { key: 'devMode', label: messages.performanceDevMode },
                     ].map((item) => (
-                      <button
-                        key={item.key}
-                        className={`palette-chip ${settings.performance[item.key as keyof typeof settings.performance] ? 'active' : ''}`}
-                        type="button"
-                        onClick={() => onUpdate({ performance: { ...settings.performance, [item.key]: !settings.performance[item.key as keyof typeof settings.performance] } })}
-                      >
-                        {item.label}
-                      </button>
+                      <div key={item.key} className="switch-row">
+                        <span className="switch-label">{item.label}</span>
+                        <button
+                          type="button"
+                          className={`switch-track ${settings.performance[item.key as keyof typeof settings.performance] ? 'active' : ''}`}
+                          onClick={() => onUpdate({ performance: { ...settings.performance, [item.key]: !settings.performance[item.key as keyof typeof settings.performance] } })}
+                          aria-pressed={settings.performance[item.key as keyof typeof settings.performance]}
+                        >
+                          <span className="switch-thumb" />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </section>
