@@ -30,7 +30,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.5.2';
+const VERSION = '0.5.3';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -2098,6 +2098,22 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.5.3',
+    date: '2026-04-20',
+    title: '0.5.3 深层 Bug 修复：导出导入 + 音效完善 + 内存安全',
+    summary: '修复 FaceMaker 死导出按钮、下载链接过早释放、模态框超时泄漏、音频引擎内存泄漏、全局音效覆盖完善。',
+    details: [
+      '修复 FaceMakerPage 导出按钮为死按钮：新增 exportDraft() 导出 JSON 配置，添加 save/export/reset 音效。',
+      '修复 downloadText 过早释放 Blob URL：URL.revokeObjectURL 从立即释放改为 100ms 延迟，防止浏览器未开始下载就丢失链接。',
+      '修复 ConfirmReturnModal 超时泄漏：requestClose/confirmLeave 中的 setTimeout 现在存储 timerRef，组件卸载时自动清理。',
+      '修复全局音效选择器缺失 input[type=color/url/password]：新增 colorPick、inputFocus、select 音效分支。',
+      '修复 .collapsible-toggle 静默问题：StyleTransferPage 高级参数折叠和 Paper2GalPage Prompt 覆盖折叠新增 expand/collapse 音效。',
+      '修复 audioEngine.ts 内存泄漏：createReverbMix 返回 convolver 引用，cleanup 时设置 buffer = null 释放 AudioBuffer。',
+      '修复 PromptSuitePage ttsConfig.language  stale：新增 useEffect 监听 language prop，与 TtsExportPage 行为一致。',
+      '补充 20+ 处 copy/download 显式音效：StyleTransferPage/Paper2GalPage/LlmHubPage/TtsExportPage/PromptSuitePage 的复制和下载按钮。',
+    ],
+  },
+  {
     version: '0.5.2',
     date: '2026-04-20',
     title: '0.5.2 全面 Bug 修复：导出导入 + 音效覆盖 + 性能优化',
@@ -2713,7 +2729,7 @@ function App() {
         return;
       }
 
-      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], select, textarea, .announcement-entry');
+      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], input[type="color"], input[type="url"], input[type="password"], select, textarea, .announcement-entry');
       if (!el) return;
 
       // Skip elements that have their own explicit sound handling (avoids double-play)
@@ -2725,7 +2741,8 @@ function App() {
       const isConfirm = el.classList.contains('primary-button');
       const isSlider = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'range';
       const isCheckbox = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'checkbox';
-      const isTextInput = el.tagName === 'INPUT' && ((el as HTMLInputElement).type === 'text' || (el as HTMLInputElement).type === 'number');
+      const isTextInput = el.tagName === 'INPUT' && ['text', 'number', 'url', 'password'].includes((el as HTMLInputElement).type);
+      const isColorInput = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'color';
       const isTextarea = el.tagName === 'TEXTAREA';
       const isSelect = el.tagName === 'SELECT';
       const isToggleChipEl = el.classList.contains('toggle-chip');
@@ -2749,6 +2766,8 @@ function App() {
         playSound(wasActive ? 'toggleOff' : 'toggleOn');
       } else if (isSelect) {
         playSound('select');
+      } else if (isColorInput) {
+        playSound('colorPick');
       } else if (isTextInput || isTextarea) {
         playSound('inputFocus');
       } else if (isBack) {
@@ -3305,10 +3324,24 @@ function FaceMakerPage({
   }
 
   function saveDraft() {
+    playSound('save');
     setSavedSnapshot(JSON.stringify(draft));
   }
 
+  function exportDraft() {
+    playSound('downloadSound');
+    const payload = JSON.stringify({ tool: 'face-maker', draft, language }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'oc-face-maker-config.json';
+    anchor.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
+
   function resetDraft() {
+    playSound('confirm');
     setDraft(initialDraft);
     setSavedSnapshot(JSON.stringify(initialDraft));
     setIsResetOpen(false);
@@ -3349,7 +3382,7 @@ function FaceMakerPage({
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
               {copy.saveDraft}
             </button>
-            <button className="primary-button small-button" type="button">
+            <button className="primary-button small-button" type="button" onClick={exportDraft}>
               {copy.export}
             </button>
           </div>
@@ -3482,15 +3515,24 @@ function ConfirmReturnModal({
   onConfirm: () => void;
 }) {
   const [isClosing, setIsClosing] = useState(false);
+  const timerRef = useRef<number>(0);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   function requestClose() {
     setIsClosing(true);
-    window.setTimeout(onCancel, MODAL_CLOSE_MS);
+    timerRef.current = window.setTimeout(onCancel, MODAL_CLOSE_MS);
   }
 
   function confirmLeave() {
     setIsClosing(true);
-    window.setTimeout(onConfirm, MODAL_CLOSE_MS);
+    timerRef.current = window.setTimeout(onConfirm, MODAL_CLOSE_MS);
   }
 
   if (typeof document === 'undefined') {

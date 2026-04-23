@@ -169,7 +169,7 @@ export function getAudioSettings(): AudioSettings {
 }
 
 // ─── Reverb helper ───
-function createReverbMix(input: AudioNode, dryGain: number, wetGain: number, decay: number): { mix: AudioNode; nodes: AudioNode[] } {
+function createReverbMix(input: AudioNode, dryGain: number, wetGain: number, decay: number): { mix: AudioNode; nodes: AudioNode[]; convolver: ConvolverNode } {
   const c = ensureContext();
   const convolver = c.createConvolver();
   const rate = c.sampleRate;
@@ -195,7 +195,7 @@ function createReverbMix(input: AudioNode, dryGain: number, wetGain: number, dec
   const mix = c.createGain();
   dry.connect(mix);
   wet.connect(mix);
-  return { mix, nodes: [convolver, dry, wet, mix] };
+  return { mix, nodes: [convolver, dry, wet, mix], convolver };
 }
 
 // ─── Core synthesis engine ───
@@ -302,10 +302,12 @@ function synthesize(params: {
   rootGain.gain.exponentialRampToValueAtTime(0.0001, when + actualDuration + rel);
 
   let output: AudioNode = rootGain;
+  let reverbConvolver: ConvolverNode | null = null;
   if (reverbWet > 0) {
     const reverb = createReverbMix(rootGain, 1 - reverbWet * 0.5, reverbWet * 0.5, 1.5);
     output = reverb.mix;
     nodesToCleanup.push(...reverb.nodes);
+    reverbConvolver = reverb.convolver;
   }
   output.connect(sfxGain!);
 
@@ -315,6 +317,9 @@ function synthesize(params: {
       nodesToCleanup.forEach((n) => n.disconnect());
       if (output !== rootGain) {
         output.disconnect();
+      }
+      if (reverbConvolver) {
+        reverbConvolver.buffer = null;
       }
     } catch {
       // ignore already-disconnected nodes
