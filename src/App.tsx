@@ -30,7 +30,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.5.0.1';
+const VERSION = '0.5.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -2098,6 +2098,22 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.5.1',
+    date: '2026-04-20',
+    title: '0.5.1 公告修复 + 端口扩展 + TTS 全面增强',
+    summary: '修复首页公告显示 Bug，扩展后端端口探测范围，TTS 导出页面新增 13 项参数与 3 个可折叠精校模块。',
+    details: [
+      '修复首页公告内容 Bug：公告卡片现在从 announcementHistory 数组动态读取最新内容，不再显示过期的硬编码 0.4.2.1 文案。',
+      '扩展后端端口探测范围：PROBE_PORTS 从 5 个端口扩展至 10 个（3000/3001/5173/4173/8080/8000/5000/5001/9000/9001），并改进错误提示信息。',
+      'TTS 导出页面全面增强：新增气息感、清晰度、表现力、语速变化 4 项基础参数滑块。',
+      '新增高级参数可折叠面板：停顿强度、语调曲线（平直/自然/戏剧化/旋律化）、强调模式（正常/强烈/微妙）。',
+      '新增音频后处理可折叠面板：降噪强度、EQ 预设（平直/温暖/明亮/广播/清晰）、压缩强度、后处理总开关。',
+      '新增发音精校可折叠面板：文本预处理开关、自定义替换规则文本框。',
+      '全部 26 个新翻译键已同步至 4 种基础语言（中/日/英/俄）。',
+      '更新 Plato API Key 至新服务密钥。',
+    ],
+  },
+  {
     version: '0.5.0.1',
     date: '2026-04-20',
     title: '0.5.0.1 紧急更新：切换 Plato API Key',
@@ -2904,12 +2920,12 @@ function HomeScreen({
         <div className="home-hero-grid">
           <article className="home-hero-copy">
             <p className="section-label">{messages.announcementTitle}</p>
-            <h2>{VERSION}</h2>
-            <p>{messages.announcementDescription}</p>
+            <h2>{announcementHistory[0].version}</h2>
+            <p className="announcement-summary">{announcementHistory[0].summary}</p>
             <ul className="home-announcement-list">
-              <li>{messages.announcementList1}</li>
-              <li>{messages.announcementList2}</li>
-              <li>{messages.announcementList3}</li>
+              {announcementHistory[0].details.slice(0, 3).map((detail, i) => (
+                <li key={i}>{detail}</li>
+              ))}
             </ul>
             <div className="workflow-actions home-announcement-actions">
               <button className="secondary-button" type="button" onClick={onOpenAnnouncementArchive}>

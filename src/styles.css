@@ -408,6 +408,12 @@ a {
   line-height: 1.72;
 }
 
+.announcement-summary {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
 .home-announcement-list {
   margin: 18px 0 0;
   padding-left: 18px;

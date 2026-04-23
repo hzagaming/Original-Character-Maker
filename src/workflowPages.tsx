@@ -315,6 +315,34 @@ type UiCopySet = {
     ttsReference: string;
     ttsReferenceButton: string;
     ttsReferenceHint: string;
+    ttsBreathiness: string;
+    ttsClarity: string;
+    ttsExpressiveness: string;
+    ttsSpeedVariation: string;
+    ttsAdvancedParams: string;
+    ttsPauseStrength: string;
+    ttsToneCurve: string;
+    ttsEmphasisMode: string;
+    ttsToneCurveFlat: string;
+    ttsToneCurveNatural: string;
+    ttsToneCurveDramatic: string;
+    ttsToneCurveMelodic: string;
+    ttsEmphasisNormal: string;
+    ttsEmphasisStrong: string;
+    ttsEmphasisSubtle: string;
+    ttsAudioPostProcessing: string;
+    ttsNoiseReduction: string;
+    ttsEqPreset: string;
+    ttsCompression: string;
+    ttsEqFlat: string;
+    ttsEqWarm: string;
+    ttsEqBright: string;
+    ttsEqRadio: string;
+    ttsEqClear: string;
+    ttsTextPreprocessing: string;
+    ttsPronunciation: string;
+    ttsCustomReplacements: string;
+    ttsReplacementsHint: string;
     editorReady: string;
     packageHint: string;
     exportOptionsTitle: string;
@@ -768,6 +796,34 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       ttsReference: '参考音频',
       ttsReferenceButton: '选择参考音频',
       ttsReferenceHint: '可选择一段参考音频，帮助后续 TTS 保持更稳定的音色方向。',
+      ttsBreathiness: '气息感',
+      ttsClarity: '清晰度',
+      ttsExpressiveness: '表现力',
+      ttsSpeedVariation: '语速变化',
+      ttsAdvancedParams: '高级参数',
+      ttsPauseStrength: '停顿强度',
+      ttsToneCurve: '语调曲线',
+      ttsEmphasisMode: '强调模式',
+      ttsToneCurveFlat: '平直',
+      ttsToneCurveNatural: '自然',
+      ttsToneCurveDramatic: '戏剧化',
+      ttsToneCurveMelodic: '旋律化',
+      ttsEmphasisNormal: '正常',
+      ttsEmphasisStrong: '强烈',
+      ttsEmphasisSubtle: '微妙',
+      ttsAudioPostProcessing: '音频后处理',
+      ttsNoiseReduction: '降噪强度',
+      ttsEqPreset: 'EQ 预设',
+      ttsCompression: '压缩强度',
+      ttsEqFlat: '平直',
+      ttsEqWarm: '温暖',
+      ttsEqBright: '明亮',
+      ttsEqRadio: '广播',
+      ttsEqClear: '清晰',
+      ttsTextPreprocessing: '文本预处理',
+      ttsPronunciation: '发音精校',
+      ttsCustomReplacements: '自定义替换',
+      ttsReplacementsHint: '每行一条，格式：原文=替换，例如：你好=您好',
       editorReady: '文档、配置和封装信息会一起进入导出包。',
       packageHint: '可以导出 HTML 文档、纯文本副本和一份完整的封装 JSON。',
       exportOptionsTitle: '导出格式',
@@ -1030,6 +1086,34 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       ttsReference: '参照音声',
       ttsReferenceButton: '参照音声を選択',
       ttsReferenceHint: '後続の TTS 音色方向を安定させるため、参照音声を 1 本紐づけられます。',
+      ttsBreathiness: '息の質感',
+      ttsClarity: '明瞭度',
+      ttsExpressiveness: '表現力',
+      ttsSpeedVariation: '速度変化',
+      ttsAdvancedParams: '詳細パラメータ',
+      ttsPauseStrength: '休止強度',
+      ttsToneCurve: 'トーンカーブ',
+      ttsEmphasisMode: '強調モード',
+      ttsToneCurveFlat: 'フラット',
+      ttsToneCurveNatural: 'ナチュラル',
+      ttsToneCurveDramatic: 'ドラマチック',
+      ttsToneCurveMelodic: 'メロディック',
+      ttsEmphasisNormal: '通常',
+      ttsEmphasisStrong: '強い',
+      ttsEmphasisSubtle: '繊細',
+      ttsAudioPostProcessing: '音声後処理',
+      ttsNoiseReduction: 'ノイズ低減',
+      ttsEqPreset: 'EQ プリセット',
+      ttsCompression: 'コンプレッション',
+      ttsEqFlat: 'フラット',
+      ttsEqWarm: 'ウォーム',
+      ttsEqBright: 'ブライト',
+      ttsEqRadio: 'ラジオ',
+      ttsEqClear: 'クリア',
+      ttsTextPreprocessing: 'テキスト前処理',
+      ttsPronunciation: '発音調整',
+      ttsCustomReplacements: 'カスタム置換',
+      ttsReplacementsHint: '1 行 1 件、形式：原文=置換、例：こんにちは=您好',
       editorReady: '文書、設定、封装情報はまとめて出力パックに含まれます。',
       packageHint: 'HTML 文書、プレーンテキスト、副次 JSON パックを書き出せます。',
       exportOptionsTitle: '書き出し形式',
@@ -1292,6 +1376,34 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       ttsReference: 'Reference audio',
       ttsReferenceButton: 'Choose reference audio',
       ttsReferenceHint: 'Attach a short reference clip if you want the downstream TTS timbre to stay closer to the intended voice.',
+      ttsBreathiness: 'Breathiness',
+      ttsClarity: 'Clarity',
+      ttsExpressiveness: 'Expressiveness',
+      ttsSpeedVariation: 'Speed Variation',
+      ttsAdvancedParams: 'Advanced Params',
+      ttsPauseStrength: 'Pause Strength',
+      ttsToneCurve: 'Tone Curve',
+      ttsEmphasisMode: 'Emphasis Mode',
+      ttsToneCurveFlat: 'Flat',
+      ttsToneCurveNatural: 'Natural',
+      ttsToneCurveDramatic: 'Dramatic',
+      ttsToneCurveMelodic: 'Melodic',
+      ttsEmphasisNormal: 'Normal',
+      ttsEmphasisStrong: 'Strong',
+      ttsEmphasisSubtle: 'Subtle',
+      ttsAudioPostProcessing: 'Audio Post-processing',
+      ttsNoiseReduction: 'Noise Reduction',
+      ttsEqPreset: 'EQ Preset',
+      ttsCompression: 'Compression',
+      ttsEqFlat: 'Flat',
+      ttsEqWarm: 'Warm',
+      ttsEqBright: 'Bright',
+      ttsEqRadio: 'Radio',
+      ttsEqClear: 'Clear',
+      ttsTextPreprocessing: 'Text Preprocessing',
+      ttsPronunciation: 'Pronunciation',
+      ttsCustomReplacements: 'Custom Replacements',
+      ttsReplacementsHint: 'One per line, format: original=replacement, e.g. hello=hi',
       editorReady: 'The document, wrapper settings, and export info are bundled together as one authoring packet.',
       packageHint: 'You can export HTML, copy plain text, and download a full wrapper JSON package.',
       exportOptionsTitle: 'Export formats',
@@ -1554,6 +1666,34 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       ttsReference: 'Референс аудио',
       ttsReferenceButton: 'Выбрать референс аудио',
       ttsReferenceHint: 'Можно прикрепить короткий референс-клип, чтобы будущий TTS держал нужное направление тембра.',
+      ttsBreathiness: 'Дыхание',
+      ttsClarity: 'Чёткость',
+      ttsExpressiveness: 'Выразительность',
+      ttsSpeedVariation: 'Вариация скорости',
+      ttsAdvancedParams: 'Расширенные параметры',
+      ttsPauseStrength: 'Сила паузы',
+      ttsToneCurve: 'Тональная кривая',
+      ttsEmphasisMode: 'Режим акцента',
+      ttsToneCurveFlat: 'Плоская',
+      ttsToneCurveNatural: 'Естественная',
+      ttsToneCurveDramatic: 'Драматичная',
+      ttsToneCurveMelodic: 'Мелодичная',
+      ttsEmphasisNormal: 'Обычный',
+      ttsEmphasisStrong: 'Сильный',
+      ttsEmphasisSubtle: 'Тонкий',
+      ttsAudioPostProcessing: 'Постобработка аудио',
+      ttsNoiseReduction: 'Шумоподавление',
+      ttsEqPreset: 'EQ пресет',
+      ttsCompression: 'Компрессия',
+      ttsEqFlat: 'Плоский',
+      ttsEqWarm: 'Тёплый',
+      ttsEqBright: 'Яркий',
+      ttsEqRadio: 'Радио',
+      ttsEqClear: 'Чистый',
+      ttsTextPreprocessing: 'Предобработка текста',
+      ttsPronunciation: 'Произношение',
+      ttsCustomReplacements: 'Пользовательские замены',
+      ttsReplacementsHint: 'По одной на строку, формат: оригинал=замена, напр. привет=здравствуй',
       editorReady: 'Документ, настройки обёртки и экспортные данные собираются в один авторский пакет.',
       packageHint: 'Можно экспортировать HTML, копировать обычный текст и скачать полный JSON-пакет.',
       exportOptionsTitle: 'Форматы экспорта',
@@ -5106,10 +5246,9 @@ export function Paper2GalPage({
     } catch (error) {
       const base = getEffectiveApiBase(settings);
       const isLocalhost = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)/.test(window.location.hostname);
-      const isDefaultPort = base === 'http://localhost:3001';
       let errorText = normalizeFetchError(error, paper.networkStartError);
-      if (isLocalhost && isDefaultPort && error instanceof TypeError && String(error.message).includes('Failed to fetch')) {
-        errorText = `${errorText}（当前尝试连接 ${base}）。如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=3000。`;
+      if (isLocalhost && error instanceof TypeError && String(error.message).includes('Failed to fetch')) {
+        errorText = `${errorText}（当前尝试连接 ${base}）。如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=8080。常用端口会自动探测：3000/3001/5173/8080/8000/5000/9000。`;
       }
       setMessage({
         type: 'error',
@@ -5779,6 +5918,19 @@ export function TtsExportPage({
     rate: 1,
     emotion: 'calm-dramatic',
     format: 'wav',
+    breathiness: 30,
+    clarity: 80,
+    expressiveness: 50,
+    speedVariation: 20,
+    pauseStrength: 50,
+    toneCurve: 'natural',
+    emphasisMode: 'normal',
+    noiseReduction: 20,
+    audioPostProcessing: false,
+    textPreprocessing: false,
+    eqPreset: 'flat',
+    compression: 30,
+    customReplacements: '',
   };
   const [persistedState] = useState(() => {
     const ownState = readLocalState('oc-maker.tts-export', {
@@ -5801,6 +5953,19 @@ export function TtsExportPage({
             volume: migrated.volume ?? initialTtsConfig.volume,
             sampleRate: migrated.sampleRate ?? initialTtsConfig.sampleRate,
             referenceClipName: migrated.referenceClipName ?? initialTtsConfig.referenceClipName,
+            breathiness: migrated.breathiness ?? initialTtsConfig.breathiness,
+            clarity: migrated.clarity ?? initialTtsConfig.clarity,
+            expressiveness: migrated.expressiveness ?? initialTtsConfig.expressiveness,
+            speedVariation: migrated.speedVariation ?? initialTtsConfig.speedVariation,
+            pauseStrength: migrated.pauseStrength ?? initialTtsConfig.pauseStrength,
+            toneCurve: migrated.toneCurve ?? initialTtsConfig.toneCurve,
+            emphasisMode: migrated.emphasisMode ?? initialTtsConfig.emphasisMode,
+            noiseReduction: migrated.noiseReduction ?? initialTtsConfig.noiseReduction,
+            audioPostProcessing: migrated.audioPostProcessing ?? initialTtsConfig.audioPostProcessing,
+            textPreprocessing: migrated.textPreprocessing ?? initialTtsConfig.textPreprocessing,
+            eqPreset: migrated.eqPreset ?? initialTtsConfig.eqPreset,
+            compression: migrated.compression ?? initialTtsConfig.compression,
+            customReplacements: migrated.customReplacements ?? initialTtsConfig.customReplacements,
           },
           savedSnapshot: '',
         };
@@ -5820,8 +5985,24 @@ export function TtsExportPage({
       volume: saved.volume ?? initialTtsConfig.volume,
       sampleRate: saved.sampleRate ?? initialTtsConfig.sampleRate,
       referenceClipName: saved.referenceClipName ?? initialTtsConfig.referenceClipName,
+      breathiness: saved.breathiness ?? initialTtsConfig.breathiness,
+      clarity: saved.clarity ?? initialTtsConfig.clarity,
+      expressiveness: saved.expressiveness ?? initialTtsConfig.expressiveness,
+      speedVariation: saved.speedVariation ?? initialTtsConfig.speedVariation,
+      pauseStrength: saved.pauseStrength ?? initialTtsConfig.pauseStrength,
+      toneCurve: saved.toneCurve ?? initialTtsConfig.toneCurve,
+      emphasisMode: saved.emphasisMode ?? initialTtsConfig.emphasisMode,
+      noiseReduction: saved.noiseReduction ?? initialTtsConfig.noiseReduction,
+      audioPostProcessing: saved.audioPostProcessing ?? initialTtsConfig.audioPostProcessing,
+      textPreprocessing: saved.textPreprocessing ?? initialTtsConfig.textPreprocessing,
+      eqPreset: saved.eqPreset ?? initialTtsConfig.eqPreset,
+      compression: saved.compression ?? initialTtsConfig.compression,
+      customReplacements: saved.customReplacements ?? initialTtsConfig.customReplacements,
     };
   });
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isAudioPostOpen, setIsAudioPostOpen] = useState(false);
+  const [isPronunciationOpen, setIsPronunciationOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const referenceAudioInputRef = useRef<HTMLInputElement>(null);
   const currentSnapshot = JSON.stringify({ ttsConfig });
@@ -5907,6 +6088,10 @@ export function TtsExportPage({
             </label>
             <RangeField label={promptCopy.ttsPitch} min={-12} max={12} step={1} value={ttsConfig.pitch} onChange={(value) => setTtsConfig((current) => ({ ...current, pitch: value }))} />
             <RangeField label={promptCopy.ttsVolume} min={40} max={140} step={1} value={ttsConfig.volume} onChange={(value) => setTtsConfig((current) => ({ ...current, volume: value }))} />
+            <RangeField label={promptCopy.ttsBreathiness} min={0} max={100} step={1} value={ttsConfig.breathiness} onChange={(value) => setTtsConfig((current) => ({ ...current, breathiness: value }))} />
+            <RangeField label={promptCopy.ttsClarity} min={0} max={100} step={1} value={ttsConfig.clarity} onChange={(value) => setTtsConfig((current) => ({ ...current, clarity: value }))} />
+            <RangeField label={promptCopy.ttsExpressiveness} min={0} max={100} step={1} value={ttsConfig.expressiveness} onChange={(value) => setTtsConfig((current) => ({ ...current, expressiveness: value }))} />
+            <RangeField label={promptCopy.ttsSpeedVariation} min={0} max={100} step={1} value={ttsConfig.speedVariation} onChange={(value) => setTtsConfig((current) => ({ ...current, speedVariation: value }))} />
           </div>
           <div className="form-grid two-column">
             <label className="field">
@@ -5938,6 +6123,91 @@ export function TtsExportPage({
             <input ref={referenceAudioInputRef} type="file" accept="audio/wav,audio/mpeg,audio/flac" hidden onChange={handleReferenceAudioChange} />
             <p className="tiny-copy">{promptCopy.ttsReferenceHint}</p>
           </label>
+        </section>
+
+        <section className="tool-card">
+          <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} role="button" tabIndex={0}>
+            <div>
+              <span className="card-caption">{promptCopy.ttsAdvancedParams}</span>
+              <h3 style={{ margin: 0 }}>{promptCopy.ttsAdvancedParams}</h3>
+            </div>
+            <span style={{ fontSize: 12, color: '#8aa4c0' }}>{isAdvancedOpen ? '▲' : '▼'}</span>
+          </div>
+          {isAdvancedOpen && (
+            <div className="form-grid two-column" style={{ marginTop: 16 }}>
+              <RangeField label={promptCopy.ttsPauseStrength} min={0} max={100} step={1} value={ttsConfig.pauseStrength} onChange={(value) => setTtsConfig((current) => ({ ...current, pauseStrength: value }))} />
+              <label className="field">
+                <span>{promptCopy.ttsToneCurve}</span>
+                <select className="settings-input tool-select" value={ttsConfig.toneCurve} onChange={(event) => setTtsConfig((current) => ({ ...current, toneCurve: event.target.value }))}>
+                  <option value="flat">{promptCopy.ttsToneCurveFlat}</option>
+                  <option value="natural">{promptCopy.ttsToneCurveNatural}</option>
+                  <option value="dramatic">{promptCopy.ttsToneCurveDramatic}</option>
+                  <option value="melodic">{promptCopy.ttsToneCurveMelodic}</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>{promptCopy.ttsEmphasisMode}</span>
+                <select className="settings-input tool-select" value={ttsConfig.emphasisMode} onChange={(event) => setTtsConfig((current) => ({ ...current, emphasisMode: event.target.value }))}>
+                  <option value="normal">{promptCopy.ttsEmphasisNormal}</option>
+                  <option value="strong">{promptCopy.ttsEmphasisStrong}</option>
+                  <option value="subtle">{promptCopy.ttsEmphasisSubtle}</option>
+                </select>
+              </label>
+            </div>
+          )}
+        </section>
+
+        <section className="tool-card">
+          <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); }} role="button" tabIndex={0}>
+            <div>
+              <span className="card-caption">{promptCopy.ttsAudioPostProcessing}</span>
+              <h3 style={{ margin: 0 }}>{promptCopy.ttsAudioPostProcessing}</h3>
+            </div>
+            <span style={{ fontSize: 12, color: '#8aa4c0' }}>{isAudioPostOpen ? '▲' : '▼'}</span>
+          </div>
+          {isAudioPostOpen && (
+            <div style={{ marginTop: 16 }}>
+              <div className="form-grid two-column">
+                <RangeField label={promptCopy.ttsNoiseReduction} min={0} max={100} step={1} value={ttsConfig.noiseReduction} onChange={(value) => setTtsConfig((current) => ({ ...current, noiseReduction: value }))} />
+                <label className="field">
+                  <span>{promptCopy.ttsEqPreset}</span>
+                  <select className="settings-input tool-select" value={ttsConfig.eqPreset} onChange={(event) => setTtsConfig((current) => ({ ...current, eqPreset: event.target.value }))}>
+                    <option value="flat">{promptCopy.ttsEqFlat}</option>
+                    <option value="warm">{promptCopy.ttsEqWarm}</option>
+                    <option value="bright">{promptCopy.ttsEqBright}</option>
+                    <option value="radio">{promptCopy.ttsEqRadio}</option>
+                    <option value="clear">{promptCopy.ttsEqClear}</option>
+                  </select>
+                </label>
+                <RangeField label={promptCopy.ttsCompression} min={0} max={100} step={1} value={ttsConfig.compression} onChange={(value) => setTtsConfig((current) => ({ ...current, compression: value }))} />
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <ToggleChip label={promptCopy.ttsAudioPostProcessing} checked={ttsConfig.audioPostProcessing} onToggle={() => setTtsConfig((current) => ({ ...current, audioPostProcessing: !current.audioPostProcessing }))} />
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="tool-card">
+          <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); }} role="button" tabIndex={0}>
+            <div>
+              <span className="card-caption">{promptCopy.ttsPronunciation}</span>
+              <h3 style={{ margin: 0 }}>{promptCopy.ttsPronunciation}</h3>
+            </div>
+            <span style={{ fontSize: 12, color: '#8aa4c0' }}>{isPronunciationOpen ? '▲' : '▼'}</span>
+          </div>
+          {isPronunciationOpen && (
+            <div style={{ marginTop: 16 }}>
+              <div style={{ marginBottom: 12 }}>
+                <ToggleChip label={promptCopy.ttsTextPreprocessing} checked={ttsConfig.textPreprocessing} onToggle={() => setTtsConfig((current) => ({ ...current, textPreprocessing: !current.textPreprocessing }))} />
+              </div>
+              <label className="field">
+                <span>{promptCopy.ttsCustomReplacements}</span>
+                <textarea className="settings-textarea" rows={4} placeholder={promptCopy.ttsReplacementsHint} value={ttsConfig.customReplacements} onChange={(event) => setTtsConfig((current) => ({ ...current, customReplacements: event.target.value }))} />
+                <p className="tiny-copy">{promptCopy.ttsReplacementsHint}</p>
+              </label>
+            </div>
+          )}
         </section>
 
         <section className="tool-card">

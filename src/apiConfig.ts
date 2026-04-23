@@ -2,7 +2,7 @@ import type { SettingsState } from './types';
 
 export type WorkflowApiBaseIssue = 'direct-model-endpoint' | '';
 
-const PROBE_PORTS = [3000, 3001, 8080, 5000, 9000];
+const PROBE_PORTS = [3000, 3001, 5173, 4173, 8080, 8000, 5000, 5001, 9000, 9001];
 const PROBE_TIMEOUT_MS = 800;
 let _probedBase = '';
 let _probePromise: Promise<string> | null = null;
