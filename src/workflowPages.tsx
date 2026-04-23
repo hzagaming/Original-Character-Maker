@@ -2056,6 +2056,25 @@ const ttsLanguageOptions: Array<{ value: AppLanguage; label: string }> = [
   { value: 'es', label: 'Español' },
   { value: 'it', label: 'Italiano' },
   { value: 'pt', label: 'Português' },
+  { value: 'cs', label: 'Čeština' },
+  { value: 'da', label: 'Dansk' },
+  { value: 'nl', label: 'Nederlands' },
+  { value: 'el', label: 'Ελληνικά' },
+  { value: 'hi', label: 'हिन्दी' },
+  { value: 'hu', label: 'Magyar' },
+  { value: 'id', label: 'Bahasa Indonesia' },
+  { value: 'no', label: 'Norsk' },
+  { value: 'pl', label: 'Polski' },
+  { value: 'ro', label: 'Română' },
+  { value: 'sk', label: 'Slovenčina' },
+  { value: 'sv', label: 'Svenska' },
+  { value: 'th', label: 'ไทย' },
+  { value: 'tr', label: 'Türkçe' },
+  { value: 'uk', label: 'Українська' },
+  { value: 'vi', label: 'Tiếng Việt' },
+  { value: 'ms', label: 'Bahasa Melayu' },
+  { value: 'fi', label: 'Suomi' },
+  { value: 'bg', label: 'Български' },
 ];
 
 const paperStepLabels: Record<BaseLanguage, Record<PaperWorkflowStepName, string>> = {
@@ -3576,6 +3595,7 @@ export function StyleTransferPage({
   }
 
   function saveDraft() {
+    playSound('save');
     setSavedSnapshot(currentSnapshot);
     setLogs((current) => [...current, { time: timestamp(), level: 'success', text: 'Current style-transfer configuration saved locally.' }]);
   }
@@ -3968,6 +3988,19 @@ export function PromptSuitePage({
     rate: 1,
     emotion: 'calm-dramatic',
     format: 'wav',
+    breathiness: 30,
+    clarity: 80,
+    expressiveness: 50,
+    speedVariation: 20,
+    pauseStrength: 50,
+    toneCurve: 'natural',
+    emphasisMode: 'normal',
+    noiseReduction: 20,
+    audioPostProcessing: false,
+    textPreprocessing: false,
+    eqPreset: 'flat',
+    compression: 30,
+    customReplacements: '',
   };
   const [persistedState] = useState(() =>
     readLocalState(PROMPT_SUITE_STORAGE_KEY, {
@@ -3999,17 +4032,7 @@ export function PromptSuitePage({
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [llmConfig, setLlmConfig] = useState({ ...initialLlmConfig, ...persistedState.llmConfig });
   const [ttsConfig, setTtsConfig] = useState(() => {
-    const savedTts = persistedState.ttsConfig as Partial<{
-      voice: string;
-      language: AppLanguage;
-      rate: number;
-      emotion: string;
-      format: string;
-      pitch: number;
-      volume: number;
-      sampleRate: number;
-      referenceClipName: string;
-    }>;
+    const savedTts = persistedState.ttsConfig as Partial<typeof initialTtsConfig>;
 
     return {
       voice: savedTts.voice ?? initialTtsConfig.voice,
@@ -4021,6 +4044,19 @@ export function PromptSuitePage({
       volume: savedTts.volume ?? initialTtsConfig.volume,
       sampleRate: savedTts.sampleRate ?? initialTtsConfig.sampleRate,
       referenceClipName: savedTts.referenceClipName ?? initialTtsConfig.referenceClipName,
+      breathiness: savedTts.breathiness ?? initialTtsConfig.breathiness,
+      clarity: savedTts.clarity ?? initialTtsConfig.clarity,
+      expressiveness: savedTts.expressiveness ?? initialTtsConfig.expressiveness,
+      speedVariation: savedTts.speedVariation ?? initialTtsConfig.speedVariation,
+      pauseStrength: savedTts.pauseStrength ?? initialTtsConfig.pauseStrength,
+      toneCurve: savedTts.toneCurve ?? initialTtsConfig.toneCurve,
+      emphasisMode: savedTts.emphasisMode ?? initialTtsConfig.emphasisMode,
+      noiseReduction: savedTts.noiseReduction ?? initialTtsConfig.noiseReduction,
+      audioPostProcessing: savedTts.audioPostProcessing ?? initialTtsConfig.audioPostProcessing,
+      textPreprocessing: savedTts.textPreprocessing ?? initialTtsConfig.textPreprocessing,
+      eqPreset: savedTts.eqPreset ?? initialTtsConfig.eqPreset,
+      compression: savedTts.compression ?? initialTtsConfig.compression,
+      customReplacements: savedTts.customReplacements ?? initialTtsConfig.customReplacements,
     };
   });
   const [toolbarState, setToolbarState] = useState(() => ({ ...defaultToolbarState, ...(persistedState.toolbarState ?? {}) }));
@@ -4861,6 +4897,11 @@ export function Paper2GalPage({
   const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(true);
   const [isPromptPanelOpen, setIsPromptPanelOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const paperRef = useRef(paper);
+  paperRef.current = paper;
   const [copiedActionKey, setCopiedActionKey] = useState('');
   const currentSnapshot = JSON.stringify({
     inputFileName,
@@ -4913,20 +4954,20 @@ export function Paper2GalPage({
 
     async function pollOnce() {
       try {
-        const latest = await fetchPaperWorkflowRequest(workflowId, settings, paper);
+        const latest = await fetchPaperWorkflowRequest(workflowId, settingsRef.current, paperRef.current);
         if (disposed) {
           return;
         }
 
         setWorkflow(latest);
         if (latest.status === 'completed') {
-          setMessage({ type: 'success', text: paper.completed });
+          setMessage({ type: 'success', text: paperRef.current.completed });
         } else if (latest.status === 'completed_with_errors') {
-          setMessage({ type: 'error', text: latest.error || paper.completedWithErrors });
+          setMessage({ type: 'error', text: latest.error || paperRef.current.completedWithErrors });
         } else if (latest.status === 'failed') {
-          setMessage({ type: 'error', text: latest.error || paper.failed });
+          setMessage({ type: 'error', text: latest.error || paperRef.current.failed });
         } else {
-          setMessage({ type: 'info', text: paper.polling });
+          setMessage({ type: 'info', text: paperRef.current.polling });
           pollTimer = window.setTimeout(pollOnce, PAPER_POLL_INTERVAL_MS);
         }
       } catch (error) {
@@ -4936,7 +4977,7 @@ export function Paper2GalPage({
 
         setMessage({
           type: 'error',
-          text: normalizeFetchError(error, paper.networkFetchError),
+          text: normalizeFetchError(error, paperRef.current.networkFetchError),
         });
         pollTimer = window.setTimeout(pollOnce, PAPER_POLL_INTERVAL_MS);
       }
@@ -4947,31 +4988,22 @@ export function Paper2GalPage({
       disposed = true;
       window.clearTimeout(pollTimer);
     };
-  }, [
-    paper.completed,
-    paper.completedWithErrors,
-    paper.failed,
-    paper.hostedApiRequired,
-    paper.networkFetchError,
-    paper.polling,
-    settings,
-    workflow?.id,
-    workflow?.status,
-  ]);
+  }, [workflow?.id, workflow?.status]);
 
   const cutoutUploadInFlight = useRef(new Set<string>());
   useEffect(() => {
-    if (!workflow?.id || !workflow.outputs) {
+    const wf = workflowRef.current;
+    if (!wf?.id || !wf.outputs) {
       return;
     }
 
-    if (workflow.outputs.providers?.remove_background !== 'frontend') {
+    if (wf.outputs.providers?.remove_background !== 'frontend') {
       return;
     }
 
-    const workflowId = workflow.id;
-    const expressions = workflow.outputs.expressions || {};
-    const cutouts = workflow.outputs.expression_cutouts || {};
+    const workflowId = wf.id;
+    const expressions = wf.outputs.expressions || {};
+    const cutouts = wf.outputs.expression_cutouts || {};
     const expressionNames: ExpressionName[] = ['thinking', 'surprise', 'angry'];
 
     let disposed = false;
@@ -4994,8 +5026,8 @@ export function Paper2GalPage({
             workflowId,
             expressionName: name,
             sourceUrl,
-            settings,
-            copy: paper,
+            settings: settingsRef.current,
+            copy: paperRef.current,
           });
 
           if (disposed) return;
@@ -5005,7 +5037,7 @@ export function Paper2GalPage({
           if (disposed) return;
           setMessage({
             type: 'error',
-            text: normalizeFetchError(error, paper.networkFetchError),
+            text: normalizeFetchError(error, paperRef.current.networkFetchError),
           });
         }
       }
@@ -5015,7 +5047,7 @@ export function Paper2GalPage({
     return () => {
       disposed = true;
     };
-  }, [paper, settings, workflow?.id, workflow?.outputs]);
+  }, [workflow?.id]);
 
   const progress = useMemo(() => {
     if (isSubmitting && !workflow) {
@@ -5235,6 +5267,7 @@ export function Paper2GalPage({
       return;
     }
 
+    playSound('confirm');
     setWorkflow(null);
     setIsSubmitting(true);
     setMessage({ type: 'info', text: paper.starting });
@@ -5263,7 +5296,7 @@ export function Paper2GalPage({
     if (!selectedFile || isSubmitting) {
       return;
     }
-
+    playSound('confirm');
     void handleStartWorkflow();
   }
 
@@ -5795,6 +5828,7 @@ export function LlmHubPage({
   }, [llmConfig, savedSnapshot]);
 
   function saveDraft() {
+    playSound('save');
     setSavedSnapshot(currentSnapshot);
   }
 
@@ -6043,6 +6077,7 @@ export function TtsExportPage({
   }
 
   function saveDraft() {
+    playSound('save');
     setSavedSnapshot(currentSnapshot);
   }
 
@@ -6187,11 +6222,14 @@ export function TtsExportPage({
           </div>
           {isAudioPostOpen && (
             <div style={{ marginTop: 16 }}>
-              <div className="form-grid two-column">
-                <RangeField label={promptCopy.ttsNoiseReduction} min={0} max={100} step={1} value={ttsConfig.noiseReduction} onChange={(value) => setTtsConfig((current) => ({ ...current, noiseReduction: value }))} />
+              <div style={{ marginBottom: 12 }}>
+                <ToggleChip label={promptCopy.ttsAudioPostProcessing} checked={ttsConfig.audioPostProcessing} onToggle={() => setTtsConfig((current) => ({ ...current, audioPostProcessing: !current.audioPostProcessing }))} />
+              </div>
+              <div className={`form-grid two-column ${!ttsConfig.audioPostProcessing ? 'disabled-section' : ''}`}>
+                <RangeField label={promptCopy.ttsNoiseReduction} min={0} max={100} step={1} value={ttsConfig.noiseReduction} disabled={!ttsConfig.audioPostProcessing} onChange={(value) => setTtsConfig((current) => ({ ...current, noiseReduction: value }))} />
                 <label className="field">
                   <span>{promptCopy.ttsEqPreset}</span>
-                  <select className="settings-input tool-select" value={ttsConfig.eqPreset} onChange={(event) => setTtsConfig((current) => ({ ...current, eqPreset: event.target.value }))}>
+                  <select className="settings-input tool-select" value={ttsConfig.eqPreset} disabled={!ttsConfig.audioPostProcessing} onChange={(event) => setTtsConfig((current) => ({ ...current, eqPreset: event.target.value }))}>
                     <option value="flat">{promptCopy.ttsEqFlat}</option>
                     <option value="warm">{promptCopy.ttsEqWarm}</option>
                     <option value="bright">{promptCopy.ttsEqBright}</option>
@@ -6199,10 +6237,7 @@ export function TtsExportPage({
                     <option value="clear">{promptCopy.ttsEqClear}</option>
                   </select>
                 </label>
-                <RangeField label={promptCopy.ttsCompression} min={0} max={100} step={1} value={ttsConfig.compression} onChange={(value) => setTtsConfig((current) => ({ ...current, compression: value }))} />
-              </div>
-              <div style={{ marginTop: 12 }}>
-                <ToggleChip label={promptCopy.ttsAudioPostProcessing} checked={ttsConfig.audioPostProcessing} onToggle={() => setTtsConfig((current) => ({ ...current, audioPostProcessing: !current.audioPostProcessing }))} />
+                <RangeField label={promptCopy.ttsCompression} min={0} max={100} step={1} value={ttsConfig.compression} disabled={!ttsConfig.audioPostProcessing} onChange={(value) => setTtsConfig((current) => ({ ...current, compression: value }))} />
               </div>
             </div>
           )}
@@ -6319,10 +6354,12 @@ export function ImageConverterPage({
     setSourcePreviewUrl(URL.createObjectURL(file));
     setConvertedUrl('');
     setError('');
+    event.target.value = '';
   }
 
   async function convertImage() {
     if (!sourceFile || !canvasRef.current) return;
+    playSound('confirm');
     setIsConverting(true);
     setError('');
     setConvertedUrl('');
@@ -6337,6 +6374,10 @@ export function ImageConverterPage({
       const canvas = canvasRef.current;
       let width = img.naturalWidth;
       let height = img.naturalHeight;
+
+      if (width === 0 || height === 0) {
+        throw new Error(copy.imageConverter.converting + ' ' + copy.imageConverter.convert);
+      }
 
       if (maxWidth > 0 && width > maxWidth) {
         const ratio = maxWidth / width;
@@ -6366,6 +6407,7 @@ export function ImageConverterPage({
 
   function downloadResult() {
     if (!convertedUrl || !sourceFile) return;
+    playSound('downloadSound');
     const ext = outputFormat === 'image/jpeg' ? 'jpg' : outputFormat === 'image/webp' ? 'webp' : 'png';
     const name = sourceFile.name.replace(/\.[^.]+$/, '') + `-converted.${ext}`;
     const link = document.createElement('a');
@@ -6387,6 +6429,7 @@ export function ImageConverterPage({
     setMaxHeight(2048);
     setMaintainAspect(true);
     setSavedSnapshot(JSON.stringify({ outputFormat: 'image/png', quality: 92, maxWidth: 2048, maxHeight: 2048, maintainAspect: true }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   return (
@@ -6506,6 +6549,7 @@ function RangeField({
   step,
   value,
   onChange,
+  disabled,
 }: {
   label: string;
   min: number;
@@ -6513,14 +6557,15 @@ function RangeField({
   step: number;
   value: number;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }) {
   return (
-    <label className="field range-field">
+    <label className={`field range-field ${disabled ? 'disabled' : ''}`}>
       <div className="range-field-top">
         <span>{label}</span>
         <strong>{Number.isInteger(value) ? value : value.toFixed(2)}</strong>
       </div>
-      <input className="tool-range" type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} />
+      <input className="tool-range" type="range" min={min} max={max} step={step} value={value} disabled={disabled} onChange={(event) => onChange(Number(event.target.value))} />
     </label>
   );
 }

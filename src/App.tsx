@@ -30,7 +30,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.5.1.1';
+const VERSION = '0.5.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -2098,6 +2098,26 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.5.2',
+    date: '2026-04-20',
+    title: '0.5.2 全面 Bug 修复：导出导入 + 音效覆盖 + 性能优化',
+    summary: '修复全部 12+ 个已知 Bug：PromptSuitePage 数据丢失、Paper2Gal 轮询抖动、ImageConverter 文件重置、TTS 面板联动、全局音效覆盖完善。',
+    details: [
+      '修复 PromptSuitePage ttsConfig 缺失新字段：扩展 initialTtsConfig 和恢复逻辑，确保 JSON 导出包含全部 22 个 TTS 参数。',
+      '修复 Paper2GalPage 轮询 thrashing：使用 ref 隔离 settings/paper，减少 effect 依赖数组，避免每次状态更新都重启轮询。',
+      '修复 Paper2GalPage cutout upload 过度触发：同样使用 ref 隔离，effect 仅依赖 workflowId。',
+      '修复 ImageConverterPage 文件输入未重置：handleFileChange 和 resetWorkspace 现在正确重置 input value，可选择同一文件。',
+      '修复 ImageConverterPage 零尺寸画布崩溃：convertImage 现在检查 naturalWidth/naturalHeight 是否为 0。',
+      '修复 TTS 音频后处理面板开关未联动：关闭 audioPostProcessing 时，降噪/EQ/压缩滑块自动禁用并降低透明度。',
+      '修复 TTS 语言选项不完整：从 10 种扩展至 29 种语言，覆盖全部 AppLanguage。',
+      '修复全局音效双击播放：tool-card-header 加入 skip list，避免同时触发 buttonClick + expand/collapse。',
+      '修复全局音效 modalClose 误触发：modal-overlay 改为直接检测 target，不再冒泡自模态框内部子元素。',
+      '修复全局音效 textarea/text input/select/toggle-chip 缺失：新增 inputFocus、select、toggleOn/toggleOff 分支。',
+      '补充各页面显式音效：TTS/StyleTransfer/Paper2Gal/ImageConverter 的保存/下载/转换/启动操作增加对应音效。',
+      '扩展 RangeField 组件支持 disabled 状态，新增 .disabled-section CSS 样式。',
+    ],
+  },
+  {
     version: '0.5.1.1',
     date: '2026-04-20',
     title: '0.5.1.1 Bug 修复：端口探测 + TTS 状态持久化',
@@ -2685,19 +2705,30 @@ function App() {
     }
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], select, .announcement-entry, .modal-backdrop, .modal-overlay');
+
+      // Detect modal overlay click directly on target (not via closest) to avoid false-positives from child clicks
+      const isOverlay = target.classList.contains('modal-overlay') || target.classList.contains('modal-backdrop');
+      if (isOverlay) {
+        playSound('modalClose');
+        return;
+      }
+
+      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], select, textarea, .announcement-entry');
       if (!el) return;
 
       // Skip elements that have their own explicit sound handling (avoids double-play)
-      if (el.classList.contains('collapsible-toggle') || el.classList.contains('toolbar-group-header')) return;
+      if (el.classList.contains('collapsible-toggle') || el.classList.contains('toolbar-group-header') || el.classList.contains('tool-card-header')) return;
 
       // Determine appropriate sound based on element type and context
-      const isBackdrop = el.classList.contains('modal-backdrop') || el.classList.contains('modal-overlay');
       const isClose = el.classList.contains('modal-close') || (el as HTMLElement).getAttribute('aria-label') === 'Close';
       const isBack = el.classList.contains('back-link') || (el as HTMLElement).textContent?.includes('返回');
       const isConfirm = el.classList.contains('primary-button');
       const isSlider = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'range';
       const isCheckbox = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'checkbox';
+      const isTextInput = el.tagName === 'INPUT' && ((el as HTMLInputElement).type === 'text' || (el as HTMLInputElement).type === 'number');
+      const isTextarea = el.tagName === 'TEXTAREA';
+      const isSelect = el.tagName === 'SELECT';
+      const isToggleChipEl = el.classList.contains('toggle-chip');
 
       // Chip logic: determine if this is a toggle-style (2-option) or select-style chip
       const isChip = el.classList.contains('choice-chip') || el.classList.contains('palette-chip');
@@ -2706,13 +2737,20 @@ function App() {
       const chipRowButtons = chipRow ? chipRow.querySelectorAll('button').length : 0;
       const isToggleChip = isChip && chipRowButtons === 2;
 
-      if (isClose || isBackdrop) {
+      if (isClose) {
         playSound('modalClose');
       } else if (isSlider) {
         playSound('sliderChange');
       } else if (isCheckbox) {
         const cb = el as HTMLInputElement;
         playSound(cb.checked ? 'toggleOn' : 'toggleOff');
+      } else if (isToggleChipEl) {
+        const wasActive = el.classList.contains('active');
+        playSound(wasActive ? 'toggleOff' : 'toggleOn');
+      } else if (isSelect) {
+        playSound('select');
+      } else if (isTextInput || isTextarea) {
+        playSound('inputFocus');
       } else if (isBack) {
         playSound('back');
       } else if (isConfirm) {
