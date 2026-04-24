@@ -1946,6 +1946,11 @@ a {
   align-content: start;
 }
 
+.editor-side.editor-assets {
+  max-height: 760px;
+  overflow-y: auto;
+}
+
 .editor-panel-block,
 .editor-stage-shell {
   border-radius: 28px;
@@ -2158,7 +2163,6 @@ a {
   position: absolute;
   left: 50%;
   top: 96px;
-  translate: -50% 0;
   display: flex;
   gap: 34px;
 }
@@ -2210,7 +2214,7 @@ a {
 .mouth-line {
   position: absolute;
   left: 50%;
-  bottom: 58px;
+  bottom: 0;
   translate: -50% 0;
   width: 62px;
   height: 20px;
@@ -3142,7 +3146,6 @@ a {
   position: absolute;
   left: 50%;
   top: 78px;
-  translate: -50% 0;
   display: flex;
   gap: 38px;
 }
@@ -3184,7 +3187,6 @@ a {
   position: absolute;
   left: 50%;
   top: 138px;
-  translate: -50% 0;
   width: 14px;
   height: 18px;
   background: linear-gradient(180deg, rgba(212,150,120,0.35), rgba(212,150,120,0.15));
@@ -3213,7 +3215,6 @@ a {
   position: absolute;
   left: 50%;
   bottom: 58px;
-  translate: -50% 0;
   width: 62px;
   height: 20px;
 }

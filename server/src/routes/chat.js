@@ -64,7 +64,13 @@ router.post("/", express.json(), async (req, res, next) => {
       signal: AbortSignal.timeout(config.platoTimeoutMs),
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+    let data;
+    try {
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      data = { error: { message: `Upstream returned non-JSON (status ${response.status}): ${responseText.slice(0, 200)}` } };
+    }
 
     if (!response.ok) {
       throw new AppError(

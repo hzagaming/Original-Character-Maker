@@ -3789,10 +3789,29 @@ function FaceMakerPage({
   const headScale = draft.headScale / 100;
   const eyeScale = draft.eyeScale / 50;
   const mouthCurve = (draft.mouthCurve - 50) / 10;
-  const skinFilter = `sepia(${draft.skinTone / 200}) brightness(${0.9 + draft.skinTone / 500})`;
+  let skinR1: number, skinG1: number, skinB1: number, skinR2: number, skinG2: number, skinB2: number;
+  if (draft.skinTone <= 50) {
+    const f = draft.skinTone / 50;
+    skinR1 = Math.round(255 - f * 0);
+    skinG1 = Math.round(245 - f * 14);
+    skinB1 = Math.round(238 - f * 24);
+    skinR2 = Math.round(255 - f * 9);
+    skinG2 = Math.round(232 - f * 26);
+    skinB2 = Math.round(216 - f * 37);
+  } else {
+    const f = (draft.skinTone - 50) / 50;
+    skinR1 = Math.round(255 - f * 55);
+    skinG1 = Math.round(231 - f * 71);
+    skinB1 = Math.round(214 - f * 86);
+    skinR2 = Math.round(246 - f * 86);
+    skinG2 = Math.round(206 - f * 94);
+    skinB2 = Math.round(179 - f * 99);
+  }
+  const skinBackground = `linear-gradient(180deg, rgb(${skinR1}, ${skinG1}, ${skinB1}), rgb(${skinR2}, ${skinG2}, ${skinB2}))`;
   const hairHue = (draft.hairColor - 50) * 3;
   const pupilHue = (draft.pupilColor - 50) * 4;
   const accessoryHue = (draft.accessoryColor - 50) * 4;
+  const chinScale = 0.8 + draft.chinWidth / 125;
 
   return (
     <main className="feature-shell face-editor-shell">
@@ -3861,22 +3880,29 @@ function FaceMakerPage({
             <div className="editor-stage">
               <div className="checkerboard-layer" />
               <div className="character-stage" style={{ transform: `rotate(${draft.tilt}deg)` }}>
-                <div className={`hair-shape ${draft.hair}`} style={{ filter: `hue-rotate(${hairHue}deg)` }} />
+                <div
+                  className={`hair-shape ${draft.hair}`}
+                  style={{
+                    filter: `hue-rotate(${hairHue}deg)`,
+                    top: `${52 + (50 - draft.forehead) / 3}px`,
+                  }}
+                />
                 <div
                   className={`head-shape ${draft.faceShape}`}
                   style={{
-                    transform: `scale(${headScale}) translateY(${(draft.faceLength - 50) / 8}px)`,
-                    filter: skinFilter,
+                    transform: `translateY(${(draft.faceLength - 50) / 3}px) scaleX(${chinScale}) scaleY(${headScale})`,
+                    background: skinBackground,
                   }}
                 >
                   <div
                     className={`brow-pair ${draft.brow}`}
-                    style={{ transform: `translateX(${(draft.browDistance - 50) / 5}px)` }}
+                    style={{ transform: `translateX(-50%)`, gap: `${38 + (draft.browDistance - 50) / 2}px` }}
                   />
                   <div
                     className={`eye-pair ${draft.eyes}`}
                     style={{
-                      transform: `scale(${eyeScale}) translateY(${(draft.eyeHeight - 50) / 5}px) translateX(${(draft.eyeDistance - 50) / 5}px)`,
+                      transform: `translateX(-50%) translateY(${(draft.eyeHeight - 50) / 5}px) scale(${eyeScale})`,
+                      gap: `${34 + (draft.eyeDistance - 50) / 2}px`,
                     }}
                   >
                     <span style={{ filter: `hue-rotate(${pupilHue}deg)` }} />
@@ -3884,11 +3910,11 @@ function FaceMakerPage({
                   </div>
                   <div
                     className={`nose-shape ${draft.nose}`}
-                    style={{ transform: `translateY(${(draft.noseHeight - 50) / 5}px)` }}
+                    style={{ transform: `translateX(-50%) translateY(${(draft.noseHeight - 50) / 5}px)` }}
                   />
                   <div
                     className={`mouth-shape ${draft.mouth}`}
-                    style={{ transform: `scaleX(${0.8 + draft.mouthWidth / 250})` }}
+                    style={{ transform: `translateX(-50%) scaleX(${0.8 + draft.mouthWidth / 250})` }}
                   >
                     <div className="mouth-line" style={{ borderRadius: `${8 + mouthCurve * 2}px` }} />
                   </div>

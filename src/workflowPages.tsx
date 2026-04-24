@@ -2984,14 +2984,14 @@ const ERR_MIN_H = 180;
 function loadErrorPanelState() {
   try {
     const raw = localStorage.getItem(ERR_PANEL_STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as { x: number; y: number; w: number; h: number };
+    if (raw) return JSON.parse(raw) as { x: number; y: number; w: number; h: number; collapsed?: boolean };
   } catch { /* ignore */ }
   return null;
 }
 
-function saveErrorPanelState(x: number, y: number, w: number, h: number) {
+function saveErrorPanelState(x: number, y: number, w: number, h: number, collapsed: boolean) {
   try {
-    localStorage.setItem(ERR_PANEL_STORAGE_KEY, JSON.stringify({ x, y, w, h }));
+    localStorage.setItem(ERR_PANEL_STORAGE_KEY, JSON.stringify({ x, y, w, h, collapsed }));
   } catch { /* ignore */ }
 }
 
@@ -3013,15 +3013,15 @@ function DraggableErrorPanel({
   const saved = loadErrorPanelState();
   const [pos, setPos] = useState({ x: saved?.x ?? 120, y: saved?.y ?? 120 });
   const [size, setSize] = useState({ w: saved?.w ?? 460, h: saved?.h ?? 360 });
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(saved?.collapsed ?? false);
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
   const dragStart = useRef({ x: 0, y: 0, px: 0, py: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: ERR_MIN_W, h: ERR_MIN_H });
 
   useEffect(() => {
-    saveErrorPanelState(pos.x, pos.y, size.w, size.h);
-  }, [pos, size]);
+    saveErrorPanelState(pos.x, pos.y, size.w, size.h, collapsed);
+  }, [pos, size, collapsed]);
 
   useEffect(() => {
     if (!dragging && !resizing) return;
@@ -6206,7 +6206,7 @@ export function LlmHubPage({
           body: JSON.stringify(body),
         });
       } else {
-        const apiCfg = getApiForFeature('style-transfer', _settings);
+        const apiCfg = getApiForFeature('llm', _settings);
         if (!apiCfg) throw new Error('No custom API configured. Please set up a custom API in Settings.');
         response = await fetch(`${apiCfg.baseUrl}/chat/completions`, {
           method: 'POST',
@@ -6215,13 +6215,20 @@ export function LlmHubPage({
         });
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: Record<string, unknown>;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(`Upstream returned non-JSON (status ${response.status}): ${responseText.slice(0, 200)}`);
+      }
       if (!response.ok) {
-        throw new Error(data.error || data.message || `HTTP ${response.status}`);
+        throw new Error((data.error as string) || (data.message as string) || `HTTP ${response.status}`);
       }
       const assistantContent = data.choices?.[0]?.message?.content || '';
       setTestOutput(assistantContent);
-      setTestHistory((current) => [...current, { role: 'assistant' as const, content: assistantContent }]);
+      const finalHistory = [...nextHistory, { role: 'assistant' as const, content: assistantContent }];
+      setTestHistory(finalHistory);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setTestError(msg);
