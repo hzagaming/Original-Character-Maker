@@ -2255,13 +2255,12 @@ function downloadText(name: string, content: string, type = 'text/plain;charset=
 }
 
 async function parseJsonResponse(response: Response) {
-  const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
-    return response.json();
-  }
-
   const text = await response.text();
-  return { error: text || `Unexpected response with status ${response.status}.` };
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: text || `Unexpected response with status ${response.status}.` };
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -3669,6 +3668,7 @@ export function StyleTransferPage({
     setInputFileName(file.name);
     setInputPreviewUrl(URL.createObjectURL(file));
     setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Input file selected: ${file.name}` }]);
+    event.target.value = '';
   }
 
   async function startWorkflow() {
@@ -5555,6 +5555,7 @@ export function Paper2GalPage({
     setInputFileName(file.name);
     setInputPreviewUrl(URL.createObjectURL(file));
     setMessage({ type: 'info', text: `${paper.sourceTitle}: ${file.name}` });
+    event.target.value = '';
   }
 
   async function handleStartWorkflow() {
@@ -6126,7 +6127,7 @@ export function LlmHubPage({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const currentSnapshot = JSON.stringify({ llmConfig });
   const [savedSnapshot, setSavedSnapshot] = useState(
-    typeof persistedState.savedSnapshot === 'string' ? persistedState.savedSnapshot : currentSnapshot,
+    persistedState.savedSnapshot || currentSnapshot,
   );
   const isDirty = currentSnapshot !== savedSnapshot;
   useBeforeUnloadGuard(isDirty);
@@ -6597,7 +6598,7 @@ export function TtsExportPage({
   const referenceAudioInputRef = useRef<HTMLInputElement>(null);
   const currentSnapshot = JSON.stringify({ ttsConfig });
   const [savedSnapshot, setSavedSnapshot] = useState(
-    typeof persistedState.savedSnapshot === 'string' ? persistedState.savedSnapshot : currentSnapshot,
+    persistedState.savedSnapshot || currentSnapshot,
   );
   const isDirty = currentSnapshot !== savedSnapshot;
   useBeforeUnloadGuard(isDirty);
@@ -6614,6 +6615,7 @@ export function TtsExportPage({
     const file = event.target.files?.[0];
     if (!file) return;
     setTtsConfig((current) => ({ ...current, referenceClipName: file.name }));
+    event.target.value = '';
   }
 
   function saveDraft() {
@@ -6896,6 +6898,8 @@ export function ImageConverterPage({
     setError('');
     event.target.value = '';
   }
+
+  useBeforeUnloadGuard(isDirty);
 
   async function convertImage() {
     if (!sourceFile || !canvasRef.current) return;

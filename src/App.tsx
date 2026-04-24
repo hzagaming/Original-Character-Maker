@@ -30,7 +30,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.5.5.1';
+const VERSION = '0.5.5.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -2192,6 +2192,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '0.5.5.2',
+    date: '2026-04-24',
+    title: '0.5.5.2 全链路容错加固 + 交互细节修复',
+    summary: '全面审计修复 6 处缺陷：JSON 解析容错、文件读取错误处理、文件输入可重复选择、页面脏状态误报、图片转换器未保存警告缺失。',
+    details: [
+      '修复 parseJsonResponse 崩溃：当后端返回 502 错误且 content-type 标头误标为 application/json 时，response.json() 不再抛出 SyntaxError，而是安全降级为返回错误文本对象。',
+      '修复音频上传无错误处理：SettingsModal 中 FileReader 添加 onerror 监听，文件读取失败时不再静默挂起。',
+      '修复文件输入无法重复选择：StyleTransferPage / Paper2GalPage / TtsExportPage 的 handleFileChange 现在重置 event.target.value，支持用户重复选择同一文件。',
+      '修复 LLM Hub 与 TTS Export 脏状态误报：savedSnapshot 初始化逻辑从 typeof 检查改为 || fallback，空字符串不再导致 isDirty 始终为 true。',
+      '修复 ImageConverter 缺失未保存警告：添加 useBeforeUnloadGuard，用户在未保存参数时刷新页面会收到浏览器原生警告。',
+    ],
+  },
   {
     version: '0.5.5.1',
     date: '2026-04-24',
@@ -4495,6 +4508,9 @@ function SettingsModal({
         });
         import('./audioEngine').then((m) => m.setCustomMusic(dataUrl)).catch(() => {});
       }
+    };
+    reader.onerror = () => {
+      // Silently ignore file read errors; user can retry.
     };
     reader.readAsDataURL(file);
   }
