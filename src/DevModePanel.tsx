@@ -36,6 +36,7 @@ export default function DevModePanel({ version, settings, effectiveApiEndpoint, 
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef<number>(0);
   const dragStart = useRef({ x: 0, y: 0, px: 0, py: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: MIN_W, h: MIN_H });
   const contentRef = useRef<HTMLDivElement>(null);
@@ -57,6 +58,14 @@ export default function DevModePanel({ version, settings, effectiveApiEndpoint, 
   useEffect(() => {
     savePanelState(pos.x, pos.y, size.w, size.h);
   }, [pos, size]);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) {
+        window.clearTimeout(copiedTimerRef.current);
+      }
+    };
+  }, []);
 
   // FPS counter
   useEffect(() => {
@@ -269,7 +278,7 @@ export default function DevModePanel({ version, settings, effectiveApiEndpoint, 
     try {
       await navigator.clipboard.writeText(buildReport());
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      copiedTimerRef.current = window.setTimeout(() => setCopied(false), 1500);
     } catch {
       setCopied(false);
     }

@@ -96,7 +96,7 @@ router.post("/", upload.single("image"), async (req, res, next) => {
     });
   } catch (error) {
     if (req.file?.path) {
-      await fs.rm(req.file.path, { force: true });
+      await fs.rm(req.file.path, { force: true }).catch(() => null);
     }
     next(error);
   }

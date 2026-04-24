@@ -52,6 +52,7 @@ router.post("/", upload.single("image"), async (req, res, next) => {
       model,
       prompt,
       negativePrompt,
+      seed,
       temperature,
       topP,
       topK,
@@ -116,6 +117,9 @@ router.post("/", upload.single("image"), async (req, res, next) => {
       parts.push(...extraPositiveTags);
     }
 
+    if (negativePrompt) {
+      parts.push(`Avoid: ${negativePrompt}`);
+    }
     const fullPrompt = parts.join(", ");
 
     const result = await platoEditImage({
@@ -124,6 +128,8 @@ router.post("/", upload.single("image"), async (req, res, next) => {
       sourceMimeType: sourceImage.mime_type,
       destinationPath: outputPath,
       prompt: fullPrompt,
+      seed,
+      negativePrompt,
     });
 
     res.status(200).json({

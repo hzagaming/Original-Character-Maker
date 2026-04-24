@@ -101,11 +101,14 @@ async function callBanana2Edit({
     signal: AbortSignal.timeout(config.banana2TimeoutMs)
   });
 
-  const responseJson = await response.json();
-
   if (!response.ok) {
-    throw new Error(responseJson?.error?.message || `Banana2 request failed with status ${response.status}`);
+    const errorText = await response.text().catch(() => '');
+    throw new Error(
+      `Banana2 request failed with status ${response.status}. Body: ${errorText.slice(0, 500)}`
+    );
   }
+
+  const responseJson = await response.json();
 
   const inlineData = extractInlineImage(responseJson);
   return writeInlineImage(destinationPath, inlineData);

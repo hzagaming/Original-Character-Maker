@@ -3,9 +3,14 @@ import type { SettingsState } from './types';
 export type WorkflowApiBaseIssue = 'direct-model-endpoint' | '';
 
 const PROBE_PORTS = [3000, 3001, 8080, 8000, 5000, 5001, 9000, 9001];
-const PROBE_TIMEOUT_MS = 800;
+const PROBE_TIMEOUT_MS = 2500;
 let _probedBase = '';
 let _probePromise: Promise<string> | null = null;
+
+export function resetApiProbe(): void {
+  _probedBase = '';
+  _probePromise = null;
+}
 
 function getLocation() {
   if (typeof window === 'undefined') {
@@ -213,7 +218,8 @@ export function buildApiUrl(
     return pathname;
   }
 
-  return `${base}${pathname}`;
+  const safePath = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  return `${base}${safePath}`;
 }
 
 export function buildApiHeaders(

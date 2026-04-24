@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import DevModePanel from './DevModePanel';
 import { createPortal } from 'react-dom';
 import type {
@@ -30,7 +30,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.5.2.1';
+const VERSION = '0.5.4';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -2193,6 +2193,30 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.5.4',
+    date: '2026-04-21',
+    title: '0.5.4 全面审计与 Bug 歼灭',
+    summary: '深度排查并修复 20+ 个运行时 Bug，涵盖黑屏、内存泄漏、下载失败、光标乱跳、后端容错等。',
+    details: [
+      '修复 Paper2Gal 黑屏：浏览器开启"减少动画"时 .fade-up 元素不可见，添加 prefers-reduced-motion 媒体查询强制显示。',
+      '修复全局快捷键 effect 每 render 重复注册：updateSettings 包裹 useCallback，toggleMute 使用 settingsRef 避免 stale closure。',
+      '修复 7 个模态框定时器泄漏：App.tsx (ActionConfirmModal/StartModal/SettingsModal) 和 workflowPages.tsx (ConfirmReturnModal/ConfirmActionModal/ExportOptionsModal/EditorExperimentalModal) 全部补 timerRef + useEffect cleanup。',
+      '修复下载链接过早释放：downloadRemoteFile / downloadPaperArchive 的 URL.revokeObjectURL 改为 100ms 延迟，防止浏览器未开始下载链接已失效。',
+      '修复 Paper2Gal cutout 上传内存泄漏：成功上传后未从 in-flight Set 删除 key，导致重复上传被错误跳过。',
+      '修复 PromptSuitePage 富文本光标乱跳：移除 dangerouslySetInnerHTML 实时重渲染，改用 useEffect 仅在 state 真正变化时同步 DOM。',
+      '修复 StyleTransfer seed / negativePrompt 死参数：seed 加入 styleConfig JSON，negativePrompt 在后端拼入 prompt (Avoid: xxx)。',
+      '修复后端容错缺陷：Plato 适配器 fetch(remoteUrl) 未 try/catch 会打断模型降级链；workflows.js 的 fs.rm 未捕获异常会导致请求挂死。',
+      '修复 Banana2 适配器错误信息丢失：response.json() 在 response.ok 之前执行，502 返回 HTML 时会抛出 SyntaxError 掩盖真实错误。',
+      '修复动态导入未捕获异常：App.tsx 4 处 audioEngine 动态导入全部补 .catch(() => {})。',
+      '修复 DevModePanel / exportAllFormats / flashCopied 定时器泄漏：多处 setTimeout 未在组件卸载时清理。',
+      '修复 ImageConverter 无意义错误提示：零尺寸图片报错从 "Converting... Convert" 改为明确的本地化文案。',
+      '修复 buildApiUrl 防御性不足：pathname 缺少前导斜杠时会拼出非法 URL，现已自动补全。',
+      '修复 getFeatureDetails 无 default case：运行时 screen 值异常会导致 undefined 崩溃。',
+      '修复 initAudio 启动崩溃：AudioContext 初始化异常未捕获，现已静默忽略。',
+      '延长 API 探测超时：PROBE_TIMEOUT_MS 从 800ms 延长至 2500ms，给慢机器更多响应时间。',
+    ],
+  },
+  {
     version: '0.5.2.1',
     date: '2026-04-20',
     title: '0.5.2.1 功能增强与 Bug 修复',
@@ -2817,12 +2841,18 @@ function App() {
   const [modalStep, setModalStep] = useState<StartModalStep>(null);
 
   useEffect(() => {
-    initAudio();
+    try {
+      initAudio();
+    } catch {
+      // Audio initialization is non-critical; ignore failures.
+    }
   }, []);
 
   // Global keyboard shortcuts
   const shortcutMapRef = useRef(settings.shortcutMap);
   useEffect(() => { shortcutMapRef.current = settings.shortcutMap; }, [settings.shortcutMap]);
+  const settingsRef = useRef(settings);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -2853,8 +2883,9 @@ function App() {
         window.location.reload();
       } else if (pressed === map.toggleMute) {
         event.preventDefault();
+        const audio = settingsRef.current.audio;
         updateSettings({
-          audio: { ...settings.audio, sfxEnabled: !settings.audio.sfxEnabled },
+          audio: { ...audio, sfxEnabled: !audio.sfxEnabled },
         });
       }
     }
@@ -2990,12 +3021,12 @@ function App() {
       : {}),
   } as CSSProperties;
 
-  function updateSettings(patch: Partial<SettingsState>) {
+  const updateSettings = useCallback((patch: Partial<SettingsState>) => {
     setSettings((current) => ({ ...current, ...patch }));
     if ('audio' in patch && patch.audio) {
       updateAudioSettings(patch.audio);
     }
-  }
+  }, []);
 
   function navigateTo(nextScreen: Exclude<FeatureScreen, 'home'>) {
     playSound('pageSwitch');
@@ -3744,15 +3775,24 @@ function ActionConfirmModal({
   onConfirm: () => void;
 }) {
   const [isClosing, setIsClosing] = useState(false);
+  const timerRef = useRef<number>(0);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   function requestClose() {
     setIsClosing(true);
-    window.setTimeout(onCancel, MODAL_CLOSE_MS);
+    timerRef.current = window.setTimeout(onCancel, MODAL_CLOSE_MS);
   }
 
   function requestConfirm() {
     setIsClosing(true);
-    window.setTimeout(onConfirm, MODAL_CLOSE_MS);
+    timerRef.current = window.setTimeout(onConfirm, MODAL_CLOSE_MS);
   }
 
   if (typeof document === 'undefined') {
@@ -3947,10 +3987,19 @@ function StartModal({
   onSelect: (screen: Exclude<FeatureScreen, 'home'>) => void;
 }) {
   const [isClosing, setIsClosing] = useState(false);
+  const timerRef = useRef<number>(0);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   function requestClose() {
     setIsClosing(true);
-    window.setTimeout(onClose, MODAL_CLOSE_MS);
+    timerRef.current = window.setTimeout(onClose, MODAL_CLOSE_MS);
   }
 
   return (
@@ -4018,9 +4067,18 @@ function SettingsModal({
 }) {
   const [tab, setTab] = useState<SettingsTab>(initialTab);
   const [isClosing, setIsClosing] = useState(false);
+  const timerRef = useRef<number>(0);
   const [selectedAnnouncementVersion, setSelectedAnnouncementVersion] = useState<
     (typeof announcementHistory)[number]['version']
   >(announcementHistory[0].version);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
   const styleLocked = settings.stylePreset === 'paper2gal';
   const resolvedLanguage = translationAliases[settings.language];
   const customAccentHex = /^#[0-9a-fA-F]{6}$/.test(settings.customAccentColor)
@@ -4073,7 +4131,7 @@ function SettingsModal({
 
   function requestClose() {
     setIsClosing(true);
-    window.setTimeout(onClose, MODAL_CLOSE_MS);
+    timerRef.current = window.setTimeout(onClose, MODAL_CLOSE_MS);
   }
 
   function applyShortcutBuilderValue() {
@@ -4127,7 +4185,7 @@ function SettingsModal({
             customSfxName: file.name,
           },
         });
-        import('./audioEngine').then((m) => m.setCustomSfx(dataUrl));
+        import('./audioEngine').then((m) => m.setCustomSfx(dataUrl)).catch(() => {});
       } else {
         onUpdate({
           audio: {
@@ -4137,7 +4195,7 @@ function SettingsModal({
             customMusicName: file.name,
           },
         });
-        import('./audioEngine').then((m) => m.setCustomMusic(dataUrl));
+        import('./audioEngine').then((m) => m.setCustomMusic(dataUrl)).catch(() => {});
       }
     };
     reader.readAsDataURL(file);
@@ -4153,7 +4211,7 @@ function SettingsModal({
           customSfxName: '',
         },
       });
-      import('./audioEngine').then((m) => m.setCustomSfx(null));
+      import('./audioEngine').then((m) => m.setCustomSfx(null)).catch(() => {});
     } else {
       onUpdate({
         audio: {
@@ -4163,7 +4221,7 @@ function SettingsModal({
           customMusicName: '',
         },
       });
-      import('./audioEngine').then((m) => m.setCustomMusic(null));
+      import('./audioEngine').then((m) => m.setCustomMusic(null)).catch(() => {});
     }
   }
 
@@ -5241,6 +5299,16 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         pipelineTitle: 'Output / Download',
         todoOne: '补格式选择与质量调整',
         todoTwo: '补批量转换与尺寸调整',
+      };
+    default:
+      return {
+        title: messages.appTitle || 'Unknown',
+        description: '',
+        workspaceTitle: 'Workspace',
+        panelTitle: 'Controls',
+        pipelineTitle: 'Outputs',
+        todoOne: '',
+        todoTwo: '',
       };
   }
 }

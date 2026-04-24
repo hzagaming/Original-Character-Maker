@@ -110,24 +110,29 @@ async function writeImagePayload(destinationPath, imagePayload) {
   if (imagePayload.remoteUrl) {
     const remoteController = new AbortController();
     const remoteTimeout = setTimeout(() => remoteController.abort(), 30000);
-    const remoteResponse = await fetch(imagePayload.remoteUrl, { signal: remoteController.signal });
-    clearTimeout(remoteTimeout);
-    if (!remoteResponse.ok) {
-      throw new AppError(
-        `Plato image download failed with status ${remoteResponse.status}`,
-        502,
-        {
-          provider: "plato",
-          image_url: imagePayload.remoteUrl,
-          http_status: remoteResponse.status,
-        },
-        "PLATO_IMAGE_DOWNLOAD_FAILED",
-      );
-    }
+    try {
+      const remoteResponse = await fetch(imagePayload.remoteUrl, { signal: remoteController.signal });
+      clearTimeout(remoteTimeout);
+      if (!remoteResponse.ok) {
+        throw new AppError(
+          `Plato image download failed with status ${remoteResponse.status}`,
+          502,
+          {
+            provider: "plato",
+            image_url: imagePayload.remoteUrl,
+            http_status: remoteResponse.status,
+          },
+          "PLATO_IMAGE_DOWNLOAD_FAILED",
+        );
+      }
 
-    const contentType = remoteResponse.headers.get("content-type") || "";
-    mimeType = contentType.startsWith("image/") ? contentType.split(";")[0] : "image/png";
-    imageBuffer = Buffer.from(await remoteResponse.arrayBuffer());
+      const contentType = remoteResponse.headers.get("content-type") || "";
+      mimeType = contentType.startsWith("image/") ? contentType.split(";")[0] : "image/png";
+      imageBuffer = Buffer.from(await remoteResponse.arrayBuffer());
+    } catch (error) {
+      clearTimeout(remoteTimeout);
+      throw error;
+    }
   } else {
     mimeType = imagePayload.mimeType || "image/png";
     imageBuffer = Buffer.from(imagePayload.data, "base64");
@@ -169,7 +174,7 @@ function isRetryableImagesEditFailure(code, message, status) {
   );
 }
 
-async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinationPath, prompt }) {
+async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinationPath, prompt, seed, negativePrompt }) {
   if (!isPlatoConfigured(config)) {
     throw new AppError(
       "PLATO_API_KEY is missing.",
@@ -296,6 +301,8 @@ async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinat
         endpoint,
         aspect_ratio: aspectRatio,
         fallback_chain: candidates,
+        seed: seed ?? null,
+        negative_prompt: negativePrompt ?? null,
       },
     };
   }

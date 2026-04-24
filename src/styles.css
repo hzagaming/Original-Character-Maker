@@ -3062,6 +3062,15 @@ a {
   transform: none !important;
 }
 
+/* Respect prefers-reduced-motion: disable animations but force content visible */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
 /* Modals also rely on keyframe animations for entrance; ensure they stay usable */
 .perf-no-anim .modal-backdrop,
 .perf-no-anim .modal-surface {
