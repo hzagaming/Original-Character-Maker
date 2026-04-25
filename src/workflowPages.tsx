@@ -16,6 +16,7 @@ type SharedPageProps = {
   language: AppLanguage;
   onBack: () => void;
   onOpenSettings: () => void;
+  onNavigate?: (screen: 'image-converter') => void;
 };
 
 type BaseLanguage = 'zh' | 'ja' | 'en' | 'ru';
@@ -416,6 +417,7 @@ type UiCopySet = {
     apiWrongEndpointHint: string;
     backendResponseLabel: string;
     requestUrlLabel: string;
+    formatConverterLink: string;
   };
 };
 
@@ -901,6 +903,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
         '这里需要填写后端根地址，例如 https://your-backend.example.com。前端会自动请求 /api/workflows，请不要填写 /v1/chat/completions、/v1/responses 这类模型接口。',
       backendResponseLabel: '后端返回',
       requestUrlLabel: '当前请求地址',
+      formatConverterLink: '其他格式请前往图片转换工具 →',
     },
   },
   ja: {
@@ -1194,6 +1197,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
         'ここには https://your-backend.example.com のような backend ルート URL を入力してください。フロントエンドが自動で /api/workflows を付与します。/v1/chat/completions や /v1/responses は入力しないでください。',
       backendResponseLabel: 'バックエンド応答',
       requestUrlLabel: '現在のリクエスト先',
+      formatConverterLink: 'その他の形式は画像変換ツールへ →',
     },
   },
   en: {
@@ -1487,6 +1491,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
         'Enter the backend root such as https://your-backend.example.com. The frontend automatically calls /api/workflows, so do not paste /v1/chat/completions or /v1/responses here.',
       backendResponseLabel: 'Backend response',
       requestUrlLabel: 'Request URL',
+      formatConverterLink: 'Other formats? Go to Image Converter →',
     },
   },
   ru: {
@@ -1780,6 +1785,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
         'Здесь нужен корневой адрес backend, например https://your-backend.example.com. Фронтенд сам добавит /api/workflows, поэтому не вставляйте /v1/chat/completions или /v1/responses.',
       backendResponseLabel: 'Ответ backend',
       requestUrlLabel: 'Адрес запроса',
+      formatConverterLink: 'Другие форматы? Перейдите в конвертер →',
     },
   },
 } as const;
@@ -5147,6 +5153,7 @@ export function Paper2GalPage({
   language,
   onBack,
   onOpenSettings,
+  onNavigate,
 }: SharedPageProps) {
   const copy = localizedUiCopy[language];
   const paper = copy.paper;
@@ -5722,7 +5729,7 @@ export function Paper2GalPage({
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/png,image/jpeg,image/webp"
+                      accept="image/png,image/jpeg"
                       hidden
                       onChange={handleFileChange}
                     />
@@ -5731,6 +5738,16 @@ export function Paper2GalPage({
                     {inputPreviewUrl ? <img className="preview-image" src={inputPreviewUrl} alt={inputFileName} /> : <div className="preview-empty">{paper.chooseHint}</div>}
                   </div>
                   <p className="tiny-copy">{inputFileName || copy.noImage}</p>
+                  {onNavigate && (
+                    <button
+                      className="link-button tiny-copy"
+                      type="button"
+                      onClick={() => onNavigate('image-converter')}
+                      style={{ marginTop: 4, display: 'inline-block' }}
+                    >
+                      {paper.formatConverterLink}
+                    </button>
+                  )}
                 </div>
               ) : null}
             </section>

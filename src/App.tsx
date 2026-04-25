@@ -3120,6 +3120,10 @@ function App() {
     language: settings.language,
     onBack: () => setScreen('home'),
     onOpenSettings: () => openSettings('style'),
+    onNavigate: (screen: 'image-converter') => {
+      playSound('pageSwitch');
+      setScreen(screen);
+    },
   };
 
   return (

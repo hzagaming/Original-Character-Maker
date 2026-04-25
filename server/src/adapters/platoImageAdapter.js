@@ -37,9 +37,19 @@ function buildModelCandidates(config, requestedModel) {
   const builtInFallbacks = [
     "gpt-image-2",
     "gpt-image-1",
+    "claude-4-sonnet",
+    "claude-4-opus",
     "qwen-image-edit",
+    "qwen-image",
     "nano-banana",
     "nano-banana-3.1-flash",
+    "dall-e-3",
+    "kandinsky-3",
+    "sdxl",
+    "flux-pro",
+    "flux-schnell",
+    "ideogram-v2",
+    "chat_fast_imagine",
   ];
   const fallbacks = builtInFallbacks.filter((m) => m !== primary);
   return [primary, ...fallbacks];
