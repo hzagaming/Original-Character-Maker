@@ -110,11 +110,10 @@ export const docsContentZh: DocsContent = {
         { name: '光照风格', description: '场景光照效果（柔和、戏剧化、背光、伦勃朗等）。' },
       ],
       errors: [
-        { code: 'VALIDATION_ERROR', message: '提示「验证错误」', cause: '未上传图片、Prompt 为空、或参数值超出有效范围。', solution: '确认已上传角色图像，Prompt 字段已填写，所有滑块参数在有效范围内。' },
-        { code: 'API_401', message: '提示「API Key 无效或已过期」', cause: '后端使用的 Plato API Key 失效或额度用尽；或自定义 API 的密钥不正确。', solution: '在「设置 → API」中检查自定义 API Key 是否正确；如果是内置模式，等待管理员更新后端 API Key。' },
-        { code: 'RUNTIME_ERROR', message: '提示「运行时错误」', cause: '后端处理过程中出现异常，可能是模型不可用、图片格式不支持、或服务器资源不足。', solution: '检查上传的图片是否为标准 PNG/JPG；尝试更换模型或降低图像尺寸后重试；查看错误详情中的具体报错信息。' },
-        { code: 'DIRECT_ENDPOINT', message: 'API 设置中提示「当前 URL 看起来是模型接口」', cause: '在自定义 API 地址中填写了类似 /v1/chat/completions 的模型端点，而不是工作流后端根地址。', solution: '将 API 地址改为工作流后端根地址，如 http://localhost:3001 或 https://your-backend.example.com，不要包含 /v1/chat/completions 等路径。' },
-        { code: 'FETCH_ABORTED', message: '转换过程中离开页面导致请求中断', cause: 'StyleTransferPage 组件卸载时未完成的 fetch 请求被 AbortController 取消。', solution: '这是预期行为，不会导致数据丢失。重新进入页面后重新上传图片并启动转换即可。' },
+        { code: 'STYLE_TRANSFER_INPUT_MISSING', message: '错误面板上显示「STYLE_TRANSFER_INPUT_MISSING」', cause: '未上传图片，或上传后点击了「开始」但没有有效的输入文件。', solution: '确认已点击「选择图片」上传了有效的 PNG/JPG 文件，且文件未损坏。' },
+        { code: 'STYLE_TRANSFER_REQUEST_FAILED', message: '错误面板上显示「STYLE_TRANSFER_REQUEST_FAILED」', cause: '后端 API 请求失败。可能是网络中断、API Key 无效、模型不可用、或服务器内部错误。', solution: '检查网络连接；在「设置 → API」中确认 API Key 正确；尝试更换模型或降低图像尺寸；查看错误详情中的具体报错信息。' },
+        { code: 'IMPORT_TOOL_MISMATCH', message: '导入配置时提示「工具类型不匹配」', cause: '导入的 JSON 文件中 tool 字段不是 style-transfer。', solution: '确认导入的是转画风页面导出的配置文件，tool 字段应为 "style-transfer"。' },
+        { code: 'IMPORT_INVALID_JSON', message: '导入配置时提示「无效的 JSON 格式」', cause: '文件内容损坏、不是 JSON 格式、或被其他程序修改过。', solution: '检查文件是否为有效的 UTF-8 编码文本文件。可以尝试用文本编辑器打开查看是否有乱码。' },
       ],
     },
     {
@@ -191,11 +190,9 @@ export const docsContentZh: DocsContent = {
         { name: '系统提示词', description: '定义 AI 的角色和行为准则的全局提示词。', tips: '这是影响输出质量最重要的参数。建议使用详细的角色设定和输出格式要求。' },
       ],
       errors: [
-        { code: 'NO_CUSTOM_API', message: '提示「没有配置自定义 API」', cause: '自定义模式下未在设置中配置有效的 API 地址和密钥。', solution: '前往「设置 → API」，切换到「自定义 API」模式，填写 API 根地址和 API Key。' },
-        { code: 'LLM_TEST_ERROR', message: '实时测试面板显示红色错误信息', cause: 'API 请求失败，可能是网络问题、API Key 无效、模型不可用或请求超时。', solution: '检查网络连接；确认 API Key 有效且未过期；尝试切换模型；增加超时时间或减少 Max Tokens。' },
-        { code: 'NON_JSON_RESPONSE', message: '提示「Upstream returned non-JSON」', cause: '后端返回了非 JSON 格式的响应，通常是 502/503 错误或 HTML 错误页面。', solution: '检查后端服务是否正常运行；如果是自定义 API，确认地址是 chat/completions 端点而非工作流后端地址。' },
-        { code: 'HTTP_ERROR', message: '提示 HTTP 4xx/5xx 错误', cause: '请求被拒绝或服务器内部错误。', solution: '查看错误详情中的状态码：401 表示认证失败（检查 API Key），429 表示频率限制（降低请求频率），500 表示服务器错误（联系管理员）。' },
-        { code: 'ABORTED', message: '离开页面后测试请求被中断', cause: '组件卸载时 AbortController 取消了进行中的请求。', solution: '这是预期行为。重新进入 LLM Hub 后可以继续测试。' },
+        { code: 'LLM_TEST_ERROR', message: '实时测试面板显示「LLM_TEST_ERROR」', cause: 'API 请求失败。可能是网络问题、API Key 无效或过期、模型不可用、或请求超时。', solution: '检查网络连接；在「设置 → API」中确认 API Key 正确且未过期；尝试切换模型；增加超时时间或减少 Max Tokens。' },
+        { code: 'IMPORT_TOOL_MISMATCH', message: '导入配置时提示「工具类型不匹配」', cause: '导入的 JSON 文件中 tool 字段不是 llm-hub。', solution: '确认导入的是 LLM Hub 页面导出的配置文件，tool 字段应为 "llm-hub"。' },
+        { code: 'IMPORT_INVALID_CONFIG', message: '导入配置时提示「无效的配置数据」', cause: '导入的 JSON 中缺少 llmConfig 字段或格式不正确。', solution: '确认导入的是 LLM Hub 页面导出的配置文件，且文件内容完整未损坏。' },
       ],
     },
     {
@@ -261,10 +258,7 @@ export const docsContentZh: DocsContent = {
         { name: 'AI 并发', description: '是否允许多个 AI 生成步骤并行执行。开启后可显著缩短总耗时。', tips: '开启并发时后端会同时调度多个模型请求，但可能增加 API 费用。' },
       ],
       errors: [
-        { code: 'VALIDATION_ERROR', message: '提示「验证错误」', cause: '上传的文件不是 PNG/JPG，或文件损坏无法读取。', solution: '确认文件格式为 PNG 或 JPG；尝试用图片查看器打开确认文件未损坏。' },
-        { code: 'WORKFLOW_FAILED', message: '工作流状态显示「失败」', cause: '某个步骤执行失败，可能是模型不可用、API Key 失效、或生成内容被安全过滤器拦截。', solution: '查看失败步骤的错误详情；检查后端日志；尝试修改 Prompt 覆盖中的敏感词汇。' },
-        { code: 'POLLING_ERROR', message: '轮询工作流状态时出错', cause: '前端向后端轮询 /api/workflows/{id} 时网络中断或后端返回错误。', solution: '检查网络连接；确认后端服务正常运行；等待几秒后工作流结果可能仍在后端处理中。' },
-        { code: 'CUTOUT_FAILURE', message: '抠图步骤失败', cause: '背景移除服务不可用、角色图像质量过低、或 provider 配置错误。', solution: '检查上传的角色图像是否有清晰的主体轮廓；确认后端 remove_background provider 配置正确。' },
+        { code: 'P2G_WORKFLOW_ERROR', message: '错误面板上显示「P2G_WORKFLOW_ERROR」', cause: 'Paper2Gal 工作流某个步骤执行失败。可能是输入验证失败、模型不可用、API Key 失效、生成内容被安全过滤器拦截、或网络中断。', solution: '查看错误面板中的详细错误信息和可能的修复提示；确认上传的是有效的 PNG/JPG；检查网络连接；尝试修改 Prompt 覆盖中的敏感词汇；确认后端服务正常运行。' },
         { code: 'UPLOAD_FORMAT', message: '上传时提示「仅支持 PNG / JPG」', cause: '选择了 WEBP、GIF 或其他格式的文件。', solution: '使用图片转换工具将文件转为 PNG 或 JPG 后再上传。' },
       ],
     },
@@ -294,8 +288,7 @@ export const docsContentZh: DocsContent = {
         { name: '灰度', description: '将图片转为灰度的强度，范围 0~100。', tips: '100 为完全黑白；0 为原始彩色。与饱和度为 0 的效果类似但算法不同。' },
       ],
       errors: [
-        { code: 'INVALID_DIMENSIONS', message: '提示「图片尺寸无效，无法转换」', cause: '上传的图片宽或高为 0 像素，或图片文件损坏导致 Canvas 无法读取尺寸。', solution: '尝试用图片查看器打开确认文件正常；重新导出图片后再次上传。' },
-        { code: 'FILE_READ_ERROR', message: '文件读取失败', cause: 'FileReader 无法读取文件，可能是文件被其他程序锁定或浏览器权限问题。', solution: '关闭其他可能占用该文件的程序；尝试刷新页面后重新选择文件。' },
+        { code: 'CONVERT_ERROR', message: '错误面板上显示「CONVERT_ERROR」', cause: '图片转换过程中发生异常。可能是源图片损坏、浏览器 Canvas 2D filter 不支持、或内存不足。', solution: '确认源图片能在浏览器正常打开；尝试刷新页面后重新上传；检查图片是否过大；如果使用了滤镜，尝试逐个关闭排查不支持的滤镜。' },
         { code: 'IMPORT_TOOL_MISMATCH', message: '导入配置时提示「工具类型不匹配」', cause: '导入的 JSON 中 tool 字段不是 image-converter。', solution: '确认导入的是图片转换器导出的配置文件。' },
         { code: 'UNSAVED_WARNING', message: '刷新页面时弹出未保存警告', cause: '滤镜参数被修改但尚未点击保存。', solution: '在离开页面前点击「保存」按钮，或确认放弃修改后继续刷新。' },
       ],

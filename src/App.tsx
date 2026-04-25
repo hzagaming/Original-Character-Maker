@@ -31,7 +31,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.0';
+const VERSION = '0.6.0.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -530,7 +530,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: '自定义快捷键属于实验性设置，请避免与浏览器或系统保留快捷键冲突。',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.6.0 用户手册全面本地化：Docs 页面所有界面元素支持中/日/英/俄四种语言；设置面板字体预设全面国际化；修复全局硬编码文本遗留问题。',
+    announcementDescription: '0.6.0.1 文档错误代码全面校准：移除虚构错误代码，替换为与源代码匹配的 TransferError code；修复三个页面「查看文档」按钮无响应。',
     announcementList1: '全局音效全覆盖，背景音乐引擎 v5 升级至 40 种风格预设并采用前瞻式精准调度。',
     announcementList2: '性能设置各项选项真正生效：减少动画禁用 CSS 动画、禁用毛玻璃移除 backdrop-filter、开发者模式显示实时调试面板。',
     announcementList3: '30 种语言同步更新，40 个 BGM 预设名称已同步到 4 种基础语言翻译中。',
@@ -879,7 +879,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'カスタムショートカットは実験的機能です。ブラウザや OS の予約ショートカットとの衝突に注意してください。',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.6.0 ユーザーマニュアルの完全ローカライズ：Docs画面のすべてのUI要素が中/日/英/俄に対応。設定パネルのフォントプリセットも完全国際化。',
+    announcementDescription: '0.6.0.1 ドキュメントエラーコードの全面校正：架空のエラーコードを削除し、ソースコードと一致するTransferErrorコードに置き換え。3つのページの「ドキュメントを見る」ボタン無反応を修正。',
     announcementList1: 'グローバルSEフルカバー、BGMエンジンv5は40種のプリセットとルックアヘッド精密スケジューリングを採用。',
     announcementList2: 'パフォーマンス設定が実際に機能：アニメーション削減でCSSアニメーション無効化、ガラス効果無効化でbackdrop-filter削除、開発者モードでリアルタイムデバッグパネル表示。',
     announcementList3: '約30言語に同期更新。40個のBGMプリセット名が4つの基礎言語翻訳に同期。',
@@ -1228,7 +1228,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Custom shortcuts are experimental. Avoid combinations that conflict with browser or system-reserved commands.',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.6.0: User Manual fully localized — all Docs UI elements now support Chinese, Japanese, English, and Russian. Font presets in Settings panel are now dynamically localized.',
+    announcementDescription: 'Version 0.6.0.1: Documentation error codes fully calibrated — removed fictional codes and replaced with actual TransferError codes matching the source. Fixed "View Docs" button unresponsiveness on three pages.',
     announcementList1: 'Global sound effects fully cover all interactions; BGM engine v5 upgrades to 40 presets with lookahead precision scheduling.',
     announcementList2: 'Performance settings now actually work: reduce animations disables CSS animations, disable glassmorphism removes backdrop-filter, dev mode shows real-time debug panel.',
     announcementList3: 'Synced to ~30 languages. 40 BGM preset names synchronized across 4 base language translations.',
@@ -1577,7 +1577,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Пользовательские шорткаты являются экспериментальной функцией. Избегайте конфликтов с системными и браузерными сочетаниями.',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.6.0: Руководство пользователя полностью локализовано — все элементы интерфейса Docs теперь поддерживают китайский, японский, английский и русский. Пресеты шрифтов в панели настроек также динамически локализованы.',
+    announcementDescription: 'Версия 0.6.0.1: Коды ошибок документации полностью откалиброваны — удалены вымышленные коды, заменены на реальные TransferError коды из исходников. Исправлена неработающая кнопка «Посмотреть документацию» на трёх страницах.',
     announcementList1: 'Глобальные звуковые эффекты полностью покрывают все взаимодействия; движок BGM v5 обновлён до 40 пресетов с точным планированием lookahead.',
     announcementList2: 'Настройки производительности теперь реально работают: уменьшение анимации отключает CSS-анимации, отключение стеклянного эффекта удаляет backdrop-filter, режим разработчика показывает панель отладки в реальном времени.',
     announcementList3: 'Синхронизировано с ~30 языками. 40 названий пресетов BGM синхронизированы для 4 базовых языков перевода.',
@@ -2409,6 +2409,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '0.6.0.1',
+    date: '2026-04-25',
+    title: '0.6.0.1 文档错误代码与实际代码对齐 + 错误面板跳转彻底修复',
+    summary: '全面审计 docsContent.ts 中所有错误条目，移除虚构错误代码，替换为与源代码完全匹配的 TransferError code；修复 StyleTransfer / TTS / ImageConverter 三个页面缺少 onNavigate 解构导致「查看文档」按钮无响应的问题。',
+    details: [
+      'docsContent.ts 错误代码全面校准：逐一比对 workflowPages.tsx 中所有 TransferError 定义，移除 12 个虚构错误代码（VALIDATION_ERROR / API_401 / RUNTIME_ERROR / DIRECT_ENDPOINT / FETCH_ABORTED / NO_CUSTOM_API / NON_JSON_RESPONSE / HTTP_ERROR / ABORTED / WORKFLOW_FAILED / POLLING_ERROR / CUTOUT_FAILURE / INVALID_DIMENSIONS / FILE_READ_ERROR），替换为 4 个实际代码中的真实错误代码（STYLE_TRANSFER_INPUT_MISSING / STYLE_TRANSFER_REQUEST_FAILED / P2G_WORKFLOW_ERROR / LLM_TEST_ERROR / CONVERT_ERROR）。',
+      '修复「查看文档」按钮无响应：StyleTransferPage / TtsExportPage / ImageConverterPage 的 props 解构中遗漏 onNavigate，导致错误面板上的「查看文档」按钮点击后无任何反应。现已补全。',
+      '保留通用错误条目：导入工具类型不匹配、无效 JSON、未保存警告等用户通过 alert 实际会遇到的错误仍然保留在文档中。',
+      '更新版本号至 0.6.0.1，首页公告同步更新。',
+    ],
+  },
   {
     version: '0.6.0',
     date: '2026-04-25',
