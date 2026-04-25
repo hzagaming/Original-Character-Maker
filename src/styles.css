@@ -65,6 +65,8 @@ a {
   overflow: hidden;
   background: var(--bg);
   color: var(--text-main);
+  display: flex;
+  flex-direction: column;
 }
 
 .app-shell > :not(.app-background) {
@@ -256,6 +258,8 @@ a {
   max-width: 1320px;
   margin: 0 auto;
   padding: 20px 22px 28px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .top-banner,
@@ -674,6 +678,64 @@ a {
 
 .home-footer {
   margin-top: 24px;
+  text-align: center;
+}
+
+.app-global-footer {
+  margin-top: auto;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(15, 30, 45, 0.8), rgba(15, 30, 45, 0.96));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-align: center;
+  z-index: 10;
+}
+
+.app-global-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.app-global-footer-version {
+  font-weight: 600;
+  color: var(--accent-solid);
+}
+
+.app-global-footer-separator {
+  opacity: 0.4;
+}
+
+.app-global-footer-link {
+  color: var(--accent-solid);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.app-global-footer-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.app-global-footer-contact {
+  opacity: 0.85;
+}
+
+.app-global-footer-copy {
+  opacity: 0.7;
+}
+
+.app-global-footer-privacy {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.6;
   text-align: center;
 }
 
@@ -2586,6 +2648,51 @@ a {
   color: rgba(159, 178, 198, 0.76);
 }
 
+.log-scroll {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.2);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.log-line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.log-time {
+  color: var(--text-secondary);
+  opacity: 0.6;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.log-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.log-badge.info { background: rgba(79, 157, 247, 0.2); color: #4f9df7; }
+.log-badge.success { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
+.log-badge.error { background: rgba(244, 90, 90, 0.2); color: #f45a5a; }
+.log-badge.debug { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
+
+.log-text {
+  color: var(--text-main);
+  word-break: break-word;
+}
+
 .custom-font-shell {
   margin-top: 14px;
 }
@@ -3383,4 +3490,324 @@ a {
   background: linear-gradient(180deg, rgba(240,240,245,0.92), rgba(220,220,230,0.85));
   border-radius: 12px 12px 24px 24px;
   border: 2px solid rgba(180,180,190,0.5);
+}
+
+/* ─── Docs Page Styles ─── */
+.docs-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 16px;
+  height: calc(100vh - 220px);
+  min-height: 500px;
+}
+
+.docs-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.docs-sidebar-inner {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+
+.docs-nav-group {
+  margin-bottom: 14px;
+}
+
+.docs-nav-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-solid);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.docs-nav-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.docs-nav-item:hover {
+  background: var(--accent-soft);
+  color: var(--text-main);
+}
+
+.docs-nav-item.active {
+  background: var(--accent-soft-strong);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.docs-nav-sub {
+  padding-left: 20px;
+  font-size: 12px;
+}
+
+.docs-content {
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.docs-article {
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+
+.docs-article h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: var(--text-main);
+}
+
+.docs-article h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 24px 0 12px;
+  color: var(--accent-solid);
+}
+
+.docs-body-text p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.docs-tool-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.docs-tool-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.docs-tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--accent-solid);
+}
+
+.docs-tool-card strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.docs-tool-card p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.docs-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.docs-section:first-of-type {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.docs-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 14px;
+}
+
+.docs-table-wrap {
+  overflow-x: auto;
+}
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.docs-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+.docs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.docs-table-name {
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  width: 140px;
+}
+
+.docs-params-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.docs-param-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+}
+
+.docs-param-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.docs-param-header strong {
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.docs-param-tip-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  text-transform: uppercase;
+}
+
+.docs-param-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
+
+.docs-param-tip {
+  font-size: 12px;
+  color: #86efac;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.docs-errors-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.docs-error-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--bg-soft);
+  border: 1px solid rgba(244, 90, 90, 0.25);
+}
+
+.docs-error-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.docs-error-code {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: monospace;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(244, 90, 90, 0.15);
+  color: #f45a5a;
+}
+
+.docs-error-message {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.docs-error-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.docs-error-row {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.docs-error-label {
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  min-width: 56px;
+}
+
+@media (max-width: 860px) {
+  .docs-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: auto;
+  }
+  .docs-sidebar {
+    position: relative;
+    height: auto;
+    max-height: 300px;
+  }
 }

@@ -17,6 +17,7 @@ import type {
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage, LlmHubPage, TtsExportPage, ImageConverterPage } from './workflowPages';
+import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
   initAudio,
@@ -30,7 +31,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.5.5.2';
+const VERSION = '0.5.8';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -52,6 +53,9 @@ type Messages = {
   outputDescription: string;
   privacyNote: string;
   footerNote: string;
+  footerBarVersion: string;
+  footerBarContact: string;
+  footerBarGithub: string;
   metricModules: string;
   metricLanguages: string;
   metricStorage: string;
@@ -63,6 +67,7 @@ type Messages = {
   featureTts: string;
   featurePaper: string;
   featureImageConverter: string;
+  featureDocs: string;
   backHome: string;
   openSettings: string;
   comingSoon: string;
@@ -85,6 +90,23 @@ type Messages = {
   actionPaper2Gal: string;
   actionImageConverter: string;
   actionBack: string;
+  importTitle: string;
+  importDescription: string;
+  importSelectTool: string;
+  importUploadFile: string;
+  importPasteJson: string;
+  importValidate: string;
+  importSuccess: string;
+  importError: string;
+  importInvalidJson: string;
+  importToolMismatch: string;
+  importInvalidConfig: string;
+  importReadError: string;
+  importGoToTool: string;
+  llmSystemPromptDefault: string;
+  llmTestMessagePlaceholder: string;
+  llmPresetNamePlaceholder: string;
+  llmResetToSettingsDefault: string;
   settingsTitle: string;
   tabStyle: string;
   tabLanguage: string;
@@ -160,6 +182,8 @@ type Messages = {
   pagePaperDescription: string;
   pageImageConverterTitle: string;
   pageImageConverterDescription: string;
+  pageDocsTitle: string;
+  pageDocsDescription: string;
   moduleCanvas: string;
   modulePanel: string;
   modulePipeline: string;
@@ -367,6 +391,9 @@ const translations: Record<BaseLanguage, Messages> = {
     outputDescription: '暂无输出。后续在捏脸、转画风和素材生成流程里的中间结果都会放到这里。',
     privacyNote: '本网站所有信息均在本地保存，不会上传你的角色社卡、个人信息或 API 私钥。',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    footerBarVersion: '版本',
+    footerBarContact: 'Contact',
+    footerBarGithub: 'GitHub',
     metricModules: '主入口',
     metricLanguages: '界面语言',
     metricStorage: '本地保存',
@@ -378,6 +405,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS 语音导出',
     featurePaper: 'paper2gal 图片素材',
     featureImageConverter: '图片格式转换',
+    featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
     comingSoon: '功能页面框架',
@@ -400,6 +428,23 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal 图片素材生成',
     actionImageConverter: '图片格式转换',
     actionBack: '返回上一级',
+    importTitle: '导入配置',
+    importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
+    importSelectTool: '选择工具',
+    importUploadFile: '选择 JSON 文件',
+    importPasteJson: '或粘贴 JSON 文本',
+    importValidate: '验证并导入',
+    importSuccess: '导入成功',
+    importError: '导入失败',
+    importInvalidJson: '无效的 JSON 格式',
+    importToolMismatch: '工具类型不匹配，请检查文件',
+    importInvalidConfig: '无效的配置数据',
+    importReadError: '文件读取失败',
+    importGoToTool: '前往工具',
+    llmSystemPromptDefault: '你是一位擅长原创角色设计的创意助手。请根据用户提供的信息，生成富有想象力的角色设定、对话和世界观的文本内容。',
+    llmTestMessagePlaceholder: '输入测试消息…',
+    llmPresetNamePlaceholder: '预设名称',
+    llmResetToSettingsDefault: '恢复为设置默认值',
     settingsTitle: '项目设置',
     tabStyle: '样式',
     tabLanguage: '语言',
@@ -475,7 +520,9 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperTitle: 'paper2gal 图片素材生成',
     pagePaperDescription: '接入 p2g-character-workflow 的 paper2gal 流程，负责上传角色图、轮询工作流进度、查看结果资产与下载调试包。',
     pageImageConverterTitle: '图片格式转换',
-    pageImageConverterDescription: '上传图片并转换为 PNG、JPG、WEBP 等不同格式，支持质量调整和尺寸缩放。',
+    pageImageConverterDescription: '上传图片并转换为 PNG、JPG 格式，支持滤镜调整、质量控制和尺寸缩放。',
+    pageDocsTitle: '用户手册',
+    pageDocsDescription: '查看全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     moduleCanvas: '主工作区画布',
     modulePanel: '右侧参数 / 功能面板',
     modulePipeline: '任务队列与输出结果区',
@@ -670,6 +717,9 @@ const translations: Record<BaseLanguage, Messages> = {
     outputDescription: '現在は出力がありません。今後の中間結果や完成物はここに集約されます。',
     privacyNote: 'このサイトの情報はすべてローカル保存です。キャラ資料、個人情報、API キーはアップロードしません。',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    footerBarVersion: 'バージョン',
+    footerBarContact: 'Contact',
+    footerBarGithub: 'GitHub',
     metricModules: 'メイン入口',
     metricLanguages: '言語対応',
     metricStorage: 'ローカル保存',
@@ -681,6 +731,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS 音声出力',
     featurePaper: 'paper2gal 素材',
     featureImageConverter: '画像フォーマット変換',
+    featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
     comingSoon: '機能ページの骨組み',
@@ -703,6 +754,23 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal 素材生成',
     actionImageConverter: '画像フォーマット変換',
     actionBack: '戻る',
+    importTitle: '設定をインポート',
+    importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
+    importSelectTool: 'ツールを選択',
+    importUploadFile: 'JSON ファイルを選択',
+    importPasteJson: 'または JSON テキストを貼り付け',
+    importValidate: '検証してインポート',
+    importSuccess: 'インポート成功',
+    importError: 'インポート失敗',
+    importInvalidJson: '無効な JSON 形式',
+    importToolMismatch: 'ツールタイプが一致しません。ファイルを確認してください',
+    importInvalidConfig: '無効な設定データ',
+    importReadError: 'ファイルの読み取りに失敗',
+    importGoToTool: 'ツールへ移動',
+    llmSystemPromptDefault: 'あなたはオリジナルキャラクターデザインに長けたクリエイティブアシスタントです。ユーザーが提供する情報に基づいて、想像力豊かなキャラクター設定、会話、世界観のテキストを生成してください。',
+    llmTestMessagePlaceholder: 'テストメッセージを入力…',
+    llmPresetNamePlaceholder: 'プリセット名',
+    llmResetToSettingsDefault: '設定のデフォルトに戻す',
     settingsTitle: 'プロジェクト設定',
     tabStyle: 'スタイル',
     tabLanguage: '言語',
@@ -778,7 +846,9 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperTitle: 'paper2gal 素材生成',
     pagePaperDescription: 'p2g-character-workflow の paper2gal パイプラインに接続し、キャラクター画像のアップロード、進捗同期、成果物確認、デバッグパックの取得を行います。',
     pageImageConverterTitle: '画像フォーマット変換',
-    pageImageConverterDescription: '画像をアップロードして PNG、JPG、WEBP などの形式に変換します。品質調整とサイズ変更に対応。',
+    pageImageConverterDescription: '画像をアップロードして PNG、JPG 形式に変換します。フィルター調整、品質制御、サイズ変更に対応。',
+    pageDocsTitle: 'ユーザーマニュアル',
+    pageDocsDescription: '7つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     moduleCanvas: 'メイン作業領域',
     modulePanel: '右側パネル',
     modulePipeline: 'タスクと出力',
@@ -973,6 +1043,9 @@ const translations: Record<BaseLanguage, Messages> = {
     outputDescription: 'No output yet. Future intermediate and final assets will be shown here.',
     privacyNote: 'Everything on this site stays local. No OC sheets, personal data, or API secrets are uploaded.',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    footerBarVersion: 'Version',
+    footerBarContact: 'Contact',
+    footerBarGithub: 'GitHub',
     metricModules: 'Main entries',
     metricLanguages: 'Interface languages',
     metricStorage: 'Local storage',
@@ -984,6 +1057,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS Voice Export',
     featurePaper: 'paper2gal Assets',
     featureImageConverter: 'Image Converter',
+    featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
     comingSoon: 'Feature shell',
@@ -1006,6 +1080,23 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal Asset Generation',
     actionImageConverter: 'Image Format Converter',
     actionBack: 'Back',
+    importTitle: 'Import Config',
+    importDescription: 'Select a tool and import a previously exported JSON configuration file.',
+    importSelectTool: 'Select Tool',
+    importUploadFile: 'Choose JSON File',
+    importPasteJson: 'Or paste JSON text',
+    importValidate: 'Validate & Import',
+    importSuccess: 'Import successful',
+    importError: 'Import failed',
+    importInvalidJson: 'Invalid JSON format',
+    importToolMismatch: 'Tool type mismatch, please check the file',
+    importInvalidConfig: 'Invalid configuration data',
+    importReadError: 'File read failed',
+    importGoToTool: 'Go to Tool',
+    llmSystemPromptDefault: 'You are a helpful creative assistant for original character design. Please generate imaginative character settings, dialogues, and world-building text based on the information provided by the user.',
+    llmTestMessagePlaceholder: 'Type a test message…',
+    llmPresetNamePlaceholder: 'Preset name',
+    llmResetToSettingsDefault: 'Reset to Settings Default',
     settingsTitle: 'Project Settings',
     tabStyle: 'Style',
     tabLanguage: 'Language',
@@ -1081,7 +1172,9 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperTitle: 'paper2gal Asset Generation',
     pagePaperDescription: 'Connects to the p2g-character-workflow paper2gal pipeline for character upload, workflow polling, output review, and debug-package download.',
     pageImageConverterTitle: 'Image Format Converter',
-    pageImageConverterDescription: 'Upload an image and convert it to PNG, JPG, WEBP and other formats. Supports quality adjustment and resizing.',
+    pageImageConverterDescription: 'Upload an image and convert it to PNG or JPG. Supports filter adjustments, quality control, and resizing.',
+    pageDocsTitle: 'User Manual',
+    pageDocsDescription: 'View detailed documentation for all 7 tools: button functions, parameter explanations, and common errors with solutions.',
     moduleCanvas: 'Main workspace',
     modulePanel: 'Control panel',
     modulePipeline: 'Task queue and outputs',
@@ -1276,6 +1369,9 @@ const translations: Record<BaseLanguage, Messages> = {
     outputDescription: 'Пока результатов нет. Будущие материалы будут отображаться здесь.',
     privacyNote: 'Вся информация хранится локально. Данные персонажа, личная информация и API-ключи не загружаются.',
     footerNote: 'Copyright © 2026 Mirako Company. Developed by Hanazar Ochikawa.',
+    footerBarVersion: 'Версия',
+    footerBarContact: 'Contact',
+    footerBarGithub: 'GitHub',
     metricModules: 'Основные входы',
     metricLanguages: 'Языков интерфейса',
     metricStorage: 'Локальное хранение',
@@ -1287,6 +1383,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS экспорт голоса',
     featurePaper: 'paper2gal материалы',
     featureImageConverter: 'Конвертер изображений',
+    featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
     comingSoon: 'Каркас страницы',
@@ -1309,6 +1406,23 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal генерация',
     actionImageConverter: 'Конвертер форматов',
     actionBack: 'Назад',
+    importTitle: 'Импорт конфигурации',
+    importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
+    importSelectTool: 'Выбрать инструмент',
+    importUploadFile: 'Выбрать JSON-файл',
+    importPasteJson: 'Или вставьте JSON-текст',
+    importValidate: 'Проверить и импортировать',
+    importSuccess: 'Импорт успешен',
+    importError: 'Импорт не удался',
+    importInvalidJson: 'Неверный формат JSON',
+    importToolMismatch: 'Несоответствие типа инструмента, проверьте файл',
+    importInvalidConfig: 'Неверные данные конфигурации',
+    importReadError: 'Ошибка чтения файла',
+    importGoToTool: 'Перейти к инструменту',
+    llmSystemPromptDefault: 'Вы — творческий ассистент по дизайну оригинальных персонажей. Пожалуйста, генерируйте содержательные тексты персонажей, диалоги и описания миров на основе информации, предоставленной пользователем.',
+    llmTestMessagePlaceholder: 'Введите тестовое сообщение…',
+    llmPresetNamePlaceholder: 'Название пресета',
+    llmResetToSettingsDefault: 'Сбросить до настроек по умолчанию',
     settingsTitle: 'Настройки проекта',
     tabStyle: 'Стиль',
     tabLanguage: 'Язык',
@@ -1384,7 +1498,9 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperTitle: 'paper2gal генерация',
     pagePaperDescription: 'Подключает paper2gal pipeline из p2g-character-workflow: загрузка изображения персонажа, polling workflow, просмотр результатов и скачивание debug-пакета.',
     pageImageConverterTitle: 'Конвертер форматов',
-    pageImageConverterDescription: 'Загрузите изображение и конвертируйте его в PNG, JPG, WEBP и другие форматы. Поддержка настройки качества и изменения размера.',
+    pageImageConverterDescription: 'Загрузите изображение и конвертируйте его в PNG или JPG. Поддержка настройки фильтров, качества и размера.',
+    pageDocsTitle: 'Руководство пользователя',
+    pageDocsDescription: 'Просмотрите подробную документацию по всем 7 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     moduleCanvas: 'Основное рабочее поле',
     modulePanel: 'Панель управления',
     modulePipeline: 'Очередь задач и вывод',
@@ -2193,6 +2309,60 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.5.8',
+    date: '2026-04-25',
+    title: '0.5.8 用户手册系统上线 + 错误面板一键跳转文档',
+    summary: '新增第 8 个主页入口「用户手册」，涵盖全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。所有错误面板新增「查看文档」按钮，可直接跳转到对应工具的报错解决章节。',
+    details: [
+      '新增用户手册（Docs）页面：左侧 7 工具导航 + 右侧内容区，每个工具包含功能概述、按钮讲解、参数说明、报错与解决四大章节。',
+      '主页和开始弹窗扩展为 8 个入口：新增「用户手册」图标卡片和弹窗按钮。',
+      '错误面板升级：DraggableErrorPanel 新增可选 onOpenDocs 回调，所有 5 个使用错误面板的工具页面（StyleTransfer / Paper2Gal / LLMHub / TTS / ImageConverter）均添加「查看文档」按钮。',
+      '文档内容详实：涵盖 7 个工具共 100+ 按钮说明、80+ 参数解释、30+ 常见报错及解决方法，全部中文编写。',
+      '文档样式系统：新增 docs-sidebar、docs-content、docs-table、docs-param-card、docs-error-card 等 30+ CSS 类，支持响应式布局。',
+      '更新版本号至 0.5.8，首页公告同步更新。',
+    ],
+  },
+  {
+    version: '0.5.7',
+    date: '2026-04-25',
+    title: '0.5.7 LLM 语言本地化 + Import 全站统一 + 全局 Bug 修复',
+    summary: 'LLM Hub 默认 system prompt 根据界面语言自动适配；全站 Import 错误提示文案彻底本地化；修复所有页面残留硬编码英文；全局 Footer 隐私声明补全；垃圾文件清理。',
+    details: [
+      'LLM 文本接入语言本地化：systemPrompt 默认值从固定英文改为根据当前界面语言动态选择（中/日/英/俄），中文下显示中文系统提示词。',
+      'LLM Hub 界面文案本地化：测试消息输入框 placeholder、预设名称输入框 placeholder、「恢复为设置默认值」按钮全部从硬编码英文改为本地化键。',
+      'Import 错误提示全站本地化：所有 7 个工具的导入失败 alert 文案（工具类型不匹配/无效配置/读取失败/无效 JSON）全部使用本地化键，不再出现英文后缀。',
+      '全局 Footer 隐私声明补全：在 GlobalFooterBar 中追加 privacyNote，明确告知用户所有信息本地保存。',
+      '垃圾文件清理：移除已不存在的 tsbuildinfo 和 vite 编译产物残留引用。',
+      '更新版本号至 0.5.7，首页公告同步更新。',
+    ],
+  },
+  {
+    version: '0.5.6',
+    date: '2026-04-20',
+    title: '0.5.6 ImageConverter 全面改版 + TTS 双栏布局 + 全局 Footer + 统一错误面板',
+    summary: '六大改造：图片转换器新增滤镜参数与日志调试面板；TTS 改为左右双栏并增加日志；全站新增底部 Footer；所有功能页统一 DraggableErrorPanel；全局 reset 增加二次确认弹窗。',
+    details: [
+      'ImageConverter 全面改版：移除 webp 输出选项；新增亮度、对比度、饱和度、模糊、色相旋转、灰度 6 大滤镜滑块；右侧增加工作流日志面板，支持复制与下载日志；错误使用 DraggableErrorPanel 统一展示；reset 增加 ConfirmActionModal 二次确认。',
+      'TTS 导出改版：整体改为左右双栏布局，左侧保留全部参数设置，右侧新增日志面板记录配置变更与导出操作；reset 增加二次确认。',
+      '全局 Footer Bar：网站最下方新增固定 footer，包含版本号、GitHub 链接、Contact 邮箱与版权信息，适配现有暗色主题。',
+      '统一错误弹窗：LLM Hub 测试错误、Paper2Gal 工作流错误均升级为 DraggableErrorPanel，支持拖拽缩放、折叠、复制、下载与重试。',
+      '全局重刷确认：逐一检查所有 7 个功能页面（FaceMaker / StyleTransfer / PromptSuite / Paper2Gal / LLMHub / TTS / ImageConverter），确保每个 reset 按钮都有 ConfirmActionModal 二次确认。',
+      '更新版本号至 0.5.6，首页公告同步更新。',
+    ],
+  },
+  {
+    version: '0.5.5.3',
+    date: '2026-04-24',
+    title: '0.5.5.3 模型扩展 + Prompt 更新 + P2G 格式限制',
+    summary: 'Plato fallback 模型列表扩展至 14 个；表情 Prompt 更新为纯白背景+2000x2000；CG Prompt 精简为 12 场景；P2G 上传限制为 png/jpg 并新增格式转换跳转。',
+    details: [
+      'platoImageAdapter 扩展 fallback 模型列表至 14 个：新增 claude-4、qwen、dall-e-3、flux、sdxl、ideogram 等。',
+      '表情 Prompt 更新：所有表情生成 prompt 要求纯白背景和严格 2000x2000 像素比例。',
+      'CG Prompt 精简：场景池从大量场景缩减为 12 个精选场景，提高一致性。',
+      'Paper2Gal 上传限制：仅接受 png/jpg，移除 webp；预览区下方新增「其他格式请前往图片转换工具」链接按钮。',
+    ],
+  },
+  {
     version: '0.5.5.2',
     date: '2026-04-24',
     title: '0.5.5.2 全链路容错加固 + 交互细节修复',
@@ -2768,7 +2938,7 @@ const defaultSettings: SettingsState = {
     responseFormat: 'text',
     seed: 0,
     topK: 40,
-    systemPrompt: 'You are a helpful creative assistant for original character design.',
+    systemPrompt: '你是一位擅长原创角色设计的创意助手。请根据用户提供的信息，生成富有想象力的角色设定、对话和世界观的文本内容。',
     timeoutMs: 30000,
     retryCount: 2,
   },
@@ -2910,6 +3080,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTab>('style');
   const [modalStep, setModalStep] = useState<StartModalStep>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -3120,7 +3291,7 @@ function App() {
     language: settings.language,
     onBack: () => setScreen('home'),
     onOpenSettings: () => openSettings('style'),
-    onNavigate: (screen: 'image-converter') => {
+    onNavigate: (screen: 'image-converter' | 'docs') => {
       playSound('pageSwitch');
       setScreen(screen);
     },
@@ -3141,6 +3312,7 @@ function App() {
           onOpenSettings={() => openSettings('style')}
           onOpenAnnouncementArchive={() => openSettings('announcement')}
           onOpenStart={() => { playSound('modalOpen'); setModalStep('root'); }}
+          onOpenImport={() => { playSound('modalOpen'); setImportOpen(true); }}
         />
       ) : screen === 'face-maker' ? (
         <FaceMakerPage
@@ -3185,6 +3357,12 @@ function App() {
           pageTitle={messages.pageImageConverterTitle}
           pageDescription={messages.pageImageConverterDescription}
         />
+      ) : screen === 'docs' ? (
+        <DocsPage
+          {...sharedPageProps}
+          pageTitle={messages.pageDocsTitle}
+          pageDescription={messages.pageDocsDescription}
+        />
       ) : (
         <FeaturePage
           screen={screen}
@@ -3200,6 +3378,15 @@ function App() {
           messages={messages}
           onClose={() => setModalStep(null)}
           onSelect={navigateTo}
+        />
+      )}
+
+      {importOpen && (
+        <ImportModal
+          messages={messages}
+          isOpen={importOpen}
+          onClose={() => setImportOpen(false)}
+          onNavigate={navigateTo}
         />
       )}
 
@@ -3223,7 +3410,28 @@ function App() {
           screen={screen}
         />
       )}
+
+      <GlobalFooterBar version={VERSION} messages={messages} />
     </div>
+  );
+}
+
+function GlobalFooterBar({ version, messages }: { version: string; messages: Messages }) {
+  return (
+    <footer className="app-global-footer">
+      <div className="app-global-footer-inner">
+        <span className="app-global-footer-version">{messages.footerBarVersion} {version}</span>
+        <span className="app-global-footer-separator">·</span>
+        <a className="app-global-footer-link" href="https://github.com/28zhong.lecheng/Original-Character-Maker" target="_blank" rel="noopener noreferrer">
+          {messages.footerBarGithub}
+        </a>
+        <span className="app-global-footer-separator">·</span>
+        <span className="app-global-footer-contact">{messages.footerBarContact}: hanazar@mirako.co</span>
+        <span className="app-global-footer-separator">·</span>
+        <span className="app-global-footer-copy">{messages.footerNote}</span>
+      </div>
+      <div className="app-global-footer-privacy">{messages.privacyNote}</div>
+    </footer>
   );
 }
 
@@ -3233,12 +3441,14 @@ function HomeScreen({
   onOpenSettings,
   onOpenAnnouncementArchive,
   onOpenStart,
+  onOpenImport,
 }: {
   messages: Messages;
   onNavigate: (screen: Exclude<FeatureScreen, 'home'>) => void;
   onOpenSettings: () => void;
   onOpenAnnouncementArchive: () => void;
   onOpenStart: () => void;
+  onOpenImport: () => void;
 }) {
   return (
     <main className="home-shell">
@@ -3307,6 +3517,10 @@ function HomeScreen({
                 <ActionIcon kind="image-converter" />
                 <span>{messages.featureImageConverter}</span>
               </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
+                <ActionIcon kind="docs" />
+                <span>{messages.featureDocs}</span>
+              </button>
             </div>
 
             <div className="workflow-actions">
@@ -3316,6 +3530,9 @@ function HomeScreen({
               <button className="secondary-button giant-button workflow-action-button" type="button" onClick={onOpenSettings}>
                 {messages.settingsButton}
               </button>
+              <button className="secondary-button giant-button workflow-action-button" type="button" onClick={onOpenImport}>
+                {messages.importTitle}
+              </button>
             </div>
 
             <p className="workflow-subhint">{messages.workflowHint}</p>
@@ -3323,10 +3540,7 @@ function HomeScreen({
         </div>
       </section>
 
-      <footer className="home-footer fade-up delay-4">
-        <div className="notice-banner">{messages.privacyNote}</div>
-        <p>{messages.footerNote}</p>
-      </footer>
+
     </main>
   );
 }
@@ -3342,6 +3556,7 @@ type FaceMakerCopy = {
   refreshWorkspaceConfirm: string;
   saveDraft: string;
   export: string;
+  importConfig: string;
   workboard: string;
   assetHairTitle: string;
   assetEyesTitle: string;
@@ -3396,6 +3611,7 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     refreshWorkspaceConfirm: '确认重刷',
     saveDraft: '保存草稿',
     export: '导出',
+    importConfig: '导入配置',
     workboard: '工作画板',
     assetHairTitle: '发型',
     assetEyesTitle: '眼型',
@@ -3448,6 +3664,7 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     refreshWorkspaceConfirm: 'リセットする',
     saveDraft: '下書きを保存',
     export: '書き出し',
+    importConfig: '設定をインポート',
     workboard: '作業ボード',
     assetHairTitle: '髪型',
     assetEyesTitle: '目元',
@@ -3500,6 +3717,7 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     refreshWorkspaceConfirm: 'Reset now',
     saveDraft: 'Save draft',
     export: 'Export',
+    importConfig: 'Import Config',
     workboard: 'Workbench',
     assetHairTitle: 'Hair',
     assetEyesTitle: 'Eyes',
@@ -3552,6 +3770,7 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     refreshWorkspaceConfirm: 'Сбросить сейчас',
     saveDraft: 'Сохранить черновик',
     export: 'Экспорт',
+    importConfig: 'Импорт конфигурации',
     workboard: 'Рабочее поле',
     assetHairTitle: 'Причёски',
     assetEyesTitle: 'Глаза',
@@ -3667,10 +3886,21 @@ function FaceMakerPage({
     tilt: 0,
   };
 
-  const [draft, setDraft] = useState(initialDraft);
-  const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(initialDraft));
+  const [draft, setDraft] = useState(() => {
+    try {
+      const imported = localStorage.getItem('oc-maker.face-maker-import');
+      if (imported) {
+        const parsed = JSON.parse(imported);
+        localStorage.removeItem('oc-maker.face-maker-import');
+        return { ...initialDraft, ...parsed };
+      }
+    } catch { /* ignore */ }
+    return initialDraft;
+  });
+  const [savedSnapshot, setSavedSnapshot] = useState(() => JSON.stringify(draft));
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
+  const importFileRef = useRef<HTMLInputElement>(null);
   const isDirty = JSON.stringify(draft) !== savedSnapshot;
 
   useEffect(() => {
@@ -3804,6 +4034,29 @@ function FaceMakerPage({
     window.setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'face-maker') { playSound('error'); alert(copy.importConfig + ': ' + messages.importToolMismatch); return; }
+        if (!data.draft || typeof data.draft !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + messages.importInvalidConfig); return; }
+        const imported = { ...initialDraft, ...(data.draft as Record<string, unknown>) };
+        setDraft(imported as typeof initialDraft);
+        setSavedSnapshot(JSON.stringify(imported));
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + messages.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + messages.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
   function resetDraft() {
     playSound('confirm');
     setDraft(initialDraft);
@@ -3869,6 +4122,10 @@ function FaceMakerPage({
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
               {copy.saveDraft}
             </button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>
+              {copy.importConfig}
+            </button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
             <button className="primary-button small-button" type="button" onClick={exportDraft}>
               {copy.export}
             </button>
@@ -4224,7 +4481,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -4279,6 +4536,15 @@ function ActionIcon({
         <path d="M8 26 16 18 22 24 28 16" />
         <circle cx="24" cy="14" r="2.5" />
         <path d="M18 30h4" />
+      </>
+    ),
+    docs: (
+      <>
+        <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
+        <path d="M10 20h12c3 0 5 2 5 4s-2 4-5 4H10z" />
+        <path d="M10 8v20" />
+        <path d="M14 12h4" />
+        <path d="M14 24h4" />
       </>
     ),
   } as const;
@@ -4357,10 +4623,306 @@ function StartModal({
             <ActionIcon kind="image-converter" />
             <strong>{messages.actionImageConverter}</strong>
           </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
+            <ActionIcon kind="docs" />
+            <strong>{messages.featureDocs}</strong>
+          </button>
         </div>
       </section>
     </div>
   );
+}
+
+type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter';
+
+function ImportModal({
+  messages,
+  isOpen,
+  onClose,
+  onNavigate,
+}: {
+  messages: Messages;
+  isOpen: boolean;
+  onClose: () => void;
+  onNavigate: (screen: Exclude<FeatureScreen, 'home'>) => void;
+}) {
+  const [isClosing, setIsClosing] = useState(false);
+  const timerRef = useRef<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [step, setStep] = useState<'select' | 'upload'>('select');
+  const [selectedTool, setSelectedTool] = useState<ImportableTool | null>(null);
+  const [jsonText, setJsonText] = useState('');
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsClosing(false);
+      setStep('select');
+      setSelectedTool(null);
+      setJsonText('');
+      setStatus('idle');
+      setStatusMessage('');
+    }
+  }, [isOpen]);
+
+  function requestClose() {
+    setIsClosing(true);
+    timerRef.current = window.setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, MODAL_CLOSE_MS);
+  }
+
+  function selectTool(tool: ImportableTool) {
+    playSound('confirm');
+    setSelectedTool(tool);
+    setStep('upload');
+    setStatus('idle');
+    setStatusMessage('');
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setJsonText(String(reader.result ?? ''));
+      setStatus('idle');
+      setStatusMessage('');
+    };
+    reader.onerror = () => {
+      setStatus('error');
+      setStatusMessage(messages.importError);
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function validateAndImport() {
+    if (!selectedTool) return;
+    let data: Record<string, unknown>;
+    try {
+      data = JSON.parse(jsonText) as Record<string, unknown>;
+    } catch {
+      setStatus('error');
+      setStatusMessage(messages.importInvalidJson);
+      playSound('error');
+      return;
+    }
+
+    const result = importToolConfig(selectedTool, data);
+    if (result.success) {
+      setStatus('success');
+      setStatusMessage(messages.importSuccess);
+      playSound('save');
+    } else {
+      setStatus('error');
+      setStatusMessage(messages.importToolMismatch);
+      playSound('error');
+    }
+  }
+
+  function goToTool() {
+    if (!selectedTool) return;
+    const screenMap: Record<ImportableTool, Exclude<FeatureScreen, 'home'>> = {
+      'face-maker': 'face-maker',
+      'style-transfer': 'style-transfer',
+      'prompt-suite': 'prompt-suite',
+      'paper2gal': 'paper2gal',
+      'llm-hub': 'llm-hub',
+      'tts-export': 'tts-export',
+      'image-converter': 'image-converter',
+    };
+    requestClose();
+    window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
+  }
+
+  const tools: { key: ImportableTool; label: string; icon: Parameters<typeof ActionIcon>[0]['kind'] }[] = [
+    { key: 'face-maker', label: messages.featureFace, icon: 'face-maker' },
+    { key: 'style-transfer', label: messages.featureStyle, icon: 'style-transfer' },
+    { key: 'prompt-suite', label: messages.featurePrompt, icon: 'prompt-suite' },
+    { key: 'llm-hub', label: messages.featureLlm, icon: 'llm-hub' },
+    { key: 'tts-export', label: messages.featureTts, icon: 'tts-export' },
+    { key: 'paper2gal', label: messages.featurePaper, icon: 'paper2gal' },
+    { key: 'image-converter', label: messages.featureImageConverter, icon: 'image-converter' },
+  ];
+
+  if (!isOpen) return null;
+
+  return (
+    <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
+      <section className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">×</button>
+
+        <p className="section-label">{messages.appSubtitle}</p>
+        <h2>{messages.importTitle}</h2>
+        <p className="modal-description">{messages.importDescription}</p>
+
+        {step === 'select' ? (
+          <>
+            <p style={{ margin: '12px 0 8px', fontWeight: 600, color: 'var(--text-secondary)' }}>{messages.importSelectTool}</p>
+            <div className="action-grid root-grid">
+              {tools.map((t) => (
+                <button key={t.key} className="action-tile" type="button" onClick={() => selectTool(t.key)}>
+                  <ActionIcon kind={t.icon} />
+                  <strong>{t.label}</strong>
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0 8px' }}>
+              <button className="secondary-button small-button" type="button" onClick={() => { setStep('select'); setStatus('idle'); }}>← {messages.actionBack}</button>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{tools.find((t) => t.key === selectedTool)?.label}</span>
+            </div>
+
+            <div className="form-grid" style={{ marginTop: 12 }}>
+              <button className="secondary-button" type="button" onClick={() => fileInputRef.current?.click()}>
+                {messages.importUploadFile}
+              </button>
+              <input ref={fileInputRef} type="file" accept="application/json,.json" hidden onChange={handleFileChange} />
+
+              <label className="field">
+                <span>{messages.importPasteJson}</span>
+                <textarea
+                  className="settings-textarea"
+                  rows={6}
+                  value={jsonText}
+                  onChange={(e) => { setJsonText(e.target.value); setStatus('idle'); }}
+                  placeholder={`{ "tool": "${selectedTool ?? '...'}" }`}
+                />
+              </label>
+            </div>
+
+            {status !== 'idle' && (
+              <div className={`notice-banner ${status === 'success' ? '' : 'error'}`} style={{ marginTop: 12, borderColor: status === 'success' ? 'rgba(74, 222, 128, 0.4)' : 'rgba(244, 90, 90, 0.4)', background: status === 'success' ? 'linear-gradient(180deg, rgba(74,222,128,0.12), rgba(255,255,255,0.02))' : 'linear-gradient(180deg, rgba(244,90,90,0.12), rgba(255,255,255,0.02))' }}>
+                <p style={{ margin: 0, color: status === 'success' ? '#86efac' : '#f45a5a' }}>{statusMessage}</p>
+              </div>
+            )}
+
+            <div className="workflow-actions" style={{ marginTop: 16 }}>
+              <button className="primary-button" type="button" onClick={validateAndImport} disabled={!jsonText.trim()}>
+                {messages.importValidate}
+              </button>
+              {status === 'success' && (
+                <button className="secondary-button" type="button" onClick={goToTool}>
+                  {messages.importGoToTool}
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): { success: boolean; message: string } {
+  switch (tool) {
+    case 'face-maker': {
+      if (data.tool !== 'face-maker') return { success: false, message: 'Tool type mismatch' };
+      if (!data.draft || typeof data.draft !== 'object') return { success: false, message: 'Missing draft config' };
+      try { localStorage.setItem('oc-maker.face-maker-import', JSON.stringify(data.draft)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'style-transfer': {
+      if (data.tool !== 'style-transfer') return { success: false, message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
+      try { localStorage.setItem('oc-maker.style-transfer', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'prompt-suite': {
+      if (data.tool !== 'prompt-suite') return { success: false, message: 'Tool type mismatch' };
+      const payload = {
+        selectedTemplate: String(data.selectedTemplate ?? 'world'),
+        documentHtml: String(data.documentHtml ?? ''),
+        toolbarState: (data.toolbarState as Record<string, unknown>) || {},
+        customFonts: Array.isArray(data.customFonts) ? data.customFonts : [],
+        llmConfig: (data.llmConfig as Record<string, unknown>) || {},
+        ttsConfig: (data.ttsConfig as Record<string, unknown>) || {},
+        savedSnapshot: '',
+      };
+      try { localStorage.setItem('oc-maker.prompt-suite', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'paper2gal': {
+      if (data.tool === 'paper2gal' && data.config && typeof data.config === 'object') {
+        const config = data.config as Record<string, unknown>;
+        const payload = {
+          inputFileName: '',
+          workflow: null,
+          message: { type: 'info', text: 'Idle' },
+          aiConcurrencyEnabled: Boolean(config.aiConcurrencyEnabled ?? true),
+          promptOverrides: (config.promptOverrides as Record<string, unknown>) || {},
+          savedSnapshot: '',
+        };
+        try { localStorage.setItem('oc-maker.paper2gal', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+        return { success: true, message: '' };
+      }
+      // Also accept legacy debug export format if it contains promptOverrides
+      if (data.promptOverrides && typeof data.promptOverrides === 'object') {
+        const payload = {
+          inputFileName: '',
+          workflow: null,
+          message: { type: 'info', text: 'Idle' },
+          aiConcurrencyEnabled: Boolean(data.aiConcurrencyEnabled ?? true),
+          promptOverrides: data.promptOverrides as Record<string, unknown>,
+          savedSnapshot: '',
+        };
+        try { localStorage.setItem('oc-maker.paper2gal', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+        return { success: true, message: '' };
+      }
+      return { success: false, message: 'Tool type mismatch or missing config' };
+    }
+    case 'llm-hub': {
+      if (data.tool !== 'llm-hub') return { success: false, message: 'Tool type mismatch' };
+      if (!data.llmConfig || typeof data.llmConfig !== 'object') return { success: false, message: 'Missing llmConfig' };
+      const payload = { llmConfig: data.llmConfig, savedSnapshot: '', presets: Array.isArray(data.presets) ? data.presets : [] };
+      try { localStorage.setItem('oc-maker.llm-hub-v2', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'tts-export': {
+      if (data.tool !== 'tts-export') return { success: false, message: 'Tool type mismatch' };
+      if (!data.ttsConfig || typeof data.ttsConfig !== 'object') return { success: false, message: 'Missing ttsConfig' };
+      const payload = { ttsConfig: data.ttsConfig, savedSnapshot: '' };
+      try { localStorage.setItem('oc-maker.tts-export', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'image-converter': {
+      if (data.tool !== 'image-converter') return { success: false, message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      const config = data.config as Record<string, unknown>;
+      const payload = {
+        outputFormat: String(config.outputFormat ?? 'image/png'),
+        quality: Number(config.quality ?? 92),
+        maxWidth: Number(config.maxWidth ?? 2048),
+        maxHeight: Number(config.maxHeight ?? 2048),
+        maintainAspect: Boolean(config.maintainAspect ?? true),
+        brightness: Number(config.brightness ?? 100),
+        contrast: Number(config.contrast ?? 100),
+        saturation: Number(config.saturation ?? 100),
+        blur: Number(config.blur ?? 0),
+        hueRotate: Number(config.hueRotate ?? 0),
+        grayscale: Number(config.grayscale ?? 0),
+        savedSnapshot: '',
+      };
+      try { localStorage.setItem('oc-maker.image-converter', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    default:
+      return { success: false, message: 'Unknown tool' };
+  }
 }
 
 function SettingsModal({

@@ -61,7 +61,7 @@ export type FontPreset =
 export type InterfaceMode = 'builtin' | 'custom';
 export type ApiPreset = 'plato' | 'custom1' | 'custom2' | 'custom3';
 
-export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter';
+export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'docs';
 export type SettingsTab = 'style' | 'language' | 'audio' | 'animation' | 'performance' | 'api' | 'llm' | 'shortcuts' | 'others' | 'announcement' | 'about';
 export type StartModalStep = 'root' | null;
 

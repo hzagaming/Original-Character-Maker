@@ -16,7 +16,7 @@ type SharedPageProps = {
   language: AppLanguage;
   onBack: () => void;
   onOpenSettings: () => void;
-  onNavigate?: (screen: 'image-converter') => void;
+  onNavigate?: (screen: 'image-converter' | 'docs') => void;
 };
 
 type BaseLanguage = 'zh' | 'ja' | 'en' | 'ru';
@@ -143,6 +143,9 @@ type UiCopySet = {
   refreshWorkspaceTitle: string;
   refreshWorkspaceDescription: string;
   refreshWorkspaceConfirm: string;
+  importConfig: string;
+  importToolMismatch: string;
+  importInvalidJson: string;
   copyJson: string;
   downloadJson: string;
   copyResult: string;
@@ -186,6 +189,44 @@ type UiCopySet = {
   exportTitle: string;
   notesTitle: string;
   operationsTitle: string;
+  openDocs: string;
+  importInvalidConfig: string;
+  importReadError: string;
+  llmSystemPromptDefault: string;
+  llmTestMessagePlaceholder: string;
+  llmPresetNamePlaceholder: string;
+  llmResetToSettingsDefault: string;
+  llm: {
+    moduleParams: string;
+    moduleTest: string;
+    modulePresets: string;
+    paramsTitle: string;
+    modelLabel: string;
+    maxTokensLabel: string;
+    temperatureLabel: string;
+    topPLabel: string;
+    frequencyPenaltyLabel: string;
+    presencePenaltyLabel: string;
+    responseFormatLabel: string;
+    seedLabel: string;
+    topKLabel: string;
+    timeoutLabel: string;
+    retryCountLabel: string;
+    stopSequencesLabel: string;
+    systemPromptLabel: string;
+    testTitle: string;
+    noMessagesYet: string;
+    userLabel: string;
+    assistantLabel: string;
+    thinking: string;
+    sendButton: string;
+    clearButton: string;
+    presetsTitle: string;
+    saveAsPresetButton: string;
+    noPresetsYet: string;
+    loadButton: string;
+    deleteButton: string;
+  };
   transfer: {
     inputTitle: string;
     paramsTitle: string;
@@ -244,6 +285,7 @@ type UiCopySet = {
     sourceTitle: string;
     settingsTitle: string;
     resultTitle: string;
+    logsTitle: string;
     noImage: string;
     resultPlaceholder: string;
     outputFormat: string;
@@ -251,12 +293,21 @@ type UiCopySet = {
     maxWidth: string;
     maxHeight: string;
     maintainAspect: string;
+    brightness: string;
+    contrast: string;
+    saturation: string;
+    blur: string;
+    hueRotate: string;
+    grayscale: string;
     converting: string;
     convert: string;
     download: string;
     formatLabel: string;
     qualityLabel: string;
     invalidDimensions: string;
+    copyLogs: string;
+    downloadLogs: string;
+    waitingOperations: string;
   };
   tagPicker: {
     filterPlaceholder: string;
@@ -628,6 +679,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     refreshWorkspaceTitle: '确定重刷当前页面吗？',
     refreshWorkspaceDescription: '这会清空当前页面的输入、结果和暂存内容，让页面回到初始状态。',
     refreshWorkspaceConfirm: '确认重刷',
+    importConfig: '导入配置',
+    importToolMismatch: '工具类型不匹配，请检查文件',
+    importInvalidJson: '无效的 JSON 格式',
     copyJson: '复制 JSON',
     downloadJson: '下载 JSON',
     copyResult: '复制结果',
@@ -671,6 +725,44 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     exportTitle: '导出与封装',
     notesTitle: '系统备注',
     operationsTitle: '操作开关',
+    openDocs: '查看文档',
+    importInvalidConfig: '无效的配置数据',
+    importReadError: '文件读取失败',
+    llmSystemPromptDefault: '你是一位擅长原创角色设计的创意助手。请根据用户提供的信息，生成富有想象力的角色设定、对话和世界观的文本内容。',
+    llmTestMessagePlaceholder: '输入测试消息…',
+    llmPresetNamePlaceholder: '预设名称',
+    llmResetToSettingsDefault: '恢复为设置默认值',
+    llm: {
+      moduleParams: '参数',
+      moduleTest: '实时测试',
+      modulePresets: '预设',
+      paramsTitle: '模型参数',
+      modelLabel: '模型',
+      maxTokensLabel: '最大 Token 数',
+      temperatureLabel: '温度',
+      topPLabel: 'Top P',
+      frequencyPenaltyLabel: '频率惩罚',
+      presencePenaltyLabel: '存在惩罚',
+      responseFormatLabel: '响应格式',
+      seedLabel: '随机种子',
+      topKLabel: 'Top K',
+      timeoutLabel: '超时 (毫秒)',
+      retryCountLabel: '重试次数',
+      stopSequencesLabel: '停止序列 (逗号分隔)',
+      systemPromptLabel: '系统提示词',
+      testTitle: '对话测试',
+      noMessagesYet: '还没有消息。在下方输入并发送。',
+      userLabel: '你',
+      assistantLabel: '助手',
+      thinking: '思考中…',
+      sendButton: '发送',
+      clearButton: '清空',
+      presetsTitle: '已保存预设',
+      saveAsPresetButton: '保存为预设',
+      noPresetsYet: '还没有保存任何预设。',
+      loadButton: '加载',
+      deleteButton: '删除',
+    },
     transfer: {
       inputTitle: '输入图片与预览',
       paramsTitle: 'AI 参数设置',
@@ -729,6 +821,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       sourceTitle: '源图片',
       settingsTitle: '格式设置',
       resultTitle: '结果预览',
+      logsTitle: '工作流日志',
       noImage: '当前还没有选择输入图片。',
       resultPlaceholder: '转换结果将显示在这里',
       outputFormat: '输出格式',
@@ -736,12 +829,21 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       maxWidth: '最大宽度 (px)',
       maxHeight: '最大高度 (px)',
       maintainAspect: '保持宽高比',
+      brightness: '亮度',
+      contrast: '对比度',
+      saturation: '饱和度',
+      blur: '模糊',
+      hueRotate: '色相旋转',
+      grayscale: '灰度',
       converting: '转换中...',
       convert: '转换',
       download: '下载',
       formatLabel: '格式',
       qualityLabel: '质量',
       invalidDimensions: '图片尺寸无效，无法转换。',
+      copyLogs: '复制日志',
+      downloadLogs: '下载日志',
+      waitingOperations: '等待操作中...',
     },
     tagPicker: {
       filterPlaceholder: '筛选标签...',
@@ -922,6 +1024,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     refreshWorkspaceTitle: '現在のページをリセットしますか？',
     refreshWorkspaceDescription: 'このページの入力、結果、ローカル一時状態を消去して、初期状態に戻します。',
     refreshWorkspaceConfirm: 'リセットする',
+    importConfig: '設定をインポート',
+    importToolMismatch: 'ツールタイプが一致しません。ファイルを確認してください',
+    importInvalidJson: '無効な JSON 形式',
     copyJson: 'JSON をコピー',
     downloadJson: 'JSON を保存',
     copyResult: '結果をコピー',
@@ -965,6 +1070,44 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     exportTitle: '書き出しと封装',
     notesTitle: 'システムメモ',
     operationsTitle: '処理オプション',
+    openDocs: 'ドキュメントを見る',
+    importInvalidConfig: '無効な設定データ',
+    importReadError: 'ファイルの読み取りに失敗',
+    llmSystemPromptDefault: 'あなたはオリジナルキャラクターデザインに長けたクリエイティブアシスタントです。ユーザーが提供する情報に基づいて、想像力豊かなキャラクター設定、会話、世界観のテキストを生成してください。',
+    llmTestMessagePlaceholder: 'テストメッセージを入力…',
+    llmPresetNamePlaceholder: 'プリセット名',
+    llmResetToSettingsDefault: '設定のデフォルトに戻す',
+    llm: {
+      moduleParams: 'パラメータ',
+      moduleTest: 'ライブテスト',
+      modulePresets: 'プリセット',
+      paramsTitle: 'モデルパラメータ',
+      modelLabel: 'モデル',
+      maxTokensLabel: '最大トークン数',
+      temperatureLabel: '温度',
+      topPLabel: 'Top P',
+      frequencyPenaltyLabel: '頻度ペナルティ',
+      presencePenaltyLabel: '存在ペナルティ',
+      responseFormatLabel: 'レスポンス形式',
+      seedLabel: 'シード',
+      topKLabel: 'Top K',
+      timeoutLabel: 'タイムアウト (ms)',
+      retryCountLabel: 'リトライ回数',
+      stopSequencesLabel: 'ストップシーケンス (カンマ区切り)',
+      systemPromptLabel: 'システムプロンプト',
+      testTitle: 'チャットテスト',
+      noMessagesYet: 'まだメッセージはありません。下に入力して送信してください。',
+      userLabel: 'あなた',
+      assistantLabel: 'アシスタント',
+      thinking: '考え中…',
+      sendButton: '送信',
+      clearButton: 'クリア',
+      presetsTitle: '保存済みプリセット',
+      saveAsPresetButton: 'プリセットとして保存',
+      noPresetsYet: 'まだプリセットが保存されていません。',
+      loadButton: '読み込み',
+      deleteButton: '削除',
+    },
     transfer: {
       inputTitle: '入力画像とプレビュー',
       paramsTitle: 'AI パラメータ設定',
@@ -1023,6 +1166,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       sourceTitle: 'ソース画像',
       settingsTitle: 'フォーマット設定',
       resultTitle: '結果プレビュー',
+      logsTitle: 'ワークフローログ',
       noImage: '入力画像が選択されていません。',
       resultPlaceholder: '変換結果がここに表示されます',
       outputFormat: '出力フォーマット',
@@ -1030,12 +1174,21 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       maxWidth: '最大幅 (px)',
       maxHeight: '最大高さ (px)',
       maintainAspect: 'アスペクト比を維持',
+      brightness: '明るさ',
+      contrast: 'コントラスト',
+      saturation: '彩度',
+      blur: 'ぼかし',
+      hueRotate: '色相回転',
+      grayscale: 'グレースケール',
       converting: '変換中...',
       convert: '変換',
       download: 'ダウンロード',
       formatLabel: 'フォーマット',
       qualityLabel: '品質',
       invalidDimensions: '画像サイズが無効のため、変換できません。',
+      copyLogs: 'ログをコピー',
+      downloadLogs: 'ログをダウンロード',
+      waitingOperations: '操作を待っています...',
     },
     tagPicker: {
       filterPlaceholder: 'タグを絞り込む...',
@@ -1216,6 +1369,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     refreshWorkspaceTitle: 'Reset this workspace?',
     refreshWorkspaceDescription: 'This clears the current input, result, and temporary saved state for this page so it goes back to its initial state.',
     refreshWorkspaceConfirm: 'Reset now',
+    importConfig: 'Import Config',
+    importToolMismatch: 'Tool type mismatch, please check the file',
+    importInvalidJson: 'Invalid JSON format',
     copyJson: 'Copy JSON',
     downloadJson: 'Download JSON',
     copyResult: 'Copy result',
@@ -1259,6 +1415,44 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     exportTitle: 'Export and packaging',
     notesTitle: 'System notes',
     operationsTitle: 'Operation toggles',
+    openDocs: 'View Docs',
+    importInvalidConfig: 'Invalid configuration data',
+    importReadError: 'File read failed',
+    llmSystemPromptDefault: 'You are a helpful creative assistant for original character design. Please generate imaginative character settings, dialogues, and world-building text based on the information provided by the user.',
+    llmTestMessagePlaceholder: 'Type a test message…',
+    llmPresetNamePlaceholder: 'Preset name',
+    llmResetToSettingsDefault: 'Reset to Settings Default',
+    llm: {
+      moduleParams: 'Parameters',
+      moduleTest: 'Live Test',
+      modulePresets: 'Presets',
+      paramsTitle: 'Model Parameters',
+      modelLabel: 'Model',
+      maxTokensLabel: 'Max Tokens',
+      temperatureLabel: 'Temperature',
+      topPLabel: 'Top P',
+      frequencyPenaltyLabel: 'Frequency Penalty',
+      presencePenaltyLabel: 'Presence Penalty',
+      responseFormatLabel: 'Response Format',
+      seedLabel: 'Seed',
+      topKLabel: 'Top K',
+      timeoutLabel: 'Timeout (ms)',
+      retryCountLabel: 'Retry Count',
+      stopSequencesLabel: 'Stop Sequences (comma separated)',
+      systemPromptLabel: 'System Prompt',
+      testTitle: 'Chat Test',
+      noMessagesYet: '{copy.llm.noMessagesYet}',
+      userLabel: 'You',
+      assistantLabel: 'Assistant',
+      thinking: '{copy.llm.thinking}',
+      sendButton: 'Send',
+      clearButton: 'Clear',
+      presetsTitle: 'Saved Presets',
+      saveAsPresetButton: 'Save Current as Preset',
+      noPresetsYet: '{copy.llm.noPresetsYet}',
+      loadButton: 'Load',
+      deleteButton: 'Delete',
+    },
     transfer: {
       inputTitle: 'Input image and preview',
       paramsTitle: 'AI parameter settings',
@@ -1317,6 +1511,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       sourceTitle: 'Source Image',
       settingsTitle: 'Format Settings',
       resultTitle: 'Result Preview',
+      logsTitle: 'Workflow Logs',
       noImage: 'No image selected yet.',
       resultPlaceholder: 'Result will appear here',
       outputFormat: 'Output Format',
@@ -1324,12 +1519,21 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       maxWidth: 'Max Width (px)',
       maxHeight: 'Max Height (px)',
       maintainAspect: 'Maintain Aspect Ratio',
+      brightness: 'Brightness',
+      contrast: 'Contrast',
+      saturation: 'Saturation',
+      blur: 'Blur',
+      hueRotate: 'Hue Rotate',
+      grayscale: 'Grayscale',
       converting: 'Converting...',
       convert: 'Convert',
       download: 'Download',
       formatLabel: 'Format',
       qualityLabel: 'Quality',
       invalidDimensions: 'Image has invalid dimensions and cannot be converted.',
+      copyLogs: 'Copy Logs',
+      downloadLogs: 'Download Logs',
+      waitingOperations: '{copy.imageConverter.waitingOperations}',
     },
     tagPicker: {
       filterPlaceholder: 'Filter tags...',
@@ -1510,6 +1714,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     refreshWorkspaceTitle: 'Сбросить текущую страницу?',
     refreshWorkspaceDescription: 'Это очистит текущие входные данные, результаты и временно сохранённое локальное состояние страницы, вернув её к начальному виду.',
     refreshWorkspaceConfirm: 'Сбросить сейчас',
+    importConfig: 'Импорт конфигурации',
+    importToolMismatch: 'Несоответствие типа инструмента, проверьте файл',
+    importInvalidJson: 'Неверный формат JSON',
     copyJson: 'Скопировать JSON',
     downloadJson: 'Скачать JSON',
     copyResult: 'Скопировать результат',
@@ -1553,6 +1760,44 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     exportTitle: 'Экспорт и упаковка',
     notesTitle: 'Системные заметки',
     operationsTitle: 'Переключатели операций',
+    openDocs: 'Открыть документацию',
+    importInvalidConfig: 'Неверные данные конфигурации',
+    importReadError: 'Ошибка чтения файла',
+    llmSystemPromptDefault: 'Вы — творческий ассистент по дизайну оригинальных персонажей. Пожалуйста, генерируйте содержательные тексты персонажей, диалоги и описания миров на основе информации, предоставленной пользователем.',
+    llmTestMessagePlaceholder: 'Введите тестовое сообщение…',
+    llmPresetNamePlaceholder: 'Название пресета',
+    llmResetToSettingsDefault: 'Сбросить до настроек по умолчанию',
+    llm: {
+      moduleParams: 'Параметры',
+      moduleTest: 'Живое тестирование',
+      modulePresets: 'Пресеты',
+      paramsTitle: 'Параметры модели',
+      modelLabel: 'Модель',
+      maxTokensLabel: 'Макс. токенов',
+      temperatureLabel: 'Температура',
+      topPLabel: 'Top P',
+      frequencyPenaltyLabel: 'Штраф за частоту',
+      presencePenaltyLabel: 'Штраф за присутствие',
+      responseFormatLabel: 'Формат ответа',
+      seedLabel: 'Сид',
+      topKLabel: 'Top K',
+      timeoutLabel: 'Таймаут (мс)',
+      retryCountLabel: 'Количество повторов',
+      stopSequencesLabel: 'Стоп-последовательности (через запятую)',
+      systemPromptLabel: 'Системный промпт',
+      testTitle: 'Тест чата',
+      noMessagesYet: 'Сообщений пока нет. Введите текст ниже и отправьте.',
+      userLabel: 'Вы',
+      assistantLabel: 'Ассистент',
+      thinking: 'Думаю…',
+      sendButton: 'Отправить',
+      clearButton: 'Очистить',
+      presetsTitle: 'Сохранённые пресеты',
+      saveAsPresetButton: 'Сохранить как пресет',
+      noPresetsYet: 'Пресеты ещё не сохранены.',
+      loadButton: 'Загрузить',
+      deleteButton: 'Удалить',
+    },
     transfer: {
       inputTitle: 'Входное изображение и превью',
       paramsTitle: 'Настройки AI',
@@ -1611,6 +1856,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       sourceTitle: 'Исходное изображение',
       settingsTitle: 'Настройки формата',
       resultTitle: 'Предпросмотр результата',
+      logsTitle: 'Журнал workflow',
       noImage: 'Изображение ещё не выбрано.',
       resultPlaceholder: 'Результат появится здесь',
       outputFormat: 'Формат вывода',
@@ -1618,12 +1864,21 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       maxWidth: 'Макс. ширина (px)',
       maxHeight: 'Макс. высота (px)',
       maintainAspect: 'Сохранять пропорции',
+      brightness: 'Яркость',
+      contrast: 'Контраст',
+      saturation: 'Насыщенность',
+      blur: 'Размытие',
+      hueRotate: 'Поворот оттенка',
+      grayscale: 'Оттенки серого',
       converting: 'Конвертация...',
       convert: 'Конвертировать',
       download: 'Скачать',
       formatLabel: 'Формат',
       qualityLabel: 'Качество',
       invalidDimensions: 'Недопустимые размеры изображения, конвертация невозможна.',
+      copyLogs: 'Копировать журнал',
+      downloadLogs: 'Скачать журнал',
+      waitingOperations: 'Ожидание операций...',
     },
     tagPicker: {
       filterPlaceholder: 'Фильтровать теги...',
@@ -3006,6 +3261,7 @@ function DraggableErrorPanel({
   onCopy,
   onDownload,
   onRetry,
+  onOpenDocs,
   copy,
 }: {
   error: TransferError | null;
@@ -3013,6 +3269,7 @@ function DraggableErrorPanel({
   onCopy: () => void;
   onDownload: () => void;
   onRetry: () => void;
+  onOpenDocs?: () => void;
   copy: UiCopySet;
 }) {
   const saved = loadErrorPanelState();
@@ -3156,6 +3413,11 @@ function DraggableErrorPanel({
         <div className="mini-action-row" style={{ marginTop: 4, flexShrink: 0 }}>
           <button className="secondary-button small-button" type="button" onClick={onCopy}>{copy.copyText}</button>
           <button className="secondary-button small-button" type="button" onClick={onDownload}>{copy.downloadJson}</button>
+          {onOpenDocs && (
+            <button className="secondary-button small-button" type="button" onClick={onOpenDocs} style={{ color: 'var(--accent-solid)' }}>
+              {copy.openDocs}
+            </button>
+          )}
           <button className="primary-button small-button" type="button" onClick={onRetry}>{copy.errorPanel.retry}</button>
         </div>
       </div>
@@ -3561,6 +3823,7 @@ export function StyleTransferPage({
   const copy = localizedUiCopy[language];
   const transfer = copy.transfer;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
 
   const defaultConfig = {
     model: 'Anime Transfer XL v4',
@@ -3662,6 +3925,30 @@ export function StyleTransferPage({
 
   function updateConfig<K extends keyof typeof config>(key: K, value: (typeof config)[K]) {
     setConfig((current) => ({ ...current, [key]: value }));
+  }
+
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'style-transfer') { playSound('error'); alert(copy.importConfig + ': ' + copy.transfer.errorHintValidation); return; }
+        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        const imported = { ...defaultConfig, ...(data.config as Record<string, unknown>) } as typeof defaultConfig;
+        setConfig(imported);
+        setInputFileName(String(data.inputFileName ?? ''));
+        setSavedSnapshot(JSON.stringify({ inputFileName: String(data.inputFileName ?? ''), config: imported }));
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
   }
 
   function handlePickFile() { fileInputRef.current?.click(); }
@@ -3911,6 +4198,8 @@ export function StyleTransferPage({
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
             <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
             <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
           </div>
         </div>
@@ -4183,9 +4472,7 @@ export function StyleTransferPage({
         </div>
       </section>
 
-      <footer className="home-footer fade-up delay-3">
-        <div className="notice-banner">{privacyNote}</div>
-      </footer>
+
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
       {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={resetWorkspaceView} />}
@@ -4217,6 +4504,7 @@ export function StyleTransferPage({
           onCopy={() => copyText(errorJson)}
           onDownload={() => downloadText('style-transfer-error.json', errorJson, 'application/json')}
           onRetry={startWorkflow}
+          onOpenDocs={() => onNavigate?.('docs')}
           copy={copy}
         />
       )}
@@ -4238,6 +4526,7 @@ export function PromptSuitePage({
   const copy = localizedUiCopy[language];
   const promptCopy = copy.prompt;
   const editorRef = useRef<HTMLDivElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
   const templates = localizedPromptTemplates[language];
   const initialTemplate = templates[0];
   const defaultToolbarState = {
@@ -4780,6 +5069,42 @@ export function PromptSuitePage({
     downloadText('oc-prompt-suite.txt', plainText);
   }
 
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'prompt-suite') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        const nextTemplate = String(data.selectedTemplate ?? initialTemplate.key);
+        const nextHtml = sanitizeHtml(String(data.documentHtml ?? initialTemplate.html));
+        setSelectedTemplate(nextTemplate);
+        setDocumentHtml(nextHtml);
+        if (editorRef.current) editorRef.current.innerHTML = nextHtml;
+        setToolbarState({ ...defaultToolbarState, ...((data.toolbarState as Record<string, unknown>) || {}) });
+        setCustomFonts(Array.isArray(data.customFonts) ? data.customFonts.filter((item): item is EditorFontOption => typeof item === 'object' && item !== null && 'label' in item && 'value' in item) : []);
+        setLlmConfig({ ...initialLlmConfig, ...((data.llmConfig as Record<string, unknown>) || {}) });
+        setTtsConfig((current) => ({ ...current, ...((data.ttsConfig as Record<string, unknown>) || {}) }));
+        setSavedSnapshot(JSON.stringify({
+          selectedTemplate: nextTemplate,
+          documentHtml: nextHtml,
+          toolbarState: { ...defaultToolbarState, ...((data.toolbarState as Record<string, unknown>) || {}) },
+          customFonts: Array.isArray(data.customFonts) ? data.customFonts.filter((item): item is EditorFontOption => typeof item === 'object' && item !== null && 'label' in item && 'value' in item) : [],
+          llmConfig: { ...initialLlmConfig, ...((data.llmConfig as Record<string, unknown>) || {}) },
+          ttsConfig: { ...ttsConfig, ...((data.ttsConfig as Record<string, unknown>) || {}) },
+        }));
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
   function exportJsonPack() {
     downloadText('oc-wrapper-pack.json', exportJson, 'application/json');
   }
@@ -4826,6 +5151,10 @@ export function PromptSuitePage({
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
               {copy.saveDocument}
             </button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>
+              {copy.importConfig}
+            </button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
             <button className="secondary-button small-button" type="button" onClick={exportHtml}>
               {copy.downloadHtml}
             </button>
@@ -5042,9 +5371,7 @@ export function PromptSuitePage({
         </div>
       </section>
 
-      <footer className="home-footer fade-up delay-3">
-        <div className="notice-banner">{privacyNote}</div>
-      </footer>
+
 
       {isCustomFontOpen ? (
         <EditorExperimentalModal title={promptCopy.customFontTitle} note={promptCopy.experimentalNote} onClose={() => setIsCustomFontOpen(false)}>
@@ -5161,6 +5488,7 @@ export function Paper2GalPage({
   const stepLabels = paperStepLabels[baseLanguage];
   const statusLabels = paperStatusLabels[baseLanguage];
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
   const [persistedState] = useState(() =>
     readLocalState(PAPER2GAL_STORAGE_KEY, {
       inputFileName: '',
@@ -5190,6 +5518,8 @@ export function Paper2GalPage({
   const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(true);
   const [isPromptPanelOpen, setIsPromptPanelOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<TransferError | null>(null);
+  const [showErrorPanel, setShowErrorPanel] = useState(false);
 
   const settingsRef = useRef(settings);
   const paperRef = useRef(paper);
@@ -5489,6 +5819,23 @@ export function Paper2GalPage({
     null,
     2,
   );
+  const configExportJson = JSON.stringify({ tool: 'paper2gal', config: { promptOverrides, aiConcurrencyEnabled } }, null, 2);
+
+  useEffect(() => {
+    if (readableErrorMessage) {
+      setError({
+        code: 'P2G_WORKFLOW_ERROR',
+        stage: latestStepError?.stepName ?? 'workflow',
+        message: readableErrorMessage,
+        hint: workflowErrorInsight.fixHint,
+        details: { possibleCause: workflowErrorInsight.possibleCause, apiBase: getEffectiveApiBase(settings) },
+      });
+    } else {
+      setError(null);
+      setShowErrorPanel(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readableErrorMessage]);
 
   const flashTimerRef = useRef<number>(0);
   useEffect(() => {
@@ -5633,6 +5980,41 @@ export function Paper2GalPage({
     }
   }
 
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        let overrides: Record<string, unknown> = {};
+        let concurrency = true;
+        if (data.tool === 'paper2gal' && data.config && typeof data.config === 'object') {
+          const config = data.config as Record<string, unknown>;
+          overrides = (config.promptOverrides as Record<string, unknown>) || {};
+          concurrency = Boolean(config.aiConcurrencyEnabled ?? true);
+        } else if (data.promptOverrides && typeof data.promptOverrides === 'object') {
+          overrides = data.promptOverrides as Record<string, unknown>;
+          concurrency = Boolean(data.aiConcurrencyEnabled ?? true);
+        } else {
+          playSound('error');
+          alert(copy.importConfig + ': ' + copy.importToolMismatch);
+          return;
+        }
+        setPromptOverrides(normalizePaperPromptOverrides(migratePaperPromptOverrides(overrides)));
+        setAiConcurrencyEnabled(concurrency);
+        setSavedSnapshot('');
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
   async function handleDownloadAll() {
     if (!workflow?.id) {
       return;
@@ -5696,6 +6078,16 @@ export function Paper2GalPage({
             </button>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>
               {paper.resetWorkflow}
+            </button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>
+              {copy.importConfig}
+            </button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
+            <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-workflow.json', debugJson, 'application/json')}>
+              {copy.copyJson}
+            </button>
+            <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-config.json', configExportJson, 'application/json')}>
+              {copy.downloadJson}
             </button>
             <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-workflow.json', debugJson, 'application/json')}>
               {paper.exportJson}
@@ -5956,6 +6348,9 @@ export function Paper2GalPage({
                       <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('paper2gal-error.json', errorJson, 'application/json'); }}>
                         {copy.downloadResult}
                       </button>
+                      {readableErrorMessage && (
+                        <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{copy.transfer.openDetailPanel}</button>
+                      )}
                     </>
                   }
                 />
@@ -6068,9 +6463,7 @@ export function Paper2GalPage({
         </div>
       </section>
 
-      <footer className="home-footer fade-up delay-3">
-        <div className="notice-banner">{privacyNote}</div>
-      </footer>
+
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
       {isResetOpen ? (
@@ -6083,6 +6476,17 @@ export function Paper2GalPage({
           onConfirm={resetWorkflowView}
         />
       ) : null}
+      {showErrorPanel && error && (
+        <DraggableErrorPanel
+          error={error}
+          onClose={() => setShowErrorPanel(false)}
+          onCopy={() => copyText(JSON.stringify(error, null, 2))}
+          onDownload={() => downloadText('paper2gal-error.json', JSON.stringify(error, null, 2), 'application/json')}
+          onRetry={() => { setShowErrorPanel(false); }}
+          onOpenDocs={() => onNavigate?.('docs')}
+          copy={copy}
+        />
+      )}
     </main>
   );
 }
@@ -6099,6 +6503,7 @@ export function LlmHubPage({
   language,
   onBack,
   onOpenSettings,
+  onNavigate,
 }: SharedPageProps) {
   const copy = localizedUiCopy[language];
   const promptCopy = copy.prompt;
@@ -6114,7 +6519,7 @@ export function LlmHubPage({
     responseFormat: (_settings.llm?.responseFormat as 'text' | 'json_object') || 'text',
     seed: _settings.llm?.seed ?? 0,
     topK: _settings.llm?.topK ?? 40,
-    systemPrompt: _settings.llm?.systemPrompt || 'You are a helpful creative assistant for original character design.',
+    systemPrompt: _settings.llm?.systemPrompt || copy.llmSystemPromptDefault,
     timeoutMs: _settings.llm?.timeoutMs ?? 30000,
     retryCount: _settings.llm?.retryCount ?? 2,
   };
@@ -6153,9 +6558,35 @@ export function LlmHubPage({
   const [testInput, setTestInput] = useState('');
   const [testOutput, setTestOutput] = useState('');
   const [testLoading, setTestLoading] = useState(false);
-  const [testError, setTestError] = useState('');
+  const [testError, setTestError] = useState<TransferError | null>(null);
+  const [showErrorPanel, setShowErrorPanel] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
   const [testHistory, setTestHistory] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'llm-hub') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        if (!data.llmConfig || typeof data.llmConfig !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        const imported = { ...fullDefaultConfig, ...(data.llmConfig as Record<string, unknown>) };
+        setLlmConfig(imported as typeof fullDefaultConfig);
+        setSavedSnapshot(JSON.stringify({ llmConfig: imported }));
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
 
   useEffect(() => {
     writeLocalState('oc-maker.llm-hub-v2', { llmConfig, savedSnapshot, presets });
@@ -6205,7 +6636,8 @@ export function LlmHubPage({
     setTestHistory(nextHistory);
     setTestInput('');
     setTestLoading(true);
-    setTestError('');
+    setTestError(null);
+    setShowErrorPanel(false);
     setTestOutput('');
 
     try {
@@ -6239,7 +6671,7 @@ export function LlmHubPage({
         });
       } else {
         const apiCfg = getApiForFeature('llm', _settings);
-        if (!apiCfg) throw new Error('No custom API configured. Please set up a custom API in Settings.');
+        if (!apiCfg) throw new Error(copy.transfer.errorHintValidation);
         response = await fetch(`${apiCfg.baseUrl}/chat/completions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiCfg.apiKey}` },
@@ -6265,7 +6697,15 @@ export function LlmHubPage({
     } catch (err) {
       if (controller.signal.aborted) return;
       const msg = err instanceof Error ? err.message : String(err);
-      setTestError(msg);
+      const transferErr: TransferError = {
+        code: 'LLM_TEST_ERROR',
+        stage: 'test-chat',
+        message: msg,
+        hint: copy.transfer.errorHintRuntime,
+        details: { model: llmConfig.model, baseUrl: _settings.interfaceMode === 'builtin' ? 'local' : getApiForFeature('llm', _settings)?.baseUrl },
+      };
+      setTestError(transferErr);
+      setShowErrorPanel(true);
     } finally {
       if (!controller.signal.aborted) {
         setTestLoading(false);
@@ -6298,9 +6738,14 @@ export function LlmHubPage({
           </div>
           <div className="tool-header-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
+            <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
               {copy.saveDocument}
             </button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>
+              {copy.importConfig}
+            </button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
             <button className="secondary-button small-button" type="button" onClick={() => downloadText('oc-llm-config.json', exportJson, 'application/json')}>
               {copy.downloadJson}
             </button>
@@ -6309,18 +6754,18 @@ export function LlmHubPage({
 
         {/* Module Tabs */}
         <div className="chip-row" style={{ marginBottom: 12 }}>
-          <button className={`choice-chip ${activeModule === 'params' ? 'active' : ''}`} type="button" onClick={() => setActiveModule('params')}>Parameters</button>
-          <button className={`choice-chip ${activeModule === 'test' ? 'active' : ''}`} type="button" onClick={() => setActiveModule('test')}>Live Test</button>
-          <button className={`choice-chip ${activeModule === 'presets' ? 'active' : ''}`} type="button" onClick={() => setActiveModule('presets')}>Presets</button>
+          <button className={`choice-chip ${activeModule === 'params' ? 'active' : ''}`} type="button" onClick={() => setActiveModule('params')}>{copy.llm.moduleParams}</button>
+          <button className={`choice-chip ${activeModule === 'test' ? 'active' : ''}`} type="button" onClick={() => setActiveModule('test')}>{copy.llm.moduleTest}</button>
+          <button className={`choice-chip ${activeModule === 'presets' ? 'active' : ''}`} type="button" onClick={() => setActiveModule('presets')}>{copy.llm.modulePresets}</button>
         </div>
 
         {activeModule === 'params' && (
           <section className="tool-card">
             <span className="card-caption">{copy.llmTitle}</span>
-            <h3>Model Parameters</h3>
+            <h3>{copy.llm.paramsTitle}</h3>
             <div className="form-grid two-column">
               <label className="field">
-                <span>Model</span>
+                <span>{copy.llm.modelLabel}</span>
                 <select className="settings-input tool-select" value={llmConfig.model} onChange={(e) => updateConfig('model', e.target.value)}>
                   <option>gpt-5.4</option>
                   <option>gpt-5.4-mini</option>
@@ -6333,41 +6778,41 @@ export function LlmHubPage({
                 </select>
               </label>
               <label className="field">
-                <span>Max Tokens</span>
+                <span>{copy.llm.maxTokensLabel}</span>
                 <input className="settings-input" type="number" min={1} max={8192} value={llmConfig.maxTokens} onChange={(e) => updateConfig('maxTokens', Number(e.target.value))} />
               </label>
-              <RangeField label="Temperature" min={0} max={2} step={0.01} value={llmConfig.temperature} onChange={(value) => updateConfig('temperature', value)} />
-              <RangeField label="Top P" min={0} max={1} step={0.01} value={llmConfig.topP} onChange={(value) => updateConfig('topP', value)} />
-              <RangeField label="Frequency Penalty" min={-2} max={2} step={0.01} value={llmConfig.frequencyPenalty} onChange={(value) => updateConfig('frequencyPenalty', value)} />
-              <RangeField label="Presence Penalty" min={-2} max={2} step={0.01} value={llmConfig.presencePenalty} onChange={(value) => updateConfig('presencePenalty', value)} />
+              <RangeField label={copy.llm.temperatureLabel} min={0} max={2} step={0.01} value={llmConfig.temperature} onChange={(value) => updateConfig('temperature', value)} />
+              <RangeField label={copy.llm.topPLabel} min={0} max={1} step={0.01} value={llmConfig.topP} onChange={(value) => updateConfig('topP', value)} />
+              <RangeField label={copy.llm.frequencyPenaltyLabel} min={-2} max={2} step={0.01} value={llmConfig.frequencyPenalty} onChange={(value) => updateConfig('frequencyPenalty', value)} />
+              <RangeField label={copy.llm.presencePenaltyLabel} min={-2} max={2} step={0.01} value={llmConfig.presencePenalty} onChange={(value) => updateConfig('presencePenalty', value)} />
               <label className="field">
-                <span>Response Format</span>
+                <span>{copy.llm.responseFormatLabel}</span>
                 <select className="settings-input tool-select" value={llmConfig.responseFormat} onChange={(e) => updateConfig('responseFormat', e.target.value)}>
                   <option value="text">text</option>
                   <option value="json_object">json_object</option>
                 </select>
               </label>
               <label className="field">
-                <span>Seed</span>
+                <span>{copy.llm.seedLabel}</span>
                 <input className="settings-input" type="number" min={0} value={llmConfig.seed} onChange={(e) => updateConfig('seed', Number(e.target.value))} />
               </label>
-              <RangeField label="Top K" min={1} max={128} step={1} value={llmConfig.topK} onChange={(value) => updateConfig('topK', value)} />
+              <RangeField label={copy.llm.topKLabel} min={1} max={128} step={1} value={llmConfig.topK} onChange={(value) => updateConfig('topK', value)} />
               <label className="field">
-                <span>Timeout (ms)</span>
+                <span>{copy.llm.timeoutLabel}</span>
                 <input className="settings-input" type="number" min={1000} max={120000} step={1000} value={llmConfig.timeoutMs} onChange={(e) => updateConfig('timeoutMs', Number(e.target.value))} />
               </label>
               <label className="field">
-                <span>Retry Count</span>
+                <span>{copy.llm.retryCountLabel}</span>
                 <input className="settings-input" type="number" min={0} max={5} value={llmConfig.retryCount} onChange={(e) => updateConfig('retryCount', Number(e.target.value))} />
               </label>
               <label className="field">
-                <span>Stop Sequences (comma separated)</span>
+                <span>{copy.llm.stopSequencesLabel}</span>
                 <input className="settings-input" type="text" value={llmConfig.stopSequences} onChange={(e) => updateConfig('stopSequences', e.target.value)} />
               </label>
             </div>
             <label className="field" style={{ marginTop: 12 }}>
               <span className="field-title-row">
-                <span>System Prompt</span>
+                <span>{copy.llm.systemPromptLabel}</span>
                 <button className="secondary-button small-button" type="button" onClick={() => copyText(llmConfig.systemPrompt)}>
                   {copy.copyText}
                 </button>
@@ -6375,41 +6820,46 @@ export function LlmHubPage({
               <textarea className="settings-textarea" rows={4} value={llmConfig.systemPrompt} onChange={(e) => updateConfig('systemPrompt', e.target.value)} />
             </label>
             <div className="mini-action-row" style={{ marginTop: 12 }}>
-              <button className="secondary-button small-button" type="button" onClick={importFromSettings}>Reset to Settings Default</button>
+              <button className="secondary-button small-button" type="button" onClick={importFromSettings}>{copy.llmResetToSettingsDefault}</button>
             </div>
           </section>
         )}
 
         {activeModule === 'test' && (
           <section className="tool-card">
-            <span className="card-caption">Live Test</span>
-            <h3>Chat Test</h3>
+            <span className="card-caption">{copy.llm.moduleTest}</span>
+            <h3>{copy.llm.testTitle}</h3>
             <div className="tool-card" style={{ background: 'rgba(0,0,0,0.2)', maxHeight: 320, overflow: 'auto', padding: 12 }}>
               {testHistory.length === 0 && <p className="muted-copy">No messages yet. Type below and send.</p>}
               {testHistory.map((msg, i) => (
                 <div key={i} style={{ marginBottom: 8, textAlign: msg.role === 'user' ? 'right' : 'left' }}>
-                  <span className="tiny-copy" style={{ color: msg.role === 'user' ? '#4f9df7' : '#8aa4c0', fontWeight: 700 }}>{msg.role === 'user' ? 'You' : 'Assistant'}</span>
+                  <span className="tiny-copy" style={{ color: msg.role === 'user' ? '#4f9df7' : '#8aa4c0', fontWeight: 700 }}>{msg.role === 'user' ? copy.llm.userLabel : copy.llm.assistantLabel}</span>
                   <p style={{ margin: '4px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</p>
                 </div>
               ))}
               {testLoading && <p className="muted-copy">Thinking…</p>}
-              {testError && <p style={{ color: '#f45a5a' }}>{testError}</p>}
+              {testError && !showErrorPanel && (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
+                  <p style={{ color: '#f45a5a', margin: 0, flex: 1 }}>{testError.message}</p>
+                  <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{copy.transfer.openDetailPanel}</button>
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <input
                 className="settings-input"
                 style={{ flex: 1 }}
                 type="text"
-                placeholder="Type a test message…"
+                placeholder={copy.llmTestMessagePlaceholder}
                 value={testInput}
                 onChange={(e) => setTestInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTestMessage(); } }}
               />
               <button className="primary-button small-button" type="button" onClick={sendTestMessage} disabled={testLoading}>
-                {testLoading ? '…' : 'Send'}
+                {testLoading ? '…' : copy.llm.sendButton}
               </button>
-              <button className="secondary-button small-button" type="button" onClick={() => { setTestHistory([]); setTestOutput(''); setTestError(''); }}>
-                Clear
+              <button className="secondary-button small-button" type="button" onClick={() => { setTestHistory([]); setTestOutput(''); setTestError(null); setShowErrorPanel(false); }}>
+                {copy.llm.clearButton}
               </button>
             </div>
           </section>
@@ -6417,14 +6867,14 @@ export function LlmHubPage({
 
         {activeModule === 'presets' && (
           <section className="tool-card">
-            <span className="card-caption">Presets</span>
-            <h3>Saved Presets</h3>
+            <span className="card-caption">{copy.llm.modulePresets}</span>
+            <h3>{copy.llm.presetsTitle}</h3>
             <div className="form-grid two-column" style={{ marginBottom: 12 }}>
               <input
                 className="settings-input"
                 id="llm-preset-name"
                 type="text"
-                placeholder="Preset name"
+                placeholder={copy.llmPresetNamePlaceholder}
               />
               <button
                 className="primary-button small-button"
@@ -6435,7 +6885,7 @@ export function LlmHubPage({
                   input.value = '';
                 }}
               >
-                Save Current as Preset
+                {copy.llm.saveAsPresetButton}
               </button>
             </div>
             {presets.length === 0 && <p className="muted-copy">No presets saved yet.</p>}
@@ -6444,8 +6894,8 @@ export function LlmHubPage({
                 <div key={index} className="palette-chip" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                   <strong>{preset.name}</strong>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="secondary-button small-button" type="button" onClick={() => loadPreset(index)}>Load</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => removePreset(index)}>Delete</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => loadPreset(index)}>{copy.llm.loadButton}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => removePreset(index)}>{copy.llm.deleteButton}</button>
                   </div>
                 </div>
               ))}
@@ -6476,11 +6926,21 @@ export function LlmHubPage({
         </section>
       </section>
 
-      <footer className="home-footer fade-up delay-3">
-        <div className="notice-banner">{privacyNote}</div>
-      </footer>
+
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
+      {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={() => { setLlmConfig({ ...fullDefaultConfig }); setSavedSnapshot(JSON.stringify({ llmConfig: fullDefaultConfig })); setTestHistory([]); setTestOutput(''); setTestError(null); setShowErrorPanel(false); }} />}
+      {showErrorPanel && testError && (
+        <DraggableErrorPanel
+          error={testError}
+          onClose={() => setShowErrorPanel(false)}
+          onCopy={() => copyText(JSON.stringify(testError, null, 2))}
+          onDownload={() => downloadText('llm-test-error.json', JSON.stringify(testError, null, 2), 'application/json')}
+          onRetry={sendTestMessage}
+          onOpenDocs={() => onNavigate?.('docs')}
+          copy={copy}
+        />
+      )}
     </main>
   );
 }
@@ -6612,7 +7072,37 @@ export function TtsExportPage({
     try { localStorage.setItem('oc-maker.tts-export.pronunciationOpen', isPronunciationOpen ? '1' : '0'); } catch {}
   }, [isPronunciationOpen]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
+  const [logs, setLogs] = useState<WorkflowLog[]>([]);
+  const [error, setError] = useState<TransferError | null>(null);
+  const [showErrorPanel, setShowErrorPanel] = useState(false);
   const referenceAudioInputRef = useRef<HTMLInputElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'tts-export') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        if (!data.ttsConfig || typeof data.ttsConfig !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        const imported = { ...initialTtsConfig, ...(data.ttsConfig as Record<string, unknown>) };
+        setTtsConfig(imported as typeof initialTtsConfig);
+        setSavedSnapshot(JSON.stringify({ ttsConfig: imported }));
+        setLogs([]);
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
   const currentSnapshot = JSON.stringify({ ttsConfig });
   const [savedSnapshot, setSavedSnapshot] = useState(
     persistedState.savedSnapshot || currentSnapshot,
@@ -6635,12 +7125,27 @@ export function TtsExportPage({
     event.target.value = '';
   }
 
+  function addLog(level: LogLevel, text: string) {
+    setLogs((prev) => [...prev, { time: new Date().toLocaleTimeString(), level, text }]);
+  }
+
   function saveDraft() {
     playSound('save');
     setSavedSnapshot(currentSnapshot);
+    addLog('info', 'Configuration saved');
+  }
+
+  function resetWorkspaceView() {
+    setTtsConfig({ ...initialTtsConfig });
+    setSavedSnapshot(JSON.stringify({ ttsConfig: initialTtsConfig }));
+    setLogs([]);
+    setError(null);
+    setShowErrorPanel(false);
+    addLog('info', 'Workspace reset');
   }
 
   const exportJson = JSON.stringify({ tool: 'tts-export', ttsConfig }, null, 2);
+  const logsText = useMemo(() => logs.map((l) => `[${l.time}] [${l.level.toUpperCase()}] ${l.text}`).join('\n'), [logs]);
 
   return (
     <main className="feature-shell tool-page-shell">
@@ -6664,194 +7169,241 @@ export function TtsExportPage({
           </div>
           <div className="tool-header-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
+            <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>
               {copy.saveDocument}
             </button>
-            <button className="secondary-button small-button" type="button" onClick={() => downloadText('oc-tts-config.json', exportJson, 'application/json')}>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>
+              {copy.importConfig}
+            </button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-tts-config.json', exportJson, 'application/json'); addLog('info', 'Exported JSON config'); }}>
               {copy.downloadJson}
             </button>
           </div>
         </div>
 
-        <section className="tool-card">
-          <span className="card-caption">{copy.ttsTitle}</span>
-          <h3>{copy.ttsTitle}</h3>
-          <div className="form-grid two-column">
-            <label className="field">
-              <span>{promptCopy.ttsVoice}</span>
-              <select className="settings-input tool-select" value={ttsConfig.voice} onChange={(event) => setTtsConfig((current) => ({ ...current, voice: event.target.value }))}>
-                <option>Hanazora</option>
-                <option>Mirako</option>
-                <option>Rin</option>
-              </select>
-            </label>
-            <label className="field">
-              <span>{promptCopy.ttsLanguage}</span>
-              <select className="settings-input tool-select" value={ttsConfig.language} onChange={(event) => setTtsConfig((current) => ({ ...current, language: event.target.value as AppLanguage }))}>
-                {ttsLanguageOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <RangeField label={promptCopy.ttsRate} min={0.6} max={1.6} step={0.05} value={ttsConfig.rate} onChange={(value) => setTtsConfig((current) => ({ ...current, rate: value }))} />
-            <label className="field">
-              <span>{promptCopy.ttsEmotion}</span>
-              <input className="settings-input" type="text" value={ttsConfig.emotion} onChange={(event) => setTtsConfig((current) => ({ ...current, emotion: event.target.value }))} />
-            </label>
-            <RangeField label={promptCopy.ttsPitch} min={-12} max={12} step={1} value={ttsConfig.pitch} onChange={(value) => setTtsConfig((current) => ({ ...current, pitch: value }))} />
-            <RangeField label={promptCopy.ttsVolume} min={40} max={140} step={1} value={ttsConfig.volume} onChange={(value) => setTtsConfig((current) => ({ ...current, volume: value }))} />
-            <RangeField label={promptCopy.ttsBreathiness} min={0} max={100} step={1} value={ttsConfig.breathiness} onChange={(value) => setTtsConfig((current) => ({ ...current, breathiness: value }))} />
-            <RangeField label={promptCopy.ttsClarity} min={0} max={100} step={1} value={ttsConfig.clarity} onChange={(value) => setTtsConfig((current) => ({ ...current, clarity: value }))} />
-            <RangeField label={promptCopy.ttsExpressiveness} min={0} max={100} step={1} value={ttsConfig.expressiveness} onChange={(value) => setTtsConfig((current) => ({ ...current, expressiveness: value }))} />
-            <RangeField label={promptCopy.ttsSpeedVariation} min={0} max={100} step={1} value={ttsConfig.speedVariation} onChange={(value) => setTtsConfig((current) => ({ ...current, speedVariation: value }))} />
-          </div>
-          <div className="form-grid two-column">
-            <label className="field">
-              <span>{promptCopy.ttsFormat}</span>
-              <select className="settings-input tool-select" value={ttsConfig.format} onChange={(event) => setTtsConfig((current) => ({ ...current, format: event.target.value }))}>
-                <option>wav</option>
-                <option>mp3</option>
-                <option>flac</option>
-              </select>
-            </label>
-            <label className="field">
-              <span>{promptCopy.ttsSampleRate}</span>
-              <select className="settings-input tool-select" value={String(ttsConfig.sampleRate)} onChange={(event) => setTtsConfig((current) => ({ ...current, sampleRate: Number(event.target.value) }))}>
-                <option value="22050">22050 Hz</option>
-                <option value="32000">32000 Hz</option>
-                <option value="44100">44100 Hz</option>
-                <option value="48000">48000 Hz</option>
-              </select>
-            </label>
-          </div>
-          <label className="field">
-            <span>{promptCopy.ttsReference}</span>
-            <div className="reference-audio-row">
-              <button className="secondary-button small-button" type="button" onClick={() => referenceAudioInputRef.current?.click()}>
-                {promptCopy.ttsReferenceButton}
-              </button>
-              <span className="reference-audio-name">{ttsConfig.referenceClipName || promptCopy.ttsReferenceHint}</span>
-            </div>
-            <input ref={referenceAudioInputRef} type="file" accept="audio/wav,audio/mpeg,audio/flac" hidden onChange={handleReferenceAudioChange} />
-            <p className="tiny-copy">{promptCopy.ttsReferenceHint}</p>
-          </label>
-        </section>
-
-        <section className="tool-card">
-          <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} role="button" tabIndex={0}>
-            <div>
-              <span className="card-caption">{promptCopy.ttsAdvancedParams}</span>
-              <h3 style={{ margin: 0 }}>{promptCopy.ttsAdvancedParams}</h3>
-            </div>
-            <span className="collapsible-state">{isAdvancedOpen ? copy.hideDetails : copy.showDetails}</span>
-          </div>
-          {isAdvancedOpen && (
-            <div className="form-grid two-column" style={{ marginTop: 16 }}>
-              <RangeField label={promptCopy.ttsPauseStrength} min={0} max={100} step={1} value={ttsConfig.pauseStrength} onChange={(value) => setTtsConfig((current) => ({ ...current, pauseStrength: value }))} />
-              <label className="field">
-                <span>{promptCopy.ttsToneCurve}</span>
-                <select className="settings-input tool-select" value={ttsConfig.toneCurve} onChange={(event) => setTtsConfig((current) => ({ ...current, toneCurve: event.target.value }))}>
-                  <option value="flat">{promptCopy.ttsToneCurveFlat}</option>
-                  <option value="natural">{promptCopy.ttsToneCurveNatural}</option>
-                  <option value="dramatic">{promptCopy.ttsToneCurveDramatic}</option>
-                  <option value="melodic">{promptCopy.ttsToneCurveMelodic}</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>{promptCopy.ttsEmphasisMode}</span>
-                <select className="settings-input tool-select" value={ttsConfig.emphasisMode} onChange={(event) => setTtsConfig((current) => ({ ...current, emphasisMode: event.target.value }))}>
-                  <option value="normal">{promptCopy.ttsEmphasisNormal}</option>
-                  <option value="strong">{promptCopy.ttsEmphasisStrong}</option>
-                  <option value="subtle">{promptCopy.ttsEmphasisSubtle}</option>
-                </select>
-              </label>
-            </div>
-          )}
-        </section>
-
-        <section className="tool-card">
-          <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); }} role="button" tabIndex={0}>
-            <div>
-              <span className="card-caption">{promptCopy.ttsAudioPostProcessing}</span>
-              <h3 style={{ margin: 0 }}>{promptCopy.ttsAudioPostProcessing}</h3>
-            </div>
-            <span className="collapsible-state">{isAudioPostOpen ? copy.hideDetails : copy.showDetails}</span>
-          </div>
-          {isAudioPostOpen && (
-            <div style={{ marginTop: 16 }}>
-              <div style={{ marginBottom: 12 }}>
-                <ToggleChip label={promptCopy.ttsAudioPostProcessing} checked={ttsConfig.audioPostProcessing} onToggle={() => setTtsConfig((current) => ({ ...current, audioPostProcessing: !current.audioPostProcessing }))} />
-              </div>
-              <div className={`form-grid two-column ${!ttsConfig.audioPostProcessing ? 'disabled-section' : ''}`}>
-                <RangeField label={promptCopy.ttsNoiseReduction} min={0} max={100} step={1} value={ttsConfig.noiseReduction} disabled={!ttsConfig.audioPostProcessing} onChange={(value) => setTtsConfig((current) => ({ ...current, noiseReduction: value }))} />
+        <div className="tool-grid transfer-grid">
+          <div className="tool-column">
+            <section className="tool-card">
+              <span className="card-caption">{copy.ttsTitle}</span>
+              <h3>{copy.ttsTitle}</h3>
+              <div className="form-grid two-column">
                 <label className="field">
-                  <span>{promptCopy.ttsEqPreset}</span>
-                  <select className="settings-input tool-select" value={ttsConfig.eqPreset} disabled={!ttsConfig.audioPostProcessing} onChange={(event) => setTtsConfig((current) => ({ ...current, eqPreset: event.target.value }))}>
-                    <option value="flat">{promptCopy.ttsEqFlat}</option>
-                    <option value="warm">{promptCopy.ttsEqWarm}</option>
-                    <option value="bright">{promptCopy.ttsEqBright}</option>
-                    <option value="radio">{promptCopy.ttsEqRadio}</option>
-                    <option value="clear">{promptCopy.ttsEqClear}</option>
+                  <span>{promptCopy.ttsVoice}</span>
+                  <select className="settings-input tool-select" value={ttsConfig.voice} onChange={(event) => { setTtsConfig((current) => ({ ...current, voice: event.target.value })); addLog('info', `Voice set to ${event.target.value}`); }}>
+                    <option>Hanazora</option>
+                    <option>Mirako</option>
+                    <option>Rin</option>
                   </select>
                 </label>
-                <RangeField label={promptCopy.ttsCompression} min={0} max={100} step={1} value={ttsConfig.compression} disabled={!ttsConfig.audioPostProcessing} onChange={(value) => setTtsConfig((current) => ({ ...current, compression: value }))} />
+                <label className="field">
+                  <span>{promptCopy.ttsLanguage}</span>
+                  <select className="settings-input tool-select" value={ttsConfig.language} onChange={(event) => { setTtsConfig((current) => ({ ...current, language: event.target.value as AppLanguage })); addLog('info', `Language set to ${event.target.value}`); }}>
+                    {ttsLanguageOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <RangeField label={promptCopy.ttsRate} min={0.6} max={1.6} step={0.05} value={ttsConfig.rate} onChange={(value) => { setTtsConfig((current) => ({ ...current, rate: value })); addLog('debug', `Rate: ${value}`); }} />
+                <label className="field">
+                  <span>{promptCopy.ttsEmotion}</span>
+                  <input className="settings-input" type="text" value={ttsConfig.emotion} onChange={(event) => setTtsConfig((current) => ({ ...current, emotion: event.target.value }))} />
+                </label>
+                <RangeField label={promptCopy.ttsPitch} min={-12} max={12} step={1} value={ttsConfig.pitch} onChange={(value) => { setTtsConfig((current) => ({ ...current, pitch: value })); addLog('debug', `Pitch: ${value}`); }} />
+                <RangeField label={promptCopy.ttsVolume} min={40} max={140} step={1} value={ttsConfig.volume} onChange={(value) => { setTtsConfig((current) => ({ ...current, volume: value })); addLog('debug', `Volume: ${value}`); }} />
+                <RangeField label={promptCopy.ttsBreathiness} min={0} max={100} step={1} value={ttsConfig.breathiness} onChange={(value) => { setTtsConfig((current) => ({ ...current, breathiness: value })); addLog('debug', `Breathiness: ${value}`); }} />
+                <RangeField label={promptCopy.ttsClarity} min={0} max={100} step={1} value={ttsConfig.clarity} onChange={(value) => { setTtsConfig((current) => ({ ...current, clarity: value })); addLog('debug', `Clarity: ${value}`); }} />
+                <RangeField label={promptCopy.ttsExpressiveness} min={0} max={100} step={1} value={ttsConfig.expressiveness} onChange={(value) => { setTtsConfig((current) => ({ ...current, expressiveness: value })); addLog('debug', `Expressiveness: ${value}`); }} />
+                <RangeField label={promptCopy.ttsSpeedVariation} min={0} max={100} step={1} value={ttsConfig.speedVariation} onChange={(value) => { setTtsConfig((current) => ({ ...current, speedVariation: value })); addLog('debug', `SpeedVariation: ${value}`); }} />
               </div>
-            </div>
-          )}
-        </section>
-
-        <section className="tool-card">
-          <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); }} role="button" tabIndex={0}>
-            <div>
-              <span className="card-caption">{promptCopy.ttsPronunciation}</span>
-              <h3 style={{ margin: 0 }}>{promptCopy.ttsPronunciation}</h3>
-            </div>
-            <span className="collapsible-state">{isPronunciationOpen ? copy.hideDetails : copy.showDetails}</span>
-          </div>
-          {isPronunciationOpen && (
-            <div style={{ marginTop: 16 }}>
-              <div style={{ marginBottom: 12 }}>
-                <ToggleChip label={promptCopy.ttsTextPreprocessing} checked={ttsConfig.textPreprocessing} onToggle={() => setTtsConfig((current) => ({ ...current, textPreprocessing: !current.textPreprocessing }))} />
+              <div className="form-grid two-column">
+                <label className="field">
+                  <span>{promptCopy.ttsFormat}</span>
+                  <select className="settings-input tool-select" value={ttsConfig.format} onChange={(event) => { setTtsConfig((current) => ({ ...current, format: event.target.value })); addLog('info', `Format set to ${event.target.value}`); }}>
+                    <option>wav</option>
+                    <option>mp3</option>
+                    <option>flac</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>{promptCopy.ttsSampleRate}</span>
+                  <select className="settings-input tool-select" value={String(ttsConfig.sampleRate)} onChange={(event) => { setTtsConfig((current) => ({ ...current, sampleRate: Number(event.target.value) })); addLog('info', `SampleRate: ${event.target.value}Hz`); }}>
+                    <option value="22050">22050 Hz</option>
+                    <option value="32000">32000 Hz</option>
+                    <option value="44100">44100 Hz</option>
+                    <option value="48000">48000 Hz</option>
+                  </select>
+                </label>
               </div>
               <label className="field">
-                <span>{promptCopy.ttsCustomReplacements}</span>
-                <textarea className="settings-textarea" rows={4} placeholder={promptCopy.ttsReplacementsHint} value={ttsConfig.customReplacements} onChange={(event) => setTtsConfig((current) => ({ ...current, customReplacements: event.target.value }))} />
-                <p className="tiny-copy">{promptCopy.ttsReplacementsHint}</p>
+                <span>{promptCopy.ttsReference}</span>
+                <div className="reference-audio-row">
+                  <button className="secondary-button small-button" type="button" onClick={() => referenceAudioInputRef.current?.click()}>
+                    {promptCopy.ttsReferenceButton}
+                  </button>
+                  <span className="reference-audio-name">{ttsConfig.referenceClipName || promptCopy.ttsReferenceHint}</span>
+                </div>
+                <input ref={referenceAudioInputRef} type="file" accept="audio/wav,audio/mpeg,audio/flac" hidden onChange={handleReferenceAudioChange} />
+                <p className="tiny-copy">{promptCopy.ttsReferenceHint}</p>
               </label>
-            </div>
-          )}
-        </section>
+            </section>
 
-        <section className="tool-card">
-          <span className="card-caption">{copy.exportTitle}</span>
-          <h3>{copy.exportTitle}</h3>
-          <p className="muted-copy">{promptCopy.packageHint}</p>
-          <CollapsibleCodePanel
-            title={copy.exportTitle}
-            description={promptCopy.packageHint}
-            code={exportJson}
-            copy={copy}
-            actions={
-              <>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }}>
-                  {copy.copyJson}
-                </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-tts-config.json', exportJson, 'application/json'); }}>
-                  {copy.downloadJson}
-                </button>
-              </>
-            }
-          />
-        </section>
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{promptCopy.ttsAdvancedParams}</span>
+                  <h3 style={{ margin: 0 }}>{promptCopy.ttsAdvancedParams}</h3>
+                </div>
+                <span className="collapsible-state">{isAdvancedOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isAdvancedOpen && (
+                <div className="form-grid two-column" style={{ marginTop: 16 }}>
+                  <RangeField label={promptCopy.ttsPauseStrength} min={0} max={100} step={1} value={ttsConfig.pauseStrength} onChange={(value) => setTtsConfig((current) => ({ ...current, pauseStrength: value }))} />
+                  <label className="field">
+                    <span>{promptCopy.ttsToneCurve}</span>
+                    <select className="settings-input tool-select" value={ttsConfig.toneCurve} onChange={(event) => setTtsConfig((current) => ({ ...current, toneCurve: event.target.value }))}>
+                      <option value="flat">{promptCopy.ttsToneCurveFlat}</option>
+                      <option value="natural">{promptCopy.ttsToneCurveNatural}</option>
+                      <option value="dramatic">{promptCopy.ttsToneCurveDramatic}</option>
+                      <option value="melodic">{promptCopy.ttsToneCurveMelodic}</option>
+                    </select>
+                  </label>
+                  <label className="field">
+                    <span>{promptCopy.ttsEmphasisMode}</span>
+                    <select className="settings-input tool-select" value={ttsConfig.emphasisMode} onChange={(event) => setTtsConfig((current) => ({ ...current, emphasisMode: event.target.value }))}>
+                      <option value="normal">{promptCopy.ttsEmphasisNormal}</option>
+                      <option value="strong">{promptCopy.ttsEmphasisStrong}</option>
+                      <option value="subtle">{promptCopy.ttsEmphasisSubtle}</option>
+                    </select>
+                  </label>
+                </div>
+              )}
+            </section>
+
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{promptCopy.ttsAudioPostProcessing}</span>
+                  <h3 style={{ margin: 0 }}>{promptCopy.ttsAudioPostProcessing}</h3>
+                </div>
+                <span className="collapsible-state">{isAudioPostOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isAudioPostOpen && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <ToggleChip label={promptCopy.ttsAudioPostProcessing} checked={ttsConfig.audioPostProcessing} onToggle={() => setTtsConfig((current) => ({ ...current, audioPostProcessing: !current.audioPostProcessing }))} />
+                  </div>
+                  <div className={`form-grid two-column ${!ttsConfig.audioPostProcessing ? 'disabled-section' : ''}`}>
+                    <RangeField label={promptCopy.ttsNoiseReduction} min={0} max={100} step={1} value={ttsConfig.noiseReduction} disabled={!ttsConfig.audioPostProcessing} onChange={(value) => setTtsConfig((current) => ({ ...current, noiseReduction: value }))} />
+                    <label className="field">
+                      <span>{promptCopy.ttsEqPreset}</span>
+                      <select className="settings-input tool-select" value={ttsConfig.eqPreset} disabled={!ttsConfig.audioPostProcessing} onChange={(event) => setTtsConfig((current) => ({ ...current, eqPreset: event.target.value }))}>
+                        <option value="flat">{promptCopy.ttsEqFlat}</option>
+                        <option value="warm">{promptCopy.ttsEqWarm}</option>
+                        <option value="bright">{promptCopy.ttsEqBright}</option>
+                        <option value="radio">{promptCopy.ttsEqRadio}</option>
+                        <option value="clear">{promptCopy.ttsEqClear}</option>
+                      </select>
+                    </label>
+                    <RangeField label={promptCopy.ttsCompression} min={0} max={100} step={1} value={ttsConfig.compression} disabled={!ttsConfig.audioPostProcessing} onChange={(value) => setTtsConfig((current) => ({ ...current, compression: value }))} />
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{promptCopy.ttsPronunciation}</span>
+                  <h3 style={{ margin: 0 }}>{promptCopy.ttsPronunciation}</h3>
+                </div>
+                <span className="collapsible-state">{isPronunciationOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isPronunciationOpen && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <ToggleChip label={promptCopy.ttsTextPreprocessing} checked={ttsConfig.textPreprocessing} onToggle={() => setTtsConfig((current) => ({ ...current, textPreprocessing: !current.textPreprocessing }))} />
+                  </div>
+                  <label className="field">
+                    <span>{promptCopy.ttsCustomReplacements}</span>
+                    <textarea className="settings-textarea" rows={4} placeholder={promptCopy.ttsReplacementsHint} value={ttsConfig.customReplacements} onChange={(event) => setTtsConfig((current) => ({ ...current, customReplacements: event.target.value }))} />
+                    <p className="tiny-copy">{promptCopy.ttsReplacementsHint}</p>
+                  </label>
+                </div>
+              )}
+            </section>
+
+            <section className="tool-card">
+              <span className="card-caption">{copy.exportTitle}</span>
+              <h3>{copy.exportTitle}</h3>
+              <p className="muted-copy">{promptCopy.packageHint}</p>
+              <CollapsibleCodePanel
+                title={copy.exportTitle}
+                description={promptCopy.packageHint}
+                code={exportJson}
+                copy={copy}
+                actions={
+                  <>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); addLog('info', 'Copied JSON to clipboard'); }}>
+                      {copy.copyJson}
+                    </button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-tts-config.json', exportJson, 'application/json'); addLog('info', 'Downloaded JSON config'); }}>
+                      {copy.downloadJson}
+                    </button>
+                  </>
+                }
+              />
+            </section>
+          </div>
+
+          <div className="tool-column side">
+            <section className="tool-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div className="tool-card-header">
+                <div>
+                  <span className="card-caption">{copy.imageConverter.logsTitle}</span>
+                  <h3>{copy.imageConverter.logsTitle}</h3>
+                </div>
+                <div className="tool-header-actions">
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('click'); }}>{copy.imageConverter.copyLogs}</button>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('tts-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button>
+                </div>
+              </div>
+              <div className="log-scroll" style={{ flex: 1, minHeight: 200 }}>
+                {logs.length === 0 ? (
+                  <p className="tiny-copy" style={{ opacity: 0.6 }}>{copy.imageConverter.waitingOperations}</p>
+                ) : (
+                  logs.map((l, i) => (
+                    <div key={i} className={`log-line log-${l.level}`}>
+                      <span className="log-time">{l.time}</span>
+                      <span className={`log-badge ${l.level}`}>{l.level}</span>
+                      <span className="log-text">{l.text}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
       </section>
 
-      <footer className="home-footer fade-up delay-3">
-        <div className="notice-banner">{privacyNote}</div>
-      </footer>
+
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
+      {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={resetWorkspaceView} />}
+      {showErrorPanel && error && (
+        <DraggableErrorPanel
+          error={error}
+          onClose={() => setShowErrorPanel(false)}
+          onCopy={() => copyText(JSON.stringify(error, null, 2))}
+          onDownload={() => downloadText('tts-error.json', JSON.stringify(error, null, 2), 'application/json')}
+          onRetry={() => { setError(null); setShowErrorPanel(false); }}
+          onOpenDocs={() => onNavigate?.('docs')}
+          copy={copy}
+        />
+      )}
     </main>
   );
 }
@@ -6871,12 +7423,62 @@ export function ImageConverterPage({
   const copy = localizedUiCopy[language];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'image-converter') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        const cfg = data.config as Record<string, unknown>;
+        setOutputFormat(String(cfg.outputFormat ?? 'image/png'));
+        setQuality(Number(cfg.quality ?? 92));
+        setMaxWidth(Number(cfg.maxWidth ?? 2048));
+        setMaxHeight(Number(cfg.maxHeight ?? 2048));
+        setMaintainAspect(Boolean(cfg.maintainAspect ?? true));
+        setBrightness(Number(cfg.brightness ?? 100));
+        setContrast(Number(cfg.contrast ?? 100));
+        setSaturation(Number(cfg.saturation ?? 100));
+        setBlur(Number(cfg.blur ?? 0));
+        setHueRotate(Number(cfg.hueRotate ?? 0));
+        setGrayscale(Number(cfg.grayscale ?? 0));
+        setSavedSnapshot(JSON.stringify({
+          outputFormat: String(cfg.outputFormat ?? 'image/png'),
+          quality: Number(cfg.quality ?? 92),
+          maxWidth: Number(cfg.maxWidth ?? 2048),
+          maxHeight: Number(cfg.maxHeight ?? 2048),
+          maintainAspect: Boolean(cfg.maintainAspect ?? true),
+          brightness: Number(cfg.brightness ?? 100),
+          contrast: Number(cfg.contrast ?? 100),
+          saturation: Number(cfg.saturation ?? 100),
+          blur: Number(cfg.blur ?? 0),
+          hueRotate: Number(cfg.hueRotate ?? 0),
+          grayscale: Number(cfg.grayscale ?? 0),
+        }));
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreviewUrl, setSourcePreviewUrl] = useState('');
   const [convertedUrl, setConvertedUrl] = useState('');
   const [isConverting, setIsConverting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<TransferError | null>(null);
+  const [showErrorPanel, setShowErrorPanel] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
+  const [logs, setLogs] = useState<WorkflowLog[]>([]);
 
   const [persistedState] = useState(() =>
     readLocalState(IMAGE_CONVERTER_STORAGE_KEY, {
@@ -6885,22 +7487,38 @@ export function ImageConverterPage({
       maxWidth: 2048,
       maxHeight: 2048,
       maintainAspect: true,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      blur: 0,
+      hueRotate: 0,
+      grayscale: 0,
       savedSnapshot: '',
     }),
   );
-  const [outputFormat, setOutputFormat] = useState(persistedState.outputFormat);
-  const [quality, setQuality] = useState(persistedState.quality);
-  const [maxWidth, setMaxWidth] = useState(persistedState.maxWidth);
-  const [maxHeight, setMaxHeight] = useState(persistedState.maxHeight);
-  const [maintainAspect, setMaintainAspect] = useState(Boolean(persistedState.maintainAspect));
+  const [outputFormat, setOutputFormat] = useState(persistedState.outputFormat ?? 'image/png');
+  const [quality, setQuality] = useState(persistedState.quality ?? 92);
+  const [maxWidth, setMaxWidth] = useState(persistedState.maxWidth ?? 2048);
+  const [maxHeight, setMaxHeight] = useState(persistedState.maxHeight ?? 2048);
+  const [maintainAspect, setMaintainAspect] = useState(Boolean(persistedState.maintainAspect ?? true));
+  const [brightness, setBrightness] = useState(persistedState.brightness ?? 100);
+  const [contrast, setContrast] = useState(persistedState.contrast ?? 100);
+  const [saturation, setSaturation] = useState(persistedState.saturation ?? 100);
+  const [blur, setBlur] = useState(persistedState.blur ?? 0);
+  const [hueRotate, setHueRotate] = useState(persistedState.hueRotate ?? 0);
+  const [grayscale, setGrayscale] = useState(persistedState.grayscale ?? 0);
 
-  const currentSnapshot = JSON.stringify({ outputFormat, quality, maxWidth, maxHeight, maintainAspect });
+  const currentSnapshot = JSON.stringify({ outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale });
   const [savedSnapshot, setSavedSnapshot] = useState(persistedState.savedSnapshot || currentSnapshot);
   const isDirty = currentSnapshot !== savedSnapshot;
 
   useEffect(() => {
-    writeLocalState(IMAGE_CONVERTER_STORAGE_KEY, { outputFormat, quality, maxWidth, maxHeight, maintainAspect, savedSnapshot });
-  }, [outputFormat, quality, maxWidth, maxHeight, maintainAspect, savedSnapshot]);
+    writeLocalState(IMAGE_CONVERTER_STORAGE_KEY, { outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot });
+  }, [outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot]);
+
+  function addLog(level: LogLevel, text: string) {
+    setLogs((prev) => [...prev, { time: new Date().toLocaleTimeString(), level, text }]);
+  }
 
   function handlePickFile() { fileInputRef.current?.click(); }
 
@@ -6912,7 +7530,9 @@ export function ImageConverterPage({
     setSourceFile(file);
     setSourcePreviewUrl(URL.createObjectURL(file));
     setConvertedUrl('');
-    setError('');
+    setError(null);
+    setShowErrorPanel(false);
+    addLog('info', `Loaded source: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
     event.target.value = '';
   }
 
@@ -6922,15 +7542,18 @@ export function ImageConverterPage({
     if (!sourceFile || !canvasRef.current) return;
     playSound('confirm');
     setIsConverting(true);
-    setError('');
+    setError(null);
+    setShowErrorPanel(false);
     setConvertedUrl('');
+    addLog('info', 'Starting conversion...');
     try {
       const img = await new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image();
         image.onload = () => resolve(image);
-        image.onerror = reject;
+        image.onerror = () => reject(new Error('Failed to load source image'));
         image.src = sourcePreviewUrl;
       });
+      addLog('info', `Source loaded: ${img.naturalWidth}x${img.naturalHeight}`);
 
       const canvas = canvasRef.current;
       let width = img.naturalWidth;
@@ -6955,12 +7578,29 @@ export function ImageConverterPage({
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error(copy.imageConverter.invalidDimensions);
+
+      const filterStr = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px) hue-rotate(${hueRotate}deg) grayscale(${grayscale}%)`;
+      ctx.filter = filterStr;
+      addLog('debug', `Filter: ${filterStr}`);
+      addLog('debug', `Resize: ${width}x${height}, format: ${outputFormat}, quality: ${quality}%`);
+
       ctx.drawImage(img, 0, 0, width, height);
 
       const dataUrl = canvas.toDataURL(outputFormat, quality / 100);
       setConvertedUrl(dataUrl);
+      addLog('success', `Conversion complete: ${width}x${height}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : copy.imageConverter.converting);
+      const message = err instanceof Error ? err.message : copy.imageConverter.converting;
+      const transferErr: TransferError = {
+        code: 'CONVERT_ERROR',
+        stage: 'convert',
+        message,
+        hint: 'Check source image validity and browser Canvas 2D filter support.',
+        details: { sourceName: sourceFile?.name, size: sourceFile?.size },
+      };
+      setError(transferErr);
+      setShowErrorPanel(true);
+      addLog('error', message);
     } finally {
       setIsConverting(false);
     }
@@ -6969,29 +7609,50 @@ export function ImageConverterPage({
   function downloadResult() {
     if (!convertedUrl || !sourceFile) return;
     playSound('downloadSound');
-    const ext = outputFormat === 'image/jpeg' ? 'jpg' : outputFormat === 'image/webp' ? 'webp' : 'png';
+    const ext = outputFormat === 'image/jpeg' ? 'jpg' : 'png';
     const name = sourceFile.name.replace(/\.[^.]+$/, '') + `-converted.${ext}`;
     const link = document.createElement('a');
     link.href = convertedUrl;
     link.download = name;
     link.click();
+    addLog('info', `Downloaded: ${name}`);
   }
 
-  function resetWorkspace() {
+  function resetWorkspaceView() {
     if (sourcePreviewUrl) URL.revokeObjectURL(sourcePreviewUrl);
     if (convertedUrl) URL.revokeObjectURL(convertedUrl);
     setSourceFile(null);
     setSourcePreviewUrl('');
     setConvertedUrl('');
-    setError('');
+    setError(null);
+    setShowErrorPanel(false);
+    setLogs([]);
     setOutputFormat('image/png');
     setQuality(92);
     setMaxWidth(2048);
     setMaxHeight(2048);
     setMaintainAspect(true);
-    setSavedSnapshot(JSON.stringify({ outputFormat: 'image/png', quality: 92, maxWidth: 2048, maxHeight: 2048, maintainAspect: true }));
+    setBrightness(100);
+    setContrast(100);
+    setSaturation(100);
+    setBlur(0);
+    setHueRotate(0);
+    setGrayscale(0);
+    const snap = JSON.stringify({ outputFormat: 'image/png', quality: 92, maxWidth: 2048, maxHeight: 2048, maintainAspect: true, brightness: 100, contrast: 100, saturation: 100, blur: 0, hueRotate: 0, grayscale: 0 });
+    setSavedSnapshot(snap);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
+
+  function handleResetClick() {
+    setIsResetOpen(true);
+  }
+
+  const errorJson = useMemo(() => (error ? JSON.stringify(error, null, 2) : ''), [error]);
+  const logsText = useMemo(() => logs.map((l) => `[${l.time}] [${l.level.toUpperCase()}] ${l.text}`).join('\n'), [logs]);
+  const exportJson = useMemo(() => JSON.stringify({
+    tool: 'image-converter',
+    config: { outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale },
+  }, null, 2), [outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale]);
 
   return (
     <main className="feature-shell tool-page-shell">
@@ -7011,8 +7672,12 @@ export function ImageConverterPage({
           </div>
           <div className="tool-header-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
-            <button className="secondary-button small-button" type="button" onClick={resetWorkspace}>{copy.refreshWorkspace}</button>
+            <button className="secondary-button small-button" type="button" onClick={handleResetClick}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={() => setSavedSnapshot(currentSnapshot)}>{copy.saveConfig}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('image-converter-config.json', exportJson, 'application/json'); }}>{copy.downloadJson}</button>
           </div>
         </div>
 
@@ -7044,7 +7709,6 @@ export function ImageConverterPage({
                   <select className="settings-input tool-select" value={outputFormat} onChange={(e) => setOutputFormat(e.target.value)}>
                     <option value="image/png">PNG (lossless)</option>
                     <option value="image/jpeg">JPEG (compressed)</option>
-                    <option value="image/webp">WEBP (modern)</option>
                   </select>
                 </label>
                 <label className="field">
@@ -7060,6 +7724,14 @@ export function ImageConverterPage({
                   <input className="settings-input" type="number" min="0" value={maxHeight} onChange={(e) => setMaxHeight(Number(e.target.value))} />
                 </label>
               </div>
+              <div className="form-grid two-column" style={{ marginTop: 8 }}>
+                <RangeField label={`${copy.imageConverter.brightness} (${brightness}%)`} min={0} max={200} step={1} value={brightness} onChange={setBrightness} />
+                <RangeField label={`${copy.imageConverter.contrast} (${contrast}%)`} min={0} max={200} step={1} value={contrast} onChange={setContrast} />
+                <RangeField label={`${copy.imageConverter.saturation} (${saturation}%)`} min={0} max={200} step={1} value={saturation} onChange={setSaturation} />
+                <RangeField label={`${copy.imageConverter.blur} (${blur}px)`} min={0} max={20} step={0.5} value={blur} onChange={setBlur} />
+                <RangeField label={`${copy.imageConverter.hueRotate} (${hueRotate}°)`} min={0} max={360} step={1} value={hueRotate} onChange={setHueRotate} />
+                <RangeField label={`${copy.imageConverter.grayscale} (${grayscale}%)`} min={0} max={100} step={1} value={grayscale} onChange={setGrayscale} />
+              </div>
               <div className="toggle-grid" style={{ marginTop: 8 }}>
                 <ToggleChip label={copy.imageConverter.maintainAspect} checked={maintainAspect} onToggle={() => setMaintainAspect((v) => !v)} />
               </div>
@@ -7071,7 +7743,6 @@ export function ImageConverterPage({
                   {copy.imageConverter.download}
                 </button>
               </div>
-              {error && <p className="tiny-copy" style={{ color: '#f45a5a', marginTop: 8 }}>{error}</p>}
             </section>
           </div>
 
@@ -7089,16 +7760,52 @@ export function ImageConverterPage({
                 </div>
               )}
             </section>
+
+            <section className="tool-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div className="tool-card-header">
+                <div>
+                  <span className="card-caption">{copy.imageConverter.logsTitle}</span>
+                  <h3>{copy.imageConverter.logsTitle}</h3>
+                </div>
+                <div className="tool-header-actions">
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('click'); }}>{copy.imageConverter.copyLogs}</button>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button>
+                </div>
+              </div>
+              <div className="log-scroll" style={{ flex: 1, minHeight: 120 }}>
+                {logs.length === 0 ? (
+                  <p className="tiny-copy" style={{ opacity: 0.6 }}>{copy.imageConverter.waitingOperations}</p>
+                ) : (
+                  logs.map((l, i) => (
+                    <div key={i} className={`log-line log-${l.level}`}>
+                      <span className="log-time">{l.time}</span>
+                      <span className={`log-badge ${l.level}`}>{l.level}</span>
+                      <span className="log-text">{l.text}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
           </div>
         </div>
       </section>
 
-      <footer className="home-footer fade-up delay-3">
-        <div className="notice-banner">{privacyNote}</div>
-      </footer>
+
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
+      {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={resetWorkspaceView} />}
+      {showErrorPanel && error && (
+        <DraggableErrorPanel
+          error={error}
+          onClose={() => setShowErrorPanel(false)}
+          onCopy={() => copyText(errorJson)}
+          onDownload={() => downloadText('converter-error.json', errorJson, 'application/json')}
+          onRetry={convertImage}
+          onOpenDocs={() => onNavigate?.('docs')}
+          copy={copy}
+        />
+      )}
     </main>
   );
 }
