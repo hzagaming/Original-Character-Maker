@@ -21,6 +21,7 @@ type DocsLabels = {
   docsErrorSolution: string;
   docsErrorSteps: string;
   docsErrorRelated: string;
+  docsErrorPrevention: string;
   docsFilterAll: string;
   docsFilterCritical: string;
   docsFilterError: string;
@@ -381,6 +382,12 @@ function ErrorCard({ error, messages }: { error: import('./docsContent').DocsErr
                 <li key={j}>{step}</li>
               ))}
             </ol>
+          </div>
+        )}
+        {error.prevention && (
+          <div className="docs-error-prevention">
+            <span className="docs-error-label">{messages.docsErrorPrevention}</span>
+            <span>🛡️ {error.prevention}</span>
           </div>
         )}
         {error.relatedCodes && error.relatedCodes.length > 0 && (

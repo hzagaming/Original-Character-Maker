@@ -10,6 +10,7 @@ export type DocsErrorItem = {
   solution: string;
   steps?: string[];
   relatedCodes?: string[];
+  prevention?: string;
 };
 
 export type DocsErrorCategory = {
@@ -108,6 +109,7 @@ export const docsContentZh: DocsContent = {
             '刷新页面后重新开始',
           ],
           relatedCodes: ['IMPORT_INVALID_JSON', 'STORAGE_READ_ONLY'],
+          prevention: '不要手动修改 localStorage 中的数据；跨版本更新后如有异常，建议重置配置。',
         },
         {
           code: 'IMPORT_INVALID_JSON',
@@ -156,6 +158,7 @@ export const docsContentZh: DocsContent = {
             '返回捏脸编辑器重新点击「保存草稿」',
           ],
           relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: '定期清理浏览器 localStorage 中不再需要的数据；大文件不要直接保存在编辑器中，改用导出功能。',
         },
         {
           code: 'STORAGE_READ_ONLY',
@@ -172,6 +175,7 @@ export const docsContentZh: DocsContent = {
             '如果问题持续，使用「导出」功能将配置保存为本地文件作为替代方案',
           ],
           relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: '避免在浏览器无痕/隐私模式中使用本应用；定期导出配置到本地文件作为备份。',
         },
         {
           code: 'UNSAVED_WARNING',
@@ -241,6 +245,7 @@ export const docsContentZh: DocsContent = {
             '返回转画风页面重新点击「开始」',
           ],
           relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
+          prevention: '首次使用任何联网工具前，务必先在「设置 → API」中配置有效的 API Key。',
         },
         {
           code: 'API_KEY_EXPIRED',
@@ -257,6 +262,7 @@ export const docsContentZh: DocsContent = {
             '保存后返回转画风重试',
           ],
           relatedCodes: ['API_KEY_MISSING', '401_UNAUTHORIZED'],
+          prevention: '定期检查 API Key 的有效期和剩余额度；在 LLM Hub 中通过实时测试快速验证 Key 是否有效。',
         },
         {
           code: 'API_TIMEOUT',
@@ -274,6 +280,7 @@ export const docsContentZh: DocsContent = {
             '重试转换',
           ],
           relatedCodes: ['NETWORK_TIMEOUT', 'BACKEND_UNAVAILABLE'],
+          prevention: '处理大尺寸图片或大量文本时，提前降低参数规模（图像尺寸、Max Tokens 等）；网络不稳定时增加超时设置。',
         },
         {
           code: 'BACKEND_UNAVAILABLE',
@@ -291,6 +298,7 @@ export const docsContentZh: DocsContent = {
             '如果是本地部署，确认后端进程是否在运行（npm start）',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED', '502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '本地部署时确保后端进程已启动（npm start）；使用远程服务时确认 URL 配置正确。',
         },
         {
           code: 'NETWORK_DISCONNECTED',
@@ -307,6 +315,7 @@ export const docsContentZh: DocsContent = {
             '如果是公司/校园网络，确认是否限制了 API 访问',
           ],
           relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: '使用联网工具前确认网络连接正常；避免在网络波动大的环境下进行长时间工作流。',
         },
         {
           code: 'FILE_FORMAT_UNSUPPORTED',
@@ -368,6 +377,7 @@ export const docsContentZh: DocsContent = {
             '重试转换',
           ],
           relatedCodes: ['403_FORBIDDEN', 'API_KEY_EXPIRED'],
+          prevention: '从下拉列表选择已知可用的模型；使用自定义 API 时查阅服务商文档确认模型列表。',
         },
         {
           code: 'PROMPT_BLOCKED',
@@ -384,6 +394,7 @@ export const docsContentZh: DocsContent = {
             '逐步添加修饰词，找出具体触发拦截的词汇',
           ],
           relatedCodes: ['403_FORBIDDEN'],
+          prevention: '修改 Prompt 覆盖时避免使用敏感词汇；先用默认 Prompt 测试通过后再自定义。',
         },
         {
           code: 'PROMPT_TOO_LONG',
@@ -434,6 +445,7 @@ export const docsContentZh: DocsContent = {
             '如果是网络错误：检查网络连接',
           ],
           relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'BACKEND_UNAVAILABLE', '429_TOO_MANY_REQUESTS'],
+          prevention: '开始转换前确认 API Key 有效、网络连接正常、模型可用。',
         },
         {
           code: '429_TOO_MANY_REQUESTS',
@@ -465,6 +477,7 @@ export const docsContentZh: DocsContent = {
             '如果问题持续，联系后端管理员查看服务器日志',
           ],
           relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '降低请求规模（图像尺寸、Max Tokens 等）；避免在服务器高负载时提交大任务。',
         },
         {
           code: '502_BAD_GATEWAY',
@@ -481,6 +494,7 @@ export const docsContentZh: DocsContent = {
             '重启后端服务后重试',
           ],
           relatedCodes: ['503_SERVICE_UNAVAILABLE', 'BACKEND_UNAVAILABLE'],
+          prevention: '本地部署时确认后端进程在运行；检查反向代理配置。',
         },
         {
           code: '503_SERVICE_UNAVAILABLE',
@@ -496,6 +510,7 @@ export const docsContentZh: DocsContent = {
             '联系后端管理员确认是否在维护',
           ],
           relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
+          prevention: '避开服务器维护时段操作；高负载时降低请求频率。',
         },
         {
           code: 'IMPORT_INVALID_JSON',
@@ -543,6 +558,7 @@ export const docsContentZh: DocsContent = {
             '如果问题持续，尝试在内存更大的设备上操作',
           ],
           relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: '处理大文件前关闭其他浏览器标签页；将图片最大边缩放到 2048 以下。',
         },
       ],
     },
@@ -595,6 +611,7 @@ export const docsContentZh: DocsContent = {
             '刷新页面',
           ],
           relatedCodes: ['IMPORT_INVALID_JSON', 'STORAGE_READ_ONLY'],
+          prevention: '不要手动修改 localStorage 中的数据；跨版本更新后如有异常，建议重置配置。',
         },
         {
           code: 'CURSOR_JUMP',
@@ -625,6 +642,7 @@ export const docsContentZh: DocsContent = {
             '使用「复制文本」功能作为临时替代方案',
           ],
           relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: '允许浏览器弹窗；文档过大时先移除部分图片再导出。',
         },
         {
           code: 'IMPORT_INVALID_JSON',
@@ -685,6 +703,7 @@ export const docsContentZh: DocsContent = {
             '导入之前导出的文件',
           ],
           relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: '避免在浏览器无痕/隐私模式中使用本应用；定期导出配置到本地文件作为备份。',
         },
         {
           code: 'LOCAL_STORAGE_FULL',
@@ -701,6 +720,7 @@ export const docsContentZh: DocsContent = {
             '返回编辑器重新保存',
           ],
           relatedCodes: ['STORAGE_READ_ONLY', 'EXPORT_FAILED'],
+          prevention: '定期清理浏览器 localStorage 中不再需要的数据；大文件不要直接保存在编辑器中，改用导出功能。',
         },
         {
           code: 'UNSAVED_WARNING',
@@ -767,6 +787,7 @@ export const docsContentZh: DocsContent = {
             '返回 LLM Hub 重新发送消息',
           ],
           relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
+          prevention: '首次使用任何联网工具前，务必先在「设置 → API」中配置有效的 API Key。',
         },
         {
           code: 'API_KEY_EXPIRED',
@@ -782,6 +803,7 @@ export const docsContentZh: DocsContent = {
             '保存后重试',
           ],
           relatedCodes: ['API_KEY_MISSING'],
+          prevention: '定期检查 API Key 的有效期和剩余额度；在 LLM Hub 中通过实时测试快速验证 Key 是否有效。',
         },
         {
           code: 'API_TIMEOUT',
@@ -798,6 +820,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED', 'API_TIMEOUT'],
+          prevention: '处理大尺寸图片或大量文本时，提前降低参数规模（图像尺寸、Max Tokens 等）；网络不稳定时增加超时设置。',
         },
         {
           code: 'BACKEND_UNAVAILABLE',
@@ -814,6 +837,7 @@ export const docsContentZh: DocsContent = {
             '如果返回 502/503，确认后端服务是否运行',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: '本地部署时确保后端进程已启动（npm start）；使用远程服务时确认 URL 配置正确。',
         },
         {
           code: 'LLM_MODEL_UNAVAILABLE',
@@ -830,6 +854,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['MODEL_NOT_FOUND', '403_FORBIDDEN'],
+          prevention: '从已知可用模型列表中选择；确认当前 Key 支持所选模型。',
         },
         {
           code: 'LLM_TEST_ERROR',
@@ -847,6 +872,7 @@ export const docsContentZh: DocsContent = {
             '增加超时时间或减少 Max Tokens',
           ],
           relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'LLM_MODEL_UNAVAILABLE'],
+          prevention: '测试前确认 API Key 有效、网络连接正常、模型可用。',
         },
         {
           code: 'MODEL_NOT_FOUND',
@@ -863,6 +889,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['LLM_MODEL_UNAVAILABLE'],
+          prevention: '从下拉列表选择已知可用的模型；使用自定义 API 时查阅服务商文档确认模型列表。',
         },
         {
           code: 'PROMPT_BLOCKED',
@@ -878,6 +905,7 @@ export const docsContentZh: DocsContent = {
             '简化测试消息，逐步排查触发词',
           ],
           relatedCodes: ['403_FORBIDDEN'],
+          prevention: '修改 Prompt 覆盖时避免使用敏感词汇；先用默认 Prompt 测试通过后再自定义。',
         },
         {
           code: '429_TOO_MANY_REQUESTS',
@@ -908,6 +936,7 @@ export const docsContentZh: DocsContent = {
             '如果持续失败，联系后端管理员',
           ],
           relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '降低请求规模（图像尺寸、Max Tokens 等）；避免在服务器高负载时提交大任务。',
         },
         {
           code: 'IMPORT_INVALID_CONFIG',
@@ -969,6 +998,7 @@ export const docsContentZh: DocsContent = {
             '导入备份',
           ],
           relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: '避免在浏览器无痕/隐私模式中使用本应用；定期导出配置到本地文件作为备份。',
         },
         {
           code: 'LOCAL_STORAGE_FULL',
@@ -984,6 +1014,7 @@ export const docsContentZh: DocsContent = {
             '重新保存',
           ],
           relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: '定期清理浏览器 localStorage 中不再需要的数据；大文件不要直接保存在编辑器中，改用导出功能。',
         },
       ],
     },
@@ -1037,6 +1068,7 @@ export const docsContentZh: DocsContent = {
             '保存后重试',
           ],
           relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: '首次使用任何联网工具前，务必先在「设置 → API」中配置有效的 API Key。',
         },
         {
           code: 'API_KEY_EXPIRED',
@@ -1052,6 +1084,7 @@ export const docsContentZh: DocsContent = {
             '保存后重试',
           ],
           relatedCodes: ['API_KEY_MISSING'],
+          prevention: '定期检查 API Key 的有效期和剩余额度；在 LLM Hub 中通过实时测试快速验证 Key 是否有效。',
         },
         {
           code: 'API_TIMEOUT',
@@ -1067,6 +1100,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: '处理大尺寸图片或大量文本时，提前降低参数规模（图像尺寸、Max Tokens 等）；网络不稳定时增加超时设置。',
         },
         {
           code: 'BACKEND_UNAVAILABLE',
@@ -1082,6 +1116,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: '本地部署时确保后端进程已启动（npm start）；使用远程服务时确认 URL 配置正确。',
         },
         {
           code: 'IMPORT_INVALID_CONFIG',
@@ -1127,6 +1162,7 @@ export const docsContentZh: DocsContent = {
             '重新保存',
           ],
           relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: '定期清理浏览器 localStorage 中不再需要的数据；大文件不要直接保存在编辑器中，改用导出功能。',
         },
         {
           code: 'STORAGE_READ_ONLY',
@@ -1142,6 +1178,7 @@ export const docsContentZh: DocsContent = {
             '在普通窗口中重新打开',
           ],
           relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: '避免在浏览器无痕/隐私模式中使用本应用；定期导出配置到本地文件作为备份。',
         },
         {
           code: 'TTS_AUDIO_GENERATION_FAILED',
@@ -1159,6 +1196,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['MODEL_NOT_FOUND', 'API_TIMEOUT'],
+          prevention: '简化文本移除特殊符号；确认参考音频格式正确；选择已知可用的声音预设。',
         },
         {
           code: 'TTS_REFERENCE_INVALID',
@@ -1226,6 +1264,7 @@ export const docsContentZh: DocsContent = {
             '保存后返回 paper2gal 重试',
           ],
           relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: '首次使用任何联网工具前，务必先在「设置 → API」中配置有效的 API Key。',
         },
         {
           code: 'API_KEY_EXPIRED',
@@ -1241,6 +1280,7 @@ export const docsContentZh: DocsContent = {
             '保存后重试',
           ],
           relatedCodes: ['API_KEY_MISSING'],
+          prevention: '定期检查 API Key 的有效期和剩余额度；在 LLM Hub 中通过实时测试快速验证 Key 是否有效。',
         },
         {
           code: 'API_TIMEOUT',
@@ -1256,6 +1296,7 @@ export const docsContentZh: DocsContent = {
             '如果卡在某一长时间步骤，可在该步骤的卡片上点击「重做」单独重试',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: '处理大尺寸图片或大量文本时，提前降低参数规模（图像尺寸、Max Tokens 等）；网络不稳定时增加超时设置。',
         },
         {
           code: 'BACKEND_UNAVAILABLE',
@@ -1271,6 +1312,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: '本地部署时确保后端进程已启动（npm start）；使用远程服务时确认 URL 配置正确。',
         },
         {
           code: 'FILE_FORMAT_UNSUPPORTED',
@@ -1314,6 +1356,7 @@ export const docsContentZh: DocsContent = {
             '如果某一步骤持续失败，可在该步骤卡片上点击「重做」尝试',
           ],
           relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: '从下拉列表选择已知可用的模型；使用自定义 API 时查阅服务商文档确认模型列表。',
         },
         {
           code: 'P2G_WORKFLOW_ERROR',
@@ -1333,6 +1376,7 @@ export const docsContentZh: DocsContent = {
             '如果整个工作流失败，点击「重刷」清除后重新开始',
           ],
           relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED', 'STYLE_TRANSFER_REQUEST_FAILED'],
+          prevention: '启动工作流前确认图片为有效 PNG/JPG、网络连接稳定、Prompt 覆盖中无敏感词汇。',
         },
         {
           code: 'PROMPT_BLOCKED',
@@ -1349,6 +1393,7 @@ export const docsContentZh: DocsContent = {
             '在该步骤卡片上点击「重做」',
           ],
           relatedCodes: ['P2G_WORKFLOW_ERROR'],
+          prevention: '修改 Prompt 覆盖时避免使用敏感词汇；先用默认 Prompt 测试通过后再自定义。',
         },
         {
           code: 'UPLOAD_FORMAT',
@@ -1394,6 +1439,7 @@ export const docsContentZh: DocsContent = {
             '如果多次重试仍失败，联系后端管理员',
           ],
           relatedCodes: ['P2G_WORKFLOW_ERROR', 'PROMPT_BLOCKED'],
+          prevention: '某步骤失败后查看错误详情，根据提示修改对应 Prompt 或检查网络后重试。',
         },
         {
           code: '429_TOO_MANY_REQUESTS',
@@ -1424,6 +1470,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '降低请求规模（图像尺寸、Max Tokens 等）；避免在服务器高负载时提交大任务。',
         },
         {
           code: '502_BAD_GATEWAY',
@@ -1439,6 +1486,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['503_SERVICE_UNAVAILABLE'],
+          prevention: '本地部署时确认后端进程在运行；检查反向代理配置。',
         },
         {
           code: '503_SERVICE_UNAVAILABLE',
@@ -1453,6 +1501,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['502_BAD_GATEWAY'],
+          prevention: '避开服务器维护时段操作；高负载时降低请求频率。',
         },
       ],
     },
@@ -1498,6 +1547,7 @@ export const docsContentZh: DocsContent = {
             '尝试换用其他浏览器',
           ],
           relatedCodes: ['FILE_CORRUPTED', 'DEVICE_MEMORY_LOW'],
+          prevention: '转换前确认图片能在浏览器正常打开；避免同时开启过多滤镜。',
         },
         {
           code: 'CONVERT_FILTER_UNSUPPORTED',
@@ -1529,6 +1579,7 @@ export const docsContentZh: DocsContent = {
             '刷新页面后重新上传',
           ],
           relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: '处理大文件前关闭其他浏览器标签页；将图片最大边缩放到 2048 以下。',
         },
         {
           code: 'FILE_CORRUPTED',
@@ -1616,6 +1667,7 @@ export const docsContentZh: DocsContent = {
             '导出配置到文件备份',
           ],
           relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: '避免在浏览器无痕/隐私模式中使用本应用；定期导出配置到本地文件作为备份。',
         },
         {
           code: 'LOCAL_STORAGE_FULL',
@@ -1631,6 +1683,7 @@ export const docsContentZh: DocsContent = {
             '重新保存',
           ],
           relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: '定期清理浏览器 localStorage 中不再需要的数据；大文件不要直接保存在编辑器中，改用导出功能。',
         },
         {
           code: 'UNSAVED_WARNING',
@@ -1669,6 +1722,7 @@ export const docsContentZh: DocsContent = {
             '保存后重试',
           ],
           relatedCodes: ['BACKEND_UNAVAILABLE', 'NETWORK_DISCONNECTED'],
+          prevention: '配置 API Base URL 时确保以 http:// 或 https:// 开头，末尾不要有多余斜杠。',
         },
         {
           code: 'API_KEY_EXPIRED',
@@ -1685,6 +1739,7 @@ export const docsContentZh: DocsContent = {
             '保存后返回对应工具重试',
           ],
           relatedCodes: ['API_KEY_MISSING', '401_UNAUTHORIZED'],
+          prevention: '定期检查 API Key 的有效期和剩余额度；在 LLM Hub 中通过实时测试快速验证 Key 是否有效。',
         },
         {
           code: 'API_KEY_MISSING',
@@ -1702,6 +1757,7 @@ export const docsContentZh: DocsContent = {
             '返回工具页面重新操作',
           ],
           relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
+          prevention: '首次使用任何联网工具前，务必先在「设置 → API」中配置有效的 API Key。',
         },
         {
           code: 'API_RATE_LIMIT',
@@ -1735,6 +1791,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['NETWORK_TIMEOUT', 'BACKEND_UNAVAILABLE'],
+          prevention: '处理大尺寸图片或大量文本时，提前降低参数规模（图像尺寸、Max Tokens 等）；网络不稳定时增加超时设置。',
         },
         {
           code: 'BACKEND_UNAVAILABLE',
@@ -1752,6 +1809,7 @@ export const docsContentZh: DocsContent = {
             '如果是本地部署，确认后端进程是否在运行（npm start）',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED', '502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '本地部署时确保后端进程已启动（npm start）；使用远程服务时确认 URL 配置正确。',
         },
         {
           code: 'NETWORK_DISCONNECTED',
@@ -1768,6 +1826,7 @@ export const docsContentZh: DocsContent = {
             '如果是公司/校园网络，确认是否限制了 API 访问',
           ],
           relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: '使用联网工具前确认网络连接正常；避免在网络波动大的环境下进行长时间工作流。',
         },
         {
           code: 'NETWORK_TIMEOUT',
@@ -1784,6 +1843,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['NETWORK_DISCONNECTED', 'API_TIMEOUT'],
+          prevention: '使用稳定的网络连接；必要时切换为有线网络或更可靠的 Wi-Fi。',
         },
       ],
     },
@@ -1808,6 +1868,7 @@ export const docsContentZh: DocsContent = {
             '刷新页面后重新开始',
           ],
           relatedCodes: ['IMPORT_INVALID_JSON', 'STORAGE_READ_ONLY'],
+          prevention: '不要手动修改 localStorage 中的数据；跨版本更新后如有异常，建议重置配置。',
         },
         {
           code: 'IMPORT_INVALID_CONFIG',
@@ -1871,6 +1932,7 @@ export const docsContentZh: DocsContent = {
             '返回工具重新点击保存',
           ],
           relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: '定期清理浏览器 localStorage 中不再需要的数据；大文件不要直接保存在编辑器中，改用导出功能。',
         },
         {
           code: 'STORAGE_READ_ONLY',
@@ -1887,6 +1949,7 @@ export const docsContentZh: DocsContent = {
             '如果问题持续，使用「导出」功能将配置保存为本地文件作为替代方案',
           ],
           relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: '避免在浏览器无痕/隐私模式中使用本应用；定期导出配置到本地文件作为备份。',
         },
         {
           code: 'UNSAVED_WARNING',
@@ -2007,6 +2070,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['MODEL_NOT_FOUND', '403_FORBIDDEN'],
+          prevention: '从已知可用模型列表中选择；确认当前 Key 支持所选模型。',
         },
         {
           code: 'LLM_TEST_ERROR',
@@ -2024,6 +2088,7 @@ export const docsContentZh: DocsContent = {
             '增加超时时间或减少 Max Tokens',
           ],
           relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'LLM_MODEL_UNAVAILABLE'],
+          prevention: '测试前确认 API Key 有效、网络连接正常、模型可用。',
         },
         {
           code: 'MODEL_NOT_FOUND',
@@ -2040,6 +2105,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['LLM_MODEL_UNAVAILABLE'],
+          prevention: '从下拉列表选择已知可用的模型；使用自定义 API 时查阅服务商文档确认模型列表。',
         },
         {
           code: 'PROMPT_BLOCKED',
@@ -2056,6 +2122,7 @@ export const docsContentZh: DocsContent = {
             '逐步添加修饰词，找出具体触发拦截的词汇',
           ],
           relatedCodes: ['403_FORBIDDEN'],
+          prevention: '修改 Prompt 覆盖时避免使用敏感词汇；先用默认 Prompt 测试通过后再自定义。',
         },
         {
           code: 'PROMPT_TOO_LONG',
@@ -2089,6 +2156,7 @@ export const docsContentZh: DocsContent = {
             '重试',
           ],
           relatedCodes: ['MODEL_NOT_FOUND', 'API_TIMEOUT'],
+          prevention: '简化文本移除特殊符号；确认参考音频格式正确；选择已知可用的声音预设。',
         },
       ],
     },
@@ -2113,6 +2181,7 @@ export const docsContentZh: DocsContent = {
             '尝试换用其他浏览器',
           ],
           relatedCodes: ['FILE_CORRUPTED', 'DEVICE_MEMORY_LOW'],
+          prevention: '转换前确认图片能在浏览器正常打开；避免同时开启过多滤镜。',
         },
         {
           code: 'CONVERT_FILTER_UNSUPPORTED',
@@ -2148,6 +2217,7 @@ export const docsContentZh: DocsContent = {
             '如果整个工作流失败，点击「重刷」清除后重新开始',
           ],
           relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED'],
+          prevention: '启动工作流前确认图片为有效 PNG/JPG、网络连接稳定、Prompt 覆盖中无敏感词汇。',
         },
         {
           code: 'STYLE_TRANSFER_INPUT_MISSING',
@@ -2182,6 +2252,7 @@ export const docsContentZh: DocsContent = {
             '如果是网络错误：检查网络连接',
           ],
           relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'BACKEND_UNAVAILABLE'],
+          prevention: '开始转换前确认 API Key 有效、网络连接正常、模型可用。',
         },
         {
           code: 'WORKFLOW_CANCELLED',
@@ -2213,6 +2284,7 @@ export const docsContentZh: DocsContent = {
             '如果多次重试仍失败，联系后端管理员',
           ],
           relatedCodes: ['P2G_WORKFLOW_ERROR', 'PROMPT_BLOCKED'],
+          prevention: '某步骤失败后查看错误详情，根据提示修改对应 Prompt 或检查网络后重试。',
         },
       ],
     },
@@ -2237,6 +2309,7 @@ export const docsContentZh: DocsContent = {
             '如果问题持续，尝试在内存更大的设备上操作',
           ],
           relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: '处理大文件前关闭其他浏览器标签页；将图片最大边缩放到 2048 以下。',
         },
         {
           code: 'EXPORT_FAILED',
@@ -2253,6 +2326,7 @@ export const docsContentZh: DocsContent = {
             '使用「复制」功能作为临时替代方案',
           ],
           relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: '允许浏览器弹窗；文档过大时先移除部分图片再导出。',
         },
       ],
     },
@@ -2275,6 +2349,7 @@ export const docsContentZh: DocsContent = {
             '保存后重试',
           ],
           relatedCodes: ['API_KEY_EXPIRED', 'API_KEY_MISSING'],
+          prevention: '定期检查 API Key 有效期；在设置面板中保存 Key 后记得点击「保存」。',
         },
         {
           code: '403_FORBIDDEN',
@@ -2290,6 +2365,7 @@ export const docsContentZh: DocsContent = {
             '联系服务商确认账户状态',
           ],
           relatedCodes: ['API_KEY_EXPIRED', 'PROMPT_BLOCKED'],
+          prevention: '确认当前 Key 支持所选模型/服务；Prompt 中避免使用敏感词汇。',
         },
         {
           code: '404_NOT_FOUND',
@@ -2305,6 +2381,7 @@ export const docsContentZh: DocsContent = {
             '确认后端 API 版本是否匹配',
           ],
           relatedCodes: ['MODEL_NOT_FOUND', 'API_BASE_INVALID'],
+          prevention: '确认 API Base URL 和模型 ID 拼写正确；后端 API 版本与前端匹配。',
         },
         {
           code: '429_TOO_MANY_REQUESTS',
@@ -2335,6 +2412,7 @@ export const docsContentZh: DocsContent = {
             '如果问题持续，联系后端管理员查看服务器日志',
           ],
           relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '降低请求规模（图像尺寸、Max Tokens 等）；避免在服务器高负载时提交大任务。',
         },
         {
           code: '502_BAD_GATEWAY',
@@ -2351,6 +2429,7 @@ export const docsContentZh: DocsContent = {
             '重启后端服务后重试',
           ],
           relatedCodes: ['503_SERVICE_UNAVAILABLE', 'BACKEND_UNAVAILABLE'],
+          prevention: '本地部署时确认后端进程在运行；检查反向代理配置。',
         },
         {
           code: '503_SERVICE_UNAVAILABLE',
@@ -2366,6 +2445,7 @@ export const docsContentZh: DocsContent = {
             '联系后端管理员确认是否在维护',
           ],
           relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
+          prevention: '避开服务器维护时段操作；高负载时降低请求频率。',
         },
       ],
     },
