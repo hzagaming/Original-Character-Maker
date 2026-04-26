@@ -8,6 +8,7 @@ type DocsLabels = {
   docsNavTools: string;
   docsNavSections: string;
   docsNavDictionary: string;
+  docsNavIndex: string;
   docsTableOfContents: string;
   docsWelcomeTitle: string;
   docsButtonName: string;
@@ -20,6 +21,12 @@ type DocsLabels = {
   docsErrorSolution: string;
   docsErrorSteps: string;
   docsErrorRelated: string;
+  docsFilterAll: string;
+  docsFilterCritical: string;
+  docsFilterError: string;
+  docsFilterWarning: string;
+  docsFilterInfo: string;
+  docsErrorCount: string;
   docsSectionOverview: string;
   docsSectionButtons: string;
   docsSectionParameters: string;
@@ -116,10 +123,11 @@ export default function DocsPage({
     return () => container.removeEventListener('scroll', onScroll);
   }, [activeSection, activeToolId]);
 
-  const dictionarySearch = useMemo(() => {
-    const allErrors = content.errorDictionary.flatMap((cat) => cat.errors);
-    return allErrors;
+  const allErrors = useMemo(() => {
+    return content.errorDictionary.flatMap((cat) => cat.errors);
   }, [content]);
+
+  const isIndexView = activeToolId === 'error-index';
 
   return (
     <main className="feature-shell tool-page-shell">
@@ -160,6 +168,21 @@ export default function DocsPage({
               </div>
 
               <div className="docs-nav-group">
+                <p className="docs-nav-group-title">{messages.docsNavIndex}</p>
+                <button
+                  className={`docs-nav-item ${isIndexView ? 'active' : ''}`}
+                  type="button"
+                  onClick={() => {
+                    setActiveToolId('error-index');
+                    setActiveSection(null);
+                    if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' });
+                  }}
+                >
+                  {messages.docsFilterAll}
+                </button>
+              </div>
+
+              <div className="docs-nav-group">
                 <p className="docs-nav-group-title">{messages.docsNavDictionary}</p>
                 {content.errorDictionary.map((cat) => (
                   <button
@@ -195,7 +218,7 @@ export default function DocsPage({
                 ))}
               </div>
 
-              {activeToolId !== 'intro' && !activeToolId.startsWith('dict-') && (
+              {activeToolId !== 'intro' && !activeToolId.startsWith('dict-') && !isIndexView && (
                 <div className="docs-nav-group">
                   <p className="docs-nav-group-title">{messages.docsNavSections}</p>
                   {SECTION_IDS.map((id) => (
@@ -246,6 +269,8 @@ export default function DocsPage({
                 category={content.errorDictionary.find((c) => `dict-${c.id}` === activeToolId)!}
                 messages={messages}
               />
+            ) : isIndexView ? (
+              <ErrorIndexView errors={allErrors} messages={messages} />
             ) : (
               <article className="docs-article">
                 <h1>{activeTool.title}</h1>
@@ -381,6 +406,66 @@ function DictionaryView({ category, messages }: { category: import('./docsConten
       <div className="docs-errors-list">
         {category.errors.map((err, i) => (
           <ErrorCard key={i} error={err} messages={messages} />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function ErrorIndexView({ errors, messages }: { errors: import('./docsContent').DocsErrorItem[]; messages: DocsLabels }) {
+  const [filter, setFilter] = useState<string>('all');
+
+  const filters = [
+    { key: 'all', label: messages.docsFilterAll },
+    { key: 'critical', label: messages.docsFilterCritical },
+    { key: 'error', label: messages.docsFilterError },
+    { key: 'warning', label: messages.docsFilterWarning },
+    { key: 'info', label: messages.docsFilterInfo },
+  ];
+
+  const filtered = useMemo(() => {
+    if (filter === 'all') return errors;
+    return errors.filter((e) => e.severity === filter);
+  }, [errors, filter]);
+
+  const counts = useMemo(() => {
+    const map: Record<string, number> = { all: errors.length };
+    for (const err of errors) {
+      map[err.severity] = (map[err.severity] ?? 0) + 1;
+    }
+    return map;
+  }, [errors]);
+
+  return (
+    <article className="docs-article">
+      <h1>{messages.docsNavIndex}</h1>
+      <p className="docs-dictionary-desc">
+        {messages.docsErrorCount.replace('{count}', String(filtered.length))}
+      </p>
+
+      <div className="docs-index-filters">
+        {filters.map((f) => (
+          <button
+            key={f.key}
+            className={`docs-index-filter ${filter === f.key ? 'active' : ''} ${f.key !== 'all' ? severityClassMap[f.key] : ''}`}
+            type="button"
+            onClick={() => setFilter(f.key)}
+          >
+            <span>{f.label}</span>
+            <span className="docs-index-filter-count">{counts[f.key] ?? 0}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="docs-index-list">
+        {filtered.map((err, i) => (
+          <div key={i} className={`docs-index-row ${severityClassMap[err.severity] ?? ''}`}>
+            <span className="docs-index-severity">{severityLabelMap[err.severity] ?? err.severity}</span>
+            <span className="docs-index-code">{err.code}</span>
+            <span className="docs-index-message">{err.message}</span>
+            <span className="docs-index-category">{err.category}</span>
+            <span className="docs-index-location">{err.location}</span>
+          </div>
         ))}
       </div>
     </article>
