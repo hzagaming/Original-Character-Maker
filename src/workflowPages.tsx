@@ -6211,6 +6211,14 @@ export function Paper2GalPage({
                     )}
                   </div>
                   <p className="tiny-copy">{paper.hint}</p>
+                  <div className="paper-feedback-row">
+                    <button className="secondary-button small-button" type="button" onClick={() => window.open('https://github.com/hzagaming/Original-Character-Maker/issues', '_blank', 'noopener,noreferrer')}>
+                      🐛 反馈问题
+                    </button>
+                    <button className="secondary-button small-button" type="button" onClick={() => window.open('https://github.com/hzagaming/Original-Character-Maker/discussions', '_blank', 'noopener,noreferrer')}>
+                      💬 讨论交流
+                    </button>
+                  </div>
                 </div>
               ) : null}
             </section>

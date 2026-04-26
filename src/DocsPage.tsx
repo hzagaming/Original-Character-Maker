@@ -86,7 +86,33 @@ export default function DocsPage({
   const content = docsContentZh;
   const [activeToolId, setActiveToolId] = useState<string>(content.tools[0].id);
   const [activeSection, setActiveSection] = useState<SectionId | null>('overview');
+  const [searchQuery, setSearchQuery] = useState('');
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const allSearchableErrors = useMemo(() => {
+    const toolErrors = content.tools.flatMap((tool) =>
+      tool.errors.map((err) => ({ ...err, toolTitle: tool.title })),
+    );
+    const dictErrors = content.errorDictionary.flatMap((cat) =>
+      cat.errors.map((err) => ({ ...err, toolTitle: cat.name })),
+    );
+    return [...toolErrors, ...dictErrors];
+  }, [content]);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return allSearchableErrors.filter((err) =>
+      err.code.toLowerCase().includes(q) ||
+      err.message.toLowerCase().includes(q) ||
+      err.cause.toLowerCase().includes(q) ||
+      err.solution.toLowerCase().includes(q) ||
+      err.location.toLowerCase().includes(q) ||
+      err.category.toLowerCase().includes(q) ||
+      (err.prevention?.toLowerCase().includes(q) ?? false) ||
+      (err.steps?.some((s) => s.toLowerCase().includes(q)) ?? false),
+    );
+  }, [allSearchableErrors, searchQuery]);
 
   const activeTool = content.tools.find((t) => t.id === activeToolId) ?? content.tools[0];
 
@@ -239,6 +265,37 @@ export default function DocsPage({
 
           {/* Content */}
           <div className="docs-content" ref={contentRef}>
+            <div className="docs-search-bar">
+              <input
+                className="docs-search-input"
+                type="text"
+                placeholder="搜索错误代码、描述、原因或解决方案..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button className="docs-search-clear" type="button" onClick={() => setSearchQuery('')}>
+                  ✕
+                </button>
+              )}
+            </div>
+            {searchQuery.trim() && (
+              <article className="docs-article">
+                <h1>搜索结果</h1>
+                <p className="docs-dictionary-desc">
+                  找到 {searchResults.length} 条与「{searchQuery}」相关的结果
+                </p>
+                {searchResults.length === 0 ? (
+                  <div className="docs-search-empty">没有找到匹配的结果，请尝试其他关键词。</div>
+                ) : (
+                  <div className="docs-errors-list">
+                    {searchResults.map((err, i) => (
+                      <ErrorCard key={i} error={err} messages={messages} />
+                    ))}
+                  </div>
+                )}
+              </article>
+            )}
             {activeToolId === 'intro' ? (
               <article className="docs-article">
                 <h1>{messages.docsWelcomeTitle}</h1>
