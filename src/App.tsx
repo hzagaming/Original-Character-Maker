@@ -31,7 +31,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.1';
+const VERSION = '0.6.1.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -530,7 +530,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: '自定义快捷键属于实验性设置，请避免与浏览器或系统保留快捷键冲突。',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.6.1 Paper2Gal 布局重构 + Prompt 更新 + Provider 映射为 gpt2 + DevMode API 信息增强。',
+    announcementDescription: '0.6.1.1 Paper2Gal 黑屏紧急修复：displayProviderName 函数缺失导致 ReferenceError；全面加固 localStorage 恢复、JSON 序列化、workflow 输出类型检查。',
     announcementList1: '全局音效全覆盖，背景音乐引擎 v5 升级至 40 种风格预设并采用前瞻式精准调度。',
     announcementList2: '性能设置各项选项真正生效：减少动画禁用 CSS 动画、禁用毛玻璃移除 backdrop-filter、开发者模式显示实时调试面板。',
     announcementList3: '30 种语言同步更新，40 个 BGM 预设名称已同步到 4 种基础语言翻译中。',
@@ -879,7 +879,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'カスタムショートカットは実験的機能です。ブラウザや OS の予約ショートカットとの衝突に注意してください。',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.6.1 Paper2Galレイアウト再構築 + Prompt更新 + Providerマッピング gpt2 + DevMode API情報強化。',
+    announcementDescription: '0.6.1.1 Paper2Gal ブラックアウト緊急修正：displayProviderName 関数の欠落による ReferenceError；localStorage 復元、JSON シリアライズ、ワークフロー出力型チェックを全面的に強化。',
     announcementList1: 'グローバルSEフルカバー、BGMエンジンv5は40種のプリセットとルックアヘッド精密スケジューリングを採用。',
     announcementList2: 'パフォーマンス設定が実際に機能：アニメーション削減でCSSアニメーション無効化、ガラス効果無効化でbackdrop-filter削除、開発者モードでリアルタイムデバッグパネル表示。',
     announcementList3: '約30言語に同期更新。40個のBGMプリセット名が4つの基礎言語翻訳に同期。',
@@ -1228,7 +1228,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Custom shortcuts are experimental. Avoid combinations that conflict with browser or system-reserved commands.',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.6.1: Paper2Gal layout refactored — results panel moved to right column. Prompt defaults updated. Provider banana2 mapped to gpt2. DevMode API info enhanced with vendor and masked keys.',
+    announcementDescription: 'Version 0.6.1.1: Paper2Gal black screen hotfix — missing displayProviderName caused ReferenceError; hardened localStorage recovery, JSON serialization, and workflow output type checks.',
     announcementList1: 'Global sound effects fully cover all interactions; BGM engine v5 upgrades to 40 presets with lookahead precision scheduling.',
     announcementList2: 'Performance settings now actually work: reduce animations disables CSS animations, disable glassmorphism removes backdrop-filter, dev mode shows real-time debug panel.',
     announcementList3: 'Synced to ~30 languages. 40 BGM preset names synchronized across 4 base language translations.',
@@ -1577,7 +1577,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Пользовательские шорткаты являются экспериментальной функцией. Избегайте конфликтов с системными и браузерными сочетаниями.',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.6.1: Рефакторинг макета Paper2Gal — панель результатов перенесена в правый столбец. Обновлены стандартные prompt. Provider banana2 отображается как gpt2. Улучшено отображение API в DevMode.',
+    announcementDescription: 'Версия 0.6.1.1: Срочное исправление чёрного экрана Paper2Gal — отсутствие displayProviderName вызывало ReferenceError; усилена защита восстановления localStorage, сериализации JSON и проверки типов выходных данных workflow.',
     announcementList1: 'Глобальные звуковые эффекты полностью покрывают все взаимодействия; движок BGM v5 обновлён до 40 пресетов с точным планированием lookahead.',
     announcementList2: 'Настройки производительности теперь реально работают: уменьшение анимации отключает CSS-анимации, отключение стеклянного эффекта удаляет backdrop-filter, режим разработчика показывает панель отладки в реальном времени.',
     announcementList3: 'Синхронизировано с ~30 языками. 40 названий пресетов BGM синхронизированы для 4 базовых языков перевода.',
@@ -2409,6 +2409,21 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '0.6.1.1',
+    date: '2026-04-20',
+    title: '0.6.1.1 Paper2Gal 黑屏紧急修复',
+    summary: '修复 Paper2Gal 页面偶发黑屏的根本问题：displayProviderName 函数意外缺失导致 ReferenceError；同时全面加固 localStorage 数据恢复、JSON 序列化、workflow 输出类型检查等防御逻辑。',
+    details: [
+      '修复 Paper2Gal 黑屏（根本原因）：displayProviderName 函数在文件中被意外移除，但 JSX 中仍有 4 处调用。页面渲染到 provider 信息区域时抛出 ReferenceError，导致 React 整棵树卸载黑屏。现已恢复该函数。',
+      '添加 safeJsonStringify 防御：所有 Paper2Gal 的 JSON.stringify 调用替换为安全版本，防止循环引用或不可序列化值导致崩溃。',
+      'localStorage 恢复数据规范化：message 和 workflow 从 localStorage 恢复后做有效性检查，防止损坏数据（如 message 为 null）导致 Cannot read properties of null。',
+      '强化 outputCards url 过滤：url 必须是 typeof === "string" 且非空，防止数字等非字符串值传入 buildApiUrl 导致 startsWith is not a function。',
+      'buildApiUrl 前置类型检查：添加 typeof pathname !== "string" 保护，即使传入非字符串也能安全返回空字符串。',
+      'workflow.outputs 类型安全检查：确保 outputs 是对象类型再访问其属性，防止损坏 workflow 数据导致 TypeError。',
+      '更新版本号至 0.6.1.1，首页公告同步更新。',
+    ],
+  },
   {
     version: '0.6.1',
     date: '2026-04-25',

@@ -205,7 +205,7 @@ export function buildApiUrl(
   pathname: string,
   channel: 1 | 2 | 3 = 1,
 ): string {
-  if (!pathname) {
+  if (typeof pathname !== 'string' || !pathname) {
     return '';
   }
 

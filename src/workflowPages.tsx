@@ -5,6 +5,14 @@ import { playSound } from './audioEngine';
 import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
 import type { AppLanguage, SettingsState, ShortcutAction } from './types';
 
+function safeJsonStringify(value: unknown, space?: number): string {
+  try {
+    return JSON.stringify(value, null, space);
+  } catch {
+    return '{"error":"JSON serialization failed"}';
+  }
+}
+
 type SharedPageProps = {
   appSubtitle: string;
   backHome: string;
@@ -618,6 +626,11 @@ const PREVIOUS_PAPER_PROMPT_OVERRIDES: PaperPromptOverrides = {
   cg01: '基于参考图中的同一角色生成新的单人原创 CG 场景。角色身份、发型、服装、配色、耳朵、饰品和整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景由 AI 自行构思，禁止新增其他人物。图片横屏的比例',
   cg02: '基于参考图中的同一角色生成另一张新的单人原创 CG 场景。角色身份、发型、服装、配色、耳朵、饰品和整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景由 AI 自行构思，禁止新增其他人物。图片横屏的比例',
 };
+
+function displayProviderName(provider: string | null | undefined): string {
+  if (provider === 'banana2') return 'gpt2';
+  return provider || '—';
+}
 
 function migratePaperPromptOverrides(value: Partial<PaperPromptOverrides> | null | undefined) {
   if (!value) {
@@ -2788,8 +2801,8 @@ function derivePaperWorkflowErrorInsight(options: {
   const detailText = [
     workflow?.error || '',
     latestStepError?.error || '',
-    JSON.stringify(workflow?.error_details || {}),
-    JSON.stringify(latestStepError?.debug || {}),
+    safeJsonStringify(workflow?.error_details || {}),
+    safeJsonStringify(latestStepError?.debug || {}),
   ]
     .filter(Boolean)
     .join('\n');
@@ -2823,12 +2836,17 @@ function derivePaperWorkflowErrorInsight(options: {
 }
 
 function normalizePaperPromptOverrides(overrides: PaperPromptOverrides): PaperPromptOverrides {
+  const defaults = createDefaultPaperPromptOverrides();
+  const safe = (value: unknown, fallback: string): string => {
+    if (typeof value === 'string') return value.trim();
+    return fallback;
+  };
   return {
-    thinking: overrides.thinking.trim(),
-    surprise: overrides.surprise.trim(),
-    angry: overrides.angry.trim(),
-    cg01: overrides.cg01.trim(),
-    cg02: overrides.cg02.trim(),
+    thinking: safe(overrides.thinking, defaults.thinking),
+    surprise: safe(overrides.surprise, defaults.surprise),
+    angry: safe(overrides.angry, defaults.angry),
+    cg01: safe(overrides.cg01, defaults.cg01),
+    cg02: safe(overrides.cg02, defaults.cg02),
   };
 }
 
@@ -3407,7 +3425,7 @@ function DraggableErrorPanel({
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <strong style={{ color: '#8aa4c0', fontSize: 12 }}>{copy.errorPanel.details}</strong>
           <pre className="code-block" style={{ flex: 1, overflow: 'auto', marginTop: 4, fontSize: 12 }}>
-            {JSON.stringify(error.details, null, 2)}
+            {safeJsonStringify(error.details, 2)}
           </pre>
         </div>
         <div className="mini-action-row" style={{ marginTop: 4, flexShrink: 0 }}>
@@ -5504,13 +5522,22 @@ export function Paper2GalPage({
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [inputPreviewUrl, setInputPreviewUrl] = useState('');
+  const safePersistedMessage: PaperMessage =
+    persistedState.message && typeof persistedState.message === 'object' && 'type' in persistedState.message && 'text' in persistedState.message
+      ? (persistedState.message as PaperMessage)
+      : { type: 'info', text: paper.idleMessage };
+  const safePersistedWorkflow: PaperWorkflow | null =
+    persistedState.workflow && typeof persistedState.workflow === 'object' && 'id' in persistedState.workflow && 'status' in persistedState.workflow
+      ? (persistedState.workflow as PaperWorkflow)
+      : null;
+
   const [inputFileName, setInputFileName] = useState(persistedState.inputFileName);
-  const [workflow, setWorkflow] = useState<PaperWorkflow | null>(persistedState.workflow);
+  const [workflow, setWorkflow] = useState<PaperWorkflow | null>(safePersistedWorkflow);
   const workflowRef = useRef<PaperWorkflow | null>(workflow);
   useEffect(() => {
     workflowRef.current = workflow;
   }, [workflow]);
-  const [message, setMessage] = useState<PaperMessage>(persistedState.message);
+  const [message, setMessage] = useState<PaperMessage>(safePersistedMessage);
   const [aiConcurrencyEnabled, setAiConcurrencyEnabled] = useState(Boolean(persistedState.aiConcurrencyEnabled));
   const [promptOverrides, setPromptOverrides] = useState<PaperPromptOverrides>(
     normalizePaperPromptOverrides(migratePaperPromptOverrides(persistedState.promptOverrides)),
@@ -5527,7 +5554,7 @@ export function Paper2GalPage({
   useEffect(() => { settingsRef.current = settings; }, [settings]);
   useEffect(() => { paperRef.current = paper; }, [paper]);
   const [copiedActionKey, setCopiedActionKey] = useState('');
-  const currentSnapshot = JSON.stringify({
+  const currentSnapshot = safeJsonStringify({
     inputFileName,
     workflowId: workflow?.id ?? '',
     workflowStatus: workflow?.status ?? 'idle',
@@ -5685,7 +5712,7 @@ export function Paper2GalPage({
   const badgeClass = workflow ? getPaperStatusBadgeClass(workflow) : isSubmitting ? 'running' : 'idle';
   const badgeLabel = workflow ? statusLabels[workflow.status] : isSubmitting ? copy.statusRunning : copy.statusIdle;
   const outputCards = useMemo(() => {
-    if (!workflow?.outputs) {
+    if (!workflow?.outputs || typeof workflow.outputs !== 'object') {
       return [];
     }
 
@@ -5739,7 +5766,8 @@ export function Paper2GalPage({
         stepName: 'cutout_expression_angry' as PaperWorkflowStepName,
       },
     ].filter(
-      (item): item is { title: string; url: string; fileName: string; stepName: PaperWorkflowStepName } => Boolean(item.url),
+      (item): item is { title: string; url: string; fileName: string; stepName: PaperWorkflowStepName } =>
+        typeof item.url === 'string' && item.url.length > 0,
     );
   }, [stepLabels, workflow]);
 
@@ -5790,8 +5818,8 @@ export function Paper2GalPage({
     workflow,
     latestStepError,
   });
-  const resultJson = JSON.stringify(workflow?.outputs ?? { state: 'waiting' }, null, 2);
-  const errorJson = JSON.stringify(
+  const resultJson = safeJsonStringify(workflow?.outputs ?? { state: 'waiting' }, 2);
+  const errorJson = safeJsonStringify(
     readableErrorMessage
       ? {
           readable_message: readableErrorMessage,
@@ -5803,10 +5831,9 @@ export function Paper2GalPage({
           workflow_error_details: workflow?.error_details ?? null,
         }
       : { state: 'none' },
-    null,
     2,
   );
-  const debugJson = JSON.stringify(
+  const debugJson = safeJsonStringify(
     {
       message,
       workflow,
@@ -5817,10 +5844,9 @@ export function Paper2GalPage({
       aiConcurrencyEnabled,
       promptOverrides,
     },
-    null,
     2,
   );
-  const configExportJson = JSON.stringify({ tool: 'paper2gal', config: { promptOverrides, aiConcurrencyEnabled } }, null, 2);
+  const configExportJson = safeJsonStringify({ tool: 'paper2gal', config: { promptOverrides, aiConcurrencyEnabled } }, 2);
 
   useEffect(() => {
     if (readableErrorMessage) {
@@ -5882,7 +5908,7 @@ export function Paper2GalPage({
     setPromptOverrides(createDefaultPaperPromptOverrides());
     setMessage({ type: 'info', text: paper.idleMessage });
 
-    const nextSnapshot = JSON.stringify({
+    const nextSnapshot = safeJsonStringify({
       inputFileName: '',
       workflowId: '',
       workflowStatus: 'idle',
@@ -6332,7 +6358,7 @@ export function Paper2GalPage({
                 </div>
               )}
 
-              {workflow?.outputs && (
+              {workflow?.outputs && typeof workflow.outputs === 'object' && (
                 <div className="mini-action-row paper-meta-actions">
                   {workflow.outputs.manifest && (
                     <button className="secondary-button small-button" type="button" onClick={() => window.open(toPaperAssetUrl(settings, workflow.outputs.manifest || ''), '_blank', 'noopener,noreferrer')}>
@@ -6479,8 +6505,8 @@ export function Paper2GalPage({
         <DraggableErrorPanel
           error={error}
           onClose={() => setShowErrorPanel(false)}
-          onCopy={() => copyText(JSON.stringify(error, null, 2))}
-          onDownload={() => downloadText('paper2gal-error.json', JSON.stringify(error, null, 2), 'application/json')}
+          onCopy={() => copyText(safeJsonStringify(error, 2))}
+          onDownload={() => downloadText('paper2gal-error.json', safeJsonStringify(error, 2), 'application/json')}
           onRetry={() => { setShowErrorPanel(false); }}
           onOpenDocs={() => onNavigate?.('docs')}
           copy={copy}
