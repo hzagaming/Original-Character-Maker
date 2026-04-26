@@ -14,6 +14,25 @@ const PANEL_STORAGE_KEY = 'oc-maker.devmode-panel';
 const MIN_W = 280;
 const MIN_H = 200;
 
+function maskKey(key: string): string {
+  if (key.length <= 8) return key;
+  return key.slice(0, 4) + '••••' + key.slice(-4);
+}
+
+function inferApiVendor(settings: SettingsState): string {
+  const url = (settings.apiBaseUrl || '').toLowerCase();
+  if (settings.apiPreset === 'plato') return 'Plato';
+  if (url.includes('openai')) return 'OpenAI';
+  if (url.includes('anthropic')) return 'Anthropic';
+  if (url.includes('google') || url.includes('gemini')) return 'Google';
+  if (url.includes('aliyun') || url.includes('dashscope')) return 'Aliyun';
+  if (url.includes('baidu')) return 'Baidu';
+  if (url.includes('qwen')) return 'Alibaba (Qwen)';
+  if (url.includes('deepseek')) return 'DeepSeek';
+  if (url.includes('localhost') || url.includes('127.0.0.1')) return 'Local';
+  return 'Unknown';
+}
+
 function loadPanelState() {
   try {
     const raw = localStorage.getItem(PANEL_STORAGE_KEY);
@@ -481,10 +500,13 @@ export default function DevModePanel({ version, settings, effectiveApiEndpoint, 
           <Row label="Mode" value={settings.interfaceMode} />
           <Row label="Endpoint" value={effectiveApiEndpoint || 'none'} />
           <Row label="Preset" value={settings.apiPreset} />
+          <Row label="Vendor" value={inferApiVendor(settings)} />
           <Row label="Ch1 URL" value={settings.apiBaseUrl || '—'} />
-          <Row label="Ch1 Key" value={settings.apiKey ? '••••' + settings.apiKey.slice(-4) : '—'} />
+          <Row label="Ch1 Key" value={settings.apiKey ? maskKey(settings.apiKey) : '—'} />
           <Row label="Ch2 URL" value={settings.apiBaseUrl2 || '—'} />
+          <Row label="Ch2 Key" value={settings.apiKey2 ? maskKey(settings.apiKey2) : '—'} />
           <Row label="Ch3 URL" value={settings.apiBaseUrl3 || '—'} />
+          <Row label="Ch3 Key" value={settings.apiKey3 ? maskKey(settings.apiKey3) : '—'} />
         </Section>
 
         {/* Presets */}

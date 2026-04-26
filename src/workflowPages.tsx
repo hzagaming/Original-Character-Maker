@@ -595,11 +595,11 @@ function buildInvisiblePromptSuffix(cfg: Record<string, unknown>): string {
 
 function createDefaultPaperPromptOverrides(): PaperPromptOverrides {
   return {
-    thinking: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成思考状态。图片背景纯白，竖屏的比例',
-    surprise: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成惊讶状态。图片背景纯白，竖屏的比例',
-    angry: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。图片背景纯白，竖屏的比例',
-    cg01: '基于参考图中的同一角色生成单人 CG 场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
-    cg02: '基于参考图中的同一角色生成单人 CG 场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
+    thinking: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成思考状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素',
+    surprise: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成惊讶状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素',
+    angry: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素',
+    cg01: '基于参考图中的同一角色生成单人CG场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
+    cg02: '基于参考图中的同一角色生成单人CG场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
   };
 }
 
@@ -6116,9 +6116,16 @@ export function Paper2GalPage({
                 <div className="collapsible-body">
                   <div className="tool-card-header">
                     <div />
-                    <button className="secondary-button small-button" type="button" onClick={handlePickFile}>
-                      {selectedFile ? copy.replaceImage : copy.chooseImage}
-                    </button>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      {onNavigate && (
+                        <button className="secondary-button small-button" type="button" onClick={() => onNavigate('image-converter')}>
+                          {paper.formatConverterLink}
+                        </button>
+                      )}
+                      <button className="secondary-button small-button" type="button" onClick={handlePickFile}>
+                        {selectedFile ? copy.replaceImage : copy.chooseImage}
+                      </button>
+                    </div>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -6131,16 +6138,6 @@ export function Paper2GalPage({
                     {inputPreviewUrl ? <img className="preview-image" src={inputPreviewUrl} alt={inputFileName} /> : <div className="preview-empty">{paper.chooseHint}</div>}
                   </div>
                   <p className="tiny-copy">{inputFileName || copy.noImage}</p>
-                  {onNavigate && (
-                    <button
-                      className="link-button tiny-copy"
-                      type="button"
-                      onClick={() => onNavigate('image-converter')}
-                      style={{ marginTop: 4, display: 'inline-block' }}
-                    >
-                      {paper.formatConverterLink}
-                    </button>
-                  )}
                 </div>
               ) : null}
             </section>
@@ -6227,6 +6224,93 @@ export function Paper2GalPage({
               ) : null}
             </section>
 
+          </div>
+
+          <div className="tool-column side">
+            <section className="tool-card">
+              <div className="tool-card-header">
+                <div>
+                  <span className="card-caption">{copy.progressTitle}</span>
+                  <h3>{copy.progressTitle}</h3>
+                </div>
+                <span className={`status-badge ${badgeClass}`}>{badgeLabel}</span>
+              </div>
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: `${progress}%` }} />
+              </div>
+              <div className="progress-meta">
+                <span>{copy.workflowId}</span>
+                <strong>{workflow?.id ?? 'paper2gal-idle'}</strong>
+              </div>
+              {workflow ? (
+                <div className="paper-step-list">
+                  {PAPER_STEP_ORDER.map((stepName) => {
+                    const step = workflow.steps?.[stepName];
+                    const stepStatus = step?.status ?? 'queued';
+                    const debugEntries =
+                      step?.debug ? Object.entries(step.debug).filter(([, value]) => value !== null && value !== undefined && value !== '') : [];
+                    return (
+                      <article key={stepName} className={`paper-step-card ${stepStatus}`}>
+                        <div className="paper-step-head">
+                          <div>
+                            <strong>{stepLabels[stepName]}</strong>
+                            <p>{displayProviderName(step?.provider)}</p>
+                          </div>
+                          <span>{statusLabels[stepStatus]}</span>
+                        </div>
+                        {step?.output_url && (
+                          <div className="mini-action-row">
+                            <button
+                              className="secondary-button small-button"
+                              type="button"
+                              onClick={() => window.open(toPaperAssetUrl(settings, step.output_url || ''), '_blank', 'noopener,noreferrer')}
+                            >
+                              {paper.openFile}
+                            </button>
+                          </div>
+                        )}
+                        {step?.error && <div className="paper-step-error">{step.error}</div>}
+                        {debugEntries.length > 0 && (
+                          <details className="paper-debug-panel">
+                            <summary>{copy.debugTitle}</summary>
+                            <div className="paper-debug-grid">
+                              {debugEntries.map(([key, value]) => (
+                                <div key={key} className="paper-debug-row">
+                                  <span>{key}</span>
+                                  <code>{String(value)}</code>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="log-empty">{paper.noWorkflow}</div>
+              )}
+              <div className="tool-card-divider" />
+              <CollapsibleCodePanel
+                title={copy.logsTitle}
+                description={paper.logsHint}
+                code={workflowLogText}
+                copy={copy}
+                defaultOpen={false}
+                autoOpenSignal={readableErrorMessage}
+                actions={
+                  <>
+                    <button className="secondary-button small-button" type="button" onClick={() => copyText(workflowLogText)}>
+                      {copy.copyLogs}
+                    </button>
+                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-logs.txt', workflowLogText)}>
+                      {copy.downloadLogs}
+                    </button>
+                  </>
+                }
+              />
+            </section>
+
             <section className="tool-card">
               <div className="tool-card-section">
                 <span className="card-caption">{paper.resultsTitle}</span>
@@ -6237,13 +6321,13 @@ export function Paper2GalPage({
               {workflow?.outputs?.providers && (
                 <div className="paper-provider-row">
                   <span className="paper-provider-pill">
-                    {paper.providerCutout}: {workflow.outputs.providers.remove_background || '—'}
+                    {paper.providerCutout}: {displayProviderName(workflow.outputs.providers.remove_background)}
                   </span>
                   <span className="paper-provider-pill">
-                    {paper.providerExpressions}: {workflow.outputs.providers.expressions || '—'}
+                    {paper.providerExpressions}: {displayProviderName(workflow.outputs.providers.expressions)}
                   </span>
                   <span className="paper-provider-pill">
-                    {paper.providerCg}: {workflow.outputs.providers.cg || '—'}
+                    {paper.providerCg}: {displayProviderName(workflow.outputs.providers.cg)}
                   </span>
                 </div>
               )}
@@ -6373,92 +6457,6 @@ export function Paper2GalPage({
                   }
                 />
               </div>
-            </section>
-          </div>
-
-          <div className="tool-column side">
-            <section className="tool-card">
-              <div className="tool-card-header">
-                <div>
-                  <span className="card-caption">{copy.progressTitle}</span>
-                  <h3>{copy.progressTitle}</h3>
-                </div>
-                <span className={`status-badge ${badgeClass}`}>{badgeLabel}</span>
-              </div>
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${progress}%` }} />
-              </div>
-              <div className="progress-meta">
-                <span>{copy.workflowId}</span>
-                <strong>{workflow?.id ?? 'paper2gal-idle'}</strong>
-              </div>
-              {workflow ? (
-                <div className="paper-step-list">
-                  {PAPER_STEP_ORDER.map((stepName) => {
-                    const step = workflow.steps?.[stepName];
-                    const stepStatus = step?.status ?? 'queued';
-                    const debugEntries =
-                      step?.debug ? Object.entries(step.debug).filter(([, value]) => value !== null && value !== undefined && value !== '') : [];
-                    return (
-                      <article key={stepName} className={`paper-step-card ${stepStatus}`}>
-                        <div className="paper-step-head">
-                          <div>
-                            <strong>{stepLabels[stepName]}</strong>
-                            <p>{step?.provider || '—'}</p>
-                          </div>
-                          <span>{statusLabels[stepStatus]}</span>
-                        </div>
-                        {step?.output_url && (
-                          <div className="mini-action-row">
-                            <button
-                              className="secondary-button small-button"
-                              type="button"
-                              onClick={() => window.open(toPaperAssetUrl(settings, step.output_url || ''), '_blank', 'noopener,noreferrer')}
-                            >
-                              {paper.openFile}
-                            </button>
-                          </div>
-                        )}
-                        {step?.error && <div className="paper-step-error">{step.error}</div>}
-                        {debugEntries.length > 0 && (
-                          <details className="paper-debug-panel">
-                            <summary>{copy.debugTitle}</summary>
-                            <div className="paper-debug-grid">
-                              {debugEntries.map(([key, value]) => (
-                                <div key={key} className="paper-debug-row">
-                                  <span>{key}</span>
-                                  <code>{String(value)}</code>
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        )}
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="log-empty">{paper.noWorkflow}</div>
-              )}
-              <div className="tool-card-divider" />
-              <CollapsibleCodePanel
-                title={copy.logsTitle}
-                description={paper.logsHint}
-                code={workflowLogText}
-                copy={copy}
-                defaultOpen={false}
-                autoOpenSignal={readableErrorMessage}
-                actions={
-                  <>
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(workflowLogText)}>
-                      {copy.copyLogs}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('paper2gal-logs.txt', workflowLogText)}>
-                      {copy.downloadLogs}
-                    </button>
-                  </>
-                }
-              />
             </section>
           </div>
         </div>
