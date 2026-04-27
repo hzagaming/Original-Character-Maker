@@ -32,7 +32,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.4';
+const VERSION = '0.6.4.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -2530,6 +2530,37 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.6.4.2',
+    date: '2026-04-27',
+    title: '0.6.4.2 表情生成支持背景开关',
+    summary: '表情生成 prompt 新增白色背景开关：默认去掉「纯白背景」限制，允许 AI 生成带精致背景的角色图；可通过 EXPRESSION_WHITE_BACKGROUND=true 环境变量恢复白色背景。',
+    details: [
+      '表情生成白色背景开关：prompts/ 目录下 expression-thinking.md / expression-surprise.md / expression-angry.md 已去掉「图片背景纯白」段落。',
+      '后端动态拼接：server/src/services/promptCompiler.js 新增 WHITE_BG_SUFFIX 常量，根据 config.expressionWhiteBackground 开关在运行时决定是否拼接白色背景段落。',
+      '环境变量控制：.env.example 新增 EXPRESSION_WHITE_BACKGROUND 说明，默认 false（不带白色背景）。',
+      '更新版本号至 0.6.4.2，公告历史同步更新。',
+    ],
+  },
+  {
+    version: '0.6.4.1',
+    date: '2026-04-27',
+    title: '0.6.4.1 捏脸编辑器全面增强',
+    summary: '新增撤销/重做系统、一键随机生成、4种角色预设模板、画布背景切换与缩放、颜色预览小圆点、角色阴影、参考网格与骨架覆盖层、丰富快捷键支持；修复 asset 选项与 CSS 不匹配问题；增强服装 CSS 细节。',
+    details: [
+      '撤销/重做系统：50步历史栈，支持 Ctrl+Z/Y 快捷键，工具栏实时显示可撤销/重做状态。',
+      '一键随机生成：随机组合全部资产与参数，支持 Ctrl+R 快捷键。',
+      '4种角色预设模板：资产面板新增可爱型/成熟型/冷酷型/运动型快速预设，支持数字键 1-4 快捷键。',
+      '画布背景切换：支持网格/纯色/渐变/透明四种背景，PNG 导出自动跟随背景设置。',
+      '画布缩放控制：60%-160% 范围缩放，支持重置视图按钮。',
+      '参考网格与骨架覆盖层：stage-toolbar 新增 Preview/Reference/Overlay 三种视图模式。',
+      '颜色预览小圆点：肤色/发色/瞳色/配件色滑块旁显示实时颜色。',
+      '角色底部阴影与过渡动画：增强视觉层次，资产切换带弹性过渡。',
+      '修复 asset 选项一致性：移除 CSS 中不存在的眼睛选项，修正随机生成与预设模板中的错误类名。',
+      '增强服装 CSS 细节：上衣新增领口、抽绳、翻领、纽扣、口袋、领巾、条纹；下装新增腰带、褶皱、裤线、裤脚、卷边、侧缝。',
+      'Toast 通知替换 alert：导出/导入失败时显示组件内 Toast，不再使用浏览器原生 alert。',
+    ],
+  },
+  {
     version: '0.6.4',
     date: '2026-04-27',
     title: '0.6.4 抠图引擎切换 rembg + 超时控制 + 错误字典扩充',
@@ -3939,6 +3970,17 @@ type FaceMakerCopy = {
   confirmTitle: string;
   confirmDirty: string;
   confirmClean: string;
+  undo: string;
+  redo: string;
+  randomize: string;
+  bgCheckerboard: string;
+  bgSolid: string;
+  bgGradient: string;
+  bgTransparent: string;
+  presetCute: string;
+  presetMature: string;
+  presetCool: string;
+  presetSporty: string;
 };
 
 const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
@@ -4001,6 +4043,17 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     confirmTitle: '确定返回首页吗？',
     confirmDirty: '你还没保存当前捏脸项目，返回后未保存的调整不会保留。',
     confirmClean: '当前内容已经保存，返回首页后可以稍后再继续编辑。',
+    undo: '撤销',
+    redo: '重做',
+    randomize: '随机生成',
+    bgCheckerboard: '网格',
+    bgSolid: '纯色',
+    bgGradient: '渐变',
+    bgTransparent: '透明',
+    presetCute: '可爱型',
+    presetMature: '成熟型',
+    presetCool: '冷酷型',
+    presetSporty: '运动型',
   },
   ja: {
     saved: '保存済み',
@@ -4061,6 +4114,17 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     confirmTitle: 'ホームへ戻りますか？',
     confirmDirty: '現在の捏脸プロジェクトはまだ保存されていません。戻ると未保存の調整は失われます。',
     confirmClean: '現在の内容は保存済みです。ホームへ戻って後で続けられます。',
+    undo: '元に戻す',
+    redo: 'やり直し',
+    randomize: 'ランダム生成',
+    bgCheckerboard: 'チェック柄',
+    bgSolid: '単色',
+    bgGradient: 'グラデーション',
+    bgTransparent: '透明',
+    presetCute: 'かわいい',
+    presetMature: '大人っぽい',
+    presetCool: 'クール',
+    presetSporty: 'スポーティ',
   },
   en: {
     saved: 'Saved',
@@ -4121,6 +4185,17 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     confirmTitle: 'Return to the homepage?',
     confirmDirty: 'This face-maker draft still has unsaved changes. Returning now will discard them.',
     confirmClean: 'The current face-maker draft is already saved. You can safely come back later.',
+    undo: 'Undo',
+    redo: 'Redo',
+    randomize: 'Randomize',
+    bgCheckerboard: 'Grid',
+    bgSolid: 'Solid',
+    bgGradient: 'Gradient',
+    bgTransparent: 'Transparent',
+    presetCute: 'Cute',
+    presetMature: 'Mature',
+    presetCool: 'Cool',
+    presetSporty: 'Sporty',
   },
   ru: {
     saved: 'Сохранено',
@@ -4181,6 +4256,17 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     confirmTitle: 'Вернуться на главную?',
     confirmDirty: 'Текущий проект face-maker ещё не сохранён. Если вернуться сейчас, правки будут потеряны.',
     confirmClean: 'Текущий черновик уже сохранён. Можно безопасно вернуться и продолжить позже.',
+    undo: 'Отменить',
+    redo: 'Вернуть',
+    randomize: 'Случайный',
+    bgCheckerboard: 'Сетка',
+    bgSolid: 'Сплошной',
+    bgGradient: 'Градиент',
+    bgTransparent: 'Прозрачный',
+    presetCute: 'Милый',
+    presetMature: 'Зрелый',
+    presetCool: 'Крутой',
+    presetSporty: 'Спортивный',
   },
 };
 
@@ -4273,8 +4359,187 @@ function FaceMakerPage({
   const [savedSnapshot, setSavedSnapshot] = useState(() => JSON.stringify(draft));
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showReference, setShowReference] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [stageBackground, setStageBackground] = useState<'checkerboard' | 'solid' | 'gradient' | 'transparent'>('checkerboard');
+  const [stageZoom, setStageZoom] = useState(1);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
   const importFileRef = useRef<HTMLInputElement>(null);
   const isDirty = JSON.stringify(draft) !== savedSnapshot;
+
+  // Undo / Redo history stack (max 50 steps)
+  const historyRef = useRef<{ past: typeof initialDraft[]; future: typeof initialDraft[] }>({ past: [], future: [] });
+  const skipHistoryRef = useRef(false);
+
+  useEffect(() => {
+    if (skipHistoryRef.current) {
+      skipHistoryRef.current = false;
+      return;
+    }
+    const hist = historyRef.current;
+    hist.past.push(draft);
+    if (hist.past.length > 50) hist.past.shift();
+    hist.future = [];
+    setCanUndo(hist.past.length > 1);
+    setCanRedo(false);
+  }, [draft]);
+
+  function undo() {
+    const hist = historyRef.current;
+    if (hist.past.length <= 1) return;
+    const current = hist.past.pop()!;
+    hist.future.unshift(current);
+    const previous = hist.past[hist.past.length - 1];
+    skipHistoryRef.current = true;
+    setDraft(previous);
+    setCanUndo(hist.past.length > 1);
+    setCanRedo(hist.future.length > 0);
+    playSound('undo');
+  }
+
+  function redo() {
+    const hist = historyRef.current;
+    if (hist.future.length === 0) return;
+    const next = hist.future.shift()!;
+    hist.past.push(next);
+    skipHistoryRef.current = true;
+    setDraft(next);
+    setCanUndo(hist.past.length > 1);
+    setCanRedo(hist.future.length > 0);
+    playSound('redo');
+  }
+
+  function randomizeDraft() {
+    const faceShapes = ['oval', 'round', 'square', 'heart', 'diamond'];
+    const hairs = ['air-bob', 'long-straight', 'short-boy', 'twin-tail', 'ponytail', 'wolf-cut', 'curly', 'bun'];
+    const brows = ['natural', 'thin', 'thick', 'flat', 'arch'];
+    const eyesList = ['soft-round', 'sharp', 'sleepy', 'idol'];
+    const noses = ['small', 'straight', 'pointed', 'button'];
+    const mouths = ['smile', 'neutral', 'pout', 'open', 'smirk', 'tongue'];
+    const earsList = ['standard', 'pointy', 'elf'];
+    const accessories = ['none', 'glasses', 'ribbon', 'scar', 'earring', 'blush', 'mole', 'mask'];
+    const poses = ['standing', 'arms-crossed', 'hand-on-hip', 'wave'];
+    const tops = ['none', 't-shirt', 'hoodie', 'blazer', 'sailor'];
+    const bottoms = ['none', 'skirt', 'pants', 'shorts'];
+    const rand = (min: number, max: number) => Math.round(min + Math.random() * (max - min));
+    const next = {
+      faceShape: faceShapes[rand(0, faceShapes.length - 1)],
+      hair: hairs[rand(0, hairs.length - 1)],
+      brow: brows[rand(0, brows.length - 1)],
+      eyes: eyesList[rand(0, eyesList.length - 1)],
+      nose: noses[rand(0, noses.length - 1)],
+      mouth: mouths[rand(0, mouths.length - 1)],
+      ears: earsList[rand(0, earsList.length - 1)],
+      accessory: accessories[rand(0, accessories.length - 1)],
+      pose: poses[rand(0, poses.length - 1)],
+      top: tops[rand(0, tops.length - 1)],
+      bottom: bottoms[rand(0, bottoms.length - 1)],
+      headScale: rand(40, 70),
+      faceLength: rand(30, 70),
+      chinWidth: rand(30, 70),
+      forehead: rand(30, 70),
+      skinTone: rand(0, 100),
+      hairColor: rand(0, 100),
+      browDistance: rand(30, 70),
+      eyeScale: rand(38, 62),
+      eyeDistance: rand(30, 70),
+      eyeHeight: rand(30, 70),
+      pupilColor: rand(0, 100),
+      noseHeight: rand(30, 70),
+      mouthCurve: rand(40, 64),
+      mouthWidth: rand(30, 70),
+      accessoryColor: rand(0, 100),
+      tilt: rand(-10, 10),
+    };
+    setDraft(next as typeof initialDraft);
+    playSound('select');
+  }
+
+  function applyPreset(preset: 'cute' | 'mature' | 'cool' | 'sporty') {
+    const presets: Record<string, typeof initialDraft> = {
+      cute: {
+        faceShape: 'round', hair: 'twin-tail', brow: 'natural', eyes: 'idol',
+        nose: 'small', mouth: 'smile', ears: 'standard', accessory: 'ribbon',
+        pose: 'standing', top: 'sailor', bottom: 'skirt',
+        headScale: 58, faceLength: 40, chinWidth: 42, forehead: 40,
+        skinTone: 35, hairColor: 65, browDistance: 48, eyeScale: 58,
+        eyeDistance: 48, eyeHeight: 45, pupilColor: 55, noseHeight: 42,
+        mouthCurve: 60, mouthWidth: 48, accessoryColor: 70, tilt: 2,
+      },
+      mature: {
+        faceShape: 'oval', hair: 'long-straight', brow: 'arch', eyes: 'idol',
+        nose: 'straight', mouth: 'neutral', ears: 'standard', accessory: 'glasses',
+        pose: 'hand-on-hip', top: 'blazer', bottom: 'pants',
+        headScale: 50, faceLength: 58, chinWidth: 52, forehead: 55,
+        skinTone: 45, hairColor: 25, browDistance: 52, eyeScale: 48,
+        eyeDistance: 52, eyeHeight: 52, pupilColor: 35, noseHeight: 55,
+        mouthCurve: 52, mouthWidth: 52, accessoryColor: 20, tilt: -1,
+      },
+      cool: {
+        faceShape: 'square', hair: 'short-boy', brow: 'flat', eyes: 'sharp',
+        nose: 'pointed', mouth: 'smirk', ears: 'pointy', accessory: 'mask',
+        pose: 'arms-crossed', top: 'hoodie', bottom: 'pants',
+        headScale: 48, faceLength: 55, chinWidth: 58, forehead: 58,
+        skinTone: 55, hairColor: 15, browDistance: 55, eyeScale: 45,
+        eyeDistance: 55, eyeHeight: 55, pupilColor: 25, noseHeight: 58,
+        mouthCurve: 44, mouthWidth: 55, accessoryColor: 40, tilt: -3,
+      },
+      sporty: {
+        faceShape: 'round', hair: 'short-boy', brow: 'thick', eyes: 'soft-round',
+        nose: 'button', mouth: 'smirk', ears: 'standard', accessory: 'none',
+        pose: 'wave', top: 't-shirt', bottom: 'shorts',
+        headScale: 55, faceLength: 48, chinWidth: 48, forehead: 48,
+        skinTone: 40, hairColor: 45, browDistance: 45, eyeScale: 55,
+        eyeDistance: 45, eyeHeight: 48, pupilColor: 60, noseHeight: 48,
+        mouthCurve: 58, mouthWidth: 50, accessoryColor: 50, tilt: 1,
+      },
+    };
+    setDraft(presets[preset]);
+    playSound('select');
+  }
+
+  // Keep latest function refs for keyboard shortcuts (avoids stale closures)
+  const undoRef = useRef(undo);
+  const redoRef = useRef(redo);
+  const saveDraftRef = useRef(saveDraft);
+  const exportPngRef = useRef(exportPng);
+  const randomizeDraftRef = useRef(randomizeDraft);
+  const applyPresetRef = useRef(applyPreset);
+  useEffect(() => { undoRef.current = undo; }, [undo]);
+  useEffect(() => { redoRef.current = redo; }, [redo]);
+  useEffect(() => { saveDraftRef.current = saveDraft; }, [saveDraft]);
+  useEffect(() => { exportPngRef.current = exportPng; }, [exportPng]);
+  useEffect(() => { randomizeDraftRef.current = randomizeDraft; }, [randomizeDraft]);
+  useEffect(() => { applyPresetRef.current = applyPreset; }, [applyPreset]);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' && !e.shiftKey) { e.preventDefault(); undoRef.current(); }
+        else if ((e.key === 'z' && e.shiftKey) || e.key === 'y') { e.preventDefault(); redoRef.current(); }
+        else if (e.key === 's') { e.preventDefault(); saveDraftRef.current(); }
+        else if (e.key === 'e') { e.preventDefault(); void exportPngRef.current(); }
+        else if (e.key === 'r') { e.preventDefault(); randomizeDraftRef.current(); }
+      }
+      // Preset hotkeys (1-4)
+      if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === '1') { e.preventDefault(); applyPresetRef.current('cute'); }
+        else if (e.key === '2') { e.preventDefault(); applyPresetRef.current('mature'); }
+        else if (e.key === '3') { e.preventDefault(); applyPresetRef.current('cool'); }
+        else if (e.key === '4') { e.preventDefault(); applyPresetRef.current('sporty'); }
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(() => setToast(null), 2800);
+    return () => window.clearTimeout(id);
+  }, [toast]);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -4333,10 +4598,6 @@ function FaceMakerPage({
         { value: 'sharp', label: '上挑眼' },
         { value: 'sleepy', label: '慵懒眼' },
         { value: 'idol', label: '偶像眼' },
-        { value: 'doe', label: '小鹿眼' },
-        { value: 'fox', label: '狐狸眼' },
-        { value: 'tsurime', label: '吊眼' },
-        { value: 'tareme', label: '垂眼' },
       ],
     },
     {
@@ -4421,6 +4682,15 @@ function FaceMakerPage({
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
+  function handleSliderChange<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
+    setDraft((current) => {
+      if (current[key] !== value) {
+        playSound('sliderChange');
+      }
+      return { ...current, [key]: value };
+    });
+  }
+
   function saveDraft() {
     playSound('save');
     setSavedSnapshot(JSON.stringify(draft));
@@ -4441,21 +4711,30 @@ function FaceMakerPage({
   async function exportPng() {
     const stage = document.querySelector('.character-stage') as HTMLElement | null;
     if (!stage) {
-      alert('无法找到预览区域');
+      setToast({ message: '无法找到预览区域', type: 'error' });
+      playSound('error');
       return;
     }
+    const bgMap: Record<typeof stageBackground, string | undefined> = {
+      checkerboard: '#0f0f12',
+      solid: '#1a1a20',
+      gradient: '#0f0f12',
+      transparent: undefined,
+    };
     playSound('downloadSound');
     try {
       const dataUrl = await toPng(stage, {
         pixelRatio: 2,
-        backgroundColor: '#0f0f12',
+        backgroundColor: bgMap[stageBackground],
       });
       const anchor = document.createElement('a');
       anchor.href = dataUrl;
       anchor.download = 'oc-character.png';
       anchor.click();
+      setToast({ message: 'PNG 导出成功', type: 'success' });
     } catch {
-      alert('导出失败，请重试');
+      setToast({ message: '导出失败，请重试', type: 'error' });
+      playSound('error');
     }
   }
 
@@ -4466,18 +4745,18 @@ function FaceMakerPage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'face-maker') { playSound('error'); alert(copy.importConfig + ': ' + messages.importToolMismatch); return; }
-        if (!data.draft || typeof data.draft !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + messages.importInvalidConfig); return; }
+        if (data.tool !== 'face-maker') { playSound('error'); setToast({ message: copy.importConfig + ': ' + messages.importToolMismatch, type: 'error' }); return; }
+        if (!data.draft || typeof data.draft !== 'object') { playSound('error'); setToast({ message: copy.importConfig + ': ' + messages.importInvalidConfig, type: 'error' }); return; }
         const imported = { ...initialDraft, ...(data.draft as Record<string, unknown>) };
         setDraft(imported as typeof initialDraft);
         setSavedSnapshot(JSON.stringify(imported));
         playSound('save');
       } catch {
         playSound('error');
-        alert(copy.importConfig + ': ' + messages.importInvalidJson);
+        setToast({ message: copy.importConfig + ': ' + messages.importInvalidJson, type: 'error' });
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + messages.importReadError); };
+    reader.onerror = () => { playSound('error'); setToast({ message: copy.importConfig + ': ' + messages.importReadError, type: 'error' }); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -4541,6 +4820,15 @@ function FaceMakerPage({
           </div>
           <div className="editor-toolbar-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.unsavedWarning : copy.savedWarning}</span>
+            <button className="secondary-button small-button" type="button" disabled={!canUndo} onClick={() => { playSound('undo'); undo(); }}>
+              {copy.undo}
+            </button>
+            <button className="secondary-button small-button" type="button" disabled={!canRedo} onClick={() => { playSound('redo'); redo(); }}>
+              {copy.redo}
+            </button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('select'); randomizeDraft(); }}>
+              {copy.randomize}
+            </button>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>
               {copy.reset}
             </button>
@@ -4571,7 +4859,7 @@ function FaceMakerPage({
                       key={item.value}
                       className={`asset-card ${draft[group.key] === item.value ? 'active' : ''}`}
                       type="button"
-                      onClick={() => updateDraft(group.key, item.value)}
+                      onClick={() => { playSound('buttonClick'); updateDraft(group.key, item.value); }}
                     >
                       <span className="asset-thumb" />
                       <strong>{item.label}</strong>
@@ -4580,20 +4868,57 @@ function FaceMakerPage({
                 </div>
               </section>
             ))}
+            <section className="editor-panel-block preset-panel">
+              <h3>快速预设</h3>
+              <div className="preset-grid">
+                {(['cute', 'mature', 'cool', 'sporty'] as const).map((p) => (
+                  <button
+                    key={p}
+                    className="preset-card"
+                    type="button"
+                    onClick={() => applyPreset(p)}
+                  >
+                    <span className="preset-thumb" />
+                    <strong>{copy[`preset${p.charAt(0).toUpperCase() + p.slice(1)}` as keyof FaceMakerCopy]}</strong>
+                  </button>
+                ))}
+              </div>
+            </section>
           </aside>
 
           <section className="editor-stage-shell">
             <div className="stage-toolbar">
               <span>{copy.workboard}</span>
               <div className="stage-toolbar-actions">
-                <button className="tool-dot active" type="button" aria-label="Preview mode" />
-                <button className="tool-dot" type="button" aria-label="Reference mode" />
-                <button className="tool-dot" type="button" aria-label="Overlay mode" />
+                <div className="zoom-control">
+                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }}>-</button>
+                  <span className="zoom-value">{Math.round(stageZoom * 100)}%</span>
+                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }}>+</button>
+                  <button className="zoom-btn reset-zoom" type="button" title="Reset view" onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }}>⟲</button>
+                </div>
+                <div className="bg-switcher">
+                  {(['checkerboard', 'solid', 'gradient', 'transparent'] as const).map((bg) => (
+                    <button
+                      key={bg}
+                      className={`bg-chip ${stageBackground === bg ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => { playSound('buttonClick'); setStageBackground(bg); }}
+                    >
+                      {copy[`bg${bg.charAt(0).toUpperCase() + bg.slice(1)}` as keyof FaceMakerCopy]}
+                    </button>
+                  ))}
+                </div>
+                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label="Preview mode" onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }} />
+                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label="Reference mode" onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }} />
+                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label="Overlay mode" onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }} />
               </div>
             </div>
             <div className="editor-stage">
-              <div className="checkerboard-layer" />
-              <div className="character-stage" style={{ transform: `rotate(${draft.tilt}deg)` }}>
+              {stageBackground === 'checkerboard' && <div className="checkerboard-layer" />}
+              {stageBackground === 'solid' && <div className="stage-bg-solid" />}
+              {stageBackground === 'gradient' && <div className="stage-bg-gradient" />}
+              {stageBackground === 'transparent' && <div className="stage-bg-transparent" />}
+              <div className="character-stage" style={{ transform: `rotate(${draft.tilt}deg) scale(${stageZoom})` }}>
                 <div
                   className={`hair-shape ${draft.hair}`}
                   style={{
@@ -4638,38 +4963,112 @@ function FaceMakerPage({
                   <div className={`accessory-chip ${draft.accessory}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }} />
                 )}
                 {/* Body / Pose */}
-                <div className={`body-shape ${draft.pose}`} style={{ background: skinBackground }} />
+                <div className={`body-shape ${draft.pose}`} style={{ background: skinBackground }}>
+                  <div className="body-collarbone" />
+                  <div className="body-waist-shadow" />
+                </div>
                 {/* Top Clothing */}
                 {draft.top !== 'none' && (
-                  <div className={`top-shape ${draft.top}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }} />
+                  <div className={`top-shape ${draft.top}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }}>
+                    {/* t-shirt */}
+                    <div className="neckline" />
+                    <div className="hem-stitch" />
+                    {/* hoodie */}
+                    <div className="hood-outline" />
+                    <div className="drawstring-left" />
+                    <div className="drawstring-right" />
+                    <div className="kangaroo-pocket" />
+                    {/* blazer */}
+                    <div className="lapel-left" />
+                    <div className="lapel-right" />
+                    <div className="blazer-btn top" />
+                    <div className="blazer-btn bottom" />
+                    <div className="pocket-square" />
+                    {/* sailor */}
+                    <div className="sailor-collar" />
+                    <div className="sailor-scarf" />
+                    <div className="sailor-stripe upper" />
+                    <div className="sailor-stripe lower" />
+                    <div className="sailor-btn top" />
+                    <div className="sailor-btn bottom" />
+                  </div>
                 )}
                 {/* Bottom Clothing */}
                 {draft.bottom !== 'none' && (
-                  <div className={`bottom-shape ${draft.bottom}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }} />
+                  <div className={`bottom-shape ${draft.bottom}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }}>
+                    {/* skirt / pants / shorts shared */}
+                    <div className="waistband" />
+                    {/* skirt */}
+                    <div className="pleat left" />
+                    <div className="pleat center" />
+                    <div className="pleat right" />
+                    {/* pants */}
+                    <div className="crease left" />
+                    <div className="crease right" />
+                    <div className="cuff left" />
+                    <div className="cuff right" />
+                    {/* shorts */}
+                    <div className="roll left" />
+                    <div className="roll right" />
+                    <div className="side-seam left" />
+                    <div className="side-seam right" />
+                  </div>
+                )}
+                <div className="character-shadow" />
+                {/* Reference grid overlay */}
+                {showReference && (
+                  <div className="stage-overlay reference-grid">
+                    <div className="ref-line ref-v" />
+                    <div className="ref-line ref-h" />
+                    <div className="ref-circle" />
+                    <div className="ref-label">HEAD</div>
+                    <div className="ref-label" style={{ top: '68%' }}>SHOULDER</div>
+                    <div className="ref-label" style={{ top: '82%' }}>HIP</div>
+                  </div>
+                )}
+                {/* Skeleton overlay */}
+                {showOverlay && (
+                  <div className="stage-overlay skeleton-overlay">
+                    <div className="skull-ring" />
+                    <div className="spine-line" />
+                    <div className="bone shoulder-left" />
+                    <div className="bone shoulder-right" />
+                    <div className="bone arm-left" />
+                    <div className="bone arm-right" />
+                    <div className="bone hip-left" />
+                    <div className="bone hip-right" />
+                    <div className="bone leg-left" />
+                    <div className="bone leg-right" />
+                  </div>
                 )}
               </div>
             </div>
+            {toast && (
+              <div className={`editor-toast ${toast.type}`}>
+                {toast.message}
+              </div>
+            )}
           </section>
 
           <aside className="editor-side editor-controls">
             <section className="editor-panel-block">
               <h3>{copy.paramsTitle}</h3>
-              <label className="slider-row"><span>{copy.headScale} ({draft.headScale})</span><input type="range" min="40" max="70" value={draft.headScale} onChange={(e) => updateDraft('headScale', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.faceLength} ({draft.faceLength})</span><input type="range" min="30" max="70" value={draft.faceLength} onChange={(e) => updateDraft('faceLength', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.chinWidth} ({draft.chinWidth})</span><input type="range" min="30" max="70" value={draft.chinWidth} onChange={(e) => updateDraft('chinWidth', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.forehead} ({draft.forehead})</span><input type="range" min="30" max="70" value={draft.forehead} onChange={(e) => updateDraft('forehead', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.skinTone} ({draft.skinTone})</span><input type="range" min="0" max="100" value={draft.skinTone} onChange={(e) => updateDraft('skinTone', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.hairColor} ({draft.hairColor})</span><input type="range" min="0" max="100" value={draft.hairColor} onChange={(e) => updateDraft('hairColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.browDistance} ({draft.browDistance})</span><input type="range" min="30" max="70" value={draft.browDistance} onChange={(e) => updateDraft('browDistance', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeScale} ({draft.eyeScale})</span><input type="range" min="38" max="62" value={draft.eyeScale} onChange={(e) => updateDraft('eyeScale', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeDistance} ({draft.eyeDistance})</span><input type="range" min="30" max="70" value={draft.eyeDistance} onChange={(e) => updateDraft('eyeDistance', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeHeight} ({draft.eyeHeight})</span><input type="range" min="30" max="70" value={draft.eyeHeight} onChange={(e) => updateDraft('eyeHeight', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.pupilColor} ({draft.pupilColor})</span><input type="range" min="0" max="100" value={draft.pupilColor} onChange={(e) => updateDraft('pupilColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.noseHeight} ({draft.noseHeight})</span><input type="range" min="30" max="70" value={draft.noseHeight} onChange={(e) => updateDraft('noseHeight', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.mouthCurve} ({draft.mouthCurve})</span><input type="range" min="40" max="64" value={draft.mouthCurve} onChange={(e) => updateDraft('mouthCurve', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.mouthWidth} ({draft.mouthWidth})</span><input type="range" min="30" max="70" value={draft.mouthWidth} onChange={(e) => updateDraft('mouthWidth', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.accessoryColor} ({draft.accessoryColor})</span><input type="range" min="0" max="100" value={draft.accessoryColor} onChange={(e) => updateDraft('accessoryColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.tilt} ({draft.tilt})</span><input type="range" min="-10" max="10" value={draft.tilt} onChange={(e) => updateDraft('tilt', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.headScale} ({draft.headScale})</span><input type="range" min="40" max="70" value={draft.headScale} onChange={(e) => handleSliderChange('headScale', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.faceLength} ({draft.faceLength})</span><input type="range" min="30" max="70" value={draft.faceLength} onChange={(e) => handleSliderChange('faceLength', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.chinWidth} ({draft.chinWidth})</span><input type="range" min="30" max="70" value={draft.chinWidth} onChange={(e) => handleSliderChange('chinWidth', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.forehead} ({draft.forehead})</span><input type="range" min="30" max="70" value={draft.forehead} onChange={(e) => handleSliderChange('forehead', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.skinTone} ({draft.skinTone})<span className="color-dot" style={{ background: skinBackground }} /></span><input type="range" min="0" max="100" value={draft.skinTone} onChange={(e) => handleSliderChange('skinTone', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.hairColor} ({draft.hairColor})<span className="color-dot" style={{ background: '#3a6ea5', filter: `hue-rotate(${hairHue}deg)` }} /></span><input type="range" min="0" max="100" value={draft.hairColor} onChange={(e) => handleSliderChange('hairColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.browDistance} ({draft.browDistance})</span><input type="range" min="30" max="70" value={draft.browDistance} onChange={(e) => handleSliderChange('browDistance', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeScale} ({draft.eyeScale})</span><input type="range" min="38" max="62" value={draft.eyeScale} onChange={(e) => handleSliderChange('eyeScale', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeDistance} ({draft.eyeDistance})</span><input type="range" min="30" max="70" value={draft.eyeDistance} onChange={(e) => handleSliderChange('eyeDistance', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeHeight} ({draft.eyeHeight})</span><input type="range" min="30" max="70" value={draft.eyeHeight} onChange={(e) => handleSliderChange('eyeHeight', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.pupilColor} ({draft.pupilColor})<span className="color-dot" style={{ background: '#5a8aee', filter: `hue-rotate(${pupilHue}deg)` }} /></span><input type="range" min="0" max="100" value={draft.pupilColor} onChange={(e) => handleSliderChange('pupilColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.noseHeight} ({draft.noseHeight})</span><input type="range" min="30" max="70" value={draft.noseHeight} onChange={(e) => handleSliderChange('noseHeight', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.mouthCurve} ({draft.mouthCurve})</span><input type="range" min="40" max="64" value={draft.mouthCurve} onChange={(e) => handleSliderChange('mouthCurve', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.mouthWidth} ({draft.mouthWidth})</span><input type="range" min="30" max="70" value={draft.mouthWidth} onChange={(e) => handleSliderChange('mouthWidth', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.accessoryColor} ({draft.accessoryColor})<span className="color-dot" style={{ background: '#c0392b', filter: `hue-rotate(${accessoryHue}deg)` }} /></span><input type="range" min="0" max="100" value={draft.accessoryColor} onChange={(e) => handleSliderChange('accessoryColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.tilt} ({draft.tilt})</span><input type="range" min="-10" max="10" value={draft.tilt} onChange={(e) => handleSliderChange('tilt', Number(e.target.value))} /></label>
             </section>
 
             <section className="editor-panel-block">

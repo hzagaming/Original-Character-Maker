@@ -1,3 +1,5 @@
+const config = require("../config");
+
 const CG_SCENE_POOL = [
   "雨后安静街角的小店门口",
   "黄昏天台边缘",
@@ -32,14 +34,22 @@ function normalizeOverrideText(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+const WHITE_BG_SUFFIX = "图片背景纯白，同时画面中不要有任何除人物外的东西，";
+
 function createDefaultExpressionPrompts() {
-  return _expressionPrompts || {
+  const base = _expressionPrompts || {
     thinking:
-      "严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成思考状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素。",
+      "严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成思考状态。比例严格限制为2000x2000像素。",
     surprise:
-      "严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成惊讶状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素。",
+      "严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成惊讶状态。比例严格限制为2000x2000像素。",
     angry:
-      "严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素。"
+      "严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。比例严格限制为2000x2000像素。"
+  };
+  if (!config.expressionWhiteBackground) return base;
+  return {
+    thinking: base.thinking.replace("比例严格限制为2000x2000像素。", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素。"),
+    surprise: base.surprise.replace("比例严格限制为2000x2000像素。", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素。"),
+    angry: base.angry.replace("比例严格限制为2000x2000像素。", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素。")
   };
 }
 

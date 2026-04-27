@@ -667,6 +667,13 @@ a {
   transform: scale(0.98);
 }
 
+.secondary-button:disabled,
+.primary-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 .settings-tab.active,
 .choice-chip.active,
 .palette-chip.active,
@@ -2125,10 +2132,84 @@ input[type='range']:active::-moz-range-thumb {
   font-size: 0.98rem;
 }
 
+/* Asset card transition */
+.asset-card {
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.asset-card:active {
+  transform: scale(0.97);
+}
+
+/* Preset panel */
+.preset-panel {
+  margin-top: 8px;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.preset-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: var(--border-width) solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.preset-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(var(--accent-rgb), 0.4);
+}
+
+.preset-card:active {
+  transform: scale(0.96);
+}
+
+.preset-thumb {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(var(--accent-rgb), 0.3), transparent 55%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+}
+
+.preset-card strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Smooth transitions for character parts */
+.hair-shape,
+.head-shape,
+.brow-pair,
+.eye-pair,
+.nose-shape,
+.mouth-shape,
+.ear-pair,
+.accessory-chip,
+.body-shape,
+.top-shape,
+.bottom-shape {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .editor-stage-shell {
   display: flex;
   flex-direction: column;
   min-height: 760px;
+  position: relative;
 }
 
 .stage-toolbar {
@@ -2193,6 +2274,97 @@ input[type='range']:active::-moz-range-thumb {
   opacity: 0.48;
 }
 
+.stage-bg-solid {
+  position: absolute;
+  inset: 0;
+  background: #1a1a20;
+}
+
+.stage-bg-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, #2a2a3a 0%, #0f0f12 70%);
+}
+
+.stage-bg-transparent {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+/* Background switcher chips */
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 10px;
+}
+
+.zoom-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.zoom-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.zoom-btn.reset-zoom {
+  font-size: 11px;
+  width: 24px;
+}
+
+.zoom-value {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 32px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.bg-switcher {
+  display: flex;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.bg-chip {
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.3px;
+}
+
+.bg-chip:hover {
+  background: var(--panel-soft);
+  color: var(--text-primary);
+}
+
+.bg-chip.active {
+  background: var(--accent-solid);
+  color: #fff;
+  border-color: var(--accent-solid);
+}
+
 .character-stage {
   position: absolute;
   left: 50%;
@@ -2201,6 +2373,20 @@ input[type='range']:active::-moz-range-thumb {
   height: 460px;
   transform-origin: 50% 100%;
   translate: -50% 0;
+}
+
+.character-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  translate: -50% 0;
+  width: 140px;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 50%;
+  filter: blur(6px);
+  z-index: 0;
+  transition: width 0.25s ease;
 }
 
 .hair-shape {
@@ -2424,6 +2610,17 @@ input[type='range']:active::-moz-range-thumb {
 .slider-row input[type='range'] {
   width: 100%;
   accent-color: var(--accent-solid);
+}
+
+.color-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 8px;
+  vertical-align: middle;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 640px) {
@@ -3573,6 +3770,33 @@ input[type='range']:active::-moz-range-thumb {
   border-radius: 36px 36px 10px 10px;
   background: linear-gradient(180deg, #d4a88c 0%, #c49a7c 40%, #b88d74 100%);
   z-index: 1;
+  box-shadow: inset -6px 0 10px rgba(0,0,0,0.08), inset 6px 0 10px rgba(255,255,255,0.06);
+}
+
+/* Body detail: collarbone / neck shadow */
+.body-shape .body-collarbone {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  translate: -50% 0;
+  width: 48px;
+  height: 14px;
+  border-radius: 0 0 50% 50%;
+  background: rgba(0,0,0,0.08);
+  z-index: 1;
+}
+
+/* Body detail: waist pinch shadow */
+.body-shape .body-waist-shadow {
+  position: absolute;
+  left: 50%;
+  top: 80px;
+  translate: -50% 0;
+  width: 60px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.06);
+  z-index: 1;
 }
 
 /* Pose variants */
@@ -3580,6 +3804,7 @@ input[type='range']:active::-moz-range-thumb {
   /* default upright */
 }
 
+/* arms-crossed: forearms cross in front */
 .body-shape.arms-crossed::before,
 .body-shape.arms-crossed::after {
   content: '';
@@ -3590,17 +3815,20 @@ input[type='range']:active::-moz-range-thumb {
   border-radius: 12px;
   background: inherit;
 }
-
 .body-shape.arms-crossed::before {
   left: -10px;
   transform: rotate(24deg);
 }
-
 .body-shape.arms-crossed::after {
   right: -10px;
   transform: rotate(-24deg);
 }
+/* crossed forearms overlay */
+.body-shape.arms-crossed {
+  box-shadow: inset -6px 0 10px rgba(0,0,0,0.1), inset 6px 0 10px rgba(255,255,255,0.05);
+}
 
+/* hand-on-hip: one hand on hip, other relaxed */
 .body-shape.hand-on-hip::before,
 .body-shape.hand-on-hip::after {
   content: '';
@@ -3611,18 +3839,16 @@ input[type='range']:active::-moz-range-thumb {
   border-radius: 12px;
   background: inherit;
 }
-
 .body-shape.hand-on-hip::before {
   left: -14px;
   transform: rotate(12deg);
 }
-
 .body-shape.hand-on-hip::after {
   right: -14px;
   transform: rotate(-12deg);
   height: 60px;
 }
-
+/* wave: one arm up waving */
 .body-shape.wave::before,
 .body-shape.wave::after {
   content: '';
@@ -3633,19 +3859,16 @@ input[type='range']:active::-moz-range-thumb {
   border-radius: 12px;
   background: inherit;
 }
-
 .body-shape.wave::before {
   left: -14px;
   transform: rotate(18deg);
 }
-
 .body-shape.wave::after {
   right: -14px;
   transform: rotate(-55deg);
   transform-origin: top center;
   height: 80px;
 }
-
 /* Top clothing */
 .top-shape {
   position: absolute;
@@ -3683,6 +3906,28 @@ input[type='range']:active::-moz-range-thumb {
   transform: rotate(-18deg);
 }
 
+/* T-shirt neckline rib */
+.top-shape.t-shirt .neckline {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% 0;
+  width: 36px;
+  height: 10px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 0 0 50% 50%;
+}
+
+/* T-shirt hem stitch */
+.top-shape.t-shirt .hem-stitch {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 4px;
+  height: 1px;
+  background: rgba(255,255,255,0.15);
+}
+
 .top-shape.hoodie {
   width: 102px;
   height: 100px;
@@ -3709,6 +3954,44 @@ input[type='range']:active::-moz-range-thumb {
 .top-shape.hoodie::after {
   right: -20px;
   transform: rotate(-16deg);
+}
+
+/* Hoodie hood outline */
+.top-shape.hoodie .hood-outline {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  translate: -50% 0;
+  width: 64px;
+  height: 34px;
+  border: 3px solid rgba(0,0,0,0.18);
+  border-bottom: none;
+  border-radius: 50% 50% 0 0;
+}
+
+/* Hoodie drawstrings */
+.top-shape.hoodie .drawstring-left,
+.top-shape.hoodie .drawstring-right {
+  position: absolute;
+  top: 6px;
+  width: 2px;
+  height: 24px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 999px;
+}
+.top-shape.hoodie .drawstring-left { left: 38px; transform: rotate(6deg); }
+.top-shape.hoodie .drawstring-right { right: 38px; transform: rotate(-6deg); }
+
+/* Hoodie front pocket */
+.top-shape.hoodie .kangaroo-pocket {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  translate: -50% 0;
+  width: 56px;
+  height: 32px;
+  background: rgba(0,0,0,0.12);
+  border-radius: 12px 12px 4px 4px;
 }
 
 .top-shape.blazer {
@@ -3746,6 +4029,40 @@ input[type='range']:active::-moz-range-thumb {
   width: 0;
   height: 0;
   border-style: solid;
+}
+.top-shape.blazer .lapel-left {
+  left: 22px;
+  border-width: 0 16px 40px 0;
+  border-color: transparent rgba(255,255,255,0.08) transparent transparent;
+}
+.top-shape.blazer .lapel-right {
+  right: 22px;
+  border-width: 0 0 40px 16px;
+  border-color: transparent transparent transparent rgba(255,255,255,0.08);
+}
+
+/* Blazer buttons */
+.top-shape.blazer .blazer-btn {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  width: 5px;
+  height: 5px;
+  background: rgba(200,180,140,0.7);
+  border-radius: 50%;
+}
+.top-shape.blazer .blazer-btn.top { top: 48px; }
+.top-shape.blazer .blazer-btn.bottom { top: 60px; }
+
+/* Pocket square */
+.top-shape.blazer .pocket-square {
+  position: absolute;
+  right: 10px;
+  top: 42px;
+  width: 10px;
+  height: 8px;
+  background: rgba(200,80,80,0.5);
+  border-radius: 0 0 2px 2px;
 }
 
 .top-shape.sailor {
@@ -3787,6 +4104,43 @@ input[type='range']:active::-moz-range-thumb {
   border-radius: 0 0 20px 20px;
 }
 
+/* Sailor scarf tie */
+.top-shape.sailor .sailor-scarf {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  translate: -50% 0;
+  width: 16px;
+  height: 16px;
+  background: #c0392b;
+  border-radius: 50%;
+}
+
+/* Sailor stripe */
+.top-shape.sailor .sailor-stripe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, #2a3a5a 0px, #2a3a5a 4px, transparent 4px, transparent 8px);
+  opacity: 0.25;
+}
+.top-shape.sailor .sailor-stripe.upper { top: 46px; }
+.top-shape.sailor .sailor-stripe.lower { top: 56px; }
+
+/* Sailor button */
+.top-shape.sailor .sailor-btn {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  width: 4px;
+  height: 4px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+}
+.top-shape.sailor .sailor-btn.top { top: 36px; }
+.top-shape.sailor .sailor-btn.bottom { top: 66px; }
+
 /* Bottom clothing */
 .bottom-shape {
   position: absolute;
@@ -3803,6 +4157,28 @@ input[type='range']:active::-moz-range-thumb {
   clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
   border-radius: 0 0 6px 6px;
 }
+
+/* Skirt waistband */
+.bottom-shape.skirt .waistband {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 0;
+  height: 8px;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Skirt pleats */
+.bottom-shape.skirt .pleat {
+  position: absolute;
+  top: 8px;
+  width: 1px;
+  height: calc(100% - 8px);
+  background: rgba(0,0,0,0.12);
+}
+.bottom-shape.skirt .pleat.left { left: 28%; }
+.bottom-shape.skirt .pleat.center { left: 50%; }
+.bottom-shape.skirt .pleat.right { left: 72%; }
 
 .bottom-shape.pants {
   width: 88px;
@@ -3830,6 +4206,39 @@ input[type='range']:active::-moz-range-thumb {
   right: 0;
 }
 
+/* Pants waistband */
+.bottom-shape.pants .waistband {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 8px;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Pants crease lines */
+.bottom-shape.pants .crease {
+  position: absolute;
+  top: 8px;
+  width: 1px;
+  height: calc(100% - 16px);
+  background: rgba(255,255,255,0.08);
+}
+.bottom-shape.pants .crease.left { left: 28%; }
+.bottom-shape.pants .crease.right { right: 28%; }
+
+/* Pants cuffs */
+.bottom-shape.pants .cuff {
+  position: absolute;
+  bottom: 2px;
+  width: 36px;
+  height: 5px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 0 0 4px 4px;
+}
+.bottom-shape.pants .cuff.left { left: 2px; }
+.bottom-shape.pants .cuff.right { right: 2px; }
+
 .bottom-shape.shorts {
   width: 90px;
   height: 56px;
@@ -3854,6 +4263,148 @@ input[type='range']:active::-moz-range-thumb {
 
 .bottom-shape.shorts::after {
   right: 0;
+}
+
+/* Shorts waistband */
+.bottom-shape.shorts .waistband {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 6px;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Shorts rolled cuffs */
+.bottom-shape.shorts .roll {
+  position: absolute;
+  bottom: 2px;
+  width: 38px;
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 0 0 6px 6px;
+}
+.bottom-shape.shorts .roll.left { left: 2px; }
+.bottom-shape.shorts .roll.right { right: 2px; }
+
+/* Shorts side seam */
+.bottom-shape.shorts .side-seam {
+  position: absolute;
+  top: 6px;
+  width: 1px;
+  height: calc(100% - 12px);
+  background: rgba(0,0,0,0.1);
+}
+.bottom-shape.shorts .side-seam.left { left: 46%; }
+.bottom-shape.shorts .side-seam.right { right: 46%; }
+
+/* ─── Stage Overlays ─── */
+.stage-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Reference grid */
+.reference-grid .ref-line {
+  position: absolute;
+  background: rgba(100, 255, 180, 0.35);
+}
+.reference-grid .ref-v {
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+}
+.reference-grid .ref-h {
+  top: 50%;
+  left: 0;
+  height: 1px;
+  width: 100%;
+}
+.reference-grid .ref-circle {
+  position: absolute;
+  left: 50%;
+  top: 32%;
+  translate: -50% -50%;
+  width: 140px;
+  height: 160px;
+  border: 1px dashed rgba(100, 255, 180, 0.25);
+  border-radius: 50%;
+}
+.reference-grid .ref-label {
+  position: absolute;
+  left: 52%;
+  top: 28%;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: rgba(100, 255, 180, 0.5);
+  text-transform: uppercase;
+}
+
+/* Skeleton overlay */
+.skeleton-overlay .skull-ring {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  translate: -50% -50%;
+  width: 56px;
+  height: 68px;
+  border: 1.5px solid rgba(255, 120, 120, 0.45);
+  border-radius: 50%;
+}
+.skeleton-overlay .spine-line {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  translate: -50% 0;
+  width: 1.5px;
+  height: 160px;
+  background: linear-gradient(180deg, rgba(255,120,120,0.5), rgba(255,120,120,0.15));
+}
+.skeleton-overlay .bone {
+  position: absolute;
+  background: rgba(255, 160, 120, 0.4);
+  border-radius: 999px;
+}
+.skeleton-overlay .shoulder-left { left: 38%; top: 52%; width: 28px; height: 3px; transform: rotate(18deg); }
+.skeleton-overlay .shoulder-right { right: 38%; top: 52%; width: 28px; height: 3px; transform: rotate(-18deg); }
+.skeleton-overlay .arm-left { left: 32%; top: 56%; width: 3px; height: 52px; transform: rotate(8deg); }
+.skeleton-overlay .arm-right { right: 32%; top: 56%; width: 3px; height: 52px; transform: rotate(-8deg); }
+.skeleton-overlay .hip-left { left: 42%; top: 74%; width: 20px; height: 3px; transform: rotate(12deg); }
+.skeleton-overlay .hip-right { right: 42%; top: 74%; width: 20px; height: 3px; transform: rotate(-12deg); }
+.skeleton-overlay .leg-left { left: 44%; top: 76%; width: 3px; height: 56px; transform: rotate(-2deg); }
+.skeleton-overlay .leg-right { right: 44%; top: 76%; width: 3px; height: 56px; transform: rotate(2deg); }
+
+/* Toast */
+.editor-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  z-index: 20;
+  animation: toastIn 0.25s ease;
+  white-space: nowrap;
+}
+.editor-toast.success {
+  background: rgba(40, 160, 80, 0.85);
+  color: #fff;
+  border: 1px solid rgba(60, 200, 100, 0.4);
+}
+.editor-toast.error {
+  background: rgba(200, 50, 50, 0.85);
+  color: #fff;
+  border: 1px solid rgba(240, 80, 80, 0.4);
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 /* ─── Docs Page Styles ─── */

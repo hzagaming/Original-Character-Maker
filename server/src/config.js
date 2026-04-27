@@ -83,5 +83,6 @@ module.exports = {
   workflowStateDir: resolvePath(process.env.WORKFLOW_STATE_DIR, "./tmp/workflows"),
   outputDir: resolvePath(process.env.OUTPUT_DIR, "./tmp/outputs"),
   webDir: path.resolve(projectRoot, "dist"),
-  promptsDir: path.resolve(projectRoot, "prompts")
+  promptsDir: path.resolve(projectRoot, "prompts"),
+  expressionWhiteBackground: process.env.EXPRESSION_WHITE_BACKGROUND === "true"
 };
