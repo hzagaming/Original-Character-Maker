@@ -1047,6 +1047,68 @@ a {
   appearance: none;
 }
 
+/* ─── Global range input styling ─── */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-solid);
+  margin-top: -6px;
+  border: 2px solid var(--panel);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type='range']:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+}
+
+input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.25);
+}
+
+input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-solid);
+  border: 2px solid var(--panel);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type='range']:hover::-moz-range-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+}
+
+input[type='range']:active::-moz-range-thumb {
+  transform: scale(1.25);
+}
+
 .settings-textarea {
   min-height: 120px;
   resize: vertical;
@@ -2348,7 +2410,9 @@ a {
 
 .slider-row {
   display: grid;
+  grid-template-columns: 1fr auto;
   gap: 10px;
+  align-items: center;
   margin-top: 14px;
 }
 
@@ -2360,6 +2424,12 @@ a {
 .slider-row input[type='range'] {
   width: 100%;
   accent-color: var(--accent-solid);
+}
+
+@media (max-width: 640px) {
+  .slider-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .status-stack {

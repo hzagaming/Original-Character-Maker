@@ -6813,7 +6813,7 @@ export function LlmHubPage({
               <RangeField label={copy.llm.presencePenaltyLabel} min={-2} max={2} step={0.01} value={llmConfig.presencePenalty} onChange={(value) => updateConfig('presencePenalty', value)} />
               <label className="field">
                 <span>{copy.llm.responseFormatLabel}</span>
-                <select className="settings-input tool-select" value={llmConfig.responseFormat} onChange={(e) => updateConfig('responseFormat', e.target.value)}>
+                <select className="settings-input tool-select" value={llmConfig.responseFormat} onChange={(e) => updateConfig('responseFormat', e.target.value as 'text' | 'json_object')}>
                   <option value="text">text</option>
                   <option value="json_object">json_object</option>
                 </select>
@@ -7741,7 +7741,7 @@ export function ImageConverterPage({
                 </label>
                 <label className="field">
                   <span>{copy.imageConverter.quality} ({quality}%)</span>
-                  <input className="settings-input" type="range" min="10" max="100" step="1" value={quality} onChange={(e) => setQuality(Number(e.target.value))} />
+                  <input className="tool-range" type="range" min="10" max="100" step="1" value={quality} onChange={(e) => setQuality(Number(e.target.value))} />
                 </label>
                 <label className="field">
                   <span>{copy.imageConverter.maxWidth}</span>

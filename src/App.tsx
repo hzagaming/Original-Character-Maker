@@ -31,7 +31,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.3.1';
+const VERSION = '0.6.3.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -166,6 +166,9 @@ type Messages = {
   shortcutsHint: string;
   shortcutsReset: string;
   shortcutsExperimental: string;
+  shortcutsEditorTitle: string;
+  shortcutsGlobalTitle: string;
+  apiQuickPorts: string;
   announcementTitle: string;
   announcementHistoryButton: string;
   announcementDescription: string;
@@ -216,6 +219,13 @@ type Messages = {
   docsSectionButtons: string;
   docsSectionParameters: string;
   docsSectionErrors: string;
+  docsNavIndex: string;
+  docsFilterAll: string;
+  docsFilterCritical: string;
+  docsFilterError: string;
+  docsFilterWarning: string;
+  docsFilterInfo: string;
+  docsErrorCount: string;
   moduleCanvas: string;
   modulePanel: string;
   modulePipeline: string;
@@ -537,6 +547,9 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsHint: '这里可以直接改 OC 设卡编辑器的快捷键组合，修改后会立刻写入本地设置。',
     shortcutsReset: '恢复默认快捷键',
     shortcutsExperimental: '自定义快捷键属于实验性设置，请避免与浏览器或系统保留快捷键冲突。',
+    shortcutsEditorTitle: '编辑器快捷键',
+    shortcutsGlobalTitle: '全局快捷键',
+    apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
     announcementDescription: '0.6.3 用户手册新增搜索功能 + Paper2Gal 增加 GitHub 反馈入口；全局错误支持关键词搜索，一秒定位任意报错；Paper2Gal 页面可直接跳转 GitHub Issues 反馈问题或 Discussions 交流。',
@@ -902,6 +915,9 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsHint: 'ここでは OC 設定エディタ用ショートカットを直接編集でき、変更はすぐローカル設定へ保存されます。',
     shortcutsReset: '既定ショートカットに戻す',
     shortcutsExperimental: 'カスタムショートカットは実験的機能です。ブラウザや OS の予約ショートカットとの衝突に注意してください。',
+    shortcutsEditorTitle: 'エディタショートカット',
+    shortcutsGlobalTitle: 'グローバルショートカット',
+    apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
     announcementDescription: '0.6.3.1 マニュアル検索対応 + 設定のAboutからGitHubフィードバックへ。',
@@ -1267,6 +1283,9 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsHint: 'Customize the OC card editor shortcuts here. Changes are saved to local settings immediately.',
     shortcutsReset: 'Reset to default shortcuts',
     shortcutsExperimental: 'Custom shortcuts are experimental. Avoid combinations that conflict with browser or system-reserved commands.',
+    shortcutsEditorTitle: 'Editor Shortcuts',
+    shortcutsGlobalTitle: 'Global Shortcuts',
+    apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
     announcementDescription: 'Version 0.6.3.1: Docs search + Settings About page links to GitHub feedback.',
@@ -1278,6 +1297,8 @@ const translations: Record<BaseLanguage, Messages> = {
     paperSiteLabel: 'Open paper2gal',
     profileLinkLabel: 'Author',
     repoLinkLabel: 'GitHub repository',
+    feedbackIssuesLabel: '🐛 Report Issue',
+    feedbackDiscussionsLabel: '💬 Discussions',
     pageFaceTitle: 'Face Maker',
     pageFaceDescription: 'Manage modular assets on the left, preview the character in the middle, and adjust controls plus export actions on the right.',
     pageStyleTitle: 'Style Transfer',
@@ -1630,6 +1651,9 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsHint: 'Здесь можно настроить сочетания клавиш для редактора карточек OC. Изменения сразу сохраняются локально.',
     shortcutsReset: 'Сбросить шорткаты',
     shortcutsExperimental: 'Пользовательские шорткаты являются экспериментальной функцией. Избегайте конфликтов с системными и браузерными сочетаниями.',
+    shortcutsEditorTitle: 'Горячие клавиши редактора',
+    shortcutsGlobalTitle: 'Глобальные шорткаты',
+    apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
     announcementDescription: 'Версия 0.6.3.1: Поиск в руководстве + ссылка на GitHub в настройках.',
@@ -1949,6 +1973,30 @@ const defaultShortcutMap: ShortcutMap = {
   refreshPage: 'F5',
   toggleMute: 'Alt+M',
 };
+
+const editorShortcutActions: ShortcutAction[] = [
+  'saveDocument',
+  'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript',
+  'blockquote', 'heading1', 'heading2', 'heading3', 'heading4', 'heading5', 'heading6',
+  'unorderedList', 'orderedList',
+  'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull',
+  'indent', 'outdent',
+  'insertLink', 'insertTable', 'insertHr', 'insertCodeBlock', 'insertImage',
+  'clearHighlight',
+  'undo', 'redo', 'selectAll', 'clearFormat',
+  'copySelection', 'pasteSelection',
+  'undoAction', 'redoAction',
+];
+
+const globalShortcutActions: ShortcutAction[] = [
+  'goHome', 'openSettings',
+  'startWorkflow', 'abortWorkflow',
+  'exportDocument',
+  'focusSearch', 'toggleSidebar',
+  'nextTab', 'prevTab',
+  'toggleTheme', 'toggleFullscreen',
+  'refreshPage', 'toggleMute',
+];
 
 const translationAliases: Record<AppLanguage, BaseLanguage> = {
   zh: 'zh',
@@ -2480,6 +2528,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '0.6.3.2',
+    date: '2026-04-27',
+    title: '0.6.3.2 API 端口扩展 + 快捷键分类 + 滑条与音频 UI 修复',
+    summary: 'API 预设通道新增常用端口一键切换；快捷键设置按编辑器/全局分类；全局滑条样式统一并修复跨浏览器一致性；音频设置补全缺失标签与高级参数。',
+    details: [
+      'API 预设通道扩展：内置模式下新增 3000/3001/5000/5001/8000/8080/9000/9001 常用端口一键切换，点击自动转入自定义模式并填入地址。',
+      '快捷键设置分类：编辑器快捷键（保存、格式、列表、对齐、插入等 31 项）与全局快捷键（首页、设置、主题、全屏、静音等 12 项）分开展示，新增分类标题。',
+      '全局滑条 UI 修复：统一自定义轨道与滑块样式（-webkit-appearance: none），修复 hover/active 缩放反馈；修复图片转换器质量滑条误用文本输入框样式；捏脸编辑器全部 16 个参数滑条新增实时数值显示。',
+      '音频设置补全：音效音量和音乐音量滑条补全标题标签；高级合成区新增音乐滤波（musicFilter）和立体声宽度（musicStereoWidth）两个缺失滑块；ADSR 与空间参数分开展示。',
+      '更新版本号至 0.6.3.2。',
+    ],
+  },
   {
     version: '0.6.3.1',
     date: '2026-04-20',
@@ -4145,7 +4206,7 @@ function FaceMakerPage({
     tilt: 0,
   };
 
-  const [draft, setDraft] = useState(() => {
+  const [draft, setDraft] = useState<typeof initialDraft>(() => {
     try {
       const imported = localStorage.getItem('oc-maker.face-maker-import');
       if (imported) {
@@ -4475,22 +4536,22 @@ function FaceMakerPage({
           <aside className="editor-side editor-controls">
             <section className="editor-panel-block">
               <h3>{copy.paramsTitle}</h3>
-              <label className="slider-row"><span>{copy.headScale}</span><input type="range" min="40" max="70" value={draft.headScale} onChange={(e) => updateDraft('headScale', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.faceLength}</span><input type="range" min="30" max="70" value={draft.faceLength} onChange={(e) => updateDraft('faceLength', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.chinWidth}</span><input type="range" min="30" max="70" value={draft.chinWidth} onChange={(e) => updateDraft('chinWidth', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.forehead}</span><input type="range" min="30" max="70" value={draft.forehead} onChange={(e) => updateDraft('forehead', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.skinTone}</span><input type="range" min="0" max="100" value={draft.skinTone} onChange={(e) => updateDraft('skinTone', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.hairColor}</span><input type="range" min="0" max="100" value={draft.hairColor} onChange={(e) => updateDraft('hairColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.browDistance}</span><input type="range" min="30" max="70" value={draft.browDistance} onChange={(e) => updateDraft('browDistance', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeScale}</span><input type="range" min="38" max="62" value={draft.eyeScale} onChange={(e) => updateDraft('eyeScale', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeDistance}</span><input type="range" min="30" max="70" value={draft.eyeDistance} onChange={(e) => updateDraft('eyeDistance', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeHeight}</span><input type="range" min="30" max="70" value={draft.eyeHeight} onChange={(e) => updateDraft('eyeHeight', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.pupilColor}</span><input type="range" min="0" max="100" value={draft.pupilColor} onChange={(e) => updateDraft('pupilColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.noseHeight}</span><input type="range" min="30" max="70" value={draft.noseHeight} onChange={(e) => updateDraft('noseHeight', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.mouthCurve}</span><input type="range" min="40" max="64" value={draft.mouthCurve} onChange={(e) => updateDraft('mouthCurve', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.mouthWidth}</span><input type="range" min="30" max="70" value={draft.mouthWidth} onChange={(e) => updateDraft('mouthWidth', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.accessoryColor}</span><input type="range" min="0" max="100" value={draft.accessoryColor} onChange={(e) => updateDraft('accessoryColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.tilt}</span><input type="range" min="-10" max="10" value={draft.tilt} onChange={(e) => updateDraft('tilt', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.headScale} ({draft.headScale})</span><input type="range" min="40" max="70" value={draft.headScale} onChange={(e) => updateDraft('headScale', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.faceLength} ({draft.faceLength})</span><input type="range" min="30" max="70" value={draft.faceLength} onChange={(e) => updateDraft('faceLength', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.chinWidth} ({draft.chinWidth})</span><input type="range" min="30" max="70" value={draft.chinWidth} onChange={(e) => updateDraft('chinWidth', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.forehead} ({draft.forehead})</span><input type="range" min="30" max="70" value={draft.forehead} onChange={(e) => updateDraft('forehead', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.skinTone} ({draft.skinTone})</span><input type="range" min="0" max="100" value={draft.skinTone} onChange={(e) => updateDraft('skinTone', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.hairColor} ({draft.hairColor})</span><input type="range" min="0" max="100" value={draft.hairColor} onChange={(e) => updateDraft('hairColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.browDistance} ({draft.browDistance})</span><input type="range" min="30" max="70" value={draft.browDistance} onChange={(e) => updateDraft('browDistance', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeScale} ({draft.eyeScale})</span><input type="range" min="38" max="62" value={draft.eyeScale} onChange={(e) => updateDraft('eyeScale', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeDistance} ({draft.eyeDistance})</span><input type="range" min="30" max="70" value={draft.eyeDistance} onChange={(e) => updateDraft('eyeDistance', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeHeight} ({draft.eyeHeight})</span><input type="range" min="30" max="70" value={draft.eyeHeight} onChange={(e) => updateDraft('eyeHeight', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.pupilColor} ({draft.pupilColor})</span><input type="range" min="0" max="100" value={draft.pupilColor} onChange={(e) => updateDraft('pupilColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.noseHeight} ({draft.noseHeight})</span><input type="range" min="30" max="70" value={draft.noseHeight} onChange={(e) => updateDraft('noseHeight', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.mouthCurve} ({draft.mouthCurve})</span><input type="range" min="40" max="64" value={draft.mouthCurve} onChange={(e) => updateDraft('mouthCurve', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.mouthWidth} ({draft.mouthWidth})</span><input type="range" min="30" max="70" value={draft.mouthWidth} onChange={(e) => updateDraft('mouthWidth', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.accessoryColor} ({draft.accessoryColor})</span><input type="range" min="0" max="100" value={draft.accessoryColor} onChange={(e) => updateDraft('accessoryColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.tilt} ({draft.tilt})</span><input type="range" min="-10" max="10" value={draft.tilt} onChange={(e) => updateDraft('tilt', Number(e.target.value))} /></label>
             </section>
 
             <section className="editor-panel-block">
@@ -5682,9 +5743,11 @@ function SettingsModal({
                     <button className={`choice-chip ${settings.audio.soundOnInteract ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, soundOnInteract: true } })}>{messages.audioSoundOnInteractOn}</button>
                     <button className={`choice-chip ${!settings.audio.soundOnInteract ? 'active' : ''}`} type="button" onClick={() => onUpdate({ audio: { ...settings.audio, soundOnInteract: false } })}>{messages.audioSoundOnInteractOff}</button>
                   </div>
-                  <div className="contrast-slider-row" style={{ marginTop: 8 }}>
-                    <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.sfxVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxVolume: Number(e.target.value) } })} />
-                    <span className="contrast-value">{settings.audio.sfxVolume}%</span>
+                  <div className="contrast-control" style={{ marginTop: 8 }}>
+                    <div className="contrast-copy"><strong>{messages.audioSfxVolume}</strong><span>{settings.audio.sfxVolume}%</span></div>
+                    <div className="contrast-slider-row">
+                      <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.sfxVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxVolume: Number(e.target.value) } })} />
+                    </div>
                   </div>
                   <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
                     <div className="contrast-control">
@@ -5753,9 +5816,11 @@ function SettingsModal({
                     <button className={`choice-chip ${settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: true } }); startMusic(); }}>{messages.toggleOn}</button>
                     <button className={`choice-chip ${!settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: false } }); stopMusic(); }}>{messages.toggleOff}</button>
                   </div>
-                  <div className="contrast-slider-row" style={{ marginTop: 8 }}>
-                    <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.musicVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicVolume: Number(e.target.value) } })} />
-                    <span className="contrast-value">{settings.audio.musicVolume}%</span>
+                  <div className="contrast-control" style={{ marginTop: 8 }}>
+                    <div className="contrast-copy"><strong>{messages.audioMusicVolume}</strong><span>{settings.audio.musicVolume}%</span></div>
+                    <div className="contrast-slider-row">
+                      <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.musicVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicVolume: Number(e.target.value) } })} />
+                    </div>
                   </div>
                   <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
                     <div className="contrast-control">
@@ -5823,6 +5888,7 @@ function SettingsModal({
                 <section className="settings-section">
                   <h3>{messages.audioAdvancedTitle}</h3>
                   <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
+                    <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-main)' }}>{messages.audioSfxPreset} ADSR</h4>
                     <div className="contrast-control">
                       <div className="contrast-copy"><strong>{messages.audioSfxAttack}</strong><span>{settings.audio.sfxAttack} ms</span></div>
                       <div className="contrast-slider-row">
@@ -5853,15 +5919,28 @@ function SettingsModal({
                         <input className="contrast-slider" type="range" min="-1" max="1" step="0.1" value={settings.audio.sfxPan} onChange={(e) => onUpdate({ audio: { ...settings.audio, sfxPan: Number(e.target.value) } })} />
                       </div>
                     </div>
+                    <h4 style={{ margin: '8px 0 0', fontSize: '0.95rem', color: 'var(--text-main)' }}>{messages.audioSpatialTitle}</h4>
                     <div className="contrast-control">
                       <div className="contrast-copy"><strong>{messages.audioMusicReverb}</strong><span>{Math.round(settings.audio.musicReverb * 100)}%</span></div>
                       <div className="contrast-slider-row">
                         <input className="contrast-slider" type="range" min="0" max="1" step="0.05" value={settings.audio.musicReverb} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicReverb: Number(e.target.value) } })} />
                       </div>
                     </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioMusicFilter}</strong><span>{settings.audio.musicFilter} Hz</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="200" max="10000" step="100" value={settings.audio.musicFilter} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicFilter: Number(e.target.value) } })} />
+                      </div>
+                    </div>
+                    <div className="contrast-control">
+                      <div className="contrast-copy"><strong>{messages.audioMusicStereoWidth}</strong><span>{settings.audio.musicStereoWidth}%</span></div>
+                      <div className="contrast-slider-row">
+                        <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.musicStereoWidth} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicStereoWidth: Number(e.target.value) } })} />
+                      </div>
+                    </div>
                   </div>
                   <div className="tool-actions-row" style={{ marginTop: 12 }}>
-                    <button className="secondary-button" type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxAttack: defaultAudioSettings.sfxAttack, sfxDecay: defaultAudioSettings.sfxDecay, sfxSustain: defaultAudioSettings.sfxSustain, sfxRelease: defaultAudioSettings.sfxRelease, sfxPan: defaultAudioSettings.sfxPan, musicReverb: defaultAudioSettings.musicReverb } })}>{messages.audioResetAdvanced}</button>
+                    <button className="secondary-button" type="button" onClick={() => onUpdate({ audio: { ...settings.audio, sfxAttack: defaultAudioSettings.sfxAttack, sfxDecay: defaultAudioSettings.sfxDecay, sfxSustain: defaultAudioSettings.sfxSustain, sfxRelease: defaultAudioSettings.sfxRelease, sfxPan: defaultAudioSettings.sfxPan, musicReverb: defaultAudioSettings.musicReverb, musicFilter: defaultAudioSettings.musicFilter, musicStereoWidth: defaultAudioSettings.musicStereoWidth } })}>{messages.audioResetAdvanced}</button>
                   </div>
                 </section>
 
@@ -5966,6 +6045,21 @@ function SettingsModal({
                     <p className="muted-copy">{messages.apiPresetHint}</p>
                     <p className="muted-copy">{presetEndpoint || messages.apiPresetUnavailable}</p>
                     {!presetEndpoint && <p className="tiny-copy settings-warning">{messages.apiPresetUnavailable}</p>}
+                    <div style={{ marginTop: 16 }}>
+                      <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: '0 0 10px' }}>{messages.apiQuickPorts}</h4>
+                      <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(72px, 1fr))' }}>
+                        {[3000, 3001, 5000, 5001, 8000, 8080, 9000, 9001].map((port) => (
+                          <button
+                            key={port}
+                            className="palette-chip"
+                            type="button"
+                            onClick={() => onUpdate({ interfaceMode: 'custom', apiBaseUrl: `http://localhost:${port}` })}
+                          >
+                            :{port}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </section>
                 ) : (
                   <>
@@ -6147,25 +6241,51 @@ function SettingsModal({
                 shortcutEntries.some(([action, combo]) => action !== shortcutBuilderAction && combo === shortcutBuilderValue.trim()) ? (
                   <p className="tiny-copy settings-warning">{shortcutBuilderLabels.conflicts}</p>
                 ) : null}
+                <h4 style={{ margin: '20px 0 10px', fontSize: '1.05rem', color: 'var(--text-main)' }}>{messages.shortcutsEditorTitle}</h4>
                 <div className="shortcut-grid">
-                  {shortcutEntries.map(([action, value]) => (
-                    <label key={action} className="shortcut-row">
-                      <span>{shortcutLabelsForLanguage[action as ShortcutAction]}</span>
-                      <input
-                        className="settings-input"
-                        type="text"
-                        value={value}
-                        onChange={(event) =>
-                          onUpdate({
-                            shortcutMap: {
-                              ...settings.shortcutMap,
-                              [action]: event.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </label>
-                  ))}
+                  {shortcutEntries
+                    .filter(([action]) => editorShortcutActions.includes(action as ShortcutAction))
+                    .map(([action, value]) => (
+                      <label key={action} className="shortcut-row">
+                        <span>{shortcutLabelsForLanguage[action as ShortcutAction]}</span>
+                        <input
+                          className="settings-input"
+                          type="text"
+                          value={value}
+                          onChange={(event) =>
+                            onUpdate({
+                              shortcutMap: {
+                                ...settings.shortcutMap,
+                                [action]: event.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </label>
+                    ))}
+                </div>
+                <h4 style={{ margin: '20px 0 10px', fontSize: '1.05rem', color: 'var(--text-main)' }}>{messages.shortcutsGlobalTitle}</h4>
+                <div className="shortcut-grid">
+                  {shortcutEntries
+                    .filter(([action]) => globalShortcutActions.includes(action as ShortcutAction))
+                    .map(([action, value]) => (
+                      <label key={action} className="shortcut-row">
+                        <span>{shortcutLabelsForLanguage[action as ShortcutAction]}</span>
+                        <input
+                          className="settings-input"
+                          type="text"
+                          value={value}
+                          onChange={(event) =>
+                            onUpdate({
+                              shortcutMap: {
+                                ...settings.shortcutMap,
+                                [action]: event.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </label>
+                    ))}
                 </div>
                 <div className="tool-actions-row">
                   <button className="secondary-button" type="button" onClick={() => onUpdate({ shortcutMap: defaultShortcutMap })}>
