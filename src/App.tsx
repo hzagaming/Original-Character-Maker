@@ -31,7 +31,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.3';
+const VERSION = '0.6.3.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -904,7 +904,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'カスタムショートカットは実験的機能です。ブラウザや OS の予約ショートカットとの衝突に注意してください。',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.6.3 ユーザーマニュアルに検索機能追加 + Paper2Gal に GitHub フィードバック入口追加；キーワードでエラーを瞬時検索。Paper2Gal から GitHub Issues / Discussions に直接ジャンプ。',
+    announcementDescription: '0.6.3.1 マニュアル検索対応 + 設定のAboutからGitHubフィードバックへ。',
     announcementList1: 'グローバルSEフルカバー、BGMエンジンv5は40種のプリセットとルックアヘッド精密スケジューリングを採用。',
     announcementList2: 'パフォーマンス設定が実際に機能：アニメーション削減でCSSアニメーション無効化、ガラス効果無効化でbackdrop-filter削除、開発者モードでリアルタイムデバッグパネル表示。',
     announcementList3: '約30言語に同期更新。40個のBGMプリセット名が4つの基礎言語翻訳に同期。',
@@ -1269,7 +1269,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Custom shortcuts are experimental. Avoid combinations that conflict with browser or system-reserved commands.',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.6.3: Docs manual now has search + Paper2Gal adds GitHub feedback buttons. Search any error by keyword across all 100+ entries. Paper2Gal page links directly to GitHub Issues and Discussions.',
+    announcementDescription: 'Version 0.6.3.1: Docs search + Settings About page links to GitHub feedback.',
     announcementList1: 'Global sound effects fully cover all interactions; BGM engine v5 upgrades to 40 presets with lookahead precision scheduling.',
     announcementList2: 'Performance settings now actually work: reduce animations disables CSS animations, disable glassmorphism removes backdrop-filter, dev mode shows real-time debug panel.',
     announcementList3: 'Synced to ~30 languages. 40 BGM preset names synchronized across 4 base language translations.',
@@ -1632,7 +1632,7 @@ const translations: Record<BaseLanguage, Messages> = {
     shortcutsExperimental: 'Пользовательские шорткаты являются экспериментальной функцией. Избегайте конфликтов с системными и браузерными сочетаниями.',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.6.3: В руководстве добавлен поиск + Paper2Gal получил кнопки обратной связи GitHub. Поиск любой ошибки по ключевым словам среди 100+ записей. Paper2Gal сразу переходит на GitHub Issues и Discussions.',
+    announcementDescription: 'Версия 0.6.3.1: Поиск в руководстве + ссылка на GitHub в настройках.',
     announcementList1: 'Глобальные звуковые эффекты полностью покрывают все взаимодействия; движок BGM v5 обновлён до 40 пресетов с точным планированием lookahead.',
     announcementList2: 'Настройки производительности теперь реально работают: уменьшение анимации отключает CSS-анимации, отключение стеклянного эффекта удаляет backdrop-filter, режим разработчика показывает панель отладки в реальном времени.',
     announcementList3: 'Синхронизировано с ~30 языками. 40 названий пресетов BGM синхронизированы для 4 базовых языков перевода.',
@@ -2481,18 +2481,15 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
-    version: '0.6.3',
+    version: '0.6.3.1',
     date: '2026-04-20',
-    title: '0.6.3 用户手册搜索 + Paper2Gal GitHub 反馈入口',
-    summary: '用户手册新增全局搜索功能，支持按错误代码、描述、原因、解决方案、预防措施等关键词搜索全部 100+ 条错误，结果实时高亮展示。Paper2Gal 页面新增「反馈问题」和「讨论交流」按钮，一键跳转到 GitHub Issues 和 Discussions。',
+    title: '0.6.3.1 用户手册搜索 + GitHub 反馈入口',
+    summary: '用户手册支持关键词搜索全部错误；设置「关于」页新增 GitHub Issues 和 Discussions 反馈链接。',
     details: [
-      '用户手册新增搜索功能：DocsPage 内容区域顶部新增 sticky 搜索栏，支持输入关键词实时搜索全部错误条目。搜索范围覆盖错误代码、描述、原因、解决方案、预防措施、位置和分类。搜索结果以 ErrorCard 形式展示，支持 severity 颜色标签。无结果时显示友好提示。',
-      '搜索栏交互设计：输入框带清除按钮（✕），聚焦时边框高亮为强调色；sticky 定位确保滚动时搜索栏始终可见；backdrop-filter 毛玻璃效果与深色主题融合。',
-      'Paper2Gal 新增 GitHub 反馈入口：左栏设置面板底部新增「🐛 反馈问题」和「💬 讨论交流」两个按钮，分别跳转 GitHub Issues（https://github.com/hzagaming/Original-Character-Maker/issues）和 Discussions（https://github.com/hzagaming/Original-Character-Maker/discussions）。',
-      '反馈按钮样式：与页面现有按钮风格一致（secondary-button small-button），上方用细线分隔，保持视觉层次清晰。',
-      '转画风 API 确认：内置模式调用 /api/style-transfer，自定义模式调用 /images/edits，响应解析逻辑完整，FormData 参数齐全，可以流畅运行。',
-      '全局 bug 检查：排查所有 playSound 调用确认 SoundName 有效性；检查 docsContent.ts 括号平衡（87,740 字符，全部平衡）；确认所有类型断言安全。',
-      '更新版本号至 0.6.3，首页公告同步更新。',
+      '用户手册新增搜索：顶部 sticky 搜索栏，支持按代码/描述/原因/解决方案/预防措施搜索 100+ 条错误。',
+      '设置「关于」页新增反馈链接：「🐛 反馈问题」跳转 Issues，「💬 讨论交流」跳转 Discussions。',
+      '转画风 API 逻辑确认完整，内置/自定义双模式可流畅运行。',
+      '更新版本号至 0.6.3.1。',
     ],
   },
   {
