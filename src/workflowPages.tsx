@@ -434,6 +434,7 @@ type UiCopySet = {
     resetWorkflowConfirm: string;
     redoWorkflow: string;
     redoCurrentResult: string;
+    retryStep: string;
     workflowConcurrency: string;
     workflowConcurrencyHint: string;
     hint: string;
@@ -666,6 +667,17 @@ function migratePaperPromptOverrides(value: Partial<PaperPromptOverrides> | null
 const PAPER_STEP_ORDER: PaperWorkflowStepName[] = [
   'validate_input',
   'analyze_character',
+  'expression_thinking',
+  'expression_surprise',
+  'expression_angry',
+  'cg_01',
+  'cg_02',
+  'cutout_expression_thinking',
+  'cutout_expression_surprise',
+  'cutout_expression_angry',
+];
+
+const PAPER_REDOABLE_STEPS: PaperWorkflowStepName[] = [
   'expression_thinking',
   'expression_surprise',
   'expression_angry',
@@ -972,6 +984,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       resetWorkflowConfirm: '确认重刷',
       redoWorkflow: '重做当前结果',
       redoCurrentResult: '重做当前结果',
+      retryStep: '重试此步骤',
       workflowConcurrency: '工作流并发',
       workflowConcurrencyHint: '默认开启表达图、CG 和抠图并行。关闭后会按顺序一个一个生成。',
       expressionCount: '表情版本数',
@@ -1317,6 +1330,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       resetWorkflowConfirm: 'リセットする',
       redoWorkflow: '結果を再生成',
       redoCurrentResult: 'この結果を再生成',
+      retryStep: 'このステップを再試行',
       workflowConcurrency: 'workflow 並列実行',
       workflowConcurrencyHint: '既定では表情、CG、切り抜きを並列実行します。オフにすると 1 つずつ順番に生成します。',
       expressionCount: '表情バージョン数',
@@ -1662,6 +1676,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       resetWorkflowConfirm: 'Reset now',
       redoWorkflow: 'Redo this result',
       redoCurrentResult: 'Redo this result',
+      retryStep: 'Retry this step',
       workflowConcurrency: 'Workflow concurrency',
       workflowConcurrencyHint: 'Expressions, CG, and cutout run in parallel by default. Turn it off to run one step at a time.',
       expressionCount: 'Expression variants',
@@ -2007,6 +2022,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       resetWorkflowConfirm: 'Сбросить сейчас',
       redoWorkflow: 'Переделать результат',
       redoCurrentResult: 'Переделать этот результат',
+      retryStep: 'Повторить этот шаг',
       workflowConcurrency: 'Параллельный workflow',
       workflowConcurrencyHint: 'По умолчанию выражения, CG и вырезание идут параллельно. Если выключить, workflow пойдет строго по шагам.',
       expressionCount: 'Число эмоций',
@@ -6314,6 +6330,18 @@ export function Paper2GalPage({
                           </div>
                         )}
                         {step?.error && <div className="paper-step-error">{step.error}</div>}
+                        {PAPER_REDOABLE_STEPS.includes(stepName) && (stepStatus === 'failed' || stepStatus === 'success') && (
+                          <div className="mini-action-row">
+                            <button
+                              className="secondary-button small-button"
+                              type="button"
+                              onClick={() => void handleRedoResult(stepName)}
+                              disabled={isSubmitting}
+                            >
+                              {stepStatus === 'failed' ? paper.retryStep : paper.redoCurrentResult}
+                            </button>
+                          </div>
+                        )}
                         {debugEntries.length > 0 && (
                           <details className="paper-debug-panel">
                             <summary>{copy.debugTitle}</summary>
