@@ -25,6 +25,6 @@ Prototype backend for:
 - Backend serves `/index.html`, `/app.js`, and `/styles.css` from the project root for the static frontend.
 - Banana2 live mode is supported through environment variables in `.env`.
 - Plato live mode is also supported through the OpenAI-compatible `/v1/chat/completions` interface.
-- Expression cutouts are generated in the frontend and uploaded back to the backend outputs directory.
+- Background removal (expression cutouts) defaults to rembg (Python local AI inference via u2net). No API Key required. The frontend provider is still supported for client-side cutout upload if needed.
 - GitHub Pages cannot host this backend. For public deployment, host `server/` on a real Node platform and point the frontend `API 地址` to that backend root URL.
 - When the frontend is on GitHub Pages, set `CORS_ORIGIN=https://your-user.github.io` or your exact frontend origin.

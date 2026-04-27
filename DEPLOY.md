@@ -65,10 +65,16 @@ PIPELINE_MODE=plato
 PLATO_API_KEY=your_api_key
 PLATO_BASE_URL=https://api.bltcy.ai/v1
 PLATO_MODEL=gemini-3.1-flash-image-preview
+
+# 背景移除（默认 rembg 本地推理，无需 API Key）
+BG_REMOVAL_PROVIDER=rembg
+
 UPLOAD_DIR=./tmp/uploads
 OUTPUT_DIR=./tmp/outputs
 WORKFLOW_STATE_DIR=./tmp/workflows
 ```
+
+> **rembg 环境要求**：如果使用 rembg（默认），服务器需要安装 Python 3.9+ 和 rembg CLI。Docker 镜像已预装；裸机部署请执行 `pip3 install rembg[cli]`，首次运行会自动下载约 176MB 的 u2net 模型。
 
 启动服务：
 
