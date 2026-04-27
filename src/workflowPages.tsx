@@ -2591,14 +2591,19 @@ function formatReadableErrorPayload(payload: unknown) {
 }
 
 function normalizeFetchError(error: unknown, fallback: string) {
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    if (error.message.includes('timed out')) {
+      return `${fallback}（请求超时，请检查 API 地址是否正确、后端服务是否正常运行，或当前网络是否稳定。）`;
+    }
+    // User-initiated abort (component unmount, clicking cancel) — suppress
+    return '';
+  }
   if (error instanceof TypeError && String(error.message).includes('Failed to fetch')) {
     return fallback;
   }
-
   if (error instanceof Error && error.message) {
     return error.message;
   }
-
   return fallback;
 }
 
@@ -2852,7 +2857,19 @@ function normalizePaperPromptOverrides(overrides: PaperPromptOverrides): PaperPr
 
 async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, timeoutMs = 30000) {
   const controller = new AbortController();
-  const id = window.setTimeout(() => controller.abort(), timeoutMs);
+  const externalSignal = init?.signal;
+
+  if (externalSignal) {
+    externalSignal.addEventListener('abort', () => controller.abort(externalSignal.reason), { once: true });
+    if (externalSignal.aborted) {
+      controller.abort(externalSignal.reason);
+    }
+  }
+
+  const id = window.setTimeout(
+    () => controller.abort(new DOMException(`Request timed out after ${timeoutMs}ms`, 'TimeoutError')),
+    timeoutMs,
+  );
   try {
     const response = await fetch(input, { ...init, signal: controller.signal });
     return response;
