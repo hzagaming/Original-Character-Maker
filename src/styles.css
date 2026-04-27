@@ -3562,6 +3562,300 @@ input[type='range']:active::-moz-range-thumb {
   border: 2px solid rgba(180,180,190,0.5);
 }
 
+/* ─── Body / Pose / Clothing Layers ─── */
+.body-shape {
+  position: absolute;
+  left: 50%;
+  top: 218px;
+  translate: -50% 0;
+  width: 86px;
+  height: 180px;
+  border-radius: 36px 36px 10px 10px;
+  background: linear-gradient(180deg, #d4a88c 0%, #c49a7c 40%, #b88d74 100%);
+  z-index: 1;
+}
+
+/* Pose variants */
+.body-shape.standing {
+  /* default upright */
+}
+
+.body-shape.arms-crossed::before,
+.body-shape.arms-crossed::after {
+  content: '';
+  position: absolute;
+  top: 38px;
+  width: 22px;
+  height: 90px;
+  border-radius: 12px;
+  background: inherit;
+}
+
+.body-shape.arms-crossed::before {
+  left: -10px;
+  transform: rotate(24deg);
+}
+
+.body-shape.arms-crossed::after {
+  right: -10px;
+  transform: rotate(-24deg);
+}
+
+.body-shape.hand-on-hip::before,
+.body-shape.hand-on-hip::after {
+  content: '';
+  position: absolute;
+  top: 38px;
+  width: 22px;
+  height: 100px;
+  border-radius: 12px;
+  background: inherit;
+}
+
+.body-shape.hand-on-hip::before {
+  left: -14px;
+  transform: rotate(12deg);
+}
+
+.body-shape.hand-on-hip::after {
+  right: -14px;
+  transform: rotate(-12deg);
+  height: 60px;
+}
+
+.body-shape.wave::before,
+.body-shape.wave::after {
+  content: '';
+  position: absolute;
+  top: 38px;
+  width: 22px;
+  height: 100px;
+  border-radius: 12px;
+  background: inherit;
+}
+
+.body-shape.wave::before {
+  left: -14px;
+  transform: rotate(18deg);
+}
+
+.body-shape.wave::after {
+  right: -14px;
+  transform: rotate(-55deg);
+  transform-origin: top center;
+  height: 80px;
+}
+
+/* Top clothing */
+.top-shape {
+  position: absolute;
+  left: 50%;
+  top: 218px;
+  translate: -50% 0;
+  z-index: 2;
+}
+
+.top-shape.t-shirt {
+  width: 96px;
+  height: 90px;
+  border-radius: 18px 18px 4px 4px;
+  background: linear-gradient(180deg, #3a6ea5, #2c5282);
+}
+
+.top-shape.t-shirt::before,
+.top-shape.t-shirt::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  width: 28px;
+  height: 50px;
+  border-radius: 10px;
+  background: inherit;
+}
+
+.top-shape.t-shirt::before {
+  left: -18px;
+  transform: rotate(18deg);
+}
+
+.top-shape.t-shirt::after {
+  right: -18px;
+  transform: rotate(-18deg);
+}
+
+.top-shape.hoodie {
+  width: 102px;
+  height: 100px;
+  border-radius: 24px 24px 6px 6px;
+  background: linear-gradient(180deg, #5a8a6e, #3d6b52);
+}
+
+.top-shape.hoodie::before,
+.top-shape.hoodie::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  width: 32px;
+  height: 56px;
+  border-radius: 12px;
+  background: inherit;
+}
+
+.top-shape.hoodie::before {
+  left: -20px;
+  transform: rotate(16deg);
+}
+
+.top-shape.hoodie::after {
+  right: -20px;
+  transform: rotate(-16deg);
+}
+
+.top-shape.blazer {
+  width: 100px;
+  height: 96px;
+  border-radius: 10px 10px 4px 4px;
+  background: linear-gradient(180deg, #2a2a35, #1a1a22);
+}
+
+.top-shape.blazer::before,
+.top-shape.blazer::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 30px;
+  height: 80px;
+  border-radius: 6px;
+  background: inherit;
+}
+
+.top-shape.blazer::before {
+  left: -16px;
+  transform: rotate(10deg);
+}
+
+.top-shape.blazer::after {
+  right: -16px;
+  transform: rotate(-10deg);
+}
+
+.top-shape.blazer .lapel-left,
+.top-shape.blazer .lapel-right {
+  position: absolute;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.top-shape.sailor {
+  width: 96px;
+  height: 90px;
+  border-radius: 16px 16px 4px 4px;
+  background: linear-gradient(180deg, #e8e8f0, #c8c8d8);
+}
+
+.top-shape.sailor::before,
+.top-shape.sailor::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  width: 26px;
+  height: 50px;
+  border-radius: 10px;
+  background: inherit;
+}
+
+.top-shape.sailor::before {
+  left: -16px;
+  transform: rotate(16deg);
+}
+
+.top-shape.sailor::after {
+  right: -16px;
+  transform: rotate(-16deg);
+}
+
+.top-shape.sailor .sailor-collar {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 60px;
+  height: 28px;
+  background: #2a3a5a;
+  border-radius: 0 0 20px 20px;
+}
+
+/* Bottom clothing */
+.bottom-shape {
+  position: absolute;
+  left: 50%;
+  top: 300px;
+  translate: -50% 0;
+  z-index: 2;
+}
+
+.bottom-shape.skirt {
+  width: 100px;
+  height: 90px;
+  background: linear-gradient(180deg, #8a5a7a, #6a3a5a);
+  clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
+  border-radius: 0 0 6px 6px;
+}
+
+.bottom-shape.pants {
+  width: 88px;
+  height: 96px;
+  background: linear-gradient(180deg, #4a5a7a, #3a4a6a);
+  border-radius: 4px 4px 8px 8px;
+}
+
+.bottom-shape.pants::before,
+.bottom-shape.pants::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 40px;
+  height: 100%;
+  background: inherit;
+  border-radius: 0 0 8px 8px;
+}
+
+.bottom-shape.pants::before {
+  left: 0;
+}
+
+.bottom-shape.pants::after {
+  right: 0;
+}
+
+.bottom-shape.shorts {
+  width: 90px;
+  height: 56px;
+  background: linear-gradient(180deg, #7a8a5a, #5a6a3a);
+  border-radius: 4px 4px 10px 10px;
+}
+
+.bottom-shape.shorts::before,
+.bottom-shape.shorts::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 42px;
+  height: 100%;
+  background: inherit;
+  border-radius: 0 0 10px 10px;
+}
+
+.bottom-shape.shorts::before {
+  left: 0;
+}
+
+.bottom-shape.shorts::after {
+  right: 0;
+}
+
 /* ─── Docs Page Styles ─── */
 .docs-layout {
   display: grid;

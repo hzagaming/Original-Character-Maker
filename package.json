@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
+    "html-to-image": "^1.11.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

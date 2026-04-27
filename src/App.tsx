@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { toPng } from 'html-to-image';
 import DevModePanel from './DevModePanel';
 import { createPortal } from 'react-dom';
 import type {
@@ -3900,6 +3901,9 @@ type FaceMakerCopy = {
   assetFaceTitle: string;
   assetEarTitle: string;
   assetAccessoryTitle: string;
+  assetPoseTitle: string;
+  assetTopTitle: string;
+  assetBottomTitle: string;
   paramsTitle: string;
   projectStatusTitle: string;
   headScale: string;
@@ -3926,6 +3930,10 @@ type FaceMakerCopy = {
   currentFace: string;
   currentEar: string;
   currentAccessory: string;
+  currentPose: string;
+  currentTop: string;
+  currentBottom: string;
+  exportPng: string;
   continueEdit: string;
   confirmReturn: string;
   confirmTitle: string;
@@ -3955,6 +3963,9 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     assetFaceTitle: '脸型',
     assetEarTitle: '耳朵',
     assetAccessoryTitle: '配件',
+    assetPoseTitle: '姿势',
+    assetTopTitle: '上衣',
+    assetBottomTitle: '下装',
     paramsTitle: '参数调整',
     projectStatusTitle: '项目状态',
     headScale: '头部比例',
@@ -3981,6 +3992,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     currentFace: '当前脸型',
     currentEar: '当前耳朵',
     currentAccessory: '当前配件',
+    currentPose: '当前姿势',
+    currentTop: '当前上衣',
+    currentBottom: '当前下装',
+    exportPng: '导出 PNG',
     continueEdit: '继续编辑',
     confirmReturn: '确认返回',
     confirmTitle: '确定返回首页吗？',
@@ -4008,6 +4023,9 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     assetFaceTitle: '顔型',
     assetEarTitle: '耳',
     assetAccessoryTitle: 'アクセサリー',
+    assetPoseTitle: 'ポーズ',
+    assetTopTitle: 'トップス',
+    assetBottomTitle: 'ボトムス',
     paramsTitle: 'パラメータ調整',
     projectStatusTitle: 'プロジェクト状態',
     headScale: '頭部比率',
@@ -4034,6 +4052,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     currentFace: '現在の顔型',
     currentEar: '現在の耳',
     currentAccessory: '現在のアクセサリー',
+    currentPose: '現在のポーズ',
+    currentTop: '現在のトップス',
+    currentBottom: '現在のボトムス',
+    exportPng: 'PNG をエクスポート',
     continueEdit: '編集を続ける',
     confirmReturn: '戻る',
     confirmTitle: 'ホームへ戻りますか？',
@@ -4061,6 +4083,9 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     assetFaceTitle: 'Face',
     assetEarTitle: 'Ears',
     assetAccessoryTitle: 'Accessories',
+    assetPoseTitle: 'Pose',
+    assetTopTitle: 'Top',
+    assetBottomTitle: 'Bottom',
     paramsTitle: 'Adjustments',
     projectStatusTitle: 'Project status',
     headScale: 'Head scale',
@@ -4087,6 +4112,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     currentFace: 'Current face',
     currentEar: 'Current ear',
     currentAccessory: 'Current accessory',
+    currentPose: 'Current pose',
+    currentTop: 'Current top',
+    currentBottom: 'Current bottom',
+    exportPng: 'Export PNG',
     continueEdit: 'Keep editing',
     confirmReturn: 'Return',
     confirmTitle: 'Return to the homepage?',
@@ -4114,6 +4143,9 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     assetFaceTitle: 'Форма лица',
     assetEarTitle: 'Уши',
     assetAccessoryTitle: 'Аксессуары',
+    assetPoseTitle: 'Поза',
+    assetTopTitle: 'Верх',
+    assetBottomTitle: 'Низ',
     paramsTitle: 'Параметры',
     projectStatusTitle: 'Состояние проекта',
     headScale: 'Размер головы',
@@ -4140,6 +4172,10 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     currentFace: 'Текущая форма лица',
     currentEar: 'Текущие уши',
     currentAccessory: 'Текущий аксессуар',
+    currentPose: 'Текущая поза',
+    currentTop: 'Текущий верх',
+    currentBottom: 'Текущий низ',
+    exportPng: 'Экспорт PNG',
     continueEdit: 'Продолжить редактирование',
     confirmReturn: 'Вернуться',
     confirmTitle: 'Вернуться на главную?',
@@ -4202,6 +4238,9 @@ function FaceMakerPage({
     mouth: 'smile',
     ears: 'standard',
     accessory: 'none',
+    pose: 'standing',
+    top: 't-shirt',
+    bottom: 'skirt',
     headScale: 52,
     faceLength: 50,
     chinWidth: 50,
@@ -4345,6 +4384,37 @@ function FaceMakerPage({
         { value: 'mask', label: '面具' },
       ],
     },
+    {
+      title: copy.assetPoseTitle,
+      key: 'pose' as const,
+      items: [
+        { value: 'standing', label: '站立' },
+        { value: 'arms-crossed', label: '抱臂' },
+        { value: 'hand-on-hip', label: '叉腰' },
+        { value: 'wave', label: '挥手' },
+      ],
+    },
+    {
+      title: copy.assetTopTitle,
+      key: 'top' as const,
+      items: [
+        { value: 't-shirt', label: 'T恤' },
+        { value: 'hoodie', label: '卫衣' },
+        { value: 'blazer', label: '西装' },
+        { value: 'sailor', label: '水手服' },
+        { value: 'none', label: '无' },
+      ],
+    },
+    {
+      title: copy.assetBottomTitle,
+      key: 'bottom' as const,
+      items: [
+        { value: 'skirt', label: '裙子' },
+        { value: 'pants', label: '长裤' },
+        { value: 'shorts', label: '短裤' },
+        { value: 'none', label: '无' },
+      ],
+    },
   ];
 
   function updateDraft<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
@@ -4366,6 +4436,27 @@ function FaceMakerPage({
     anchor.download = 'oc-face-maker-config.json';
     anchor.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
+
+  async function exportPng() {
+    const stage = document.querySelector('.character-stage') as HTMLElement | null;
+    if (!stage) {
+      alert('无法找到预览区域');
+      return;
+    }
+    playSound('downloadSound');
+    try {
+      const dataUrl = await toPng(stage, {
+        pixelRatio: 2,
+        backgroundColor: '#0f0f12',
+      });
+      const anchor = document.createElement('a');
+      anchor.href = dataUrl;
+      anchor.download = 'oc-character.png';
+      anchor.click();
+    } catch {
+      alert('导出失败，请重试');
+    }
   }
 
   function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
@@ -4463,6 +4554,9 @@ function FaceMakerPage({
             <button className="primary-button small-button" type="button" onClick={exportDraft}>
               {copy.export}
             </button>
+            <button className="primary-button small-button" type="button" onClick={() => void exportPng()}>
+              {copy.exportPng}
+            </button>
           </div>
         </div>
 
@@ -4543,6 +4637,16 @@ function FaceMakerPage({
                 {draft.accessory !== 'none' && (
                   <div className={`accessory-chip ${draft.accessory}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }} />
                 )}
+                {/* Body / Pose */}
+                <div className={`body-shape ${draft.pose}`} style={{ background: skinBackground }} />
+                {/* Top Clothing */}
+                {draft.top !== 'none' && (
+                  <div className={`top-shape ${draft.top}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }} />
+                )}
+                {/* Bottom Clothing */}
+                {draft.bottom !== 'none' && (
+                  <div className={`bottom-shape ${draft.bottom}`} style={{ filter: `hue-rotate(${accessoryHue}deg)` }} />
+                )}
               </div>
             </div>
           </section>
@@ -4579,6 +4683,9 @@ function FaceMakerPage({
                 <div className="status-card-mini"><strong>{draft.mouth}</strong><span>{copy.currentMouth}</span></div>
                 <div className="status-card-mini"><strong>{draft.ears}</strong><span>{copy.currentEar}</span></div>
                 <div className="status-card-mini"><strong>{draft.accessory}</strong><span>{copy.currentAccessory}</span></div>
+                <div className="status-card-mini"><strong>{draft.pose}</strong><span>{copy.currentPose}</span></div>
+                <div className="status-card-mini"><strong>{draft.top}</strong><span>{copy.currentTop}</span></div>
+                <div className="status-card-mini"><strong>{draft.bottom}</strong><span>{copy.currentBottom}</span></div>
               </div>
             </section>
           </aside>
