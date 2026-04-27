@@ -31,7 +31,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.3.2';
+const VERSION = '0.6.4';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -552,10 +552,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.6.3 用户手册新增搜索功能 + Paper2Gal 增加 GitHub 反馈入口；全局错误支持关键词搜索，一秒定位任意报错；Paper2Gal 页面可直接跳转 GitHub Issues 反馈问题或 Discussions 交流。',
-    announcementList1: '全局音效全覆盖，背景音乐引擎 v5 升级至 40 种风格预设并采用前瞻式精准调度。',
-    announcementList2: '性能设置各项选项真正生效：减少动画禁用 CSS 动画、禁用毛玻璃移除 backdrop-filter、开发者模式显示实时调试面板。',
-    announcementList3: '30 种语言同步更新，40 个 BGM 预设名称已同步到 4 种基础语言翻译中。',
+    announcementDescription: '0.6.4 抠图引擎切换为 rembg 本地推理；新增超时控制与详细错误码；用户手册补充 rembg 排查指南；修复阿里云超时与 fetch 中断提示。',
+    announcementList1: '抠图引擎全面切换至 rembg（Python 本地 AI 推理），无需 API Key，服务器本地完成背景移除。',
+    announcementList2: 'rembg 新增 120 秒超时控制，超时/未安装/输出异常分别抛出独立错误码，用户手册已补充完整排查步骤。',
+    announcementList3: '修复阿里云抠图 SDK 超时参数被忽略的问题；fetch 超时中断现在显示友好中文提示而非原始 abort 信息。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -920,10 +920,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.6.3.1 マニュアル検索対応 + 設定のAboutからGitHubフィードバックへ。',
-    announcementList1: 'グローバルSEフルカバー、BGMエンジンv5は40種のプリセットとルックアヘッド精密スケジューリングを採用。',
-    announcementList2: 'パフォーマンス設定が実際に機能：アニメーション削減でCSSアニメーション無効化、ガラス効果無効化でbackdrop-filter削除、開発者モードでリアルタイムデバッグパネル表示。',
-    announcementList3: '約30言語に同期更新。40個のBGMプリセット名が4つの基礎言語翻訳に同期。',
+    announcementDescription: '0.6.4 背景除去エンジンを rembg ローカル推論に切り替え；タイムアウト制御と詳細エラーコードを追加；マニュアルに rembg トラブルシューティングを追加；阿里云タイムアウトと fetch 中断メッセージを修正。',
+    announcementList1: '背景除去エンジンを rembg（Python ローカル AI 推論）に全面切り替え。API Key 不要、サーバー上で背景除去を完結。',
+    announcementList2: 'rembg に 120 秒タイムアウト制御を追加。タイムアウト／未インストール／出力異常それぞれ独立したエラーコードを出力。マニュアルに完全な対処手順を掲載。',
+    announcementList3: '阿里云切り抜き SDK のタイムアウトパラメータ無視問題を修正。fetch タイムアウト中断が分かりやすい日本語メッセージを表示。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1288,10 +1288,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.6.3.1: Docs search + Settings About page links to GitHub feedback.',
-    announcementList1: 'Global sound effects fully cover all interactions; BGM engine v5 upgrades to 40 presets with lookahead precision scheduling.',
-    announcementList2: 'Performance settings now actually work: reduce animations disables CSS animations, disable glassmorphism removes backdrop-filter, dev mode shows real-time debug panel.',
-    announcementList3: 'Synced to ~30 languages. 40 BGM preset names synchronized across 4 base language translations.',
+    announcementDescription: 'Version 0.6.4: Background removal switched to rembg local inference; added timeout control and detailed error codes; docs updated with rembg troubleshooting; fixed Aliyun timeout and fetch abort messages.',
+    announcementList1: 'Background removal engine fully switched to rembg (Python local AI inference). No API Key required; background removal completed entirely on the server.',
+    announcementList2: 'rembg now has 120-second timeout control. Independent error codes for timeout / not installed / output anomaly. Docs include complete troubleshooting steps.',
+    announcementList3: 'Fixed Aliyun cutout SDK timeout parameter being ignored. Fetch timeout aborts now show friendly messages instead of raw abort text.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1656,10 +1656,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.6.3.1: Поиск в руководстве + ссылка на GitHub в настройках.',
-    announcementList1: 'Глобальные звуковые эффекты полностью покрывают все взаимодействия; движок BGM v5 обновлён до 40 пресетов с точным планированием lookahead.',
-    announcementList2: 'Настройки производительности теперь реально работают: уменьшение анимации отключает CSS-анимации, отключение стеклянного эффекта удаляет backdrop-filter, режим разработчика показывает панель отладки в реальном времени.',
-    announcementList3: 'Синхронизировано с ~30 языками. 40 названий пресетов BGM синхронизированы для 4 базовых языков перевода.',
+    announcementDescription: 'Версия 0.6.4: движок удаления фона переключён на локальный rembg; добавлен контроль таймаута и детальные коды ошибок; руководство дополнено инструкциями по rembg; исправлены таймаут Aliyun и сообщения об прерывании fetch.',
+    announcementList1: 'Движок удаления фона полностью переключён на rembg (локальное AI-инференс Python). API Key не требуется; удаление фона выполняется полностью на сервере.',
+    announcementList2: 'Для rembg добавлен контроль таймаута 120 секунд. Независимые коды ошибок для таймаута / не установлен / аномалия вывода. Руководство содержит полные шаги устранения.',
+    announcementList3: 'Исправлена проблема игнорирования параметра таймаута SDK Aliyun. Прерывание по таймауту fetch теперь отображает понятные сообщения вместо сырого текста abort.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2528,6 +2528,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '0.6.4',
+    date: '2026-04-27',
+    title: '0.6.4 抠图引擎切换 rembg + 超时控制 + 错误字典扩充',
+    summary: 'Paper2Gal 抠图引擎从 frontend/aliyun 全面切换为 rembg 本地 Python 推理，无需 API Key；rembg 新增 120 秒超时与独立错误码；用户手册补充 rembg 完整排查指南；修复阿里云 SDK 超时与 fetch 中断提示。',
+    details: [
+      '抠图引擎切换 rembg：Paper2Gal 背景移除从 frontend（浏览器 canvas）和 aliyun（云端 API）全面迁移至 rembg（Python 本地 AI 推理）。无需 API Key，依赖服务器本地 Python 环境。',
+      'rembg 适配器增强：新增 120 秒超时控制（SIGTERM + SIGKILL 兜底）；超时/未安装/输出异常分别抛出 REMBG_TIMEOUT / REMBG_SPAWN_FAILED / REMBG_EXECUTION_FAILED / REMBG_OUTPUT_MISSING 独立错误码。',
+      '用户手册 rembg 专题：Paper2Gal 工具概述更新为 rembg 方案说明；错误字典新增 3 条 rembg 专用条目；全局系统错误分类同步收录 rembg 排查指南。',
+      '修复阿里云抠图超时：createRuntimeOptions 改为逐个字段赋值（原构造函数传参被 SDK 忽略导致默认 3 秒超时），并开启指数退避重试。',
+      '修复 fetch 超时提示：fetchWithTimeout 超时 abort 时添加原因字符串，normalizeFetchError 识别超时/用户主动取消并输出友好中文提示，不再显示「signal is aborted without reason」。',
+      '更新版本号至 0.6.4，首页公告同步更新。',
+    ],
+  },
   {
     version: '0.6.3.2',
     date: '2026-04-27',
