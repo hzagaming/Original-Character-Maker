@@ -21,12 +21,14 @@ function createAliyunImageSegClient(config) {
 }
 
 function createRuntimeOptions(config) {
-  return new TeaUtil.RuntimeOptions({
-    connectTimeout: config.aliyunImageSegTimeoutMs,
-    readTimeout: config.aliyunImageSegTimeoutMs,
-    autoretry: false,
-    maxAttempts: 1
-  });
+  const runtime = new TeaUtil.RuntimeOptions();
+  runtime.connectTimeout = config.aliyunImageSegTimeoutMs;
+  runtime.readTimeout = config.aliyunImageSegTimeoutMs;
+  runtime.autoretry = true;
+  runtime.maxAttempts = 3;
+  runtime.backoffPolicy = 'exponential';
+  runtime.backoffPeriod = 1000;
+  return runtime;
 }
 
 function resolveActionConfig(action) {
