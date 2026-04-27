@@ -10,9 +10,18 @@ function isRembgConfigured(config) {
 
 function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
   return new Promise((resolve, reject) => {
-    const proc = spawn("rembg", ["i", sourcePath, destinationPath], {
-      stdio: ["ignore", "pipe", "pipe"]
-    });
+    // Try "rembg" first, fallback to "python3 -m rembg" for environments
+    // where pip installed the CLI into a non-standard path.
+    let proc;
+    try {
+      proc = spawn("rembg", ["i", sourcePath, destinationPath], {
+        stdio: ["ignore", "pipe", "pipe"]
+      });
+    } catch {
+      proc = spawn("python3", ["-m", "rembg", "cli", "i", sourcePath, destinationPath], {
+        stdio: ["ignore", "pipe", "pipe"]
+      });
+    }
 
     let stdout = "";
     let stderr = "";

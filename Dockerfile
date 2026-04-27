@@ -21,17 +21,23 @@ FROM node:20-bookworm-slim AS runner
 
 ENV NODE_ENV=production
 ENV PORT=3001
+# Ensure rembg downloads models to a path the node user can access
+ENV HOME=/app
+ENV U2NET_HOME=/app/.u2net
 
 WORKDIR /app
 
-# Install Python 3, pip and rembg for background removal
+# Install Python 3 and pip for rembg
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip python3-venv \
-  && rm -rf /var/lib/apt/lists/* \
-  && pip3 install --break-system-packages rembg[cli] || pip3 install rembg[cli]
+    python3 python3-pip \
+  && rm -rf /var/lib/apt/lists/*
 
-# Pre-download the u2net model so the first cutout request doesn't have to wait
-RUN python3 -c "from rembg.session_factory import new_session; new_session('u2net')" || true
+# Install rembg[cli] using python3 -m pip (more reliable than pip3 alias)
+RUN python3 -m pip install --break-system-packages rembg[cli]
+
+# Pre-download the u2net model as the node user so permissions are correct
+RUN mkdir -p /app/.u2net \
+  && python3 -c "from rembg.session_factory import new_session; new_session('u2net')"
 
 COPY --from=frontend-builder /app/dist ./dist
 COPY --from=frontend-builder /app/index.html ./index.html
