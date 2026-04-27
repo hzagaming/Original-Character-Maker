@@ -629,6 +629,7 @@ const PREVIOUS_PAPER_PROMPT_OVERRIDES: PaperPromptOverrides = {
 
 function displayProviderName(provider: string | null | undefined): string {
   if (provider === 'banana2') return 'gpt2';
+  if (provider === 'rembg') return 'rembg';
   return provider || '—';
 }
 

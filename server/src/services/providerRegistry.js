@@ -20,6 +20,10 @@ const {
   aliyunRemoveBackground,
   isAliyunImageSegConfigured
 } = require("../adapters/aliyunImageSegAdapter");
+const {
+  rembgRemoveBackground,
+  isRembgConfigured
+} = require("../adapters/rembgAdapter");
 
 function getMimeTypeFromPath(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -88,6 +92,13 @@ function getBackgroundRemovalRunner(config) {
       run: async () => {
         throw new Error("Frontend background removal is handled client-side.");
       }
+    };
+  }
+
+  if (config.bgRemovalProvider === "rembg" && isRembgConfigured(config)) {
+    return {
+      provider: "rembg",
+      run: rembgRemoveBackground
     };
   }
 
