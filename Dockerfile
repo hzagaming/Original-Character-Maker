@@ -33,11 +33,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # Install rembg[cli] using python3 -m pip (more reliable than pip3 alias)
-RUN python3 -m pip install --break-system-packages rembg[cli]
+RUN python3 -m pip install --break-system-packages --no-cache-dir rembg[cli] \
+  && rm -rf ~/.cache/pip
 
-# Pre-download the u2net model as the node user so permissions are correct
+# Pre-download the u2net model so first-run is fast
 RUN mkdir -p /app/.u2net \
-  && python3 -c "from rembg.session_factory import new_session; new_session('u2net')"
+  && python3 -c "from rembg.session_factory import new_session; new_session('u2net')" || echo "u2net pre-download skipped, will fetch on first run"
 
 COPY --from=frontend-builder /app/dist ./dist
 COPY --from=frontend-builder /app/index.html ./index.html
