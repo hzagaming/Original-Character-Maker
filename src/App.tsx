@@ -32,7 +32,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.4.2';
+const VERSION = '0.6.4.3';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 

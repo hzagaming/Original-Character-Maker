@@ -24,8 +24,6 @@ echo.
 echo Frontend: http://127.0.0.1:5173
 echo Backend : http://127.0.0.1:3001
 echo.
-echo If Aliyun cutout is enabled, make sure .env contains:
-echo   ALIBABA_CLOUD_ACCESS_KEY_ID
-echo   ALIBABA_CLOUD_ACCESS_KEY_SECRET
+echo Make sure .env is configured if using live providers (PLATO_API_KEY, etc.)
 
 exit /b 0

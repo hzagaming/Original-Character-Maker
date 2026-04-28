@@ -40,18 +40,6 @@ function validateUploadedFile(file, config) {
     );
   }
 
-  const usesBanana2 =
-    config.bgRemovalProvider === "banana2" ||
-    config.expressionProvider === "banana2" ||
-    config.cgProvider === "banana2";
-
-  if (usesBanana2 && file.mimetype === "image/webp") {
-    throw new AppError(
-      "Banana2 live mode currently supports PNG and JPEG uploads. Please re-upload as PNG or JPG.",
-      400
-    );
-  }
-
   return {
     original_name: file.originalname,
     mime_type: file.mimetype,

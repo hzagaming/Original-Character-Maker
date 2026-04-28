@@ -604,9 +604,9 @@ function buildInvisiblePromptSuffix(cfg: Record<string, unknown>): string {
 
 function createDefaultPaperPromptOverrides(): PaperPromptOverrides {
   return {
-    thinking: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成思考状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素',
-    surprise: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成惊讶状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素',
-    angry: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。图片背景纯白，同时画面中不要有任何除人物外的东西，比例严格限制为2000x2000像素',
+    thinking: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成思考状态。比例严格限制为2000x2000像素',
+    surprise: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成惊讶状态。比例严格限制为2000x2000像素',
+    angry: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。比例严格限制为2000x2000像素',
     cg01: '基于参考图中的同一角色生成单人CG场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
     cg02: '基于参考图中的同一角色生成单人CG场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
   };
@@ -629,9 +629,13 @@ const PREVIOUS_PAPER_PROMPT_OVERRIDES: PaperPromptOverrides = {
 };
 
 function displayProviderName(provider: string | null | undefined): string {
-  if (provider === 'banana2') return 'gpt2';
   if (provider === 'rembg') return 'rembg';
   return provider || '—';
+}
+
+function isOldWhiteBgPrompt(prompt: string | undefined): boolean {
+  if (!prompt) return false;
+  return prompt.includes('图片背景纯白');
 }
 
 function migratePaperPromptOverrides(value: Partial<PaperPromptOverrides> | null | undefined) {
@@ -642,23 +646,31 @@ function migratePaperPromptOverrides(value: Partial<PaperPromptOverrides> | null
   const defaults = createDefaultPaperPromptOverrides();
   return {
     thinking:
-      value.thinking === LEGACY_PAPER_PROMPT_OVERRIDES.thinking || value.thinking === PREVIOUS_PAPER_PROMPT_OVERRIDES.thinking
+      value.thinking === LEGACY_PAPER_PROMPT_OVERRIDES.thinking ||
+      value.thinking === PREVIOUS_PAPER_PROMPT_OVERRIDES.thinking ||
+      isOldWhiteBgPrompt(value.thinking)
         ? defaults.thinking
         : value.thinking || defaults.thinking,
     surprise:
-      value.surprise === LEGACY_PAPER_PROMPT_OVERRIDES.surprise || value.surprise === PREVIOUS_PAPER_PROMPT_OVERRIDES.surprise
+      value.surprise === LEGACY_PAPER_PROMPT_OVERRIDES.surprise ||
+      value.surprise === PREVIOUS_PAPER_PROMPT_OVERRIDES.surprise ||
+      isOldWhiteBgPrompt(value.surprise)
         ? defaults.surprise
         : value.surprise || defaults.surprise,
     angry:
-      value.angry === LEGACY_PAPER_PROMPT_OVERRIDES.angry || value.angry === PREVIOUS_PAPER_PROMPT_OVERRIDES.angry
+      value.angry === LEGACY_PAPER_PROMPT_OVERRIDES.angry ||
+      value.angry === PREVIOUS_PAPER_PROMPT_OVERRIDES.angry ||
+      isOldWhiteBgPrompt(value.angry)
         ? defaults.angry
         : value.angry || defaults.angry,
     cg01:
-      value.cg01 === LEGACY_PAPER_PROMPT_OVERRIDES.cg01 || value.cg01 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg01
+      value.cg01 === LEGACY_PAPER_PROMPT_OVERRIDES.cg01 ||
+      value.cg01 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg01
         ? defaults.cg01
         : value.cg01 || defaults.cg01,
     cg02:
-      value.cg02 === LEGACY_PAPER_PROMPT_OVERRIDES.cg02 || value.cg02 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg02
+      value.cg02 === LEGACY_PAPER_PROMPT_OVERRIDES.cg02 ||
+      value.cg02 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg02
         ? defaults.cg02
         : value.cg02 || defaults.cg02,
   };
@@ -5993,7 +6005,7 @@ export function Paper2GalPage({
       const isLocalhost = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)/.test(window.location.hostname);
       let errorText = normalizeFetchError(error, paper.networkStartError);
       if (isLocalhost && error instanceof TypeError && String(error.message).includes('Failed to fetch')) {
-        errorText = `${errorText}（当前尝试连接 ${base}）。如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=8080。常用端口会自动探测：3000/3001/5173/8080/8000/5000/9000。`;
+        errorText = `${errorText}（当前尝试连接 ${base}）。如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=8080。常用端口会自动探测：3000/3001/5000/5001/8000/8080/9000/9001。`;
       }
       setMessage({
         type: 'error',

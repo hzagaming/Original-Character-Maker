@@ -4,22 +4,24 @@ const {
   mockGenerateExpression,
   mockRemoveBackground
 } = require("../adapters/mockImageAdapter");
-const {
-  banana2GenerateCg,
-  banana2GenerateExpression,
-  banana2RemoveBackground,
-  isBanana2Configured
-} = require("../adapters/banana2ImageAdapter");
+// banana2 adapters removed per user requirement (no banana2 globally)
+// const {
+//   banana2GenerateCg,
+//   banana2GenerateExpression,
+//   banana2RemoveBackground,
+//   isBanana2Configured
+// } = require("../adapters/banana2ImageAdapter");
 const {
   isPlatoConfigured,
   platoGenerateCg,
   platoGenerateExpression,
   platoRemoveBackground
 } = require("../adapters/platoImageAdapter");
-const {
-  aliyunRemoveBackground,
-  isAliyunImageSegConfigured
-} = require("../adapters/aliyunImageSegAdapter");
+// aliyun adapters removed per user requirement (rembg only for cutout)
+// const {
+//   aliyunRemoveBackground,
+//   isAliyunImageSegConfigured
+// } = require("../adapters/aliyunImageSegAdapter");
 const {
   rembgRemoveBackground,
   isRembgConfigured
@@ -39,11 +41,7 @@ function getMimeTypeFromPath(filePath) {
   return "image/png";
 }
 
-function getProviderLabel(provider, config) {
-  if (provider === "banana2" && !isBanana2Configured(config)) {
-    return "mock";
-  }
-
+function getProviderLabel(provider, _config) {
   return provider;
 }
 
@@ -109,20 +107,6 @@ function getBackgroundRemovalRunner(config) {
     };
   }
 
-  if (config.bgRemovalProvider === "aliyun" && isAliyunImageSegConfigured(config)) {
-    return {
-      provider: "aliyun",
-      run: aliyunRemoveBackground
-    };
-  }
-
-  if (config.bgRemovalProvider === "banana2" && isBanana2Configured(config)) {
-    return {
-      provider: "banana2",
-      run: banana2RemoveBackground
-    };
-  }
-
   return {
     provider: "mock",
     run: mockRemoveBackground
@@ -137,13 +121,6 @@ function getExpressionRunner(config) {
     };
   }
 
-  if (config.expressionProvider === "banana2" && isBanana2Configured(config)) {
-    return {
-      provider: "banana2",
-      run: banana2GenerateExpression
-    };
-  }
-
   return {
     provider: "mock",
     run: mockGenerateExpression
@@ -155,13 +132,6 @@ function getCgRunner(config) {
     return {
       provider: "plato",
       run: platoGenerateCg
-    };
-  }
-
-  if (config.cgProvider === "banana2" && isBanana2Configured(config)) {
-    return {
-      provider: "banana2",
-      run: banana2GenerateCg
     };
   }
 
