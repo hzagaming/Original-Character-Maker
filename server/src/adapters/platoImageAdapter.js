@@ -234,6 +234,8 @@ async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinat
     let responseJson = null;
     let rawBody = "";
 
+    const platoController = new AbortController();
+    const platoTimeout = setTimeout(() => platoController.abort(), config.platoTimeoutMs);
     try {
       response = await fetch(endpoint, {
         method: "POST",
@@ -241,8 +243,9 @@ async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinat
           Authorization: `Bearer ${config.platoApiKey}`,
         },
         body,
-        signal: AbortSignal.timeout(config.platoTimeoutMs),
+        signal: platoController.signal,
       });
+      clearTimeout(platoTimeout);
 
       rawBody = await response.text();
       try {
@@ -251,6 +254,7 @@ async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinat
         responseJson = {};
       }
     } catch (error) {
+      clearTimeout(platoTimeout);
       attemptErrors.push({
         model: modelName,
         code: "PLATO_NETWORK_ERROR",

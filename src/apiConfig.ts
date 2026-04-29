@@ -188,9 +188,31 @@ export function getEffectiveApiBase(
   settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset' | 'apiBaseUrl2' | 'apiBaseUrl3'>,
   channel: 1 | 2 | 3 = 1,
 ): string {
+  // 同域部署优先：如果已经探测到同域可用，使用相对路径
+  if (_probeDone && _sameOriginAvailable) {
+    return '';
+  }
+
   if (settings.interfaceMode === 'custom') {
     const url = channel === 1 ? settings.apiBaseUrl : channel === 2 ? settings.apiBaseUrl2 : settings.apiBaseUrl3;
-    return (url || '').trim().replace(/\/+$/, '');
+    const trimmed = (url || '').trim().replace(/\/+$/, '');
+
+    // 如果在非 localhost 环境下配置了 localhost URL，忽略它（避免连接失败）
+    if (trimmed && typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        try {
+          const parsed = new URL(trimmed);
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+            return '';
+          }
+        } catch {
+          // invalid URL, ignore
+        }
+      }
+    }
+
+    return trimmed;
   }
 
   return getPresetApiBase(settings);
@@ -253,6 +275,12 @@ export function buildApiUrl(
 
   if (/^https?:\/\//.test(pathname)) {
     return pathname;
+  }
+
+  // 同域部署：使用相对路径，不再拼接 base
+  if (_probeDone && _sameOriginAvailable) {
+    const safePath = pathname.startsWith('/') ? pathname : `/${pathname}`;
+    return safePath;
   }
 
   const base = getEffectiveApiBase(settings, channel);

@@ -6563,12 +6563,20 @@ function SettingsModal({
                       </button>
                     </div>
                     <p className="muted-copy">{messages.apiPresetHint}</p>
-                    <p className="muted-copy">{presetEndpoint || messages.apiPresetUnavailable}</p>
-                    {!presetEndpoint && <p className="tiny-copy settings-warning">{messages.apiPresetUnavailable}</p>}
+                    <p className="muted-copy">
+                      {presetEndpoint || (
+                        typeof window !== 'undefined' && !/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)
+                          ? `${window.location.origin}（同域部署已就绪）`
+                          : messages.apiPresetUnavailable
+                      )}
+                    </p>
+                    {!presetEndpoint && !(typeof window !== 'undefined' && !/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) && (
+                      <p className="tiny-copy settings-warning">{messages.apiPresetUnavailable}</p>
+                    )}
                     <div style={{ marginTop: 16 }}>
                       <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: '0 0 10px' }}>{messages.apiQuickPorts}</h4>
                       <div className="palette-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(72px, 1fr))' }}>
-                        {[3000, 3001, 5000, 5001, 8000, 8080, 9000, 9001].map((port) => (
+                        {[3000, 3001, 5173, 4173, 5000, 5001, 8000, 8080, 9000, 9001].map((port) => (
                           <button
                             key={port}
                             className="palette-chip"

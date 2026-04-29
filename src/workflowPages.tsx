@@ -6005,7 +6005,7 @@ export function Paper2GalPage({
       const isLocalhost = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)/.test(window.location.hostname);
       let errorText = normalizeFetchError(error, paper.networkStartError);
       if (isLocalhost && error instanceof TypeError && String(error.message).includes('Failed to fetch')) {
-        errorText = `${errorText}（当前尝试连接 ${base}）。如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=8080。常用端口会自动探测：3000/3001/5000/5001/8000/8080/9000/9001。`;
+        errorText = `${errorText}（当前尝试连接 ${base}）。如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=8080。常用端口会自动探测：3000/3001/5173/4173/5000/5001/8000/8080/9000/9001。`;
       }
       setMessage({
         type: 'error',
