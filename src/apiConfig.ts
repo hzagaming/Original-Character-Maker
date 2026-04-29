@@ -2,13 +2,17 @@ import type { SettingsState } from './types';
 
 export type WorkflowApiBaseIssue = 'direct-model-endpoint' | '';
 
-const PROBE_PORTS = [3000, 3001, 8080, 8000, 5000, 5001, 9000, 9001];
+const PROBE_PORTS = [3000, 3001, 5173, 4173, 8080, 8000, 5000, 5001, 9000, 9001];
 const PROBE_TIMEOUT_MS = 2500;
 let _probedBase = '';
+let _probeDone = false;
+let _sameOriginAvailable = false;
 let _probePromise: Promise<string> | null = null;
 
 export function resetApiProbe(): void {
   _probedBase = '';
+  _probeDone = false;
+  _sameOriginAvailable = false;
   _probePromise = null;
 }
 
@@ -26,6 +30,22 @@ export function readQueryApiBase(key: string): string {
   }
   const params = new URLSearchParams(location.search);
   return (params.get(key) || '').trim();
+}
+
+async function probeSameOrigin(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+    const response = await fetch('/api/health', {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    return response.ok;
+  } catch {
+    // ignore
+  }
+  return false;
 }
 
 async function probePort(port: number): Promise<string | null> {
@@ -47,36 +67,51 @@ async function probePort(port: number): Promise<string | null> {
 }
 
 async function doProbe(): Promise<string> {
-  if (_probedBase) {
+  if (_probeDone) {
+    return _probedBase;
+  }
+
+  // 1. 同域探测优先（适用于 Zeabur / Render / Railway / Vite proxy 等同域部署）
+  const sameOriginOk = await probeSameOrigin();
+  if (sameOriginOk) {
+    _probedBase = '';
+    _sameOriginAvailable = true;
+    _probeDone = true;
     return _probedBase;
   }
 
   const location = getLocation();
   const hostname = location?.hostname || '';
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return '';
-  }
 
-  // 1. URL query param 优先
+  // 2. URL query param 优先
   const queryPort = readQueryApiBase('apiPort');
   if (queryPort && /^\d+$/.test(queryPort)) {
     _probedBase = `http://localhost:${queryPort}`;
+    _probeDone = true;
     return _probedBase;
   }
   const queryBase = readQueryApiBase('apiBase');
   if (queryBase) {
     _probedBase = queryBase.replace(/\/+$/, '');
+    _probeDone = true;
     return _probedBase;
   }
 
-  // 2. 如果前端本身就跑在常用后端端口上
+  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    // 非 localhost 且同域探测失败：没有可用的内置 API
+    _probeDone = true;
+    return '';
+  }
+
+  // 3. 如果前端本身就跑在常用后端端口上
   const currentPort = location?.port || '';
   if (PROBE_PORTS.includes(Number(currentPort))) {
     _probedBase = location!.origin;
+    _probeDone = true;
     return _probedBase;
   }
 
-  // 3. 并发探测常用端口
+  // 4. 并发探测常用端口
   const probes = PROBE_PORTS.map(async (port) => {
     const base = await probePort(port);
     return base ? { port, base } : null;
@@ -86,16 +121,18 @@ async function doProbe(): Promise<string> {
 
   if (hit) {
     _probedBase = hit.base;
+    _probeDone = true;
     return _probedBase;
   }
 
-  // 4. fallback 3001
+  // 5. fallback 3001
   _probedBase = 'http://localhost:3001';
+  _probeDone = true;
   return _probedBase;
 }
 
 export async function ensureLocalApiProbed(): Promise<string> {
-  if (_probedBase) {
+  if (_probeDone) {
     return _probedBase;
   }
   if (!_probePromise) {
@@ -110,13 +147,18 @@ export function defaultLocalApiBase(): string {
     return '';
   }
 
+  // 同域探测已完成且成功：使用相对路径（空 base）
+  if (_probeDone && _sameOriginAvailable) {
+    return '';
+  }
+
   const { hostname, origin, port, protocol } = location;
   if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
     return '';
   }
 
   // 如果已经探测过，直接返回
-  if (_probedBase) {
+  if (_probeDone) {
     return _probedBase;
   }
 

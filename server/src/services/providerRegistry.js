@@ -114,7 +114,13 @@ function getBackgroundRemovalRunner(config) {
 }
 
 function getExpressionRunner(config) {
-  if (config.expressionProvider === "plato" && isPlatoConfigured(config)) {
+  if (config.expressionProvider === "plato") {
+    if (!isPlatoConfigured(config)) {
+      throw new Error(
+        "expressionProvider is set to 'plato' but PLATO_API_KEY is not configured. " +
+        "Please set PLATO_API_KEY in the backend .env file, or switch to mock mode by setting EXPRESSION_PROVIDER=mock."
+      );
+    }
     return {
       provider: "plato",
       run: platoGenerateExpression
@@ -128,7 +134,13 @@ function getExpressionRunner(config) {
 }
 
 function getCgRunner(config) {
-  if (config.cgProvider === "plato" && isPlatoConfigured(config)) {
+  if (config.cgProvider === "plato") {
+    if (!isPlatoConfigured(config)) {
+      throw new Error(
+        "cgProvider is set to 'plato' but PLATO_API_KEY is not configured. " +
+        "Please set PLATO_API_KEY in the backend .env file, or switch to mock mode by setting CG_PROVIDER=mock."
+      );
+    }
     return {
       provider: "plato",
       run: platoGenerateCg

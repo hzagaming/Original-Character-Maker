@@ -45,8 +45,7 @@ module.exports = {
   publicAppBaseUrl: parsePublicBaseUrl(
     process.env.PUBLIC_APP_BASE_URL ||
       process.env.PUBLIC_BASE_URL ||
-      process.env.APP_BASE_URL ||
-      "https://p2g-workflow.zeabur.app",
+      process.env.APP_BASE_URL || "",
     corsOrigin
   ),
   cutoutAssetBaseUrl:
@@ -64,8 +63,8 @@ module.exports = {
   aliyunImageSegAction: process.env.ALIYUN_IMAGESEG_ACTION || "SegmentCommonImage",
   aliyunImageSegReturnForm: process.env.ALIYUN_IMAGESEG_RETURN_FORM || "",
   aliyunImageSegTimeoutMs: parseInteger(process.env.ALIYUN_IMAGESEG_TIMEOUT_MS, 120000),
-  expressionProvider: process.env.EXPRESSION_PROVIDER || "mock",
-  cgProvider: process.env.CG_PROVIDER || "mock",
+  expressionProvider: process.env.EXPRESSION_PROVIDER || "plato",
+  cgProvider: process.env.CG_PROVIDER || "plato",
   platoApiKey: process.env.PLATO_API_KEY || "",
   platoBaseUrl: process.env.PLATO_BASE_URL || "https://api.bltcy.ai/v1",
   platoModel: process.env.PLATO_MODEL || "gpt-image-2",
