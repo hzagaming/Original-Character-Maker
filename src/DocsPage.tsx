@@ -89,159 +89,30 @@ export default function DocsPage({
   const [searchQuery, setSearchQuery] = useState('');
   const contentRef = useRef<HTMLDivElement>(null);
 
-  type SearchResultType = 'error' | 'dict-error' | 'parameter' | 'button' | 'overview';
-
-  type SearchResultItem = {
-    type: SearchResultType;
-    toolId: string;
-    toolTitle: string;
-    title: string;
-    snippet: string;
-    severity?: string;
-    sectionId: SectionId | null;
-    anchor?: string;
-  };
-
-  const allSearchableItems = useMemo(() => {
-    const items: SearchResultItem[] = [];
-
-    // Tool overviews
-    content.tools.forEach((tool) => {
-      items.push({
-        type: 'overview',
-        toolId: tool.id,
-        toolTitle: tool.title,
-        title: tool.title,
-        snippet: tool.overview.slice(0, 200),
-        sectionId: 'overview',
-      });
-    });
-
-    // Tool buttons
-    content.tools.forEach((tool) => {
-      tool.buttons.forEach((btn) => {
-        items.push({
-          type: 'button',
-          toolId: tool.id,
-          toolTitle: tool.title,
-          title: btn.name,
-          snippet: btn.description,
-          sectionId: 'buttons',
-        });
-      });
-    });
-
-    // Tool parameters
-    content.tools.forEach((tool) => {
-      tool.parameters.forEach((param) => {
-        items.push({
-          type: 'parameter',
-          toolId: tool.id,
-          toolTitle: tool.title,
-          title: param.name,
-          snippet: `${param.description}${param.tips ? ` · ${param.tips}` : ''}`,
-          sectionId: 'parameters',
-        });
-      });
-    });
-
-    // Tool errors
-    content.tools.forEach((tool) => {
-      tool.errors.forEach((err) => {
-        items.push({
-          type: 'error',
-          toolId: tool.id,
-          toolTitle: tool.title,
-          title: `${err.code}: ${err.message}`,
-          snippet: `${err.cause} · ${err.solution}`,
-          severity: err.severity,
-          sectionId: 'errors',
-          anchor: err.code,
-        });
-      });
-    });
-
-    // Dictionary errors
-    content.errorDictionary.forEach((cat) => {
-      cat.errors.forEach((err) => {
-        items.push({
-          type: 'dict-error',
-          toolId: `dict-${cat.id}`,
-          toolTitle: cat.name,
-          title: `${err.code}: ${err.message}`,
-          snippet: `${err.cause} · ${err.solution}`,
-          severity: err.severity,
-          sectionId: null,
-          anchor: err.code,
-        });
-      });
-    });
-
-    return items;
+  const allSearchableErrors = useMemo(() => {
+    const toolErrors = content.tools.flatMap((tool) =>
+      tool.errors.map((err) => ({ ...err, toolTitle: tool.title })),
+    );
+    const dictErrors = content.errorDictionary.flatMap((cat) =>
+      cat.errors.map((err) => ({ ...err, toolTitle: cat.name })),
+    );
+    return [...toolErrors, ...dictErrors];
   }, [content]);
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase();
-    return allSearchableItems.filter((item) =>
-      item.title.toLowerCase().includes(q) ||
-      item.snippet.toLowerCase().includes(q) ||
-      item.toolTitle.toLowerCase().includes(q),
+    return allSearchableErrors.filter((err) =>
+      err.code.toLowerCase().includes(q) ||
+      err.message.toLowerCase().includes(q) ||
+      err.cause.toLowerCase().includes(q) ||
+      err.solution.toLowerCase().includes(q) ||
+      err.location.toLowerCase().includes(q) ||
+      err.category.toLowerCase().includes(q) ||
+      (err.prevention?.toLowerCase().includes(q) ?? false) ||
+      (err.steps?.some((s) => s.toLowerCase().includes(q)) ?? false),
     );
-  }, [allSearchableItems, searchQuery]);
-
-  const groupedSearchResults = useMemo(() => {
-    const groups: Record<string, SearchResultItem[]> = {};
-    searchResults.forEach((item) => {
-      const key = item.type;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(item);
-    });
-    return groups;
-  }, [searchResults]);
-
-  const handleSearchResultClick = useCallback((item: SearchResultItem) => {
-    setActiveToolId(item.toolId);
-    if (item.sectionId) {
-      setActiveSection(item.sectionId);
-      setTimeout(() => {
-        if (item.sectionId) {
-          const el = document.getElementById(`docs-section-${item.sectionId}`);
-          if (el && contentRef.current) {
-            const top = el.offsetTop - contentRef.current.offsetTop - 16;
-            contentRef.current.scrollTo({ top, behavior: 'smooth' });
-          }
-        }
-        if (item.anchor) {
-          const anchorEl = document.getElementById(`docs-anchor-${item.anchor}`);
-          if (anchorEl && contentRef.current) {
-            const top = anchorEl.offsetTop - contentRef.current.offsetTop - 16;
-            contentRef.current.scrollTo({ top, behavior: 'smooth' });
-          }
-        }
-      }, 50);
-    } else {
-      setActiveSection(null);
-      if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' });
-    }
-    setSearchQuery('');
-  }, []);
-
-  function highlightText(text: string, query: string) {
-    if (!query.trim()) return text;
-    const q = query.toLowerCase();
-    const parts: (string | JSX.Element)[] = [];
-    let lastIndex = 0;
-    let index = text.toLowerCase().indexOf(q);
-    while (index !== -1) {
-      parts.push(text.slice(lastIndex, index));
-      parts.push(<mark key={index} className="docs-search-highlight">{text.slice(index, index + q.length)}</mark>);
-      lastIndex = index + q.length;
-      index = text.toLowerCase().indexOf(q, lastIndex);
-    }
-    parts.push(text.slice(lastIndex));
-    return parts;
-  }
+  }, [allSearchableErrors, searchQuery]);
 
   const activeTool = content.tools.find((t) => t.id === activeToolId) ?? content.tools[0];
 
@@ -394,51 +265,11 @@ export default function DocsPage({
 
           {/* Content */}
           <div className="docs-content" ref={contentRef}>
-            {/* Breadcrumb */}
-            {!searchQuery.trim() && (
-              <nav className="docs-breadcrumb">
-                <button
-                  className="docs-breadcrumb-item"
-                  type="button"
-                  onClick={() => { setActiveToolId('intro'); setActiveSection(null); if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' }); }}
-                >
-                  {messages.docsNavIntro}
-                </button>
-                {activeToolId !== 'intro' && (
-                  <>
-                    <span className="docs-breadcrumb-sep">/</span>
-                    {activeToolId === 'error-index' ? (
-                      <span className="docs-breadcrumb-current">{messages.docsNavIndex}</span>
-                    ) : activeToolId.startsWith('dict-') ? (
-                      <span className="docs-breadcrumb-current">
-                        {content.errorDictionary.find((c) => `dict-${c.id}` === activeToolId)?.name ?? messages.docsNavDictionary}
-                      </span>
-                    ) : (
-                      <>
-                        <button
-                          className="docs-breadcrumb-item"
-                          type="button"
-                          onClick={() => { if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' }); }}
-                        >
-                          {activeTool?.title}
-                        </button>
-                        {activeSection && (
-                          <>
-                            <span className="docs-breadcrumb-sep">/</span>
-                            <span className="docs-breadcrumb-current">{sectionLabels[activeSection]}</span>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </nav>
-            )}
             <div className="docs-search-bar">
               <input
                 className="docs-search-input"
                 type="text"
-                placeholder="搜索工具、按钮、参数、错误代码或解决方案..."
+                placeholder="搜索错误代码、描述、原因或解决方案..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -455,57 +286,12 @@ export default function DocsPage({
                   找到 {searchResults.length} 条与「{searchQuery}」相关的结果
                 </p>
                 {searchResults.length === 0 ? (
-                  <div className="docs-search-empty">
-                    <p>没有找到匹配的结果，请尝试其他关键词。</p>
-                    <p className="muted-copy" style={{ marginTop: 8 }}>支持搜索：工具名称、按钮功能、参数说明、错误代码、错误描述、原因、解决方案。</p>
-                  </div>
+                  <div className="docs-search-empty">没有找到匹配的结果，请尝试其他关键词。</div>
                 ) : (
-                  <div className="docs-search-results">
-                    {(['overview', 'button', 'parameter', 'error', 'dict-error'] as SearchResultType[]).map((type) => {
-                      const group = groupedSearchResults[type];
-                      if (!group || group.length === 0) return null;
-                      const typeLabels: Record<SearchResultType, string> = {
-                        overview: '工具概述',
-                        button: '按钮',
-                        parameter: '参数',
-                        error: '工具错误',
-                        'dict-error': '全局错误',
-                      };
-                      return (
-                        <div key={type} className="docs-search-group">
-                          <h3 className="docs-search-group-title">
-                            {typeLabels[type]}
-                            <span className="docs-search-group-count">{group.length}</span>
-                          </h3>
-                          <div className="docs-search-group-list">
-                            {group.slice(0, 8).map((item, i) => (
-                              <button
-                                key={i}
-                                className="docs-search-result-item"
-                                type="button"
-                                onClick={() => handleSearchResultClick(item)}
-                              >
-                                <div className="docs-search-result-title">
-                                  {item.severity && (
-                                    <span className={`docs-search-result-badge ${severityClassMap[item.severity] ?? ''}`}>
-                                      {severityLabelMap[item.severity] ?? item.severity}
-                                    </span>
-                                  )}
-                                  {highlightText(item.title, searchQuery)}
-                                </div>
-                                <div className="docs-search-result-snippet">
-                                  {highlightText(item.snippet, searchQuery)}
-                                </div>
-                                <div className="docs-search-result-source">{item.toolTitle}</div>
-                              </button>
-                            ))}
-                            {group.length > 8 && (
-                              <p className="docs-search-more">还有 {group.length - 8} 条结果...</p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="docs-errors-list">
+                    {searchResults.map((err, i) => (
+                      <ErrorCard key={i} error={err} messages={messages} />
+                    ))}
                   </div>
                 )}
               </article>
@@ -620,7 +406,7 @@ function ErrorCard({ error, messages }: { error: import('./docsContent').DocsErr
   const severityLabel = severityLabelMap[error.severity] ?? error.severity;
 
   return (
-    <div className={`docs-error-card ${severityClass}`} id={`docs-anchor-${error.code}`}>
+    <div className={`docs-error-card ${severityClass}`}>
       <div className="docs-error-header">
         <span className="docs-error-code">{error.code}</span>
         <span className={`docs-error-severity ${severityClass}`}>{severityLabel}</span>
