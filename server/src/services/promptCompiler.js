@@ -46,16 +46,28 @@ function createDefaultExpressionPrompts() {
       "严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。比例严格限制为2000x2000像素。"
   };
   if (!config.expressionWhiteBackground) return base;
+  function injectWhiteBgSuffix(prompt) {
+    // 兼容 markdown 文件中有无句号的两种写法
+    if (prompt.includes("比例严格限制为2000x2000像素。")) {
+      return prompt.replace("比例严格限制为2000x2000像素。", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素。");
+    }
+    return prompt.replace("比例严格限制为2000x2000像素", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素");
+  }
   return {
-    thinking: base.thinking.replace("比例严格限制为2000x2000像素。", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素。"),
-    surprise: base.surprise.replace("比例严格限制为2000x2000像素。", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素。"),
-    angry: base.angry.replace("比例严格限制为2000x2000像素。", WHITE_BG_SUFFIX + "比例严格限制为2000x2000像素。")
+    thinking: injectWhiteBgSuffix(base.thinking),
+    surprise: injectWhiteBgSuffix(base.surprise),
+    angry: injectWhiteBgSuffix(base.angry)
   };
 }
 
 function buildCgPrompt(_slotIndex, scene) {
-  const template = _cgPromptTemplate || "基于参考图中的同一角色生成单人 CG 场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例";
-  return template.replace(/\{scene\}/g, scene);
+  const template = _cgPromptTemplate || "基于参考图中的同一角色生成单人 CG 场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景为{scene}，尽量柔和，禁止新增其他人物。图片横屏的比例";
+  const result = template.replace(/\{scene\}/g, scene);
+  // 防御：如果模板中没有 {scene} 占位符，直接在末尾追加场景描述
+  if (!result.includes(scene)) {
+    return result + "。场景：" + scene;
+  }
+  return result;
 }
 
 function pickRandomScenes(count) {
