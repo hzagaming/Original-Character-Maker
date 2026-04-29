@@ -1,7 +1,7 @@
 {
   "name": "original-character-maker",
   "private": true,
-  "version": "0.6.4.5",
+  "version": "0.6.4.6",
   "type": "module",
   "scripts": {
     "dev": "vite",

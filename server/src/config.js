@@ -54,7 +54,7 @@ module.exports = {
   minImageWidth: parseInteger(process.env.MIN_IMAGE_WIDTH, 256),
   minImageHeight: parseInteger(process.env.MIN_IMAGE_HEIGHT, 256),
   imageGenConcurrency: parseInteger(process.env.IMAGE_GEN_CONCURRENCY, 2),
-  pipelineMode: process.env.PIPELINE_MODE || "mock",
+  pipelineMode: process.env.PIPELINE_MODE || "live",
   bgRemovalProvider: process.env.BG_REMOVAL_PROVIDER || "rembg",
   aliyunAccessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID || process.env.ALIYUN_ACCESS_KEY_ID || "",
   aliyunAccessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET || process.env.ALIYUN_ACCESS_KEY_SECRET || "",

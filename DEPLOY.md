@@ -61,10 +61,13 @@ npm install --production
 ```env
 PORT=3001
 CORS_ORIGIN=https://your-frontend-domain.com
-PIPELINE_MODE=plato
+
+# AI 图像生成（表情 + CG）
+EXPRESSION_PROVIDER=plato
+CG_PROVIDER=plato
 PLATO_API_KEY=your_api_key
 PLATO_BASE_URL=https://api.bltcy.ai/v1
-PLATO_MODEL=gemini-3.1-flash-image-preview
+PLATO_MODEL=gpt-image-2
 
 # 背景移除（默认 rembg 本地推理，无需 API Key）
 BG_REMOVAL_PROVIDER=rembg
