@@ -142,7 +142,12 @@ export function defaultLocalApiBase(): string {
 
   const { hostname, origin, port, protocol } = location;
 
-  // 同域探测已完成且成功：使用当前 origin 作为 base（确保 URL 完整且可靠）
+  // Vite dev server (5173/4173): 本地开发时后端固定跑在 3001，不要探测前端端口
+  if ((hostname === 'localhost' || hostname === '127.0.0.1') && (port === '5173' || port === '4173')) {
+    return 'http://localhost:3001';
+  }
+
+  // 同域探测已完成且成功
   if (_probeDone && _sameOriginAvailable) {
     return origin;
   }
@@ -157,12 +162,11 @@ export function defaultLocalApiBase(): string {
     return _probedBase;
   }
 
-  // 尚未探测过：返回一个合理的 fallback（调用方应在请求前 await ensureLocalApiProbed()）
+  // 尚未探测过：返回一个合理的 fallback
   if (PROBE_PORTS.includes(Number(port))) {
     return origin;
   }
 
-  // Prefer the workflow backend dev port.
   return `${protocol}//${hostname}:3001`;
 }
 
