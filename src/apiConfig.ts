@@ -140,14 +140,16 @@ export function defaultLocalApiBase(): string {
     return '';
   }
 
-  // 同域探测已完成且成功：使用相对路径（空 base）
+  const { hostname, origin, port, protocol } = location;
+
+  // 同域探测已完成且成功：使用当前 origin 作为 base（确保 URL 完整且可靠）
   if (_probeDone && _sameOriginAvailable) {
-    return '';
+    return origin;
   }
 
-  const { hostname, origin, port, protocol } = location;
+  // 非 localhost 环境：始终使用当前 origin（同域部署）
   if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return '';
+    return origin;
   }
 
   // 如果已经探测过，直接返回
@@ -181,9 +183,9 @@ export function getEffectiveApiBase(
   settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset' | 'apiBaseUrl2' | 'apiBaseUrl3'>,
   channel: 1 | 2 | 3 = 1,
 ): string {
-  // 同域部署优先：如果已经探测到同域可用，使用相对路径
+  // 同域部署优先：如果已经探测到同域可用，使用当前 origin
   if (_probeDone && _sameOriginAvailable) {
-    return '';
+    return getLocation()?.origin || '';
   }
 
   if (settings.interfaceMode === 'custom') {
@@ -197,7 +199,7 @@ export function getEffectiveApiBase(
         try {
           const parsed = new URL(trimmed);
           if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
-            return '';
+            return getLocation()?.origin || '';
           }
         } catch {
           // invalid URL, ignore
@@ -270,10 +272,11 @@ export function buildApiUrl(
     return pathname;
   }
 
-  // 同域部署：使用相对路径，不再拼接 base
+  // 同域部署：使用完整 origin + pathname（避免某些部署环境下相对路径失效）
   if (_probeDone && _sameOriginAvailable) {
+    const origin = getLocation()?.origin || '';
     const safePath = pathname.startsWith('/') ? pathname : `/${pathname}`;
-    return safePath;
+    return origin ? `${origin}${safePath}` : safePath;
   }
 
   const base = getEffectiveApiBase(settings, channel);
