@@ -103,15 +103,8 @@ async function doProbe(): Promise<string> {
     return '';
   }
 
-  // 3. 如果前端本身就跑在常用后端端口上
-  const currentPort = location?.port || '';
-  if (PROBE_PORTS.includes(Number(currentPort))) {
-    _probedBase = location!.origin;
-    _probeDone = true;
-    return _probedBase;
-  }
-
-  // 4. 并发探测常用端口
+  // 3. 并发探测常用端口（包括当前端口）
+  // 注意：不再直接假设前端端口 = 后端端口，而是实际探测每个端口
   const probes = PROBE_PORTS.map(async (port) => {
     const base = await probePort(port);
     return base ? { port, base } : null;
@@ -162,7 +155,7 @@ export function defaultLocalApiBase(): string {
     return _probedBase;
   }
 
-  // 如果前端本身就跑在常用后端端口上
+  // 尚未探测过：返回一个合理的 fallback（调用方应在请求前 await ensureLocalApiProbed()）
   if (PROBE_PORTS.includes(Number(port))) {
     return origin;
   }
