@@ -32,11 +32,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-<<<<<<< HEAD
 const VERSION = '0.6.4.3';
-=======
-const VERSION = '0.6.3.2';
->>>>>>> parent of 2ceca14 (v0.6.4: rembg local background removal + timeout control + error dictionary expansion)
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -557,10 +553,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.6.3 用户手册新增搜索功能 + Paper2Gal 增加 GitHub 反馈入口；全局错误支持关键词搜索，一秒定位任意报错；Paper2Gal 页面可直接跳转 GitHub Issues 反馈问题或 Discussions 交流。',
-    announcementList1: '全局音效全覆盖，背景音乐引擎 v5 升级至 40 种风格预设并采用前瞻式精准调度。',
-    announcementList2: '性能设置各项选项真正生效：减少动画禁用 CSS 动画、禁用毛玻璃移除 backdrop-filter、开发者模式显示实时调试面板。',
-    announcementList3: '30 种语言同步更新，40 个 BGM 预设名称已同步到 4 种基础语言翻译中。',
+    announcementDescription: '0.6.4 抠图引擎切换为 rembg 本地推理；新增超时控制与详细错误码；用户手册补充 rembg 排查指南；修复阿里云超时与 fetch 中断提示。',
+    announcementList1: '抠图引擎全面切换至 rembg（Python 本地 AI 推理），无需 API Key，服务器本地完成背景移除。',
+    announcementList2: 'rembg 新增 120 秒超时控制，超时/未安装/输出异常分别抛出独立错误码，用户手册已补充完整排查步骤。',
+    announcementList3: '修复阿里云抠图 SDK 超时参数被忽略的问题；fetch 超时中断现在显示友好中文提示而非原始 abort 信息。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -925,10 +921,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.6.3.1 マニュアル検索対応 + 設定のAboutからGitHubフィードバックへ。',
-    announcementList1: 'グローバルSEフルカバー、BGMエンジンv5は40種のプリセットとルックアヘッド精密スケジューリングを採用。',
-    announcementList2: 'パフォーマンス設定が実際に機能：アニメーション削減でCSSアニメーション無効化、ガラス効果無効化でbackdrop-filter削除、開発者モードでリアルタイムデバッグパネル表示。',
-    announcementList3: '約30言語に同期更新。40個のBGMプリセット名が4つの基礎言語翻訳に同期。',
+    announcementDescription: '0.6.4 背景除去エンジンを rembg ローカル推論に切り替え；タイムアウト制御と詳細エラーコードを追加；マニュアルに rembg トラブルシューティングを追加；阿里云タイムアウトと fetch 中断メッセージを修正。',
+    announcementList1: '背景除去エンジンを rembg（Python ローカル AI 推論）に全面切り替え。API Key 不要、サーバー上で背景除去を完結。',
+    announcementList2: 'rembg に 120 秒タイムアウト制御を追加。タイムアウト／未インストール／出力異常それぞれ独立したエラーコードを出力。マニュアルに完全な対処手順を掲載。',
+    announcementList3: '阿里云切り抜き SDK のタイムアウトパラメータ無視問題を修正。fetch タイムアウト中断が分かりやすい日本語メッセージを表示。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1293,10 +1289,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.6.3.1: Docs search + Settings About page links to GitHub feedback.',
-    announcementList1: 'Global sound effects fully cover all interactions; BGM engine v5 upgrades to 40 presets with lookahead precision scheduling.',
-    announcementList2: 'Performance settings now actually work: reduce animations disables CSS animations, disable glassmorphism removes backdrop-filter, dev mode shows real-time debug panel.',
-    announcementList3: 'Synced to ~30 languages. 40 BGM preset names synchronized across 4 base language translations.',
+    announcementDescription: 'Version 0.6.4: Background removal switched to rembg local inference; added timeout control and detailed error codes; docs updated with rembg troubleshooting; fixed Aliyun timeout and fetch abort messages.',
+    announcementList1: 'Background removal engine fully switched to rembg (Python local AI inference). No API Key required; background removal completed entirely on the server.',
+    announcementList2: 'rembg now has 120-second timeout control. Independent error codes for timeout / not installed / output anomaly. Docs include complete troubleshooting steps.',
+    announcementList3: 'Fixed Aliyun cutout SDK timeout parameter being ignored. Fetch timeout aborts now show friendly messages instead of raw abort text.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1661,10 +1657,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.6.3.1: Поиск в руководстве + ссылка на GitHub в настройках.',
-    announcementList1: 'Глобальные звуковые эффекты полностью покрывают все взаимодействия; движок BGM v5 обновлён до 40 пресетов с точным планированием lookahead.',
-    announcementList2: 'Настройки производительности теперь реально работают: уменьшение анимации отключает CSS-анимации, отключение стеклянного эффекта удаляет backdrop-filter, режим разработчика показывает панель отладки в реальном времени.',
-    announcementList3: 'Синхронизировано с ~30 языками. 40 названий пресетов BGM синхронизированы для 4 базовых языков перевода.',
+    announcementDescription: 'Версия 0.6.4: движок удаления фона переключён на локальный rembg; добавлен контроль таймаута и детальные коды ошибок; руководство дополнено инструкциями по rembg; исправлены таймаут Aliyun и сообщения об прерывании fetch.',
+    announcementList1: 'Движок удаления фона полностью переключён на rembg (локальное AI-инференс Python). API Key не требуется; удаление фона выполняется полностью на сервере.',
+    announcementList2: 'Для rembg добавлен контроль таймаута 120 секунд. Независимые коды ошибок для таймаута / не установлен / аномалия вывода. Руководство содержит полные шаги устранения.',
+    announcementList3: 'Исправлена проблема игнорирования параметра таймаута SDK Aliyun. Прерывание по таймауту fetch теперь отображает понятные сообщения вместо сырого текста abort.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2534,7 +2530,6 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
-<<<<<<< HEAD
     version: '0.6.4.2',
     date: '2026-04-27',
     title: '0.6.4.2 表情生成支持背景开关',
@@ -2580,8 +2575,6 @@ const announcementHistory = [
     ],
   },
   {
-=======
->>>>>>> parent of 2ceca14 (v0.6.4: rembg local background removal + timeout control + error dictionary expansion)
     version: '0.6.3.2',
     date: '2026-04-27',
     title: '0.6.3.2 API 端口扩展 + 快捷键分类 + 滑条与音频 UI 修复',

@@ -147,27 +147,27 @@ export function defaultLocalApiBase(): string {
 
   const { hostname, origin, port, protocol } = location;
 
-  // Vite dev server (5173/4173): 本地开发时后端固定跑在 3001，不要探测前端端口
-  if ((hostname === 'localhost' || hostname === '127.0.0.1') && (port === '5173' || port === '4173')) {
-    return 'http://localhost:3001';
-  }
-
-  // 同域探测已完成且成功
+  // 同域探测已完成且成功（Zeabur / Render / Railway 等同域部署）
   if (_probeDone && _sameOriginAvailable) {
     return origin;
   }
 
-  // 非 localhost 环境：始终使用当前 origin（同域部署）
+  // 非 localhost 环境：始终使用当前 origin
   if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
     return origin;
   }
 
-  // 如果已经探测过，直接返回
+  // 探测已完成：使用实际探测到的后端地址（无论后端跑在哪个端口）
   if (_probeDone) {
     return _probedBase;
   }
 
-  // 尚未探测过：返回一个合理的 fallback
+  // 尚未探测过：Vite dev 端口直接假设后端在 3001（避免同步调用时返回错误的前端地址）
+  if (port === '5173' || port === '4173') {
+    return 'http://localhost:3001';
+  }
+
+  // 其他已知端口，假设同端口可能有后端
   if (PROBE_PORTS.includes(Number(port))) {
     return origin;
   }

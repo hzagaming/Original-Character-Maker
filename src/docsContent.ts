@@ -1237,7 +1237,6 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
     {
       id: 'paper2gal',
       title: 'paper2gal 图片素材生成',
-<<<<<<< HEAD
       overview: `Paper2Gal 工具接入 p2g-character-workflow 后端工作流，负责上传角色图像并自动生成系列素材：表情图（思考、惊讶、生气）、CG 场景图和抠图素材。
 
 **抠图方案（v0.6.4+）**
@@ -1264,17 +1263,6 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
         { name: '导出工作流 JSON', description: '下载包含工作流完整状态、步骤详情、调试信息和各步骤提供商分配的 JSON 文件，用于排查问题或向开发者反馈 Bug。导出前请确保工作流已至少执行过一次。' },
         { name: '展开 / 收起 Prompt 覆盖', description: '展开或折叠 Prompt 覆盖面板，可自定义各步骤的生成提示词。展开后支持一键重置为默认值。' },
         { name: '重刷', description: '清除工作流状态、上传的图片和结果，恢复为初始状态。此操作不可撤销，已生成的素材和步骤进度将全部丢失。' },
-=======
-      overview: `Paper2Gal 工具接入 p2g-character-workflow 后端工作流，负责上传角色图像并自动生成系列素材：表情图（思考、惊讶、生气）、CG 场景图和抠图素材。支持 Prompt 覆盖和 AI 并发控制，可实时查看工作流进度和下载结果。`,
-      buttons: [
-        { name: '选择图片', description: '上传角色图像。仅接受 PNG 和 JPG 格式，最大尺寸建议不超过 4096x4096。' },
-        { name: '启动工作流', description: '向后端提交角色图像，启动 paper2gal 工作流。工作流会依次执行：验证输入、分析角色、生成表情、生成 CG、执行抠图。' },
-        { name: '复制 JSON', description: '复制当前 Prompt 覆盖配置为 JSON 文本。' },
-        { name: '下载 JSON', description: '下载当前配置为 JSON 文件。' },
-        { name: '导出工作流 JSON', description: '下载包含工作流完整状态、步骤详情和调试信息的 JSON 文件，用于排查问题。' },
-        { name: '展开 / 收起 Prompt 覆盖', description: '展开或折叠 Prompt 覆盖面板，可自定义各步骤的生成提示词。' },
-        { name: '重刷', description: '清除工作流状态、上传的图片和结果，恢复为初始状态。' },
->>>>>>> parent of 2ceca14 (v0.6.4: rembg local background removal + timeout control + error dictionary expansion)
       ],
       parameters: [
         { name: '表情 Prompt 覆盖 - 思考', description: '覆盖「思考」表情生成步骤的默认 Prompt。留空则使用后端预设提示词。', tips: '建议保留角色名和核心外貌特征，仅修改表情描述部分，以保证角色一致性。' },
@@ -1540,7 +1528,6 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           relatedCodes: ['502_BAD_GATEWAY'],
           prevention: '避开服务器维护时段操作；高负载时降低请求频率。',
         },
-<<<<<<< HEAD
         {
           code: 'REMBG_SPAWN_FAILED',
           message: '抠图步骤报错，提示 rembg 无法启动',
@@ -1608,8 +1595,6 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           relatedCodes: ['PLATO_REQUEST_FAILED', 'BANANA2_REQUEST_FAILED', 'MOCK_STEP_FAILED'],
           prevention: '确保表情生成步骤成功后再进行抠图；工作流会自动按顺序执行，不要跳过步骤。',
         },
-=======
->>>>>>> parent of 2ceca14 (v0.6.4: rembg local background removal + timeout control + error dictionary expansion)
       ],
     },
     {
@@ -2435,7 +2420,6 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           relatedCodes: ['DEVICE_MEMORY_LOW'],
           prevention: '允许浏览器弹窗；文档过大时先移除部分图片再导出。',
         },
-<<<<<<< HEAD
         {
           code: 'REMBG_SPAWN_FAILED',
           message: '服务器未安装 rembg 或 Python 环境',
@@ -2520,8 +2504,6 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           relatedCodes: ['REMBG_SPAWN_FAILED', 'REMBG_TIMEOUT', 'REMBG_EXECUTION_FAILED'],
           prevention: '确保输入图片格式正确；避免使用损坏或特殊编码的图片。',
         },
-=======
->>>>>>> parent of 2ceca14 (v0.6.4: rembg local background removal + timeout control + error dictionary expansion)
       ],
     },
     {
