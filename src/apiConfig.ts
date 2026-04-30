@@ -41,7 +41,10 @@ async function probeSameOrigin(): Promise<boolean> {
       signal: controller.signal,
     });
     clearTimeout(timer);
-    return response.ok;
+    // Vite dev server 会对未知路由做 SPA fallback，返回 200 + text/html。
+    // 真正的后端 /api/health 返回的是 application/json。
+    const contentType = response.headers.get('content-type') || '';
+    return response.ok && contentType.includes('application/json');
   } catch {
     // ignore
   }
@@ -57,7 +60,9 @@ async function probePort(port: number): Promise<string | null> {
       signal: controller.signal,
     });
     clearTimeout(timer);
-    if (response.ok) {
+    // 过滤掉 Vite SPA fallback 返回的 HTML（200 OK 但不是 JSON）
+    const contentType = response.headers.get('content-type') || '';
+    if (response.ok && contentType.includes('application/json')) {
       return `http://localhost:${port}`;
     }
   } catch {
@@ -187,9 +192,17 @@ export function getEffectiveApiBase(
   settings: Pick<SettingsState, 'interfaceMode' | 'apiBaseUrl' | 'apiPreset' | 'apiBaseUrl2' | 'apiBaseUrl3'>,
   channel: 1 | 2 | 3 = 1,
 ): string {
+  const location = getLocation();
+
   // 同域部署优先：如果已经探测到同域可用，使用当前 origin
+  // 但本地开发时前端在 Vite 端口（5173/4173），绝不把前端 dev server 当后端用
   if (_probeDone && _sameOriginAvailable) {
-    return getLocation()?.origin || '';
+    const origin = location?.origin || '';
+    if (origin.includes('://localhost:5173') || origin.includes('://localhost:4173') ||
+        origin.includes('://127.0.0.1:5173') || origin.includes('://127.0.0.1:4173')) {
+      return 'http://localhost:3001';
+    }
+    return origin;
   }
 
   if (settings.interfaceMode === 'custom') {
@@ -277,9 +290,14 @@ export function buildApiUrl(
   }
 
   // 同域部署：使用完整 origin + pathname（避免某些部署环境下相对路径失效）
+  // 本地开发时前端在 Vite 端口（5173/4173），绝不把请求发给前端 dev server
   if (_probeDone && _sameOriginAvailable) {
     const origin = getLocation()?.origin || '';
     const safePath = pathname.startsWith('/') ? pathname : `/${pathname}`;
+    if (origin.includes('://localhost:5173') || origin.includes('://localhost:4173') ||
+        origin.includes('://127.0.0.1:5173') || origin.includes('://127.0.0.1:4173')) {
+      return `http://localhost:3001${safePath}`;
+    }
     return origin ? `${origin}${safePath}` : safePath;
   }
 

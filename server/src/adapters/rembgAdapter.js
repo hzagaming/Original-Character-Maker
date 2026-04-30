@@ -8,7 +8,7 @@ function isRembgConfigured(config) {
   return config.bgRemovalProvider === "rembg";
 }
 
-function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
+function runRembgCommand(sourcePath, destinationPath) {
   return new Promise((resolve, reject) => {
     // Try "rembg" first, fallback to "python3 -m rembg" for environments
     // where pip installed the CLI into a non-standard path.
@@ -25,14 +25,6 @@ function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
 
     let stdout = "";
     let stderr = "";
-    let killed = false;
-
-    const timer = setTimeout(() => {
-      killed = true;
-      proc.kill("SIGTERM");
-      // Force kill after 5s if still running
-      setTimeout(() => proc.kill("SIGKILL"), 5000).unref();
-    }, timeoutMs);
 
     proc.stdout.on("data", (data) => {
       stdout += String(data);
@@ -42,25 +34,13 @@ function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
       stderr += String(data);
     });
 
-    proc.on("close", (code, signal) => {
-      clearTimeout(timer);
-      if (killed) {
-        reject(
-          new AppError(
-            `rembg timed out after ${timeoutMs}ms. The image may be too large or the server is under heavy load. Try again with a smaller image or check server CPU/RAM usage.`,
-            504,
-            { provider: "rembg", source_path: sourcePath, timeout_ms: timeoutMs },
-            "REMBG_TIMEOUT"
-          )
-        );
-        return;
-      }
+    proc.on("close", (code) => {
       if (code === 0) {
         resolve({ stdout, stderr });
       } else {
         reject(
           new AppError(
-            `rembg failed (exit code ${code}). ${stderr || stdout || "No error output captured."}`,
+            `rembg exited with code ${code}. ${stderr || stdout}`,
             502,
             { provider: "rembg", source_path: sourcePath, exit_code: code },
             "REMBG_EXECUTION_FAILED"
@@ -70,10 +50,9 @@ function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
     });
 
     proc.on("error", (error) => {
-      clearTimeout(timer);
       reject(
         new AppError(
-          `Failed to start rembg: ${error.message}. Please ensure Python 3 and rembg are installed on the server (pip install rembg[cli]).`,
+          `Failed to spawn rembg: ${error.message}. Is Python and rembg installed?`,
           500,
           { provider: "rembg", source_path: sourcePath },
           "REMBG_SPAWN_FAILED"
@@ -84,18 +63,6 @@ function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
 }
 
 async function rembgRemoveBackground({ sourcePath, destinationPath }) {
-  // Validate input file exists
-  try {
-    await fs.access(sourcePath);
-  } catch {
-    throw new AppError(
-      `rembg cannot find source image: ${sourcePath}. The upstream step may have failed to generate the expression image.`,
-      500,
-      { provider: "rembg", source_path: sourcePath },
-      "REMBG_SOURCE_MISSING"
-    );
-  }
-
   await fs.mkdir(path.dirname(destinationPath), { recursive: true });
 
   try {
@@ -111,7 +78,7 @@ async function rembgRemoveBackground({ sourcePath, destinationPath }) {
     await fs.access(destinationPath);
   } catch {
     throw new AppError(
-      "rembg finished but no output file was produced. This may indicate an unsupported image format or a corrupted input file.",
+      "rembg completed but output file was not created.",
       502,
       { provider: "rembg", destination_path: destinationPath },
       "REMBG_OUTPUT_MISSING"
