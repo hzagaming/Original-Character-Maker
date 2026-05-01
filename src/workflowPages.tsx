@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getApiForFeature, getEffectiveApiBase, requiresHostedApiBase } from './apiConfig';
+import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getApiForFeature, getEffectiveApiBase, getProbeLog, requiresHostedApiBase } from './apiConfig';
 import { playSound } from './audioEngine';
 import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
 import type { AppLanguage, SettingsState, ShortcutAction } from './types';
@@ -6005,7 +6005,18 @@ export function Paper2GalPage({
       const isLocalhost = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)/.test(window.location.hostname);
       let errorText = normalizeFetchError(error, paper.networkStartError);
       if (isLocalhost && error instanceof TypeError && String(error.message).includes('Failed to fetch')) {
-        errorText = `${errorText}（当前尝试连接 ${base}）。如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=8080。常用端口会自动探测：3000/3001/5173/4173/5000/5001/8000/8080/9000/9001。`;
+        const probeLog = getProbeLog();
+        const okPorts = probeLog.filter((p) => p.status === 'ok').map((p) => p.port);
+        const failSummary = probeLog.length > 0
+          ? probeLog.map((p) => `${p.port}:${p.status}`).join(', ')
+          : '尚未探测';
+        errorText = `${errorText}\n当前尝试连接 ${base}。`;
+        if (okPorts.length > 0) {
+          errorText += `\n探测到后端端口：${okPorts.join(', ')}。`;
+        } else {
+          errorText += `\n未探测到任何后端端口。探测记录：${failSummary}。`;
+        }
+        errorText += `\n如果后端跑在其他端口，请在 URL 后面加 ?apiPort=你的端口，例如 ?apiPort=8080。`;
       }
       setMessage({
         type: 'error',

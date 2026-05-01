@@ -2,18 +2,35 @@ import type { SettingsState } from './types';
 
 export type WorkflowApiBaseIssue = 'direct-model-endpoint' | '';
 
-const PROBE_PORTS = [3000, 3001, 5173, 4173, 8080, 8000, 5000, 5001, 9000, 9001];
+const PROBE_PORTS = [
+  3000, 3001, 3002, 3003,
+  5173, 4173,
+  8080, 8000, 8008, 8010,
+  5000, 5001,
+  9000, 9001,
+  4000, 4001, 4002,
+  6000, 6001, 6002,
+  7000, 7001,
+  3500, 3600, 3700, 3800,
+  8100, 8200, 8300,
+];
 const PROBE_TIMEOUT_MS = 2500;
 let _probedBase = '';
 let _probeDone = false;
 let _sameOriginAvailable = false;
 let _probePromise: Promise<string> | null = null;
+let _probeLog: { port: number; status: 'ok' | 'no-json' | 'error' | 'timeout'; detail?: string }[] = [];
 
 export function resetApiProbe(): void {
   _probedBase = '';
   _probeDone = false;
   _sameOriginAvailable = false;
   _probePromise = null;
+  _probeLog = [];
+}
+
+export function getProbeLog(): { port: number; status: 'ok' | 'no-json' | 'error' | 'timeout'; detail?: string }[] {
+  return [..._probeLog];
 }
 
 function getLocation() {
@@ -60,13 +77,15 @@ async function probePort(port: number): Promise<string | null> {
       signal: controller.signal,
     });
     clearTimeout(timer);
-    // 过滤掉 Vite SPA fallback 返回的 HTML（200 OK 但不是 JSON）
     const contentType = response.headers.get('content-type') || '';
     if (response.ok && contentType.includes('application/json')) {
+      _probeLog.push({ port, status: 'ok', detail: 'JSON' });
       return `http://localhost:${port}`;
     }
-  } catch {
-    // ignore
+    _probeLog.push({ port, status: 'no-json', detail: `${response.status} ${contentType.slice(0, 30)}` });
+  } catch (error: unknown) {
+    const reason = error instanceof Error ? error.name : String(error);
+    _probeLog.push({ port, status: reason === 'AbortError' ? 'timeout' : 'error', detail: reason });
   }
   return null;
 }
@@ -108,9 +127,15 @@ async function doProbe(): Promise<string> {
     return '';
   }
 
-  // 3. 并发探测常用端口（包括当前端口）
-  // 注意：不再直接假设前端端口 = 后端端口，而是实际探测每个端口
-  const probes = PROBE_PORTS.map(async (port) => {
+  // 3. 并发探测常用端口
+  // 把当前页面端口加入探测列表（如果不在 PROBE_PORTS 中）
+  const currentPort = Number(location?.port);
+  const portsToProbe = new Set(PROBE_PORTS);
+  if (currentPort && !portsToProbe.has(currentPort)) {
+    portsToProbe.add(currentPort);
+  }
+
+  const probes = Array.from(portsToProbe).map(async (port) => {
     const base = await probePort(port);
     return base ? { port, base } : null;
   });
@@ -195,14 +220,9 @@ export function getEffectiveApiBase(
   const location = getLocation();
 
   // 同域部署优先：如果已经探测到同域可用，使用当前 origin
-  // 但本地开发时前端在 Vite 端口（5173/4173），绝不把前端 dev server 当后端用
+  // probeSameOrigin() 已带 Content-Type 检查，Vite SPA fallback 的 HTML 会被过滤掉
   if (_probeDone && _sameOriginAvailable) {
-    const origin = location?.origin || '';
-    if (origin.includes('://localhost:5173') || origin.includes('://localhost:4173') ||
-        origin.includes('://127.0.0.1:5173') || origin.includes('://127.0.0.1:4173')) {
-      return 'http://localhost:3001';
-    }
-    return origin;
+    return location?.origin || '';
   }
 
   if (settings.interfaceMode === 'custom') {
@@ -290,14 +310,9 @@ export function buildApiUrl(
   }
 
   // 同域部署：使用完整 origin + pathname（避免某些部署环境下相对路径失效）
-  // 本地开发时前端在 Vite 端口（5173/4173），绝不把请求发给前端 dev server
   if (_probeDone && _sameOriginAvailable) {
     const origin = getLocation()?.origin || '';
     const safePath = pathname.startsWith('/') ? pathname : `/${pathname}`;
-    if (origin.includes('://localhost:5173') || origin.includes('://localhost:4173') ||
-        origin.includes('://127.0.0.1:5173') || origin.includes('://127.0.0.1:4173')) {
-      return `http://localhost:3001${safePath}`;
-    }
     return origin ? `${origin}${safePath}` : safePath;
   }
 
