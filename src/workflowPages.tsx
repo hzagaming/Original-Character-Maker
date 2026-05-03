@@ -4027,6 +4027,7 @@ export function StyleTransferPage({
     setInputPreviewUrl(URL.createObjectURL(file));
     setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Input file selected: ${file.name}` }]);
     event.target.value = '';
+    playSound('uploadComplete');
   }
 
   async function startWorkflow() {
@@ -4053,6 +4054,7 @@ export function StyleTransferPage({
     }
     setStatus('running');
     setProgress(5);
+    playSound('workflowStart');
     setError(null);
     setShowErrorPanel(false);
     setResult(null);
@@ -4159,6 +4161,7 @@ export function StyleTransferPage({
 
       setProgress(100);
       setStatus('success');
+      playSound('workflowComplete');
       setError(null);
       setShowErrorPanel(false);
       setResult({
@@ -4194,6 +4197,7 @@ export function StyleTransferPage({
       };
       setStatus('error');
       setError(runtimeError);
+      playSound('workflowFail');
       setShowErrorPanel(true);
       setLogs((current) => [
         ...current,
@@ -5983,6 +5987,7 @@ export function Paper2GalPage({
     setInputPreviewUrl(URL.createObjectURL(file));
     setMessage({ type: 'info', text: `${paper.sourceTitle}: ${file.name}` });
     event.target.value = '';
+    playSound('uploadComplete');
   }
 
   async function handleStartWorkflow() {
@@ -6000,7 +6005,9 @@ export function Paper2GalPage({
       const nextWorkflow = await startPaperWorkflowRequest(selectedFile, promptOverrides, aiConcurrencyEnabled, settings, paper);
       setWorkflow(nextWorkflow);
       setMessage({ type: 'info', text: paper.submitted });
+      playSound('workflowComplete');
     } catch (error) {
+      playSound('workflowFail');
       const base = getEffectiveApiBase(settings);
       const isLocalhost = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)/.test(window.location.hostname);
       let errorText = normalizeFetchError(error, paper.networkStartError);
@@ -6031,7 +6038,7 @@ export function Paper2GalPage({
     if (!selectedFile || isSubmitting) {
       return;
     }
-    playSound('confirm');
+    playSound('workflowStart');
     void handleStartWorkflow();
   }
 
@@ -6054,11 +6061,13 @@ export function Paper2GalPage({
       );
       setWorkflow(nextWorkflow);
       setMessage({ type: 'info', text: `${paper.redoCurrentResult}: ${stepLabels[stepName]}` });
+      playSound('workflowComplete');
     } catch (error) {
       setMessage({
         type: 'error',
         text: normalizeFetchError(error, paper.networkStartError),
       });
+      playSound('workflowFail');
     } finally {
       setIsSubmitting(false);
     }
@@ -7631,6 +7640,7 @@ export function ImageConverterPage({
     setShowErrorPanel(false);
     addLog('info', `Loaded source: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
     event.target.value = '';
+    playSound('uploadComplete');
   }
 
   useBeforeUnloadGuard(isDirty);
@@ -7686,7 +7696,9 @@ export function ImageConverterPage({
       const dataUrl = canvas.toDataURL(outputFormat, quality / 100);
       setConvertedUrl(dataUrl);
       addLog('success', `Conversion complete: ${width}x${height}`);
+      playSound('success');
     } catch (err) {
+      playSound('error');
       const message = err instanceof Error ? err.message : copy.imageConverter.converting;
       const transferErr: TransferError = {
         code: 'CONVERT_ERROR',

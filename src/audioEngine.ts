@@ -28,7 +28,7 @@ export const defaultAudioSettings: AudioSettings = {
   sfxVolume: 70,
   musicVolume: 30,
   sfxEnabled: true,
-  musicEnabled: false,
+  musicEnabled: true,
   soundOnInteract: true,
   sfxPreset: 'classic',
   musicPreset: 'orchestral',
@@ -958,6 +958,24 @@ export function stopMusic() {
 
 export function initAudio() {
   ensureContext();
+}
+
+/** Auto-resume suspended AudioContext on first user interaction.
+ *  Modern browsers suspend AudioContext until a user gesture occurs.
+ */
+let resumeHandlerAttached = false;
+export function attachAudioResumeHandler() {
+  if (resumeHandlerAttached) return;
+  resumeHandlerAttached = true;
+  const events = ['click', 'keydown', 'touchstart'];
+  const handler = () => {
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+  };
+  events.forEach((evt) => {
+    document.addEventListener(evt, handler, { once: true, passive: true });
+  });
 }
 
 export const SOUND_PRESETS: SoundPreset[] = [

@@ -3449,6 +3449,34 @@ input[type='range']:active::-moz-range-thumb {
   transform: none !important;
 }
 
+/* Custom scrollbar that matches the dark/light theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent-rgb), 0.22);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--accent-rgb), 0.38);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--accent-rgb), 0.22) transparent;
+}
+
 /* Respect prefers-reduced-motion: disable animations but force content visible */
 @media (prefers-reduced-motion: reduce) {
   .fade-up {

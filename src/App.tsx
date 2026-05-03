@@ -21,6 +21,7 @@ import { Paper2GalPage, PromptSuitePage, StyleTransferPage, LlmHubPage, TtsExpor
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
+  attachAudioResumeHandler,
   initAudio,
   MUSIC_PRESETS_LIST,
   playSound,
@@ -32,7 +33,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.6.4.3';
+const VERSION = '0.7.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -553,10 +554,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.6.4 抠图引擎切换为 rembg 本地推理；新增超时控制与详细错误码；用户手册补充 rembg 排查指南；修复阿里云超时与 fetch 中断提示。',
-    announcementList1: '抠图引擎全面切换至 rembg（Python 本地 AI 推理），无需 API Key，服务器本地完成背景移除。',
-    announcementList2: 'rembg 新增 120 秒超时控制，超时/未安装/输出异常分别抛出独立错误码，用户手册已补充完整排查步骤。',
-    announcementList3: '修复阿里云抠图 SDK 超时参数被忽略的问题；fetch 超时中断现在显示友好中文提示而非原始 abort 信息。',
+    announcementDescription: '0.7.0 回档修复版本：后端自动启动、API 连接修复、rembg 全面修复、音频与 UI/UX 优化。',
+    announcementList1: '后端一键启动：npm run dev 同时启动前后端；API 探测修复 Vite SPA fallback 误判；29 个常用端口自动探测。',
+    announcementList2: 'rembg 全面修复：修复 pip 损坏、安装 rembg[cpu] + onnxruntime、重写 fallback 逻辑支持 Windows / Unix 多路径调用。',
+    announcementList3: '音频与 UI/UX：BGM 默认开启、AudioContext 自动恢复、hover 音效、自定义滚动条、字体预加载与 meta 标签优化。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -921,10 +922,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.6.4 背景除去エンジンを rembg ローカル推論に切り替え；タイムアウト制御と詳細エラーコードを追加；マニュアルに rembg トラブルシューティングを追加；阿里云タイムアウトと fetch 中断メッセージを修正。',
-    announcementList1: '背景除去エンジンを rembg（Python ローカル AI 推論）に全面切り替え。API Key 不要、サーバー上で背景除去を完結。',
-    announcementList2: 'rembg に 120 秒タイムアウト制御を追加。タイムアウト／未インストール／出力異常それぞれ独立したエラーコードを出力。マニュアルに完全な対処手順を掲載。',
-    announcementList3: '阿里云切り抜き SDK のタイムアウトパラメータ無視問題を修正。fetch タイムアウト中断が分かりやすい日本語メッセージを表示。',
+    announcementDescription: '0.7.0 ロールバック修正版：バックエンド自動起動、API 接続修正、rembg 完全修正、オーディオと UI/UX の最適化。',
+    announcementList1: 'バックエンドワンクリック起動：npm run dev でフロントエンドとバックエンドを同時起動；API 探知の Vite SPA fallback 誤判定を修正；29 つの常用ポートを自動探知。',
+    announcementList2: 'rembg 完全修正：pip 破損を修復、rembg[cpu] + onnxruntime をインストール、fallback ロジックを書き換えて Windows / Unix 両対応。',
+    announcementList3: 'オーディオと UI/UX：BGM をデフォルトで有効化、AudioContext 自動復帰、hover サウンド、カスタムスクロールバー、フォントプリロードと meta タグ最適化。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1289,10 +1290,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.6.4: Background removal switched to rembg local inference; added timeout control and detailed error codes; docs updated with rembg troubleshooting; fixed Aliyun timeout and fetch abort messages.',
-    announcementList1: 'Background removal engine fully switched to rembg (Python local AI inference). No API Key required; background removal completed entirely on the server.',
-    announcementList2: 'rembg now has 120-second timeout control. Independent error codes for timeout / not installed / output anomaly. Docs include complete troubleshooting steps.',
-    announcementList3: 'Fixed Aliyun cutout SDK timeout parameter being ignored. Fetch timeout aborts now show friendly messages instead of raw abort text.',
+    announcementDescription: 'Version 0.7.0 Rollback Fix: auto backend startup, API connection fix, rembg full repair, audio and UI/UX improvements.',
+    announcementList1: 'One-click backend startup: npm run dev launches both frontend and backend; API probe fixed for Vite SPA fallback misdetection; 29 common ports auto-probed.',
+    announcementList2: 'rembg fully repaired: fixed broken pip, installed rembg[cpu] + onnxruntime, rewrote fallback logic for Windows / Unix multi-path invocation.',
+    announcementList3: 'Audio and UI/UX: BGM enabled by default, AudioContext auto-resume, hover sounds, custom scrollbar, font preloading and meta tag optimizations.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1657,10 +1658,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.6.4: движок удаления фона переключён на локальный rembg; добавлен контроль таймаута и детальные коды ошибок; руководство дополнено инструкциями по rembg; исправлены таймаут Aliyun и сообщения об прерывании fetch.',
-    announcementList1: 'Движок удаления фона полностью переключён на rembg (локальное AI-инференс Python). API Key не требуется; удаление фона выполняется полностью на сервере.',
-    announcementList2: 'Для rembg добавлен контроль таймаута 120 секунд. Независимые коды ошибок для таймаута / не установлен / аномалия вывода. Руководство содержит полные шаги устранения.',
-    announcementList3: 'Исправлена проблема игнорирования параметра таймаута SDK Aliyun. Прерывание по таймауту fetch теперь отображает понятные сообщения вместо сырого текста abort.',
+    announcementDescription: 'Версия 0.7.0 Откат и исправления: автозапуск бэкенда, исправление подключения API, полный ремонт rembg, улучшения аудио и UI/UX.',
+    announcementList1: 'Автозапуск бэкенда: npm run dev запускает фронтенд и бэкенд одновременно; исправлено ложное срабатывание пробы API из-за Vite SPA fallback; 29 распространённых портов автоопределение.',
+    announcementList2: 'Полный ремонт rembg: исправлен сломанный pip, установлен rembg[cpu] + onnxruntime, переписана логика fallback для поддержки Windows / Unix.',
+    announcementList3: 'Аудио и UI/UX: фоновая музыка включена по умолчанию, авто-возобновление AudioContext, звуки наведения, кастомный скроллбар, предзагрузка шрифтов и оптимизация meta-тегов.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2529,6 +2530,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '0.7.0',
+    date: '2026-05-03',
+    title: '0.7.0 回档修复版本',
+    summary: '全面修复后端连接、rembg 抠图、音频系统与 UI/UX 体验问题。Vite 插件自动启动后端；API 探测修复 Vite SPA fallback 误判；rembg 修复 pip 损坏与 fallback 逻辑；BGM 默认开启，音效覆盖补全，滚动条与 meta 标签优化。',
+    details: [
+      '后端自动启动：vite.config.ts 新增 startBackend 插件，npm run dev 一键同时启动前端（5173）与后端（3001），无需手动开两个终端。',
+      'API 连接修复：前端探测修复 Vite SPA fallback 返回 HTML 200 导致的误判（新增 Content-Type: application/json 校验）；删除错误的 localhost:3001 硬编码覆盖逻辑；探测端口扩展至 29 个常用端口。',
+      'rembg 全面修复：修复服务器 pip 损坏导致无法安装 rembg；安装 rembg[cpu] + onnxruntime；重写 rembgAdapter.js fallback 逻辑（Node.js spawn() 异步 error 事件驱动，依次尝试 rembg / python -m rembg.cli / python3 -m rembg.cli）。',
+      '音频系统优化：BGM 默认开启（音量 30%）；新增 attachAudioResumeHandler() 自动恢复被浏览器挂起的 AudioContext；全局 hover 音效委托（按钮/卡片 90ms throttle）。',
+      'UI/UX 优化：index.html 新增 meta 标签、theme-color、字体预加载；styles.css 新增自定义滚动条（跟随主题强调色）；workflowPages 补全工作流启动/完成/失败、文件上传、转换成功/失败音效。',
+      'Git 合并冲突清理：修复 App.tsx 与 docsContent.ts 中残留的 HEAD 冲突标记。',
+    ],
+  },
   {
     version: '0.6.4.2',
     date: '2026-04-27',
@@ -3450,9 +3465,31 @@ function App() {
   useEffect(() => {
     try {
       initAudio();
+      attachAudioResumeHandler();
     } catch {
       // Audio initialization is non-critical; ignore failures.
     }
+  }, []);
+
+  // Global hover sound delegation (throttled)
+  useEffect(() => {
+    let lastHoverTime = 0;
+    const HOVER_THROTTLE_MS = 90;
+    const handler = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      const now = Date.now();
+      if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
+      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle')) {
+        lastHoverTime = now;
+        playSound('buttonHover');
+      } else if (target.closest('.home-card, .feature-intro-card, .tool-card, .asset-card, .template-card, .announcement-entry')) {
+        lastHoverTime = now;
+        playSound('cardHover');
+      }
+    };
+    document.addEventListener('mouseenter', handler, true);
+    return () => document.removeEventListener('mouseenter', handler, true);
   }, []);
 
   // Global keyboard shortcuts

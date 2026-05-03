@@ -8,78 +8,125 @@ function isRembgConfigured(config) {
   return config.bgRemovalProvider === "rembg";
 }
 
+/**
+ * Try multiple ways to invoke rembg:
+ * 1. "rembg" CLI (if pip installed it into PATH)
+ * 2. "python -m rembg.cli" (Windows / venv standard)
+ * 3. "python3 -m rembg.cli" (Unix standard)
+ *
+ * Node.js spawn() does NOT synchronously throw ENOENT; it emits an "error" event.
+ * Therefore we must listen for "error" and fall back to the next candidate.
+ */
 function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
-  return new Promise((resolve, reject) => {
-    // Try "rembg" first, fallback to "python3 -m rembg" for environments
-    // where pip installed the CLI into a non-standard path.
-    let proc;
-    try {
-      proc = spawn("rembg", ["i", sourcePath, destinationPath], {
-        stdio: ["ignore", "pipe", "pipe"]
-      });
-    } catch {
-      proc = spawn("python3", ["-m", "rembg", "cli", "i", sourcePath, destinationPath], {
-        stdio: ["ignore", "pipe", "pipe"]
-      });
-    }
+  const candidates = [
+    { cmd: "rembg", args: ["i", sourcePath, destinationPath] },
+    { cmd: "python", args: ["-m", "rembg.cli", "i", sourcePath, destinationPath] },
+    { cmd: "python3", args: ["-m", "rembg.cli", "i", sourcePath, destinationPath] },
+  ];
 
-    let stdout = "";
-    let stderr = "";
+  return new Promise((resolve, reject) => {
+    let candidateIndex = 0;
+    const errors = [];
+    let currentProc = null;
+    let timer = null;
     let killed = false;
 
-    const timer = setTimeout(() => {
-      killed = true;
-      proc.kill("SIGTERM");
-      // Force kill after 5s if still running
-      setTimeout(() => proc.kill("SIGKILL"), 5000).unref();
-    }, timeoutMs);
+    function cleanup() {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    }
 
-    proc.stdout.on("data", (data) => {
-      stdout += String(data);
-    });
-
-    proc.stderr.on("data", (data) => {
-      stderr += String(data);
-    });
-
-    proc.on("close", (code, signal) => {
-      clearTimeout(timer);
-      if (killed) {
+    function tryNext() {
+      if (candidateIndex >= candidates.length) {
+        cleanup();
         reject(
           new AppError(
-            `rembg timed out after ${timeoutMs}ms. The image may be too large or the server is under heavy load. Try again with a smaller image or check server CPU/RAM usage.`,
-            504,
-            { provider: "rembg", source_path: sourcePath, timeout_ms: timeoutMs },
-            "REMBG_TIMEOUT"
+            `Failed to start rembg. Tried ${candidates.length} ways:\n` +
+              errors.map((e, i) => `  ${i + 1}. ${e}`).join("\n") +
+              `\nPlease ensure Python 3 and rembg are installed (pip install "rembg[cpu]").`,
+            500,
+            { provider: "rembg", source_path: sourcePath },
+            "REMBG_SPAWN_FAILED"
           )
         );
         return;
       }
-      if (code === 0) {
-        resolve({ stdout, stderr });
-      } else {
-        reject(
-          new AppError(
-            `rembg failed (exit code ${code}). ${stderr || stdout || "No error output captured."}`,
-            502,
-            { provider: "rembg", source_path: sourcePath, exit_code: code },
-            "REMBG_EXECUTION_FAILED"
-          )
-        );
-      }
-    });
 
-    proc.on("error", (error) => {
-      clearTimeout(timer);
-      reject(
-        new AppError(
-          `Failed to start rembg: ${error.message}. Please ensure Python 3 and rembg are installed on the server (pip install rembg[cli]).`,
-          500,
-          { provider: "rembg", source_path: sourcePath },
-          "REMBG_SPAWN_FAILED"
-        )
-      );
-    });
+      const { cmd, args } = candidates[candidateIndex];
+      candidateIndex++;
+
+      try {
+        currentProc = spawn(cmd, args, {
+          stdio: ["ignore", "pipe", "pipe"],
+        });
+      } catch (syncErr) {
+        // Extremely rare: spawn itself threw synchronously
+        errors.push(`${cmd}: ${syncErr.message}`);
+        tryNext();
+        return;
+      }
+
+      let stdout = "";
+      let stderr = "";
+
+      timer = setTimeout(() => {
+        killed = true;
+        if (currentProc) {
+          currentProc.kill("SIGTERM");
+          setTimeout(() => {
+            if (currentProc && !currentProc.killed) {
+              currentProc.kill("SIGKILL");
+            }
+          }, 5000).unref();
+        }
+      }, timeoutMs);
+
+      currentProc.stdout.on("data", (data) => {
+        stdout += String(data);
+      });
+
+      currentProc.stderr.on("data", (data) => {
+        stderr += String(data);
+      });
+
+      currentProc.on("close", (code, signal) => {
+        cleanup();
+        if (killed) {
+          reject(
+            new AppError(
+              `rembg timed out after ${timeoutMs}ms. The image may be too large or the server is under heavy load. Try again with a smaller image or check server CPU/RAM usage.`,
+              504,
+              { provider: "rembg", source_path: sourcePath, timeout_ms: timeoutMs },
+              "REMBG_TIMEOUT"
+            )
+          );
+          return;
+        }
+        if (code === 0) {
+          resolve({ stdout, stderr });
+        } else {
+          reject(
+            new AppError(
+              `rembg failed (exit code ${code}). ${stderr || stdout || "No error output captured."}`,
+              502,
+              { provider: "rembg", source_path: sourcePath, exit_code: code },
+              "REMBG_EXECUTION_FAILED"
+            )
+          );
+        }
+      });
+
+      currentProc.on("error", (error) => {
+        cleanup();
+        errors.push(`${cmd}: ${error.message}`);
+        // Try next candidate
+        tryNext();
+      });
+    }
+
+    tryNext();
   });
 }
 
