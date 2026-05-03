@@ -1,7 +1,15 @@
 const path = require("path");
 const dotenv = require("dotenv");
+const fs = require("fs");
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+const envPath = path.resolve(__dirname, "../../.env");
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+} else {
+  // On Zeabur and other PaaS platforms, .env is not committed;
+  // environment variables are injected via the platform UI.
+  dotenv.config();
+}
 
 const projectRoot = path.resolve(__dirname, "../..");
 

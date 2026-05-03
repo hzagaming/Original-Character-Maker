@@ -1243,8 +1243,10 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
 抠图引擎已全面切换为 rembg（Python 本地 AI 推理，基于 u2net 模型）。rembg 在服务器本地运行，无需任何外部 API Key，也不依赖浏览器 Canvas 或阿里云接口。处理后的输出为透明背景 PNG。
 
 **部署注意事项**
+- **Zeabur 部署（推荐）**：选择 Dockerfile 部署方式，镜像已预装 Python 3、rembg[cli] 并自动下载 u2net 模型。环境变量需在 Zeabur 控制台设置（.env 文件不会被上传）。详见 DEPLOY.md。
 - Docker 部署：镜像已预装 Python 3、rembg[cli] 并自动下载 u2net 模型，开箱即用。
 - 裸机部署：需手动安装 Python 3 和 rembg（pip3 install rembg[cli]），首次运行时会自动下载约 176MB 的 u2net 模型到 ~/.u2net/。
+- 无 Python 环境：如果服务器没有 Python（如 Zeabur Node.js 模板），rembg 会自动降级为 frontend 抠图（由浏览器 Canvas 处理）。
 - 性能建议：rembg 对 CPU 和内存有一定要求，处理 1024×1024 图片约需 2~5 秒。低配置服务器建议关闭 AI 并发，让步骤串行执行。
 
 **工作流执行顺序**

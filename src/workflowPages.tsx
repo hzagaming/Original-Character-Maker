@@ -2622,13 +2622,13 @@ function formatReadableErrorPayload(payload: unknown) {
 function normalizeFetchError(error: unknown, fallback: string) {
   if (error instanceof DOMException && error.name === 'AbortError') {
     if (error.message.includes('timed out')) {
-      return `${fallback}（请求超时，请检查 API 地址是否正确、后端服务是否正常运行，或当前网络是否稳定。）`;
+      return `${fallback}（请求超时，请检查：1) 后端服务是否已启动；2) 如果是 Zeabur 部署，确认选择了 Dockerfile 部署方式且环境变量已设置；3) 网络是否稳定。）`;
     }
     // User-initiated abort (component unmount, clicking cancel) — suppress
     return '';
   }
   if (error instanceof TypeError && String(error.message).includes('Failed to fetch')) {
-    return fallback;
+    return `${fallback}（无法连接到后端，请确认后端服务已启动且 API 地址配置正确。）`;
   }
   if (error instanceof Error && error.message) {
     return error.message;
@@ -2920,6 +2920,25 @@ async function startPaperWorkflowRequest(
 
   await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, '/api/workflows');
+
+  // Pre-flight health check: fail fast with a clear message if backend is not responding
+  try {
+    const healthController = new AbortController();
+    const healthTimer = setTimeout(() => healthController.abort(), 5000);
+    const healthResponse = await fetch(buildApiUrl(settings, '/api/health'), {
+      method: 'GET',
+      signal: healthController.signal,
+    });
+    clearTimeout(healthTimer);
+    if (!healthResponse.ok) {
+      throw new Error(copy.networkStartError + '（后端健康检查失败，请确认后端已启动。）');
+    }
+  } catch (healthError) {
+    if (healthError instanceof DOMException && healthError.name === 'AbortError') {
+      throw new Error(copy.networkStartError + '（后端无响应，请确认后端服务已启动且可访问。）');
+    }
+    throw new Error(copy.networkStartError + '（无法连接到后端，请检查 API 地址配置。）');
+  }
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
   }

@@ -1,6 +1,7 @@
 const app = require("./app");
 const config = require("./config");
 const { ensureDirectories } = require("./utils/fs");
+const { printEnvDiagnostics } = require("./utils/envCheck");
 
 async function bootstrap() {
   await ensureDirectories([config.uploadDir, config.outputDir, config.workflowStateDir]);
@@ -10,9 +11,10 @@ async function bootstrap() {
     console.log(`[Backend] CORS origin: ${config.corsOrigin}`);
     console.log(`[Backend] Upload dir: ${config.uploadDir}`);
     console.log(`[Backend] Output dir: ${config.outputDir}`);
+    printEnvDiagnostics(config);
     if (!config.platoApiKey && (config.expressionProvider === "plato" || config.cgProvider === "plato")) {
       console.warn(`[Backend] WARNING: PLATO_API_KEY is not set. Workflow steps using plato provider will fail.`);
-      console.warn(`[Backend] Copy .env.example to .env and fill in PLATO_API_KEY, or switch to mock mode.`);
+      console.warn(`[Backend] Set PLATO_API_KEY in environment variables, or switch to mock mode.`);
     }
   });
 }

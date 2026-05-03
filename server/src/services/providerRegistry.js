@@ -26,6 +26,7 @@ const {
   rembgRemoveBackground,
   isRembgConfigured
 } = require("../adapters/rembgAdapter");
+const { resolveEffectiveBgRemovalProvider } = require("../utils/envCheck");
 
 function getMimeTypeFromPath(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -84,7 +85,9 @@ function withMockFallback(primaryProvider, primaryRunner, mockRunner, config) {
 }
 
 function getBackgroundRemovalRunner(config) {
-  if (config.bgRemovalProvider === "frontend") {
+  const effectiveProvider = resolveEffectiveBgRemovalProvider(config);
+
+  if (effectiveProvider === "frontend") {
     return {
       provider: "frontend",
       run: async () => {
@@ -93,14 +96,14 @@ function getBackgroundRemovalRunner(config) {
     };
   }
 
-  if (config.bgRemovalProvider === "rembg" && isRembgConfigured(config)) {
+  if (effectiveProvider === "rembg" && isRembgConfigured(config)) {
     return {
       provider: "rembg",
       run: rembgRemoveBackground
     };
   }
 
-  if (config.bgRemovalProvider === "plato" && isPlatoConfigured(config)) {
+  if (effectiveProvider === "plato" && isPlatoConfigured(config)) {
     return {
       provider: "plato",
       run: platoRemoveBackground
