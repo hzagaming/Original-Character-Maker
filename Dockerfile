@@ -35,6 +35,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install rembg[cli] using python3 -m pip (more reliable than pip3 alias)
 # Split into two steps to isolate build failures
 RUN python3 -m pip install --break-system-packages --no-cache-dir rembg[cli] \
+  && python3 -c "import rembg.cli; print('rembg installed:', rembg.__version__)" \
+  && ln -sf $(python3 -c "import shutil, sys; p=shutil.which('rembg'); print(p if p else '')") /usr/local/bin/rembg 2>/dev/null || true \
   && rm -rf ~/.cache/pip
 
 # Pre-download the u2net model so first-run is fast

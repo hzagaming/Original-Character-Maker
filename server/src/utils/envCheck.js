@@ -21,7 +21,12 @@ function isPythonAvailable() {
 
 function isRembgAvailable() {
   if (_rembgAvailable === null) {
-    _rembgAvailable = checkCommand("rembg", ["--version"]);
+    // Use import checks instead of --version, because rembg CLI may not support --version
+    // and because we only need to know whether the Python module is importable.
+    _rembgAvailable =
+      checkCommand("rembg", ["--version"]) ||
+      checkCommand("python3", ["-c", "import rembg.cli; print('rembg-ok')"]) ||
+      checkCommand("python", ["-c", "import rembg.cli; print('rembg-ok')"]);
   }
   return _rembgAvailable;
 }

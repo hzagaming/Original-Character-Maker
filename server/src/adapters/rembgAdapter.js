@@ -20,8 +20,10 @@ function isRembgConfigured(config) {
 function runRembgCommand(sourcePath, destinationPath, timeoutMs = 120000) {
   const candidates = [
     { cmd: "rembg", args: ["i", sourcePath, destinationPath] },
-    { cmd: "python", args: ["-m", "rembg.cli", "i", sourcePath, destinationPath] },
     { cmd: "python3", args: ["-m", "rembg.cli", "i", sourcePath, destinationPath] },
+    { cmd: "python3", args: ["-m", "rembg", "i", sourcePath, destinationPath] },
+    { cmd: "python", args: ["-m", "rembg.cli", "i", sourcePath, destinationPath] },
+    { cmd: "python", args: ["-m", "rembg", "i", sourcePath, destinationPath] },
   ];
 
   return new Promise((resolve, reject) => {
