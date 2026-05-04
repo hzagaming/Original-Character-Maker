@@ -12,6 +12,17 @@ function checkCommand(cmd, args = ["--version"]) {
   }
 }
 
+function checkPythonModule(pythonCmd) {
+  try {
+    execSync(`${pythonCmd} -c "import rembg.cli; print('rembg-ok')"`, { stdio: "pipe", timeout: 5000 });
+    return true;
+  } catch (err) {
+    const stderr = err.stderr ? err.stderr.toString().trim() : "";
+    console.log(`[Backend] ${pythonCmd} rembg check failed: ${stderr || err.message}`);
+    return false;
+  }
+}
+
 function isPythonAvailable() {
   if (_pythonAvailable === null) {
     _pythonAvailable = checkCommand("python", ["--version"]) || checkCommand("python3", ["--version"]);
@@ -21,12 +32,10 @@ function isPythonAvailable() {
 
 function isRembgAvailable() {
   if (_rembgAvailable === null) {
-    // Use import checks instead of --version, because rembg CLI may not support --version
-    // and because we only need to know whether the Python module is importable.
     _rembgAvailable =
       checkCommand("rembg", ["--version"]) ||
-      checkCommand("python3", ["-c", "import rembg.cli; print('rembg-ok')"]) ||
-      checkCommand("python", ["-c", "import rembg.cli; print('rembg-ok')"]);
+      checkPythonModule("python3") ||
+      checkPythonModule("python");
   }
   return _rembgAvailable;
 }
