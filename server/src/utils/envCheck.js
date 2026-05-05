@@ -18,7 +18,11 @@ function checkPythonModule(pythonCmd) {
     return true;
   } catch (err) {
     const stderr = err.stderr ? err.stderr.toString().trim() : "";
-    console.log(`[Backend] ${pythonCmd} rembg check failed: ${stderr || err.message}`);
+    const stdout = err.stdout ? err.stdout.toString().trim() : "";
+    console.log(`[Backend] ${pythonCmd} rembg check failed:`);
+    console.log(`  message: ${err.message}`);
+    console.log(`  stdout: ${stdout || '(empty)'}`);
+    console.log(`  stderr: ${stderr || '(empty)'}`);
     return false;
   }
 }

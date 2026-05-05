@@ -29,15 +29,18 @@ WORKDIR /app
 
 # Install Python 3 and pip for rembg
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip \
+    python3 python3-pip libgomp1 \
   && rm -rf /var/lib/apt/lists/*
 
 # Install rembg[cli] using python3 -m pip (more reliable than pip3 alias)
 # Split into two steps to isolate build failures
+# Install rembg and verify it can be imported (build fails if verification fails)
 RUN python3 -m pip install --break-system-packages --no-cache-dir rembg[cli] \
   && python3 -c "import rembg.cli; print('rembg module ok')" \
-  && ln -sf $(python3 -c "import shutil; p=shutil.which('rembg'); print(p if p else '')") /usr/local/bin/rembg 2>/dev/null || true \
   && rm -rf ~/.cache/pip
+
+# Symlink rembg binary into PATH (best-effort, do not fail build)
+RUN ln -sf $(python3 -c "import shutil; p=shutil.which('rembg'); print(p if p else '')") /usr/local/bin/rembg 2>/dev/null || true
 
 # Pre-download the u2net model so first-run is fast
 # Allow failure: model will be downloaded lazily at runtime if this fails
