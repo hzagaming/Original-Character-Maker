@@ -35,9 +35,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install rembg with CPU backend + CLI tools.
 # CRITICAL: rembg[cli] alone does NOT install onnxruntime.
 # Must use rembg[cpu,cli] to get both the backend and the CLI.
-RUN echo "[docker] installing rembg[cpu,cli] v0.7.6-fix" \
+#
+# Zeabur builders are memory-constrained; installing everything in one RUN
+# can OOM-kill the build. We split into smaller steps and allow each to
+# fail gracefully (|| true) so the service can still start.
+RUN echo "[docker] installing heavy python deps (step 1/3)" \
+  && python3 -m pip install --break-system-packages --no-cache-dir numpy onnxruntime \
+  && rm -rf ~/.cache/pip \
+  || (echo "[docker] step 1 failed, continuing" && true)
+
+RUN echo "[docker] installing heavy python deps (step 2/3)" \
+  && python3 -m pip install --break-system-packages --no-cache-dir scipy scikit-image pillow pymatting \
+  && rm -rf ~/.cache/pip \
+  || (echo "[docker] step 2 failed, continuing" && true)
+
+RUN echo "[docker] installing rembg[cpu,cli] (step 3/3)" \
   && python3 -m pip install --break-system-packages --no-cache-dir "rembg[cpu,cli]" \
-  && rm -rf ~/.cache/pip
+  && rm -rf ~/.cache/pip \
+  || (echo "[docker] step 3 failed, continuing without rembg" && true)
 
 # Verify rembg + onnxruntime can be imported. Do NOT fail build; just log.
 RUN python3 -c "import rembg.cli; print('[docker] rembg module ok')" 2>&1 \

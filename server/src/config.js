@@ -63,7 +63,7 @@ module.exports = {
   minImageHeight: parseInteger(process.env.MIN_IMAGE_HEIGHT, 256),
   imageGenConcurrency: parseInteger(process.env.IMAGE_GEN_CONCURRENCY, 2),
   pipelineMode: process.env.PIPELINE_MODE || "live",
-  bgRemovalProvider: process.env.BG_REMOVAL_PROVIDER || "rembg",
+  bgRemovalProvider: process.env.BG_REMOVAL_PROVIDER || "frontend",
   aliyunAccessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID || process.env.ALIYUN_ACCESS_KEY_ID || "",
   aliyunAccessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET || process.env.ALIYUN_ACCESS_KEY_SECRET || "",
   aliyunImageSegEndpoint: process.env.ALIYUN_IMAGESEG_ENDPOINT || "imageseg.cn-shanghai.aliyuncs.com",
