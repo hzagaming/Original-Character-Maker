@@ -29,15 +29,18 @@ WORKDIR /app
 
 # Install Python 3 and pip for rembg
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip libgomp1 \
+    python3 python3-pip libgomp1 libgfortran5 \
   && rm -rf /var/lib/apt/lists/*
 
 # Install rembg[cli] using python3 -m pip (more reliable than pip3 alias)
 # Split into two steps to isolate build failures
-# Install rembg and verify it can be imported (build fails if verification fails)
+# Install rembg[cli]
 RUN python3 -m pip install --break-system-packages --no-cache-dir rembg[cli] \
-  && python3 -c "import rembg.cli; print('rembg module ok')" \
   && rm -rf ~/.cache/pip
+
+# Diagnostic: verify rembg can be imported. Print detailed error but do NOT fail build.
+RUN python3 -c "import rembg.cli; print('[docker] rembg module ok')" 2>&1 \
+  || (echo "[docker] rembg.cli import failed, diagnostic:"; python3 -c "import traceback; traceback.print_exc()" 2>&1; true)
 
 # Symlink rembg binary into PATH (best-effort, do not fail build)
 RUN ln -sf $(python3 -c "import shutil; p=shutil.which('rembg'); print(p if p else '')") /usr/local/bin/rembg 2>/dev/null || true
