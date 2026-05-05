@@ -1,30 +1,24 @@
-const { execSync } = require("child_process");
+const { spawnSync } = require("child_process");
 
 let _rembgAvailable = null;
 let _pythonAvailable = null;
 
 function checkCommand(cmd, args = ["--version"]) {
-  try {
-    execSync(`${cmd} ${args.join(" ")}`, { stdio: "pipe", timeout: 5000 });
-    return true;
-  } catch {
-    return false;
-  }
+  const result = spawnSync(cmd, args, { stdio: "pipe", timeout: 5000 });
+  return result.status === 0;
 }
 
 function checkPythonModule(pythonCmd) {
-  try {
-    execSync(`${pythonCmd} -c "import rembg.cli; print('rembg-ok')"`, { stdio: "pipe", timeout: 5000 });
+  const result = spawnSync(pythonCmd, ["-c", "import rembg.cli; print('rembg-ok')"], { stdio: "pipe", timeout: 5000 });
+  if (result.status === 0) {
     return true;
-  } catch (err) {
-    const stderr = err.stderr ? err.stderr.toString().trim() : "";
-    const stdout = err.stdout ? err.stdout.toString().trim() : "";
-    console.log(`[Backend] ${pythonCmd} rembg check failed:`);
-    console.log(`  message: ${err.message}`);
-    console.log(`  stdout: ${stdout || '(empty)'}`);
-    console.log(`  stderr: ${stderr || '(empty)'}`);
-    return false;
   }
+  const stdout = result.stdout ? result.stdout.toString().trim() : "";
+  const stderr = result.stderr ? result.stderr.toString().trim() : "";
+  console.log(`[Backend] ${pythonCmd} rembg check failed (exit=${result.status || result.signal}):`);
+  console.log(`  stdout: ${stdout || '(empty)'}`);
+  console.log(`  stderr: ${stderr || '(empty)'}`);
+  return false;
 }
 
 function isPythonAvailable() {
