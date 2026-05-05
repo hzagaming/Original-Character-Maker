@@ -9,7 +9,7 @@ function checkCommand(cmd, args = ["--version"]) {
 }
 
 function checkPythonModule(pythonCmd) {
-  const result = spawnSync(pythonCmd, ["-c", "import rembg.cli; print('rembg-ok')"], { stdio: "pipe", timeout: 5000 });
+  const result = spawnSync(pythonCmd, ["-c", "import rembg.cli; print('rembg-ok')"], { stdio: "pipe", timeout: 30000 });
   if (result.status === 0) {
     return true;
   }
