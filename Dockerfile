@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install rembg[cli] using python3 -m pip (more reliable than pip3 alias)
 # Split into two steps to isolate build failures
 # Install rembg[cli]
-RUN python3 -m pip install --break-system-packages --no-cache-dir rembg[cli] \
+RUN python3 -m pip install --break-system-packages --no-cache-dir "rembg[cpu,cli]" \
   && rm -rf ~/.cache/pip
 
 # Diagnostic: verify rembg can be imported. Print detailed error but do NOT fail build.
