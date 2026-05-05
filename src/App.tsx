@@ -26,6 +26,8 @@ import {
   MUSIC_PRESETS_LIST,
   playSound,
   previewSound,
+  setCustomMusic,
+  setCustomSfx,
   SOUND_PRESETS,
   SOUND_PREVIEW_LIST,
   startMusic,
@@ -5952,7 +5954,7 @@ function SettingsModal({
             customSfxName: file.name,
           },
         });
-        import('./audioEngine').then((m) => m.setCustomSfx(dataUrl)).catch(() => {});
+        setCustomSfx(dataUrl);
       } else {
         onUpdate({
           audio: {
@@ -5962,7 +5964,7 @@ function SettingsModal({
             customMusicName: file.name,
           },
         });
-        import('./audioEngine').then((m) => m.setCustomMusic(dataUrl)).catch(() => {});
+        setCustomMusic(dataUrl);
       }
     };
     reader.onerror = () => {
@@ -5981,7 +5983,7 @@ function SettingsModal({
           customSfxName: '',
         },
       });
-      import('./audioEngine').then((m) => m.setCustomSfx(null)).catch(() => {});
+      setCustomSfx(null);
     } else {
       onUpdate({
         audio: {
@@ -5991,7 +5993,7 @@ function SettingsModal({
           customMusicName: '',
         },
       });
-      import('./audioEngine').then((m) => m.setCustomMusic(null)).catch(() => {});
+      setCustomMusic(null);
     }
   }
 

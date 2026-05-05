@@ -8,8 +8,26 @@ function checkCommand(cmd, args = ["--version"]) {
   return result.status === 0;
 }
 
+/** Fast check: use Python's shutil.which to see if rembg binary is in PATH.
+ *  This avoids loading heavy dependencies (onnxruntime) just to check existence.
+ */
+function checkRembgInPath() {
+  for (const py of ["python3", "python"]) {
+    const result = spawnSync(
+      py,
+      ["-c", "import shutil,sys; sys.exit(0 if shutil.which('rembg') else 1)"],
+      { stdio: "pipe", timeout: 5000 }
+    );
+    if (result.status === 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function checkPythonModule(pythonCmd) {
-  const result = spawnSync(pythonCmd, ["-c", "import rembg.cli; print('rembg-ok')"], { stdio: "pipe", timeout: 30000 });
+  // Give rembg import enough time on CPU-constrained containers (e.g. Zeabur)
+  const result = spawnSync(pythonCmd, ["-c", "import rembg.cli; print('rembg-ok')"], { stdio: "pipe", timeout: 120000 });
   if (result.status === 0) {
     return true;
   }
@@ -30,8 +48,10 @@ function isPythonAvailable() {
 
 function isRembgAvailable() {
   if (_rembgAvailable === null) {
+    // 1) Fast PATH check (no heavy import)
+    // 2) Slow import check as fallback
     _rembgAvailable =
-      checkCommand("rembg", ["--version"]) ||
+      checkRembgInPath() ||
       checkPythonModule("python3") ||
       checkPythonModule("python");
   }
