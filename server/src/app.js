@@ -45,6 +45,12 @@ app.use(
 );
 app.use(express.json());
 
+// Request logging for debugging 502 issues
+app.use((req, _res, next) => {
+  console.log(`[Backend] ${req.method} ${req.url} - ${req.headers["user-agent"] || "no-ua"}`);
+  next();
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
