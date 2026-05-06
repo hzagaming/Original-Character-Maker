@@ -49,6 +49,11 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+// Zeabur default health check path
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.get("/api/cutout-assets/*", async (req, res, next) => {
   try {
     const assetPath = String(req.params[0] || "")
