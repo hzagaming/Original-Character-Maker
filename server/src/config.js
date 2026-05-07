@@ -48,9 +48,8 @@ const corsOrigin = process.env.CORS_ORIGIN || "*";
 
 module.exports = {
   projectRoot,
-  // Zeabur injects PORT=8080 which conflicts with Dockerfile EXPOSE 3001.
-  // Force 3001 to match EXPOSE and avoid 502.
-  port: 3001,
+  // Zeabur may inject PORT env var. Use it if present, otherwise 3001.
+  port: process.env.PORT ? parseInteger(process.env.PORT, 3001) : 3001,
   corsOrigin,
   publicAppBaseUrl: parsePublicBaseUrl(
     process.env.PUBLIC_APP_BASE_URL ||
