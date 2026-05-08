@@ -3887,12 +3887,12 @@ function HomeScreen({
         <div className="home-hero-grid">
           <article className="home-hero-copy">
             <p className="section-label">{messages.announcementTitle}</p>
-            <h2>{announcementHistory[0].version}</h2>
-            <p className="announcement-summary">{announcementHistory[0].summary}</p>
+            <h2>{VERSION}</h2>
+            <p className="announcement-summary">{messages.announcementDescription}</p>
             <ul className="home-announcement-list">
-              {announcementHistory[0].details.slice(0, 3).map((detail, i) => (
-                <li key={i}>{detail}</li>
-              ))}
+              <li>{messages.announcementList1}</li>
+              <li>{messages.announcementList2}</li>
+              <li>{messages.announcementList3}</li>
             </ul>
             <div className="workflow-actions home-announcement-actions">
               <button className="secondary-button" type="button" onClick={onOpenAnnouncementArchive}>
