@@ -66,9 +66,10 @@ function getCutoutExpressionName(stepName) {
 function syncFrontendCutoutSteps(workflowId) {
   const workflow = getWorkflow(workflowId);
   if (!workflow) {
-    return;
+    return false;
   }
 
+  let hasPendingCutouts = false;
   for (const expressionName of Object.keys(EXPRESSION_STEP_MAP)) {
     const cutoutStepName = CUTOUT_STEP_MAP[expressionName];
     const expressionOutputUrl = workflow.outputs?.expressions?.[expressionName] || null;
@@ -85,8 +86,27 @@ function syncFrontendCutoutSteps(workflowId) {
           note: "Frontend cutout skipped because the source expression output is missing."
         }
       });
+      continue;
     }
+
+    hasPendingCutouts = true;
+    markStepStatus(workflowId, cutoutStepName, "running", "Waiting for browser background removal upload.", {
+      provider: "frontend",
+      debug: {
+        source_url: expressionOutputUrl,
+        note: "The browser will remove the background with @imgly/background-removal and upload a transparent PNG."
+      }
+    });
   }
+
+  if (hasPendingCutouts) {
+    setWorkflowStatus(workflowId, "running", "cutout_expression_thinking", null, {
+      provider: "frontend",
+      note: "Waiting for browser-side cutout uploads."
+    });
+  }
+
+  return hasPendingCutouts;
 }
 
 function getExpressionArtifactFromUrl(outputDir, outputUrl) {
@@ -521,7 +541,11 @@ async function executeWorkflow(workflowId, config) {
     const cgTasks = CG_STEP_CONFIG.map(([, _outputName], index) => async () => runCgGeneration(runtime, index));
     await asyncPool(cgTasks, getAiTaskConcurrency(workflow, config));
     if (runtime.bgRemovalRunner.provider === "frontend") {
-      syncFrontendCutoutSteps(workflowId);
+      const waitingForFrontendCutouts = syncFrontendCutoutSteps(workflowId);
+      if (waitingForFrontendCutouts) {
+        await writeWorkflowSnapshots(workflowId, runtime.outputDir, runtime.characterProfile, runtime.promptPack);
+        return getWorkflow(workflowId);
+      }
     }
 
     await finalizeWorkflowState(runtime);
@@ -589,7 +613,15 @@ async function rerunWorkflowStep(workflowId, targetStep, config) {
     const cutoutExpressionName = getCutoutExpressionName(targetStep);
     if (cutoutExpressionName) {
       if (runtime.bgRemovalRunner.provider === "frontend") {
-        throw new Error("Frontend background removal is handled client-side. Please upload the cutout from the frontend instead of rerunning this step.");
+        markStepStatus(workflowId, targetStep, "idle", "Waiting for browser background removal upload.", {
+          provider: "frontend",
+          debug: {
+            note: "The cutout output was cleared. The frontend will regenerate and upload it from the existing expression image."
+          }
+        });
+        setWorkflowStatus(workflowId, "completed", "done", null, null);
+        await writeWorkflowSnapshots(workflowId, runtime.outputDir, runtime.characterProfile, runtime.promptPack);
+        return getWorkflow(workflowId);
       }
       await runCutoutGeneration(runtime, cutoutExpressionName);
       await finalizeWorkflowState(runtime);

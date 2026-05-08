@@ -629,7 +629,7 @@ const PREVIOUS_PAPER_PROMPT_OVERRIDES: PaperPromptOverrides = {
 };
 
 function displayProviderName(provider: string | null | undefined): string {
-  if (provider === 'rembg') return 'rembg';
+  if (provider === 'frontend') return 'browser';
   return provider || '—';
 }
 
@@ -2791,6 +2791,16 @@ function getPaperStatusBadgeClass(workflow: PaperWorkflow | null): TransferStatu
   return 'running';
 }
 
+function hasPendingFrontendCutout(workflow: PaperWorkflow | null) {
+  if (workflow?.outputs?.providers?.remove_background !== 'frontend') {
+    return false;
+  }
+
+  return (['thinking', 'surprise', 'angry'] as ExpressionName[]).some((name) => {
+    return Boolean(workflow.outputs?.expressions?.[name]) && !workflow.outputs?.expression_cutouts?.[name];
+  });
+}
+
 function buildPaperApiErrorMessage(options: {
   response: Response;
   payload: unknown;
@@ -3031,7 +3041,7 @@ async function fetchPaperWorkflowRequest(workflowId: string, settings: SettingsS
 
   const response = await fetchWithTimeout(requestUrl, {
     headers: buildApiHeaders(settings),
-  });
+  }, 90000);
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
@@ -5695,6 +5705,15 @@ export function Paper2GalPage({
           return;
         }
 
+        if (hasPendingFrontendCutout(workflowRef.current)) {
+          setMessage({
+            type: 'info',
+            text: '浏览器端抠图模型正在加载或处理图片，首次运行可能需要 1-2 分钟。请保持页面打开。',
+          });
+          pollTimer = window.setTimeout(pollOnce, PAPER_POLL_INTERVAL_MS * 3);
+          return;
+        }
+
         setMessage({
           type: 'error',
           text: normalizeFetchError(error, paperRef.current.networkFetchError),
@@ -5768,7 +5787,16 @@ export function Paper2GalPage({
     return () => {
       disposed = true;
     };
-  }, [workflow?.id]);
+  }, [
+    workflow?.id,
+    workflow?.outputs?.providers?.remove_background,
+    workflow?.outputs?.expressions?.thinking,
+    workflow?.outputs?.expressions?.surprise,
+    workflow?.outputs?.expressions?.angry,
+    workflow?.outputs?.expression_cutouts?.thinking,
+    workflow?.outputs?.expression_cutouts?.surprise,
+    workflow?.outputs?.expression_cutouts?.angry,
+  ]);
 
   const progress = useMemo(() => {
     if (isSubmitting && !workflow) {

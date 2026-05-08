@@ -48,8 +48,9 @@ const corsOrigin = process.env.CORS_ORIGIN || "*";
 
 module.exports = {
   projectRoot,
-  // Zeabur may inject PORT env var. Use it if present, otherwise 3001.
-  port: process.env.PORT ? parseInteger(process.env.PORT, 3001) : 3001,
+  // Zeabur injects PORT for web services. Keep local development on 3001
+  // through .env/start scripts, but default deployed containers to 8080.
+  port: process.env.PORT ? parseInteger(process.env.PORT, 8080) : 8080,
   corsOrigin,
   publicAppBaseUrl: parsePublicBaseUrl(
     process.env.PUBLIC_APP_BASE_URL ||
@@ -64,7 +65,9 @@ module.exports = {
   minImageHeight: parseInteger(process.env.MIN_IMAGE_HEIGHT, 256),
   imageGenConcurrency: parseInteger(process.env.IMAGE_GEN_CONCURRENCY, 2),
   pipelineMode: process.env.PIPELINE_MODE || "live",
-  bgRemovalProvider: process.env.BG_REMOVAL_PROVIDER || "rembg",
+  // Background removal is intentionally fixed to browser-side IMG.LY.
+  // Ignore stale deployment variables from previous server-side cutout builds.
+  bgRemovalProvider: "frontend",
   aliyunAccessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID || process.env.ALIYUN_ACCESS_KEY_ID || "",
   aliyunAccessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET || process.env.ALIYUN_ACCESS_KEY_SECRET || "",
   aliyunImageSegEndpoint: process.env.ALIYUN_IMAGESEG_ENDPOINT || "imageseg.cn-shanghai.aliyuncs.com",
@@ -90,6 +93,7 @@ module.exports = {
   uploadDir: resolvePath(process.env.UPLOAD_DIR, "./tmp/uploads"),
   workflowStateDir: resolvePath(process.env.WORKFLOW_STATE_DIR, "./tmp/workflows"),
   outputDir: resolvePath(process.env.OUTPUT_DIR, "./tmp/outputs"),
+  cutoutAssetCacheDir: resolvePath(process.env.CUTOUT_ASSET_CACHE_DIR, "./tmp/cutout-assets"),
   webDir: path.resolve(projectRoot, "dist"),
   promptsDir: path.resolve(projectRoot, "prompts"),
   expressionWhiteBackground: process.env.EXPRESSION_WHITE_BACKGROUND === "true"

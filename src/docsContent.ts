@@ -1,4 +1,4 @@
-export type DocsErrorSeverity = 'critical' | 'error' | 'warning' | 'info';
+﻿export type DocsErrorSeverity = 'critical' | 'error' | 'warning' | 'info';
 
 export type DocsErrorItem = {
   code: string;
@@ -1240,26 +1240,26 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
       overview: `Paper2Gal 工具接入 p2g-character-workflow 后端工作流，负责上传角色图像并自动生成系列素材：表情图（思考、惊讶、生气）、CG 场景图和抠图素材。
 
 **抠图方案（v0.6.4+）**
-抠图引擎已全面切换为 rembg（Python 本地 AI 推理，基于 u2net 模型）。rembg 在服务器本地运行，无需任何外部 API Key，也不依赖浏览器 Canvas 或阿里云接口。处理后的输出为透明背景 PNG。
+抠图引擎已全面切换为 browser cutout（浏览器端 AI 抠图，基于 IMG.LY 浏览器模型）。browser cutout 在用户浏览器中运行，无需任何外部 API Key，不依赖服务端本地抠图环境或阿里云接口。处理后的输出为透明背景 PNG。
 
 **部署注意事项**
-- **Zeabur 部署（推荐）**：选择 Dockerfile 部署方式，镜像已预装 Python 3、rembg[cli] 并自动下载 u2net 模型。环境变量需在 Zeabur 控制台设置（.env 文件不会被上传）。详见 DEPLOY.md。
-- Docker 部署：镜像已预装 Python 3、rembg[cli] 并自动下载 u2net 模型，开箱即用。
-- 裸机部署：需手动安装 Python 3 和 rembg（pip3 install rembg[cli]），首次运行时会自动下载约 176MB 的 u2net 模型到 ~/.u2net/。
-- 无 Python 环境：如果服务器没有 Python（如 Zeabur Node.js 模板），rembg 会自动降级为 frontend 抠图（由浏览器 Canvas 处理）。
-- 性能建议：rembg 对 CPU 和内存有一定要求，处理 1024×1024 图片约需 2~5 秒。低配置服务器建议关闭 AI 并发，让步骤串行执行。
+- **Zeabur 部署（推荐）**：选择 Dockerfile 部署方式，镜像不需要预装服务端抠图运行时。环境变量需在 Zeabur 控制台设置（.env 文件不会被上传）。详见 DEPLOY.md。
+- Docker 部署：镜像不需要预装服务端抠图运行时，开箱即用。
+- 裸机部署：无需安装服务端抠图工具；浏览器会在首次抠图时加载 IMG.LY 模型资源。
+- 服务端无本地抠图依赖：背景移除固定由浏览器端执行。
+- 性能建议：browser cutout 对 CPU 和内存有一定要求，处理 1024×1024 图片约需 2~5 秒。低配置服务器建议关闭 AI 并发，让步骤串行执行。
 
 **工作流执行顺序**
 1. 验证输入（格式、尺寸检查）
 2. 分析角色（生成角色描述，供后续步骤复用）
 3. 并行/串行生成表情（thinking、surprise、angry）
 4. 并行/串行生成 CG（CG01、CG02）
-5. 并行/串行执行 rembg 抠图（基于已生成的表情图）
+5. 并行/串行执行 browser cutout 抠图（基于已生成的表情图）
 
 支持 Prompt 覆盖和 AI 并发控制，可实时查看工作流进度和下载结果。`,
       buttons: [
         { name: '选择图片', description: '上传角色图像。仅接受 PNG 和 JPG 格式，最大尺寸建议不超过 4096x4096。' },
-        { name: '启动工作流', description: '向后端提交角色图像，启动 paper2gal 工作流。工作流会依次执行：验证输入、分析角色、生成表情、生成 CG、执行 rembg 抠图。支持断点续传：如果某个步骤失败，修复问题后点击对应步骤卡片的「重做」即可单独重试，无需从头开始。' },
+        { name: '启动工作流', description: '向后端提交角色图像，启动 paper2gal 工作流。工作流会依次执行：验证输入、分析角色、生成表情、生成 CG、执行 browser cutout 抠图。支持断点续传：如果某个步骤失败，修复问题后点击对应步骤卡片的「重做」即可单独重试，无需从头开始。' },
         { name: '复制 JSON', description: '复制当前 Prompt 覆盖配置为 JSON 文本。可用于快速备份或分享给其他用户。' },
         { name: '下载 JSON', description: '下载当前 Prompt 覆盖配置为 JSON 文件。下次使用时可通过「导入 JSON」恢复配置。' },
         { name: '导出工作流 JSON', description: '下载包含工作流完整状态、步骤详情、调试信息和各步骤提供商分配的 JSON 文件，用于排查问题或向开发者反馈 Bug。导出前请确保工作流已至少执行过一次。' },
@@ -1272,9 +1272,9 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
         { name: '表情 Prompt 覆盖 - 生气', description: '覆盖「生气」表情生成步骤的默认 Prompt。留空则使用后端预设提示词。', tips: '生气表情注意避免生成暴力元素，可加入「皱眉」「抿嘴」等温和描述。' },
         { name: 'CG Prompt 覆盖 - CG01', description: '覆盖第一张 CG 场景图的生成 Prompt。留空则使用后端预设提示词。', tips: 'CG 图通常包含背景场景，可在 Prompt 中指定「室内/室外」「白天/夜晚」等氛围关键词。' },
         { name: 'CG Prompt 覆盖 - CG02', description: '覆盖第二张 CG 场景图的生成 Prompt。留空则使用后端预设提示词。', tips: '建议与 CG01 保持角色一致性，仅改变场景或动作，形成系列感。' },
-        { name: 'AI 并发', description: '是否允许多个 AI 生成步骤并行执行。开启后可显著缩短总耗时。', tips: '开启并发时后端会同时调度多个模型请求，但可能增加 API 费用。rembg 抠图步骤也参与并发池，低配置服务器建议关闭。' },
+        { name: 'AI 并发', description: '是否允许多个 AI 生成步骤并行执行。开启后可显著缩短总耗时。', tips: '开启并发时后端会同时调度多个模型请求，但可能增加 API 费用。browser cutout 抠图步骤也参与并发池，低配置服务器建议关闭。' },
         { name: '输入图片尺寸', description: '上传的角色图像建议尺寸。', tips: '推荐 1024×1024 ~ 2048×2048。过大（>4096）会导致生成和抠图耗时显著增加；过小（<512）会影响角色细节和后续素材质量。' },
-        { name: '抠图提供商', description: '当前工作流使用的背景移除引擎。v0.6.4 起固定为 rembg。', tips: 'rembg 在服务器本地运行，无需 API Key，输出为透明 PNG。若服务器未安装 rembg，会报 REMBG_SPAWN_FAILED 错误。' },
+        { name: '抠图提供商', description: '当前工作流使用的背景移除引擎。v0.6.4 起固定为 browser cutout。', tips: 'browser cutout 在用户浏览器中运行，无需 API Key，输出为透明 PNG。若模型资源加载失败，浏览器端抠图会失败并在页面提示错误。' },
       ],
       errors: [
         {
@@ -1531,29 +1531,29 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           prevention: '避开服务器维护时段操作；高负载时降低请求频率。',
         },
         {
-          code: 'REMBG_SPAWN_FAILED',
-          message: '抠图步骤报错，提示 rembg 无法启动',
+          code: 'FRONTEND_CUTOUT_SPAWN_FAILED',
+          message: '抠图步骤报错，提示 browser cutout 无法启动',
           severity: 'critical',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: '服务器上未安装 Python 3 或 rembg。',
-          solution: '在服务器上安装 rembg。',
+          cause: '浏览器端模型资源无法加载，或当前浏览器不支持所需能力。',
+          solution: '确认前端抠图资源可访问后刷新重试。',
           steps: [
-            '确认服务器已安装 Python 3（python3 --version）',
-            '执行 pip3 install rembg[cli] 安装 rembg',
+            '确认浏览器可以访问前端抠图模型资源',
+            '刷新页面后重新触发浏览器端抠图',
             '如果是 Docker 部署，重新构建镜像（Dockerfile 已包含安装步骤）',
             '重启后端服务',
           ],
-          relatedCodes: ['REMBG_EXECUTION_FAILED'],
-          prevention: 'Docker 部署会自动安装 rembg；非 Docker 部署请参考 DEPLOY.md 手动安装 Python 依赖。',
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
+          prevention: 'Docker 部署会代理前端抠图资源；非 Docker 部署请参考 DEPLOY.md 使用前端抠图配置。',
         },
         {
-          code: 'REMBG_TIMEOUT',
+          code: 'FRONTEND_CUTOUT_TIMEOUT',
           message: '抠图步骤长时间无响应后失败',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'rembg 处理超时（默认 120 秒）。可能是图片过大、服务器 CPU/RAM 不足。',
+          cause: 'browser cutout 处理超时（默认 120 秒）。可能是图片过大、服务器 CPU/RAM 不足。',
           solution: '缩小图片或提升服务器性能。',
           steps: [
             '重新上传一张最大边不超过 2048 像素的图片',
@@ -1561,16 +1561,16 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
             '如果是低配置服务器，关闭「AI 并发」让步骤串行执行',
             '重试',
           ],
-          relatedCodes: ['REMBG_EXECUTION_FAILED'],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
           prevention: '上传前将图片压缩到合理尺寸（建议 1024~2048px）；确保服务器至少有 2GB 可用内存。',
         },
         {
-          code: 'REMBG_EXECUTION_FAILED',
-          message: '抠图步骤报错，提示 rembg 执行失败',
+          code: 'FRONTEND_CUTOUT_EXECUTION_FAILED',
+          message: '抠图步骤报错，提示 browser cutout 执行失败',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'rembg 处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或依赖库异常。',
+          cause: 'browser cutout 处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或依赖库异常。',
           solution: '更换图片后重试。',
           steps: [
             '确认表情图片已成功生成（点击步骤卡片查看输出）',
@@ -1578,16 +1578,16 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
             '检查后端日志中的详细错误输出',
             '在该步骤卡片上点击「重做」单独重试抠图',
           ],
-          relatedCodes: ['REMBG_SPAWN_FAILED', 'REMBG_TIMEOUT', 'REMBG_OUTPUT_MISSING'],
+          relatedCodes: ['FRONTEND_CUTOUT_SPAWN_FAILED', 'FRONTEND_CUTOUT_TIMEOUT', 'FRONTEND_CUTOUT_OUTPUT_MISSING'],
           prevention: '上传标准格式的 PNG/JPG 图片；避免使用特殊编码或损坏的图片文件。',
         },
         {
-          code: 'REMBG_SOURCE_MISSING',
+          code: 'FRONTEND_CUTOUT_SOURCE_MISSING',
           message: '抠图步骤报错，提示找不到源图片',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: '上游表情生成步骤失败，导致 rembg 没有输入文件可处理。',
+          cause: '上游表情生成步骤失败，导致 browser cutout 没有输入文件可处理。',
           solution: '先排查并修复表情生成步骤的错误，再重试抠图。',
           steps: [
             '检查表情生成步骤（thinking / surprise / angry）的错误信息',
@@ -2423,29 +2423,29 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           prevention: '允许浏览器弹窗；文档过大时先移除部分图片再导出。',
         },
         {
-          code: 'REMBG_SPAWN_FAILED',
-          message: '服务器未安装 rembg 或 Python 环境',
+          code: 'FRONTEND_CUTOUT_SPAWN_FAILED',
+          message: '浏览器端抠图资源加载失败',
           severity: 'critical',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: '服务器上未安装 Python 3 或 rembg。',
-          solution: '在服务器上安装 rembg。',
+          cause: '浏览器端模型资源无法加载，或当前浏览器不支持所需能力。',
+          solution: '确认前端抠图资源可访问后刷新重试。',
           steps: [
-            '确认服务器已安装 Python 3（python3 --version）',
-            '执行 pip3 install rembg[cli] 安装 rembg',
+            '确认浏览器可以访问前端抠图模型资源',
+            '刷新页面后重新触发浏览器端抠图',
             '如果是 Docker 部署，重新构建镜像（Dockerfile 已包含安装步骤）',
             '重启后端服务',
           ],
-          relatedCodes: ['REMBG_EXECUTION_FAILED'],
-          prevention: 'Docker 镜像已预装 rembg；裸机部署时确保 Python 3 和 pip 可用。',
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
+          prevention: 'Docker 镜像会提供前端抠图资源代理；裸机部署时确保浏览器能访问模型资源。',
         },
         {
-          code: 'REMBG_TIMEOUT',
-          message: 'rembg 处理超时',
+          code: 'FRONTEND_CUTOUT_TIMEOUT',
+          message: 'browser cutout 处理超时',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'rembg 处理超时（默认 120 秒）。可能是图片过大、服务器 CPU/RAM 不足。',
+          cause: 'browser cutout 处理超时（默认 120 秒）。可能是图片过大、服务器 CPU/RAM 不足。',
           solution: '缩小图片或提升服务器性能。',
           steps: [
             '重新上传一张最大边不超过 2048 像素的图片',
@@ -2453,16 +2453,16 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
             '如果是低配置服务器，关闭「AI 并发」让步骤串行执行',
             '重试',
           ],
-          relatedCodes: ['REMBG_EXECUTION_FAILED', 'REMBG_OUTPUT_MISSING'],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED', 'FRONTEND_CUTOUT_OUTPUT_MISSING'],
           prevention: '上传前将图片缩放到合理尺寸；确保服务器有足够的 CPU 和内存。',
         },
         {
-          code: 'REMBG_EXECUTION_FAILED',
-          message: 'rembg 处理失败（非零退出码）',
+          code: 'FRONTEND_CUTOUT_EXECUTION_FAILED',
+          message: 'browser cutout 处理失败（非零退出码）',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'rembg 处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或依赖库异常。',
+          cause: 'browser cutout 处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或依赖库异常。',
           solution: '更换图片后重试，并检查后端日志。',
           steps: [
             '确认表情图片已成功生成（点击步骤卡片查看输出）',
@@ -2470,16 +2470,16 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
             '检查后端日志中的详细错误输出',
             '在该步骤卡片上点击「重做」单独重试抠图',
           ],
-          relatedCodes: ['REMBG_SPAWN_FAILED', 'REMBG_TIMEOUT', 'REMBG_OUTPUT_MISSING'],
+          relatedCodes: ['FRONTEND_CUTOUT_SPAWN_FAILED', 'FRONTEND_CUTOUT_TIMEOUT', 'FRONTEND_CUTOUT_OUTPUT_MISSING'],
           prevention: '上传标准格式的 PNG/JPG 图片；避免使用特殊编码或损坏的图片文件。',
         },
         {
-          code: 'REMBG_SOURCE_MISSING',
-          message: 'rembg 找不到源图片',
+          code: 'FRONTEND_CUTOUT_SOURCE_MISSING',
+          message: 'browser cutout 找不到源图片',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: '上游表情生成步骤失败，导致 rembg 没有输入文件可处理。',
+          cause: '上游表情生成步骤失败，导致 browser cutout 没有输入文件可处理。',
           solution: '先排查并修复表情生成步骤的错误，再重试抠图。',
           steps: [
             '检查表情生成步骤（thinking / surprise / angry）的错误信息',
@@ -2490,12 +2490,12 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           prevention: '确保表情生成步骤成功后再进行抠图；工作流会自动按顺序执行，不要跳过步骤。',
         },
         {
-          code: 'REMBG_OUTPUT_MISSING',
-          message: 'rembg 执行成功但未生成输出文件',
+          code: 'FRONTEND_CUTOUT_OUTPUT_MISSING',
+          message: 'browser cutout 执行成功但未生成输出文件',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'rembg 处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或依赖库异常。',
+          cause: 'browser cutout 处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或依赖库异常。',
           solution: '更换图片后重试。',
           steps: [
             '确认表情图片已成功生成（点击步骤卡片查看输出）',
@@ -2503,7 +2503,7 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
             '检查后端日志中的详细错误输出',
             '在该步骤卡片上点击「重做」单独重试抠图',
           ],
-          relatedCodes: ['REMBG_SPAWN_FAILED', 'REMBG_TIMEOUT', 'REMBG_EXECUTION_FAILED'],
+          relatedCodes: ['FRONTEND_CUTOUT_SPAWN_FAILED', 'FRONTEND_CUTOUT_TIMEOUT', 'FRONTEND_CUTOUT_EXECUTION_FAILED'],
           prevention: '确保输入图片格式正确；避免使用损坏或特殊编码的图片。',
         },
       ],

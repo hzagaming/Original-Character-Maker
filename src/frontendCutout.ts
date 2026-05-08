@@ -2,8 +2,10 @@ import { preload, removeBackground, type Config } from '@imgly/background-remova
 
 export type ExpressionName = 'thinking' | 'surprise' | 'angry';
 
-let preloaded = false;
-let preloadedPublicPath = '';
+export const DEFAULT_CUTOUT_ASSET_PUBLIC_PATH =
+  'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/';
+
+const preloadedPublicPaths = new Set<string>();
 
 function buildCutoutConfig(publicPath: string): Config {
   return {
@@ -14,10 +16,9 @@ function buildCutoutConfig(publicPath: string): Config {
 }
 
 export async function ensureCutoutModelLoaded(publicPath: string) {
-  if (preloaded && preloadedPublicPath === publicPath) return;
+  if (preloadedPublicPaths.has(publicPath)) return;
   await preload(buildCutoutConfig(publicPath));
-  preloaded = true;
-  preloadedPublicPath = publicPath;
+  preloadedPublicPaths.add(publicPath);
 }
 
 export async function generateCutoutPngBlob(source: Blob, publicPath: string): Promise<Blob> {

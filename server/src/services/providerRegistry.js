@@ -1,8 +1,7 @@
 const path = require("path");
 const {
   mockGenerateCg,
-  mockGenerateExpression,
-  mockRemoveBackground
+  mockGenerateExpression
 } = require("../adapters/mockImageAdapter");
 // banana2 adapters removed per user requirement (no banana2 globally)
 // const {
@@ -14,18 +13,13 @@ const {
 const {
   isPlatoConfigured,
   platoGenerateCg,
-  platoGenerateExpression,
-  platoRemoveBackground
+  platoGenerateExpression
 } = require("../adapters/platoImageAdapter");
-// aliyun adapters removed per user requirement (rembg only for cutout)
+// aliyun adapters removed per user requirement
 // const {
 //   aliyunRemoveBackground,
 //   isAliyunImageSegConfigured
 // } = require("../adapters/aliyunImageSegAdapter");
-const {
-  rembgRemoveBackground,
-  isRembgConfigured
-} = require("../adapters/rembgAdapter");
 const { resolveEffectiveBgRemovalProvider } = require("../utils/envCheck");
 
 function getMimeTypeFromPath(filePath) {
@@ -87,32 +81,14 @@ function withMockFallback(primaryProvider, primaryRunner, mockRunner, config) {
 function getBackgroundRemovalRunner(config) {
   const effectiveProvider = resolveEffectiveBgRemovalProvider(config);
 
-  if (effectiveProvider === "frontend") {
-    return {
-      provider: "frontend",
-      run: async () => {
-        throw new Error("Frontend background removal is handled client-side.");
-      }
-    };
+  if (effectiveProvider !== "frontend") {
+    console.warn(`[Backend] BG_REMOVAL_PROVIDER=${effectiveProvider} is ignored; frontend cutout is always used.`);
   }
-
-  if (effectiveProvider === "rembg" && isRembgConfigured(config)) {
-    return {
-      provider: "rembg",
-      run: rembgRemoveBackground
-    };
-  }
-
-  if (effectiveProvider === "plato" && isPlatoConfigured(config)) {
-    return {
-      provider: "plato",
-      run: platoRemoveBackground
-    };
-  }
-
   return {
-    provider: "mock",
-    run: mockRemoveBackground
+    provider: "frontend",
+    run: async () => {
+      throw new Error("Frontend background removal is handled client-side.");
+    }
   };
 }
 

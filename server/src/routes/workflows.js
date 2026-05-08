@@ -75,6 +75,19 @@ function getDependentRedoSteps(stepName) {
   return [];
 }
 
+function areFrontendCutoutsComplete(workflow) {
+  return ["thinking", "surprise", "angry"].every((name) => {
+    const step = workflow.steps?.[`cutout_expression_${name}`];
+    return step?.status === "success" || step?.status === "skipped";
+  });
+}
+
+function hasSkippedFrontendCutouts(workflow) {
+  return ["thinking", "surprise", "angry"].some((name) => {
+    return workflow.steps?.[`cutout_expression_${name}`]?.status === "skipped";
+  });
+}
+
 router.post("/", upload.single("image"), async (req, res, next) => {
   try {
     const sourceImage = validateUploadedFile(req.file, config);
@@ -238,6 +251,14 @@ router.post("/:id/cutouts/:expression", upload.single("image"), async (req, res,
       provider: "frontend",
       output_url: outputUrl
     });
+
+    const latestWorkflow = getWorkflow(workflow.id);
+    if (areFrontendCutoutsComplete(latestWorkflow)) {
+      setWorkflowStatus(workflow.id, hasSkippedFrontendCutouts(latestWorkflow) ? "completed_with_errors" : "completed", "done", null, {
+        provider: "frontend",
+        note: "Browser background removal uploads completed."
+      });
+    }
 
     await writeWorkflowSnapshots(
       workflow.id,

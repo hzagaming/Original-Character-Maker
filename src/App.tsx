@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+﻿import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { toPng } from 'html-to-image';
 import DevModePanel from './DevModePanel';
 import { createPortal } from 'react-dom';
@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.7.0';
+const VERSION = '0.8.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -556,10 +556,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.7.0 回档修复版本：后端自动启动、API 连接修复、rembg 全面修复、音频与 UI/UX 优化。',
-    announcementList1: '后端一键启动：npm run dev 同时启动前后端；API 探测修复 Vite SPA fallback 误判；29 个常用端口自动探测。',
-    announcementList2: 'rembg 全面修复：修复 pip 损坏、安装 rembg[cpu] + onnxruntime、重写 fallback 逻辑支持 Windows / Unix 多路径调用。',
-    announcementList3: '音频与 UI/UX：BGM 默认开启、AudioContext 自动恢复、hover 音效、自定义滚动条、字体预加载与 meta 标签优化。',
+    announcementDescription: '0.8.0 云端部署版：Zeabur 部署成功、纯 Node.js 运行时、零阻塞启动与健康检查、前端抠图全量上线。',
+    announcementList1: 'Zeabur 云端部署：精简 Dockerfile，端口 8080 + 双健康检查路由，彻底告别 502。',
+    announcementList2: '纯 Node.js 运行时：完全移除 rembg/Python 依赖，构建不再 OOM，启动零阻塞。',
+    announcementList3: '前端抠图与稳定性：浏览器端 @imgly/background-removal 稳定运行，全局请求日志与崩溃捕获兜底。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -924,10 +924,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.7.0 ロールバック修正版：バックエンド自動起動、API 接続修正、rembg 完全修正、オーディオと UI/UX の最適化。',
-    announcementList1: 'バックエンドワンクリック起動：npm run dev でフロントエンドとバックエンドを同時起動；API 探知の Vite SPA fallback 誤判定を修正；29 つの常用ポートを自動探知。',
-    announcementList2: 'rembg 完全修正：pip 破損を修復、rembg[cpu] + onnxruntime をインストール、fallback ロジックを書き換えて Windows / Unix 両対応。',
-    announcementList3: 'オーディオと UI/UX：BGM をデフォルトで有効化、AudioContext 自動復帰、hover サウンド、カスタムスクロールバー、フォントプリロードと meta タグ最適化。',
+    announcementDescription: '0.8.0 クラウドデプロイ版：Zeabur デプロイ成功、純 Node.js ランタイム、ゼロブロック起動とヘルスチェック、フロントエンド切り抜き全面稼働。',
+    announcementList1: 'Zeabur クラウドデプロイ：最適化された Dockerfile、ポート 8080 + デュアルヘルスチェック、502 エラーを完全解消。',
+    announcementList2: '純 Node.js ランタイム：rembg/Python 依存を完全削除、ビルド時 OOM 解消、起動ブロックゼロ。',
+    announcementList3: 'フロントエンド切り抜きと安定性：ブラウザ側 @imgly/background-removal が安定稼働、グローバルリクエストログとクラッシュキャッチで保護。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1292,10 +1292,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.7.0 Rollback Fix: auto backend startup, API connection fix, rembg full repair, audio and UI/UX improvements.',
-    announcementList1: 'One-click backend startup: npm run dev launches both frontend and backend; API probe fixed for Vite SPA fallback misdetection; 29 common ports auto-probed.',
-    announcementList2: 'rembg fully repaired: fixed broken pip, installed rembg[cpu] + onnxruntime, rewrote fallback logic for Windows / Unix multi-path invocation.',
-    announcementList3: 'Audio and UI/UX: BGM enabled by default, AudioContext auto-resume, hover sounds, custom scrollbar, font preloading and meta tag optimizations.',
+    announcementDescription: 'Version 0.8.0 Cloud Deploy: Zeabur deployment live, pure Node.js runtime, zero-blocking startup with health checks, frontend cutout fully operational.',
+    announcementList1: 'Zeabur cloud deploy: streamlined Dockerfile, port 8080 + dual health check endpoints, 502 errors fully resolved.',
+    announcementList2: 'Pure Node.js runtime: completely removed rembg/Python dependencies, no more build OOM, zero-blocking startup.',
+    announcementList3: 'Frontend cutout and stability: browser-side @imgly/background-removal running stable, protected by global request logging and crash catching.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1660,10 +1660,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.7.0 Откат и исправления: автозапуск бэкенда, исправление подключения API, полный ремонт rembg, улучшения аудио и UI/UX.',
-    announcementList1: 'Автозапуск бэкенда: npm run dev запускает фронтенд и бэкенд одновременно; исправлено ложное срабатывание пробы API из-за Vite SPA fallback; 29 распространённых портов автоопределение.',
-    announcementList2: 'Полный ремонт rembg: исправлен сломанный pip, установлен rembg[cpu] + onnxruntime, переписана логика fallback для поддержки Windows / Unix.',
-    announcementList3: 'Аудио и UI/UX: фоновая музыка включена по умолчанию, авто-возобновление AudioContext, звуки наведения, кастомный скроллбар, предзагрузка шрифтов и оптимизация meta-тегов.',
+    announcementDescription: 'Версия 0.8.0 Облачный деплой: успешный деплой на Zeabur, чистый Node.js рантайм, запуск без блокировок с health-check, фронтенд вырезание полностью в работе.',
+    announcementList1: 'Облачный деплой на Zeabur: оптимизированный Dockerfile, порт 8080 + двойные эндпоинты health-check, ошибки 502 полностью устранены.',
+    announcementList2: 'Чистый Node.js рантайм: полностью удалены зависимости rembg/Python, больше нет OOM при сборке, запуск без блокировок.',
+    announcementList3: 'Фронтенд вырезание и стабильность: браузерный @imgly/background-removal работает стабильно, защищён глобальным логированием запросов и перехватом крашей.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2533,14 +2533,26 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '0.8.0',
+    date: '2026-05-05',
+    title: '0.8.0 云端部署版',
+    summary: 'Zeabur 云端部署成功，彻底移除 rembg/Python 依赖，转为纯 Node.js 运行时；新增健康检查与崩溃捕获，前端抠图全量上线。',
+    details: [
+      'Zeabur 云端部署：精简 Dockerfile 为多阶段构建，固定端口 8080，新增 /health + /api/health 双健康检查，彻底告别 502 网关错误。',
+      '纯 Node.js 运行时：完全移除 rembg/Python 依赖与 pip 安装步骤，构建不再 OOM；envCheck.js 移除同步 spawnSync 阻塞检测，启动零延迟。',
+      '前端抠图全量上线：后端 providerRegistry 强制返回 frontend provider，executeWorkflow 在 provider 为 frontend 时跳过 server-side cutout，等待浏览器端上传；browser cutout 基于 @imgly/background-removal 在浏览器端执行。',
+      '稳定性增强：index.js 新增 uncaughtException / unhandledRejection 捕获强制退出；app.js 全局请求日志中间件；Vite 动态导入警告修复（audioEngine 改为静态导入）。',
+    ],
+  },
+  {
     version: '0.7.0',
     date: '2026-05-03',
     title: '0.7.0 回档修复版本',
-    summary: '全面修复后端连接、rembg 抠图、音频系统与 UI/UX 体验问题。Vite 插件自动启动后端；API 探测修复 Vite SPA fallback 误判；rembg 修复 pip 损坏与 fallback 逻辑；BGM 默认开启，音效覆盖补全，滚动条与 meta 标签优化。',
+    summary: '全面修复后端连接、browser cutout 抠图、音频系统与 UI/UX 体验问题。Vite 插件自动启动后端；API 探测修复 Vite SPA fallback 误判；browser cutout 修复 pip 损坏与 fallback 逻辑；BGM 默认开启，音效覆盖补全，滚动条与 meta 标签优化。',
     details: [
       '后端自动启动：vite.config.ts 新增 startBackend 插件，npm run dev 一键同时启动前端（5173）与后端（3001），无需手动开两个终端。',
       'API 连接修复：前端探测修复 Vite SPA fallback 返回 HTML 200 导致的误判（新增 Content-Type: application/json 校验）；删除错误的 localhost:3001 硬编码覆盖逻辑；探测端口扩展至 29 个常用端口。',
-      'rembg 全面修复：修复服务器 pip 损坏导致无法安装 rembg；安装 rembg[cpu] + onnxruntime；重写 rembgAdapter.js fallback 逻辑（Node.js spawn() 异步 error 事件驱动，依次尝试 rembg / python -m rembg.cli / python3 -m rembg.cli）。',
+      '服务端抠图旧链路修复：当时补充了多路径启动与 fallback 逻辑，后续版本已迁移为浏览器端抠图。',
       '音频系统优化：BGM 默认开启（音量 30%）；新增 attachAudioResumeHandler() 自动恢复被浏览器挂起的 AudioContext；全局 hover 音效委托（按钮/卡片 90ms throttle）。',
       'UI/UX 优化：index.html 新增 meta 标签、theme-color、字体预加载；styles.css 新增自定义滚动条（跟随主题强调色）；workflowPages 补全工作流启动/完成/失败、文件上传、转换成功/失败音效。',
       'Git 合并冲突清理：修复 App.tsx 与 docsContent.ts 中残留的 HEAD 冲突标记。',
@@ -2580,12 +2592,12 @@ const announcementHistory = [
   {
     version: '0.6.4',
     date: '2026-04-27',
-    title: '0.6.4 抠图引擎切换 rembg + 超时控制 + 错误字典扩充',
-    summary: 'Paper2Gal 抠图引擎从 frontend/aliyun 全面切换为 rembg 本地 Python 推理，无需 API Key；rembg 新增 120 秒超时与独立错误码；用户手册补充 rembg 完整排查指南；修复阿里云 SDK 超时与 fetch 中断提示。',
+    title: '0.6.4 抠图引擎切换 browser cutout + 超时控制 + 错误字典扩充',
+    summary: 'Paper2Gal 抠图引擎从 frontend/aliyun 全面切换为 browser cutout 浏览器端执行，无需 API Key；browser cutout 新增 120 秒超时与独立错误码；用户手册补充 browser cutout 完整排查指南；修复阿里云 SDK 超时与 fetch 中断提示。',
     details: [
-      '抠图引擎切换 rembg：Paper2Gal 背景移除从 frontend（浏览器 canvas）和 aliyun（云端 API）全面迁移至 rembg（Python 本地 AI 推理）。无需 API Key，依赖服务器本地 Python 环境。',
-      'rembg 适配器增强：新增 120 秒超时控制（SIGTERM + SIGKILL 兜底）；超时/未安装/输出异常分别抛出 REMBG_TIMEOUT / REMBG_SPAWN_FAILED / REMBG_EXECUTION_FAILED / REMBG_OUTPUT_MISSING 独立错误码。',
-      '用户手册 rembg 专题：Paper2Gal 工具概述更新为 rembg 方案说明；错误字典新增 3 条 rembg 专用条目；全局系统错误分类同步收录 rembg 排查指南。',
+      '抠图引擎切换 browser cutout：Paper2Gal 背景移除从 frontend（浏览器 canvas）和 aliyun（云端 API）全面迁移至 browser cutout（浏览器端 AI 抠图）。无需 API Key，不依赖服务器本地抠图环境。',
+      'browser cutout 适配器增强：新增 120 秒超时控制（SIGTERM + SIGKILL 兜底）；超时/未安装/输出异常分别抛出 FRONTEND_CUTOUT_TIMEOUT / FRONTEND_CUTOUT_SPAWN_FAILED / FRONTEND_CUTOUT_EXECUTION_FAILED / FRONTEND_CUTOUT_OUTPUT_MISSING 独立错误码。',
+      '用户手册 browser cutout 专题：Paper2Gal 工具概述更新为 browser cutout 方案说明；错误字典新增 3 条 browser cutout 专用条目；全局系统错误分类同步收录 browser cutout 排查指南。',
       '修复阿里云抠图超时：createRuntimeOptions 改为逐个字段赋值（原构造函数传参被 SDK 忽略导致默认 3 秒超时），并开启指数退避重试。',
       '修复 fetch 超时提示：fetchWithTimeout 超时 abort 时添加原因字符串，normalizeFetchError 识别超时/用户主动取消并输出友好中文提示，不再显示「signal is aborted without reason」。',
       '更新版本号至 0.6.4，首页公告同步更新。',
@@ -3023,7 +3035,7 @@ const announcementHistory = [
     summary: '把 paper2gal 的图像步骤切到更稳定的 images/edits 图生图链路，修复参考图失真、假成功和错误提示不清晰的问题。',
     details: [
       'plato 图像适配层从旧的 chat/completions 路径切到 images/edits，并优先使用 qwen-image-edit，避免参考图被上游改写成无效的占位 URL。',
-      '新 workflow 的表情、CG 和 rembg 抠图都会走真实链路执行，不再静默回退到 mock，参考图约束和结果一致性也更稳定。',
+      '新 workflow 的表情、CG 和 browser cutout 抠图都会走真实链路执行，不再静默回退到 mock，参考图约束和结果一致性也更稳定。',
       '错误详情补充了 possible_cause 与 fix_hint，能直接提示当前是图像模型通道、内容审核还是参考图改写链路的问题。',
     ],
   },
@@ -3041,12 +3053,12 @@ const announcementHistory = [
   {
     version: '0.3.6',
     date: '2026-04-19',
-    title: '0.3.6 paper2gal 顺序执行、单结果重做与 rembg 切换',
-    summary: 'paper2gal 默认回到顺序执行，新增工作流并发开关、单结果重做与 Prompt 自定义，并把 cutout 路径切回 rembg。',
+    title: '0.3.6 paper2gal 顺序执行、单结果重做与 browser cutout 切换',
+    summary: 'paper2gal 默认回到顺序执行，新增工作流并发开关、单结果重做与 Prompt 自定义，并把 cutout 路径切回 browser cutout。',
     details: [
       'workflow 现在默认按顺序逐步执行；只有开启“工作流并发”后，AI 生成部分才会并发，cutout 仍然保持顺序处理。',
       '每个输出结果卡片都新增了“重做当前结果”，可以只重跑某一张表情、某一张 CG 或对应透明底素材。',
-      '上传提示文案改为无背景角色图，cutout 不再使用 Prompt，而是切换为 rembg 抠图路径，并沿用更强的一致性 Prompt 约束角色特征。',
+      '上传提示文案改为无背景角色图，cutout 不再使用 Prompt，而是切换为 browser cutout 抠图路径，并沿用更强的一致性 Prompt 约束角色特征。',
     ],
   },
   {

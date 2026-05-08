@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const fsp = require("fs/promises");
 const cors = require("cors");
 const express = require("express");
 const multer = require("multer");
@@ -27,6 +28,15 @@ function shouldServeSpaShell(req) {
 
   const accept = String(req.headers.accept || "");
   return accept.includes("text/html") || accept.includes("*/*");
+}
+
+function getCutoutAssetContentType(assetPath) {
+  const ext = path.extname(assetPath).toLowerCase();
+  if (ext === ".json") return "application/json";
+  if (ext === ".wasm") return "application/wasm";
+  if (ext === ".mjs" || ext === ".js") return "application/javascript";
+  if (ext === ".onnx") return "application/octet-stream";
+  return "application/octet-stream";
 }
 
 app.use(
@@ -70,9 +80,16 @@ app.get("/api/cutout-assets/*", async (req, res, next) => {
       return res.status(400).json({ error: "Invalid cutout asset path." });
     }
 
+    const cachePath = path.join(config.cutoutAssetCacheDir, assetPath);
+    if (fs.existsSync(cachePath)) {
+      res.setHeader("Content-Type", getCutoutAssetContentType(assetPath));
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      return res.sendFile(cachePath);
+    }
+
     const upstreamUrl = `${config.cutoutAssetBaseUrl}/${assetPath}`;
     const upstreamController = new AbortController();
-    const upstreamTimeout = setTimeout(() => upstreamController.abort(), 15000);
+    const upstreamTimeout = setTimeout(() => upstreamController.abort(), 120000);
     let upstreamResponse;
     try {
       upstreamResponse = await fetch(upstreamUrl, { signal: upstreamController.signal });
@@ -103,8 +120,19 @@ app.get("/api/cutout-assets/*", async (req, res, next) => {
       res.setHeader("ETag", etag);
     }
 
+    await fsp.mkdir(path.dirname(cachePath), { recursive: true });
+    const tmpCachePath = `${cachePath}.${process.pid}.${Date.now()}.tmp`;
     const arrayBuffer = await upstreamResponse.arrayBuffer();
-    return res.send(Buffer.from(arrayBuffer));
+    const buffer = Buffer.from(arrayBuffer);
+    await fsp.writeFile(tmpCachePath, buffer);
+    await fsp.rename(tmpCachePath, cachePath).catch(async (error) => {
+      await fsp.rm(tmpCachePath, { force: true }).catch(() => null);
+      if (error.code !== "EEXIST") {
+        throw error;
+      }
+    });
+    res.setHeader("Cache-Control", cacheControl || "public, max-age=31536000, immutable");
+    return res.send(buffer);
   } catch (error) {
     if (error.name === "AbortError") {
       return res.status(504).json({ error: "Upstream cutout asset request timed out." });
