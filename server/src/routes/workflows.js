@@ -22,6 +22,7 @@ const { executeWorkflow, rerunWorkflowStep } = require("../pipeline/executeWorkf
 const { writeWorkflowSnapshots } = require("../services/workflowArtifacts");
 
 const router = express.Router();
+const activeRedoGroups = new Map();
 
 const storage = multer.diskStorage({
   destination: (_req, _file, callback) => {
@@ -75,16 +76,142 @@ function getDependentRedoSteps(stepName) {
   return [];
 }
 
-function areFrontendCutoutsComplete(workflow) {
-  return ["thinking", "surprise", "angry"].every((name) => {
-    const step = workflow.steps?.[`cutout_expression_${name}`];
-    return step?.status === "success" || step?.status === "skipped";
+function getRedoConflictGroup(stepName) {
+  if (stepName === "expression_thinking" || stepName === "cutout_expression_thinking") return "expression:thinking";
+  if (stepName === "expression_surprise" || stepName === "cutout_expression_surprise") return "expression:surprise";
+  if (stepName === "expression_angry" || stepName === "cutout_expression_angry") return "expression:angry";
+  if (stepName === "cg_01") return "cg:01";
+  if (stepName === "cg_02") return "cg:02";
+  return stepName;
+}
+
+function getActiveRedoGroups(workflowId) {
+  return activeRedoGroups.get(workflowId) || new Set();
+}
+
+function getActiveRedoList(workflowId) {
+  return [...getActiveRedoGroups(workflowId)];
+}
+
+function hasActiveRedo(workflowId) {
+  return getActiveRedoGroups(workflowId).size > 0;
+}
+
+function beginRedoJob(workflowId, targetStep) {
+  const group = getRedoConflictGroup(targetStep);
+  const current = getActiveRedoGroups(workflowId);
+  if (current.has(group)) {
+    return {
+      ok: false,
+      group,
+      active: [...current]
+    };
+  }
+
+  current.add(group);
+  activeRedoGroups.set(workflowId, current);
+  updateWorkflow(workflowId, {
+    active_redos: [...current]
+  });
+  return {
+    ok: true,
+    group,
+    active: [...current]
+  };
+}
+
+function finishRedoJob(workflowId, group) {
+  const current = getActiveRedoGroups(workflowId);
+  current.delete(group);
+  if (current.size === 0) {
+    activeRedoGroups.delete(workflowId);
+  } else {
+    activeRedoGroups.set(workflowId, current);
+  }
+  updateWorkflow(workflowId, {
+    active_redos: [...current]
   });
 }
 
-function hasSkippedFrontendCutouts(workflow) {
+function getExpressionStepName(expressionName) {
+  if (expressionName === "thinking") return "expression_thinking";
+  if (expressionName === "surprise") return "expression_surprise";
+  if (expressionName === "angry") return "expression_angry";
+  return "";
+}
+
+function getCurrentExpressionVersion(workflow, expressionName) {
+  const stepName = getExpressionStepName(expressionName);
+  const step = stepName ? workflow.steps?.[stepName] : null;
+  return step?.finished_at || step?.started_at || "";
+}
+
+function clearRedoOutputs(workflowId, stepName) {
+  if (stepName === "expression_thinking") {
+    mergeWorkflowOutputs(workflowId, { expressions: { thinking: null }, expression_cutouts: { thinking: null } });
+    return;
+  }
+  if (stepName === "expression_surprise") {
+    mergeWorkflowOutputs(workflowId, { expressions: { surprise: null }, expression_cutouts: { surprise: null } });
+    return;
+  }
+  if (stepName === "expression_angry") {
+    mergeWorkflowOutputs(workflowId, { expressions: { angry: null }, expression_cutouts: { angry: null } });
+    return;
+  }
+  if (stepName === "cutout_expression_thinking") {
+    mergeWorkflowOutputs(workflowId, { expression_cutouts: { thinking: null } });
+    return;
+  }
+  if (stepName === "cutout_expression_surprise") {
+    mergeWorkflowOutputs(workflowId, { expression_cutouts: { surprise: null } });
+    return;
+  }
+  if (stepName === "cutout_expression_angry") {
+    mergeWorkflowOutputs(workflowId, { expression_cutouts: { angry: null } });
+    return;
+  }
+  if (stepName === "cg_01" || stepName === "cg_02") {
+    const workflow = getWorkflow(workflowId);
+    const next = [...(workflow?.outputs?.cg_outputs || [null, null])];
+    next[stepName === "cg_01" ? 0 : 1] = null;
+    mergeWorkflowOutputs(workflowId, { cg_outputs: next });
+  }
+}
+
+function areFrontendCutoutsComplete(workflow) {
+  return ["thinking", "surprise", "angry"].every((name) => {
+    const step = workflow.steps?.[`cutout_expression_${name}`];
+    return step?.status === "success" || step?.status === "skipped" || step?.status === "failed";
+  });
+}
+
+function hasErroredFrontendCutouts(workflow) {
   return ["thinking", "surprise", "angry"].some((name) => {
-    return workflow.steps?.[`cutout_expression_${name}`]?.status === "skipped";
+    const status = workflow.steps?.[`cutout_expression_${name}`]?.status;
+    return status === "skipped" || status === "failed";
+  });
+}
+
+function isWaitingOnlyForFrontendCutouts(workflow) {
+  if (!workflow || workflow.outputs?.providers?.remove_background !== "frontend") {
+    return false;
+  }
+
+  const activeNonCutoutStep = WORKFLOW_STEPS.some((stepName) => {
+    if (stepName.startsWith("cutout_expression_")) {
+      return false;
+    }
+    const status = workflow.steps?.[stepName]?.status;
+    return status === "queued" || status === "running";
+  });
+  if (activeNonCutoutStep) {
+    return false;
+  }
+
+  return ["thinking", "surprise", "angry"].some((name) => {
+    const step = workflow.steps?.[`cutout_expression_${name}`];
+    return step?.provider === "frontend" && (step.status === "queued" || step.status === "idle" || step.status === "running");
   });
 }
 
@@ -116,13 +243,15 @@ router.post("/", upload.single("image"), async (req, res, next) => {
 });
 
 router.post("/:id/rerun", express.json(), async (req, res, next) => {
+  let acceptedRedoJob = null;
+  let acceptedWorkflowId = null;
   try {
     const workflow = getWorkflow(req.params.id);
     if (!workflow) {
       throw new AppError("Workflow not found.", 404);
     }
 
-    if (workflow.status === "running" || workflow.status === "queued") {
+    if ((workflow.status === "running" || workflow.status === "queued") && !isWaitingOnlyForFrontendCutouts(workflow) && !hasActiveRedo(workflow.id)) {
       throw new AppError("Workflow is still running. Please wait for it to finish before redoing a result.", 409);
     }
 
@@ -134,6 +263,17 @@ router.post("/:id/rerun", express.json(), async (req, res, next) => {
       throw new AppError(`Invalid targetStep: ${targetStep}`, 400);
     }
 
+    const redoJob = beginRedoJob(workflow.id, targetStep);
+    if (!redoJob.ok) {
+      throw new AppError("This result is already being redone. Please wait for that redo to finish.", 409, {
+        target_step: targetStep,
+        conflict_group: redoJob.group,
+        active_redos: redoJob.active
+      });
+    }
+    acceptedRedoJob = redoJob;
+    acceptedWorkflowId = workflow.id;
+
     const promptOverrides = parsePromptOverrides(req.body?.promptOverrides);
     const executionOptions = parseExecutionOptions(req.body);
     updateWorkflow(workflow.id, {
@@ -143,25 +283,54 @@ router.post("/:id/rerun", express.json(), async (req, res, next) => {
         ...executionOptions
       }
     });
+    clearRedoOutputs(workflow.id, targetStep);
     resetWorkflowStep(workflow.id, targetStep);
+    markStepStatus(workflow.id, targetStep, "running", null, {
+      provider: "redo",
+      debug: {
+        target_step: targetStep,
+        conflict_group: redoJob.group,
+        active_redos: redoJob.active,
+        note: "Redo request accepted. This step is queued/running now."
+      }
+    });
     for (const dependentStep of getDependentRedoSteps(targetStep)) {
+      clearRedoOutputs(workflow.id, dependentStep);
       resetWorkflowStep(workflow.id, dependentStep);
+      markStepStatus(workflow.id, dependentStep, "queued", null, {
+        provider: "redo",
+        debug: {
+          triggered_by: targetStep,
+          conflict_group: redoJob.group,
+          note: "Dependent cutout will be regenerated after the expression redo finishes."
+        }
+      });
     }
     setWorkflowStatus(workflow.id, "running", targetStep, null, null);
 
     setImmediate(() => {
-      rerunWorkflowStep(workflow.id, targetStep, config).catch((_error) => {
-        // Error is already persisted in workflow state; no need to log here
-      });
+      console.log(`[Backend] Redo started workflow=${workflow.id} step=${targetStep} group=${redoJob.group}`);
+      rerunWorkflowStep(workflow.id, targetStep, config)
+        .catch((error) => {
+          console.error(`[Backend] Redo failed workflow=${workflow.id} step=${targetStep}: ${error.message}`);
+        })
+        .finally(() => {
+          finishRedoJob(workflow.id, redoJob.group);
+          console.log(`[Backend] Redo finished workflow=${workflow.id} step=${targetStep} group=${redoJob.group}`);
+        });
     });
 
     res.status(202).json({
       workflow_id: workflow.id,
       status: "accepted",
       message: `Redo request accepted for ${targetStep}.`,
+      active_redos: getActiveRedoList(workflow.id),
       workflow: getWorkflow(workflow.id)
     });
   } catch (error) {
+    if (acceptedRedoJob && acceptedWorkflowId && !res.headersSent) {
+      finishRedoJob(acceptedWorkflowId, acceptedRedoJob.group);
+    }
     next(error);
   }
 });
@@ -228,6 +397,23 @@ router.post("/:id/cutouts/:expression", upload.single("image"), async (req, res,
       throw new AppError("No cutout uploaded. Please provide one image file in field 'image'.", 400);
     }
 
+    const submittedSourceUrl = String(req.body?.source_url || "").trim();
+    const submittedSourceVersion = String(req.body?.source_version || "").trim();
+    const currentSourceUrl = workflow.outputs?.expressions?.[expressionName] || "";
+    if (submittedSourceUrl && currentSourceUrl && submittedSourceUrl !== currentSourceUrl) {
+      throw new AppError("Stale cutout upload rejected because the source expression was regenerated.", 409, {
+        submitted_source_url: submittedSourceUrl,
+        current_source_url: currentSourceUrl
+      });
+    }
+    const currentSourceVersion = getCurrentExpressionVersion(workflow, expressionName);
+    if (submittedSourceVersion && currentSourceVersion && submittedSourceVersion !== currentSourceVersion) {
+      throw new AppError("Stale cutout upload rejected because the source expression version changed.", 409, {
+        submitted_source_version: submittedSourceVersion,
+        current_source_version: currentSourceVersion
+      });
+    }
+
     const workflowOutputDir = path.join(config.outputDir, workflow.id);
     await fs.mkdir(workflowOutputDir, { recursive: true });
 
@@ -254,10 +440,17 @@ router.post("/:id/cutouts/:expression", upload.single("image"), async (req, res,
 
     const latestWorkflow = getWorkflow(workflow.id);
     if (areFrontendCutoutsComplete(latestWorkflow)) {
-      setWorkflowStatus(workflow.id, hasSkippedFrontendCutouts(latestWorkflow) ? "completed_with_errors" : "completed", "done", null, {
+      const hasCutoutErrors = hasErroredFrontendCutouts(latestWorkflow);
+      setWorkflowStatus(
+        workflow.id,
+        hasCutoutErrors ? "completed_with_errors" : "completed",
+        "done",
+        hasCutoutErrors ? "Browser background removal did not finish for all expressions." : null,
+        {
         provider: "frontend",
         note: "Browser background removal uploads completed."
-      });
+        }
+      );
     }
 
     await writeWorkflowSnapshots(
@@ -274,6 +467,73 @@ router.post("/:id/cutouts/:expression", upload.single("image"), async (req, res,
     if (req.file?.path) {
       await fs.rm(req.file.path, { force: true }).catch(() => null);
     }
+    next(error);
+  }
+});
+
+router.post("/:id/cutouts/:expression/failed", async (req, res, next) => {
+  try {
+    const workflow = getWorkflow(req.params.id);
+    if (!workflow) {
+      throw new AppError("Workflow not found.", 404);
+    }
+
+    const expressionName = String(req.params.expression || "").trim();
+    if (!["thinking", "surprise", "angry"].includes(expressionName)) {
+      throw new AppError("Unsupported expression cutout name.", 400, { expression: expressionName });
+    }
+
+    const submittedSourceUrl = String(req.body?.source_url || "").trim();
+    const submittedSourceVersion = String(req.body?.source_version || "").trim();
+    const currentSourceUrl = workflow.outputs?.expressions?.[expressionName] || "";
+    if (submittedSourceUrl && currentSourceUrl && submittedSourceUrl !== currentSourceUrl) {
+      return res.status(409).json({
+        status: "stale",
+        workflow,
+        error: "Stale cutout failure report ignored because the source expression was regenerated."
+      });
+    }
+    const currentSourceVersion = getCurrentExpressionVersion(workflow, expressionName);
+    if (submittedSourceVersion && currentSourceVersion && submittedSourceVersion !== currentSourceVersion) {
+      return res.status(409).json({
+        status: "stale",
+        workflow,
+        error: "Stale cutout failure report ignored because the source expression version changed."
+      });
+    }
+
+    const errorMessage = String(req.body?.error || "Browser background removal failed.").slice(0, 1000);
+    const stepName = `cutout_expression_${expressionName}`;
+    markStepStatus(workflow.id, stepName, "failed", errorMessage, {
+      provider: "frontend",
+      debug: {
+        source_url: currentSourceUrl || null,
+        frontend_error: errorMessage,
+        note: "The browser could not generate a transparent PNG cutout."
+      }
+    });
+
+    const latestWorkflow = getWorkflow(workflow.id);
+    if (areFrontendCutoutsComplete(latestWorkflow)) {
+      setWorkflowStatus(workflow.id, "completed_with_errors", "done", "Browser background removal did not finish for all expressions.", {
+        provider: "frontend",
+        note: "At least one browser-side cutout failed."
+      });
+    }
+
+    const workflowOutputDir = path.join(config.outputDir, workflow.id);
+    await writeWorkflowSnapshots(
+      workflow.id,
+      workflowOutputDir,
+      latestWorkflow.character_profile,
+      latestWorkflow.prompt_pack
+    );
+
+    res.json({
+      status: "ok",
+      workflow: getWorkflow(workflow.id)
+    });
+  } catch (error) {
     next(error);
   }
 });

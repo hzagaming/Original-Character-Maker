@@ -14,6 +14,12 @@ const app = express();
 const distIndexPath = path.join(config.webDir, "index.html");
 const rootIndexPath = path.join(config.webDir, "index.html");
 
+app.use((_req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  next();
+});
+
 function isAllowedCutoutAssetPath(assetPath) {
   return /^[a-zA-Z0-9/_\-.]+$/.test(assetPath) && !assetPath.includes("..");
 }

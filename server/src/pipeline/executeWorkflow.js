@@ -25,6 +25,7 @@ const {
 const { formatErrorDetails } = require("../utils/errors");
 const { asyncPool } = require("../utils/asyncPool");
 const { toPublicOutputUrl, writeWorkflowSnapshots } = require("../services/workflowArtifacts");
+const { generateEdgeColorCutout, normalizeExpressionImage } = require("../services/imagePostProcess");
 
 const EXPRESSION_STEP_MAP = {
   thinking: "expression_thinking",
@@ -63,13 +64,64 @@ function getCutoutExpressionName(stepName) {
   return Object.entries(CUTOUT_STEP_MAP).find(([, value]) => value === stepName)?.[0] || null;
 }
 
-function syncFrontendCutoutSteps(workflowId) {
+async function generateServerFallbackCutout(workflowId, outputDir, expressionName) {
+  const workflow = getWorkflow(workflowId);
+  const cutoutStepName = CUTOUT_STEP_MAP[expressionName];
+  const expressionOutputUrl = workflow?.outputs?.expressions?.[expressionName] || null;
+
+  if (!expressionOutputUrl) {
+    markStepStatus(workflowId, cutoutStepName, "skipped", "Source expression image was not generated, so fallback cutout was not run.", {
+      provider: "server-edge-cutout",
+      debug: {
+        note: "Fallback cutout skipped because the source expression output is missing."
+      }
+    });
+    return null;
+  }
+
+  const sourcePath = path.join(outputDir, path.basename(expressionOutputUrl));
+  const destinationName = `expression-${expressionName}-cutout.png`;
+  const destinationPath = path.join(outputDir, destinationName);
+  markStepStatus(workflowId, cutoutStepName, "running", null, {
+    provider: "server-edge-cutout",
+    debug: {
+      source_url: expressionOutputUrl,
+      note: "Server fallback cutout is running so the workflow will not wait for browser upload."
+    }
+  });
+
+  const result = await generateEdgeColorCutout(sourcePath, destinationPath);
+  const outputUrl = toPublicOutputUrl(workflowId, destinationName);
+  mergeWorkflowOutputs(workflowId, {
+    expression_cutouts: {
+      [expressionName]: outputUrl
+    },
+    providers: {
+      remove_background: "server-edge-cutout"
+    }
+  });
+  markStepStatus(workflowId, cutoutStepName, "success", null, {
+    provider: "server-edge-cutout",
+    output_url: outputUrl,
+    debug: {
+      source_url: expressionOutputUrl,
+      width: result.width,
+      height: result.height,
+      removed_pixels: result.removed_pixels,
+      note: "Stable server fallback cutout generated. Browser-side cutout upload is no longer required."
+    }
+  });
+  return outputUrl;
+}
+
+async function syncFrontendCutoutSteps(workflowId, outputDir) {
   const workflow = getWorkflow(workflowId);
   if (!workflow) {
     return false;
   }
 
   let hasPendingCutouts = false;
+  let firstPendingCutoutStep = null;
   for (const expressionName of Object.keys(EXPRESSION_STEP_MAP)) {
     const cutoutStepName = CUTOUT_STEP_MAP[expressionName];
     const expressionOutputUrl = workflow.outputs?.expressions?.[expressionName] || null;
@@ -89,18 +141,26 @@ function syncFrontendCutoutSteps(workflowId) {
       continue;
     }
 
-    hasPendingCutouts = true;
-    markStepStatus(workflowId, cutoutStepName, "running", "Waiting for browser background removal upload.", {
-      provider: "frontend",
-      debug: {
-        source_url: expressionOutputUrl,
-        note: "The browser will remove the background with @imgly/background-removal and upload a transparent PNG."
+    try {
+      await generateServerFallbackCutout(workflowId, outputDir, expressionName);
+    } catch (error) {
+      hasPendingCutouts = true;
+      if (!firstPendingCutoutStep) {
+        firstPendingCutoutStep = cutoutStepName;
       }
-    });
+      markStepStatus(workflowId, cutoutStepName, "running", "Waiting for browser background removal upload.", {
+        provider: "frontend",
+        debug: {
+          source_url: expressionOutputUrl,
+          fallback_error: error.message,
+          note: "Server fallback cutout failed. The browser will remove the background with @imgly/background-removal and upload a transparent PNG."
+        }
+      });
+    }
   }
 
   if (hasPendingCutouts) {
-    setWorkflowStatus(workflowId, "running", "cutout_expression_thinking", null, {
+    setWorkflowStatus(workflowId, "running", firstPendingCutoutStep || "cutout_expression_thinking", null, {
       provider: "frontend",
       note: "Waiting for browser-side cutout uploads."
     });
@@ -267,9 +327,33 @@ async function runExpressionGeneration(runtime, expressionName) {
         prompt: expressionPrompt
       }),
     async (result, outputUrl) => {
+      let normalizedDebug = null;
+      let finalOutputUrl = outputUrl;
+      if (result.output_path) {
+        try {
+          normalizedDebug = await normalizeExpressionImage(result.output_path);
+          result.output_path = normalizedDebug.outputPath;
+          finalOutputUrl = toPublicOutputUrl(workflowId, path.basename(normalizedDebug.outputPath));
+        } catch (error) {
+          normalizedDebug = {
+            normalized: false,
+            error: error.message
+          };
+        }
+      }
+      if (normalizedDebug) {
+        markStepStatus(workflowId, stepName, "success", null, {
+          provider: result.provider || expressionRunner.provider,
+          output_url: finalOutputUrl,
+          debug: {
+            ...(result.debug || {}),
+            expression_canvas: normalizedDebug
+          }
+        });
+      }
       mergeWorkflowOutputs(workflowId, {
         expressions: {
-          [expressionName]: outputUrl
+          [expressionName]: finalOutputUrl
         },
         providers: {
           expressions: result.provider || expressionRunner.provider
@@ -397,6 +481,18 @@ async function runCutoutGeneration(runtime, expressionName, artifact = null) {
 async function finalizeWorkflowState(runtime) {
   const { workflowId, outputDir, characterProfile, promptPack, bgRemovalRunner, expressionRunner, cgRunner } = runtime;
   const currentWorkflow = getWorkflow(workflowId);
+  const activeRedoCount = Array.isArray(currentWorkflow.active_redos) ? currentWorkflow.active_redos.length : 0;
+  const activeSteps = Object.entries(currentWorkflow.steps).filter(([, step]) => step.status === "running");
+  if (activeRedoCount > 1 || activeSteps.length > 0) {
+    const [activeStepName] = activeSteps[0] || [currentWorkflow.current_step || "running"];
+    setWorkflowStatus(workflowId, "running", activeStepName, null, {
+      active_redos: currentWorkflow.active_redos || [],
+      note: "One redo finished while other redo jobs are still running."
+    });
+    await writeWorkflowSnapshots(workflowId, outputDir, characterProfile, promptPack);
+    return;
+  }
+
   const failedOrSkippedSteps = Object.entries(currentWorkflow.steps).filter(([, step]) =>
     step.status === "failed" || step.status === "skipped"
   );
@@ -541,7 +637,7 @@ async function executeWorkflow(workflowId, config) {
     const cgTasks = CG_STEP_CONFIG.map(([, _outputName], index) => async () => runCgGeneration(runtime, index));
     await asyncPool(cgTasks, getAiTaskConcurrency(workflow, config));
     if (runtime.bgRemovalRunner.provider === "frontend") {
-      const waitingForFrontendCutouts = syncFrontendCutoutSteps(workflowId);
+      const waitingForFrontendCutouts = await syncFrontendCutoutSteps(workflowId, runtime.outputDir);
       if (waitingForFrontendCutouts) {
         await writeWorkflowSnapshots(workflowId, runtime.outputDir, runtime.characterProfile, runtime.promptPack);
         return getWorkflow(workflowId);
@@ -595,7 +691,11 @@ async function rerunWorkflowStep(workflowId, targetStep, config) {
 
       const artifact = await runExpressionGeneration(runtime, expressionName);
       if (runtime.bgRemovalRunner.provider === "frontend") {
-        syncFrontendCutoutSteps(workflowId);
+        const waitingForFrontendCutouts = await syncFrontendCutoutSteps(workflowId, runtime.outputDir);
+        await writeWorkflowSnapshots(workflowId, runtime.outputDir, runtime.characterProfile, runtime.promptPack);
+        if (waitingForFrontendCutouts) {
+          return getWorkflow(workflowId);
+        }
       } else {
         await runCutoutGeneration(runtime, expressionName, artifact);
       }
@@ -613,14 +713,9 @@ async function rerunWorkflowStep(workflowId, targetStep, config) {
     const cutoutExpressionName = getCutoutExpressionName(targetStep);
     if (cutoutExpressionName) {
       if (runtime.bgRemovalRunner.provider === "frontend") {
-        markStepStatus(workflowId, targetStep, "idle", "Waiting for browser background removal upload.", {
-          provider: "frontend",
-          debug: {
-            note: "The cutout output was cleared. The frontend will regenerate and upload it from the existing expression image."
-          }
-        });
-        setWorkflowStatus(workflowId, "completed", "done", null, null);
+        await generateServerFallbackCutout(workflowId, runtime.outputDir, cutoutExpressionName);
         await writeWorkflowSnapshots(workflowId, runtime.outputDir, runtime.characterProfile, runtime.promptPack);
+        await finalizeWorkflowState(runtime);
         return getWorkflow(workflowId);
       }
       await runCutoutGeneration(runtime, cutoutExpressionName);
@@ -628,6 +723,27 @@ async function rerunWorkflowStep(workflowId, targetStep, config) {
       return getWorkflow(workflowId);
     }
   } catch (error) {
+    const latestWorkflow = getWorkflow(workflowId);
+    const activeRedoCount = Array.isArray(latestWorkflow?.active_redos) ? latestWorkflow.active_redos.length : 0;
+    const detailed = formatErrorDetails(error, {
+      step: targetStep,
+      provider: "redo",
+      workflow_id: workflowId
+    });
+    if (latestWorkflow?.steps?.[targetStep]?.status === "running") {
+      markStepStatus(workflowId, targetStep, "failed", detailed.message, {
+        provider: latestWorkflow.steps[targetStep].provider || "redo",
+        debug: detailed.debug
+      });
+    }
+    if (latestWorkflow && activeRedoCount <= 1) {
+      setWorkflowStatus(workflowId, "completed_with_errors", targetStep, detailed.message, detailed.debug);
+    } else if (latestWorkflow) {
+      setWorkflowStatus(workflowId, "running", latestWorkflow.current_step || targetStep, null, {
+        active_redos: latestWorkflow.active_redos || [],
+        note: "A redo failed while other redo jobs may still be running."
+      });
+    }
     if (runtime) {
       await writeWorkflowSnapshots(
         workflowId,

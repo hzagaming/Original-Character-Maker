@@ -82,6 +82,7 @@ module.exports = {
   platoModel: process.env.PLATO_MODEL || "gpt-image-2",
   platoModelFallbacks: parseStringList(process.env.PLATO_MODEL_FALLBACKS || ""),
   platoImageEditModels: parseStringList(process.env.PLATO_IMAGE_EDIT_MODELS || ""),
+  platoImageEditRetries: Math.max(1, parseInteger(process.env.PLATO_IMAGE_EDIT_RETRIES, 2)),
   platoTimeoutMs: parseInteger(process.env.PLATO_TIMEOUT_MS, 120000),
   allowProviderMockFallback: process.env.ALLOW_PROVIDER_MOCK_FALLBACK !== "false",
   banana2ApiKey: process.env.BANANA2_API_KEY || "",

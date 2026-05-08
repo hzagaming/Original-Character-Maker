@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '0.8.0';
+const VERSION = '1.0.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -556,10 +556,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '0.8.0 云端部署版：Zeabur 部署成功、纯 Node.js 运行时、零阻塞启动与健康检查、前端抠图全量上线。',
-    announcementList1: 'Zeabur 云端部署：精简 Dockerfile，端口 8080 + 双健康检查路由，彻底告别 502。',
-    announcementList2: '纯 Node.js 运行时：完全移除 rembg/Python 依赖，构建不再 OOM，启动零阻塞。',
-    announcementList3: '前端抠图与稳定性：浏览器端 @imgly/background-removal 稳定运行，全局请求日志与崩溃捕获兜底。',
+    announcementDescription: '1.0.0 正式运行版：Paper2Gal 工作流正式投入使用，Zeabur 部署、服务端抠图兜底、单结果并行重做和日志提示全部就绪。',
+    announcementList1: '工作流正式运行：上传角色图后可稳定生成三张表情、两张 CG、透明抠图素材和完整调试包。',
+    announcementList2: '抠图稳定性升级：服务端 sharp 兜底接管抠图，不再卡死等待浏览器上传，浏览器抠图保留为备用链路。',
+    announcementList3: '重做体验上线：表情重做会同步重做对应抠图，不同表情和 CG 可并行重做，并提供状态 notice 与详细日志。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -924,10 +924,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '0.8.0 クラウドデプロイ版：Zeabur デプロイ成功、純 Node.js ランタイム、ゼロブロック起動とヘルスチェック、フロントエンド切り抜き全面稼働。',
-    announcementList1: 'Zeabur クラウドデプロイ：最適化された Dockerfile、ポート 8080 + デュアルヘルスチェック、502 エラーを完全解消。',
-    announcementList2: '純 Node.js ランタイム：rembg/Python 依存を完全削除、ビルド時 OOM 解消、起動ブロックゼロ。',
-    announcementList3: 'フロントエンド切り抜きと安定性：ブラウザ側 @imgly/background-removal が安定稼働、グローバルリクエストログとクラッシュキャッチで保護。',
+    announcementDescription: '1.0.0 正式稼働版：Paper2Gal ワークフローが正式稼働。Zeabur デプロイ、サーバー側切り抜きフォールバック、単一結果の並列リドゥ、ログ通知が揃いました。',
+    announcementList1: 'ワークフロー正式稼働：キャラクター画像から表情3種、CG2枚、透明切り抜き素材、デバッグパッケージを生成できます。',
+    announcementList2: '切り抜き安定性を強化：sharp によるサーバー側フォールバックで、ブラウザアップロード待ちの停止を回避します。',
+    announcementList3: 'リドゥ体験を改善：表情のリドゥ時は対応する切り抜きも再生成し、別表情や CG は並列でリドゥできます。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1292,10 +1292,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 0.8.0 Cloud Deploy: Zeabur deployment live, pure Node.js runtime, zero-blocking startup with health checks, frontend cutout fully operational.',
-    announcementList1: 'Zeabur cloud deploy: streamlined Dockerfile, port 8080 + dual health check endpoints, 502 errors fully resolved.',
-    announcementList2: 'Pure Node.js runtime: completely removed rembg/Python dependencies, no more build OOM, zero-blocking startup.',
-    announcementList3: 'Frontend cutout and stability: browser-side @imgly/background-removal running stable, protected by global request logging and crash catching.',
+    announcementDescription: 'Version 1.0.0 Official Workflow: Paper2Gal is now production-ready with Zeabur deployment, server cutout fallback, parallel single-result redo, notices, and logs.',
+    announcementList1: 'Workflow officially running: generate three expressions, two CG images, transparent cutouts, and a complete debug package from one character upload.',
+    announcementList2: 'Cutout stability upgrade: server-side sharp fallback prevents workflows from hanging while browser cutout remains available as backup.',
+    announcementList3: 'Redo experience shipped: expression redo regenerates its cutout, unrelated expressions and CG outputs can redo in parallel, with notice and log feedback.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1660,10 +1660,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 0.8.0 Облачный деплой: успешный деплой на Zeabur, чистый Node.js рантайм, запуск без блокировок с health-check, фронтенд вырезание полностью в работе.',
-    announcementList1: 'Облачный деплой на Zeabur: оптимизированный Dockerfile, порт 8080 + двойные эндпоинты health-check, ошибки 502 полностью устранены.',
-    announcementList2: 'Чистый Node.js рантайм: полностью удалены зависимости rembg/Python, больше нет OOM при сборке, запуск без блокировок.',
-    announcementList3: 'Фронтенд вырезание и стабильность: браузерный @imgly/background-removal работает стабильно, защищён глобальным логированием запросов и перехватом крашей.',
+    announcementDescription: 'Версия 1.0.0 Официальный workflow: Paper2Gal готов к рабочему использованию с Zeabur, серверным fallback для вырезания, параллельным redo, notice и логами.',
+    announcementList1: 'Workflow официально работает: из одного изображения персонажа генерируются 3 выражения, 2 CG, прозрачные cutout-ассеты и debug-пакет.',
+    announcementList2: 'Стабильность cutout улучшена: серверный fallback на sharp не дает workflow зависать в ожидании браузерной загрузки.',
+    announcementList3: 'Redo готов: повтор выражения заново делает связанный cutout, а независимые выражения и CG можно перегенерировать параллельно.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2532,6 +2532,21 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.0.0',
+    date: '2026-05-08',
+    title: '1.0.0 正式运行版',
+    summary: 'Paper2Gal 工作流正式投入使用：Zeabur 部署链路稳定，服务端抠图兜底上线，单结果重做支持并行执行，表情重做会同步刷新对应抠图，并补齐 notice 与详细日志。',
+    details: [
+      '工作流正式运行：角色上传、三张表情、两张 CG、透明抠图、manifest、character pack、p2g handoff 和 debug 日志链路完整可用。',
+      '抠图稳定性升级：新增 sharp 服务端边缘色抠图兜底，优先在后端生成透明 PNG，不再让 workflow 长时间卡在等待浏览器上传；浏览器 @imgly/background-removal 保留为备用链路。',
+      '表情生成更新：去掉 2000x2000 固定方图要求，表情 prompt 改为竖屏图片，并同步 Plato 请求比例与后处理画布。',
+      '单结果重做上线：表情重做会清理旧表情和旧抠图并自动重做对应抠图；不同表情、CG1、CG2 可以并行重做，同一张图会互锁防止覆盖。',
+      '状态与日志增强：点击重做后立即显示 notice，步骤卡进入 running/重做中状态，详细日志展示 active_redos，后端 Runtime Logs 输出 Redo started / finished / failed。',
+      'Plato 稳定性加固：5xx、traceid、消息流异常、timeout 等上游瞬时问题会重试并走 fallback 模型；安全策略类错误保持明确失败，不误判为普通网络故障。',
+      '部署包确认：Dockerfile 保持纯 Node.js 运行，不再引入 rembg/Python；Zeabur 上传包排除 .env、node_modules、dist、tmp 等本地文件。',
+    ],
+  },
   {
     version: '0.8.0',
     date: '2026-05-05',

@@ -125,6 +125,7 @@ type PaperWorkflow = {
   steps: Partial<Record<PaperWorkflowStepName, PaperWorkflowStep>>;
   outputs: PaperWorkflowOutputs;
   prompt_overrides?: PaperPromptOverrides | null;
+  active_redos?: string[];
 };
 
 type PaperMessageType = 'info' | 'success' | 'error';
@@ -604,11 +605,11 @@ function buildInvisiblePromptSuffix(cfg: Record<string, unknown>): string {
 
 function createDefaultPaperPromptOverrides(): PaperPromptOverrides {
   return {
-    thinking: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成思考状态。比例严格限制为2000x2000像素',
-    surprise: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成惊讶状态。比例严格限制为2000x2000像素',
-    angry: '严格保持参考图里角色的特征，同时角色的姿势不变，只把表情调整成微微生气的状态。比例严格限制为2000x2000像素',
-    cg01: '基于参考图中的同一角色生成单人CG场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
-    cg02: '基于参考图中的同一角色生成单人CG场景。角色整体画风必须完全一致，只允许变化场景、镜头、姿势和表情，场景随机生成，尽量柔和，禁止新增其他人物。图片横屏的比例',
+    thinking: '严格保持参考图中同一角色的身份、脸型、眉毛粗细、眼型、发型、服装、饰品、体型比例、配色和整体画风一致。保持角色在画面中的大小和构图稳定，不要扩图，不要延伸身体，不要新增肢体，不要改变服装，不要改变眉毛和发型。只允许为了表达情绪产生小幅上半身动作和手势。生成自然思考状态：可以轻托下巴、手指轻触脸颊、视线稍微侧移或微微低头，动作不要公式化，保持单人角色表情素材。竖屏构图，生成一张竖屏图片。',
+    surprise: '严格保持参考图中同一角色的身份、脸型、眉毛粗细、眼型、发型、服装、饰品、体型比例、配色和整体画风一致。保持角色在画面中的大小和构图稳定，不要扩图，不要延伸身体，不要新增肢体，不要改变服装，不要改变眉毛和发型。只允许为了表达情绪产生小幅上半身动作和手势。生成惊讶状态：可以轻微睁大眼睛、肩膀轻抬、手部微微抬起或身体轻微后仰，动作自然克制，不要夸张变形。保持单人角色表情素材。竖屏构图，生成一张竖屏图片。',
+    angry: '严格保持参考图中同一角色的身份、脸型、眉毛粗细、眼型、发型、服装、饰品、体型比例、配色和整体画风一致。保持角色在画面中的大小和构图稳定，不要扩图，不要延伸身体，不要新增肢体，不要改变服装，不要改变眉毛和发型。只允许为了表达情绪产生小幅上半身动作和手势。生成生气状态：眉眼和嘴型要明确表现不满，可以轻微前倾、抱臂或小幅握拳；愤怒程度按角色气质自然发挥，不要所有角色都只是轻微生气，也不要暴走夸张。保持单人角色表情素材。竖屏构图，生成一张竖屏图片。',
+    cg01: '基于参考图中的同一角色生成单人全年龄日常剧情 CG 场景。角色身份、脸型、眉毛粗细、眼型、发型、服装、饰品、体型比例、配色和整体画风必须完全一致，只允许变化场景、镜头、姿势和表情。场景随机生成，氛围自然、有故事感，禁止新增其他人物。安全边界：禁止性感化，禁止暴露服装，禁止暧昧姿势，禁止床、浴室、擦边镜头，禁止成人暗示；镜头聚焦角色表情、动作和场景氛围。图片横屏16:9比例。',
+    cg02: '基于参考图中的同一角色生成另一张单人全年龄日常剧情 CG 场景。角色身份、脸型、眉毛粗细、眼型、发型、服装、饰品、体型比例、配色和整体画风必须完全一致，只允许变化场景、镜头、姿势和表情。场景随机生成，氛围自然、有故事感，禁止新增其他人物。安全边界：禁止性感化，禁止暴露服装，禁止暧昧姿势，禁止床、浴室、擦边镜头，禁止成人暗示；镜头聚焦角色表情、动作和场景氛围。图片横屏16:9比例。',
   };
 }
 
@@ -638,6 +639,16 @@ function isOldWhiteBgPrompt(prompt: string | undefined): boolean {
   return prompt.includes('图片背景纯白');
 }
 
+function isOldFixedPoseExpressionPrompt(prompt: string | undefined): boolean {
+  if (!prompt) return false;
+  return prompt.includes('姿势不变') && prompt.includes('比例严格限制为2000x2000像素');
+}
+
+function isOldUnsafeCgPrompt(prompt: string | undefined): boolean {
+  if (!prompt) return false;
+  return prompt.includes('场景随机生成') && prompt.includes('尽量柔和') && !prompt.includes('禁止性感化');
+}
+
 function migratePaperPromptOverrides(value: Partial<PaperPromptOverrides> | null | undefined) {
   if (!value) {
     return createDefaultPaperPromptOverrides();
@@ -648,29 +659,34 @@ function migratePaperPromptOverrides(value: Partial<PaperPromptOverrides> | null
     thinking:
       value.thinking === LEGACY_PAPER_PROMPT_OVERRIDES.thinking ||
       value.thinking === PREVIOUS_PAPER_PROMPT_OVERRIDES.thinking ||
-      isOldWhiteBgPrompt(value.thinking)
+      isOldWhiteBgPrompt(value.thinking) ||
+      isOldFixedPoseExpressionPrompt(value.thinking)
         ? defaults.thinking
         : value.thinking || defaults.thinking,
     surprise:
       value.surprise === LEGACY_PAPER_PROMPT_OVERRIDES.surprise ||
       value.surprise === PREVIOUS_PAPER_PROMPT_OVERRIDES.surprise ||
-      isOldWhiteBgPrompt(value.surprise)
+      isOldWhiteBgPrompt(value.surprise) ||
+      isOldFixedPoseExpressionPrompt(value.surprise)
         ? defaults.surprise
         : value.surprise || defaults.surprise,
     angry:
       value.angry === LEGACY_PAPER_PROMPT_OVERRIDES.angry ||
       value.angry === PREVIOUS_PAPER_PROMPT_OVERRIDES.angry ||
-      isOldWhiteBgPrompt(value.angry)
+      isOldWhiteBgPrompt(value.angry) ||
+      isOldFixedPoseExpressionPrompt(value.angry)
         ? defaults.angry
         : value.angry || defaults.angry,
     cg01:
       value.cg01 === LEGACY_PAPER_PROMPT_OVERRIDES.cg01 ||
-      value.cg01 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg01
+      value.cg01 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg01 ||
+      isOldUnsafeCgPrompt(value.cg01)
         ? defaults.cg01
         : value.cg01 || defaults.cg01,
     cg02:
       value.cg02 === LEGACY_PAPER_PROMPT_OVERRIDES.cg02 ||
-      value.cg02 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg02
+      value.cg02 === PREVIOUS_PAPER_PROMPT_OVERRIDES.cg02 ||
+      isOldUnsafeCgPrompt(value.cg02)
         ? defaults.cg02
         : value.cg02 || defaults.cg02,
   };
@@ -699,6 +715,23 @@ const PAPER_REDOABLE_STEPS: PaperWorkflowStepName[] = [
   'cutout_expression_surprise',
   'cutout_expression_angry',
 ];
+
+function getRedoConflictGroup(stepName: PaperWorkflowStepName): string {
+  if (stepName === 'expression_thinking' || stepName === 'cutout_expression_thinking') return 'expression:thinking';
+  if (stepName === 'expression_surprise' || stepName === 'cutout_expression_surprise') return 'expression:surprise';
+  if (stepName === 'expression_angry' || stepName === 'cutout_expression_angry') return 'expression:angry';
+  if (stepName === 'cg_01') return 'cg:01';
+  if (stepName === 'cg_02') return 'cg:02';
+  return stepName;
+}
+
+function hasRedoConflict(stepName: PaperWorkflowStepName, inFlight: PaperWorkflowStepName[], workflow: PaperWorkflow | null): boolean {
+  const group = getRedoConflictGroup(stepName);
+  return (
+    inFlight.some((item) => getRedoConflictGroup(item) === group) ||
+    Boolean(workflow?.active_redos?.includes(group))
+  );
+}
 
 const uiCopy: Record<BaseLanguage, UiCopySet> = {
   zh: {
@@ -2797,6 +2830,10 @@ function hasPendingFrontendCutout(workflow: PaperWorkflow | null) {
   }
 
   return (['thinking', 'surprise', 'angry'] as ExpressionName[]).some((name) => {
+    const step = workflow.steps?.[`cutout_expression_${name}` as PaperWorkflowStepName];
+    if (step?.status === 'failed' || step?.status === 'skipped') {
+      return false;
+    }
     return Boolean(workflow.outputs?.expressions?.[name]) && !workflow.outputs?.expression_cutouts?.[name];
   });
 }
@@ -2917,6 +2954,22 @@ async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, ti
   }
 }
 
+async function fetchWithRetry(input: RequestInfo | URL, init?: RequestInit, timeoutMs = 30000, attempts = 2) {
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await fetchWithTimeout(input, init, timeoutMs);
+    } catch (error) {
+      lastError = error;
+      if (attempt + 1 >= attempts) {
+        break;
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 800 * (attempt + 1)));
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('Request failed.');
+}
+
 async function startPaperWorkflowRequest(
   file: File,
   promptOverrides: PaperPromptOverrides,
@@ -2931,23 +2984,17 @@ async function startPaperWorkflowRequest(
   await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, '/api/workflows');
 
-  // Pre-flight health check: fail fast with a clear message if backend is not responding
+  // Best-effort health check. Do not block workflow start on a transient
+  // Zeabur/mobile network miss; the POST below has its own retry/error path.
   try {
-    const healthController = new AbortController();
-    const healthTimer = setTimeout(() => healthController.abort(), 5000);
-    const healthResponse = await fetch(buildApiUrl(settings, '/api/health'), {
+    const healthResponse = await fetchWithRetry(buildApiUrl(settings, '/api/health'), {
       method: 'GET',
-      signal: healthController.signal,
-    });
-    clearTimeout(healthTimer);
+    }, 10000, 2);
     if (!healthResponse.ok) {
-      throw new Error(copy.networkStartError + '（后端健康检查失败，请确认后端已启动。）');
+      console.warn('[Paper2Gal] Backend health check returned non-OK status', healthResponse.status);
     }
   } catch (healthError) {
-    if (healthError instanceof DOMException && healthError.name === 'AbortError') {
-      throw new Error(copy.networkStartError + '（后端无响应，请确认后端服务已启动且可访问。）');
-    }
-    throw new Error(copy.networkStartError + '（无法连接到后端，请检查 API 地址配置。）');
+    console.warn('[Paper2Gal] Backend health check skipped after retry', healthError);
   }
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
@@ -2958,11 +3005,11 @@ async function startPaperWorkflowRequest(
   formData.append('promptOverrides', JSON.stringify(normalizePaperPromptOverrides(promptOverrides)));
   formData.append('aiConcurrencyEnabled', String(aiConcurrencyEnabled));
 
-  const response = await fetchWithTimeout(requestUrl, {
+  const response = await fetchWithRetry(requestUrl, {
     method: 'POST',
     body: formData,
     headers: buildApiHeaders(settings),
-  }, 60000);
+  }, 90000, 2);
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
@@ -2999,7 +3046,7 @@ async function redoPaperWorkflowStepRequest(
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
   }
 
-  const response = await fetchWithTimeout(requestUrl, {
+  const response = await fetchWithRetry(requestUrl, {
     method: 'POST',
     headers: buildApiHeaders(settings, {
       'Content-Type': 'application/json',
@@ -3009,7 +3056,7 @@ async function redoPaperWorkflowStepRequest(
       promptOverrides: normalizePaperPromptOverrides(promptOverrides),
       aiConcurrencyEnabled,
     }),
-  }, 60000);
+  }, 90000, 2);
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
@@ -3064,10 +3111,11 @@ async function uploadFrontendCutout(options: {
   workflowId: string;
   expressionName: ExpressionName;
   sourceUrl: string;
+  sourceVersion?: string | null;
   settings: SettingsState;
   copy: UiCopySet['paper'];
 }) {
-  const { workflowId, expressionName, sourceUrl, settings, copy } = options;
+  const { workflowId, expressionName, sourceUrl, sourceVersion, settings, copy } = options;
 
   if (requiresHostedApiBase(settings)) {
     throw new Error(copy.hostedApiRequired);
@@ -3075,26 +3123,48 @@ async function uploadFrontendCutout(options: {
 
   await ensureLocalApiProbed();
   const requestUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/cutouts/${expressionName}`);
+  const failureUrl = buildApiUrl(settings, `/api/workflows/${workflowId}/cutouts/${expressionName}/failed`);
   if (detectWorkflowApiBaseIssue(getEffectiveApiBase(settings)) === 'direct-model-endpoint') {
     throw new Error(`${copy.apiWrongEndpoint} ${copy.apiWrongEndpointHint} ${copy.requestUrlLabel}: ${requestUrl}`);
   }
 
   const resolvedSourceUrl = sourceUrl.startsWith('/') ? buildApiUrl(settings, sourceUrl) : sourceUrl;
-  const imageResponse = await fetch(resolvedSourceUrl, { credentials: 'omit' });
-  if (!imageResponse.ok) {
-    throw new Error(`Failed to fetch source image for cutout: ${imageResponse.status}`);
+  const versionedSourceUrl = sourceVersion
+    ? `${resolvedSourceUrl}${resolvedSourceUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(sourceVersion)}`
+    : resolvedSourceUrl;
+  let cutoutBlob: Blob;
+  try {
+    const imageResponse = await fetchWithRetry(versionedSourceUrl, { credentials: 'omit', cache: 'no-store' }, 90000, 3);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch source image for cutout: ${imageResponse.status}`);
+    }
+    const sourceBlob = await imageResponse.blob();
+    cutoutBlob = await generateCutoutPngBlob(sourceBlob, buildApiUrl(settings, '/api/cutout-assets/v1/'));
+  } catch (error) {
+    await fetchWithRetry(failureUrl, {
+      method: 'POST',
+      headers: buildApiHeaders(settings, {
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({
+        source_url: sourceUrl,
+        source_version: sourceVersion || '',
+        error: normalizeFetchError(error, copy.networkFetchError),
+      }),
+    }, 30000, 2).catch(() => null);
+    throw error;
   }
-  const sourceBlob = await imageResponse.blob();
-  const cutoutBlob = await generateCutoutPngBlob(sourceBlob, buildApiUrl(settings, '/api/cutout-assets/v1/'));
 
   const form = new FormData();
   form.append('image', cutoutBlob, `expression-${expressionName}-cutout.png`);
+  form.append('source_url', sourceUrl);
+  form.append('source_version', sourceVersion || '');
 
-  const response = await fetch(requestUrl, {
+  const response = await fetchWithRetry(requestUrl, {
     method: 'POST',
     headers: buildApiHeaders(settings),
     body: form,
-  });
+  }, 90000, 3);
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
@@ -5625,11 +5695,14 @@ export function Paper2GalPage({
   const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(true);
   const [isPromptPanelOpen, setIsPromptPanelOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redoStepsInFlight, setRedoStepsInFlight] = useState<PaperWorkflowStepName[]>([]);
   const [error, setError] = useState<TransferError | null>(null);
   const [showErrorPanel, setShowErrorPanel] = useState(false);
 
   const settingsRef = useRef(settings);
   const paperRef = useRef(paper);
+  const cutoutUploadInFlight = useRef(new Set<string>());
+  const cutoutUploadFailureRef = useRef('');
   useEffect(() => { settingsRef.current = settings; }, [settings]);
   useEffect(() => { paperRef.current = paper; }, [paper]);
   const [copiedActionKey, setCopiedActionKey] = useState('');
@@ -5696,6 +5769,17 @@ export function Paper2GalPage({
           setMessage({ type: 'error', text: latest.error || paperRef.current.completedWithErrors });
         } else if (latest.status === 'failed') {
           setMessage({ type: 'error', text: latest.error || paperRef.current.failed });
+        } else if (hasPendingFrontendCutout(latest)) {
+          if (!cutoutUploadFailureRef.current) {
+            setMessage({
+              type: 'info',
+              text:
+                cutoutUploadInFlight.current.size > 0
+                  ? '浏览器端抠图正在处理并上传，请保持页面打开。'
+                  : '正在等待浏览器端抠图启动，请保持页面打开。',
+            });
+          }
+          pollTimer = window.setTimeout(pollOnce, PAPER_POLL_INTERVAL_MS);
         } else {
           setMessage({ type: 'info', text: paperRef.current.polling });
           pollTimer = window.setTimeout(pollOnce, PAPER_POLL_INTERVAL_MS);
@@ -5706,10 +5790,15 @@ export function Paper2GalPage({
         }
 
         if (hasPendingFrontendCutout(workflowRef.current)) {
-          setMessage({
-            type: 'info',
-            text: '浏览器端抠图模型正在加载或处理图片，首次运行可能需要 1-2 分钟。请保持页面打开。',
-          });
+          if (!cutoutUploadFailureRef.current) {
+            setMessage({
+              type: 'info',
+              text:
+                cutoutUploadInFlight.current.size > 0
+                  ? '浏览器端抠图模型正在加载或处理图片，首次运行可能需要 1-2 分钟。请保持页面打开。'
+                  : '正在等待浏览器端抠图启动，请保持页面打开。',
+            });
+          }
           pollTimer = window.setTimeout(pollOnce, PAPER_POLL_INTERVAL_MS * 3);
           return;
         }
@@ -5729,9 +5818,8 @@ export function Paper2GalPage({
     };
   }, [workflow?.id, workflow?.status]);
 
-  const cutoutUploadInFlight = useRef(new Set<string>());
   useEffect(() => {
-    const wf = workflowRef.current;
+    const wf = workflow;
     if (!wf?.id || !wf.outputs) {
       return;
     }
@@ -5741,14 +5829,27 @@ export function Paper2GalPage({
     }
 
     const workflowId = wf.id;
+    const steps = wf.steps || {};
     const expressions = wf.outputs.expressions || {};
     const cutouts = wf.outputs.expression_cutouts || {};
     const expressionNames: ExpressionName[] = ['thinking', 'surprise', 'angry'];
+    const expressionLabels: Record<ExpressionName, string> = {
+      thinking: stepLabels.cutout_expression_thinking,
+      surprise: stepLabels.cutout_expression_surprise,
+      angry: stepLabels.cutout_expression_angry,
+    };
 
     let disposed = false;
     async function run() {
       for (const name of expressionNames) {
+        const step = steps[`cutout_expression_${name}` as PaperWorkflowStepName];
+        if (step?.status === 'failed' || step?.status === 'skipped') {
+          continue;
+        }
+
         const sourceUrl = expressions[name];
+        const sourceStep = steps[`expression_${name}` as PaperWorkflowStepName];
+        const sourceVersion = sourceStep?.finished_at || sourceStep?.started_at || '';
         const existingCutout = cutouts[name];
         if (!sourceUrl || existingCutout) {
           continue;
@@ -5760,25 +5861,34 @@ export function Paper2GalPage({
         }
 
         cutoutUploadInFlight.current.add(key);
+        cutoutUploadFailureRef.current = '';
+        setMessage({
+          type: 'info',
+          text: `正在浏览器端抠图：${expressionLabels[name]}。首次运行会下载模型，请保持页面打开。`,
+        });
         try {
           const next = await uploadFrontendCutout({
             workflowId,
             expressionName: name,
             sourceUrl,
+            sourceVersion,
             settings: settingsRef.current,
             copy: paperRef.current,
           });
 
           if (disposed) return;
           cutoutUploadInFlight.current.delete(key);
+          cutoutUploadFailureRef.current = '';
           setWorkflow(next);
         } catch (error) {
           cutoutUploadInFlight.current.delete(key);
           if (disposed) return;
+          cutoutUploadFailureRef.current = key;
           setMessage({
             type: 'error',
-            text: normalizeFetchError(error, paperRef.current.networkFetchError),
+            text: `浏览器端抠图失败（${expressionLabels[name]}）：${normalizeFetchError(error, paperRef.current.networkFetchError)}`,
           });
+          return;
         }
       }
     }
@@ -5789,6 +5899,7 @@ export function Paper2GalPage({
     };
   }, [
     workflow?.id,
+    workflow?.status,
     workflow?.outputs?.providers?.remove_background,
     workflow?.outputs?.expressions?.thinking,
     workflow?.outputs?.expressions?.surprise,
@@ -5891,7 +6002,7 @@ export function Paper2GalPage({
       return paper.idleMessage;
     }
 
-    return PAPER_STEP_ORDER.map((stepName) => {
+    const stepLogs = PAPER_STEP_ORDER.map((stepName) => {
       const step = workflow.steps?.[stepName];
       const label = stepLabels[stepName];
       if (!step) {
@@ -5903,7 +6014,11 @@ export function Paper2GalPage({
       if (step.output_url) parts.push(`output=${step.output_url}`);
       if (step.error) parts.push(`error=${step.error}`);
       return parts.join(' | ');
-    }).join('\n');
+    });
+    const redoLogs = workflow.active_redos?.length
+      ? [`[running] active_redos=${workflow.active_redos.join(', ')}`]
+      : [];
+    return [...redoLogs, ...stepLogs].join('\n');
   }, [paper.idleMessage, stepLabels, workflow]);
 
   const apiBaseIssue = detectWorkflowApiBaseIssue(getEffectiveApiBase(settings));
@@ -6090,12 +6205,18 @@ export function Paper2GalPage({
   }
 
   async function handleRedoResult(stepName: PaperWorkflowStepName) {
-    if (!workflow?.id || isSubmitting) {
+    if (!workflow?.id) {
       return;
     }
 
-    setIsSubmitting(true);
-    setMessage({ type: 'info', text: `${paper.redoCurrentResult}: ${stepLabels[stepName]}` });
+    if (hasRedoConflict(stepName, redoStepsInFlight, workflow)) {
+      setMessage({ type: 'info', text: `这个结果已经在重做中：${stepLabels[stepName]}。请等它完成后再重做同一张图。` });
+      return;
+    }
+
+    setRedoStepsInFlight((current) => [...current, stepName]);
+    setMessage({ type: 'info', text: `重做已开始：${stepLabels[stepName]}。其他未冲突的结果仍可继续重做。` });
+    playSound('workflowStart');
 
     try {
       const nextWorkflow = await redoPaperWorkflowStepRequest(
@@ -6107,8 +6228,7 @@ export function Paper2GalPage({
         paper,
       );
       setWorkflow(nextWorkflow);
-      setMessage({ type: 'info', text: `${paper.redoCurrentResult}: ${stepLabels[stepName]}` });
-      playSound('workflowComplete');
+      setMessage({ type: 'info', text: `重做请求已提交：${stepLabels[stepName]}。后台正在处理，页面会继续同步状态。` });
     } catch (error) {
       setMessage({
         type: 'error',
@@ -6116,7 +6236,7 @@ export function Paper2GalPage({
       });
       playSound('workflowFail');
     } finally {
-      setIsSubmitting(false);
+      setRedoStepsInFlight((current) => current.filter((item) => item !== stepName));
     }
   }
 
@@ -6386,6 +6506,7 @@ export function Paper2GalPage({
                   {PAPER_STEP_ORDER.map((stepName) => {
                     const step = workflow.steps?.[stepName];
                     const stepStatus = step?.status ?? 'queued';
+                    const redoBusy = hasRedoConflict(stepName, redoStepsInFlight, workflow);
                     const debugEntries =
                       step?.debug ? Object.entries(step.debug).filter(([, value]) => value !== null && value !== undefined && value !== '') : [];
                     return (
@@ -6415,9 +6536,9 @@ export function Paper2GalPage({
                               className="secondary-button small-button"
                               type="button"
                               onClick={() => void handleRedoResult(stepName)}
-                              disabled={isSubmitting}
+                              disabled={redoBusy}
                             >
-                              {stepStatus === 'failed' ? paper.retryStep : paper.redoCurrentResult}
+                              {redoBusy ? '重做中' : stepStatus === 'failed' ? paper.retryStep : paper.redoCurrentResult}
                             </button>
                           </div>
                         )}
@@ -6524,6 +6645,7 @@ export function Paper2GalPage({
                 <div className="paper-output-grid">
                   {outputCards.map((card) => {
                     const copyKey = `asset-${card.fileName}`;
+                    const redoBusy = hasRedoConflict(card.stepName, redoStepsInFlight, workflow);
                     return (
                       <article key={card.fileName} className="paper-output-card">
                         <div className="paper-output-card-header">
@@ -6540,8 +6662,8 @@ export function Paper2GalPage({
                           <button className="secondary-button small-button" type="button" onClick={() => handleCopyAsset(card.url, copyKey)}>
                             {copiedActionKey === copyKey ? copy.copied : paper.copyAsset}
                           </button>
-                          <button className="secondary-button small-button" type="button" onClick={() => void handleRedoResult(card.stepName)} disabled={isSubmitting}>
-                            {paper.redoCurrentResult}
+                          <button className="secondary-button small-button" type="button" onClick={() => void handleRedoResult(card.stepName)} disabled={redoBusy}>
+                            {redoBusy ? '重做中' : paper.redoCurrentResult}
                           </button>
                         </div>
                       </article>

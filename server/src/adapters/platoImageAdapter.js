@@ -34,6 +34,9 @@ function buildModelCandidates(config, requestedModel) {
   }
 
   const primary = requestedModel || config.platoModel || "gpt-image-2";
+  const configuredFallbacks = Array.isArray(config.platoModelFallbacks)
+    ? config.platoModelFallbacks.filter(Boolean)
+    : [];
   const builtInFallbacks = [
     "gpt-image-2",
     "gpt-image-1",
@@ -51,8 +54,7 @@ function buildModelCandidates(config, requestedModel) {
     "ideogram-v2",
     "chat_fast_imagine",
   ];
-  const fallbacks = builtInFallbacks.filter((m) => m !== primary);
-  return [primary, ...fallbacks];
+  return [...new Set([primary, ...configuredFallbacks, ...builtInFallbacks])];
 }
 
 function getMimeTypeFromInput(sourceMimeType) {
@@ -83,7 +85,11 @@ function getAspectRatioFromContext(destinationPath, prompt) {
     return "16:9";
   }
 
-  return "9:16";
+  if (outputName.startsWith("expression-") || hint.includes("竖屏")) {
+    return "9:16";
+  }
+
+  return "1:1";
 }
 
 function extractEditedImagePayload(responseJson) {
@@ -176,17 +182,49 @@ function isRetryableImagesEditFailure(code, message, status) {
   const normalizedCode = String(code || "").toLowerCase();
   const normalizedMessage = String(message || "").toLowerCase();
 
+  if (isContentPolicyFailure(code, message)) {
+    return false;
+  }
+
   return (
+    status === 408 ||
     status === 429 ||
+    status === 500 ||
+    status === 502 ||
     status === 503 ||
+    status === 504 ||
     normalizedCode === "model_not_found" ||
     normalizedCode === "invalid_request" ||
-    normalizedMessage.includes("prompt图片未通过审核") ||
-    normalizedMessage.includes("may contains sensitive words") ||
     normalizedMessage.includes("当前分组上游负载已饱和") ||
     normalizedMessage.includes("当前所选分组") ||
+    normalizedMessage.includes("消息流出现异常") ||
+    normalizedMessage.includes("traceid") ||
+    normalizedMessage.includes("upstream") ||
+    normalizedMessage.includes("temporarily unavailable") ||
+    normalizedMessage.includes("timeout") ||
+    normalizedMessage.includes("timed out") ||
     normalizedMessage.includes("parameter error")
   );
+}
+
+function isContentPolicyFailure(code, message) {
+  const normalizedCode = String(code || "").toLowerCase();
+  const normalizedMessage = String(message || "").toLowerCase();
+  return (
+    normalizedCode.includes("content_policy") ||
+    normalizedCode.includes("safety") ||
+    normalizedMessage.includes("safety system") ||
+    normalizedMessage.includes("safety_violations") ||
+    normalizedMessage.includes("sexual") ||
+    normalizedMessage.includes("prompt图片未通过审核") ||
+    normalizedMessage.includes("may contains sensitive words") ||
+    normalizedMessage.includes("内容策略") ||
+    normalizedMessage.includes("审核")
+  );
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinationPath, prompt, seed, negativePrompt, requestedModel }) {
@@ -221,109 +259,122 @@ async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinat
   const candidates = buildModelCandidates(config, requestedModel);
   const aspectRatio = getAspectRatioFromContext(destinationPath, prompt);
   const attemptErrors = [];
+  const attemptsPerModel = Math.max(1, config.platoImageEditRetries || 2);
 
   for (const modelName of candidates) {
-    const body = new FormData();
-    body.append("model", modelName);
-    body.append("prompt", prompt);
-    body.append("response_format", "url");
-    body.append("aspect_ratio", aspectRatio);
-    body.append("image", new Blob([imageBytes], { type: mimeType }), path.basename(sourcePath));
+    for (let attempt = 1; attempt <= attemptsPerModel; attempt += 1) {
+      const body = new FormData();
+      body.append("model", modelName);
+      body.append("prompt", prompt);
+      body.append("response_format", "url");
+      body.append("aspect_ratio", aspectRatio);
+      body.append("image", new Blob([imageBytes], { type: mimeType }), path.basename(sourcePath));
 
-    let response;
-    let responseJson = null;
-    let rawBody = "";
+      let response;
+      let responseJson = null;
+      let rawBody = "";
 
-    const platoController = new AbortController();
-    const platoTimeout = setTimeout(() => platoController.abort(), config.platoTimeoutMs);
-    try {
-      response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${config.platoApiKey}`,
-        },
-        body,
-        signal: platoController.signal,
-      });
-      clearTimeout(platoTimeout);
-
-      rawBody = await response.text();
+      const platoController = new AbortController();
+      const platoTimeout = setTimeout(() => platoController.abort(), config.platoTimeoutMs);
       try {
-        responseJson = rawBody ? JSON.parse(rawBody) : {};
-      } catch (_error) {
-        responseJson = {};
-      }
-    } catch (error) {
-      clearTimeout(platoTimeout);
-      attemptErrors.push({
-        model: modelName,
-        code: "PLATO_NETWORK_ERROR",
-        message: error.message,
-      });
-      continue;
-    }
+        response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${config.platoApiKey}`,
+          },
+          body,
+          signal: platoController.signal,
+        });
+        clearTimeout(platoTimeout);
 
-    if (!response.ok) {
-      const errorCode = responseJson?.error?.code || responseJson?.code || "PLATO_REQUEST_FAILED";
-      const errorMessage =
-        responseJson?.error?.message ||
-        responseJson?.message ||
-        `Plato images/edits request failed with status ${response.status}`;
-
-      attemptErrors.push({
-        model: modelName,
-        code: errorCode,
-        message: errorMessage,
-        http_status: response.status,
-      });
-
-      if (isRetryableImagesEditFailure(errorCode, errorMessage, response.status)) {
+        rawBody = await response.text();
+        try {
+          responseJson = rawBody ? JSON.parse(rawBody) : {};
+        } catch (_error) {
+          responseJson = {};
+        }
+      } catch (error) {
+        clearTimeout(platoTimeout);
+        attemptErrors.push({
+          model: modelName,
+          attempt,
+          code: "PLATO_NETWORK_ERROR",
+          message: error.message,
+        });
+        if (attempt < attemptsPerModel) {
+          await wait(800 * attempt);
+        }
         continue;
       }
 
-      throw new AppError(
-        errorMessage,
-        502,
-        {
-          provider: "plato",
-          endpoint,
+      if (!response.ok) {
+        const errorCode = responseJson?.error?.code || responseJson?.code || "PLATO_REQUEST_FAILED";
+        const errorMessage =
+          responseJson?.error?.message ||
+          responseJson?.message ||
+          `Plato images/edits request failed with status ${response.status}`;
+
+        attemptErrors.push({
           model: modelName,
+          attempt,
+          code: errorCode,
+          message: errorMessage,
           http_status: response.status,
-          response_body: rawBody,
-          source_path: sourcePath,
-          source_mime_type: mimeType,
+        });
+
+        if (isRetryableImagesEditFailure(errorCode, errorMessage, response.status)) {
+          if (attempt < attemptsPerModel) {
+            await wait(800 * attempt);
+          }
+          continue;
+        }
+
+        throw new AppError(
+          errorMessage,
+          502,
+          {
+            provider: "plato",
+            endpoint,
+            model: modelName,
+            http_status: response.status,
+            response_body: rawBody,
+            source_path: sourcePath,
+            source_mime_type: mimeType,
+          },
+          isContentPolicyFailure(errorCode, errorMessage) ? "PLATO_CONTENT_POLICY_BLOCKED" : "PLATO_REQUEST_FAILED",
+        );
+      }
+
+      let imagePayload;
+
+      try {
+        imagePayload = extractEditedImagePayload(responseJson);
+      } catch (error) {
+        attemptErrors.push({
+          model: modelName,
+          attempt,
+          code: "PLATO_IMAGE_PAYLOAD_MISSING",
+          message: error.message,
+        });
+        continue;
+      }
+
+      const result = await writeImagePayload(destinationPath, imagePayload);
+      return {
+        ...result,
+        debug: {
+          ...(result.debug || {}),
+          requested_prompt: prompt,
+          requested_model: modelName,
+          endpoint,
+          aspect_ratio: aspectRatio,
+          fallback_chain: candidates,
+          seed: seed ?? null,
+          negative_prompt: negativePrompt ?? null,
+          plato_attempt: attempt,
         },
-        "PLATO_REQUEST_FAILED",
-      );
+      };
     }
-
-    let imagePayload;
-
-    try {
-      imagePayload = extractEditedImagePayload(responseJson);
-    } catch (error) {
-      attemptErrors.push({
-        model: modelName,
-        code: "PLATO_IMAGE_PAYLOAD_MISSING",
-        message: error.message,
-      });
-      continue;
-    }
-
-    const result = await writeImagePayload(destinationPath, imagePayload);
-    return {
-      ...result,
-      debug: {
-        ...(result.debug || {}),
-        requested_prompt: prompt,
-        requested_model: modelName,
-        endpoint,
-        aspect_ratio: aspectRatio,
-        fallback_chain: candidates,
-        seed: seed ?? null,
-        negative_prompt: negativePrompt ?? null,
-      },
-    };
   }
 
   const lastAttempt = attemptErrors[attemptErrors.length - 1] || null;
@@ -332,7 +383,7 @@ async function callPlatoImageEdit({ config, sourcePath, sourceMimeType, destinat
     .filter((item) => (item.code === "model_not_found" || item.code === "invalid_request") && item.http_status !== 401)
     .map((item) => item.model);
   const blockedModels = attemptErrors
-    .filter((item) => String(item.code).includes("POLICY") || String(item.message).includes("审核") || String(item.message).includes("sensitive"))
+    .filter((item) => isContentPolicyFailure(item.code, item.message))
     .map((item) => item.model);
 
   const isAllUnauthorized = unauthorizedModels.length === attemptErrors.length && attemptErrors.length > 0;
