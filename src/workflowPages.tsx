@@ -2652,6 +2652,19 @@ function formatReadableErrorPayload(payload: unknown) {
   return parts.slice(0, 8).join(' ; ');
 }
 
+function isWorkflowNotFoundPayload(payload: unknown, readablePayload: string) {
+  if (/WORKFLOW_NOT_FOUND|Workflow not found/i.test(readablePayload)) {
+    return true;
+  }
+  if (!isRecord(payload)) {
+    return false;
+  }
+  const details = isRecord(payload.details) ? payload.details : {};
+  const code = String(payload.code || details.code || '').trim();
+  const error = String(payload.error || payload.message || details.error || '').trim();
+  return code === 'WORKFLOW_NOT_FOUND' || /Workflow not found/i.test(error);
+}
+
 function normalizeFetchError(error: unknown, fallback: string) {
   if (error instanceof DOMException && error.name === 'AbortError') {
     if (error.message.includes('timed out')) {
@@ -2847,9 +2860,13 @@ function buildPaperApiErrorMessage(options: {
   fallback: string;
 }) {
   const { response, payload, requestUrl, settings, copy, fallback } = options;
-  const pieces: string[] = [`${fallback} (HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ''})`];
   const apiBaseIssue = detectWorkflowApiBaseIssue(getEffectiveApiBase(settings));
   const backendMessage = formatReadableErrorPayload(payload);
+  const workflowNotFound = response.status === 404 && isWorkflowNotFoundPayload(payload, backendMessage);
+  const primaryMessage = workflowNotFound
+    ? '这个工作流记录已不存在，无法继续重做或下载。通常是 Zeabur 重新部署/重启后没有把 WORKFLOW_STATE_DIR 挂载到持久化硬盘，旧 wf_* 状态被清空。请重新启动一个新工作流；如果要保留历史工作流，请在 Zeabur 硬盘挂载里设置 WORKFLOW_STATE_DIR、OUTPUT_DIR、UPLOAD_DIR。'
+    : fallback;
+  const pieces: string[] = [`${primaryMessage} (HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ''})`];
 
   if (apiBaseIssue === 'direct-model-endpoint') {
     pieces.push(copy.apiWrongEndpoint);

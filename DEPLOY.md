@@ -102,6 +102,24 @@ PORT=3001
 BG_REMOVAL_PROVIDER=frontend
 ```
 
+## Zeabur workflow 持久化
+
+如果 Zeabur 重新部署、重启或替换实例，容器内的 `./tmp` 目录可能会被清空。旧的 `wf_*` 工作流记录丢失后，重做、下载或轮询旧工作流会返回：
+
+```text
+WORKFLOW_NOT_FOUND / Workflow not found
+```
+
+这不是 API 地址错误，也不是后端未启动；它表示旧 workflow 状态文件已经不存在。需要重新启动一个新工作流。
+
+如果希望旧 workflow 在重新部署后仍可继续重做和下载，请在 Zeabur 的「硬盘」里挂载 Volume，并设置：
+
+```env
+UPLOAD_DIR=/mnt/volume/uploads
+OUTPUT_DIR=/mnt/volume/outputs
+WORKFLOW_STATE_DIR=/mnt/volume/workflows
+```
+
 ## 静态前端 + 独立后端
 
 如果前端部署到 OSS、CDN 或其他静态站点，后端仍需部署为 Node 服务。前端设置中的 API 地址填写后端根地址，例如：

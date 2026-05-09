@@ -69,6 +69,19 @@ function parseExecutionOptions(value) {
   };
 }
 
+function createWorkflowNotFoundError(workflowId) {
+  return new AppError(
+    "Workflow not found.",
+    404,
+    {
+      workflow_id: workflowId || null,
+      possible_cause: "The workflow state is no longer available. This usually happens after a redeploy/restart when WORKFLOW_STATE_DIR is not mounted to persistent storage.",
+      fix_hint: "Start a new workflow. For Zeabur, mount a volume and set WORKFLOW_STATE_DIR, OUTPUT_DIR, and UPLOAD_DIR to persistent paths if old workflow reruns/downloads must survive redeploys."
+    },
+    "WORKFLOW_NOT_FOUND"
+  );
+}
+
 function getDependentRedoSteps(stepName) {
   if (stepName === "expression_thinking") return ["cutout_expression_thinking"];
   if (stepName === "expression_surprise") return ["cutout_expression_surprise"];
@@ -248,7 +261,7 @@ router.post("/:id/rerun", express.json(), async (req, res, next) => {
   try {
     const workflow = getWorkflow(req.params.id);
     if (!workflow) {
-      throw new AppError("Workflow not found.", 404);
+      throw createWorkflowNotFoundError(req.params.id);
     }
 
     if ((workflow.status === "running" || workflow.status === "queued") && !isWaitingOnlyForFrontendCutouts(workflow) && !hasActiveRedo(workflow.id)) {
@@ -339,7 +352,7 @@ router.get("/:id", (req, res, next) => {
   try {
     const workflow = getWorkflow(req.params.id);
     if (!workflow) {
-      throw new AppError("Workflow not found.", 404);
+      throw createWorkflowNotFoundError(req.params.id);
     }
 
     res.json(workflow);
@@ -352,7 +365,7 @@ router.get("/:id/download", async (req, res, next) => {
   try {
     const workflow = getWorkflow(req.params.id);
     if (!workflow) {
-      throw new AppError("Workflow not found.", 404);
+      throw createWorkflowNotFoundError(req.params.id);
     }
 
     const workflowOutputDir = path.join(config.outputDir, workflow.id);
@@ -385,7 +398,7 @@ router.post("/:id/cutouts/:expression", upload.single("image"), async (req, res,
   try {
     const workflow = getWorkflow(req.params.id);
     if (!workflow) {
-      throw new AppError("Workflow not found.", 404);
+      throw createWorkflowNotFoundError(req.params.id);
     }
 
     const expressionName = String(req.params.expression || "").trim();
@@ -475,7 +488,7 @@ router.post("/:id/cutouts/:expression/failed", async (req, res, next) => {
   try {
     const workflow = getWorkflow(req.params.id);
     if (!workflow) {
-      throw new AppError("Workflow not found.", 404);
+      throw createWorkflowNotFoundError(req.params.id);
     }
 
     const expressionName = String(req.params.expression || "").trim();
