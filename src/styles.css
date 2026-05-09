@@ -4830,6 +4830,32 @@ input[type='range']:active::-moz-range-thumb {
   margin-bottom: 3px;
 }
 
+.docs-error-detail-blocks {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.docs-error-detail-block {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.docs-error-detail-block ul {
+  margin: 6px 0 0 18px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.docs-error-detail-block li {
+  margin-bottom: 4px;
+}
+
 .docs-error-prevention {
   margin-top: 6px;
   padding: 8px 12px;

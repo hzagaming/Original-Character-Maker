@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -556,10 +556,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '1.0.0 正式运行版：Paper2Gal 工作流正式投入使用，Zeabur 部署、服务端抠图兜底、单结果并行重做和日志提示全部就绪。',
-    announcementList1: '工作流正式运行：上传角色图后可稳定生成三张表情、两张 CG、透明抠图素材和完整调试包。',
-    announcementList2: '抠图稳定性升级：服务端 sharp 兜底接管抠图，不再卡死等待浏览器上传，浏览器抠图保留为备用链路。',
-    announcementList3: '重做体验上线：表情重做会同步重做对应抠图，不同表情和 CG 可并行重做，并提供状态 notice 与详细日志。',
+    announcementDescription: '1.1.0 用户手册增强版：全语言手册接入深度错误排查，报错解决方案、部署诊断、工作流说明和日志收集指引全面扩容。',
+    announcementList1: '全语言覆盖：30 种语言入口全部通过增强层获得新增错误字典和深度排查章节。',
+    announcementList2: '错误详情升级：错误卡片支持长排查块，状态码、诊断顺序、日志收集和部署检查都会显示并参与搜索。',
+    announcementList3: '手册内容补齐：新增 API Base URL、CORS、502/503、Zeabur 持久卷、前端抠图、workflow not found 等详细解决步骤。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -924,10 +924,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '1.0.0 正式稼働版：Paper2Gal ワークフローが正式稼働。Zeabur デプロイ、サーバー側切り抜きフォールバック、単一結果の並列リドゥ、ログ通知が揃いました。',
-    announcementList1: 'ワークフロー正式稼働：キャラクター画像から表情3種、CG2枚、透明切り抜き素材、デバッグパッケージを生成できます。',
-    announcementList2: '切り抜き安定性を強化：sharp によるサーバー側フォールバックで、ブラウザアップロード待ちの停止を回避します。',
-    announcementList3: 'リドゥ体験を改善：表情のリドゥ時は対応する切り抜きも再生成し、別表情や CG は並列でリドゥできます。',
+    announcementDescription: '1.1.0 ユーザーマニュアル強化版：全言語の手冊に詳細なエラー診断、デプロイ確認、ワークフロー説明、ログ収集ガイドを追加しました。',
+    announcementList1: '全言語対応：30 言語の入口すべてで、拡張エラー辞書と深掘りトラブルシューティングを利用できます。',
+    announcementList2: 'エラー詳細を拡張：ステータスコード、診断順序、ログ収集、デプロイ確認を長い詳細ブロックとして表示し、検索対象にも含めます。',
+    announcementList3: '手冊を補完：API Base URL、CORS、502/503、Zeabur 永続ボリューム、フロントエンド切り抜き、workflow not found などの解決手順を追加しました。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1292,10 +1292,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 1.0.0 Official Workflow: Paper2Gal is now production-ready with Zeabur deployment, server cutout fallback, parallel single-result redo, notices, and logs.',
-    announcementList1: 'Workflow officially running: generate three expressions, two CG images, transparent cutouts, and a complete debug package from one character upload.',
-    announcementList2: 'Cutout stability upgrade: server-side sharp fallback prevents workflows from hanging while browser cutout remains available as backup.',
-    announcementList3: 'Redo experience shipped: expression redo regenerates its cutout, unrelated expressions and CG outputs can redo in parallel, with notice and log feedback.',
+    announcementDescription: 'Version 1.1.0 User Manual Expansion: every language now receives deeper error troubleshooting, deployment diagnostics, workflow explanations, and log collection guidance.',
+    announcementList1: 'All-language coverage: all 30 language entries receive the expanded error dictionary and deep troubleshooting chapters.',
+    announcementList2: 'Richer error cards: long diagnostic blocks now cover status codes, investigation order, log collection, and deployment checks, and are included in search.',
+    announcementList3: 'Manual gaps filled: added detailed fixes for API Base URL, CORS, 502/503, Zeabur persistent volumes, frontend cutouts, workflow not found, and more.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1660,10 +1660,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 1.0.0 Официальный workflow: Paper2Gal готов к рабочему использованию с Zeabur, серверным fallback для вырезания, параллельным redo, notice и логами.',
-    announcementList1: 'Workflow официально работает: из одного изображения персонажа генерируются 3 выражения, 2 CG, прозрачные cutout-ассеты и debug-пакет.',
-    announcementList2: 'Стабильность cutout улучшена: серверный fallback на sharp не дает workflow зависать в ожидании браузерной загрузки.',
-    announcementList3: 'Redo готов: повтор выражения заново делает связанный cutout, а независимые выражения и CG можно перегенерировать параллельно.',
+    announcementDescription: 'Версия 1.1.0: руководство пользователя расширено для всех языков, добавлены подробная диагностика ошибок, деплой, workflow и сбор логов.',
+    announcementList1: 'Покрытие всех языков: все 30 языковых входов получают расширенный словарь ошибок и глубокие разделы диагностики.',
+    announcementList2: 'Карточки ошибок расширены: статус-коды, порядок проверки, сбор логов и деплой-чеклисты теперь отображаются длинными блоками и участвуют в поиске.',
+    announcementList3: 'Руководство дополнено: API Base URL, CORS, 502/503, persistent volumes Zeabur, frontend cutouts, workflow not found и другие подробные решения.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2532,6 +2532,21 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.1.0',
+    date: '2026-05-09',
+    title: '1.1.0 用户手册增强版',
+    summary: '全语言用户手册完成深度扩容：所有 30 种语言入口统一接入增强错误字典，错误卡片支持长排查块和搜索，报错解决方案补齐 API、网络、Paper2Gal 工作流、浏览器、本地存储、部署和运行时诊断。',
+    details: [
+      '全语言覆盖确认：AppLanguage 中 30 种语言均存在 docsContent 文件并映射到 getDocsContent，所有语言都会经过 enhanceDocsContent 增强层。',
+      '错误卡片能力升级：DocsErrorItem 新增 detailBlocks，DocsPage 会渲染长排查块，并把块标题和内容纳入错误搜索。',
+      '深度错误字典新增：补充 API_BASE_URL_POINTS_TO_MODEL_ENDPOINT、CORS_ORIGIN_BLOCKED、UPSTREAM_NON_JSON_RESPONSE、API_RATE_LIMIT、REQUEST_TIMEOUT_CHAIN 等 API/网络排查条目。',
+      'Paper2Gal 手册补齐：新增前端抠图等待、重做冲突、下载 zip 为空或 404、源图尺寸过小、输出 URL 不可公网访问等工作流问题的详细定位步骤。',
+      '浏览器与文件排查补齐：新增图片解码失败、localStorage 版本不兼容、剪贴板权限、浏览器内存不足、文本编码乱码等解决方案。',
+      '部署与运行时排查补齐：新增端口监听不匹配、dist 构建缺失、持久卷未挂载、sharp/libvips 原生依赖安装失败等 Zeabur/Docker/Node 运行时手册。',
+      '公告与版本同步：应用版本、根 package、server package、首页公告和公告历史统一更新到 1.1.0。',
+    ],
+  },
   {
     version: '1.0.0',
     date: '2026-05-08',

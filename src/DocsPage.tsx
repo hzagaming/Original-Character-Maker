@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playSound } from './audioEngine';
-import { docsContentZh } from './docsContent';
+import { getDocsContent } from './docsContent';
 import type { AppLanguage, SettingsState } from './types';
 
 type DocsLabels = {
@@ -83,7 +83,7 @@ export default function DocsPage({
     errors: messages.docsSectionErrors,
   };
 
-  const content = docsContentZh;
+  const content = useMemo(() => getDocsContent(language), [language]);
   const [activeToolId, setActiveToolId] = useState<string>(content.tools[0].id);
   const [activeSection, setActiveSection] = useState<SectionId | null>('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,7 +110,11 @@ export default function DocsPage({
       err.location.toLowerCase().includes(q) ||
       err.category.toLowerCase().includes(q) ||
       (err.prevention?.toLowerCase().includes(q) ?? false) ||
-      (err.steps?.some((s) => s.toLowerCase().includes(q)) ?? false),
+      (err.steps?.some((s) => s.toLowerCase().includes(q)) ?? false) ||
+      (err.detailBlocks?.some((block) =>
+        block.title.toLowerCase().includes(q) ||
+        block.items.some((item) => item.toLowerCase().includes(q))
+      ) ?? false),
     );
   }, [allSearchableErrors, searchQuery]);
 
@@ -439,6 +443,20 @@ function ErrorCard({ error, messages }: { error: import('./docsContent').DocsErr
                 <li key={j}>{step}</li>
               ))}
             </ol>
+          </div>
+        )}
+        {error.detailBlocks && error.detailBlocks.length > 0 && (
+          <div className="docs-error-detail-blocks">
+            {error.detailBlocks.map((block, j) => (
+              <section className="docs-error-detail-block" key={`${error.code}-${block.title}-${j}`}>
+                <span className="docs-error-label">{block.title}</span>
+                <ul>
+                  {block.items.map((item, k) => (
+                    <li key={`${error.code}-${block.title}-${k}`}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            ))}
           </div>
         )}
         {error.prevention && (

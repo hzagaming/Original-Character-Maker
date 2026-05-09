@@ -1,52 +1,7 @@
-﻿export type DocsErrorSeverity = 'critical' | 'error' | 'warning' | 'info';
+﻿import type { DocsContent } from './types';
 
-export type DocsErrorItem = {
-  code: string;
-  message: string;
-  severity: DocsErrorSeverity;
-  category: string;
-  location: string;
-  cause: string;
-  solution: string;
-  steps?: string[];
-  relatedCodes?: string[];
-  prevention?: string;
-};
 
-export type DocsErrorCategory = {
-  id: string;
-  name: string;
-  description: string;
-  errors: DocsErrorItem[];
-};
-
-export type DocsButtonItem = {
-  name: string;
-  description: string;
-};
-
-export type DocsParamItem = {
-  name: string;
-  description: string;
-  tips?: string;
-};
-
-export type DocsToolSection = {
-  id: string;
-  title: string;
-  overview: string;
-  buttons: DocsButtonItem[];
-  parameters: DocsParamItem[];
-  errors: DocsErrorItem[];
-};
-
-export type DocsContent = {
-  intro: string;
-  tools: DocsToolSection[];
-  errorDictionary: DocsErrorCategory[];
-};
-
-export const docsContentZh: DocsContent = {
+export const docsContent: DocsContent = {
   intro: `欢迎使用 Original Character Maker 用户手册！
 
 本手册涵盖全部 7 个功能模块的详细说明，以及一份全局错误字典。当你在某个工具中遇到报错或不清楚某个按钮/参数的作用时，可以打开本手册查阅对应的章节。
@@ -1029,13 +984,17 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
       title: 'TTS 语音导出',
       overview: `TTS 语音导出工具用于配置语音合成参数并生成角色语音素材。支持调整声音、语言、语速、音调、音量等基础参数，以及气息感、清晰度、表现力、停顿强度等高级参数。可上传参考音频作为音色克隆源，支持音频后处理（降噪、EQ、压缩）和发音精校（自定义替换规则）。`,
       buttons: [
-        { name: '保存', description: '将当前 TTS 配置保存到本地存储。' },
-        { name: '重刷', description: '将所有参数重置为默认值。会弹出二次确认。' },
-        { name: '导入配置', description: '导入之前导出的 TTS JSON 配置文件。' },
-        { name: '下载 JSON', description: '将当前 TTS 配置下载为 JSON 文件。' },
+        { name: '保存', description: '将当前 TTS 配置保存到本地存储。保存成功后状态指示器会从「未保存」变为「已保存」。' },
+        { name: '重刷', description: '将所有参数重置为默认值，清空参考音频和日志。会弹出二次确认弹窗防止误触。' },
+        { name: '导入配置', description: '导入之前导出的 TTS JSON 配置文件，恢复全部参数设置。' },
+        { name: '下载 JSON', description: '将当前 TTS 配置下载为 JSON 文件（oc-tts-config.json），可用于备份或跨设备迁移。' },
+        { name: '复制 JSON', description: '将当前 TTS 配置复制为 JSON 文本到剪贴板。' },
+        { name: '上传参考音频', description: '选择并上传一段参考音频（WAV/MP3/FLAC，不超过 10MB），用于音色克隆。上传后会显示文件名。' },
         { name: '展开 / 收起高级参数', description: '展开或折叠高级参数面板（停顿强度、语调曲线、强调模式）。' },
         { name: '展开 / 收起音频后处理', description: '展开或折叠音频后处理面板（降噪、EQ、压缩）。' },
         { name: '展开 / 收起发音精校', description: '展开或折叠发音精校面板（文本预处理、替换规则）。' },
+        { name: '复制日志', description: '将右侧日志面板的内容复制到剪贴板。' },
+        { name: '下载日志', description: '将日志内容下载为文本文件（tts-logs.txt）。' },
       ],
       parameters: [
         { name: '声音', description: '选择预设的语音音色。', tips: 'Hanazora 是默认女声；Mirako 是元气女声；Rin 是少年声。' },
@@ -1237,123 +1196,232 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
     {
       id: 'paper2gal',
       title: 'paper2gal 图片素材生成',
-      overview: `Paper2Gal 工具接入 p2g-character-workflow 后端工作流，负责上传角色图像并自动生成系列素材：表情图（思考、惊讶、生气）、CG 场景图和抠图素材。
+      overview: `Paper2Gal 是 Original Character Maker 的核心工作流工具，接入 p2g-character-workflow 后端，实现「单图进、多资产出」的角色素材批量生成。上传一张角色参考图后，工作流会自动执行 10 个步骤，生成 8 张最终素材和 5 份元数据文件。
 
-**抠图方案（v0.6.4+）**
-抠图引擎已全面切换为 browser cutout（浏览器端 AI 抠图，基于 IMG.LY 浏览器模型）。browser cutout 在用户浏览器中运行，无需任何外部 API Key，不依赖服务端本地抠图环境或阿里云接口。处理后的输出为透明背景 PNG。
+**最终输出资产（共 8 张图片）**
+· 表情图 ×3：思考（thinking）、惊讶（surprise）、生气（angry），竖屏构图
+· CG 场景图 ×2：CG01、CG02，横屏 16:9 构图，单人全年龄日常剧情场景
+· 透明抠图 ×3：对应上述三张表情的透明背景 PNG
 
-**部署注意事项**
-- **Zeabur 部署（推荐）**：选择 Dockerfile 部署方式，镜像不需要预装服务端抠图运行时。环境变量需在 Zeabur 控制台设置（.env 文件不会被上传）。详见 DEPLOY.md。
-- Docker 部署：镜像不需要预装服务端抠图运行时，开箱即用。
-- 裸机部署：无需安装服务端抠图工具；浏览器会在首次抠图时加载 IMG.LY 模型资源。
-- 服务端无本地抠图依赖：背景移除固定由浏览器端执行。
-- 性能建议：browser cutout 对 CPU 和内存有一定要求，处理 1024×1024 图片约需 2~5 秒。低配置服务器建议关闭 AI 并发，让步骤串行执行。
+**元数据文件（共 5 份）**
+· manifest：工作流完整清单
+· character_profile：角色分析档案
+· prompts：各步骤使用的最终提示词记录
+· character_pack：角色封装包
+· p2g_handoff：paper2gal 交接文件
 
-**工作流执行顺序**
-1. 验证输入（格式、尺寸检查）
-2. 分析角色（生成角色描述，供后续步骤复用）
-3. 并行/串行生成表情（thinking、surprise、angry）
-4. 并行/串行生成 CG（CG01、CG02）
-5. 并行/串行执行 browser cutout 抠图（基于已生成的表情图）
+**工作流执行顺序（10 步）**
+1. validate_input — 验证输入图片格式、尺寸
+2. analyze_character — AI 分析角色特征，生成角色描述供后续步骤复用
+3. expression_thinking — 生成思考表情图
+4. expression_surprise — 生成惊讶表情图
+5. expression_angry — 生生气表情图
+6. cg_01 — 生成第一张 CG 场景图
+7. cg_02 — 生成第二张 CG 场景图
+8. cutout_expression_thinking — 对思考表情进行透明抠图
+9. cutout_expression_surprise — 对惊讶表情进行透明抠图
+10. cutout_expression_angry — 对生气表情进行透明抠图
 
-支持 Prompt 覆盖和 AI 并发控制，可实时查看工作流进度和下载结果。`,
+**Prompt 覆盖系统**
+每个生成步骤都支持自定义 Prompt 覆盖。默认提示词已内置严格的角色一致性约束（身份、脸型、发型、服装、配色、画风保持一致）和安全边界（禁止性感化、暴露服装、暧昧姿势、成人暗示）。你可以根据角色特点微调表情描述和场景氛围，但建议保留默认提示词中的约束部分以保证输出质量。
+
+**重做系统（v1.0.0+）**
+支持对单个结果进行重做（Redo），不同表情和 CG 可以并行重做。重做时页面会显示「重做中」状态，并自动同步后端进度。注意：重做表情会自动同步重做对应的抠图（它们属于同一个冲突组）。
+
+**抠图方案**
+抠图由后端统一调度。当后端将 remove_background 提供商设为 frontend 时，浏览器会自动执行 AI 抠图（基于 IMG.LY background-removal 模型）。浏览器抠图在本地运行，无需额外 API Key，首次运行需要下载模型资源（约 1-2 分钟）。如果浏览器抠图失败，会自动回退到边缘颜色检测兜底方案。
+
+**状态保存**
+页面会自动保存当前工作流状态、Prompt 覆盖配置和并发设置到浏览器本地存储。刷新页面后可恢复进度。未保存的修改会显示黄色「未保存」指示器，离开页面前会提示确认。`,
       buttons: [
-        { name: '选择图片', description: '上传角色图像。仅接受 PNG 和 JPG 格式，最大尺寸建议不超过 4096x4096。' },
-        { name: '启动工作流', description: '向后端提交角色图像，启动 paper2gal 工作流。工作流会依次执行：验证输入、分析角色、生成表情、生成 CG、执行 browser cutout 抠图。支持断点续传：如果某个步骤失败，修复问题后点击对应步骤卡片的「重做」即可单独重试，无需从头开始。' },
-        { name: '复制 JSON', description: '复制当前 Prompt 覆盖配置为 JSON 文本。可用于快速备份或分享给其他用户。' },
-        { name: '下载 JSON', description: '下载当前 Prompt 覆盖配置为 JSON 文件。下次使用时可通过「导入 JSON」恢复配置。' },
-        { name: '导出工作流 JSON', description: '下载包含工作流完整状态、步骤详情、调试信息和各步骤提供商分配的 JSON 文件，用于排查问题或向开发者反馈 Bug。导出前请确保工作流已至少执行过一次。' },
-        { name: '展开 / 收起 Prompt 覆盖', description: '展开或折叠 Prompt 覆盖面板，可自定义各步骤的生成提示词。展开后支持一键重置为默认值。' },
-        { name: '重刷', description: '清除工作流状态、上传的图片和结果，恢复为初始状态。此操作不可撤销，已生成的素材和步骤进度将全部丢失。' },
+        { name: '返回首页', description: '离开 paper2gal 页面返回主页。如果当前有未保存的配置修改（Prompt 覆盖或并发设置），会先弹出确认弹窗，可选择「继续编辑」保存后再离开，或「确认返回」放弃修改。' },
+        { name: '打开设置', description: '打开全局设置面板。在 paper2gal 中最常用的设置项是「API」标签页（配置后端地址和 Key）和「性能」标签页（调整图像预览质量、最大并发请求数）。' },
+        { name: '未保存 / 已保存', description: '状态指示器。当修改了 Prompt 覆盖文本或 AI 并发开关后，指示器显示黄色「未保存」。点击「保存配置」后变为绿色「已保存」。此状态也决定是否弹出离开确认弹窗。' },
+        { name: '保存配置', description: '将当前的 Prompt 覆盖配置和 AI 并发设置保存为快照。保存后「未保存」指示器变为「已保存」，离开页面时不再弹窗提示。注意：此操作仅保存配置，不保存工作流状态（工作流状态由页面自动持久化）。' },
+        { name: '重置工作流', description: '清除所有工作流状态、上传的图片、生成结果和配置，恢复为初始空白状态。此操作不可撤销，已生成的素材图片、步骤进度、调试日志将全部丢失。操作前会弹出二次确认弹窗。' },
+        { name: '导入配置', description: '导入之前导出的 paper2gal JSON 配置文件，恢复 Prompt 覆盖和 AI 并发设置。支持两种格式：标准格式（包含 tool: "paper2gal" 和 config 对象）和兼容格式（直接包含 promptOverrides 和 aiConcurrencyEnabled 字段）。如果文件格式不正确会弹出提示。' },
+        { name: '复制 JSON', description: '将当前工作流的完整调试信息（包含消息状态、工作流对象、生效 API 地址、Prompt 覆盖等）复制为 JSON 文本到剪贴板。用于向开发者反馈问题时提供上下文。' },
+        { name: '下载 JSON', description: '下载当前工作流的调试 JSON 文件（paper2gal-workflow.json），内容与「复制 JSON」相同。' },
+        { name: '导出封装配置', description: '下载仅包含 Prompt 覆盖和 AI 并发设置的精简 JSON 文件（paper2gal-config.json），不含工作流状态。此文件可通过「导入配置」恢复，便于跨设备迁移配置或分享 Prompt 模板。' },
+        { name: '源图片面板 — 展开/收起', description: '点击面板标题可展开或收起源图片区域。展开后显示图片预览、文件名和格式转换器快捷入口。' },
+        { name: '选择图片 / 替换图片', description: '打开系统文件选择器上传角色参考图。仅接受 PNG 和 JPG 格式。支持重复选择同一文件（每次选择后会自动重置文件输入框）。推荐上传单人立绘或清晰半身图，尺寸建议 1024×1024 ~ 2048×2048。' },
+        { name: '格式转换器', description: '快捷跳转到「图片格式转换」工具的按钮。如果当前图片格式或尺寸不合适，可先去转换工具处理后再回来上传。' },
+        { name: '设置面板 — 展开/收起', description: '点击面板标题可展开或收起设置区域。展开后显示源文件信息、当前步骤、AI 并发开关、操作按钮和提示文本。' },
+        { name: '开始', description: '向后端提交角色图像，启动完整的 paper2gal 工作流。提交前会检查是否已选择图片。工作流启动后，页面会自动轮询进度（每秒一次），右侧进度区会实时更新各步骤状态。' },
+        { name: '重做工作流', description: '使用当前已上传的同一张图片重新启动工作流。相当于「快速再来一次」，无需重新选择文件。如果工作流已完成但你对结果不满意，或想更换 Prompt 覆盖后重新生成，可使用此按钮。' },
+        { name: '下载全部', description: '下载包含所有生成素材和元数据文件的 ZIP 压缩包（文件名格式：{workflowId}-outputs.zip）。只有工作流已经启动（存在 workflowId）时此按钮才可用。' },
+        { name: 'Prompt 覆盖面板 — 展开/收起', description: '点击面板标题展开或折叠 Prompt 覆盖编辑区。默认折叠，需要自定义提示词时展开。展开后显示 5 个文本编辑框，分别对应 3 张表情和 2 张 CG。' },
+        { name: '步骤卡片 — 打开文件', description: '当某个步骤成功生成输出后，其步骤卡片上会出现「打开文件」按钮。点击后在新标签页打开该步骤的输出图片 URL，可直接查看原图。' },
+        { name: '步骤卡片 — 重做 / 重试', description: '对于可重做的步骤（expression_thinking / expression_surprise / expression_angry / cg_01 / cg_02 及对应的 cutout 步骤），步骤卡片上会显示重做按钮。失败状态的步骤显示「重试步骤」，成功状态的步骤显示「重做当前结果」。点击后向后端提交重做请求，页面会继续轮询新进度。不同步骤可以并行重做，但同一冲突组内的步骤（如表情和对应抠图）会互斥。' },
+        { name: '结果区 — 打开文件', description: '在右侧结果网格的每张输出卡片上，点击「打开文件」可在新标签页查看原图。' },
+        { name: '结果区 — 下载', description: '下载单张输出图片到本地，使用预设的文件名（如 expression-thinking.png、cg-01.png 等）。' },
+        { name: '结果区 — 复制素材', description: '将单张输出图片复制到系统剪贴板（如果浏览器支持 ClipboardItem API）。复制成功后按钮文字会短暂变为「已复制」。' },
+        { name: '结果区 — 重做当前结果', description: '在结果卡片上直接对某张输出图发起重做，与步骤卡片上的重做功能相同。' },
+        { name: '元数据操作 — 打开 Manifest', description: '在工作流完成后，点击此按钮在新标签页打开 manifest.json 文件，查看工作流的完整执行记录和输出清单。' },
+        { name: '元数据操作 — 打开角色档案', description: '打开 character_profile 文件，查看 AI 对上传角色的分析结果（外貌特征、服装、配色等描述）。' },
+        { name: '元数据操作 — 打开提示词记录', description: '打开 prompts 文件，查看各步骤实际使用的最终提示词（包含默认提示词和你的 Prompt 覆盖合并后的结果）。' },
+        { name: '元数据操作 — 打开角色封装包', description: '打开 character_pack 文件，查看角色封装数据。' },
+        { name: '元数据操作 — 打开 P2G 交接文件', description: '打开 p2g_handoff 文件，查看供 paper2gal 下游流程使用的交接数据。' },
+        { name: '日志面板 — 复制日志', description: '复制当前工作流的所有步骤状态日志到剪贴板。日志格式包含每个步骤的状态、提供商、输出 URL 和错误信息。' },
+        { name: '日志面板 — 下载日志', description: '将日志内容下载为文本文件（paper2gal-logs.txt）。' },
+        { name: '结果摘要 — 复制结果', description: '复制结果摘要 JSON（outputs 对象）到剪贴板。' },
+        { name: '结果摘要 — 下载结果', description: '下载结果摘要 JSON 文件（paper2gal-result.json）。' },
+        { name: '最新错误 — 复制 / 下载', description: '复制或下载当前最新的错误详情 JSON，包含可读错误信息、可能原因、修复提示和调试数据。' },
+        { name: '最新错误 — 打开详情面板', description: '打开可拖拽的错误详情浮窗，以结构化方式展示错误代码、阶段、消息、提示和详细数据。' },
+        { name: '调试面板 — 复制调试 / 下载调试', description: '复制或下载完整的调试 JSON（paper2gal-debug.json），包含消息、工作流状态、生效 API 地址、接口模式、输入文件名、并发设置和 Prompt 覆盖。用于深度排查问题时向开发者提供完整上下文。' },
       ],
       parameters: [
-        { name: '表情 Prompt 覆盖 - 思考', description: '覆盖「思考」表情生成步骤的默认 Prompt。留空则使用后端预设提示词。', tips: '建议保留角色名和核心外貌特征，仅修改表情描述部分，以保证角色一致性。' },
-        { name: '表情 Prompt 覆盖 - 惊讶', description: '覆盖「惊讶」表情生成步骤的默认 Prompt。留空则使用后端预设提示词。', tips: '惊讶表情容易生成夸张效果，可适当加入「微微张嘴」「瞳孔收缩」等细节约束。' },
-        { name: '表情 Prompt 覆盖 - 生气', description: '覆盖「生气」表情生成步骤的默认 Prompt。留空则使用后端预设提示词。', tips: '生气表情注意避免生成暴力元素，可加入「皱眉」「抿嘴」等温和描述。' },
-        { name: 'CG Prompt 覆盖 - CG01', description: '覆盖第一张 CG 场景图的生成 Prompt。留空则使用后端预设提示词。', tips: 'CG 图通常包含背景场景，可在 Prompt 中指定「室内/室外」「白天/夜晚」等氛围关键词。' },
-        { name: 'CG Prompt 覆盖 - CG02', description: '覆盖第二张 CG 场景图的生成 Prompt。留空则使用后端预设提示词。', tips: '建议与 CG01 保持角色一致性，仅改变场景或动作，形成系列感。' },
-        { name: 'AI 并发', description: '是否允许多个 AI 生成步骤并行执行。开启后可显著缩短总耗时。', tips: '开启并发时后端会同时调度多个模型请求，但可能增加 API 费用。browser cutout 抠图步骤也参与并发池，低配置服务器建议关闭。' },
-        { name: '输入图片尺寸', description: '上传的角色图像建议尺寸。', tips: '推荐 1024×1024 ~ 2048×2048。过大（>4096）会导致生成和抠图耗时显著增加；过小（<512）会影响角色细节和后续素材质量。' },
-        { name: '抠图提供商', description: '当前工作流使用的背景移除引擎。v0.6.4 起固定为 browser cutout。', tips: 'browser cutout 在用户浏览器中运行，无需 API Key，输出为透明 PNG。若模型资源加载失败，浏览器端抠图会失败并在页面提示错误。' },
+        { name: 'AI 并发执行', description: '开关参数。开启后，工作流中的 AI 生成步骤（表情 ×3 + CG ×2）可以并行执行，显著缩短总耗时。关闭后所有步骤串行执行，耗时更长但 API 调用更平稳。', tips: '开启并发时后端会同时调度多个模型请求，可能增加 API 费用；低配置服务器或速率限制较严的 Key 建议关闭。浏览器端抠图步骤是否参与并发由后端控制。' },
+        { name: 'Prompt 覆盖 — 思考表情', description: '覆盖「思考」表情生成步骤的默认 Prompt。默认提示词要求严格保持角色一致性，并指定竖屏构图、自然思考状态（轻托下巴、视线侧移等）。', tips: '建议保留默认提示词中「严格保持...一致」和「竖屏构图」的约束部分，仅修改表情动作描述。如果清空文本框，后端会使用默认提示词。' },
+        { name: 'Prompt 覆盖 — 惊讶表情', description: '覆盖「惊讶」表情生成步骤的默认 Prompt。默认提示词要求轻微睁大眼睛、肩膀轻抬、手部微微抬起等自然克制的惊讶动作。', tips: '惊讶表情容易生成夸张变形，可在覆盖中加入「动作自然克制，不要夸张变形」等约束。' },
+        { name: 'Prompt 覆盖 — 生气表情', description: '覆盖「生气」表情生成步骤的默认 Prompt。默认提示词要求眉眼和嘴型明确表现不满，可轻微前倾、抱臂或小幅握拳，愤怒程度按角色气质自然发挥。', tips: '注意避免生成暴力元素。默认提示词已包含「不要所有角色都只是轻微生气，也不要暴走夸张」的平衡约束。' },
+        { name: 'Prompt 覆盖 — CG01', description: '覆盖第一张 CG 场景图的生成 Prompt。默认提示词要求基于同一角色生成单人全年龄日常剧情场景，横屏 16:9，禁止新增其他人物，禁止性感化、暴露服装、暧昧姿势、成人暗示。', tips: '可在保留角色一致性约束的前提下，指定特定场景（如「教室」「公园」「雨天街道」）或氛围（如「温馨」「紧张」「悠闲」）。' },
+        { name: 'Prompt 覆盖 — CG02', description: '覆盖第二张 CG 场景图的生成 Prompt。默认约束与 CG01 相同。', tips: '建议与 CG01 保持角色和画风一致，仅改变场景、镜头、姿势或情绪，形成系列感。' },
+        { name: '输入图片', description: '工作流的源图片。仅支持 PNG 和 JPG 格式。图片内容应包含清晰的角色形象，推荐单人立绘或半身图。', tips: '推荐尺寸 1024×1024 ~ 2048×2048。过大（>4096）会导致生成和抠图耗时显著增加；过小（<512）会影响角色细节质量。' },
+        { name: '源文件信息', description: '只读信息，显示当前上传的文件名。' },
+        { name: '当前步骤', description: '只读信息，显示工作流当前正在执行的步骤名称（中文标签）。工作流未启动时显示「—」。' },
+        { name: '工作流 ID', description: '只读信息，显示当前工作流的唯一标识符。工作流未启动时显示「paper2gal-idle」。此 ID 用于后端追踪和下载全部素材。', tips: '如果需要在后端日志中查找对应记录，可复制此 ID 提供给后端管理员。' },
+        { name: '抠图提供商', description: '只读信息，显示当前工作流使用的背景移除引擎名称（如 frontend、sharp、aliyun 等）。由后端根据可用资源自动分配。', tips: '当显示为 frontend 时，抠图由浏览器端 AI 模型执行；显示为其他值时由后端服务执行。' },
+        { name: '表情提供商 / CG 提供商', description: '只读信息，显示表情生成和 CG 生成的后端服务提供商。由后端根据配置自动分配。' },
       ],
       errors: [
         {
           code: 'API_KEY_MISSING',
-          message: '启动工作流后报错，提示 API Key 未配置',
+          message: '启动工作流后立刻报错，提示 API Key 未配置',
           severity: 'critical',
           category: 'A. API 与网络',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: '未在「设置 → API」中配置 API Key。paper2gal 需要调用后端图像生成服务。',
-          solution: '配置 API Key。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '未在「设置 → API」中配置 API Key，或 Key 被清空。paper2gal 需要调用后端图像生成服务，必须配置有效的 API Key。',
+          solution: '在设置面板中配置有效的 API Key。',
           steps: [
-            '打开「设置 → API」',
-            '填入有效 Key',
-            '保存后返回 paper2gal 重试',
+            '点击右上角「打开设置」或按对应快捷键',
+            '切换到「API」标签页',
+            '在「API Key」输入框中填入你的有效 Key',
+            '点击「保存」后关闭设置面板',
+            '返回 paper2gal 页面重新点击「开始」',
           ],
-          relatedCodes: ['API_KEY_EXPIRED'],
+          relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
           prevention: '首次使用任何联网工具前，务必先在「设置 → API」中配置有效的 API Key。',
         },
         {
           code: 'API_KEY_EXPIRED',
-          message: '请求返回 401',
+          message: '请求返回 401 或提示 Key 无效',
           severity: 'critical',
           category: 'A. API 与网络',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: 'Key 过期。',
-          solution: '更换 Key。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '配置的 API Key 已过期、被吊销、或额度已用完。',
+          solution: '更换有效的 API Key。',
           steps: [
-            '打开「设置 → API」',
-            '替换为新的 Key',
-            '保存后重试',
+            '打开「设置 → API」面板',
+            '删除当前 Key，填入新的有效 Key',
+            '如果不确定 Key 是否有效，可在 LLM Hub 的实时测试面板中先测试',
+            '保存后返回 paper2gal 重试',
           ],
           relatedCodes: ['API_KEY_MISSING'],
           prevention: '定期检查 API Key 的有效期和剩余额度；在 LLM Hub 中通过实时测试快速验证 Key 是否有效。',
         },
         {
+          code: 'HOSTED_API_REQUIRED',
+          message: '提示「当前为静态托管环境，必须配置自定义 API」',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：paper2gal → 区域：顶部消息条',
+          cause: '当前页面部署在 GitHub Pages、阿里云 OSS/CDN 等纯静态托管环境中，无法直接访问本地后端。必须配置远程自定义 API 地址才能使用工作流功能。',
+          solution: '在设置中配置远程 API 地址。',
+          steps: [
+            '打开「设置 → API」',
+            '将「接口模式」切换为「自定义 API」',
+            '在「API 地址」中填入已部署的后端根地址（如 https://your-backend.example.com）',
+            '填入对应的 API Key',
+            '保存后重试',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'BACKEND_UNAVAILABLE'],
+          prevention: '在静态托管环境使用 paper2gal 前，务必先部署后端服务并配置正确的 API 地址和 Key。',
+        },
+        {
+          code: 'DIRECT_MODEL_ENDPOINT',
+          message: '提示「当前填写的看起来是模型接口，不是工作流后端根地址」',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：paper2gal → 区域：设置面板 API 标签页 / 顶部消息条',
+          cause: '在「设置 → API → API 地址」中填写了类似 https://api.example.com/v1/chat/completions 的模型接口地址，而不是工作流后端根地址（如 https://your-backend.example.com）。paper2gal 需要的是后端根地址，前端会自动拼接 /api/workflows 等路径。',
+          solution: '修改为正确的工作流后端根地址。',
+          steps: [
+            '打开「设置 → API」',
+            '将「API 地址」修改为后端根地址（格式如 https://your-backend.example.com 或 http://localhost:3001）',
+            '确保地址末尾没有 /api/workflows 或 /v1/chat/completions 等路径',
+            '保存后重试',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_BASE_INVALID'],
+          prevention: '配置 API 地址时只填写后端服务的根域名和端口，不要附加任何 API 路径。',
+        },
+        {
           code: 'API_TIMEOUT',
-          message: '工作流长时间无响应',
+          message: '工作流长时间无响应，最终提示超时',
           severity: 'error',
           category: 'A. API 与网络',
-          location: '页面：paper2gal → 区域：右栏进度条 / 错误面板',
-          cause: '某个步骤耗时过长。可能是图像尺寸过大、模型负载高。',
-          solution: '检查网络或稍后重试。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏进度条',
+          cause: '某个步骤耗时过长。可能原因：图像尺寸过大、模型负载高、网络延迟高、或后端处理排队。',
+          solution: '检查网络或稍后重试，或对单个步骤重做。',
           steps: [
-            '等待 2~3 分钟，看是否有进度更新',
-            '检查网络连接',
+            '等待 2~3 分钟，看是否有进度更新（某些步骤确实需要较长时间）',
+            '检查网络连接是否稳定',
             '如果卡在某一长时间步骤，可在该步骤的卡片上点击「重做」单独重试',
+            '如果整个工作流卡住，可尝试点击「重做工作流」用同一张图重新开始',
           ],
-          relatedCodes: ['NETWORK_DISCONNECTED'],
-          prevention: '处理大尺寸图片或大量文本时，提前降低参数规模（图像尺寸、Max Tokens 等）；网络不稳定时增加超时设置。',
+          relatedCodes: ['NETWORK_DISCONNECTED', 'BACKEND_UNAVAILABLE'],
+          prevention: '处理大尺寸图片时提前压缩；网络不稳定时关闭 AI 并发降低请求频率。',
         },
         {
           code: 'BACKEND_UNAVAILABLE',
-          message: '提示后端不可用',
+          message: '提示「后端不可用」或「无法连接到服务器」',
           severity: 'critical',
           category: 'A. API 与网络',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: '后端未启动或配置错误。',
-          solution: '检查后端状态。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '后端服务器未启动、崩溃、或前端配置的 API Base URL 不正确。',
+          solution: '检查后端服务状态和 API 配置。',
           steps: [
-            '检查 API Base URL',
-            '确认后端服务运行中',
-            '重试',
+            '打开浏览器开发者工具 → Network 标签页',
+            '重新点击「开始」，观察请求是否发出以及响应状态码',
+            '如果请求未发出，检查「设置 → API → API Base URL」是否正确',
+            '如果请求返回 502/503，联系后端管理员确认服务状态',
+            '如果是本地部署，确认后端进程是否在运行（npm start）',
           ],
-          relatedCodes: ['NETWORK_DISCONNECTED'],
+          relatedCodes: ['NETWORK_DISCONNECTED', '502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
           prevention: '本地部署时确保后端进程已启动（npm start）；使用远程服务时确认 URL 配置正确。',
         },
         {
+          code: 'NETWORK_DISCONNECTED',
+          message: '提示网络断开或无法访问互联网',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '设备未连接网络、Wi-Fi 断开、或防火墙阻止了请求。',
+          solution: '恢复网络连接。',
+          steps: [
+            '检查设备的网络连接状态',
+            '尝试访问其他网站确认网络是否正常',
+            '如果使用代理/VPN，检查代理设置是否正确',
+            '如果是公司/校园网络，确认是否限制了 API 访问',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: '使用联网工具前确认网络连接正常；避免在网络波动大的环境下进行长时间工作流。',
+        },
+        {
           code: 'FILE_FORMAT_UNSUPPORTED',
-          message: '上传时提示不支持的格式',
+          message: '上传时提示「不支持的文件格式」',
           severity: 'warning',
           category: 'C. 文件与输入',
-          location: '页面：paper2gal → 区域：左栏「选择图片」按钮',
-          cause: '选择了 WEBP、GIF 等不支持的格式。',
-          solution: '转换为 PNG/JPG。',
+          location: '页面：paper2gal → 区域：左栏源图片面板',
+          cause: '选择了 WEBP、GIF、BMP、TIFF 或其他不支持的格式。paper2gal 仅支持 PNG 和 JPG。',
+          solution: '将图片转换为 PNG 或 JPG 格式。',
           steps: [
-            '使用图片转换工具转为 PNG 或 JPG',
-            '重新上传',
+            '使用图片转换工具（主页 → 图片格式转换）将文件转为 PNG 或 JPG',
+            '或使用系统自带的图片预览/编辑工具导出为 PNG/JPG',
+            '重新在 paper2gal 页面选择转换后的文件',
           ],
           relatedCodes: ['UPLOAD_FORMAT'],
+          prevention: '上传前确认文件格式为 PNG 或 JPG。',
         },
         {
           code: 'FILE_TOO_LARGE',
@@ -1361,13 +1429,15 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           severity: 'warning',
           category: 'C. 文件与输入',
           location: '页面：paper2gal → 区域：左栏预览区',
-          cause: '图片过大。',
-          solution: '缩小图片。',
+          cause: '上传的图片尺寸过大（超过 4096x4096 像素）或文件大小超过浏览器/后端限制。',
+          solution: '压缩或缩小图片后再上传。',
           steps: [
-            '使用图片转换工具将最大边缩放到 2048 以下',
-            '重新上传',
+            '使用图片转换工具将图片最大边缩放到 2048 或 4096 像素以下',
+            '如果是 PNG，可转为 JPG 以减小文件大小',
+            '重新上传处理后的图片',
           ],
           relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: '推荐上传 1024×1024 ~ 2048×2048 的图片，平衡质量与处理速度。',
         },
         {
           code: 'MODEL_NOT_FOUND',
@@ -1375,66 +1445,102 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           severity: 'error',
           category: 'D. 模型与生成',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: '后端配置的模型不存在或 Key 无权访问。',
-          solution: '切换模型或联系后端管理员。',
+          cause: '后端配置的模型不存在、已被下架、或当前 API Key 无权访问该模型。',
+          solution: '联系后端管理员切换模型，或更换有权限的 API Key。',
           steps: [
             '查看错误面板中的具体步骤和模型信息',
             '联系后端管理员确认模型配置',
             '如果某一步骤持续失败，可在该步骤卡片上点击「重做」尝试',
           ],
-          relatedCodes: ['API_KEY_EXPIRED'],
-          prevention: '从下拉列表选择已知可用的模型；使用自定义 API 时查阅服务商文档确认模型列表。',
+          relatedCodes: ['API_KEY_EXPIRED', '403_FORBIDDEN'],
+          prevention: '确保后端配置的模型可用且当前 Key 有权访问；定期验证 Key 权限。',
+        },
+        {
+          code: 'PROMPT_BLOCKED',
+          message: '某步骤报错，提示内容策略违规或敏感词拦截',
+          severity: 'error',
+          category: 'D. 模型与生成',
+          location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
+          cause: 'Prompt 覆盖中的内容被后端服务商的安全过滤器拦截。即使是正常的艺术创作词汇，某些平台也会误判。',
+          solution: '修改 Prompt 覆盖，移除或替换可能触发过滤器的词汇。',
+          steps: [
+            '在左栏展开「Prompt 覆盖」面板',
+            '找到报错的步骤对应的 Prompt',
+            '移除或替换可能触发过滤器的词汇',
+            '在该步骤卡片上点击「重做」',
+            '如果仍失败，尝试将 Prompt 简化为最基础的描述，逐步添加修饰词排查触发词',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', '403_FORBIDDEN'],
+          prevention: '修改 Prompt 覆盖时避免使用敏感词汇；先用默认 Prompt 测试通过后再自定义。',
         },
         {
           code: 'P2G_WORKFLOW_ERROR',
           message: '错误面板上显示「P2G_WORKFLOW_ERROR」',
           severity: 'error',
           category: 'E. 工作流与转换',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: 'Paper2Gal 工作流某个步骤执行失败。可能是输入验证失败、模型不可用、API Key 失效、生成内容被安全过滤器拦截、或网络中断。',
-          solution: '根据错误详情逐步排查。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板 / 可拖拽错误浮窗',
+          cause: 'Paper2Gal 工作流某个步骤执行失败。可能是输入验证失败、模型不可用、API Key 失效、生成内容被安全过滤器拦截、网络中断、或后端内部异常。',
+          solution: '根据错误详情中的「阶段」「消息」「提示」逐步排查。',
           steps: [
-            '展开错误面板，阅读「可读错误信息」「可能原因」「修复提示」',
+            '展开错误面板或打开可拖拽错误浮窗，阅读「可读错误信息」「可能原因」「修复提示」',
             '检查上传的图片是否为有效的 PNG/JPG',
             '检查网络连接',
             '如果提示「内容策略违规」，修改 Prompt 覆盖中的敏感词汇',
             '确认后端服务正常运行',
             '如果某一步骤失败，可在步骤卡片上点击「重做」单独重试该步骤',
-            '如果整个工作流失败，点击「重刷」清除后重新开始',
+            '如果整个工作流失败，点击「重置工作流」清除后重新开始',
           ],
-          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED', 'STYLE_TRANSFER_REQUEST_FAILED'],
-          prevention: '启动工作流前确认图片为有效 PNG/JPG、网络连接稳定、Prompt 覆盖中无敏感词汇。',
+          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED', 'STYLE_TRANSFER_REQUEST_FAILED', 'WORKFLOW_STEP_FAILED'],
+          prevention: '启动工作流前确认图片为有效 PNG/JPG、网络连接稳定、Prompt 覆盖中无敏感词汇、API Key 有效。',
         },
         {
-          code: 'PROMPT_BLOCKED',
-          message: '某步骤报错，提示内容策略违规',
+          code: 'WORKFLOW_NOT_FOUND',
+          message: '重做或下载时提示「这个工作流记录已不存在」',
           severity: 'error',
-          category: 'D. 模型与生成',
+          category: 'E. 工作流与转换',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'Prompt 覆盖中的内容被后端安全过滤器拦截。',
-          solution: '修改 Prompt 覆盖。',
+          cause: '后端（特别是 Zeabur 等无服务器平台）重新部署或重启后，没有把 WORKFLOW_STATE_DIR 挂载到持久化硬盘，旧的 wf_* 状态文件被清空。',
+          solution: '重新启动一个新工作流。',
           steps: [
-            '在左栏展开「Prompt 覆盖」面板',
-            '找到报错的步骤对应的 Prompt',
-            '移除或替换可能触发过滤器的词汇',
-            '在该步骤卡片上点击「重做」',
+            '这是一个后端存储问题，无法恢复旧工作流',
+            '点击「开始」用当前图片启动一个新工作流',
+            '如果需要保留历史工作流，联系后端管理员在 Zeabur/服务器上设置 WORKFLOW_STATE_DIR、OUTPUT_DIR、UPLOAD_DIR 的持久化硬盘挂载',
           ],
-          relatedCodes: ['P2G_WORKFLOW_ERROR'],
-          prevention: '修改 Prompt 覆盖时避免使用敏感词汇；先用默认 Prompt 测试通过后再自定义。',
+          relatedCodes: ['P2G_WORKFLOW_ERROR', 'BACKEND_UNAVAILABLE'],
+          prevention: '使用 Zeabur 等无服务器平台时，务必配置持久化硬盘挂载；重要素材生成后及时点击「下载全部」备份到本地。',
         },
         {
-          code: 'UPLOAD_FORMAT',
-          message: '上传时提示「仅支持 PNG / JPG」',
-          severity: 'warning',
-          category: 'C. 文件与输入',
-          location: '页面：paper2gal → 区域：左栏「选择图片」按钮',
-          cause: '选择了 WEBP、GIF 等格式。',
-          solution: '转换格式。',
+          code: 'WORKFLOW_STEP_FAILED',
+          message: '某个步骤卡片显示为「失败」状态',
+          severity: 'error',
+          category: 'E. 工作流与转换',
+          location: '页面：paper2gal → 区域：右栏步骤列表',
+          cause: '该具体步骤执行时出错。常见原因：模型不可用、Prompt 被拦截、网络超时、后端资源不足。',
+          solution: '查看步骤详情并单独重试。',
           steps: [
-            '使用图片转换工具转为 PNG 或 JPG',
-            '重新上传',
+            '点击失败步骤卡片查看错误详情（error 字段）',
+            '根据错误信息排查（如修改 Prompt、检查网络、更换模型）',
+            '点击该步骤卡片上的「重试步骤」按钮单独重试',
+            '如果多次重试仍失败，联系后端管理员',
           ],
-          relatedCodes: ['FILE_FORMAT_UNSUPPORTED'],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', 'PROMPT_BLOCKED', 'API_TIMEOUT'],
+          prevention: '某步骤失败后查看错误详情，根据提示修改对应 Prompt 或检查网络后重试。',
+        },
+        {
+          code: 'REDO_CONFLICT',
+          message: '点击重做时提示「这个结果已经在重做中」',
+          severity: 'info',
+          category: 'E. 工作流与转换',
+          location: '页面：paper2gal → 区域：步骤卡片 / 结果卡片',
+          cause: '当前步骤或其冲突组中的另一个步骤正在重做中。例如，重做 expression_thinking 时，对应的 cutout_expression_thinking 也会进入重做状态，此时再次点击会提示冲突。',
+          solution: '等待当前重做完成后再操作。',
+          steps: [
+            '观察页面消息条，确认重做进度',
+            '等待该步骤状态从「重做中」变为「成功」或「失败」',
+            '如果重做长时间无响应，刷新页面后重试',
+          ],
+          relatedCodes: ['WORKFLOW_STEP_FAILED'],
+          prevention: '不要对同一冲突组内的步骤同时发起多个重做请求；等待一个完成后再发起下一个。',
         },
         {
           code: 'WORKFLOW_CANCELLED',
@@ -1447,105 +1553,91 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           steps: [
             '确认是否是自己点击了取消',
             '如果不是，可能是后端资源不足',
-            '等待几分钟后重新点击「启动工作流」',
+            '等待几分钟后重新点击「开始」',
           ],
           relatedCodes: ['P2G_WORKFLOW_ERROR'],
         },
         {
-          code: 'WORKFLOW_STEP_FAILED',
-          message: '某个步骤卡片显示为「失败」状态',
-          severity: 'error',
-          category: 'E. 工作流与转换',
-          location: '页面：paper2gal → 区域：右栏步骤列表',
-          cause: '该具体步骤执行时出错。',
-          solution: '查看步骤详情并单独重试。',
-          steps: [
-            '点击失败步骤卡片查看错误详情',
-            '根据错误信息排查（如修改 Prompt、检查网络、更换模型）',
-            '点击该步骤卡片上的「重做」按钮单独重试',
-            '如果多次重试仍失败，联系后端管理员',
-          ],
-          relatedCodes: ['P2G_WORKFLOW_ERROR', 'PROMPT_BLOCKED'],
-          prevention: '某步骤失败后查看错误详情，根据提示修改对应 Prompt 或检查网络后重试。',
-        },
-        {
           code: '429_TOO_MANY_REQUESTS',
-          message: '提示请求过于频繁',
+          message: '提示请求过于频繁（Rate Limit）',
           severity: 'warning',
           category: 'A. API 与网络',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: '工作流并发执行时发送了过多请求。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '工作流并发执行时发送了过多请求，超过了服务商的速率限制。',
           solution: '关闭 AI 并发或等待后重试。',
           steps: [
-            '在左栏关闭「AI 并发」开关',
+            '在左栏设置面板关闭「AI 并发」开关',
             '等待 1~2 分钟',
             '重新启动工作流',
           ],
           relatedCodes: ['API_RATE_LIMIT'],
+          prevention: '使用速率限制较严的 API Key 时，建议关闭 AI 并发；避免在短时间内重复启动多个工作流。',
         },
         {
           code: '500_INTERNAL_ERROR',
-          message: '后端返回 500',
+          message: '后端返回 500 内部服务器错误',
           severity: 'error',
           category: '0~9. HTTP 状态码',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: '后端内部异常。',
-          solution: '稍后重试。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '后端服务在处理请求时发生内部异常。可能是模型加载失败、GPU 内存不足、或代码 Bug。',
+          solution: '稍后重试或联系后端管理员。',
           steps: [
             '等待 2 分钟',
-            '降低上传图片尺寸',
-            '重试',
+            '降低上传图片尺寸后重试',
+            '如果问题持续，联系后端管理员查看服务器日志',
           ],
           relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
-          prevention: '降低请求规模（图像尺寸、Max Tokens 等）；避免在服务器高负载时提交大任务。',
+          prevention: '降低请求规模（图像尺寸）；避免在服务器高负载时提交大任务。',
         },
         {
           code: '502_BAD_GATEWAY',
-          message: '后端返回 502',
+          message: '后端返回 502 Bad Gateway',
           severity: 'error',
           category: '0~9. HTTP 状态码',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: '反向代理无法连接后端。',
-          solution: '检查后端状态。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '反向代理（如 Nginx）无法连接到后端应用服务器。可能是后端进程崩溃或未启动。',
+          solution: '检查后端服务状态。',
           steps: [
-            '确认后端进程运行中',
-            '重启后端',
-            '重试',
+            '如果是本地部署，确认后端进程是否在运行',
+            '检查后端服务端口是否被占用',
+            '查看后端日志确认是否有启动错误',
+            '重启后端服务后重试',
           ],
-          relatedCodes: ['503_SERVICE_UNAVAILABLE'],
+          relatedCodes: ['503_SERVICE_UNAVAILABLE', 'BACKEND_UNAVAILABLE'],
           prevention: '本地部署时确认后端进程在运行；检查反向代理配置。',
         },
         {
           code: '503_SERVICE_UNAVAILABLE',
-          message: '后端返回 503',
+          message: '后端返回 503 Service Unavailable',
           severity: 'error',
           category: '0~9. HTTP 状态码',
-          location: '页面：paper2gal → 区域：右栏错误面板',
-          cause: '后端暂时不可用。',
+          location: '页面：paper2gal → 区域：顶部消息条 / 右栏错误面板',
+          cause: '后端服务暂时不可用，可能正在进行维护、重启、或过载保护。',
           solution: '稍后重试。',
           steps: [
-            '等待 2~3 分钟',
-            '重试',
+            '等待 2~3 分钟后重试',
+            '检查后端服务状态页面（如果有）',
+            '联系后端管理员确认是否在维护',
           ],
-          relatedCodes: ['502_BAD_GATEWAY'],
+          relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
           prevention: '避开服务器维护时段操作；高负载时降低请求频率。',
         },
         {
           code: 'FRONTEND_CUTOUT_SPAWN_FAILED',
-          message: '抠图步骤报错，提示 browser cutout 无法启动',
+          message: '抠图步骤报错，提示浏览器端抠图资源无法加载',
           severity: 'critical',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: '浏览器端模型资源无法加载，或当前浏览器不支持所需能力。',
-          solution: '确认前端抠图资源可访问后刷新重试。',
+          cause: '浏览器端 IMG.LY 模型资源无法加载，或当前浏览器不支持所需的 WebGL/WASM 能力。',
+          solution: '刷新页面重试，或换用现代浏览器。',
           steps: [
-            '确认浏览器可以访问前端抠图模型资源',
             '刷新页面后重新触发浏览器端抠图',
-            '如果是 Docker 部署，重新构建镜像（Dockerfile 已包含安装步骤）',
-            '重启后端服务',
+            '确认浏览器为 Chrome/Firefox/Edge 等现代浏览器（IE 和旧版 Safari 不支持）',
+            '检查浏览器是否禁用了 WebGL 或 WASM',
+            '如果是 Docker 部署，确认镜像已正确构建（Dockerfile 已包含模型资源）',
           ],
           relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
-          prevention: 'Docker 部署会代理前端抠图资源；非 Docker 部署请参考 DEPLOY.md 使用前端抠图配置。',
+          prevention: '使用现代浏览器（Chrome/Firefox/Edge 最新版）；不要禁用 WebGL 或 WASM。',
         },
         {
           code: 'FRONTEND_CUTOUT_TIMEOUT',
@@ -1553,32 +1645,32 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'browser cutout 处理超时（默认 120 秒）。可能是图片过大、服务器 CPU/RAM 不足。',
-          solution: '缩小图片或提升服务器性能。',
+          cause: '浏览器端抠图处理超时。可能是图片过大、设备 CPU/RAM 不足、或模型资源加载缓慢。',
+          solution: '缩小图片或提升设备性能。',
           steps: [
             '重新上传一张最大边不超过 2048 像素的图片',
-            '检查服务器 CPU 和内存使用率',
-            '如果是低配置服务器，关闭「AI 并发」让步骤串行执行',
+            '关闭其他浏览器标签页释放内存',
+            '关闭「AI 并发」让步骤串行执行，减少资源竞争',
             '重试',
           ],
-          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
-          prevention: '上传前将图片压缩到合理尺寸（建议 1024~2048px）；确保服务器至少有 2GB 可用内存。',
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED', 'DEVICE_MEMORY_LOW'],
+          prevention: '上传前将图片压缩到合理尺寸（建议 1024~2048px）；确保设备有足够内存。',
         },
         {
           code: 'FRONTEND_CUTOUT_EXECUTION_FAILED',
-          message: '抠图步骤报错，提示 browser cutout 执行失败',
+          message: '抠图步骤报错，提示浏览器端抠图执行失败',
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: 'browser cutout 处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或依赖库异常。',
+          cause: '浏览器端抠图处理图片时发生内部错误。可能是图片格式损坏、不支持的编码、或 IMG.LY 模型异常。',
           solution: '更换图片后重试。',
           steps: [
-            '确认表情图片已成功生成（点击步骤卡片查看输出）',
+            '确认表情图片已成功生成（点击步骤卡片查看 output_url）',
             '如果源图片损坏，重新上传一张新的 PNG/JPG 图片',
-            '检查后端日志中的详细错误输出',
             '在该步骤卡片上点击「重做」单独重试抠图',
+            '如果浏览器抠图持续失败，联系后端管理员将 remove_background 提供商切换到后端服务',
           ],
-          relatedCodes: ['FRONTEND_CUTOUT_SPAWN_FAILED', 'FRONTEND_CUTOUT_TIMEOUT', 'FRONTEND_CUTOUT_OUTPUT_MISSING'],
+          relatedCodes: ['FRONTEND_CUTOUT_SPAWN_FAILED', 'FRONTEND_CUTOUT_TIMEOUT'],
           prevention: '上传标准格式的 PNG/JPG 图片；避免使用特殊编码或损坏的图片文件。',
         },
         {
@@ -1587,15 +1679,129 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           severity: 'error',
           category: 'F. 系统与权限',
           location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
-          cause: '上游表情生成步骤失败，导致 browser cutout 没有输入文件可处理。',
+          cause: '上游表情生成步骤失败，导致浏览器端抠图没有输入文件可处理。',
           solution: '先排查并修复表情生成步骤的错误，再重试抠图。',
           steps: [
             '检查表情生成步骤（thinking / surprise / angry）的错误信息',
-            '修复表情生成的问题（通常是 API Key 无效或网络问题）',
+            '修复表情生成的问题（通常是 API Key 无效、Prompt 被拦截或网络问题）',
             '确认表情图片已成功生成后，再对抠图步骤点击「重做」',
           ],
-          relatedCodes: ['PLATO_REQUEST_FAILED', 'BANANA2_REQUEST_FAILED', 'MOCK_STEP_FAILED'],
+          relatedCodes: ['WORKFLOW_STEP_FAILED'],
           prevention: '确保表情生成步骤成功后再进行抠图；工作流会自动按顺序执行，不要跳过步骤。',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_OUTPUT_MISSING',
+          message: '浏览器端抠图执行成功但未生成输出',
+          severity: 'error',
+          category: 'F. 系统与权限',
+          location: '页面：paper2gal → 区域：右栏步骤卡片 / 错误面板',
+          cause: '浏览器端抠图处理异常，可能生成了空数据或上传失败。',
+          solution: '更换图片或刷新页面后重试。',
+          steps: [
+            '确认表情图片已成功生成',
+            '刷新页面，让页面重新检测待处理的抠图任务',
+            '如果仍然失败，重新上传新图片并启动新工作流',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
+          prevention: '确保输入图片格式正确；避免使用损坏或特殊编码的图片。',
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: '导入配置时提示「无效的 JSON 格式」',
+          severity: 'warning',
+          category: 'B. 配置与数据',
+          location: '页面：paper2gal → 区域：顶部「导入配置」按钮',
+          cause: '文件内容损坏、不是 JSON 格式、或被其他程序修改过。',
+          solution: '检查文件是否为有效的 UTF-8 编码文本文件。',
+          steps: [
+            '用文本编辑器打开要导入的 JSON 文件',
+            '确认文件是有效的 UTF-8 编码，无乱码',
+            '用 JSON 在线格式化工具验证',
+            '如果文件损坏，尝试从历史备份中恢复',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH'],
+          prevention: '妥善保管导出的配置文件，不要用非文本编辑器修改。',
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: '导入配置时提示「工具类型不匹配」',
+          severity: 'warning',
+          category: 'B. 配置与数据',
+          location: '页面：paper2gal → 区域：顶部「导入配置」按钮',
+          cause: '导入的 JSON 文件中 tool 字段不是 paper2gal，或不包含 promptOverrides 字段。',
+          solution: '确认导入的是 paper2gal 页面导出的配置文件。',
+          steps: [
+            '用文本编辑器打开要导入的 JSON 文件',
+            '确认文件包含 "tool": "paper2gal" 或直接包含 promptOverrides 字段',
+            '如果不是，找到正确的 paper2gal 配置文件再导入',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+          prevention: '从 paper2gal 页面导出的配置文件才包含正确的 tool 字段。',
+        },
+        {
+          code: 'LOCAL_STORAGE_FULL',
+          message: '保存失败，提示浏览器存储空间不足',
+          severity: 'error',
+          category: 'B. 配置与数据',
+          location: '页面：paper2gal → 区域：顶部「保存配置」按钮',
+          cause: '浏览器 localStorage 存储空间已满（通常约 5~10MB）。工作流状态、Prompt 覆盖和历史记录可能占用较大空间。',
+          solution: '清理浏览器存储空间或导出配置到本地文件。',
+          steps: [
+            '先点击「导出封装配置」将当前配置备份到本地文件',
+            '按 Ctrl+Shift+I 打开开发者工具 → Application → Local Storage',
+            '删除不再需要的键（尤其是包含工作流历史的大键）',
+            '返回 paper2gal 重新点击「保存配置」',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: '定期清理浏览器 localStorage 中不再需要的数据；及时导出配置到本地文件备份。',
+        },
+        {
+          code: 'STORAGE_READ_ONLY',
+          message: '保存操作无反应，刷新后数据丢失',
+          severity: 'critical',
+          category: 'B. 配置与数据',
+          location: '页面：paper2gal → 区域：顶部「保存配置」按钮',
+          cause: '浏览器处于隐私/无痕模式，或 localStorage 被系统策略禁用，或磁盘空间已满导致浏览器将存储设为只读。',
+          solution: '退出隐私模式或释放磁盘空间。',
+          steps: [
+            '确认浏览器不在无痕/隐私浏览模式（该模式通常禁用 localStorage）',
+            '检查系统磁盘空间是否已满',
+            '尝试在普通窗口中重新打开应用',
+            '如果问题持续，使用「导出封装配置」功能将配置保存为本地文件作为替代方案',
+          ],
+          relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: '避免在浏览器无痕/隐私模式中使用本应用；定期导出配置到本地文件作为备份。',
+        },
+        {
+          code: 'UNSAVED_WARNING',
+          message: '返回首页时提示「你还没保存当前页面内容」',
+          severity: 'info',
+          category: 'B. 配置与数据',
+          location: '页面：paper2gal → 区域：左上角「返回首页」按钮',
+          cause: '当前 Prompt 覆盖或 AI 并发设置与上次保存的快照不一致（isDirty 为 true）。你可能修改了配置但忘记保存。',
+          solution: '根据需要选择保存或放弃。',
+          steps: [
+            '如果希望保留修改：点击弹窗中的「继续编辑」，回到页面点击「保存配置」，然后再返回首页',
+            '如果不需要保留：点击弹窗中的「确认返回」',
+          ],
+        },
+        {
+          code: 'DEVICE_MEMORY_LOW',
+          message: '浏览器标签页崩溃或无响应',
+          severity: 'critical',
+          category: 'F. 系统与权限',
+          location: '页面：paper2gal → 区域：整个页面',
+          cause: '设备内存不足，浏览器强制终止了标签页进程。通常发生在处理超大图片（>4096 分辨率）或浏览器抠图模型加载时。',
+          solution: '关闭其他标签页，降低图片尺寸，或换用内存更大的设备。',
+          steps: [
+            '保存当前工作（点击「保存配置」）',
+            '关闭其他不用的浏览器标签页',
+            '使用图片转换工具将图片最大边缩放到 2048 以下',
+            '重启浏览器后重试',
+            '如果问题持续，尝试在内存更大的设备上操作',
+          ],
+          relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: '处理大文件前关闭其他浏览器标签页；将图片最大边缩放到 2048 以下；低内存设备建议关闭 AI 并发。',
         },
       ],
     },
@@ -1938,6 +2144,41 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           ],
           relatedCodes: ['NETWORK_DISCONNECTED', 'API_TIMEOUT'],
           prevention: '使用稳定的网络连接；必要时切换为有线网络或更可靠的 Wi-Fi。',
+        },
+        {
+          code: 'HOSTED_API_REQUIRED',
+          message: '提示「当前为静态托管环境，必须配置自定义 API」',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：任意需联网工具 → 区域：错误面板 / 顶部消息条',
+          cause: '页面部署在 GitHub Pages、阿里云 OSS/CDN 等纯静态托管环境中，无法直接访问本地后端。必须配置远程自定义 API 地址和 Key 才能使用工作流功能。',
+          solution: '在设置中配置远程 API 地址和 Key。',
+          steps: [
+            '打开「设置 → API」',
+            '将「接口模式」切换为「自定义 API」',
+            '在「API 地址」中填入已部署的后端根地址',
+            '填入对应的 API Key',
+            '保存后重试',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'BACKEND_UNAVAILABLE'],
+          prevention: '在静态托管环境使用联网工具前，务必先部署后端服务并配置正确的 API 地址和 Key。',
+        },
+        {
+          code: 'DIRECT_MODEL_ENDPOINT',
+          message: '提示「当前填写的看起来是模型接口，不是工作流后端根地址」',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：任意需联网工具 → 区域：设置面板 API 标签页 / 错误面板',
+          cause: '在「设置 → API → API 地址」中填写了类似 https://api.example.com/v1/chat/completions 的模型接口地址，而不是工作流后端根地址。工作流工具需要的是后端根地址，前端会自动拼接 /api/workflows 等路径。',
+          solution: '修改为正确的工作流后端根地址。',
+          steps: [
+            '打开「设置 → API」',
+            '将「API 地址」修改为后端根地址（格式如 https://your-backend.example.com）',
+            '确保地址末尾没有 /v1/chat/completions 等模型路径',
+            '保存后重试',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_BASE_INVALID'],
+          prevention: '配置 API 地址时只填写后端服务的根域名和端口，不要附加任何 API 路径。',
         },
       ],
     },
@@ -2379,6 +2620,38 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
           ],
           relatedCodes: ['P2G_WORKFLOW_ERROR', 'PROMPT_BLOCKED'],
           prevention: '某步骤失败后查看错误详情，根据提示修改对应 Prompt 或检查网络后重试。',
+        },
+        {
+          code: 'WORKFLOW_NOT_FOUND',
+          message: '重做或下载时提示「这个工作流记录已不存在」',
+          severity: 'error',
+          category: 'E. 工作流与转换',
+          location: '页面：paper2gal → 区域：步骤卡片 / 错误面板',
+          cause: '后端（特别是 Zeabur 等无服务器平台）重新部署或重启后，没有把 WORKFLOW_STATE_DIR 挂载到持久化硬盘，旧的 wf_* 状态文件被清空。',
+          solution: '重新启动一个新工作流。',
+          steps: [
+            '这是一个后端存储问题，无法恢复旧工作流',
+            '点击「开始」用当前图片启动一个新工作流',
+            '如果需要保留历史工作流，联系后端管理员配置持久化硬盘挂载',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', 'BACKEND_UNAVAILABLE'],
+          prevention: '使用 Zeabur 等无服务器平台时，务必配置持久化硬盘挂载；重要素材生成后及时点击「下载全部」备份到本地。',
+        },
+        {
+          code: 'REDO_CONFLICT',
+          message: '点击重做时提示「这个结果已经在重做中」',
+          severity: 'info',
+          category: 'E. 工作流与转换',
+          location: '页面：paper2gal → 区域：步骤卡片 / 结果卡片',
+          cause: '当前步骤或其冲突组中的另一个步骤正在重做中。例如，重做 expression_thinking 时，对应的 cutout_expression_thinking 也会进入重做状态。',
+          solution: '等待当前重做完成后再操作。',
+          steps: [
+            '观察页面消息条，确认重做进度',
+            '等待该步骤状态从「重做中」变为「成功」或「失败」',
+            '如果重做长时间无响应，刷新页面后重试',
+          ],
+          relatedCodes: ['WORKFLOW_STEP_FAILED'],
+          prevention: '不要对同一冲突组内的步骤同时发起多个重做请求；等待一个完成后再发起下一个。',
         },
       ],
     },
