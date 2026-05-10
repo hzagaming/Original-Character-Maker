@@ -527,9 +527,24 @@ async function finalizeWorkflowState(runtime) {
   await writeWorkflowSnapshots(workflowId, outputDir, characterProfile, promptPack);
 }
 
+function createStepRunId(stepName) {
+  return `${stepName}:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function isCurrentStepRun(workflowId, stepName, runId) {
+  const workflow = getWorkflow(workflowId);
+  return workflow?.steps?.[stepName]?.debug?.run_id === runId;
+}
+
 async function runStep(workflowId, stepName, provider, runFn, onSuccess, options = {}) {
   const { fatal = true, updateCurrentStep = true } = options;
-  markStepStatus(workflowId, stepName, "running", null, { provider });
+  const runId = createStepRunId(stepName);
+  markStepStatus(workflowId, stepName, "running", null, {
+    provider,
+    debug: {
+      run_id: runId
+    }
+  });
   if (updateCurrentStep) {
     setWorkflowStatus(workflowId, "running", stepName, null, null);
   }
@@ -540,10 +555,17 @@ async function runStep(workflowId, stepName, provider, runFn, onSuccess, options
       ? toPublicOutputUrl(workflowId, path.basename(result.output_path))
       : null;
 
+    if (!isCurrentStepRun(workflowId, stepName, runId)) {
+      return null;
+    }
+
     markStepStatus(workflowId, stepName, "success", null, {
       provider: result?.provider || provider,
       output_url: outputUrl,
-      debug: result?.debug || null
+      debug: {
+        ...(result?.debug || {}),
+        run_id: runId
+      }
     });
 
     if (typeof onSuccess === "function") {
@@ -552,6 +574,10 @@ async function runStep(workflowId, stepName, provider, runFn, onSuccess, options
 
     return result;
   } catch (error) {
+    if (!isCurrentStepRun(workflowId, stepName, runId)) {
+      return null;
+    }
+
     const detailed = formatErrorDetails(error, {
       step: stepName,
       provider,
@@ -560,7 +586,10 @@ async function runStep(workflowId, stepName, provider, runFn, onSuccess, options
 
     markStepStatus(workflowId, stepName, "failed", detailed.message, {
       provider,
-      debug: detailed.debug
+      debug: {
+        ...detailed.debug,
+        run_id: runId
+      }
     });
 
     if (fatal) {

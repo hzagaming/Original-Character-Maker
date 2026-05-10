@@ -733,6 +733,10 @@ function hasRedoConflict(stepName: PaperWorkflowStepName, inFlight: PaperWorkflo
   );
 }
 
+function canRedoPaperStep(stepName: PaperWorkflowStepName, status: PaperWorkflowStepStatus): boolean {
+  return PAPER_REDOABLE_STEPS.includes(stepName) && (status === 'running' || status === 'failed' || status === 'success');
+}
+
 const uiCopy: Record<BaseLanguage, UiCopySet> = {
   zh: {
     dirty: '未保存',
@@ -6547,7 +6551,7 @@ export function Paper2GalPage({
                           </div>
                         )}
                         {step?.error && <div className="paper-step-error">{step.error}</div>}
-                        {PAPER_REDOABLE_STEPS.includes(stepName) && (stepStatus === 'failed' || stepStatus === 'success') && (
+                        {canRedoPaperStep(stepName, stepStatus) && (
                           <div className="mini-action-row">
                             <button
                               className="secondary-button small-button"

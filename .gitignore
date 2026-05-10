@@ -11,3 +11,5 @@ vite.config.d.ts
 tmp/
 dist/
 *.log
+*.zip
+zeabur-upload-folder/

@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "start": "cd server && node src/index.js",
     "server:install": "cd server && npm install",
-    "server:dev": "cd server && node src/index.js"
+    "server:dev": "cd server && node src/index.js",
+    "package:zeabur": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-zeabur.ps1"
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",

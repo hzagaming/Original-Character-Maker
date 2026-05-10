@@ -106,10 +106,6 @@ function getActiveRedoList(workflowId) {
   return [...getActiveRedoGroups(workflowId)];
 }
 
-function hasActiveRedo(workflowId) {
-  return getActiveRedoGroups(workflowId).size > 0;
-}
-
 function beginRedoJob(workflowId, targetStep) {
   const group = getRedoConflictGroup(targetStep);
   const current = getActiveRedoGroups(workflowId);
@@ -206,28 +202,6 @@ function hasErroredFrontendCutouts(workflow) {
   });
 }
 
-function isWaitingOnlyForFrontendCutouts(workflow) {
-  if (!workflow || workflow.outputs?.providers?.remove_background !== "frontend") {
-    return false;
-  }
-
-  const activeNonCutoutStep = WORKFLOW_STEPS.some((stepName) => {
-    if (stepName.startsWith("cutout_expression_")) {
-      return false;
-    }
-    const status = workflow.steps?.[stepName]?.status;
-    return status === "queued" || status === "running";
-  });
-  if (activeNonCutoutStep) {
-    return false;
-  }
-
-  return ["thinking", "surprise", "angry"].some((name) => {
-    const step = workflow.steps?.[`cutout_expression_${name}`];
-    return step?.provider === "frontend" && (step.status === "queued" || step.status === "idle" || step.status === "running");
-  });
-}
-
 router.post("/", upload.single("image"), async (req, res, next) => {
   try {
     const sourceImage = validateUploadedFile(req.file, config);
@@ -262,10 +236,6 @@ router.post("/:id/rerun", express.json(), async (req, res, next) => {
     const workflow = getWorkflow(req.params.id);
     if (!workflow) {
       throw createWorkflowNotFoundError(req.params.id);
-    }
-
-    if ((workflow.status === "running" || workflow.status === "queued") && !isWaitingOnlyForFrontendCutouts(workflow) && !hasActiveRedo(workflow.id)) {
-      throw new AppError("Workflow is still running. Please wait for it to finish before redoing a result.", 409);
     }
 
     const targetStep = String(req.body?.targetStep || "").trim();
