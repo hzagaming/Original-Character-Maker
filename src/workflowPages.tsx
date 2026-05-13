@@ -4201,6 +4201,7 @@ export function StyleTransferPage({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [config, setConfig] = useState({ ...defaultConfig, ...persistedState.config });
+  const [isInputOpen, setIsInputOpen] = useState(true);
   const [isParamsOpen, setIsParamsOpen] = useState(true);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [isResultOpen, setIsResultOpen] = useState(true);
@@ -4538,7 +4539,7 @@ export function StyleTransferPage({
           <div className="tool-column">
             {/* Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.inputTitle}</span>
                   <h3>{transfer.inputTitle}</h3>
@@ -4547,11 +4548,11 @@ export function StyleTransferPage({
                   <button className="secondary-button small-button" type="button" onClick={(e) => { e.stopPropagation(); handlePickFile(); }}>
                     {inputFileName ? copy.replaceImage : copy.chooseImage}
                   </button>
-                  <span className="collapsible-state">{isParamsOpen ? copy.hideDetails : copy.showDetails}</span>
+                  <span className="collapsible-state">{isInputOpen ? copy.hideDetails : copy.showDetails}</span>
                 </div>
               </div>
               <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleFileChange} />
-              {isParamsOpen && (
+              {isInputOpen && (
                 <>
                   <p className="muted-copy">{transfer.fileHint}</p>
                   <div className="preview-surface">
@@ -8632,7 +8633,7 @@ export function CharacterGifPage({
       let response: Response;
 
       if (config.model === 'custom') {
-        const apiCfg = getApiForFeature('style-transfer', _settings);
+        const apiCfg = getApiForFeature('character-gif', _settings);
         if (!apiCfg) {
           throw new Error('No custom API configured for Character GIF. Please go to Settings > API and configure a custom API channel for Character GIF.');
         }

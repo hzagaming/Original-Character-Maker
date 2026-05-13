@@ -263,6 +263,9 @@ export interface SettingsState {
   apiCustom2ForPaper2Gal: boolean;
   apiCustom3ForStyleTransfer: boolean;
   apiCustom3ForPaper2Gal: boolean;
+  apiCustom1ForCharacterGif: boolean;
+  apiCustom2ForCharacterGif: boolean;
+  apiCustom3ForCharacterGif: boolean;
   shortcutMap: ShortcutMap;
   audio: AudioSettings;
   animation: AnimationSettings;

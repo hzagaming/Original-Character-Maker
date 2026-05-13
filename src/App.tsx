@@ -170,6 +170,7 @@ type Messages = {
   apiPrivacy: string;
   apiUseForStyleTransfer: string;
   apiUseForPaper2Gal: string;
+  apiUseForCharacterGif: string;
   shortcutsTitle: string;
   shortcutsHint: string;
   shortcutsReset: string;
@@ -559,6 +560,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: '本网站所有信息均在本地保存，不会上传任何角色社卡、个人信息或私钥。',
     apiUseForStyleTransfer: '此 API 将用于：转画风',
     apiUseForPaper2Gal: '此 API 将用于：Paper2Gal',
+    apiUseForCharacterGif: '此 API 将用于：角色 GIF',
     shortcutsTitle: '编辑器快捷键',
     shortcutsHint: '这里可以直接改 OC 设卡编辑器的快捷键组合，修改后会立刻写入本地设置。',
     shortcutsReset: '恢复默认快捷键',
@@ -935,6 +937,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: 'このサイトの情報はすべてローカル保存です。',
     apiUseForStyleTransfer: 'このAPIの用途：スタイル転送',
     apiUseForPaper2Gal: 'このAPIの用途：Paper2Gal',
+    apiUseForCharacterGif: 'このAPIの用途：キャラクターGIF',
     shortcutsTitle: 'エディタショートカット',
     shortcutsHint: 'ここでは OC 設定エディタ用ショートカットを直接編集でき、変更はすぐローカル設定へ保存されます。',
     shortcutsReset: '既定ショートカットに戻す',
@@ -1311,6 +1314,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: 'Everything stays local in this browser.',
     apiUseForStyleTransfer: 'Use this API for: Style Transfer',
     apiUseForPaper2Gal: 'Use this API for: Paper2Gal',
+    apiUseForCharacterGif: 'Use this API for: Character GIF',
     shortcutsTitle: 'Editor shortcuts',
     shortcutsHint: 'Customize the OC card editor shortcuts here. Changes are saved to local settings immediately.',
     shortcutsReset: 'Reset to default shortcuts',
@@ -1687,6 +1691,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiPrivacy: 'Всё остаётся локально в браузере.',
     apiUseForStyleTransfer: 'Использовать этот API для: стильного переноса',
     apiUseForPaper2Gal: 'Использовать этот API для: Paper2Gal',
+    apiUseForCharacterGif: 'Использовать этот API для: Character GIF',
     shortcutsTitle: 'Горячие клавиши редактора',
     shortcutsHint: 'Здесь можно настроить сочетания клавиш для редактора карточек OC. Изменения сразу сохраняются локально.',
     shortcutsReset: 'Сбросить шорткаты',
@@ -2577,6 +2582,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '1.4.0',
+    date: '2026-05-12',
+    title: '1.4.0 角色 GIF 生成器与用户手册大更新',
+    summary:
+      '新增 Character GIF Generator 页面，支持将角色图像转换为呼吸、眨眼、摇摆、漂浮等 8 种动态 GIF 动画；用户手册全面更新，新增角色 GIF 的完整文档（使用教程、按钮说明、参数详解、18 条错误代码与解决方法）；30 语言文档同步扩展；API 设置支持为角色 GIF 独立配置自定义 API 通道。',
+    details: [
+      '新增角色 GIF 生成器：上传角色图像，调整帧数、帧率、循环、动画类型（呼吸/眨眼/摇摆/漂浮/心跳/发丝飘动/尾巴摇摆/魔法光芒）和缓动函数，一键生成动态角色 GIF。支持透明背景、自动抠图、面部锁定。',
+      '用户手册大更新：为角色 GIF 生成器新增完整文档，涵盖基本流程、GIF 动画技术原理、8 种动画类型详解、全部参数说明（含 Tips）、14 个按钮功能、18 条错误代码（从 API Key 缺失到内存不足）的详细排查步骤与预防措施。',
+      '30 语言文档同步：zh/en/ja/ru/ko 五语完整翻译，25 个骨架语言同步添加英文占位文档；所有语言的用户手册 intro 已从「7 个功能模块」更新为「8 个」。',
+      'API 通道扩展：自定义 API 设置现在支持为「角色 GIF」独立配置 API 通道，与转画风、Paper2Gal 分开管理。',
+      '版本同步：VERSION 升级到 1.4.0，首页公告和公告历史同步更新，5 种基础语言全部覆盖。',
+    ],
+  },
+  {
     version: '1.3.1',
     date: '2026-05-12',
     title: '1.3.1 转画风结果优化与交互修复',
@@ -3402,10 +3421,13 @@ const defaultSettings: SettingsState = {
   apiKey3: '',
   apiCustom1ForStyleTransfer: false,
   apiCustom1ForPaper2Gal: false,
+  apiCustom1ForCharacterGif: false,
   apiCustom2ForStyleTransfer: false,
   apiCustom2ForPaper2Gal: false,
+  apiCustom2ForCharacterGif: false,
   apiCustom3ForStyleTransfer: false,
   apiCustom3ForPaper2Gal: false,
+  apiCustom3ForCharacterGif: false,
   fontPreset: 'sans',
   shortcutMap: defaultShortcutMap,
   audio: { ...defaultAudioSettings },
@@ -3575,10 +3597,13 @@ function loadInitialSettings(): SettingsState {
     if (typeof nextSettings.apiKey3 !== 'string') nextSettings.apiKey3 = '';
     if (typeof nextSettings.apiCustom1ForStyleTransfer !== 'boolean') nextSettings.apiCustom1ForStyleTransfer = false;
     if (typeof nextSettings.apiCustom1ForPaper2Gal !== 'boolean') nextSettings.apiCustom1ForPaper2Gal = false;
+    if (typeof nextSettings.apiCustom1ForCharacterGif !== 'boolean') nextSettings.apiCustom1ForCharacterGif = false;
     if (typeof nextSettings.apiCustom2ForStyleTransfer !== 'boolean') nextSettings.apiCustom2ForStyleTransfer = false;
     if (typeof nextSettings.apiCustom2ForPaper2Gal !== 'boolean') nextSettings.apiCustom2ForPaper2Gal = false;
+    if (typeof nextSettings.apiCustom2ForCharacterGif !== 'boolean') nextSettings.apiCustom2ForCharacterGif = false;
     if (typeof nextSettings.apiCustom3ForStyleTransfer !== 'boolean') nextSettings.apiCustom3ForStyleTransfer = false;
     if (typeof nextSettings.apiCustom3ForPaper2Gal !== 'boolean') nextSettings.apiCustom3ForPaper2Gal = false;
+    if (typeof nextSettings.apiCustom3ForCharacterGif !== 'boolean') nextSettings.apiCustom3ForCharacterGif = false;
 
     updateAudioSettings(nextSettings.audio);
     return nextSettings;
@@ -6820,6 +6845,7 @@ function SettingsModal({
                       const apiKeyKey = ch === 1 ? 'apiKey' : ch === 2 ? 'apiKey2' : 'apiKey3';
                       const styleTransferKey = ch === 1 ? 'apiCustom1ForStyleTransfer' : ch === 2 ? 'apiCustom2ForStyleTransfer' : 'apiCustom3ForStyleTransfer';
                       const paper2GalKey = ch === 1 ? 'apiCustom1ForPaper2Gal' : ch === 2 ? 'apiCustom2ForPaper2Gal' : 'apiCustom3ForPaper2Gal';
+                      const characterGifKey = ch === 1 ? 'apiCustom1ForCharacterGif' : ch === 2 ? 'apiCustom2ForCharacterGif' : 'apiCustom3ForCharacterGif';
                       const title = ch === 1 ? messages.apiChannel1 : ch === 2 ? messages.apiChannel2 : messages.apiChannel3;
                       return (
                         <section className="settings-section" key={ch}>
@@ -6853,6 +6879,13 @@ function SettingsModal({
                               onClick={() => onUpdate({ [paper2GalKey]: !(settings[paper2GalKey as keyof SettingsState] as boolean) })}
                             >
                               {messages.apiUseForPaper2Gal}
+                            </button>
+                            <button
+                              className={`palette-chip ${settings[characterGifKey as keyof SettingsState] ? 'active' : ''}`}
+                              type="button"
+                              onClick={() => onUpdate({ [characterGifKey]: !(settings[characterGifKey as keyof SettingsState] as boolean) })}
+                            >
+                              {messages.apiUseForCharacterGif}
                             </button>
                           </div>
                           <div className="tool-actions-row" style={{ marginTop: 8 }}>
