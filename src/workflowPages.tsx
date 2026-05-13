@@ -2978,9 +2978,11 @@ function normalizePaperPromptOverrides(overrides: PaperPromptOverrides): PaperPr
 async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, timeoutMs = 30000) {
   const controller = new AbortController();
   const externalSignal = init?.signal;
+  let onAbort: (() => void) | null = null;
 
   if (externalSignal) {
-    externalSignal.addEventListener('abort', () => controller.abort(externalSignal.reason), { once: true });
+    onAbort = () => controller.abort(externalSignal.reason);
+    externalSignal.addEventListener('abort', onAbort, { once: true });
     if (externalSignal.aborted) {
       controller.abort(externalSignal.reason);
     }
@@ -2995,6 +2997,9 @@ async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, ti
     return response;
   } finally {
     window.clearTimeout(id);
+    if (externalSignal && onAbort) {
+      externalSignal.removeEventListener('abort', onAbort);
+    }
   }
 }
 
@@ -4157,6 +4162,8 @@ export function StyleTransferPage({
   }
 
   function resetWorkspaceView() {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
     if (inputPreviewUrl) URL.revokeObjectURL(inputPreviewUrl);
     if (fileInputRef.current) fileInputRef.current.value = '';
     const nextConfig = { ...defaultConfig };
@@ -6002,6 +6009,7 @@ export function Paper2GalPage({
 
   function resetWorkflowView() {
     setIsResetOpen(false);
+    setRedoStepsInFlight([]);
 
     if (inputPreviewUrl) {
       URL.revokeObjectURL(inputPreviewUrl);
@@ -6898,7 +6906,9 @@ export function LlmHubPage({
       if (!controller.signal.aborted) {
         setTestLoading(false);
       }
-      abortControllerRef.current = null;
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
     }
   }
 
@@ -7121,7 +7131,7 @@ export function LlmHubPage({
 
 
       {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
-      {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={() => { setLlmConfig({ ...fullDefaultConfig }); setSavedSnapshot(JSON.stringify({ llmConfig: fullDefaultConfig })); setTestHistory([]); setTestOutput(''); setTestError(null); setShowErrorPanel(false); }} />}
+      {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={() => { setIsResetOpen(false); setLlmConfig({ ...fullDefaultConfig }); setSavedSnapshot(JSON.stringify({ llmConfig: fullDefaultConfig })); setTestHistory([]); setTestOutput(''); setTestError(null); setShowErrorPanel(false); }} />}
       {_settings.others.showErrorPanel && showErrorPanel && testError && (
         <DraggableErrorPanel
           error={testError}
@@ -7341,6 +7351,7 @@ export function TtsExportPage({
   }
 
   function resetWorkspaceView() {
+    setIsResetOpen(false);
     setTtsConfig({ ...initialTtsConfig });
     setSavedSnapshot(JSON.stringify({ ttsConfig: initialTtsConfig }));
     setLogs([]);
@@ -7738,6 +7749,13 @@ export function ImageConverterPage({
     writeLocalState(IMAGE_CONVERTER_STORAGE_KEY, { outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot });
   }, [outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot]);
 
+  useEffect(() => {
+    return () => {
+      if (sourcePreviewUrl) URL.revokeObjectURL(sourcePreviewUrl);
+      if (convertedUrl) URL.revokeObjectURL(convertedUrl);
+    };
+  }, []);
+
   function addLog(level: LogLevel, text: string) {
     setLogs((prev) => [...prev, { time: new Date().toLocaleTimeString(), level, text }]);
   }
@@ -7844,6 +7862,8 @@ export function ImageConverterPage({
   }
 
   function resetWorkspaceView() {
+    setIsResetOpen(false);
+    setIsConverting(false);
     if (sourcePreviewUrl) URL.revokeObjectURL(sourcePreviewUrl);
     if (convertedUrl) URL.revokeObjectURL(convertedUrl);
     setSourceFile(null);

@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.3.1';
+const VERSION = '1.3.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -3585,6 +3585,9 @@ function App() {
     } catch {
       // Audio initialization is non-critical; ignore failures.
     }
+    return () => {
+      try { stopMusic(); } catch { /* ignore */ }
+    };
   }, []);
 
   // Global hover sound delegation (throttled)
@@ -3694,7 +3697,7 @@ function App() {
 
       // Determine appropriate sound based on element type and context
       const isClose = el.classList.contains('modal-close') || (el as HTMLElement).getAttribute('aria-label') === 'Close';
-      const isBack = el.classList.contains('back-link') || (el as HTMLElement).textContent?.includes('返回');
+      const isBack = el.classList.contains('back-link');
       const isConfirm = el.classList.contains('primary-button');
       const isSlider = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'range';
       const isCheckbox = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'checkbox';
@@ -4848,12 +4851,11 @@ function FaceMakerPage({
   }
 
   function handleSliderChange<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
-    setDraft((current) => {
-      if (current[key] !== value) {
-        playSound('sliderChange');
-      }
-      return { ...current, [key]: value };
-    });
+    const changed = draft[key] !== value;
+    if (changed) {
+      playSound('sliderChange');
+    }
+    setDraft((current) => ({ ...current, [key]: value }));
   }
 
   function saveDraft() {
@@ -4876,7 +4878,7 @@ function FaceMakerPage({
   async function exportPng() {
     const stage = document.querySelector('.character-stage') as HTMLElement | null;
     if (!stage) {
-      setToast({ message: '无法找到预览区域', type: 'error' });
+      setToast({ message: 'Preview area not found', type: 'error' });
       playSound('error');
       return;
     }
@@ -4896,9 +4898,9 @@ function FaceMakerPage({
       anchor.href = dataUrl;
       anchor.download = 'oc-character.png';
       anchor.click();
-      setToast({ message: 'PNG 导出成功', type: 'success' });
+      setToast({ message: 'PNG exported successfully', type: 'success' });
     } catch {
-      setToast({ message: '导出失败，请重试', type: 'error' });
+      setToast({ message: 'Export failed, please try again', type: 'error' });
       playSound('error');
     }
   }
@@ -5304,11 +5306,13 @@ function ConfirmReturnModal({
 
   function requestClose() {
     setIsClosing(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(onCancel, MODAL_CLOSE_MS);
   }
 
   function confirmLeave() {
     setIsClosing(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(onConfirm, MODAL_CLOSE_MS);
   }
 
@@ -5367,11 +5371,13 @@ function ActionConfirmModal({
 
   function requestClose() {
     setIsClosing(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(onCancel, MODAL_CLOSE_MS);
   }
 
   function requestConfirm() {
     setIsClosing(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(onConfirm, MODAL_CLOSE_MS);
   }
 

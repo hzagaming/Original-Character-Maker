@@ -171,9 +171,20 @@ async function generateEdgeColorFallbackCutout(source: Blob): Promise<Blob> {
 
 export async function generateCutoutPngBlob(source: Blob, publicPath: string): Promise<Blob> {
   const config = buildCutoutConfig(publicPath);
-  const preparedSource = await prepareCutoutSource(source);
-  let lastError: unknown = null;
+  let preparedSource: Blob;
+  try {
+    preparedSource = await prepareCutoutSource(source);
+  } catch (prepError) {
+    console.warn('[Paper2Gal cutout] Source preparation failed, trying fallback.', prepError);
+    try {
+      return await generateEdgeColorFallbackCutout(source);
+    } catch (fallbackError) {
+      console.error('[Paper2Gal cutout] Fallback cutout failed', fallbackError);
+      throw fallbackError;
+    }
+  }
 
+  let lastError: unknown = null;
   for (let attempt = 0; attempt <= CUTOUT_RETRY_COUNT; attempt += 1) {
     try {
       await ensureCutoutModelLoaded(publicPath);
