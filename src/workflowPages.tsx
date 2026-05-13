@@ -317,6 +317,69 @@ type UiCopySet = {
     downloadLogs: string;
     waitingOperations: string;
   };
+  characterGif: {
+    inputTitle: string;
+    paramsTitle: string;
+    outputTitle: string;
+    queueTitle: string;
+    model: string;
+    prompt: string;
+    negativePrompt: string;
+    temperature: string;
+    topP: string;
+    topK: string;
+    seed: string;
+    steps: string;
+    cfg: string;
+    frames: string;
+    fps: string;
+    loop: string;
+    duration: string;
+    motionType: string;
+    easing: string;
+    reverseLoop: string;
+    needCutout: string;
+    keepPalette: string;
+    preservePose: string;
+    faceLock: string;
+    detailBoost: string;
+    start: string;
+    stop: string;
+    fileHint: string;
+    resultReady: string;
+    waitingResult: string;
+    validationError: string;
+    runtimeError: string;
+    errorHintRuntime: string;
+    errorHintValidation: string;
+    successMessage: string;
+    effectivePromptPreview: string;
+    advancedParams: string;
+    advancedParamsHint: string;
+    aspectRatio: string;
+    imageSize: string;
+    styleIntensity: string;
+    lineArtStyle: string;
+    colorScheme: string;
+    backgroundType: string;
+    lightingStyle: string;
+    cameraAngle: string;
+    characterMood: string;
+    outfitDetail: string;
+    eyeStyle: string;
+    hairStyle: string;
+    skinTexture: string;
+    addPositiveTags: string;
+    addNegativeTags: string;
+    customModelOption: string;
+    customModelPlaceholder: string;
+    redo: string;
+    openDetailPanel: string;
+    debugDescription: string;
+    openFile: string;
+    downloadFile: string;
+    copyAsset: string;
+  };
   tagPicker: {
     filterPlaceholder: string;
     close: string;
@@ -482,6 +545,7 @@ type UiCopySet = {
 };
 
 const STYLE_TRANSFER_STORAGE_KEY = 'oc-maker.style-transfer';
+const CHARACTER_GIF_STORAGE_KEY = 'oc-maker.character-gif';
 const PROMPT_SUITE_STORAGE_KEY = 'oc-maker.prompt-suite';
 const PAPER2GAL_STORAGE_KEY = 'oc-maker.paper2gal';
 const IMAGE_CONVERTER_STORAGE_KEY = 'oc-maker.image-converter';
@@ -924,6 +988,69 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       downloadLogs: '下载日志',
       waitingOperations: '等待操作中...',
     },
+    characterGif: {
+      inputTitle: '输入图片与预览',
+      paramsTitle: 'GIF 参数设置',
+      outputTitle: '结果概览',
+      queueTitle: '执行状态',
+      model: '模型',
+      prompt: '风格提示词',
+      negativePrompt: '负面提示词',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      steps: '采样步数',
+      cfg: 'CFG Scale',
+      frames: '帧数',
+      fps: '帧率 (FPS)',
+      loop: '循环播放',
+      duration: '单帧时长 (ms)',
+      motionType: '动画类型',
+      easing: '缓动函数',
+      reverseLoop: '反向循环',
+      needCutout: '需要抠图',
+      keepPalette: '保留原配色',
+      preservePose: '保留姿态',
+      faceLock: '锁定五官',
+      detailBoost: '细节增强',
+      start: '生成 GIF',
+      stop: '中止任务',
+      fileHint: '支持 PNG / JPG / WEBP，建议上传单人立绘或清晰半身图。',
+      resultReady: 'GIF 已经生成，可以复制、下载或导出调试数据。',
+      waitingResult: '运行完成后，这里会显示 GIF 结果、错误信息和调试 JSON。',
+      validationError: '未检测到输入图片文件，已在预检查阶段停止工作流。',
+      runtimeError: 'GIF 生成在高随机参数下发生发散，已终止输出并保留完整调试信息。',
+      errorHintRuntime: '降低 Temperature、减小 Top P，或在重试前关闭部分较重的保留开关。',
+      errorHintValidation: '在生成 GIF 前先选择一张源图片。',
+      successMessage: '角色 GIF 生成成功，输出元数据和调试包已经生成。',
+      effectivePromptPreview: '实际 Prompt 预览',
+      advancedParams: '高级参数',
+      advancedParamsHint: '宽高比、光照、镜头角度、情绪、服装等',
+      aspectRatio: '宽高比',
+      imageSize: '图像尺寸',
+      styleIntensity: '风格强度',
+      lineArtStyle: '线稿风格',
+      colorScheme: '配色方案',
+      backgroundType: '背景类型',
+      lightingStyle: '光照风格',
+      cameraAngle: '镜头角度',
+      characterMood: '角色情绪',
+      outfitDetail: '服装细节',
+      eyeStyle: '眼睛风格',
+      hairStyle: '发型',
+      skinTexture: '皮肤质感',
+      addPositiveTags: '正面提示词库',
+      addNegativeTags: '负面提示词库',
+      customModelOption: '自定义模型',
+      customModelPlaceholder: '输入自定义模型名称',
+      redo: '重做',
+      openDetailPanel: '打开详情面板',
+      debugDescription: '队列追踪、参数快照、日志、结果载荷和最新错误包均汇总于此。',
+      openFile: '打开文件',
+      downloadFile: '下载',
+      copyAsset: '复制',
+    },
     tagPicker: {
       filterPlaceholder: '筛选标签...',
       close: '关闭',
@@ -1274,6 +1401,69 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       copyLogs: 'ログをコピー',
       downloadLogs: 'ログをダウンロード',
       waitingOperations: '操作を待っています...',
+    },
+    characterGif: {
+      inputTitle: '入力画像とプレビュー',
+      paramsTitle: 'GIF パラメータ設定',
+      outputTitle: '結果概要',
+      queueTitle: '実行状態',
+      model: 'モデル',
+      prompt: 'スタイルプロンプト',
+      negativePrompt: 'ネガティブプロンプト',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      steps: 'ステップ数',
+      cfg: 'CFG Scale',
+      frames: 'フレーム数',
+      fps: 'FPS',
+      loop: 'ループ再生',
+      duration: '1フレームの長さ (ms)',
+      motionType: 'アニメーションタイプ',
+      easing: 'イージング',
+      reverseLoop: '逆ループ',
+      needCutout: '切り抜きが必要',
+      keepPalette: '元の配色を保持',
+      preservePose: 'ポーズを保持',
+      faceLock: '顔を固定',
+      detailBoost: 'ディテール強化',
+      start: 'GIF を生成',
+      stop: 'タスクを停止',
+      fileHint: 'PNG / JPG / WEBP 対応。単体キャラクター立ち絵または鮮明な半身図を推奨します。',
+      resultReady: 'GIF が生成されました。コピー、ダウンロード、またはデバッグデータのエクスポートが可能です。',
+      waitingResult: '実行が完了すると、ここに GIF 結果、エラー情報、およびデバッグ JSON が表示されます。',
+      validationError: '入力画像ファイルが検出されませんでした。プリフライト段階でワークフローが停止しました。',
+      runtimeError: 'GIF 生成が高ランダムパラメータで発散しました。出力を中止し、完全なデバッグ情報を保持しました。',
+      errorHintRuntime: 'Temperature を下げ、Top P を小さくするか、再試行前に一部の重い保存スイッチをオフにしてください。',
+      errorHintValidation: 'GIF を生成する前にソース画像を選択してください。',
+      successMessage: 'キャラクター GIF の生成が成功しました。出力メタデータとデバッグパッケージが生成されました。',
+      effectivePromptPreview: '実際の Prompt プレビュー',
+      advancedParams: '詳細パラメータ',
+      advancedParamsHint: 'アスペクト比、照明、カメラ角度、感情、服装など',
+      aspectRatio: 'アスペクト比',
+      imageSize: '画像サイズ',
+      styleIntensity: 'スタイル強度',
+      lineArtStyle: '線画スタイル',
+      colorScheme: '配色方案',
+      backgroundType: '背景タイプ',
+      lightingStyle: '照明スタイル',
+      cameraAngle: 'カメラ角度',
+      characterMood: 'キャラクター感情',
+      outfitDetail: '服装詳細',
+      eyeStyle: '目のスタイル',
+      hairStyle: '髪型',
+      skinTexture: '肌質感',
+      addPositiveTags: 'ポジティブプロンプトライブラリ',
+      addNegativeTags: 'ネガティブプロンプトライブラリ',
+      customModelOption: 'カスタムモデル',
+      customModelPlaceholder: 'カスタムモデル名を入力',
+      redo: 'やり直し',
+      openDetailPanel: '詳細パネルを開く',
+      debugDescription: 'キュートレース、パラメータスナップショット、ログ、結果ペイロード、最新のエラーパッケージがここにまとめられています。',
+      openFile: 'ファイルを開く',
+      downloadFile: 'ダウンロード',
+      copyAsset: 'コピー',
     },
     tagPicker: {
       filterPlaceholder: 'タグを絞り込む...',
@@ -1626,6 +1816,69 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       downloadLogs: 'Download Logs',
       waitingOperations: 'Waiting for operations...',
     },
+    characterGif: {
+      inputTitle: 'Input Image & Preview',
+      paramsTitle: 'GIF Parameters',
+      outputTitle: 'Result Overview',
+      queueTitle: 'Execution Status',
+      model: 'Model',
+      prompt: 'Style Prompt',
+      negativePrompt: 'Negative Prompt',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      steps: 'Sampling Steps',
+      cfg: 'CFG Scale',
+      frames: 'Frames',
+      fps: 'FPS',
+      loop: 'Loop Playback',
+      duration: 'Frame Duration (ms)',
+      motionType: 'Animation Type',
+      easing: 'Easing Function',
+      reverseLoop: 'Reverse Loop',
+      needCutout: 'Need Cutout',
+      keepPalette: 'Keep Original Palette',
+      preservePose: 'Preserve Pose',
+      faceLock: 'Lock Face',
+      detailBoost: 'Detail Boost',
+      start: 'Generate GIF',
+      stop: 'Abort Task',
+      fileHint: 'Supports PNG / JPG / WEBP. Upload a single character illustration or clear half-body image.',
+      resultReady: 'GIF generated. You can copy, download, or export debug data.',
+      waitingResult: 'After completion, the GIF result, error info, and debug JSON will appear here.',
+      validationError: 'No input image detected. Workflow stopped at preflight.',
+      runtimeError: 'GIF generation diverged under high randomness parameters. Output aborted and debug info preserved.',
+      errorHintRuntime: 'Reduce Temperature, lower Top P, or disable some heavier preservation toggles before retrying.',
+      errorHintValidation: 'Select a source image before generating the GIF.',
+      successMessage: 'Character GIF generated successfully. Output metadata and debug package are ready.',
+      effectivePromptPreview: 'Effective Prompt Preview',
+      advancedParams: 'Advanced Parameters',
+      advancedParamsHint: 'Aspect ratio, lighting, camera angle, mood, outfit, etc.',
+      aspectRatio: 'Aspect Ratio',
+      imageSize: 'Image Size',
+      styleIntensity: 'Style Intensity',
+      lineArtStyle: 'Line Art Style',
+      colorScheme: 'Color Scheme',
+      backgroundType: 'Background Type',
+      lightingStyle: 'Lighting Style',
+      cameraAngle: 'Camera Angle',
+      characterMood: 'Character Mood',
+      outfitDetail: 'Outfit Detail',
+      eyeStyle: 'Eye Style',
+      hairStyle: 'Hair Style',
+      skinTexture: 'Skin Texture',
+      addPositiveTags: 'Positive Prompt Library',
+      addNegativeTags: 'Negative Prompt Library',
+      customModelOption: 'Custom Model',
+      customModelPlaceholder: 'Enter custom model name',
+      redo: 'Redo',
+      openDetailPanel: 'Open Detail Panel',
+      debugDescription: 'Queue trace, parameter snapshot, logs, result payload, and the latest error package are bundled here.',
+      openFile: 'Open File',
+      downloadFile: 'Download',
+      copyAsset: 'Copy',
+    },
     tagPicker: {
       filterPlaceholder: 'Filter tags...',
       close: 'Close',
@@ -1976,6 +2229,69 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       copyLogs: 'Копировать журнал',
       downloadLogs: 'Скачать журнал',
       waitingOperations: 'Ожидание операций...',
+    },
+    characterGif: {
+      inputTitle: 'Исходное изображение и превью',
+      paramsTitle: 'Параметры GIF',
+      outputTitle: 'Обзор результата',
+      queueTitle: 'Статус выполнения',
+      model: 'Модель',
+      prompt: 'Промпт стиля',
+      negativePrompt: 'Негативный промпт',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      steps: 'Шаги семплирования',
+      cfg: 'CFG Scale',
+      frames: 'Количество кадров',
+      fps: 'FPS',
+      loop: 'Цикличное воспроизведение',
+      duration: 'Длительность кадра (мс)',
+      motionType: 'Тип анимации',
+      easing: 'Функция сглаживания',
+      reverseLoop: 'Обратный цикл',
+      needCutout: 'Нужно вырезание',
+      keepPalette: 'Сохранить исходную палитру',
+      preservePose: 'Сохранить позу',
+      faceLock: 'Зафиксировать лицо',
+      detailBoost: 'Усиление деталей',
+      start: 'Сгенерировать GIF',
+      stop: 'Прервать задачу',
+      fileHint: 'Поддерживаются PNG / JPG / WEBP. Лучше всего подходит чистое изображение одного персонажа или четкий арт по пояс.',
+      resultReady: 'GIF сгенерирован. Можно скопировать, скачать или экспортировать отладочные данные.',
+      waitingResult: 'После завершения здесь появится результат GIF, информация об ошибках и отладочный JSON.',
+      validationError: 'Исходное изображение не обнаружено. Workflow остановлен на этапе предварительной проверки.',
+      runtimeError: 'Генерация GIF разошлась при высоких случайных параметрах. Вывод прерван, отладочная информация сохранена.',
+      errorHintRuntime: 'Уменьшите Temperature, снизьте Top P или отключите часть тяжёлых переключателей сохранения перед повторной попыткой.',
+      errorHintValidation: 'Выберите исходное изображение перед генерацией GIF.',
+      successMessage: 'GIF персонажа успешно сгенерирован. Метаданные вывода и отладочный пакет готовы.',
+      effectivePromptPreview: 'Предпросмотр эффективного Prompt',
+      advancedParams: 'Расширенные параметры',
+      advancedParamsHint: 'Соотношение сторон, освещение, угол камеры, настроение, одежда и т.д.',
+      aspectRatio: 'Соотношение сторон',
+      imageSize: 'Размер изображения',
+      styleIntensity: 'Интенсивность стиля',
+      lineArtStyle: 'Стиль линий',
+      colorScheme: 'Цветовая схема',
+      backgroundType: 'Тип фона',
+      lightingStyle: 'Стиль освещения',
+      cameraAngle: 'Угол камеры',
+      characterMood: 'Настроение персонажа',
+      outfitDetail: 'Детали одежды',
+      eyeStyle: 'Стиль глаз',
+      hairStyle: 'Причёска',
+      skinTexture: 'Текстура кожи',
+      addPositiveTags: 'Библиотека позитивных промптов',
+      addNegativeTags: 'Библиотека негативных промптов',
+      customModelOption: 'Пользовательская модель',
+      customModelPlaceholder: 'Введите название модели',
+      redo: 'Повторить',
+      openDetailPanel: 'Открыть панель деталей',
+      debugDescription: 'Здесь собраны трассировка очереди, снимок параметров, логи, полезная нагрузка результата и последний пакет ошибок.',
+      openFile: 'Открыть файл',
+      downloadFile: 'Скачать',
+      copyAsset: 'Копировать',
     },
     tagPicker: {
       filterPlaceholder: 'Фильтровать теги...',
@@ -8110,5 +8426,822 @@ function ToggleChip({
       <span className="toggle-chip-dot" />
       {label}
     </button>
+  );
+}
+
+export function CharacterGifPage({
+  appSubtitle,
+  backHome,
+  openSettings,
+  privacyNote,
+  pageTitle,
+  pageDescription,
+  settings: _settings,
+  language,
+  onBack,
+  onOpenSettings,
+  onNavigate,
+  onOpenDocs,
+}: SharedPageProps) {
+  const copy = localizedUiCopy[language];
+  const transfer = copy.characterGif;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  const defaultConfig = {
+    model: 'Anime Transfer XL v4',
+    customModel: '',
+    prompt: 'soft watercolor anime shading, subtle breathing animation, gentle eye blink, refined outline',
+    negativePrompt: 'lowres, muddy colors, over-sharpened edges, broken anatomy, jittery motion',
+    temperature: 0.78,
+    topP: 0.92,
+    topK: 48,
+    seed: 240315,
+    steps: 28,
+    cfg: 6.8,
+    frames: 8,
+    fps: 12,
+    loop: true,
+    duration: 100,
+    motionType: 'breathing',
+    easing: 'easeInOut',
+    reverseLoop: false,
+    needCutout: true,
+    keepPalette: true,
+    preservePose: true,
+    faceLock: true,
+    detailBoost: true,
+    aspectRatio: '1:1',
+    imageSize: '1024x1024',
+    styleIntensity: 0.75,
+    lineArtStyle: 'clean',
+    colorScheme: 'vibrant',
+    backgroundType: 'simple',
+    lightingStyle: 'dramatic',
+    cameraAngle: 'three-quarter',
+    characterMood: 'calm',
+    outfitDetail: 'school uniform',
+    eyeStyle: 'detailed',
+    hairStyle: 'long straight',
+    skinTexture: 'smooth',
+    extraPositiveTags: [] as string[],
+    extraNegativeTags: [] as string[],
+  };
+
+  const [persistedState] = useState(() =>
+    readLocalState(CHARACTER_GIF_STORAGE_KEY, {
+      inputFileName: '',
+      config: defaultConfig,
+      savedSnapshot: '',
+    }),
+  );
+  const [inputFileName, setInputFileName] = useState(persistedState.inputFileName);
+  const [inputFile, setInputFile] = useState<File | null>(null);
+  const [inputPreviewUrl, setInputPreviewUrl] = useState('');
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [status, setStatus] = useState<TransferStatus>('idle');
+  const [progress, setProgress] = useState(0);
+  const [logs, setLogs] = useState<WorkflowLog[]>([]);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [error, setError] = useState<TransferError | null>(null);
+  const [showErrorPanel, setShowErrorPanel] = useState(false);
+  const [runNonce, setRunNonce] = useState(0);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
+  const [config, setConfig] = useState({ ...defaultConfig, ...persistedState.config });
+  const [isParamsOpen, setIsParamsOpen] = useState(true);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isResultOpen, setIsResultOpen] = useState(true);
+  const [isLogsOpen, setIsLogsOpen] = useState(true);
+  const [isPositiveTagOpen, setIsPositiveTagOpen] = useState(false);
+  const [isNegativeTagOpen, setIsNegativeTagOpen] = useState(false);
+  const [tagDraft, setTagDraft] = useState<Set<string>>(new Set());
+  const statusLabelKey = getStatusLabelKey(status);
+
+  const invisibleSuffix = useMemo(() => buildInvisiblePromptSuffix(config), [config]);
+  const effectivePrompt = useMemo(() => {
+    const base = config.prompt;
+    const tags = config.extraPositiveTags.length > 0 ? config.extraPositiveTags.join(', ') : '';
+    const suffix = invisibleSuffix;
+    const parts = [base, tags, suffix].filter(Boolean);
+    return parts.join(', ');
+  }, [config.prompt, config.extraPositiveTags, invisibleSuffix]);
+
+  const effectiveNegativePrompt = useMemo(() => {
+    const base = config.negativePrompt;
+    const tags = config.extraNegativeTags.length > 0 ? config.extraNegativeTags.join(', ') : '';
+    return [base, tags].filter(Boolean).join(', ');
+  }, [config.negativePrompt, config.extraNegativeTags]);
+
+  const currentSnapshot = JSON.stringify({ inputFileName, config });
+  const [savedSnapshot, setSavedSnapshot] = useState(persistedState.savedSnapshot || currentSnapshot);
+  const isDirty = currentSnapshot !== savedSnapshot;
+  useBeforeUnloadGuard(isDirty);
+
+  useEffect(() => {
+    writeLocalState(CHARACTER_GIF_STORAGE_KEY, { inputFileName, config, savedSnapshot });
+  }, [config, inputFileName, savedSnapshot]);
+
+  useEffect(() => {
+    return () => { if (inputPreviewUrl) URL.revokeObjectURL(inputPreviewUrl); };
+  }, [inputPreviewUrl]);
+
+  useEffect(() => {
+    return () => { abortControllerRef.current?.abort(); };
+  }, []);
+
+  function updateConfig<K extends keyof typeof config>(key: K, value: (typeof config)[K]) {
+    setConfig((current) => ({ ...current, [key]: value }));
+  }
+
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'character-gif') { playSound('error'); alert(copy.importConfig + ': ' + copy.characterGif.errorHintValidation); return; }
+        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        const imported = { ...defaultConfig, ...(data.config as Record<string, unknown>) } as typeof defaultConfig;
+        setConfig(imported);
+        setInputFileName(String(data.inputFileName ?? ''));
+        setSavedSnapshot(JSON.stringify({ inputFileName: String(data.inputFileName ?? ''), config: imported }));
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function handlePickFile() { fileInputRef.current?.click(); }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (inputPreviewUrl) URL.revokeObjectURL(inputPreviewUrl);
+    setInputFile(file);
+    setInputFileName(file.name);
+    setInputPreviewUrl(URL.createObjectURL(file));
+    setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Input file selected: ${file.name}` }]);
+    event.target.value = '';
+    playSound('uploadComplete');
+  }
+
+  async function startWorkflow() {
+    if (status === 'running') return;
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    if (!inputFileName || !inputFile) {
+      const validationError: TransferError = {
+        code: 'CHARACTER_GIF_INPUT_MISSING',
+        stage: 'preflight/input',
+        message: transfer.validationError,
+        hint: transfer.errorHintValidation,
+        details: { fileSelected: Boolean(inputFile), status: 'stopped-before-run' },
+      };
+      setStatus('error');
+      setProgress(0);
+      setResult(null);
+      setError(validationError);
+      setShowErrorPanel(true);
+      setLogs([{ time: timestamp(), level: 'error', text: `${validationError.code}: ${validationError.message}` }]);
+      return;
+    }
+    setStatus('running');
+    setProgress(5);
+    playSound('workflowStart');
+    setError(null);
+    setShowErrorPanel(false);
+    setResult(null);
+    setLogs([
+      { time: timestamp(), level: 'info', text: 'GIF workflow submitted to the local queue.' },
+      { time: timestamp(), level: 'debug', text: `Debug context prepared for ${inputFileName}.` },
+      { time: timestamp(), level: 'debug', text: `Effective prompt: ${effectivePrompt.slice(0, 200)}...` },
+    ]);
+    const nonce = runNonce + 1;
+    setRunNonce(nonce);
+
+    try {
+      let response: Response;
+
+      if (config.model === 'custom') {
+        const apiCfg = getApiForFeature('style-transfer', _settings);
+        if (!apiCfg) {
+          throw new Error('No custom API configured for Character GIF. Please go to Settings > API and configure a custom API channel for Character GIF.');
+        }
+        setProgress(15);
+        setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Using custom API: ${apiCfg.baseUrl}` }]);
+
+        const formData = new FormData();
+        formData.append('image', inputFile);
+        formData.append('model', config.customModel || 'custom');
+        formData.append('prompt', effectivePrompt);
+        if (effectiveNegativePrompt) formData.append('negative_prompt', effectiveNegativePrompt);
+        formData.append('frames', String(config.frames));
+        formData.append('fps', String(config.fps));
+        formData.append('loop', String(config.loop));
+        formData.append('duration', String(config.duration));
+        formData.append('motionType', config.motionType);
+        formData.append('easing', config.easing);
+        formData.append('reverseLoop', String(config.reverseLoop));
+
+        response = await fetch(`${apiCfg.baseUrl}/images/edits`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiCfg.apiKey}` },
+          body: formData,
+          signal: controller.signal,
+        });
+      } else {
+        setProgress(15);
+        setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Using built-in model: ${config.model}` }]);
+
+        await ensureLocalApiProbed();
+        const requestUrl = buildApiUrl(_settings, '/api/character-gif');
+        const formData = new FormData();
+        formData.append('image', inputFile);
+        formData.append('gifConfig', JSON.stringify({
+          model: config.model,
+          prompt: config.prompt,
+          negativePrompt: config.negativePrompt,
+          seed: config.seed,
+          temperature: config.temperature,
+          topP: config.topP,
+          topK: config.topK,
+          steps: config.steps,
+          cfg: config.cfg,
+          frames: config.frames,
+          fps: config.fps,
+          loop: config.loop,
+          duration: config.duration,
+          motionType: config.motionType,
+          easing: config.easing,
+          reverseLoop: config.reverseLoop,
+          aspectRatio: config.aspectRatio,
+          imageSize: config.imageSize,
+          styleIntensity: config.styleIntensity,
+          lineArtStyle: config.lineArtStyle,
+          colorScheme: config.colorScheme,
+          backgroundType: config.backgroundType,
+          lightingStyle: config.lightingStyle,
+          cameraAngle: config.cameraAngle,
+          characterMood: config.characterMood,
+          outfitDetail: config.outfitDetail,
+          eyeStyle: config.eyeStyle,
+          hairStyle: config.hairStyle,
+          skinTexture: config.skinTexture,
+          needCutout: config.needCutout,
+          keepPalette: config.keepPalette,
+          preservePose: config.preservePose,
+          faceLock: config.faceLock,
+          detailBoost: config.detailBoost,
+          extraPositiveTags: config.extraPositiveTags,
+          extraNegativeTags: config.extraNegativeTags,
+        }));
+
+        response = await fetch(requestUrl, {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal,
+        });
+      }
+
+      setProgress(60);
+      setLogs((current) => [...current, { time: timestamp(), level: 'debug', text: 'API response received. Processing result...' }]);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData: Record<string, unknown> = {};
+        try { errorData = JSON.parse(errorText); } catch { /* ignore */ }
+        throw new Error(
+          (errorData.error as string) || (errorData.message as string) || `HTTP ${response.status}: ${errorText.slice(0, 200)}`
+        );
+      }
+
+      const data = await response.json();
+      const outputUrl = data.outputUrl || data.url || data.gif_url || data.image_url;
+      if (!outputUrl) {
+        throw new Error('API returned success but no output GIF URL was found in the response.');
+      }
+
+      setProgress(100);
+      setStatus('success');
+      playSound('workflowComplete');
+      setError(null);
+      setShowErrorPanel(false);
+      setResult({
+        workflowId: `cg-${Date.now()}`,
+        input: inputFileName,
+        model: config.model === 'custom' ? config.customModel : config.model,
+        outputUrl,
+        outputPath: data.outputPath,
+        frames: config.frames,
+        fps: config.fps,
+        loop: config.loop,
+        duration: config.duration,
+        motionType: config.motionType,
+        steps: config.steps,
+        seed: config.seed,
+        cutout: config.needCutout,
+        effectivePrompt,
+        effectiveNegativePrompt,
+        message: transfer.successMessage,
+      });
+      setLogs((current) => [
+        ...current,
+        { time: timestamp(), level: 'success', text: 'GIF workflow finished and the result package is ready.' },
+      ]);
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      const message = err instanceof Error ? err.message : String(err);
+      const runtimeError: TransferError = {
+        code: 'CHARACTER_GIF_REQUEST_FAILED',
+        stage: 'api/request',
+        message,
+        hint: transfer.errorHintRuntime,
+        details: {
+          model: config.model === 'custom' ? config.customModel : config.model,
+          apiBase: config.model === 'custom' ? getApiForFeature('style-transfer', _settings)?.baseUrl ?? 'none' : 'backend',
+          prompt: effectivePrompt.slice(0, 300),
+        },
+      };
+      setStatus('error');
+      setError(runtimeError);
+      playSound('workflowFail');
+      setShowErrorPanel(true);
+      setLogs((current) => [
+        ...current,
+        { time: timestamp(), level: 'error', text: `${runtimeError.code}: ${runtimeError.message}` },
+      ]);
+    }
+  }
+
+  function abortWorkflow() {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setStatus('idle');
+    setProgress(0);
+    playSound('workflowFail');
+    setLogs((current) => [...current, { time: timestamp(), level: 'error', text: 'Workflow aborted by the user.' }]);
+  }
+
+  function saveDraft() {
+    playSound('save');
+    setSavedSnapshot(currentSnapshot);
+    setLogs((current) => [...current, { time: timestamp(), level: 'success', text: 'Current character-gif configuration saved locally.' }]);
+  }
+
+  function resetWorkspaceView() {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    if (inputPreviewUrl) URL.revokeObjectURL(inputPreviewUrl);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    const nextConfig = { ...defaultConfig };
+    const nextSnapshot = JSON.stringify({ inputFileName: '', config: nextConfig });
+    setIsResetOpen(false);
+    setInputFile(null);
+    setInputFileName('');
+    setInputPreviewUrl('');
+    setStatus('idle');
+    setProgress(0);
+    setLogs([]);
+    setResult(null);
+    setError(null);
+    setShowErrorPanel(false);
+    setRunNonce(0);
+    setConfig(nextConfig);
+    setSavedSnapshot(nextSnapshot);
+  }
+
+  const configJson = JSON.stringify({ tool: 'character-gif', inputFileName, config }, null, 2);
+  const logsText = logs.map((entry) => `[${entry.time}] [${entry.level.toUpperCase()}] ${entry.text}`).join('\n');
+  const resultJson = JSON.stringify(result ?? { state: 'waiting' }, null, 2);
+  const errorJson = JSON.stringify(error ?? { state: 'none' }, null, 2);
+  const debugJson = JSON.stringify({ workflowId: result?.workflowId ?? `draft-${Date.now()}`, status, progress, inputFileName, config, effectivePrompt, effectiveNegativePrompt, result, error, logs }, null, 2);
+
+  return (
+    <main className="feature-shell tool-page-shell">
+      <header className="feature-header fade-up delay-1">
+        <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>{backHome}</button>
+        <div className="feature-header-meta">
+          <button className="secondary-button small-button" type="button" onClick={() => onOpenDocs?.('character-gif', 'overview')}>{copy.helpButton}</button>
+          <button className="secondary-button small-button" type="button" onClick={() => onOpenDocs?.('character-gif', 'buttons')}>{copy.tutorialButton}</button>
+          <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>{openSettings}</button>
+        </div>
+      </header>
+
+      <section className="tool-workbench fade-up delay-2">
+        <div className="tool-header">
+          <div>
+            <p className="section-label">{appSubtitle}</p>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+          <div className="tool-header-actions">
+            <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
+            <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
+            <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
+          </div>
+        </div>
+
+        <div className="tool-grid transfer-grid">
+          <div className="tool-column">
+            {/* Input Card */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{transfer.inputTitle}</span>
+                  <h3>{transfer.inputTitle}</h3>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button className="secondary-button small-button" type="button" onClick={(e) => { e.stopPropagation(); handlePickFile(); }}>
+                    {inputFileName ? copy.replaceImage : copy.chooseImage}
+                  </button>
+                  <span className="collapsible-state">{isParamsOpen ? copy.hideDetails : copy.showDetails}</span>
+                </div>
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleFileChange} />
+              {isParamsOpen && (
+                <>
+                  <p className="muted-copy">{transfer.fileHint}</p>
+                  <div className="preview-surface">
+                    {inputPreviewUrl ? <img className="preview-image" src={inputPreviewUrl} alt={inputFileName} /> : <div className="preview-empty">{copy.noImage}</div>}
+                  </div>
+                  {inputFileName && <p className="tiny-copy">{inputFileName}</p>}
+                </>
+              )}
+            </section>
+
+            {/* Parameters Card */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{transfer.paramsTitle}</span>
+                  <h3>{transfer.paramsTitle}</h3>
+                </div>
+                <span className="collapsible-state">{isParamsOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isParamsOpen && (
+                <>
+                  <div className="form-grid two-column">
+                    <label className="field">
+                      <span>{transfer.model}</span>
+                      <select className="settings-input tool-select" value={config.model} onChange={(e) => updateConfig('model', e.target.value)}>
+                        <option>gpt-image-2</option>
+                        <option>gpt-image-1</option>
+                        <option>Anime Transfer XL v4</option>
+                        <option>Painterly Diffusion Mix</option>
+                        <option>Paper2Gal Bridge Preview</option>
+                        <option value="custom">{transfer.customModelOption || 'Custom Model'}</option>
+                      </select>
+                      {config.model === 'custom' && (
+                        <input
+                          className="settings-input"
+                          style={{ marginTop: 8 }}
+                          type="text"
+                          placeholder={transfer.customModelPlaceholder || 'Enter custom model name'}
+                          value={config.customModel}
+                          onChange={(e) => updateConfig('customModel', e.target.value)}
+                        />
+                      )}
+                    </label>
+                    <label className="field">
+                      <span>{transfer.seed}</span>
+                      <input className="settings-input" type="number" value={config.seed} onChange={(e) => updateConfig('seed', Number(e.target.value))} />
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>{transfer.prompt}</span>
+                    <textarea className="settings-textarea" value={config.prompt} onChange={(e) => updateConfig('prompt', e.target.value)} />
+                  </label>
+                  <div className="mini-action-row" style={{ marginBottom: 8 }}>
+                    <button className="secondary-button small-button" type="button" onClick={() => { setTagDraft(new Set(config.extraPositiveTags)); setIsPositiveTagOpen(true); }}>{transfer.addPositiveTags}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { setTagDraft(new Set(config.extraNegativeTags)); setIsNegativeTagOpen(true); }}>{transfer.addNegativeTags}</button>
+                  </div>
+                  <label className="field">
+                    <span>{transfer.negativePrompt}</span>
+                    <textarea className="settings-textarea compact" value={config.negativePrompt} onChange={(e) => updateConfig('negativePrompt', e.target.value)} />
+                  </label>
+
+                  {/* Effective Prompt Preview */}
+                  <div className="tool-card" style={{ marginTop: 12, background: 'rgba(79,157,247,0.06)' }}>
+                    <span className="card-caption">{transfer.effectivePromptPreview}</span>
+                    <p className="tiny-copy" style={{ color: '#8aa4c0', marginTop: 4 }}>{effectivePrompt}</p>
+                    <p className="tiny-copy" style={{ color: '#f45a5a', marginTop: 4 }}>{effectiveNegativePrompt}</p>
+                  </div>
+
+                  <div className="slider-grid">
+                    <RangeField label={transfer.temperature} min={0} max={2} step={0.01} value={config.temperature} onChange={(value) => updateConfig('temperature', value)} />
+                    <RangeField label={transfer.topP} min={0} max={1} step={0.01} value={config.topP} onChange={(value) => updateConfig('topP', value)} />
+                    <RangeField label={transfer.topK} min={1} max={128} step={1} value={config.topK} onChange={(value) => updateConfig('topK', value)} />
+                    <RangeField label={transfer.steps} min={8} max={60} step={1} value={config.steps} onChange={(value) => updateConfig('steps', value)} />
+                    <RangeField label={transfer.cfg} min={1} max={14} step={0.1} value={config.cfg} onChange={(value) => updateConfig('cfg', value)} />
+                    <RangeField label={transfer.frames} min={2} max={60} step={1} value={config.frames} onChange={(value) => updateConfig('frames', value)} />
+                    <RangeField label={transfer.fps} min={1} max={60} step={1} value={config.fps} onChange={(value) => updateConfig('fps', value)} />
+                    <RangeField label={transfer.duration} min={10} max={1000} step={10} value={config.duration} onChange={(value) => updateConfig('duration', value)} />
+                  </div>
+
+                  <div className="toggle-grid">
+                    <ToggleChip label={transfer.needCutout} checked={config.needCutout} onToggle={() => updateConfig('needCutout', !config.needCutout)} />
+                    <ToggleChip label={transfer.keepPalette} checked={config.keepPalette} onToggle={() => updateConfig('keepPalette', !config.keepPalette)} />
+                    <ToggleChip label={transfer.preservePose} checked={config.preservePose} onToggle={() => updateConfig('preservePose', !config.preservePose)} />
+                    <ToggleChip label={transfer.faceLock} checked={config.faceLock} onToggle={() => updateConfig('faceLock', !config.faceLock)} />
+                    <ToggleChip label={transfer.detailBoost} checked={config.detailBoost} onToggle={() => updateConfig('detailBoost', !config.detailBoost)} />
+                    <ToggleChip label={transfer.loop} checked={config.loop} onToggle={() => updateConfig('loop', !config.loop)} />
+                    <ToggleChip label={transfer.reverseLoop} checked={config.reverseLoop} onToggle={() => updateConfig('reverseLoop', !config.reverseLoop)} />
+                  </div>
+
+                  {/* GIF-specific parameters */}
+                  <div className="form-grid two-column" style={{ marginTop: 12 }}>
+                    <label className="field">
+                      <span>{transfer.motionType}</span>
+                      <select className="settings-input tool-select" value={config.motionType} onChange={(e) => updateConfig('motionType', e.target.value)}>
+                        <option>breathing</option>
+                        <option>blinking</option>
+                        <option>swaying</option>
+                        <option>floating</option>
+                        <option>heartbeat</option>
+                        <option>hair-flow</option>
+                        <option>tail-wag</option>
+                        <option>magic-glow</option>
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>{transfer.easing}</span>
+                      <select className="settings-input tool-select" value={config.easing} onChange={(e) => updateConfig('easing', e.target.value)}>
+                        <option>linear</option>
+                        <option>easeInOut</option>
+                        <option>easeIn</option>
+                        <option>easeOut</option>
+                        <option>spring</option>
+                        <option>bounce</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  {/* Advanced Parameters */}
+                  <div className="tool-card-section" style={{ marginTop: 12 }}>
+                    <button className="collapsible-toggle" type="button" onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} style={{ padding: '8px 0', width: '100%', textAlign: 'left' }}>
+                      <strong>{transfer.advancedParams}</strong><span className="collapsible-state">{isAdvancedOpen ? copy.hideDetails : copy.showDetails}</span>
+                      <p className="muted-copy" style={{ margin: 0 }}>{transfer.advancedParamsHint}</p>
+                    </button>
+                    {isAdvancedOpen && (
+                      <div className="form-grid two-column" style={{ marginTop: 8 }}>
+                        <label className="field">
+                          <span>{transfer.aspectRatio}</span>
+                          <select className="settings-input tool-select" value={config.aspectRatio} onChange={(e) => updateConfig('aspectRatio', e.target.value)}>
+                            <option>1:1</option><option>4:3</option><option>3:4</option><option>16:9</option><option>9:16</option><option>2:3</option><option>3:2</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.imageSize}</span>
+                          <select className="settings-input tool-select" value={config.imageSize} onChange={(e) => updateConfig('imageSize', e.target.value)}>
+                            <option>512x512</option><option>768x768</option><option>1024x1024</option><option>1024x1536</option><option>1536x1024</option>
+                          </select>
+                        </label>
+                        <RangeField label={transfer.styleIntensity} min={0} max={1} step={0.05} value={config.styleIntensity} onChange={(value) => updateConfig('styleIntensity', value)} />
+                        <label className="field">
+                          <span>{transfer.lineArtStyle}</span>
+                          <select className="settings-input tool-select" value={config.lineArtStyle} onChange={(e) => updateConfig('lineArtStyle', e.target.value)}>
+                            <option>clean</option><option>sketchy</option><option>thick</option><option>thin</option><option>none</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.colorScheme}</span>
+                          <select className="settings-input tool-select" value={config.colorScheme} onChange={(e) => updateConfig('colorScheme', e.target.value)}>
+                            <option>vibrant</option><option>pastel</option><option>muted</option><option>monochrome</option><option>neon</option><option>warm</option><option>cool</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.backgroundType}</span>
+                          <select className="settings-input tool-select" value={config.backgroundType} onChange={(e) => updateConfig('backgroundType', e.target.value)}>
+                            <option>simple</option><option>gradient</option><option>detailed</option><option>transparent</option><option>blurred</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.lightingStyle}</span>
+                          <select className="settings-input tool-select" value={config.lightingStyle} onChange={(e) => updateConfig('lightingStyle', e.target.value)}>
+                            <option>dramatic</option><option>soft</option><option>neon</option><option>natural</option><option>studio</option><option>backlight</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.cameraAngle}</span>
+                          <select className="settings-input tool-select" value={config.cameraAngle} onChange={(e) => updateConfig('cameraAngle', e.target.value)}>
+                            <option>three-quarter</option><option>front</option><option>profile</option><option>low-angle</option><option>high-angle</option><option>dutch</option><option>over-shoulder</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.characterMood}</span>
+                          <select className="settings-input tool-select" value={config.characterMood} onChange={(e) => updateConfig('characterMood', e.target.value)}>
+                            <option>calm</option><option>happy</option><option>serious</option><option>shy</option><option>confident</option><option>surprised</option><option>angry</option><option>sad</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.outfitDetail}</span>
+                          <select className="settings-input tool-select" value={config.outfitDetail} onChange={(e) => updateConfig('outfitDetail', e.target.value)}>
+                            <option>school uniform</option><option>casual wear</option><option>battle outfit</option><option>maid outfit</option><option>kimono</option><option>gothic lolita</option><option>sportswear</option><option>swimsuit</option><option>wedding dress</option><option>idol costume</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.eyeStyle}</span>
+                          <select className="settings-input tool-select" value={config.eyeStyle} onChange={(e) => updateConfig('eyeStyle', e.target.value)}>
+                            <option>detailed</option><option>simple</option><option>sparkling</option><option>half-closed</option><option>heterochromia</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.hairStyle}</span>
+                          <select className="settings-input tool-select" value={config.hairStyle} onChange={(e) => updateConfig('hairStyle', e.target.value)}>
+                            <option>long straight</option><option>long wavy</option><option>short</option><option>bob cut</option><option>ponytail</option><option>twin tails</option><option>ahoge</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>{transfer.skinTexture}</span>
+                          <select className="settings-input tool-select" value={config.skinTexture} onChange={(e) => updateConfig('skinTexture', e.target.value)}>
+                            <option>smooth</option><option>realistic</option><option>porcelain</option><option>freckled</option><option>tan</option>
+                          </select>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="tool-actions-row" style={{ marginTop: 12 }}>
+                    <button className="primary-button" type="button" onClick={startWorkflow} disabled={status === 'running'}>{transfer.start}</button>
+                    <button className="secondary-button" type="button" onClick={abortWorkflow} disabled={status !== 'running'}>{transfer.stop}</button>
+                    <button className="secondary-button" type="button" onClick={() => setConfig((current) => ({ ...current, prompt: '', negativePrompt: '' }))} disabled={status === 'running'}>{copy.reset}</button>
+                  </div>
+                </>
+              )}
+            </section>
+          </div>
+
+          <div className="tool-column side">
+            {/* Progress & Logs */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{copy.progressTitle}</span>
+                  <h3>{copy.progressTitle}</h3>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span className={`status-badge ${status}`}>{copy[statusLabelKey]}</span>
+                  <span className="collapsible-state">{isLogsOpen ? copy.hideDetails : copy.showDetails}</span>
+                </div>
+              </div>
+              {isLogsOpen && (
+                <>
+                  <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+                  <div className="progress-meta">
+                    <span>{copy.workflowId}</span>
+                    <strong>{result?.workflowId?.toString() ?? `draft-${status}`}</strong>
+                  </div>
+                  <div className="log-stack">
+                    <div className="log-stack-header">
+                      <strong>{copy.logsTitle}</strong>
+                      <div className="mini-action-row">
+                        <button className="secondary-button small-button" type="button" onClick={() => copyText(logsText)}>{copy.copyLogs}</button>
+                        <button className="secondary-button small-button" type="button" onClick={() => downloadText('character-gif-logs.txt', logsText)}>{copy.downloadLogs}</button>
+                      </div>
+                    </div>
+                    {logs.length > 0 ? logs.map((log) => (
+                      <div key={`${log.time}-${log.text}`} className={`log-entry ${log.level}`}>
+                        <span>{log.time}</span><p>{log.text}</p>
+                      </div>
+                    )) : <div className="log-empty">{transfer.waitingResult}</div>}
+                  </div>
+                </>
+              )}
+            </section>
+
+            {/* Results */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{copy.resultsTitle}</span>
+                  <h3>{copy.resultsTitle}</h3>
+                </div>
+                <span className="collapsible-state">{isResultOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isResultOpen && (
+                <div className="result-grid">
+                  {/* Output GIF preview */}
+                  {(() => {
+                    const outputUrl = result?.outputUrl;
+                    if (!outputUrl) return null;
+                    return (
+                      <div className="tool-card" style={{ padding: 12 }}>
+                        <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
+                          <strong>{transfer.outputTitle}</strong>
+                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
+                        </div>
+                        <img
+                          className="paper-output-image"
+                          src={String(outputUrl)}
+                          alt={transfer.outputTitle}
+                          style={{ width: '100%', borderRadius: 8, marginBottom: 8 }}
+                        />
+                        <div className="mini-action-row">
+                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                            try {
+                              const res = await fetch(String(outputUrl));
+                              const blob = await res.blob();
+                              const objectUrl = URL.createObjectURL(blob);
+                              const anchor = document.createElement('a');
+                              anchor.href = objectUrl;
+                              anchor.download = String(outputUrl).split('/').pop() || 'character-gif-output.gif';
+                              anchor.click();
+                              window.setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+                              playSound('downloadSound');
+                            } catch { /* ignore */ }
+                          }}>{transfer.downloadFile}</button>
+                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                            try {
+                              const res = await fetch(String(outputUrl));
+                              const blob = await res.blob();
+                              await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                              playSound('copySound');
+                            } catch { /* ignore */ }
+                          }}>{transfer.copyAsset}</button>
+                          <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
+                  </>} />
+                  <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
+                  </>} />
+                  <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
+                  </>} />
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+      </section>
+
+      {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
+      {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={resetWorkspaceView} />}
+
+      <TagPickerModal
+        open={isPositiveTagOpen}
+        title={transfer.addPositiveTags}
+        categories={STYLE_TAG_CATEGORIES}
+        selected={tagDraft}
+        onToggle={(tag) => setTagDraft((prev) => { const next = new Set(prev); if (next.has(tag)) next.delete(tag); else next.add(tag); return next; })}
+        onClose={() => setIsPositiveTagOpen(false)}
+        onApply={() => { updateConfig('extraPositiveTags', Array.from(tagDraft)); setIsPositiveTagOpen(false); }}
+        copy={copy}
+      />
+      <TagPickerModal
+        open={isNegativeTagOpen}
+        title={transfer.addNegativeTags}
+        categories={NEGATIVE_TAG_CATEGORIES}
+        selected={tagDraft}
+        onToggle={(tag) => setTagDraft((prev) => { const next = new Set(prev); if (next.has(tag)) next.delete(tag); else next.add(tag); return next; })}
+        onClose={() => setIsNegativeTagOpen(false)}
+        onApply={() => { updateConfig('extraNegativeTags', Array.from(tagDraft)); setIsNegativeTagOpen(false); }}
+        copy={copy}
+      />
+      {_settings.others.showErrorPanel && showErrorPanel && error && (
+        <DraggableErrorPanel
+          error={error}
+          labels={{
+            title: copy.errorPanel.title,
+            stage: copy.errorPanel.stage,
+            message: copy.errorPanel.message,
+            hint: copy.errorPanel.hint,
+            details: copy.errorPanel.details,
+            copyText: copy.copyText,
+            downloadJson: copy.downloadJson,
+            openDocs: copy.openDocs,
+            retry: copy.errorPanel.retry,
+          }}
+          onClose={() => setShowErrorPanel(false)}
+          onCopy={() => copyText(errorJson)}
+          onDownload={() => downloadText('character-gif-error.json', errorJson, 'application/json')}
+          onRetry={startWorkflow}
+          docAnchor={error?.code}
+          onOpenDocs={(code) => onOpenDocs?.('character-gif', 'errors', code)}
+        />
+      )}
+    </main>
   );
 }

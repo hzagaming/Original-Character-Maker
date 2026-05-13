@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, LlmHubPage, TtsExportPage, ImageConverterPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, LlmHubPage, TtsExportPage, ImageConverterPage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.3.2';
+const VERSION = '1.3.3';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -71,6 +71,7 @@ type Messages = {
   featureTts: string;
   featurePaper: string;
   featureImageConverter: string;
+  featureGif: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -95,6 +96,7 @@ type Messages = {
   actionTtsExport: string;
   actionPaper2Gal: string;
   actionImageConverter: string;
+  actionGif: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -202,6 +204,8 @@ type Messages = {
   pagePaperDescription: string;
   pageImageConverterTitle: string;
   pageImageConverterDescription: string;
+  pageGifTitle: string;
+  pageGifDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -455,6 +459,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS 语音导出',
     featurePaper: 'paper2gal 图片素材',
     featureImageConverter: '图片格式转换',
+    featureGif: '角色 GIF 生成',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -479,6 +484,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionTtsExport: 'TTS 语音导出',
     actionPaper2Gal: 'paper2gal 图片素材生成',
     actionImageConverter: '图片格式转换',
+    actionGif: '角色 GIF 生成',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -587,6 +593,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperDescription: '接入 p2g-character-workflow 的 paper2gal 流程，负责上传角色图、轮询工作流进度、查看结果资产与下载调试包。',
     pageImageConverterTitle: '图片格式转换',
     pageImageConverterDescription: '上传图片并转换为 PNG、JPG 格式，支持滤镜调整、质量控制和尺寸缩放。',
+    pageGifTitle: '角色 GIF 生成',
+    pageGifDescription: '上传角色图像、调整 GIF 动画参数（帧数、帧率、循环、动画类型），生成动态角色 GIF。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -827,6 +835,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS 音声出力',
     featurePaper: 'paper2gal 素材',
     featureImageConverter: '画像フォーマット変換',
+    featureGif: 'キャラクター GIF 生成',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -851,6 +860,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionTtsExport: 'TTS 音声出力',
     actionPaper2Gal: 'paper2gal 素材生成',
     actionImageConverter: '画像フォーマット変換',
+    actionGif: 'キャラクター GIF 生成',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -959,6 +969,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperDescription: 'p2g-character-workflow の paper2gal パイプラインに接続し、キャラクター画像のアップロード、進捗同期、成果物確認、デバッグパックの取得を行います。',
     pageImageConverterTitle: '画像フォーマット変換',
     pageImageConverterDescription: '画像をアップロードして PNG、JPG 形式に変換します。フィルター調整、品質制御、サイズ変更に対応。',
+    pageGifTitle: 'キャラクター GIF 生成',
+    pageGifDescription: 'キャラクター画像をアップロードし、GIF アニメーション パラメータ（フレーム数、FPS、ループ、アニメーション タイプ）を調整して、動的なキャラクター GIF を生成します。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: '7つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1199,6 +1211,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS Voice Export',
     featurePaper: 'paper2gal Assets',
     featureImageConverter: 'Image Converter',
+    featureGif: 'Character GIF Generator',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1223,6 +1236,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionTtsExport: 'TTS Voice Export',
     actionPaper2Gal: 'paper2gal Asset Generation',
     actionImageConverter: 'Image Format Converter',
+    actionGif: 'Character GIF Generator',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1331,6 +1345,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperDescription: 'Connects to the p2g-character-workflow paper2gal pipeline for character upload, workflow polling, output review, and debug-package download.',
     pageImageConverterTitle: 'Image Format Converter',
     pageImageConverterDescription: 'Upload an image and convert it to PNG or JPG. Supports filter adjustments, quality control, and resizing.',
+    pageGifTitle: 'Character GIF Generator',
+    pageGifDescription: 'Upload a character image, adjust GIF animation parameters (frames, FPS, loop, motion type), and generate an animated character GIF.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all 7 tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1571,6 +1587,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureTts: 'TTS экспорт голоса',
     featurePaper: 'paper2gal материалы',
     featureImageConverter: 'Конвертер изображений',
+    featureGif: 'Генератор GIF персонажа',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1595,6 +1612,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionTtsExport: 'TTS экспорт голоса',
     actionPaper2Gal: 'paper2gal генерация',
     actionImageConverter: 'Конвертер форматов',
+    actionGif: 'Генератор GIF персонажа',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1703,6 +1721,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pagePaperDescription: 'Подключает paper2gal pipeline из p2g-character-workflow: загрузка изображения персонажа, polling workflow, просмотр результатов и скачивание debug-пакета.',
     pageImageConverterTitle: 'Конвертер форматов',
     pageImageConverterDescription: 'Загрузите изображение и конвертируйте его в PNG или JPG. Поддержка настройки фильтров, качества и размера.',
+    pageGifTitle: 'Генератор GIF персонажа',
+    pageGifDescription: 'Загрузите изображение персонажа, настройте параметры GIF-анимации (кадры, FPS, цикл, тип движения) и сгенерируйте анимированный GIF персонажа.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем 7 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -3878,6 +3898,12 @@ function App() {
           pageTitle={messages.pagePaperTitle}
           pageDescription={messages.pagePaperDescription}
         />
+      ) : screen === 'character-gif' ? (
+        <CharacterGifPage
+          {...sharedPageProps}
+          pageTitle={messages.pageGifTitle}
+          pageDescription={messages.pageGifDescription}
+        />
       ) : screen === 'image-converter' ? (
         <ImageConverterPage
           {...sharedPageProps}
@@ -4048,6 +4074,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('image-converter')}>
                 <ActionIcon kind="image-converter" />
                 <span>{messages.featureImageConverter}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-gif')}>
+                <ActionIcon kind="character-gif" />
+                <span>{messages.featureGif}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5495,7 +5525,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -5550,6 +5580,16 @@ function ActionIcon({
         <path d="M8 26 16 18 22 24 28 16" />
         <circle cx="24" cy="14" r="2.5" />
         <path d="M18 30h4" />
+      </>
+    ),
+    'character-gif': (
+      <>
+        <rect x="8" y="8" width="24" height="24" rx="3" />
+        <circle cx="16" cy="16" r="3" />
+        <circle cx="24" cy="16" r="3" />
+        <path d="M14 24c2 3 6 3 8 0" />
+        <path d="M10 10h4" />
+        <path d="M26 10h4" />
       </>
     ),
     docs: (
@@ -5637,6 +5677,10 @@ function StartModal({
             <ActionIcon kind="image-converter" />
             <strong>{messages.actionImageConverter}</strong>
           </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('character-gif')}>
+            <ActionIcon kind="character-gif" />
+            <strong>{messages.actionGif}</strong>
+          </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
             <strong>{messages.featureDocs}</strong>
@@ -5647,7 +5691,7 @@ function StartModal({
   );
 }
 
-type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter';
+type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif';
 
 function ImportModal({
   messages,
@@ -5759,6 +5803,7 @@ function ImportModal({
       'llm-hub': 'llm-hub',
       'tts-export': 'tts-export',
       'image-converter': 'image-converter',
+      'character-gif': 'character-gif',
     };
     requestClose();
     navigateTimerRef.current = window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
@@ -5772,6 +5817,7 @@ function ImportModal({
     { key: 'tts-export', label: messages.featureTts, icon: 'tts-export' },
     { key: 'paper2gal', label: messages.featurePaper, icon: 'paper2gal' },
     { key: 'image-converter', label: messages.featureImageConverter, icon: 'image-converter' },
+    { key: 'character-gif', label: messages.featureGif, icon: 'character-gif' },
   ];
 
   if (!isOpen) return null;
@@ -7274,6 +7320,16 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         pipelineTitle: 'Outputs / Logs',
         todoOne: '补图片素材工作流配置与启动入口',
         todoTwo: '补 Character Workflow 仓库联动',
+      };
+    case 'character-gif':
+      return {
+        title: messages.pageGifTitle,
+        description: messages.pageGifDescription,
+        workspaceTitle: 'GIF Generator Workspace',
+        panelTitle: 'GIF Parameters',
+        pipelineTitle: 'Generated GIF / Logs',
+        todoOne: '补 GIF 帧数、帧率、循环与动画类型配置',
+        todoTwo: '补角色图像输入与动态 GIF 生成导出',
       };
     case 'image-converter':
       return {
