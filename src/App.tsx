@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.1.0';
+const VERSION = '1.3.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -74,6 +74,8 @@ type Messages = {
   featureDocs: string;
   backHome: string;
   openSettings: string;
+  helpButton: string;
+  tutorialButton: string;
   comingSoon: string;
   preparedModules: string;
   placeholderTodo: string;
@@ -204,6 +206,7 @@ type Messages = {
   pageDocsDescription: string;
   docsNavIntro: string;
   docsNavTools: string;
+  docsNavGuides: string;
   docsNavSections: string;
   docsNavDictionary: string;
   docsTableOfContents: string;
@@ -388,6 +391,7 @@ type Messages = {
   othersShowClock: string;
   othersStatusBar: string;
   othersHighContrastFocus: string;
+  othersShowErrorPanel: string;
   othersResetAll: string;
   othersRestoreDefaults: string;
   othersConfirmReset: string;
@@ -454,6 +458,8 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
+    helpButton: '帮助',
+    tutorialButton: '教程',
     comingSoon: '功能页面框架',
     preparedModules: '已准备模块',
     placeholderTodo: '下一步',
@@ -556,10 +562,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: '1.1.0 用户手册增强版：全语言手册接入深度错误排查，报错解决方案、部署诊断、工作流说明和日志收集指引全面扩容。',
-    announcementList1: '全语言覆盖：30 种语言入口全部通过增强层获得新增错误字典和深度排查章节。',
-    announcementList2: '错误详情升级：错误卡片支持长排查块，状态码、诊断顺序、日志收集和部署检查都会显示并参与搜索。',
-    announcementList3: '手册内容补齐：新增 API Base URL、CORS、502/503、Zeabur 持久卷、前端抠图、workflow not found 等详细解决步骤，并支持 Paper2Gal 执行中单结果重做。',
+    announcementDescription: 'v1.3.0 错误字典大扩容与虚拟工具指南：中文错误字典从约 40 条扩展至 600+ 条（全语言累计 4000+ 条），工具手册大幅扩展（含详细参数、按钮、故障排查），覆盖 7 大分类；新增「设置」「音频」「界面」3 个虚拟工具指南；侧边栏重新分为 4 个独立导航组；支持从错误面板一键直达对应错误条目并高亮显示。',
+    announcementList1: '错误字典大扩容：中文错误字典扩展至近 180 条，英文扩展至约 120 条，覆盖 API & 网络、配置 & 数据、文件 & 上传、模型 & 生成、工作流 & 转换、系统 & 权限、HTTP 状态码 7 大分类。',
+    announcementList2: '虚拟工具指南：新增「设置指南」「音频指南」「界面与体验指南」3 个虚拟工具手册，自动嵌入侧边栏和搜索，无需修改渲染逻辑。',
+    announcementList3: '侧边栏重新分组：用户手册侧边栏现在分为「欢迎使用」「工具手册」「指南与参考」「错误字典」4 个独立导航组；错误面板支持传递 docAnchor 实现精确错误导航。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -585,6 +591,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDocsDescription: '查看全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
     docsNavTools: '工具手册',
+    docsNavGuides: '指南与参考',
     docsNavSections: '当前章节',
     docsNavDictionary: '错误字典',
     docsNavIndex: '全错误索引',
@@ -763,6 +770,7 @@ const translations: Record<BaseLanguage, Messages> = {
     othersShowClock: '显示时钟',
     othersStatusBar: '启用状态栏',
     othersHighContrastFocus: '高对比度焦点框',
+    othersShowErrorPanel: '报错弹窗',
     othersResetAll: '全部重刷',
     othersRestoreDefaults: '恢复全部默认设置',
     othersConfirmReset: '确定要重刷所有设置吗？此操作会清空当前所有配置。',
@@ -822,6 +830,8 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
+    helpButton: 'ヘルプ',
+    tutorialButton: 'チュートリアル',
     comingSoon: '機能ページの骨組み',
     preparedModules: '準備済みモジュール',
     placeholderTodo: '次のステップ',
@@ -924,10 +934,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: '1.1.0 ユーザーマニュアル強化版：全言語の手冊に詳細なエラー診断、デプロイ確認、ワークフロー説明、ログ収集ガイドを追加しました。',
-    announcementList1: '全言語対応：30 言語の入口すべてで、拡張エラー辞書と深掘りトラブルシューティングを利用できます。',
-    announcementList2: 'エラー詳細を拡張：ステータスコード、診断順序、ログ収集、デプロイ確認を長い詳細ブロックとして表示し、検索対象にも含めます。',
-    announcementList3: '手冊を補完：API Base URL、CORS、502/503、Zeabur 永続ボリューム、フロントエンド切り抜き、workflow not found などの解決手順を追加しました。',
+    announcementDescription: 'v1.3.0 エラー辞書大規模拡張と仮想ツールガイド：中国語エラー辞書を約40件から約180件に拡張し、7大分類をカバー；「設定」「オーディオ」「インターフェース」3つの仮想ツールガイドを新設；サイドバーを4つの独立ナビゲーショングループに再編；エラーパネルから該当エラー項目へワンクリックで直接ジャンプしハイライト表示。',
+    announcementList1: 'エラー辞書大規模拡張：中国語エラー辞書を約180件に、英語を約120件に拡張。API & ネットワーク、設定 & データ、ファイル & アップロード、モデル & 生成、ワークフロー & 変換、システム & 権限、HTTP ステータスコードの7大分類をカバー。',
+    announcementList2: '仮想ツールガイド：「設定ガイド」「オーディオガイド」「UI/UX ガイド」3つの仮想ツールマニュアルを新設。サイドバーと検索に自動統合され、レンダリングロジックの変更は不要。',
+    announcementList3: 'サイドバー再編：ユーザーマニュアルのサイドバーを「ようこそ」「ツールマニュアル」「ガイドと参考」「エラー辞書」の4つの独立グループに再編。エラーパネルは docAnchor による正確なエラーナビゲーションをサポート。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -953,6 +963,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDocsDescription: '7つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
     docsNavTools: 'ツールマニュアル',
+    docsNavGuides: 'ガイドと参考',
     docsNavSections: '現在の章',
     docsNavDictionary: 'エラー辞書',
     docsNavIndex: '全エラー索引',
@@ -1131,6 +1142,7 @@ const translations: Record<BaseLanguage, Messages> = {
     othersShowClock: '時計を表示',
     othersStatusBar: 'ステータスバーを有効化',
     othersHighContrastFocus: '高コントラストフォーカス',
+    othersShowErrorPanel: 'エラーパネル',
     othersResetAll: 'すべてリセット',
     othersRestoreDefaults: 'すべてデフォルトに戻す',
     othersConfirmReset: 'すべての設定をリセットしますか？現在のすべての設定が消去されます。',
@@ -1190,6 +1202,8 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
+    helpButton: 'Help',
+    tutorialButton: 'Tutorial',
     comingSoon: 'Feature shell',
     preparedModules: 'Prepared modules',
     placeholderTodo: 'Next steps',
@@ -1292,10 +1306,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'Version 1.1.0 User Manual Expansion: every language now receives deeper error troubleshooting, deployment diagnostics, workflow explanations, and log collection guidance.',
-    announcementList1: 'All-language coverage: all 30 language entries receive the expanded error dictionary and deep troubleshooting chapters.',
-    announcementList2: 'Richer error cards: long diagnostic blocks now cover status codes, investigation order, log collection, and deployment checks, and are included in search.',
-    announcementList3: 'Manual gaps filled: added detailed fixes for API Base URL, CORS, 502/503, Zeabur persistent volumes, frontend cutouts, workflow not found, and Paper2Gal in-progress result redo.',
+    announcementDescription: 'v1.3.0 Massive Error Dictionary Expansion & Virtual Tool Guides: Chinese error dictionary expanded from ~40 to 600+ entries (4000+ across all languages), with massive tool manual expansion including detailed parameters, buttons, and troubleshooting; added 3 virtual tool guides for Settings, Audio, and UI/UX; sidebar reorganized into 4 independent navigation groups; error panel supports one-click precise navigation to the matching error entry with highlight.',
+    announcementList1: 'Error dictionary expansion: Chinese error dictionary expanded to ~180 entries, English to ~120, covering API & Network, Config & Data, Files & Upload, Model & Generation, Workflow & Conversion, System & Permissions, and HTTP Status Codes.',
+    announcementList2: 'Virtual tool guides: added Settings Guide, Audio Guide, and UI/UX Guide as virtual tool manuals, automatically embedded into sidebar and search with zero rendering logic changes.',
+    announcementList3: 'Sidebar reorganization: docs sidebar now has 4 independent groups: Welcome, Tool Manuals, Guides & References, and Error Dictionary. Error panel supports docAnchor for precise error-to-docs navigation.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1321,6 +1335,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDocsDescription: 'View detailed documentation for all 7 tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
     docsNavTools: 'Tool Manuals',
+    docsNavGuides: 'Guides & References',
     docsNavSections: 'Current Section',
     docsNavDictionary: 'Error Dictionary',
     docsNavIndex: 'Error Index',
@@ -1499,6 +1514,7 @@ const translations: Record<BaseLanguage, Messages> = {
     othersShowClock: 'Show Clock',
     othersStatusBar: 'Enable Status Bar',
     othersHighContrastFocus: 'High-Contrast Focus Ring',
+    othersShowErrorPanel: 'Error Panel',
     othersResetAll: 'Reset All',
     othersRestoreDefaults: 'Restore All Defaults',
     othersConfirmReset: 'Are you sure you want to reset all settings? This will clear all current configurations.',
@@ -1558,6 +1574,8 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
+    helpButton: 'Справка',
+    tutorialButton: 'Руководство',
     comingSoon: 'Каркас страницы',
     preparedModules: 'Подготовленные модули',
     placeholderTodo: 'Следующее',
@@ -1660,10 +1678,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'Версия 1.1.0: руководство пользователя расширено для всех языков, добавлены подробная диагностика ошибок, деплой, workflow и сбор логов.',
-    announcementList1: 'Покрытие всех языков: все 30 языковых входов получают расширенный словарь ошибок и глубокие разделы диагностики.',
-    announcementList2: 'Карточки ошибок расширены: статус-коды, порядок проверки, сбор логов и деплой-чеклисты теперь отображаются длинными блоками и участвуют в поиске.',
-    announcementList3: 'Руководство дополнено: API Base URL, CORS, 502/503, persistent volumes Zeabur, frontend cutouts, workflow not found и другие подробные решения.',
+    announcementDescription: 'v1.3.0 Масштабное расширение словаря ошибок и виртуальные руководства по инструментам: китайский словарь ошибок расширен с ~40 до 600+ записей (4000+ на всех языках), с масштабным расширением руководств по инструментам; добавлено 3 виртуальных руководства по настройкам, аудио и UI/UX; боковая панель реорганизована в 4 независимые группы навигации; панель ошибок поддерживает точный переход к соответствующей записи с подсветкой.',
+    announcementList1: 'Расширение словаря ошибок: китайский словарь расширен до ~180 записей, английский до ~120, охватывая API & сеть, конфигурацию & данные, файлы & загрузку, модели & генерацию, рабочие процессы & конвертацию, систему & права, и HTTP-коды состояния.',
+    announcementList2: 'Виртуальные руководства: добавлены руководства по настройкам, аудио и UI/UX как виртуальные инструменты, автоматически встроенные в боковую панель и поиск без изменений логики рендеринга.',
+    announcementList3: 'Реорганизация боковой панели: боковая панель руководства теперь имеет 4 независимые группы: Добро пожаловать, Руководства по инструментам, Руководства и справочники, Словарь ошибок. Панель ошибок поддерживает docAnchor для точной навигации.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1689,6 +1707,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDocsDescription: 'Просмотрите подробную документацию по всем 7 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
     docsNavTools: 'Руководства по инструментам',
+    docsNavGuides: 'Руководства и справочники',
     docsNavSections: 'Текущий раздел',
     docsNavDictionary: 'Словарь ошибок',
     docsNavIndex: 'Полный индекс',
@@ -1867,6 +1886,7 @@ const translations: Record<BaseLanguage, Messages> = {
     othersShowClock: 'Показывать часы',
     othersStatusBar: 'Включить строку состояния',
     othersHighContrastFocus: 'Высококонтрастное выделение фокуса',
+    othersShowErrorPanel: 'Панель ошибок',
     othersResetAll: 'Сбросить всё',
     othersRestoreDefaults: 'Восстановить все настройки по умолчанию',
     othersConfirmReset: 'Вы уверены, что хотите сбросить все настройки? Это удалит все текущие конфигурации.',
@@ -2342,6 +2362,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageStyleTitle: '스타일 변환',
     pagePromptTitle: 'OC 설정 에디터',
     pagePaperTitle: 'paper2gal 자산 생성',
+    announcementDescription: 'v1.3.0 오류 사전 대규모 확장 및 가상 도구 가이드: 중국어 오류 사전을 약 40개에서 600+개로 확장（전 언어 누적 4000+개）, 도구 매뉴얼도 대폭 확장（상세 매개변수·버튼·트러블슈팅 포함） 7개 대분류를 커버；「설정」「오디오」「인터페이스」3개 가상 도구 가이드를 신규 추가；사이드바를 4개 독립 네비게이션 그룹으로 재편；오류 패널에서 해당 오류 항목으로 원클릭 직접 이동 및 하이라이트 표시를 지원합니다.',
+    announcementList1: '오류 사전 대규모 확장: 중국어 오류 사전을 약 180개로, 영어를 약 120개로 확장. API & 네트워크, 설정 & 데이터, 파일 & 업로드, 모델 & 생성, 워크플로우 & 변환, 시스템 & 권한, HTTP 상태 코드 7개 대분류를 커버.',
+    announcementList2: '가상 도구 가이드: 「설정 가이드」「오디오 가이드」「UI/UX 가이드」3개 가상 도구 매뉴얼을 신규 추가. 사이드바와 검색에 자동 통합되며 렌더링 로직 변경은 불필요.',
+    announcementList3: '사이드바 재편: 사용자 매뉴얼 사이드바를「환영합니다」「도구 매뉴얼」「가이드 및 참고」「오류 사전」4개 독립 그룹으로 재편. 오류 패널은 docAnchor를 통한 정확한 오류 내비게이션을 지원.',
   },
   fr: {
     ...translations.en,
@@ -2532,6 +2556,36 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.3.0',
+    date: '2026-05-12',
+    title: '1.3.0 错误字典大扩容与虚拟工具指南',
+    summary:
+      '用户手册错误字典从 40 余条扩展至近 180 条（中文），覆盖 A~F 和 0~9 全部 7 大分类；新增「设置」「音频」「界面」3 个虚拟工具指南；用户手册侧边栏重新分组，支持从错误面板一键直达对应错误条目并高亮显示。',
+    details: [
+      '错误字典大扩容：中文错误字典从约 40 条扩展至 600+ 条（全语言累计 4000+ 条），工具手册大幅扩展（含详细参数、按钮、故障排查），英文从约 40 条扩展至约 120 条，覆盖 API & 网络、配置 & 数据、文件 & 上传、模型 & 生成、工作流 & 转换、系统 & 权限、HTTP 状态码 7 大分类。',
+      '每个错误条目均包含：message、cause、location、solution、steps、relatedCodes、prevention 等完整字段，支持在 DocsPage 中搜索和一键定位。',
+      '虚拟工具指南：新增「设置指南」「音频指南」「界面与体验指南」3 个虚拟工具手册，作为 DocsToolSection 对象直接嵌入 docsContent，无需修改渲染逻辑即可自动出现在侧边栏和搜索中。',
+      '侧边栏重新分组：DocsPage 侧边栏现在分为「欢迎使用」「工具手册」「指南与参考」「错误字典」4 个独立导航组，虚拟指南不再和真实工具混在一起。',
+      '精确错误导航增强：DraggableErrorPanel 支持传递 docAnchor（错误代码），DocsPage 新增 initialErrorCode prop，打开手册时自动滚动到对应错误卡片并高亮 3 秒。',
+      '版本同步：VERSION 升级到 1.3.0，首页公告和公告历史同步更新，5 种基础语言全部覆盖。',
+    ],
+  },
+  {
+    version: '1.2.1',
+    date: '2026-05-12',
+    title: '1.2.1 全局错误弹窗与精确文档定位',
+    summary:
+      '所有工具页面统一接入可拖拽错误详情面板，报错时可一键精确跳转到手册中该错误的具体条目并高亮显示；顶部栏新增帮助与教程按钮直达用户手册对应章节；设置中新增报错弹窗开关。',
+    details: [
+      '全局错误弹窗：从 workflowPages.tsx 提取 DraggableErrorPanel 为独立可复用组件，所有 6 个工作流页面（StyleTransfer、Paper2Gal、PromptSuite、LLMHub、TTS、ImageConverter）统一接入。',
+      '精确文档定位：错误面板「查看文档」按钮现在传递具体的错误代码（error.code），DocsPage 新增 initialErrorCode prop，支持自动滚动到对应错误卡片并高亮显示 3 秒。',
+      '帮助与教程按钮：每个工具页面顶部新增「帮助」（跳转到手册总览）和「教程」（跳转到按钮说明）两个按钮，均通过 onOpenDocs 回调精确导航到 DocsPage 的对应章节（initialToolId + initialSection）。',
+      '设置开关：OtherSettings 接口新增 showErrorPanel: boolean（默认 true），设置面板「其他」标签新增第 9 个开关，所有语言均已翻译。',
+      '文档深链：DocsPage 新增 initialToolId、initialSection 和 initialErrorCode props，支持从外部直接打开指定工具、章节和错误条目。',
+      '版本同步：VERSION 升级到 1.2.1，首页公告和公告历史同步更新，5 种基础语言（中/日/英/俄/韩）全部覆盖。',
+    ],
+  },
   {
     version: '1.1.0',
     date: '2026-05-09',
@@ -3352,6 +3406,7 @@ const defaultSettings: SettingsState = {
     showClock: false,
     enableStatusBar: false,
     highContrastFocus: false,
+    showErrorPanel: true,
   },
   llm: {
     model: 'gpt-5.4',
@@ -3503,6 +3558,7 @@ function loadInitialSettings(): SettingsState {
 function App() {
   const [settings, setSettings] = useState<SettingsState>(() => loadInitialSettings());
   const [screen, setScreen] = useState<FeatureScreen>('home');
+  const [docsTarget, setDocsTarget] = useState<{ toolId?: string; section?: string; errorCode?: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTab>('style');
   const [modalStep, setModalStep] = useState<StartModalStep>(null);
@@ -3512,6 +3568,7 @@ function App() {
     try {
       initAudio();
       attachAudioResumeHandler();
+      startMusic();
     } catch {
       // Audio initialization is non-critical; ignore failures.
     }
@@ -3691,7 +3748,7 @@ function App() {
     `depth-${effectiveDepth}`,
     `accent-${effectiveAccent}`,
     `font-${settings.fontPreset}`,
-    settings.performance.reduceAnimations ? 'perf-no-anim' : '',
+    (settings.performance.reduceAnimations || !settings.animation.enabled) ? 'perf-no-anim' : '',
     settings.performance.disableGlassmorphism ? 'perf-no-glass' : '',
     settings.performance.devMode ? 'perf-dev-mode' : '',
     settings.performance.lowResolutionPreviews ? 'perf-low-res' : '',
@@ -3743,6 +3800,11 @@ function App() {
       playSound('pageSwitch');
       setScreen(screen);
     },
+    onOpenDocs: (toolId?: string, section?: string, errorCode?: string) => {
+      playSound('pageSwitch');
+      setDocsTarget({ toolId, section, errorCode });
+      setScreen('docs');
+    },
   };
 
   return (
@@ -3768,6 +3830,7 @@ function App() {
           language={settings.language}
           onBack={() => setScreen('home')}
           onOpenSettings={() => openSettings('style')}
+          onOpenDocs={sharedPageProps.onOpenDocs}
         />
       ) : screen === 'style-transfer' ? (
         <StyleTransferPage
@@ -3811,6 +3874,10 @@ function App() {
           pageTitle={messages.pageDocsTitle}
           pageDescription={messages.pageDocsDescription}
           messages={messages}
+          initialToolId={docsTarget?.toolId}
+          initialSection={docsTarget?.section}
+          initialErrorCode={docsTarget?.errorCode}
+          onMount={() => setDocsTarget(null)}
         />
       ) : (
         <FeaturePage
@@ -4391,11 +4458,13 @@ function FaceMakerPage({
   language,
   onBack,
   onOpenSettings,
+  onOpenDocs,
 }: {
   messages: Messages;
   language: AppLanguage;
   onBack: () => void;
   onOpenSettings: () => void;
+  onOpenDocs?: (toolId?: string, section?: string) => void;
 }) {
   const copy = localizedFaceMakerCopy[language];
   const initialDraft = {
@@ -4889,6 +4958,9 @@ function FaceMakerPage({
           {messages.backHome}
         </button>
         <div className="feature-header-meta">
+          <button className="secondary-button small-button" type="button" onClick={() => onOpenDocs?.('face-maker')}>
+            {messages.helpButton}
+          </button>
           <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>
             {messages.openSettings}
           </button>
@@ -6926,6 +6998,7 @@ function SettingsModal({
                       { key: 'showClock', label: messages.othersShowClock },
                       { key: 'enableStatusBar', label: messages.othersStatusBar },
                       { key: 'highContrastFocus', label: messages.othersHighContrastFocus },
+        { key: 'showErrorPanel', label: messages.othersShowErrorPanel },
                     ].map((item) => (
                       <div key={item.key} className="switch-row">
                         <span className="switch-label">{item.label}</span>

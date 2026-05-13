@@ -6,6 +6,7 @@ import type { AppLanguage, SettingsState } from './types';
 type DocsLabels = {
   docsNavIntro: string;
   docsNavTools: string;
+  docsNavGuides: string;
   docsNavSections: string;
   docsNavDictionary: string;
   docsNavIndex: string;
@@ -46,6 +47,10 @@ type DocsPageProps = {
   onBack: () => void;
   onOpenSettings: () => void;
   onNavigate?: (screen: 'image-converter' | 'docs') => void;
+  initialToolId?: string;
+  initialSection?: string;
+  initialErrorCode?: string;
+  onMount?: () => void;
 };
 
 const SECTION_IDS = ['overview', 'buttons', 'parameters', 'errors'] as const;
@@ -75,6 +80,10 @@ export default function DocsPage({
   messages,
   onBack,
   onOpenSettings,
+  initialToolId,
+  initialSection,
+  initialErrorCode,
+  onMount,
 }: DocsPageProps) {
   const sectionLabels: Record<SectionId, string> = {
     overview: messages.docsSectionOverview,
@@ -84,10 +93,36 @@ export default function DocsPage({
   };
 
   const content = useMemo(() => getDocsContent(language), [language]);
-  const [activeToolId, setActiveToolId] = useState<string>(content.tools[0].id);
-  const [activeSection, setActiveSection] = useState<SectionId | null>('overview');
+  const [activeToolId, setActiveToolId] = useState<string>(initialToolId && content.tools.some((t) => t.id === initialToolId) ? initialToolId : content.tools[0].id);
+  const [activeSection, setActiveSection] = useState<SectionId | null>(
+    initialSection && SECTION_IDS.includes(initialSection as SectionId) ? (initialSection as SectionId) : 'overview',
+  );
+  const [highlightedErrorCode, setHighlightedErrorCode] = useState<string | null>(initialErrorCode ?? null);
   const [searchQuery, setSearchQuery] = useState('');
   const contentRef = useRef<HTMLDivElement>(null);
+  const hasHandledMount = useRef(false);
+
+  useEffect(() => {
+    if (!hasHandledMount.current && onMount) {
+      hasHandledMount.current = true;
+      onMount();
+    }
+  }, [onMount]);
+
+  useEffect(() => {
+    if (!initialErrorCode) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`docs-error-${initialErrorCode}`);
+      if (el && contentRef.current) {
+        const top = el.offsetTop - contentRef.current.offsetTop - 16;
+        contentRef.current.scrollTo({ top, behavior: 'smooth' });
+        setHighlightedErrorCode(initialErrorCode);
+        const removeHighlight = setTimeout(() => setHighlightedErrorCode(null), 3000);
+        return () => clearTimeout(removeHighlight);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [initialErrorCode, activeToolId]);
 
   const allSearchableErrors = useMemo(() => {
     const toolErrors = content.tools.flatMap((tool) =>
@@ -226,28 +261,50 @@ export default function DocsPage({
                       if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' });
                     }}
                   >
-                    {cat.name}
+                    {cat.name} <span className="docs-nav-count">({cat.errors.length})</span>
                   </button>
                 ))}
               </div>
 
-              <div className="docs-nav-group">
-                <p className="docs-nav-group-title">{messages.docsNavTools}</p>
-                {content.tools.map((tool) => (
-                  <button
-                    key={tool.id}
-                    className={`docs-nav-item ${activeToolId === tool.id ? 'active' : ''}`}
-                    type="button"
-                    onClick={() => {
-                      setActiveToolId(tool.id);
-                      setActiveSection('overview');
-                      if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' });
-                    }}
-                  >
-                    {tool.title}
-                  </button>
-                ))}
-              </div>
+              {content.tools.filter((t) => !['settings-guide', 'audio-guide', 'ui-ux-guide'].includes(t.id)).length > 0 && (
+                <div className="docs-nav-group">
+                  <p className="docs-nav-group-title">{messages.docsNavTools}</p>
+                  {content.tools.filter((t) => !['settings-guide', 'audio-guide', 'ui-ux-guide'].includes(t.id)).map((tool) => (
+                    <button
+                      key={tool.id}
+                      className={`docs-nav-item ${activeToolId === tool.id ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => {
+                        setActiveToolId(tool.id);
+                        setActiveSection('overview');
+                        if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' });
+                      }}
+                    >
+                      {tool.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {content.tools.filter((t) => ['settings-guide', 'audio-guide', 'ui-ux-guide'].includes(t.id)).length > 0 && (
+                <div className="docs-nav-group">
+                  <p className="docs-nav-group-title">{messages.docsNavGuides}</p>
+                  {content.tools.filter((t) => ['settings-guide', 'audio-guide', 'ui-ux-guide'].includes(t.id)).map((tool) => (
+                    <button
+                      key={tool.id}
+                      className={`docs-nav-item ${activeToolId === tool.id ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => {
+                        setActiveToolId(tool.id);
+                        setActiveSection('overview');
+                        if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' });
+                      }}
+                    >
+                      {tool.title}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {activeToolId !== 'intro' && !activeToolId.startsWith('dict-') && !isIndexView && (
                 <div className="docs-nav-group">
@@ -293,9 +350,12 @@ export default function DocsPage({
                   <div className="docs-search-empty">没有找到匹配的结果，请尝试其他关键词。</div>
                 ) : (
                   <div className="docs-errors-list">
-                    {searchResults.map((err, i) => (
-                      <ErrorCard key={i} error={err} messages={messages} />
+                    {searchResults.slice(0, 100).map((err, i) => (
+                      <ErrorCard key={i} error={err} messages={messages} isHighlighted={highlightedErrorCode === err.code} />
                     ))}
+                    {searchResults.length > 100 && (
+                      <div className="docs-search-more">还有 {searchResults.length - 100} 条结果，请尝试更精确的关键词。</div>
+                    )}
                   </div>
                 )}
               </article>
@@ -330,9 +390,10 @@ export default function DocsPage({
               <DictionaryView
                 category={content.errorDictionary.find((c) => `dict-${c.id}` === activeToolId)!}
                 messages={messages}
+                highlightedErrorCode={highlightedErrorCode}
               />
             ) : isIndexView ? (
-              <ErrorIndexView errors={allErrors} messages={messages} />
+              <ErrorIndexView errors={allErrors} messages={messages} highlightedErrorCode={highlightedErrorCode} />
             ) : (
               <article className="docs-article">
                 <h1>{activeTool.title}</h1>
@@ -392,7 +453,7 @@ export default function DocsPage({
                   <h2 className="docs-section-title">{sectionLabels.errors}</h2>
                   <div className="docs-errors-list">
                     {activeTool.errors.map((err, i) => (
-                      <ErrorCard key={i} error={err} messages={messages} />
+                      <ErrorCard key={i} error={err} messages={messages} isHighlighted={highlightedErrorCode === err.code} />
                     ))}
                   </div>
                 </section>
@@ -405,12 +466,12 @@ export default function DocsPage({
   );
 }
 
-function ErrorCard({ error, messages }: { error: import('./docsContent').DocsErrorItem; messages: DocsLabels }) {
+function ErrorCard({ error, messages, isHighlighted }: { error: import('./docsContent').DocsErrorItem; messages: DocsLabels; isHighlighted?: boolean }) {
   const severityClass = severityClassMap[error.severity] ?? 'severity-info';
   const severityLabel = severityLabelMap[error.severity] ?? error.severity;
 
   return (
-    <div className={`docs-error-card ${severityClass}`}>
+    <div id={`docs-error-${error.code}`} className={`docs-error-card ${severityClass} ${isHighlighted ? 'docs-error-highlighted' : ''}`}>
       <div className="docs-error-header">
         <span className="docs-error-code">{error.code}</span>
         <span className={`docs-error-severity ${severityClass}`}>{severityLabel}</span>
@@ -480,21 +541,21 @@ function ErrorCard({ error, messages }: { error: import('./docsContent').DocsErr
   );
 }
 
-function DictionaryView({ category, messages }: { category: import('./docsContent').DocsErrorCategory; messages: DocsLabels }) {
+function DictionaryView({ category, messages, highlightedErrorCode }: { category: import('./docsContent').DocsErrorCategory; messages: DocsLabels; highlightedErrorCode?: string | null }) {
   return (
     <article className="docs-article">
       <h1>{category.name}</h1>
       <p className="docs-dictionary-desc">{category.description}</p>
       <div className="docs-errors-list">
         {category.errors.map((err, i) => (
-          <ErrorCard key={i} error={err} messages={messages} />
+          <ErrorCard key={i} error={err} messages={messages} isHighlighted={highlightedErrorCode === err.code} />
         ))}
       </div>
     </article>
   );
 }
 
-function ErrorIndexView({ errors, messages }: { errors: import('./docsContent').DocsErrorItem[]; messages: DocsLabels }) {
+function ErrorIndexView({ errors, messages, highlightedErrorCode }: { errors: import('./docsContent').DocsErrorItem[]; messages: DocsLabels; highlightedErrorCode?: string | null }) {
   const [filter, setFilter] = useState<string>('all');
 
   const filters = [

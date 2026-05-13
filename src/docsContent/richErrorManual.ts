@@ -1065,10 +1065,121 @@ function manualSuffix(language: string): string {
 This manual now includes longer error-resolution sections. In addition to buttons, parameters, and basic errors, the error dictionary contains deep troubleshooting for API base URLs, CORS, 502/503, Zeabur deployment, persistent directories, Paper2Gal workflow steps, frontend cutouts, browser memory, text encoding, import/export, and upstream model status codes. For complex issues, copy the full error JSON and diagnose in this order: status code → current step → provider → backend logs → browser Network/Console.`;
 }
 
+const jaDetailedCategories: DocsErrorCategory[] = [
+  {
+    id: 'deep-api-network',
+    name: '深掘りトラブルシューティング：API、ネットワーク、認証とアップストリームサービス',
+    description: 'Key、Base URL、CORS、タイムアウト、レート制限、ステータスコード、アップストリームモデルサービスを網羅した、通常のエラー辞書より詳細な API 診断マニュアルです。',
+    errors: [
+      {
+        code: 'API_BASE_URL_POINTS_TO_MODEL_ENDPOINT',
+        message: 'API Base URL に /v1/chat/completions などのモデル直接エンドポイントが設定されている',
+        severity: 'critical',
+        category: 'A. API とネットワーク',
+        location: '設定 → API → API Base URL；Paper2Gal / 転画风 / LLM Hub のリクエスト前',
+        cause: '本アプリのフロントエンドは /api/workflows、/api/style-transfer、/api/chat などのパスを自動的に追加します。Base URL が既にモデルプロバイダーの直接エンドポイントである場合、最終的な URL が無効なネストパスになります。',
+        solution: 'API Base URL を OC Maker バックエンドのルートアドレスに変更してください。',
+        steps: [
+          '誤った例：https://api.example.com/v1/chat/completions。',
+          '正しい例：https://your-oc-maker-backend.example.com。',
+          '保存後、https://your-oc-maker-backend.example.com/api/health に直接アクセスし、{"status":"ok"} が返ることを確認してください。',
+        ],
+        relatedCodes: ['BACKEND_UNAVAILABLE', 'HOSTED_API_REQUIRED', 'STYLE_TRANSFER_REQUEST_FAILED'],
+        prevention: '「OC Maker バックエンドのルートアドレス」と「モデルプロバイダーの API アドレス」を分けて記録してください。',
+      },
+      {
+        code: 'CORS_ORIGIN_BLOCKED',
+        message: 'ブラウザコンソールに CORS policy、No Access-Control-Allow-Origin、または preflight 失敗が表示される',
+        severity: 'error',
+        category: 'A. API とネットワーク',
+        location: 'ブラウザ DevTools → Console / Network；すべてのオンラインツール',
+        cause: 'フロントエンドページの origin がバックエンドの CORS_ORIGIN によって許可されていないか、OPTIONS プリフライトリクエストがゲートウェイ、リバースプロキシ、プラットフォーム設定によってブロックされています。',
+        solution: 'バックエンドの環境変数に正しい CORS_ORIGIN を設定し、プロキシが OPTIONS を許可していることを確認してください。',
+        steps: [
+          'ブラウザのアドレスバーから origin をコピーします（例：https://user.github.io）。',
+          'バックエンドの CORS_ORIGIN をこの origin に設定します。複数の origin は英語のカンマで区切ります。',
+          '一時的な診断には CORS_ORIGIN=* を使用できます。問題の確認後に制限を強化してください。',
+          '再デプロイまたはバックエンドの再起動後、フロントエンドページを更新します。',
+        ],
+        relatedCodes: ['BACKEND_UNAVAILABLE', 'HOSTED_API_REQUIRED'],
+        prevention: 'フロントエンドとバックエンドを別ドメインでデプロイする場合、フロントエンドのドメインを変更するたびにバックエンドの CORS_ORIGIN も同期して更新してください。',
+      },
+    ],
+  },
+  {
+    id: 'deep-p2g-workflow',
+    name: '深掘りトラブルシューティング：Paper2Gal ワークフローと生成物',
+    description: 'ワークフローの状態、再実行、ダウンロード、透過切り抜き、出力ディレクトリ、Zeabur の永続化をカバーします。',
+    errors: [
+      {
+        code: 'P2G_STUCK_WAITING_FOR_FRONTEND_CUTOUTS',
+        message: 'Paper2Gal の表情と CG は生成されたが、cutout_expression_* やブラウザ切り抜きの待機で止まっている',
+        severity: 'warning',
+        category: 'S. システムとワークフロー',
+        location: 'Paper2Gal → プログレスバー / 透過表情 PNG エリア',
+        cause: '背景除去はブラウザ側の IMG.LY で処理されます。ランタイムアセットのダウンロード失敗、WebAssembly 非対応、COOP/COEP ヘッダー欠落、バックグラウンドタブのスロットリング、画像のクロスオリジンアクセスなどが原因で、フロントエンドの切り抜きアップロードが行われない可能性があります。',
+        solution: 'サーバー側のエッジカラーフォールバックが完了するのを待つか、ブラウザが IMG.LY ランタイムアセットを正常に読み込んだ後に再生成/再実行してください。',
+        steps: [
+          'Paper2Gal ページを開いたままにし、生成中にタブを閉じないでください。',
+          'Console を開き、@imgly/background-removal、wasm、onnx、SharedArrayBuffer に関連するエラーを検索します。',
+          'Network を開き、/api/cutout-assets をフィルタリングし、.wasm、.onnx、.mjs が正常に読み込まれることを確認します。',
+        ],
+        relatedCodes: ['WORKFLOW_STEP_FAILED', 'P2G_WORKFLOW_ERROR'],
+      },
+    ],
+  },
+  {
+    id: 'deep-files-browser',
+    name: '深掘りトラブルシューティング：ファイル、ブラウザ、インポート/エクスポートとローカルストレージ',
+    description: 'アップロード形式、画像デコード、localStorage、クリップボード、ダウンロード、ブラウザメモリ、テキストエンコーディングをカバーします。',
+    errors: [
+      {
+        code: 'IMAGE_DECODE_FAILED',
+        message: '画像の拡張子は正しいが、バックエンドがサイズを読み取れない、またはフロントエンドのプレビューが空白',
+        severity: 'error',
+        category: 'C. ファイルとアップロード',
+        location: '画像アップロード、画像変換、Paper2Gal 参照画像',
+        cause: 'ファイルは拡張子だけ変更された可能性があり、実際の内容が破損しているかもしれません。また、プログレッシブエンコーディング、CMYK、特殊な色彩空間、巨大な透過キャンバス、またはブラウザが非対応のエンコーディングの可能性もあります。',
+        solution: '標準的な画像ツールで sRGB PNG または JPEG として再エクスポートしてください。',
+        steps: [
+          'ブラウザの新しいタブで画像を直接開き、表示されることを確認します。',
+          '画像エディタで開き、「名前を付けて保存」で PNG として保存します。',
+          '過大な透過余白を削除し、キャラクター本体を適切な範囲にトリミングします。',
+        ],
+        relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'FILE_CORRUPTED'],
+      },
+    ],
+  },
+  {
+    id: 'deep-deployment',
+    name: '深掘りトラブルシューティング：デプロイ、環境変数とランタイム',
+    description: 'Docker、Zeabur、ポート、ヘルスチェック、永続ボリューム、ビルド成果物、サーバー依存関係をカバーします。',
+    errors: [
+      {
+        code: 'PORT_BINDING_MISMATCH',
+        message: 'ローカルでは動作するが、クラウドで 502 が返る、またはログにサービスが起動したがプラットフォームからアクセスできない',
+        severity: 'critical',
+        category: 'Z. デプロイとランタイム',
+        location: 'Zeabur / Docker / クラウドプラットフォームのランタイムログ',
+        cause: 'プラットフォームはプロセスが指定された PORT と 0.0.0.0 でリッスンすることを期待していますが、アプリケーションが誤ったポートでリッスンしている、localhost のみでリッスンしている、またはヘルスチェックが別のポートを対象にしている可能性があります。',
+        solution: 'バックエンドが process.env.PORT を読み取り、0.0.0.0 でリッスンしていることを確認してください。',
+        steps: [
+          '起動ログを確認します：Server listening on 0.0.0.0:{PORT}。',
+          'Zeabur などのプラットフォームでは通常 PORT が注入されます。Dockerfile やコードで 3001 にだけハードコードしないでください。',
+          'ヘルスチェックパスには /health または /api/health を使用します。',
+        ],
+        relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
+      },
+    ],
+  },
+];
+
+
 export function enhanceDocsContent(content: DocsContent, language: string): DocsContent {
   const isZh = language.toLowerCase().startsWith('zh');
   const patched = patchToolErrors(content, isZh ? zhSharedPatches : enSharedPatches);
-  const extraCategories = isZh ? zhDetailedCategories : enDetailedCategories;
+  const isJa = language.toLowerCase().startsWith("ja");
+  const extraCategories = isZh ? zhDetailedCategories : isJa ? jaDetailedCategories : enDetailedCategories;
 
   return {
     ...patched,
