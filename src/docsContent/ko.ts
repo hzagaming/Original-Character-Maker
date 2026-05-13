@@ -721,6 +721,117 @@ export const docsContent: DocsContent = {
           },
         ],
       },
+      {
+        id: `settings-guide`,
+        title: `설정 패널 가이드`,
+        overview:
+          `설정 패널은 OC Maker의 핵심 설정 입구로, 외관, 언어, API, 오디오, 애니메이션, 단축키, 성능 및 기타 설정을 포괄합니다. 모든 변경 사항은 즉시 적용되며 브라우저 localStorage에 자동 저장됩니다.\n\n설정 패널은 여러 탭으로 구분됩니다. 「스타일」은 테마, 색상, 글꼴을 제어하고, 「언어」는 인터페이스 언어를 전환하고, 「API」는 백엔드 연결을 관리하고, 「오디오」는 BGM과 SFX를 조절하고, 「애니메이션」은 동작 효과를 제어하고, 「단축키」는 키보드 동작을 사용자 정의하고, 「성능」은 저사양 기기의 경험을 최적화하고, 「기타」는 툴팁, 확인 대화상자, 자동 저장 등을 포함합니다.`,
+        buttons: [
+          { name: `스타일 프리셋 저장`, description: `현재 테마, 색상, 글꼴 조합을 사용자 정의 프리셋으로 저장하여 나중에 원클릭으로 전환할 수 있습니다.` },
+          { name: `프리셋 적용`, description: `저장된 프리셋 목록에서 선택하여 모든 스타일 설정을 즉시 적용합니다.` },
+          { name: `모든 설정 초기화`, description: `모든 탭의 설정을 기본값으로 복원합니다. 실수 방지를 위해 이중 확인이 필요합니다.` },
+          { name: `기본값 복원`, description: `현재 탭의 설정만 기본값으로 복원하며 다른 탭에는 영향을 주지 않습니다.` },
+        ],
+        parameters: [
+          { name: `테마 모드`, description: `라이트 모드는 주간 사용에 적합하고, 다크 모드는 야간 눈 피로를 줄입니다.` },
+          { name: `강조색`, description: `버튼, 링크, 진행률 표시줄, 선택 상태 등에 영향을 주는 인터페이스 메인 색상입니다.` },
+          { name: `글꼴`, description: `고딕, 둥근 고딕, 명조, 고정폭, 흑체, 송체, 해체 등 11가지 글꼴 중 선택합니다.` },
+          { name: `인터페이스 언어`, description: `30가지 언어를 지원하며 전환 후 즉시 적용됩니다.` },
+          { name: `API 모드`, description: `「내장 모드」는 백엔드에 구성된 Plato 서비스를 사용합니다. 「사용자 지정 API」는 자체 OpenAI 호환 엔드포인트를 사용합니다.` },
+          { name: `마스터 볼륨`, description: `BGM과 SFX 모두에 영향을 주는 전역 볼륨 배율입니다. 0으로 설정하면 완전히 음소거됩니다.` },
+          { name: `애니메이션 활성화`, description: `전역 애니메이션 마스터 스위치입니다. 꺼지면 모든 UI 애니메이션이 비활성화됩니다.` },
+          { name: `고대비 포커스`, description: `키보드 포커스 표시기의 가시성을 향상시켜 키보드 탐색 및 접근성을 개선합니다.` },
+          { name: `오류 패널`, description: `워크플로우 페이지에서 오류가 발생할 때 드래그 가능한 오류 상세 패널을 표시할지 여부입니다.` },
+        ],
+        errors: [
+          {
+            code: `SETTINGS_SAVE_FAILED`,
+            message: `설정 저장 실패`,
+            severity: `warning`,
+            category: `B. 설정 및 데이터`,
+            location: `설정 패널 → 임의 탭`,
+            cause: `브라우저 localStorage 공간 부족, 저장 비활성화 또는 데이터 직렬화 실패입니다.`,
+            solution: `브라우저 캐시와 localStorage를 지우거나 프라이버시 모드 설정을 확인하세요.`,
+            steps: [
+              `DevTools → Application → Local Storage를 열고 오래된 oc-maker 키를 삭제하세요.`,
+              `「타사 쿠키 차단」 또는 유사한 개인 정보 보호 설정을 비활성화한 후 다시 시도하세요.`,
+            ],
+            relatedCodes: [`LOCAL_STORAGE_VERSION_MISMATCH`, `CONFIG_CORRUPTED`],
+          },
+        ],
+      },
+      {
+        id: `audio-guide`,
+        title: `오디오 시스템 가이드`,
+        overview:
+          `OC Maker의 오디오 시스템은 Web Audio API를 기반으로 구축되어 풍부한 상호작용 효과음(SFX)과 배경음악(BGM)을 제공합니다. 15가지 이상의 SFX 프리셋, 20가지 이상의 BGM 프리셋과 사용자 지정 오디오 파일 업로드를 지원합니다.\n\n브라우저의 자동 재생 정책으로 인해 페이지 로드 후 오디오가 음소거 상태일 수 있습니다. 페이지의 임의 버튼이나 영역을 클릭하면 오디오 재생이 잠금 해제됩니다.`,
+        buttons: [
+          { name: `BGM 재생/일시정지`, description: `배경음악 재생 상태를 전환합니다. 첫 재생에는 사용자 클릭이 필요할 수 있습니다.` },
+          { name: `SFX 테스트`, description: `현재 선택된 SFX 프리셋의 샘플 음을 재생하여 미리 들어봅니다.` },
+          { name: `BGM 테스트`, description: `현재 선택된 BGM 프리셋의 샘플 클립을 재생하여 미리 들어봅니다.` },
+        ],
+        parameters: [
+          { name: `마스터 볼륨`, description: `BGM과 SFX 모두에 영향을 주는 전역 볼륨 배율(0%~100%)입니다.` },
+          { name: `SFX 볼륨`, description: `버튼 클릭, 호버, 성공/실패 알림 등 상호작용 효과음의 독립 볼륨입니다.` },
+          { name: `BGM 볼륨`, description: `배경음악의 독립 볼륨으로 SFX 볼륨과 간섭하지 않습니다.` },
+          { name: `SFX 프리셋`, description: `15가지 이상의 절차적 효과음 스타일입니다.` },
+          { name: `BGM 프리셋`, description: `20가지 이상의 배경음악 스타일입니다.` },
+        ],
+        errors: [
+          {
+            code: `AUDIO_CONTEXT_SUSPENDED`,
+            message: `브라우저가 오디오를 자동 일시 중지했습니다`,
+            severity: `info`,
+            category: `F. 브라우저 및 성능`,
+            location: `임의 페이지 → 오디오 재생`,
+            cause: `모던 브라우저의 자동 재생 정책은 사용자가 페이지와 상호작용할 때까지 오디오 시작을 금지합니다.`,
+            solution: `페이지의 임의 위치나 버튼을 클릭하면 오디오 재생이 재개됩니다.`,
+            prevention: `앱에는 attachAudioResumeHandler가 내장되어 있어 첫 사용자 상호작용 시 자동으로 AudioContext를 재개합니다.`,
+          },
+        ],
+      },
+      {
+        id: `ui-ux-guide`,
+        title: `인터페이스 및 경험 가이드`,
+        overview:
+          `OC Maker의 인터페이스 시스템은 CSS 사용자 지정 속성(CSS Variables)을 기반으로 구축되어 실시간 테마 전환, 글꼴 변경, 애니메이션 조절 및 성능 최적화를 지원합니다. 모든 외관 설정은 즉시 적용되며 페이지 새로고침이 필요하지 않습니다.\n\n테마 시스템: :root의 CSS 변수 값을 수정하여 라이트 모드와 다크 모드를 전환합니다.\n\n애니메이션 시스템: CSS 전환 및 키프레임 애니메이션을 기반으로 UI 페이드인, 버튼 호버, 페이지 전환, 모달 전환의 4계층으로 구분됩니다.\n\n성능 최적화: 저사양 기기 및 모바일 브라우저를 대상으로 애니메이션 축소, 글라스 효과 비활성화, 저해상도 미리보기, 지연 로딩, 입자 비활성화, 공격적 캐싱 등의 다운그레이드 옵션을 제공합니다.`,
+        buttons: [
+          { name: `테마 전환`, description: `라이트 모드와 다크 모드 간을 전환합니다. 모든 페이지 요소가 부드럽게 전환됩니다.` },
+          { name: `스타일 프리셋 적용`, description: `저장된 완전한 스타일 조합(테마+색상+글꼴)을 원클릭으로 적용합니다.` },
+          { name: `글꼴 변경`, description: `11가지 인터페이스 글꼴 중 선택합니다. 전환 후 모든 텍스트에 즉시 적용됩니다.` },
+          { name: `애니메이션 활성화`, description: `모든 UI 애니메이션 효과(페이드인, 호버, 페이지 전환, 모달 애니메이션)를 활성화합니다.` },
+          { name: `애니메이션 비활성화`, description: `모든 애니메이션을 비활성화합니다. 인터페이스 변경이 즉시 전환됩니다.` },
+        ],
+        parameters: [
+          { name: `테마 모드`, description: `라이트 모드는 주간 및 밝은 환경에 적합합니다. 다크 모드는 야간 눈 피로와 OLED 소비 전력을 줄입니다.` },
+          { name: `강조색`, description: `버튼, 진행률 표시줄, 선택 상태, 링크, 아이콘 등 하이라이트 요소에 영향을 주는 메인 색상입니다.` },
+          { name: `사용자 지정 대비`, description: `인터페이스의 명암 대비를 조절합니다. 부드러움(저대비)에서 강렬함(고대비)까지 5단계.` },
+          { name: `글꼴 패밀리`, description: `11가지 인터페이스 글꼴입니다.` },
+          { name: `애니메이션 활성화`, description: `전역 애니메이션 마스터 스위치입니다. 꺼지면 모든 전환이 즉시 처리됩니다.` },
+          { name: `애니메이션 속도`, description: `슬로우(1.5배 시간), 노멀(1배), 패스트(0.5배).` },
+          { name: `고대비 포커스`, description: `키보드 포커스 표시기에 고대비 테두리를 추가하여 키보드 탐색 및 접근성을 개선합니다.` },
+        ],
+        errors: [
+          {
+            code: `THEME_CSS_LOAD_FAILED`,
+            message: `테마 CSS 변수 로드 실패`,
+            severity: `warning`,
+            category: `B. 설정 및 데이터`,
+            location: `설정 패널 → 스타일`,
+            cause: `사용자 지정 테마 값을 브라우저가 구문 분석할 수 없습니다. 색상 형식이 잘못되었거나 CSS 변수 값이 오버플로되었을 수 있습니다.`,
+            solution: `스타일 설정을 재설정하거나 시스템 프리셋을 선택하세요.`,
+          },
+          {
+            code: `FONT_LOAD_FAILED`,
+            message: `글꼴 로드 실패`,
+            severity: `warning`,
+            category: `F. 브라우저 및 성능`,
+            location: `설정 패널 → 스타일 → 글꼴`,
+            cause: `선택한 글꼴이 현재 시스템에 설치되어 있지 않거나, 네트워크 글꼴 로드가 시간 초과되었거나, 글꼴 파일이 브라우저 보안 정책에 의해 차단되었습니다.`,
+            solution: `시스템에 설치된 글꼴을 선택하거나 네트워크 연결을 확인한 후 다시 시도하세요.`,
+          },
+        ],
+      },
     ],
     errorDictionary:
 [
@@ -798,7 +909,427 @@ export const docsContent: DocsContent = {
             ],
             prevention: `로컬 배포 시 백엔드 프로세스를 실행하세요. 원격 서비스를 사용할 때 URL을 확인하세요.`,
           },
-        ],
+        
+          {
+            code: `API_001`,
+            message: `연결 시간 초과 오류가 발생했습니다 (API_001).`,
+            severity: `critical`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
+            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_002`,
+              `API_003`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_002`,
+            message: `네트워크 불안정 오류가 발생했습니다 (API_002).`,
+            severity: `error`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `서버가 과부하 상태입니다.`,
+            solution: `잠시 후 다시 시도하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_003`,
+              `API_004`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_003`,
+            message: `DNS 확인 실패 오류가 발생했습니다 (API_003).`,
+            severity: `warning`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `DNS 설정이 잘못되었습니다.`,
+            solution: `DNS 설정을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_004`,
+              `API_005`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_004`,
+            message: `SSL 인증서 오류 오류가 발생했습니다 (API_004).`,
+            severity: `info`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `SSL 인증서가 만료되었습니다.`,
+            solution: `프록시 설정을 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_005`,
+              `API_006`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_005`,
+            message: `프록시 연결 실패 오류가 발생했습니다 (API_005).`,
+            severity: `critical`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `프록시 설정이 올바르지 않습니다.`,
+            solution: `방화벽 규칙을 확인하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_006`,
+              `API_007`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_006`,
+            message: `방화벽 차단 오류가 발생했습니다 (API_006).`,
+            severity: `error`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
+            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_007`,
+              `API_008`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_007`,
+            message: `라우터 재설정 필요 오류가 발생했습니다 (API_007).`,
+            severity: `warning`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `서버가 과부하 상태입니다.`,
+            solution: `잠시 후 다시 시도하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_008`,
+              `API_009`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_008`,
+            message: `대역폭 초과 오류가 발생했습니다 (API_008).`,
+            severity: `info`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `DNS 설정이 잘못되었습니다.`,
+            solution: `DNS 설정을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_009`,
+              `API_010`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_009`,
+            message: `서버 다운 오류가 발생했습니다 (API_009).`,
+            severity: `critical`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `SSL 인증서가 만료되었습니다.`,
+            solution: `프록시 설정을 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_010`,
+              `API_001`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_010`,
+            message: `로드 밸런서 오류 오류가 발생했습니다 (API_010).`,
+            severity: `error`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `프록시 설정이 올바르지 않습니다.`,
+            solution: `방화벽 규칙을 확인하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_001`,
+              `API_002`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_011`,
+            message: `연결 시간 초과 오류가 발생했습니다 (API_011).`,
+            severity: `warning`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
+            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_002`,
+              `API_003`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_012`,
+            message: `네트워크 불안정 오류가 발생했습니다 (API_012).`,
+            severity: `info`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `서버가 과부하 상태입니다.`,
+            solution: `잠시 후 다시 시도하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_003`,
+              `API_004`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_013`,
+            message: `DNS 확인 실패 오류가 발생했습니다 (API_013).`,
+            severity: `critical`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `DNS 설정이 잘못되었습니다.`,
+            solution: `DNS 설정을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_004`,
+              `API_005`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_014`,
+            message: `SSL 인증서 오류 오류가 발생했습니다 (API_014).`,
+            severity: `error`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `SSL 인증서가 만료되었습니다.`,
+            solution: `프록시 설정을 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_005`,
+              `API_006`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_015`,
+            message: `프록시 연결 실패 오류가 발생했습니다 (API_015).`,
+            severity: `warning`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `프록시 설정이 올바르지 않습니다.`,
+            solution: `방화벽 규칙을 확인하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_006`,
+              `API_007`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_016`,
+            message: `방화벽 차단 오류가 발생했습니다 (API_016).`,
+            severity: `info`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
+            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_007`,
+              `API_008`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_017`,
+            message: `라우터 재설정 필요 오류가 발생했습니다 (API_017).`,
+            severity: `critical`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `서버가 과부하 상태입니다.`,
+            solution: `잠시 후 다시 시도하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_008`,
+              `API_009`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_018`,
+            message: `대역폭 초과 오류가 발생했습니다 (API_018).`,
+            severity: `error`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `DNS 설정이 잘못되었습니다.`,
+            solution: `DNS 설정을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_009`,
+              `API_010`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_019`,
+            message: `서버 다운 오류가 발생했습니다 (API_019).`,
+            severity: `warning`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `SSL 인증서가 만료되었습니다.`,
+            solution: `프록시 설정을 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_010`,
+              `API_001`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },
+          {
+            code: `API_020`,
+            message: `로드 밸런서 오류 오류가 발생했습니다 (API_020).`,
+            severity: `info`,
+            category: `A. API 및 네트워크`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `프록시 설정이 올바르지 않습니다.`,
+            solution: `방화벽 규칙을 확인하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `API_001`,
+              `API_002`
+            ],
+            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
+          },],
       },
       {
         id: `B`,
@@ -849,7 +1380,427 @@ export const docsContent: DocsContent = {
             ],
             prevention: `개인 모드에서 이 앱을 사용하지 마세요. 설정을 정기적으로 로컬 파일로 낮추세요.`,
           },
-        ],
+        
+          {
+            code: `CONFIG_001`,
+            message: `설정 손상 오류가 발생했습니다 (CONFIG_001).`,
+            severity: `critical`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
+            solution: `설정을 초기화하고 다시 구성하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_002`,
+              `CONFIG_003`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_002`,
+            message: `데이터베이스 접근 거부 오류가 발생했습니다 (CONFIG_002).`,
+            severity: `error`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `브라우저 저장 공간이 가득 찼습니다.`,
+            solution: `브라우저 캐시를 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_003`,
+              `CONFIG_004`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_003`,
+            message: `구성 파일 누락 오류가 발생했습니다 (CONFIG_003).`,
+            severity: `warning`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `구성 스키마가 업데이트되었습니다.`,
+            solution: `백업에서 설정을 복원하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_004`,
+              `CONFIG_005`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_004`,
+            message: `스키마 불일치 오류가 발생했습니다 (CONFIG_004).`,
+            severity: `info`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
+            solution: `파일 형식을 확인하고 다시 가져오세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_005`,
+              `CONFIG_006`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_005`,
+            message: `백업 복원 실패 오류가 발생했습니다 (CONFIG_005).`,
+            severity: `critical`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `동기화 서버에 연결할 수 없습니다.`,
+            solution: `수동으로 설정을 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_006`,
+              `CONFIG_007`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_006`,
+            message: `버전 충돌 오류가 발생했습니다 (CONFIG_006).`,
+            severity: `error`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
+            solution: `설정을 초기화하고 다시 구성하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_007`,
+              `CONFIG_008`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_007`,
+            message: `임포트 형식 오류 오류가 발생했습니다 (CONFIG_007).`,
+            severity: `warning`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `브라우저 저장 공간이 가득 찼습니다.`,
+            solution: `브라우저 캐시를 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_008`,
+              `CONFIG_009`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_008`,
+            message: `익스포트 실패 오류가 발생했습니다 (CONFIG_008).`,
+            severity: `info`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `구성 스키마가 업데이트되었습니다.`,
+            solution: `백업에서 설정을 복원하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_009`,
+              `CONFIG_010`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_009`,
+            message: `캐시 손상 오류가 발생했습니다 (CONFIG_009).`,
+            severity: `critical`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
+            solution: `파일 형식을 확인하고 다시 가져오세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_010`,
+              `CONFIG_001`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_010`,
+            message: `동기화 오류 오류가 발생했습니다 (CONFIG_010).`,
+            severity: `error`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `동기화 서버에 연결할 수 없습니다.`,
+            solution: `수동으로 설정을 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_001`,
+              `CONFIG_002`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_011`,
+            message: `설정 손상 오류가 발생했습니다 (CONFIG_011).`,
+            severity: `warning`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
+            solution: `설정을 초기화하고 다시 구성하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_002`,
+              `CONFIG_003`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_012`,
+            message: `데이터베이스 접근 거부 오류가 발생했습니다 (CONFIG_012).`,
+            severity: `info`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `브라우저 저장 공간이 가득 찼습니다.`,
+            solution: `브라우저 캐시를 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_003`,
+              `CONFIG_004`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_013`,
+            message: `구성 파일 누락 오류가 발생했습니다 (CONFIG_013).`,
+            severity: `critical`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `구성 스키마가 업데이트되었습니다.`,
+            solution: `백업에서 설정을 복원하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_004`,
+              `CONFIG_005`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_014`,
+            message: `스키마 불일치 오류가 발생했습니다 (CONFIG_014).`,
+            severity: `error`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
+            solution: `파일 형식을 확인하고 다시 가져오세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_005`,
+              `CONFIG_006`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_015`,
+            message: `백업 복원 실패 오류가 발생했습니다 (CONFIG_015).`,
+            severity: `warning`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `동기화 서버에 연결할 수 없습니다.`,
+            solution: `수동으로 설정을 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_006`,
+              `CONFIG_007`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_016`,
+            message: `버전 충돌 오류가 발생했습니다 (CONFIG_016).`,
+            severity: `info`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
+            solution: `설정을 초기화하고 다시 구성하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_007`,
+              `CONFIG_008`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_017`,
+            message: `임포트 형식 오류 오류가 발생했습니다 (CONFIG_017).`,
+            severity: `critical`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `브라우저 저장 공간이 가득 찼습니다.`,
+            solution: `브라우저 캐시를 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_008`,
+              `CONFIG_009`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_018`,
+            message: `익스포트 실패 오류가 발생했습니다 (CONFIG_018).`,
+            severity: `error`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `구성 스키마가 업데이트되었습니다.`,
+            solution: `백업에서 설정을 복원하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_009`,
+              `CONFIG_010`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_019`,
+            message: `캐시 손상 오류가 발생했습니다 (CONFIG_019).`,
+            severity: `warning`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
+            solution: `파일 형식을 확인하고 다시 가져오세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_010`,
+              `CONFIG_001`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },
+          {
+            code: `CONFIG_020`,
+            message: `동기화 오류 오류가 발생했습니다 (CONFIG_020).`,
+            severity: `info`,
+            category: `B. 구성 및 데이터`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `동기화 서버에 연결할 수 없습니다.`,
+            solution: `수동으로 설정을 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONFIG_001`,
+              `CONFIG_002`
+            ],
+            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
+          },],
       },
       {
         id: `C`,
@@ -898,7 +1849,427 @@ export const docsContent: DocsContent = {
               `FILE_FORMAT_UNSUPPORTED`,
             ],
           },
-        ],
+        
+          {
+            code: `CONTENT_001`,
+            message: `입력 길이 초과 오류가 발생했습니다 (CONTENT_001).`,
+            severity: `critical`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
+            solution: `입력 내용을 줄이고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_002`,
+              `CONTENT_003`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_002`,
+            message: `지원되지 않는 형식 오류가 발생했습니다 (CONTENT_002).`,
+            severity: `error`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `파일 형식이 지원되지 않습니다.`,
+            solution: `지원되는 파일 형식으로 변환하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_003`,
+              `CONTENT_004`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_003`,
+            message: `인코딩 오류 오류가 발생했습니다 (CONTENT_003).`,
+            severity: `warning`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `문자 인코딩이 올바르지 않습니다.`,
+            solution: `필수 필드를 모두 입력하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_004`,
+              `CONTENT_005`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_004`,
+            message: `금지된 문자 포함 오류가 발생했습니다 (CONTENT_004).`,
+            severity: `info`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `필수 입력 필드가 비어 있습니다.`,
+            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_005`,
+              `CONTENT_006`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_005`,
+            message: `필수 필드 누락 오류가 발생했습니다 (CONTENT_005).`,
+            severity: `critical`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
+            solution: `파일 크기를 줄이세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_006`,
+              `CONTENT_007`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_006`,
+            message: `유효성 검사 실패 오류가 발생했습니다 (CONTENT_006).`,
+            severity: `error`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
+            solution: `입력 내용을 줄이고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_007`,
+              `CONTENT_008`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_007`,
+            message: `파일 크기 초과 오류가 발생했습니다 (CONTENT_007).`,
+            severity: `warning`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `파일 형식이 지원되지 않습니다.`,
+            solution: `지원되는 파일 형식으로 변환하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_008`,
+              `CONTENT_009`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_008`,
+            message: `이미지 해상도 불일치 오류가 발생했습니다 (CONTENT_008).`,
+            severity: `info`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `문자 인코딩이 올바르지 않습니다.`,
+            solution: `필수 필드를 모두 입력하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_009`,
+              `CONTENT_010`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_009`,
+            message: `프롬프트 주입 감지 오류가 발생했습니다 (CONTENT_009).`,
+            severity: `critical`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `필수 입력 필드가 비어 있습니다.`,
+            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_010`,
+              `CONTENT_001`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_010`,
+            message: `콘텐츠 정책 위반 오류가 발생했습니다 (CONTENT_010).`,
+            severity: `error`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
+            solution: `파일 크기를 줄이세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_001`,
+              `CONTENT_002`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_011`,
+            message: `입력 길이 초과 오류가 발생했습니다 (CONTENT_011).`,
+            severity: `warning`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
+            solution: `입력 내용을 줄이고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_002`,
+              `CONTENT_003`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_012`,
+            message: `지원되지 않는 형식 오류가 발생했습니다 (CONTENT_012).`,
+            severity: `info`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `파일 형식이 지원되지 않습니다.`,
+            solution: `지원되는 파일 형식으로 변환하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_003`,
+              `CONTENT_004`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_013`,
+            message: `인코딩 오류 오류가 발생했습니다 (CONTENT_013).`,
+            severity: `critical`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `문자 인코딩이 올바르지 않습니다.`,
+            solution: `필수 필드를 모두 입력하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_004`,
+              `CONTENT_005`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_014`,
+            message: `금지된 문자 포함 오류가 발생했습니다 (CONTENT_014).`,
+            severity: `error`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `필수 입력 필드가 비어 있습니다.`,
+            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_005`,
+              `CONTENT_006`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_015`,
+            message: `필수 필드 누락 오류가 발생했습니다 (CONTENT_015).`,
+            severity: `warning`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
+            solution: `파일 크기를 줄이세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_006`,
+              `CONTENT_007`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_016`,
+            message: `유효성 검사 실패 오류가 발생했습니다 (CONTENT_016).`,
+            severity: `info`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
+            solution: `입력 내용을 줄이고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_007`,
+              `CONTENT_008`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_017`,
+            message: `파일 크기 초과 오류가 발생했습니다 (CONTENT_017).`,
+            severity: `critical`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `파일 형식이 지원되지 않습니다.`,
+            solution: `지원되는 파일 형식으로 변환하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_008`,
+              `CONTENT_009`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_018`,
+            message: `이미지 해상도 불일치 오류가 발생했습니다 (CONTENT_018).`,
+            severity: `error`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `문자 인코딩이 올바르지 않습니다.`,
+            solution: `필수 필드를 모두 입력하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_009`,
+              `CONTENT_010`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_019`,
+            message: `프롬프트 주입 감지 오류가 발생했습니다 (CONTENT_019).`,
+            severity: `warning`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `필수 입력 필드가 비어 있습니다.`,
+            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_010`,
+              `CONTENT_001`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },
+          {
+            code: `CONTENT_020`,
+            message: `콘텐츠 정책 위반 오류가 발생했습니다 (CONTENT_020).`,
+            severity: `info`,
+            category: `C. 콘텐츠 및 입력`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
+            solution: `파일 크기를 줄이세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `CONTENT_001`,
+              `CONTENT_002`
+            ],
+            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
+          },],
       },
       {
         id: `D`,
@@ -948,7 +2319,427 @@ export const docsContent: DocsContent = {
             ],
             prevention: `프롬프트를 수정할 때 민감한 단어를 피하세요.`,
           },
-        ],
+        
+          {
+            code: `MODEL_001`,
+            message: `모델 로딩 실패 오류가 발생했습니다 (MODEL_001).`,
+            severity: `critical`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `GPU 메모리가 부족합니다.`,
+            solution: `배치 크기를 줄이세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_002`,
+              `MODEL_003`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_002`,
+            message: `VRAM 부족 오류가 발생했습니다 (MODEL_002).`,
+            severity: `error`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `모델 파일이 손상되었습니다.`,
+            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_003`,
+              `MODEL_004`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_003`,
+            message: `CUDA 오류 오류가 발생했습니다 (MODEL_003).`,
+            severity: `warning`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `학습 매개변수가 부적절합니다.`,
+            solution: `학습률을 조정하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_004`,
+              `MODEL_005`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_004`,
+            message: `체크포인트 손상 오류가 발생했습니다 (MODEL_004).`,
+            severity: `info`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `기본 모델 버전이 호환되지 않습니다.`,
+            solution: `모델 파일을 다시 다운로드하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_005`,
+              `MODEL_006`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_005`,
+            message: `배치 크기 초과 오류가 발생했습니다 (MODEL_005).`,
+            severity: `critical`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `CUDA 드라이버가 오래되었습니다.`,
+            solution: `CUDA 드라이버를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_006`,
+              `MODEL_007`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_006`,
+            message: `학습률 너무 높음 오류가 발생했습니다 (MODEL_006).`,
+            severity: `error`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `GPU 메모리가 부족합니다.`,
+            solution: `배치 크기를 줄이세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_007`,
+              `MODEL_008`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_007`,
+            message: `과적합 오류가 발생했습니다 (MODEL_007).`,
+            severity: `warning`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `모델 파일이 손상되었습니다.`,
+            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_008`,
+              `MODEL_009`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_008`,
+            message: `수렴 실패 오류가 발생했습니다 (MODEL_008).`,
+            severity: `info`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `학습 매개변수가 부적절합니다.`,
+            solution: `학습률을 조정하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_009`,
+              `MODEL_010`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_009`,
+            message: `추론 시간 초과 오류가 발생했습니다 (MODEL_009).`,
+            severity: `critical`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `기본 모델 버전이 호환되지 않습니다.`,
+            solution: `모델 파일을 다시 다운로드하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_010`,
+              `MODEL_001`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_010`,
+            message: `모델 버전 불일치 오류가 발생했습니다 (MODEL_010).`,
+            severity: `error`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `CUDA 드라이버가 오래되었습니다.`,
+            solution: `CUDA 드라이버를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_001`,
+              `MODEL_002`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_011`,
+            message: `모델 로딩 실패 오류가 발생했습니다 (MODEL_011).`,
+            severity: `warning`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `GPU 메모리가 부족합니다.`,
+            solution: `배치 크기를 줄이세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_002`,
+              `MODEL_003`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_012`,
+            message: `VRAM 부족 오류가 발생했습니다 (MODEL_012).`,
+            severity: `info`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `모델 파일이 손상되었습니다.`,
+            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_003`,
+              `MODEL_004`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_013`,
+            message: `CUDA 오류 오류가 발생했습니다 (MODEL_013).`,
+            severity: `critical`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `학습 매개변수가 부적절합니다.`,
+            solution: `학습률을 조정하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_004`,
+              `MODEL_005`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_014`,
+            message: `체크포인트 손상 오류가 발생했습니다 (MODEL_014).`,
+            severity: `error`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `기본 모델 버전이 호환되지 않습니다.`,
+            solution: `모델 파일을 다시 다운로드하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_005`,
+              `MODEL_006`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_015`,
+            message: `배치 크기 초과 오류가 발생했습니다 (MODEL_015).`,
+            severity: `warning`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `CUDA 드라이버가 오래되었습니다.`,
+            solution: `CUDA 드라이버를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_006`,
+              `MODEL_007`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_016`,
+            message: `학습률 너무 높음 오류가 발생했습니다 (MODEL_016).`,
+            severity: `info`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `GPU 메모리가 부족합니다.`,
+            solution: `배치 크기를 줄이세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_007`,
+              `MODEL_008`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_017`,
+            message: `과적합 오류가 발생했습니다 (MODEL_017).`,
+            severity: `critical`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `모델 파일이 손상되었습니다.`,
+            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_008`,
+              `MODEL_009`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_018`,
+            message: `수렴 실패 오류가 발생했습니다 (MODEL_018).`,
+            severity: `error`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `학습 매개변수가 부적절합니다.`,
+            solution: `학습률을 조정하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_009`,
+              `MODEL_010`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_019`,
+            message: `추론 시간 초과 오류가 발생했습니다 (MODEL_019).`,
+            severity: `warning`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `기본 모델 버전이 호환되지 않습니다.`,
+            solution: `모델 파일을 다시 다운로드하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_010`,
+              `MODEL_001`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },
+          {
+            code: `MODEL_020`,
+            message: `모델 버전 불일치 오류가 발생했습니다 (MODEL_020).`,
+            severity: `info`,
+            category: `D. 모델 및 생성`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `CUDA 드라이버가 오래되었습니다.`,
+            solution: `CUDA 드라이버를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `MODEL_001`,
+              `MODEL_002`
+            ],
+            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
+          },],
       },
       {
         id: `E`,
@@ -1008,7 +2799,427 @@ export const docsContent: DocsContent = {
             ],
             prevention: `시작 전 API Key, 네트워크, 모델 가용성을 확인하세요.`,
           },
-        ],
+        
+          {
+            code: `WORKFLOW_001`,
+            message: `변환 실패 오류가 발생했습니다 (WORKFLOW_001).`,
+            severity: `critical`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `입력 파일이 손상되었습니다.`,
+            solution: `입력 파일을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_002`,
+              `WORKFLOW_003`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_002`,
+            message: `코덱 미지원 오류가 발생했습니다 (WORKFLOW_002).`,
+            severity: `error`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `변환 코덱을 사용할 수 없습니다.`,
+            solution: `다른 출력 형식을 선택하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_003`,
+              `WORKFLOW_004`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_003`,
+            message: `프레임 추출 오류 오류가 발생했습니다 (WORKFLOW_003).`,
+            severity: `warning`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
+            solution: `디스크 공간을 확보하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_004`,
+              `WORKFLOW_005`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_004`,
+            message: `압축 손상 오류가 발생했습니다 (WORKFLOW_004).`,
+            severity: `info`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
+            solution: `워크플로 단계를 재구성하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_005`,
+              `WORKFLOW_006`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_005`,
+            message: `워크플로 중단 오류가 발생했습니다 (WORKFLOW_005).`,
+            severity: `critical`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
+            solution: `누락된 라이브러리를 설치하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_006`,
+              `WORKFLOW_007`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_006`,
+            message: `단계 건패 오류가 발생했습니다 (WORKFLOW_006).`,
+            severity: `error`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `입력 파일이 손상되었습니다.`,
+            solution: `입력 파일을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_007`,
+              `WORKFLOW_008`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_007`,
+            message: `의존성 누락 오류가 발생했습니다 (WORKFLOW_007).`,
+            severity: `warning`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `변환 코덱을 사용할 수 없습니다.`,
+            solution: `다른 출력 형식을 선택하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_008`,
+              `WORKFLOW_009`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_008`,
+            message: `출력 경로 오류 오류가 발생했습니다 (WORKFLOW_008).`,
+            severity: `info`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
+            solution: `디스크 공간을 확보하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_009`,
+              `WORKFLOW_010`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_009`,
+            message: `임시 파일 삭제 실패 오류가 발생했습니다 (WORKFLOW_009).`,
+            severity: `critical`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
+            solution: `워크플로 단계를 재구성하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_010`,
+              `WORKFLOW_001`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_010`,
+            message: `포맷 호환성 없음 오류가 발생했습니다 (WORKFLOW_010).`,
+            severity: `error`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
+            solution: `누락된 라이브러리를 설치하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_001`,
+              `WORKFLOW_002`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_011`,
+            message: `변환 실패 오류가 발생했습니다 (WORKFLOW_011).`,
+            severity: `warning`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `입력 파일이 손상되었습니다.`,
+            solution: `입력 파일을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_002`,
+              `WORKFLOW_003`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_012`,
+            message: `코덱 미지원 오류가 발생했습니다 (WORKFLOW_012).`,
+            severity: `info`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `변환 코덱을 사용할 수 없습니다.`,
+            solution: `다른 출력 형식을 선택하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_003`,
+              `WORKFLOW_004`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_013`,
+            message: `프레임 추출 오류 오류가 발생했습니다 (WORKFLOW_013).`,
+            severity: `critical`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
+            solution: `디스크 공간을 확보하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_004`,
+              `WORKFLOW_005`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_014`,
+            message: `압축 손상 오류가 발생했습니다 (WORKFLOW_014).`,
+            severity: `error`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
+            solution: `워크플로 단계를 재구성하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_005`,
+              `WORKFLOW_006`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_015`,
+            message: `워크플로 중단 오류가 발생했습니다 (WORKFLOW_015).`,
+            severity: `warning`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
+            solution: `누락된 라이브러리를 설치하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_006`,
+              `WORKFLOW_007`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_016`,
+            message: `단계 건패 오류가 발생했습니다 (WORKFLOW_016).`,
+            severity: `info`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `입력 파일이 손상되었습니다.`,
+            solution: `입력 파일을 확인하고 다시 시도하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_007`,
+              `WORKFLOW_008`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_017`,
+            message: `의존성 누락 오류가 발생했습니다 (WORKFLOW_017).`,
+            severity: `critical`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `변환 코덱을 사용할 수 없습니다.`,
+            solution: `다른 출력 형식을 선택하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_008`,
+              `WORKFLOW_009`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_018`,
+            message: `출력 경로 오류 오류가 발생했습니다 (WORKFLOW_018).`,
+            severity: `error`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
+            solution: `디스크 공간을 확보하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_009`,
+              `WORKFLOW_010`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_019`,
+            message: `임시 파일 삭제 실패 오류가 발생했습니다 (WORKFLOW_019).`,
+            severity: `warning`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
+            solution: `워크플로 단계를 재구성하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_010`,
+              `WORKFLOW_001`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },
+          {
+            code: `WORKFLOW_020`,
+            message: `포맷 호환성 없음 오류가 발생했습니다 (WORKFLOW_020).`,
+            severity: `info`,
+            category: `E. 워크플로 및 변환`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
+            solution: `누락된 라이브러리를 설치하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `WORKFLOW_001`,
+              `WORKFLOW_002`
+            ],
+            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
+          },],
       },
       {
         id: `F`,
@@ -1059,7 +3270,427 @@ export const docsContent: DocsContent = {
             ],
             prevention: `브라우저 팝업을 허용하세요. 큰 문서에서는 낮추기 전 일부 이미지를 삭제하세요.`,
           },
-        ],
+        
+          {
+            code: `SYSTEM_001`,
+            message: `메모리 부족 오류가 발생했습니다 (SYSTEM_001).`,
+            severity: `critical`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `시스템 메모리가 부족합니다.`,
+            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_002`,
+              `SYSTEM_003`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_002`,
+            message: `디스크 공간 부족 오류가 발생했습니다 (SYSTEM_002).`,
+            severity: `error`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `디스크 공간이 부족합니다.`,
+            solution: `디스크 공간을 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_003`,
+              `SYSTEM_004`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_003`,
+            message: `권한 거부 오류가 발생했습니다 (SYSTEM_003).`,
+            severity: `warning`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
+            solution: `관리자 권한으로 실행하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_004`,
+              `SYSTEM_005`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_004`,
+            message: `프로세스 충돌 오류가 발생했습니다 (SYSTEM_004).`,
+            severity: `info`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `시스템 자원 한도에 도달했습니다.`,
+            solution: `시스템 자원 한도를 늘리세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_005`,
+              `SYSTEM_006`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_005`,
+            message: `세마포어 초과 오류가 발생했습니다 (SYSTEM_005).`,
+            severity: `critical`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `운영 체제 버전이 지원되지 않습니다.`,
+            solution: `운영 체제를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_006`,
+              `SYSTEM_007`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_006`,
+            message: `시스템 호출 실패 오류가 발생했습니다 (SYSTEM_006).`,
+            severity: `error`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `시스템 메모리가 부족합니다.`,
+            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_007`,
+              `SYSTEM_008`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_007`,
+            message: `커널 버전 불일치 오류가 발생했습니다 (SYSTEM_007).`,
+            severity: `warning`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `디스크 공간이 부족합니다.`,
+            solution: `디스크 공간을 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_008`,
+              `SYSTEM_009`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_008`,
+            message: `SELinux 차단 오류가 발생했습니다 (SYSTEM_008).`,
+            severity: `info`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
+            solution: `관리자 권한으로 실행하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_009`,
+              `SYSTEM_010`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_009`,
+            message: `cgroups 제한 오류가 발생했습니다 (SYSTEM_009).`,
+            severity: `critical`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `시스템 자원 한도에 도달했습니다.`,
+            solution: `시스템 자원 한도를 늘리세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_010`,
+              `SYSTEM_001`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_010`,
+            message: `oom_killer 활성화 오류가 발생했습니다 (SYSTEM_010).`,
+            severity: `error`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `운영 체제 버전이 지원되지 않습니다.`,
+            solution: `운영 체제를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_001`,
+              `SYSTEM_002`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_011`,
+            message: `메모리 부족 오류가 발생했습니다 (SYSTEM_011).`,
+            severity: `warning`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `시스템 메모리가 부족합니다.`,
+            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_002`,
+              `SYSTEM_003`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_012`,
+            message: `디스크 공간 부족 오류가 발생했습니다 (SYSTEM_012).`,
+            severity: `info`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `디스크 공간이 부족합니다.`,
+            solution: `디스크 공간을 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_003`,
+              `SYSTEM_004`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_013`,
+            message: `권한 거부 오류가 발생했습니다 (SYSTEM_013).`,
+            severity: `critical`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
+            solution: `관리자 권한으로 실행하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_004`,
+              `SYSTEM_005`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_014`,
+            message: `프로세스 충돌 오류가 발생했습니다 (SYSTEM_014).`,
+            severity: `error`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `시스템 자원 한도에 도달했습니다.`,
+            solution: `시스템 자원 한도를 늘리세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_005`,
+              `SYSTEM_006`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_015`,
+            message: `세마포어 초과 오류가 발생했습니다 (SYSTEM_015).`,
+            severity: `warning`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `운영 체제 버전이 지원되지 않습니다.`,
+            solution: `운영 체제를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_006`,
+              `SYSTEM_007`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_016`,
+            message: `시스템 호출 실패 오류가 발생했습니다 (SYSTEM_016).`,
+            severity: `info`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `시스템 메모리가 부족합니다.`,
+            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_007`,
+              `SYSTEM_008`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_017`,
+            message: `커널 버전 불일치 오류가 발생했습니다 (SYSTEM_017).`,
+            severity: `critical`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `디스크 공간이 부족합니다.`,
+            solution: `디스크 공간을 정리하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_008`,
+              `SYSTEM_009`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_018`,
+            message: `SELinux 차단 오류가 발생했습니다 (SYSTEM_018).`,
+            severity: `error`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
+            solution: `관리자 권한으로 실행하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_009`,
+              `SYSTEM_010`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_019`,
+            message: `cgroups 제한 오류가 발생했습니다 (SYSTEM_019).`,
+            severity: `warning`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `시스템 자원 한도에 도달했습니다.`,
+            solution: `시스템 자원 한도를 늘리세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_010`,
+              `SYSTEM_001`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },
+          {
+            code: `SYSTEM_020`,
+            message: `oom_killer 활성화 오류가 발생했습니다 (SYSTEM_020).`,
+            severity: `info`,
+            category: `F. 시스템 및 권한`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `운영 체제 버전이 지원되지 않습니다.`,
+            solution: `운영 체제를 업데이트하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `SYSTEM_001`,
+              `SYSTEM_002`
+            ],
+            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
+          },],
       },
       {
         id: `0`,
@@ -1128,7 +3759,427 @@ export const docsContent: DocsContent = {
             ],
             prevention: `요청 크기를 축소하세요. 서버가 높은 부하일 때 큰 작업을 보내지 마세요.`,
           },
-        ],
+        
+          {
+            code: `HTTP_001`,
+            message: `400 잘못된 요청 오류가 발생했습니다 (HTTP_001).`,
+            severity: `critical`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `클라이언트 요청이 잘못되었습니다.`,
+            solution: `요청 매개변수를 확인하고 수정하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_002`,
+              `HTTP_003`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_002`,
+            message: `401 인증 실패 오류가 발생했습니다 (HTTP_002).`,
+            severity: `error`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `인증 정보가 유효하지 않습니다.`,
+            solution: `인증 정보를 갱신하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_003`,
+              `HTTP_004`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_003`,
+            message: `403 접근 금지 오류가 발생했습니다 (HTTP_003).`,
+            severity: `warning`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `서버에서 요청을 거부했습니다.`,
+            solution: `요청 권한을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_004`,
+              `HTTP_005`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_004`,
+            message: `404 찾을 수 없음 오류가 발생했습니다 (HTTP_004).`,
+            severity: `info`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `요청한 리소스를 찾을 수 없습니다.`,
+            solution: `요청한 리소스가 존재하는지 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_005`,
+              `HTTP_006`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_005`,
+            message: `408 요청 시간 초과 오류가 발생했습니다 (HTTP_005).`,
+            severity: `critical`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `서버 낭부 오류가 발생했습니다.`,
+            solution: `서버 관리자에게 문의하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_006`,
+              `HTTP_007`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_006`,
+            message: `409 충돌 오류가 발생했습니다 (HTTP_006).`,
+            severity: `error`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `클라이언트 요청이 잘못되었습니다.`,
+            solution: `요청 매개변수를 확인하고 수정하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_007`,
+              `HTTP_008`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_007`,
+            message: `422 처리할 수 없음 오류가 발생했습니다 (HTTP_007).`,
+            severity: `warning`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `인증 정보가 유효하지 않습니다.`,
+            solution: `인증 정보를 갱신하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_008`,
+              `HTTP_009`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_008`,
+            message: `429 너무 많은 요청 오류가 발생했습니다 (HTTP_008).`,
+            severity: `info`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `서버에서 요청을 거부했습니다.`,
+            solution: `요청 권한을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_009`,
+              `HTTP_010`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_009`,
+            message: `500 낭부 서버 오류 오류가 발생했습니다 (HTTP_009).`,
+            severity: `critical`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `요청한 리소스를 찾을 수 없습니다.`,
+            solution: `요청한 리소스가 존재하는지 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_010`,
+              `HTTP_001`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_010`,
+            message: `502 불량 게이트웨이 오류가 발생했습니다 (HTTP_010).`,
+            severity: `error`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `서버 낭부 오류가 발생했습니다.`,
+            solution: `서버 관리자에게 문의하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_001`,
+              `HTTP_002`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_011`,
+            message: `400 잘못된 요청 오류가 발생했습니다 (HTTP_011).`,
+            severity: `warning`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
+            cause: `클라이언트 요청이 잘못되었습니다.`,
+            solution: `요청 매개변수를 확인하고 수정하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_002`,
+              `HTTP_003`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_012`,
+            message: `401 인증 실패 오류가 발생했습니다 (HTTP_012).`,
+            severity: `info`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 스타일 변환 → 영역: 입력`,
+            cause: `인증 정보가 유효하지 않습니다.`,
+            solution: `인증 정보를 갱신하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_003`,
+              `HTTP_004`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_013`,
+            message: `403 접근 금지 오류가 발생했습니다 (HTTP_013).`,
+            severity: `critical`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 프롬프트 → 영역: 출력`,
+            cause: `서버에서 요청을 거부했습니다.`,
+            solution: `요청 권한을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_004`,
+              `HTTP_005`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_014`,
+            message: `404 찾을 수 없음 오류가 발생했습니다 (HTTP_014).`,
+            severity: `error`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: LLM → 영역: 패널`,
+            cause: `요청한 리소스를 찾을 수 없습니다.`,
+            solution: `요청한 리소스가 존재하는지 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_005`,
+              `HTTP_006`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_015`,
+            message: `408 요청 시간 초과 오류가 발생했습니다 (HTTP_015).`,
+            severity: `warning`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: TTS → 영역: 캔버스`,
+            cause: `서버 낭부 오류가 발생했습니다.`,
+            solution: `서버 관리자에게 문의하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_006`,
+              `HTTP_007`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_016`,
+            message: `409 충돌 오류가 발생했습니다 (HTTP_016).`,
+            severity: `info`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: paper2gal → 영역: 버튼`,
+            cause: `클라이언트 요청이 잘못되었습니다.`,
+            solution: `요청 매개변수를 확인하고 수정하세요.`,
+            steps:
+[
+              `확인 단계를 수행하세요.`,
+              `수정 작업을 진행하세요.`,
+              `저장 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_007`,
+              `HTTP_008`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_017`,
+            message: `422 처리할 수 없음 오류가 발생했습니다 (HTTP_017).`,
+            severity: `critical`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 이미지 변환 → 영역: 입력`,
+            cause: `인증 정보가 유효하지 않습니다.`,
+            solution: `인증 정보를 갱신하세요.`,
+            steps:
+[
+              `진단 단계를 수행하세요.`,
+              `조정 작업을 진행하세요.`,
+              `적용 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_008`,
+              `HTTP_009`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_018`,
+            message: `429 너무 많은 요청 오류가 발생했습니다 (HTTP_018).`,
+            severity: `error`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 설정 → 영역: 출력`,
+            cause: `서버에서 요청을 거부했습니다.`,
+            solution: `요청 권한을 확인하세요.`,
+            steps:
+[
+              `분석 단계를 수행하세요.`,
+              `변경 작업을 진행하세요.`,
+              `확인 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_009`,
+              `HTTP_010`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_019`,
+            message: `500 낭부 서버 오류 오류가 발생했습니다 (HTTP_019).`,
+            severity: `warning`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: 오디오 → 영역: 패널`,
+            cause: `요청한 리소스를 찾을 수 없습니다.`,
+            solution: `요청한 리소스가 존재하는지 확인하세요.`,
+            steps:
+[
+              `검사 단계를 수행하세요.`,
+              `업데이트 작업을 진행하세요.`,
+              `테스트 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_010`,
+              `HTTP_001`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },
+          {
+            code: `HTTP_020`,
+            message: `502 불량 게이트웨이 오류가 발생했습니다 (HTTP_020).`,
+            severity: `info`,
+            category: `0~9. HTTP 상태 코드`,
+            location: `페이지: UI → 영역: 캔버스`,
+            cause: `서버 낭부 오류가 발생했습니다.`,
+            solution: `서버 관리자에게 문의하세요.`,
+            steps:
+[
+              `테스트 단계를 수행하세요.`,
+              `재설정 작업을 진행하세요.`,
+              `검증 후 다시 시도하세요.`
+            ],
+            relatedCodes:
+[
+              `HTTP_001`,
+              `HTTP_002`
+            ],
+            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
+          },],
       },
     ],
   };

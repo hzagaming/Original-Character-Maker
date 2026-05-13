@@ -200,6 +200,7 @@ export interface OtherSettings {
   showClock: boolean;
   enableStatusBar: boolean;
   highContrastFocus: boolean;
+  showErrorPanel: boolean;
 }
 
 export interface SavedStylePreset {
@@ -228,6 +229,14 @@ export interface LlmSettings {
   systemPrompt: string;
   timeoutMs: number;
   retryCount: number;
+}
+
+export interface TransferError {
+  code: string;
+  stage: string;
+  message: string;
+  hint: string;
+  details: Record<string, unknown>;
 }
 
 export interface SettingsState {
