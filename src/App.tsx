@@ -563,7 +563,11 @@ const translations: Record<BaseLanguage, Messages> = {
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
     announcementDescription: 'v1.3.0 错误字典大扩容与虚拟工具指南：中文错误字典从约 40 条扩展至 600+ 条（全语言累计 4000+ 条），工具手册大幅扩展（含详细参数、按钮、故障排查），覆盖 7 大分类；新增「设置」「音频」「界面」3 个虚拟工具指南；侧边栏重新分为 4 个独立导航组；支持从错误面板一键直达对应错误条目并高亮显示。',
+<<<<<<< HEAD
     announcementList1: '错误字典大扩容：中文错误字典扩展至 600+ 条，英文扩展至 560+ 条，日文 200+ 条，俄文 200+ 条，韩文 170+ 条，其余 25 种语言各 100+ 条，全语言累计 4000+ 条，覆盖 API & 网络、配置 & 数据、文件 & 上传、模型 & 生成、工作流 & 转换、系统 & 权限、HTTP 状态码 7 大分类。',
+=======
+    announcementList1: '错误字典大扩容：中文错误字典扩展至近 180 条，英文扩展至约 120 条，覆盖 API & 网络、配置 & 数据、文件 & 上传、模型 & 生成、工作流 & 转换、系统 & 权限、HTTP 状态码 7 大分类。',
+>>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
     announcementList2: '虚拟工具指南：新增「设置指南」「音频指南」「界面与体验指南」3 个虚拟工具手册，自动嵌入侧边栏和搜索，无需修改渲染逻辑。',
     announcementList3: '侧边栏重新分组：用户手册侧边栏现在分为「欢迎使用」「工具手册」「指南与参考」「错误字典」4 个独立导航组；错误面板支持传递 docAnchor 实现精确错误导航。',
     aboutTitle: '关于',
@@ -935,7 +939,11 @@ const translations: Record<BaseLanguage, Messages> = {
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
     announcementDescription: 'v1.3.0 エラー辞書大規模拡張と仮想ツールガイド：中国語エラー辞書を約40件から約180件に拡張し、7大分類をカバー；「設定」「オーディオ」「インターフェース」3つの仮想ツールガイドを新設；サイドバーを4つの独立ナビゲーショングループに再編；エラーパネルから該当エラー項目へワンクリックで直接ジャンプしハイライト表示。',
+<<<<<<< HEAD
     announcementList1: 'エラー辞書大規模拡張：中国語エラー辞書を約600件に、英語を約560件に、日本語を約200件に拡張。全言語で累計4000件以上。API & ネットワーク、設定 & データ、ファイル & アップロード、モデル & 生成、ワークフロー & 変換、システム & 権限、HTTP ステータスコードの7大分類をカバー。',
+=======
+    announcementList1: 'エラー辞書大規模拡張：中国語エラー辞書を約180件に、英語を約120件に拡張。API & ネットワーク、設定 & データ、ファイル & アップロード、モデル & 生成、ワークフロー & 変換、システム & 権限、HTTP ステータスコードの7大分類をカバー。',
+>>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
     announcementList2: '仮想ツールガイド：「設定ガイド」「オーディオガイド」「UI/UX ガイド」3つの仮想ツールマニュアルを新設。サイドバーと検索に自動統合され、レンダリングロジックの変更は不要。',
     announcementList3: 'サイドバー再編：ユーザーマニュアルのサイドバーを「ようこそ」「ツールマニュアル」「ガイドと参考」「エラー辞書」の4つの独立グループに再編。エラーパネルは docAnchor による正確なエラーナビゲーションをサポート。',
     aboutTitle: '情報',
@@ -1307,7 +1315,11 @@ const translations: Record<BaseLanguage, Messages> = {
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
     announcementDescription: 'v1.3.0 Massive Error Dictionary Expansion & Virtual Tool Guides: Chinese error dictionary expanded from ~40 to 600+ entries (4000+ across all languages), with massive tool manual expansion including detailed parameters, buttons, and troubleshooting; added 3 virtual tool guides for Settings, Audio, and UI/UX; sidebar reorganized into 4 independent navigation groups; error panel supports one-click precise navigation to the matching error entry with highlight.',
+<<<<<<< HEAD
     announcementList1: 'Error dictionary expansion: Chinese expanded to ~600 entries, English to ~560, Japanese ~200, Russian ~200, Korean ~170, and 25 other languages ~100 each, totaling 4000+ across all languages. Covers API & Network, Config & Data, Files & Upload, Model & Generation, Workflow & Conversion, System & Permissions, and HTTP Status Codes.',
+=======
+    announcementList1: 'Error dictionary expansion: Chinese error dictionary expanded to ~180 entries, English to ~120, covering API & Network, Config & Data, Files & Upload, Model & Generation, Workflow & Conversion, System & Permissions, and HTTP Status Codes.',
+>>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
     announcementList2: 'Virtual tool guides: added Settings Guide, Audio Guide, and UI/UX Guide as virtual tool manuals, automatically embedded into sidebar and search with zero rendering logic changes.',
     announcementList3: 'Sidebar reorganization: docs sidebar now has 4 independent groups: Welcome, Tool Manuals, Guides & References, and Error Dictionary. Error panel supports docAnchor for precise error-to-docs navigation.',
     aboutTitle: 'About',
@@ -1679,7 +1691,11 @@ const translations: Record<BaseLanguage, Messages> = {
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
     announcementDescription: 'v1.3.0 Масштабное расширение словаря ошибок и виртуальные руководства по инструментам: китайский словарь ошибок расширен с ~40 до 600+ записей (4000+ на всех языках), с масштабным расширением руководств по инструментам; добавлено 3 виртуальных руководства по настройкам, аудио и UI/UX; боковая панель реорганизована в 4 независимые группы навигации; панель ошибок поддерживает точный переход к соответствующей записи с подсветкой.',
+<<<<<<< HEAD
     announcementList1: 'Расширение словаря ошибок: китайский словарь расширен до ~600 записей, английский до ~560, японский ~200, русский ~200, корейский ~170, и 25 других языков по ~100 каждый, всего 4000+ на всех языках. Охватывает API & сеть, конфигурацию & данные, файлы & загрузку, модели & генерацию, рабочие процессы & конвертацию, систему & права, и HTTP-коды состояния.',
+=======
+    announcementList1: 'Расширение словаря ошибок: китайский словарь расширен до ~180 записей, английский до ~120, охватывая API & сеть, конфигурацию & данные, файлы & загрузку, модели & генерацию, рабочие процессы & конвертацию, систему & права, и HTTP-коды состояния.',
+>>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
     announcementList2: 'Виртуальные руководства: добавлены руководства по настройкам, аудио и UI/UX как виртуальные инструменты, автоматически встроенные в боковую панель и поиск без изменений логики рендеринга.',
     announcementList3: 'Реорганизация боковой панели: боковая панель руководства теперь имеет 4 независимые группы: Добро пожаловать, Руководства по инструментам, Руководства и справочники, Словарь ошибок. Панель ошибок поддерживает docAnchor для точной навигации.',
     aboutTitle: 'О проекте',
@@ -2363,7 +2379,11 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pagePromptTitle: 'OC 설정 에디터',
     pagePaperTitle: 'paper2gal 자산 생성',
     announcementDescription: 'v1.3.0 오류 사전 대규모 확장 및 가상 도구 가이드: 중국어 오류 사전을 약 40개에서 600+개로 확장（전 언어 누적 4000+개）, 도구 매뉴얼도 대폭 확장（상세 매개변수·버튼·트러블슈팅 포함） 7개 대분류를 커버；「설정」「오디오」「인터페이스」3개 가상 도구 가이드를 신규 추가；사이드바를 4개 독립 네비게이션 그룹으로 재편；오류 패널에서 해당 오류 항목으로 원클릭 직접 이동 및 하이라이트 표시를 지원합니다.',
+<<<<<<< HEAD
     announcementList1: '오류 사전 대규모 확장: 중국어 약 600개, 영어 약 560개, 일본어 약 200개, 러시아어 약 200개, 한국어 약 170개, 기타 25개 언어 각 약 100개, 전 언어 누적 4000+개. API & 네트워크, 설정 & 데이터, 파일 & 업로드, 모델 & 생성, 워크플로우 & 변환, 시스템 & 권한, HTTP 상태 코드 7개 대분류를 커버.',
+=======
+    announcementList1: '오류 사전 대규모 확장: 중국어 오류 사전을 약 180개로, 영어를 약 120개로 확장. API & 네트워크, 설정 & 데이터, 파일 & 업로드, 모델 & 생성, 워크플로우 & 변환, 시스템 & 권한, HTTP 상태 코드 7개 대분류를 커버.',
+>>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
     announcementList2: '가상 도구 가이드: 「설정 가이드」「오디오 가이드」「UI/UX 가이드」3개 가상 도구 매뉴얼을 신규 추가. 사이드바와 검색에 자동 통합되며 렌더링 로직 변경은 불필요.',
     announcementList3: '사이드바 재편: 사용자 매뉴얼 사이드바를「환영합니다」「도구 매뉴얼」「가이드 및 참고」「오류 사전」4개 독립 그룹으로 재편. 오류 패널은 docAnchor를 통한 정확한 오류 내비게이션을 지원.',
   },
