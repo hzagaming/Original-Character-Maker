@@ -285,6 +285,9 @@ type UiCopySet = {
     redo: string;
     openDetailPanel: string;
     debugDescription: string;
+    openFile: string;
+    downloadFile: string;
+    copyAsset: string;
   };
   imageConverter: {
     sourceTitle: string;
@@ -889,6 +892,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redo: '重做',
       openDetailPanel: '打开详情面板',
       debugDescription: '队列追踪、参数快照、日志、结果载荷和最新错误包均汇总于此。',
+      openFile: '打开文件',
+      downloadFile: '下载',
+      copyAsset: '复制',
     },
     imageConverter: {
       sourceTitle: '源图片',
@@ -1237,6 +1243,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       errorHintRuntime: 'Temperature を下げ、Top P を小さくするか、再試行前に一部の重い保存スイッチをオフにしてください。',
       errorHintValidation: '画風変換ワークフローを実行する前にソース画像を選択してください。',
       debugDescription: 'キュートレース、パラメータスナップショット、ログ、結果ペイロード、最新のエラーパッケージがここにまとめられています。',
+      openFile: 'ファイルを開く',
+      downloadFile: 'ダウンロード',
+      copyAsset: 'コピー',
     },
     imageConverter: {
       sourceTitle: 'ソース画像',
@@ -1585,6 +1594,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       errorHintRuntime: 'Reduce Temperature, lower Top P, or disable one of the heavier preservation toggles before retrying.',
       errorHintValidation: 'Select a source image before running the transfer workflow.',
       debugDescription: 'Queue trace, parameter snapshot, logs, result payload, and the latest error package are bundled here.',
+      openFile: 'Open file',
+      downloadFile: 'Download',
+      copyAsset: 'Copy',
     },
     imageConverter: {
       sourceTitle: 'Source Image',
@@ -1933,6 +1945,9 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       errorHintRuntime: 'Уменьшите Temperature, снизьте Top P или отключите часть тяжёлых переключателей сохранения перед повторной попыткой.',
       errorHintValidation: 'Выберите исходное изображение перед запуском рабочего процесса переноса стиля.',
       debugDescription: 'Здесь собраны трассировка очереди, снимок параметров, логи, полезная нагрузка результата и последний пакет ошибок.',
+      openFile: 'Открыть файл',
+      downloadFile: 'Скачать',
+      copyAsset: 'Копировать',
     },
     imageConverter: {
       sourceTitle: 'Исходное изображение',
@@ -4442,10 +4457,53 @@ export function StyleTransferPage({
               </div>
               {isResultOpen && (
                 <div className="result-grid">
+                  {/* Output image preview */}
+                  {(() => {
+                    const outputUrl = result?.outputUrl;
+                    if (!outputUrl) return null;
+                    return (
+                      <div className="tool-card" style={{ padding: 12 }}>
+                        <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
+                          <strong>{transfer.outputTitle}</strong>
+                          <button className="secondary-button small-button" type="button" onClick={() => window.open(String(outputUrl), '_blank', 'noopener,noreferrer')}>{transfer.openFile}</button>
+                        </div>
+                        <img
+                          className="paper-output-image"
+                          src={String(outputUrl)}
+                          alt={transfer.outputTitle}
+                          style={{ width: '100%', borderRadius: 8, marginBottom: 8 }}
+                        />
+                        <div className="mini-action-row">
+                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                            try {
+                              const res = await fetch(String(outputUrl));
+                              const blob = await res.blob();
+                              const objectUrl = URL.createObjectURL(blob);
+                              const anchor = document.createElement('a');
+                              anchor.href = objectUrl;
+                              anchor.download = String(outputUrl).split('/').pop() || 'style-transfer-output.png';
+                              anchor.click();
+                              window.setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+                              playSound('downloadSound');
+                            } catch { /* ignore */ }
+                          }}>{transfer.downloadFile}</button>
+                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                            try {
+                              const res = await fetch(String(outputUrl));
+                              const blob = await res.blob();
+                              await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                              playSound('copySound');
+                            } catch { /* ignore */ }
+                          }}>{transfer.copyAsset}</button>
+                          <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
                     <button className="secondary-button small-button" type="button" onClick={() => copyText(resultJson)}>{copy.copyResult}</button>
                     <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-result.json', resultJson, 'application/json')}>{copy.downloadResult}</button>
-                    {status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
+                    {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
