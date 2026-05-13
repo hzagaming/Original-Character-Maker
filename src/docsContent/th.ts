@@ -169,6 +169,109 @@ Character GIF uses frame interpolation and motion synthesis. The backend generat
       ],
     },
     {
+      id: 'index-tts',
+      title: 'IndexTTS Voice Synthesis',
+      overview: `IndexTTS Voice Synthesis generates speech from text using zero-shot voice cloning. Upload a reference audio clip (3~10 seconds) to clone a voice, or use the default voice. The tool supports emotion control, speed adjustment, and multiple output formats.
+
+Basic Workflow:
+1. Enter the text to synthesize
+2. Upload a reference audio clip (optional)
+3. Adjust TTS parameters (temperature, speed, emotion, etc.)
+4. Click "Generate Speech"
+5. Play, copy, or download the generated audio
+
+[TTS Technology]
+IndexTTS is a GPT-style text-to-speech model based on XTTS and Tortoise. It supports Chinese pinyin correction and pause control via punctuation marks. The model uses a conformer conditioning encoder and BigVGAN2-based speechcode decoder for high-quality audio output.
+
+[Supported Parameters]
+- Text: Input text to synthesize (supports Chinese, English, etc.)
+- Reference Audio: 3~10 second audio clip for zero-shot voice cloning
+- Model: index-tts-1.5 or index-tts-2
+- Temperature (0.0~1.0): Controls randomness/creativity
+- Top P (0.0~1.0): Nucleus sampling threshold
+- Top K (1~128): Top-k sampling
+- Speed (0.5~2.0): Playback speed multiplier
+- CFG (1.0~14.0): Classifier-free guidance scale
+- Emotion Alpha (0.0~2.0): Emotion intensity
+- Emotion Text: Soft emotion instruction (e.g., "angry shouting")
+- Seed: Random seed for reproducibility
+- Device: GPU (fast) or CPU (fallback)
+- Format: WAV or MP3
+- Sample Rate: 22050 / 44100 / 48000 Hz
+- Noise Reduction (0~100): Post-process noise reduction strength
+
+[Output Formats]
+- WAV: Uncompressed, highest quality
+- MP3: Compressed, smaller file size
+- Typical file size: 100KB ~ 5MB depending on duration and format
+- Recommended sample rate: 48000 Hz for best quality`,
+      buttons: [
+        { name: 'Generate Speech', description: 'Starts the TTS generation workflow. Validates input text and parameters, then sends the request to the backend.' },
+        { name: 'Abort Task', description: 'Cancels the ongoing TTS generation task.' },
+        { name: 'Copy JSON', description: 'Copies current parameter config as JSON to clipboard.' },
+        { name: 'Download JSON', description: 'Downloads current parameter config as a JSON file.' },
+        { name: 'Copy Result', description: 'After successful generation, copies the audio to clipboard (if browser supports).' },
+        { name: 'Download Result', description: 'Downloads the generated audio to local machine.' },
+        { name: 'Open File', description: 'Opens the generated audio in a new tab.' },
+        { name: 'Redo', description: 'Regenerates the speech using the same parameters.' },
+        { name: 'Show / Hide Details', description: 'Expands or collapses the parameters panel and debug info panel.' },
+        { name: 'Refresh', description: 'Resets all parameters to defaults, clears text and results.' },
+      ],
+      parameters: [
+        { name: 'Model', description: 'Selects the TTS model version.', tips: 'index-tts-1.5 is the stable version; index-tts-2 has advanced emotion control.' },
+        { name: 'Temperature', description: 'Sampling temperature controlling randomness. Range 0~1, default 0.8.', tips: 'Lower = more stable/predictable; higher = more creative but may deviate.' },
+        { name: 'Top P', description: 'Nucleus sampling threshold. Range 0~1, default 0.92.', tips: 'Lower reduces diversity, increases consistency.' },
+        { name: 'Top K', description: 'Top-K sampling. Range 1~128, default 48.', tips: 'Lower values make generation more conservative.' },
+        { name: 'Speed', description: 'Playback speed multiplier. Range 0.5~2.0, default 1.0.', tips: '1.0 is normal speed; 0.5 is half speed; 2.0 is double speed.' },
+        { name: 'CFG', description: 'Classifier-Free Guidance scale. Range 1~14, default 6.8.', tips: 'Higher = stronger prompt adherence. 7~10 is the safe zone.' },
+        { name: 'Emotion Alpha', description: 'Emotion intensity. Range 0.0~2.0, default 1.0.', tips: '0.0 = neutral; 1.0 = balanced; 2.0 = very expressive.' },
+        { name: 'Emotion Text', description: 'Soft emotion instruction using natural language.', tips: 'Examples: "angry man shouting", "gentle whisper", "happy and excited".' },
+        { name: 'Seed', description: 'Random seed, default 240315. Fixed seed enables reproducible results.', tips: 'Record seeds of favorite results for easy reproduction.' },
+        { name: 'Device', description: 'Inference device: GPU (fast) or CPU (fallback).', tips: 'GPU is recommended for faster generation; CPU works on any machine.' },
+        { name: 'Format', description: 'Output audio format: WAV or MP3.', tips: 'WAV has best quality; MP3 is smaller and more portable.' },
+        { name: 'Sample Rate', description: 'Output sample rate in Hz.', tips: '48000 Hz is CD quality; 44100 Hz is standard; 22050 Hz is acceptable for speech.' },
+        { name: 'Noise Reduction', description: 'Post-process noise reduction strength. Range 0~100, default 20.', tips: 'Higher values remove more background noise but may affect voice quality.' },
+      ],
+      errors: [
+        {
+          code: 'INDEX_TTS_TEXT_MISSING',
+          message: 'Input text is missing.',
+          severity: 'error',
+          category: 'api/request',
+          cause: 'The text input field is empty when starting the workflow.',
+          location: 'IndexTTS Page → Text Input Card',
+          solution: 'Enter the text you want to synthesize before clicking "Generate Speech".',
+          steps: ['Click the Text Input area', 'Type or paste your text', 'Click "Generate Speech" again'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: 'Always verify that the text input contains valid content before starting.',
+        },
+        {
+          code: 'INDEX_TTS_REQUEST_FAILED',
+          message: 'IndexTTS generation request failed.',
+          severity: 'error',
+          category: 'api/request',
+          cause: 'Backend API returned an error or the request could not be completed.',
+          location: 'IndexTTS Page → API Request',
+          solution: 'Check the backend status, API configuration, and network connectivity.',
+          steps: ['Check Settings → API for correct configuration', 'Verify the backend server is running', 'Check the browser console for detailed error messages', 'Reduce Temperature/Top P and retry'],
+          relatedCodes: ['INDEX_TTS_TEXT_MISSING', 'PLATO_NOT_CONFIGURED'],
+          prevention: 'Keep Temperature below 0.9 and Top P below 0.95 for stable generation.',
+        },
+        {
+          code: 'INDEX_TTS_NOT_CONFIGURED',
+          message: 'IndexTTS backend is not configured.',
+          severity: 'error',
+          category: 'api/request',
+          cause: 'The backend has no IndexTTS provider configured.',
+          location: 'Server → /api/index-tts',
+          solution: 'Configure an IndexTTS provider in the backend .env file.',
+          steps: ['Set up an IndexTTS API key (e.g., SiliconFlow)', 'Add the provider configuration to backend .env', 'Restart the backend server'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: 'Set up the IndexTTS provider before using the tool.',
+        },
+      ],
+    },
+    {
       id: 'prompt-suite',
       title: 'การ์ดตัวละคร / ตัวแก้ไขโลก',
       overview: `PromptSuite is a formatted text editor for organizing character cards, world descriptions, relationship maps, and speech profiles. Supports font, color, emphasis, headings, lists, tables, code blocks, quotes, and image insertion formatting. All content is automatically saved in the browser.`,

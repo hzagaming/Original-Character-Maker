@@ -380,6 +380,49 @@ type UiCopySet = {
     downloadFile: string;
     copyAsset: string;
   };
+  indexTts: {
+    textTitle: string;
+    textHint: string;
+    textPlaceholder: string;
+    charCountLabel: string;
+    referenceAudioTitle: string;
+    referenceAudioHint: string;
+    paramsTitle: string;
+    outputTitle: string;
+    queueTitle: string;
+    model: string;
+    temperature: string;
+    topP: string;
+    topK: string;
+    seed: string;
+    speed: string;
+    cfg: string;
+    emotionAlpha: string;
+    emotionText: string;
+    emotionTextPlaceholder: string;
+    device: string;
+    format: string;
+    sampleRate: string;
+    noiseReduction: string;
+    start: string;
+    stop: string;
+    resultReady: string;
+    waitingResult: string;
+    validationError: string;
+    runtimeError: string;
+    errorHintRuntime: string;
+    errorHintValidation: string;
+    successMessage: string;
+    customModelOption: string;
+    customModelPlaceholder: string;
+    redo: string;
+    openDetailPanel: string;
+    debugDescription: string;
+    openFile: string;
+    downloadFile: string;
+    copyAsset: string;
+    importToolMismatch: string;
+  };
   tagPicker: {
     filterPlaceholder: string;
     close: string;
@@ -1051,6 +1094,49 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       downloadFile: '下载',
       copyAsset: '复制',
     },
+    indexTts: {
+      textTitle: '文本输入',
+      textHint: '输入要合成的文本。支持中文、英文等多种语言。中文可使用拼音纠正发音。',
+      textPlaceholder: '请输入要合成语音的文本...',
+      charCountLabel: '字符',
+      referenceAudioTitle: '参考音频',
+      referenceAudioHint: '上传 3~10 秒的参考音频（WAV/MP3/OGG/FLAC），用于零样本音色克隆。',
+      paramsTitle: 'TTS 参数设置',
+      outputTitle: '结果概览',
+      queueTitle: '执行状态',
+      model: '模型',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      speed: '语速',
+      cfg: 'CFG Scale',
+      emotionAlpha: '情感强度',
+      emotionText: '情感描述',
+      emotionTextPlaceholder: '例如：愤怒的 shouting、温柔低语、开心兴奋...',
+      device: '推理设备',
+      format: '输出格式',
+      sampleRate: '采样率',
+      noiseReduction: '降噪强度',
+      start: '生成语音',
+      stop: '中止任务',
+      resultReady: '语音已生成，可以播放、复制、下载或导出调试数据。',
+      waitingResult: '运行完成后，这里会显示语音结果、错误信息和调试 JSON。',
+      validationError: '未检测到输入文本，已在预检查阶段停止工作流。',
+      runtimeError: 'IndexTTS 生成在高随机参数下发生发散，已终止输出并保留完整调试信息。',
+      errorHintRuntime: '降低 Temperature、减小 Top P，或关闭情感强度后重试。',
+      errorHintValidation: '在生成语音前先输入一段文本。',
+      successMessage: 'IndexTTS 语音合成成功，输出音频和调试包已经生成。',
+      customModelOption: '自定义模型',
+      customModelPlaceholder: '输入自定义模型名称',
+      redo: '重做',
+      openDetailPanel: '打开详情面板',
+      debugDescription: '队列追踪、参数快照、日志、结果载荷和最新错误包均汇总于此。',
+      openFile: '打开文件',
+      downloadFile: '下载',
+      copyAsset: '复制',
+      importToolMismatch: '配置文件不是 IndexTTS 类型，无法导入。',
+    },
     tagPicker: {
       filterPlaceholder: '筛选标签...',
       close: '关闭',
@@ -1464,6 +1550,49 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       openFile: 'ファイルを開く',
       downloadFile: 'ダウンロード',
       copyAsset: 'コピー',
+    },
+    indexTts: {
+      textTitle: 'テキスト入力',
+      textHint: '合成するテキストを入力してください。中国語、英語など多言語に対応。中国語ではピンインによる発音修正も可能です。',
+      textPlaceholder: '合成するテキストを入力...',
+      charCountLabel: '文字',
+      referenceAudioTitle: '参照音声',
+      referenceAudioHint: '3〜10秒の参照音声（WAV/MP3/OGG/FLAC）をアップロードし、ゼロショット音色クローンを行います。',
+      paramsTitle: 'TTS パラメータ設定',
+      outputTitle: '結果概要',
+      queueTitle: '実行状態',
+      model: 'モデル',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      speed: '話速',
+      cfg: 'CFG Scale',
+      emotionAlpha: '感情強度',
+      emotionText: '感情説明',
+      emotionTextPlaceholder: '例：怒った shouting、優しく囁く、楽しそうに興奮...',
+      device: '推論デバイス',
+      format: '出力形式',
+      sampleRate: 'サンプリングレート',
+      noiseReduction: '降噪強度',
+      start: '音声を生成',
+      stop: 'タスクを中止',
+      resultReady: '音声が生成されました。再生、コピー、ダウンロード、またはデバッグデータのエクスポートが可能です。',
+      waitingResult: '実行完了後、ここに音声結果、エラー情報、デバッグ JSON が表示されます。',
+      validationError: '入力テキストが検出されませんでした。プリフライト段階でワークフローが停止しました。',
+      runtimeError: 'IndexTTS 生成が高ランダムパラメータで発散しました。出力を停止し、完全なデバッグ情報を保持します。',
+      errorHintRuntime: 'Temperature を下げ、Top P を小さくするか、感情強度をオフにしてから再試行してください。',
+      errorHintValidation: '音声を生成する前にテキストを入力してください。',
+      successMessage: 'IndexTTS 音声合成が成功しました。出力音声とデバッグパッケージが生成されました。',
+      customModelOption: 'カスタムモデル',
+      customModelPlaceholder: 'カスタムモデル名を入力',
+      redo: 'やり直し',
+      openDetailPanel: '詳細パネルを開く',
+      debugDescription: 'キュートレース、パラメータスナップショット、ログ、結果ペイロード、最新のエラーパッケージがここにまとめられています。',
+      openFile: 'ファイルを開く',
+      downloadFile: 'ダウンロード',
+      copyAsset: 'コピー',
+      importToolMismatch: '設定ファイルは IndexTTS タイプではないため、インポートできません。',
     },
     tagPicker: {
       filterPlaceholder: 'タグを絞り込む...',
@@ -1879,6 +2008,49 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       downloadFile: 'Download',
       copyAsset: 'Copy',
     },
+    indexTts: {
+      textTitle: 'Text Input',
+      textHint: 'Enter the text to synthesize. Supports Chinese, English, and other languages. Chinese pronunciation can be corrected using pinyin.',
+      textPlaceholder: 'Enter text to synthesize...',
+      charCountLabel: 'chars',
+      referenceAudioTitle: 'Reference Audio',
+      referenceAudioHint: 'Upload a 3~10 second reference audio clip (WAV/MP3/OGG/FLAC) for zero-shot voice cloning.',
+      paramsTitle: 'TTS Parameter Settings',
+      outputTitle: 'Result Overview',
+      queueTitle: 'Execution Status',
+      model: 'Model',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      speed: 'Speed',
+      cfg: 'CFG Scale',
+      emotionAlpha: 'Emotion Intensity',
+      emotionText: 'Emotion Description',
+      emotionTextPlaceholder: 'e.g., angry shouting, gentle whisper, happy and excited...',
+      device: 'Inference Device',
+      format: 'Output Format',
+      sampleRate: 'Sample Rate',
+      noiseReduction: 'Noise Reduction',
+      start: 'Generate Speech',
+      stop: 'Abort Task',
+      resultReady: 'Speech generated. You can play, copy, download, or export debug data.',
+      waitingResult: 'After execution completes, the speech result, error info, and debug JSON will be displayed here.',
+      validationError: 'No input text detected. Workflow stopped at preflight stage.',
+      runtimeError: 'IndexTTS generation diverged under high-randomness parameters. Output terminated and full debug info preserved.',
+      errorHintRuntime: 'Lower Temperature, reduce Top P, or disable emotion intensity before retrying.',
+      errorHintValidation: 'Please enter some text before generating speech.',
+      successMessage: 'IndexTTS voice synthesis succeeded. Output audio and debug package have been generated.',
+      customModelOption: 'Custom Model',
+      customModelPlaceholder: 'Enter custom model name',
+      redo: 'Redo',
+      openDetailPanel: 'Open Detail Panel',
+      debugDescription: 'Queue trace, parameter snapshot, logs, result payload, and the latest error package are bundled here.',
+      openFile: 'Open File',
+      downloadFile: 'Download',
+      copyAsset: 'Copy',
+      importToolMismatch: 'The config file is not an IndexTTS type and cannot be imported.',
+    },
     tagPicker: {
       filterPlaceholder: 'Filter tags...',
       close: 'Close',
@@ -2292,6 +2464,49 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       openFile: 'Открыть файл',
       downloadFile: 'Скачать',
       copyAsset: 'Копировать',
+    },
+    indexTts: {
+      textTitle: 'Ввод текста',
+      textHint: 'Введите текст для синтеза. Поддерживается китайский, английский и другие языки. Для китайского доступна коррекция произношения с помощью пиньинь.',
+      textPlaceholder: 'Введите текст для синтеза речи...',
+      charCountLabel: 'символов',
+      referenceAudioTitle: 'Образец голоса',
+      referenceAudioHint: 'Загрузите образец голоса длительностью 3~10 секунд (WAV/MP3/OGG/FLAC) для клонирования голоса в режиме zero-shot.',
+      paramsTitle: 'Параметры TTS',
+      outputTitle: 'Обзор результатов',
+      queueTitle: 'Состояние выполнения',
+      model: 'Модель',
+      temperature: 'Temperature',
+      topP: 'Top P',
+      topK: 'Top K',
+      seed: 'Seed',
+      speed: 'Скорость речи',
+      cfg: 'CFG Scale',
+      emotionAlpha: 'Интенсивность эмоций',
+      emotionText: 'Описание эмоций',
+      emotionTextPlaceholder: 'например: злой крик, нежный шёпот, радостное возбуждение...',
+      device: 'Устройство вывода',
+      format: 'Формат вывода',
+      sampleRate: 'Частота дискретизации',
+      noiseReduction: 'Шумоподавление',
+      start: 'Синтезировать речь',
+      stop: 'Прервать задачу',
+      resultReady: 'Речь сгенерирована. Можно воспроизвести, скопировать, скачать или экспортировать отладочные данные.',
+      waitingResult: 'После завершения выполнения здесь отобразятся результат речи, информация об ошибках и отладочный JSON.',
+      validationError: 'Входной текст не обнаружен. Рабочий процесс остановлен на этапе предварительной проверки.',
+      runtimeError: 'Генерация IndexTTS расходится при высоких случайных параметрах. Вывод остановлен, полная отладочная информация сохранена.',
+      errorHintRuntime: 'Понизьте Temperature, уменьшите Top P или отключите интенсивность эмоций перед повторной попыткой.',
+      errorHintValidation: 'Пожалуйста, введите текст перед генерацией речи.',
+      successMessage: 'Синтез речи IndexTTS выполнен успешно. Выходной аудиофайл и отладочный пакет сгенерированы.',
+      customModelOption: 'Пользовательская модель',
+      customModelPlaceholder: 'Введите название пользовательской модели',
+      redo: 'Повторить',
+      openDetailPanel: 'Открыть панель деталей',
+      debugDescription: 'Здесь собраны трассировка очереди, снимок параметров, логи, полезная нагрузка результата и последний пакет ошибок.',
+      openFile: 'Открыть файл',
+      downloadFile: 'Скачать',
+      copyAsset: 'Копировать',
+      importToolMismatch: 'Файл конфигурации не является типом IndexTTS и не может быть импортирован.',
     },
     tagPicker: {
       filterPlaceholder: 'Фильтровать теги...',
@@ -9241,6 +9456,651 @@ export function CharacterGifPage({
           onRetry={startWorkflow}
           docAnchor={error?.code}
           onOpenDocs={(code) => onOpenDocs?.('character-gif', 'errors', code)}
+        />
+      )}
+    </main>
+  );
+}
+
+
+// ─── IndexTTS Page ───
+const INDEX_TTS_STORAGE_KEY = 'oc-maker.index-tts';
+
+export function IndexTtsPage({
+  appSubtitle,
+  backHome,
+  openSettings,
+  privacyNote,
+  pageTitle,
+  pageDescription,
+  settings: _settings,
+  language,
+  onBack,
+  onOpenSettings,
+  onNavigate,
+  onOpenDocs,
+}: SharedPageProps) {
+  const copy = localizedUiCopy[language];
+  const transfer = copy.indexTts;
+  const textInputRef = useRef<HTMLTextAreaElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  const defaultConfig = {
+    model: 'index-tts-1.5',
+    customModel: '',
+    temperature: 0.8,
+    topP: 0.92,
+    topK: 48,
+    speed: 1.0,
+    cfg: 6.8,
+    emotionAlpha: 1.0,
+    emotionText: '',
+    seed: 240315,
+    device: 'gpu',
+    format: 'wav',
+    sampleRate: 48000,
+    noiseReduction: 20,
+  };
+
+  const [persistedState] = useState(() =>
+    readLocalState(INDEX_TTS_STORAGE_KEY, {
+      text: '',
+      referenceAudioName: '',
+      config: defaultConfig,
+      savedSnapshot: '',
+    }),
+  );
+  const [text, setText] = useState(persistedState.text);
+  const [referenceAudio, setReferenceAudio] = useState<File | null>(null);
+  const [referenceAudioName, setReferenceAudioName] = useState(persistedState.referenceAudioName);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [status, setStatus] = useState<TransferStatus>('idle');
+  const [progress, setProgress] = useState(0);
+  const [logs, setLogs] = useState<WorkflowLog[]>([]);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [error, setError] = useState<TransferError | null>(null);
+  const [showErrorPanel, setShowErrorPanel] = useState(false);
+  const [runNonce, setRunNonce] = useState(0);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
+  const [config, setConfig] = useState({ ...defaultConfig, ...persistedState.config });
+  const [isInputOpen, setIsInputOpen] = useState(true);
+  const [isParamsOpen, setIsParamsOpen] = useState(true);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isResultOpen, setIsResultOpen] = useState(true);
+  const [isLogsOpen, setIsLogsOpen] = useState(true);
+  const statusLabelKey = getStatusLabelKey(status);
+
+  const currentSnapshot = JSON.stringify({ text, referenceAudioName, config });
+  const [savedSnapshot, setSavedSnapshot] = useState(persistedState.savedSnapshot || currentSnapshot);
+  const isDirty = currentSnapshot !== savedSnapshot;
+  useBeforeUnloadGuard(isDirty);
+
+  useEffect(() => {
+    writeLocalState(INDEX_TTS_STORAGE_KEY, { text, referenceAudioName, config, savedSnapshot });
+  }, [config, text, referenceAudioName, savedSnapshot]);
+
+  useEffect(() => {
+    return () => { abortControllerRef.current?.abort(); };
+  }, []);
+
+  function updateConfig<K extends keyof typeof config>(key: K, value: (typeof config)[K]) {
+    setConfig((current) => ({ ...current, [key]: value }));
+  }
+
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
+        if (data.tool !== 'index-tts') { playSound('error'); alert(copy.importConfig + ': ' + copy.indexTts.importToolMismatch); return; }
+        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        const imported = { ...defaultConfig, ...(data.config as Record<string, unknown>) } as typeof defaultConfig;
+        setConfig(imported);
+        setText(String(data.text ?? ''));
+        setReferenceAudioName(String(data.referenceAudioName ?? ''));
+        setSavedSnapshot(JSON.stringify({ text: String(data.text ?? ''), referenceAudioName: String(data.referenceAudioName ?? ''), config: imported }));
+        playSound('save');
+      } catch {
+        playSound('error');
+        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+      }
+    };
+    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function handlePickAudio() { audioInputRef.current?.click(); }
+
+  function handleAudioChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setReferenceAudio(file);
+    setReferenceAudioName(file.name);
+    setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Reference audio selected: ${file.name}` }]);
+    event.target.value = '';
+    playSound('uploadComplete');
+  }
+
+  async function startWorkflow() {
+    if (status === 'running') return;
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    if (!text.trim()) {
+      const validationError: TransferError = {
+        code: 'INDEX_TTS_TEXT_MISSING',
+        stage: 'preflight/input',
+        message: transfer.validationError,
+        hint: transfer.errorHintValidation,
+        details: { textLength: text.length, status: 'stopped-before-run' },
+      };
+      setStatus('error');
+      setProgress(0);
+      setResult(null);
+      setError(validationError);
+      setShowErrorPanel(true);
+      setLogs([{ time: timestamp(), level: 'error', text: `${validationError.code}: ${validationError.message}` }]);
+      return;
+    }
+    setStatus('running');
+    setProgress(5);
+    playSound('workflowStart');
+    setError(null);
+    setShowErrorPanel(false);
+    setResult(null);
+    setLogs([
+      { time: timestamp(), level: 'info', text: 'IndexTTS workflow submitted to the local queue.' },
+      { time: timestamp(), level: 'debug', text: `Text length: ${text.length} chars.` },
+      { time: timestamp(), level: 'debug', text: `Reference audio: ${referenceAudioName || 'none'}` },
+    ]);
+    const nonce = runNonce + 1;
+    setRunNonce(nonce);
+
+    try {
+      let response: Response;
+
+      if (config.model === 'custom') {
+        const apiCfg = getApiForFeature('index-tts', _settings);
+        if (!apiCfg) {
+          throw new Error('No custom API configured for IndexTTS. Please go to Settings > API and configure a custom API channel for IndexTTS.');
+        }
+        setProgress(15);
+        setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Using custom API: ${apiCfg.baseUrl}` }]);
+
+        const formData = new FormData();
+        formData.append('text', text);
+        if (referenceAudio) formData.append('reference_audio', referenceAudio);
+        formData.append('model', config.customModel || 'custom');
+        formData.append('temperature', String(config.temperature));
+        formData.append('top_p', String(config.topP));
+        formData.append('top_k', String(config.topK));
+        formData.append('speed', String(config.speed));
+        formData.append('cfg', String(config.cfg));
+        formData.append('emotion_alpha', String(config.emotionAlpha));
+        if (config.emotionText) formData.append('emotion_text', config.emotionText);
+        formData.append('seed', String(config.seed));
+        formData.append('device', config.device);
+        formData.append('format', config.format);
+        formData.append('sample_rate', String(config.sampleRate));
+        formData.append('noise_reduction', String(config.noiseReduction));
+
+        response = await fetch(`${apiCfg.baseUrl}/audio/tts`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiCfg.apiKey}` },
+          body: formData,
+          signal: controller.signal,
+        });
+      } else {
+        setProgress(15);
+        setLogs((current) => [...current, { time: timestamp(), level: 'info', text: `Using built-in model: ${config.model}` }]);
+
+        await ensureLocalApiProbed();
+        const requestUrl = buildApiUrl(_settings, '/api/index-tts');
+        const formData = new FormData();
+        formData.append('text', text);
+        if (referenceAudio) formData.append('referenceAudio', referenceAudio);
+        formData.append('ttsConfig', JSON.stringify({
+          model: config.model,
+          temperature: config.temperature,
+          topP: config.topP,
+          topK: config.topK,
+          speed: config.speed,
+          cfg: config.cfg,
+          emotionAlpha: config.emotionAlpha,
+          emotionText: config.emotionText,
+          seed: config.seed,
+          device: config.device,
+          format: config.format,
+          sampleRate: config.sampleRate,
+          noiseReduction: config.noiseReduction,
+        }));
+
+        response = await fetch(requestUrl, {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal,
+        });
+      }
+
+      setProgress(60);
+      setLogs((current) => [...current, { time: timestamp(), level: 'debug', text: 'API response received. Processing result...' }]);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData: Record<string, unknown> = {};
+        try { errorData = JSON.parse(errorText); } catch { /* ignore */ }
+        throw new Error(
+          (errorData.error as string) || (errorData.message as string) || `HTTP ${response.status}: ${errorText.slice(0, 200)}`
+        );
+      }
+
+      const data = await response.json();
+      const outputUrl = data.outputUrl || data.url || data.audio_url;
+      if (!outputUrl) {
+        throw new Error('API returned success but no output audio URL was found in the response.');
+      }
+
+      setProgress(100);
+      setStatus('success');
+      playSound('workflowComplete');
+      setError(null);
+      setShowErrorPanel(false);
+      setResult({
+        workflowId: `it-${Date.now()}`,
+        text: text.slice(0, 100),
+        model: config.model === 'custom' ? config.customModel : config.model,
+        outputUrl,
+        outputPath: data.outputPath,
+        format: config.format,
+        sampleRate: config.sampleRate,
+        duration: data.duration,
+        message: transfer.successMessage,
+      });
+      setLogs((current) => [
+        ...current,
+        { time: timestamp(), level: 'success', text: 'IndexTTS workflow finished and the audio is ready.' },
+      ]);
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      const message = err instanceof Error ? err.message : String(err);
+      const runtimeError: TransferError = {
+        code: 'INDEX_TTS_REQUEST_FAILED',
+        stage: 'api/request',
+        message,
+        hint: transfer.errorHintRuntime,
+        details: {
+          model: config.model === 'custom' ? config.customModel : config.model,
+          apiBase: config.model === 'custom' ? getApiForFeature('index-tts', _settings)?.baseUrl ?? 'none' : 'backend',
+          textLength: text.length,
+        },
+      };
+      setStatus('error');
+      setError(runtimeError);
+      playSound('workflowFail');
+      setShowErrorPanel(true);
+      setLogs((current) => [
+        ...current,
+        { time: timestamp(), level: 'error', text: `${runtimeError.code}: ${runtimeError.message}` },
+      ]);
+    }
+  }
+
+  function abortWorkflow() {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setStatus('idle');
+    setProgress(0);
+    playSound('workflowFail');
+    setLogs((current) => [...current, { time: timestamp(), level: 'error', text: 'Workflow aborted by the user.' }]);
+  }
+
+  function saveDraft() {
+    playSound('save');
+    setSavedSnapshot(currentSnapshot);
+    setLogs((current) => [...current, { time: timestamp(), level: 'success', text: 'Current IndexTTS configuration saved locally.' }]);
+  }
+
+  function resetWorkspaceView() {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    if (audioInputRef.current) audioInputRef.current.value = '';
+    const nextConfig = { ...defaultConfig };
+    const nextSnapshot = JSON.stringify({ text: '', referenceAudioName: '', config: nextConfig });
+    setIsResetOpen(false);
+    setText('');
+    setReferenceAudio(null);
+    setReferenceAudioName('');
+    setStatus('idle');
+    setProgress(0);
+    setLogs([]);
+    setResult(null);
+    setError(null);
+    setShowErrorPanel(false);
+    setRunNonce(0);
+    setConfig(nextConfig);
+    setSavedSnapshot(nextSnapshot);
+  }
+
+  const configJson = JSON.stringify({ tool: 'index-tts', text, referenceAudioName, config }, null, 2);
+  const logsText = logs.map((entry) => `[${entry.time}] [${entry.level.toUpperCase()}] ${entry.text}`).join('\n');
+  const resultJson = JSON.stringify(result ?? { state: 'waiting' }, null, 2);
+  const errorJson = JSON.stringify(error ?? { state: 'none' }, null, 2);
+  const debugJson = JSON.stringify({ workflowId: result?.workflowId ?? `draft-${Date.now()}`, status, progress, text, referenceAudioName, config, result, error, logs }, null, 2);
+
+  return (
+    <main className="feature-shell tool-page-shell">
+      <header className="feature-header fade-up delay-1">
+        <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>{backHome}</button>
+        <div className="feature-header-meta">
+          <button className="secondary-button small-button" type="button" onClick={() => onOpenDocs?.('index-tts', 'overview')}>{copy.helpButton}</button>
+          <button className="secondary-button small-button" type="button" onClick={() => onOpenDocs?.('index-tts', 'buttons')}>{copy.tutorialButton}</button>
+          <button className="secondary-button small-button" type="button" onClick={onOpenSettings}>{openSettings}</button>
+        </div>
+      </header>
+
+      <section className="tool-workbench fade-up delay-2">
+        <div className="tool-header">
+          <div>
+            <p className="section-label">{appSubtitle}</p>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+          <div className="tool-header-actions">
+            <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
+            <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
+            <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
+            <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
+          </div>
+        </div>
+
+        <div className="tool-grid transfer-grid">
+          <div className="tool-column">
+            {/* Text Input Card */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{transfer.textTitle}</span>
+                  <h3>{transfer.textTitle}</h3>
+                </div>
+                <span className="collapsible-state">{isInputOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isInputOpen && (
+                <>
+                  <p className="muted-copy">{transfer.textHint}</p>
+                  <textarea
+                    ref={textInputRef}
+                    className="settings-textarea"
+                    style={{ minHeight: 120 }}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder={transfer.textPlaceholder}
+                  />
+                  <p className="tiny-copy">{text.length} {transfer.charCountLabel}</p>
+                </>
+              )}
+            </section>
+
+            {/* Reference Audio Card */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{transfer.referenceAudioTitle}</span>
+                  <h3>{transfer.referenceAudioTitle}</h3>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button className="secondary-button small-button" type="button" onClick={(e) => { e.stopPropagation(); handlePickAudio(); }}>
+                    {referenceAudioName ? copy.replaceImage : copy.chooseImage}
+                  </button>
+                  <span className="collapsible-state">{isInputOpen ? copy.hideDetails : copy.showDetails}</span>
+                </div>
+              </div>
+              <input ref={audioInputRef} type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/flac" hidden onChange={handleAudioChange} />
+              {isInputOpen && (
+                <>
+                  <p className="muted-copy">{transfer.referenceAudioHint}</p>
+                  <div className="preview-surface">
+                    {referenceAudioName ? (
+                      <div className="preview-empty" style={{ flexDirection: 'column', gap: 8 }}>
+                        <span style={{ fontSize: 32 }}>🎵</span>
+                        <span>{referenceAudioName}</span>
+                      </div>
+                    ) : (
+                      <div className="preview-empty">{copy.noImage}</div>
+                    )}
+                  </div>
+                </>
+              )}
+            </section>
+
+            {/* Parameters Card */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{transfer.paramsTitle}</span>
+                  <h3>{transfer.paramsTitle}</h3>
+                </div>
+                <span className="collapsible-state">{isParamsOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isParamsOpen && (
+                <>
+                  <div className="form-grid two-column">
+                    <label className="field">
+                      <span>{transfer.model}</span>
+                      <select className="settings-input tool-select" value={config.model} onChange={(e) => updateConfig('model', e.target.value)}>
+                        <option>index-tts-1.5</option>
+                        <option>index-tts-2</option>
+                        <option value="custom">{transfer.customModelOption || 'Custom Model'}</option>
+                      </select>
+                      {config.model === 'custom' && (
+                        <input
+                          className="settings-input"
+                          style={{ marginTop: 8 }}
+                          type="text"
+                          placeholder={transfer.customModelPlaceholder || 'Enter custom model name'}
+                          value={config.customModel}
+                          onChange={(e) => updateConfig('customModel', e.target.value)}
+                        />
+                      )}
+                    </label>
+                    <label className="field">
+                      <span>{transfer.seed}</span>
+                      <input className="settings-input" type="number" value={config.seed} onChange={(e) => updateConfig('seed', Number(e.target.value))} />
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>{transfer.emotionText}</span>
+                    <textarea className="settings-textarea compact" value={config.emotionText} onChange={(e) => updateConfig('emotionText', e.target.value)} placeholder={transfer.emotionTextPlaceholder} />
+                  </label>
+
+                  <div className="slider-grid">
+                    <RangeField label={transfer.temperature} min={0} max={1} step={0.01} value={config.temperature} onChange={(value) => updateConfig('temperature', value)} />
+                    <RangeField label={transfer.topP} min={0} max={1} step={0.01} value={config.topP} onChange={(value) => updateConfig('topP', value)} />
+                    <RangeField label={transfer.topK} min={1} max={128} step={1} value={config.topK} onChange={(value) => updateConfig('topK', value)} />
+                    <RangeField label={transfer.speed} min={0.5} max={2} step={0.05} value={config.speed} onChange={(value) => updateConfig('speed', value)} />
+                    <RangeField label={transfer.cfg} min={1} max={14} step={0.1} value={config.cfg} onChange={(value) => updateConfig('cfg', value)} />
+                    <RangeField label={transfer.emotionAlpha} min={0} max={2} step={0.05} value={config.emotionAlpha} onChange={(value) => updateConfig('emotionAlpha', value)} />
+                    <RangeField label={transfer.noiseReduction} min={0} max={100} step={1} value={config.noiseReduction} onChange={(value) => updateConfig('noiseReduction', value)} />
+                  </div>
+
+                  <div className="form-grid two-column" style={{ marginTop: 12 }}>
+                    <label className="field">
+                      <span>{transfer.device}</span>
+                      <select className="settings-input tool-select" value={config.device} onChange={(e) => updateConfig('device', e.target.value)}>
+                        <option value="gpu">GPU</option>
+                        <option value="cpu">CPU</option>
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>{transfer.format}</span>
+                      <select className="settings-input tool-select" value={config.format} onChange={(e) => updateConfig('format', e.target.value)}>
+                        <option value="wav">WAV</option>
+                        <option value="mp3">MP3</option>
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>{transfer.sampleRate}</span>
+                      <select className="settings-input tool-select" value={config.sampleRate} onChange={(e) => updateConfig('sampleRate', Number(e.target.value))}>
+                        <option value={22050}>22050 Hz</option>
+                        <option value={44100}>44100 Hz</option>
+                        <option value={48000}>48000 Hz</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="tool-actions-row" style={{ marginTop: 12 }}>
+                    <button className="primary-button" type="button" onClick={startWorkflow} disabled={status === 'running'}>{transfer.start}</button>
+                    <button className="secondary-button" type="button" onClick={abortWorkflow} disabled={status !== 'running'}>{transfer.stop}</button>
+                    <button className="secondary-button" type="button" onClick={() => { setText(''); updateConfig('emotionText', ''); }} disabled={status === 'running'}>{copy.reset}</button>
+                  </div>
+                </>
+              )}
+            </section>
+          </div>
+
+          <div className="tool-column side">
+            {/* Progress & Logs */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{copy.progressTitle}</span>
+                  <h3>{copy.progressTitle}</h3>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span className={`status-badge ${status}`}>{copy[statusLabelKey]}</span>
+                  <span className="collapsible-state">{isLogsOpen ? copy.hideDetails : copy.showDetails}</span>
+                </div>
+              </div>
+              {isLogsOpen && (
+                <>
+                  <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+                  <div className="progress-meta">
+                    <span>{copy.workflowId}</span>
+                    <strong>{result?.workflowId?.toString() ?? `draft-${status}`}</strong>
+                  </div>
+                  <div className="log-stack">
+                    <div className="log-stack-header">
+                      <strong>{copy.logsTitle}</strong>
+                      <div className="mini-action-row">
+                        <button className="secondary-button small-button" type="button" onClick={() => copyText(logsText)}>{copy.copyLogs}</button>
+                        <button className="secondary-button small-button" type="button" onClick={() => downloadText('index-tts-logs.txt', logsText)}>{copy.downloadLogs}</button>
+                      </div>
+                    </div>
+                    {logs.length > 0 ? logs.map((log) => (
+                      <div key={`${log.time}-${log.text}`} className={`log-entry ${log.level}`}>
+                        <span>{log.time}</span><p>{log.text}</p>
+                      </div>
+                    )) : <div className="log-empty">{transfer.waitingResult}</div>}
+                  </div>
+                </>
+              )}
+            </section>
+
+            {/* Results */}
+            <section className="tool-card">
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+                <div>
+                  <span className="card-caption">{copy.resultsTitle}</span>
+                  <h3>{copy.resultsTitle}</h3>
+                </div>
+                <span className="collapsible-state">{isResultOpen ? copy.hideDetails : copy.showDetails}</span>
+              </div>
+              {isResultOpen && (
+                <div className="result-grid">
+                  {/* Audio player */}
+                  {(() => {
+                    const outputUrl = result?.outputUrl;
+                    if (!outputUrl) return null;
+                    return (
+                      <div className="tool-card" style={{ padding: 12 }}>
+                        <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
+                          <strong>{transfer.outputTitle}</strong>
+                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
+                        </div>
+                        <audio
+                          controls
+                          style={{ width: '100%', marginBottom: 8 }}
+                          src={String(outputUrl)}
+                        />
+                        <div className="mini-action-row">
+                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                            try {
+                              const res = await fetch(String(outputUrl));
+                              const blob = await res.blob();
+                              const objectUrl = URL.createObjectURL(blob);
+                              const anchor = document.createElement('a');
+                              anchor.href = objectUrl;
+                              anchor.download = String(outputUrl).split('/').pop() || `index-tts-output.${config.format}`;
+                              anchor.click();
+                              window.setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+                              playSound('downloadSound');
+                            } catch { /* ignore */ }
+                          }}>{transfer.downloadFile}</button>
+                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                            try {
+                              const res = await fetch(String(outputUrl));
+                              const blob = await res.blob();
+                              await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                              playSound('copySound');
+                            } catch { /* ignore */ }
+                          }}>{transfer.copyAsset}</button>
+                          <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
+                  </>} />
+                  <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
+                  </>} />
+                  <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
+                  </>} />
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+      </section>
+
+      {isConfirmOpen && <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />}
+      {isResetOpen && <ConfirmActionModal title={copy.refreshWorkspaceTitle} description={copy.refreshWorkspaceDescription} cancelLabel={copy.continueEdit} confirmLabel={copy.refreshWorkspaceConfirm} onCancel={() => setIsResetOpen(false)} onConfirm={resetWorkspaceView} />}
+
+      {_settings.others.showErrorPanel && showErrorPanel && error && (
+        <DraggableErrorPanel
+          error={error}
+          labels={{
+            title: copy.errorPanel.title,
+            stage: copy.errorPanel.stage,
+            message: copy.errorPanel.message,
+            hint: copy.errorPanel.hint,
+            details: copy.errorPanel.details,
+            copyText: copy.copyText,
+            downloadJson: copy.downloadJson,
+            openDocs: copy.openDocs,
+            retry: copy.errorPanel.retry,
+          }}
+          onClose={() => setShowErrorPanel(false)}
+          onCopy={() => copyText(errorJson)}
+          onDownload={() => downloadText('index-tts-error.json', errorJson, 'application/json')}
+          onRetry={startWorkflow}
+          docAnchor={error?.code}
+          onOpenDocs={(code) => onOpenDocs?.('index-tts', 'errors', code)}
         />
       )}
     </main>

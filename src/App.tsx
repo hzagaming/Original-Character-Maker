@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, LlmHubPage, TtsExportPage, ImageConverterPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.4.1';
+const VERSION = '1.5.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -72,6 +72,7 @@ type Messages = {
   featurePaper: string;
   featureImageConverter: string;
   featureGif: string;
+  featureIndexTts: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -97,6 +98,7 @@ type Messages = {
   actionPaper2Gal: string;
   actionImageConverter: string;
   actionGif: string;
+  actionIndexTts: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -171,6 +173,7 @@ type Messages = {
   apiUseForStyleTransfer: string;
   apiUseForPaper2Gal: string;
   apiUseForCharacterGif: string;
+  apiUseForIndexTts: string;
   shortcutsTitle: string;
   shortcutsHint: string;
   shortcutsReset: string;
@@ -207,6 +210,8 @@ type Messages = {
   pageImageConverterDescription: string;
   pageGifTitle: string;
   pageGifDescription: string;
+  pageIndexTtsTitle: string;
+  pageIndexTtsDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -461,6 +466,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featurePaper: 'paper2gal 图片素材',
     featureImageConverter: '图片格式转换',
     featureGif: '角色 GIF 生成',
+    featureIndexTts: 'IndexTTS 语音合成',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -486,6 +492,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal 图片素材生成',
     actionImageConverter: '图片格式转换',
     actionGif: '角色 GIF 生成',
+    actionIndexTts: 'IndexTTS 语音合成',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -561,6 +568,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiUseForStyleTransfer: '此 API 将用于：转画风',
     apiUseForPaper2Gal: '此 API 将用于：Paper2Gal',
     apiUseForCharacterGif: '此 API 将用于：角色 GIF',
+    apiUseForIndexTts: '此 API 将用于：IndexTTS',
     shortcutsTitle: '编辑器快捷键',
     shortcutsHint: '这里可以直接改 OC 设卡编辑器的快捷键组合，修改后会立刻写入本地设置。',
     shortcutsReset: '恢复默认快捷键',
@@ -570,10 +578,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.4.0 新增「角色 GIF 生成」工具与用户手册大更新：新增 Character GIF Generator 页面，支持将角色图像转换为呼吸、眨眼、摇摆、漂浮等 8 种动态 GIF 动画；用户手册全面更新，新增角色 GIF 的完整文档（使用教程、按钮说明、参数详解、18 条错误代码与解决方法）；30 语言文档同步扩展。',
-    announcementList1: '新增角色 GIF 生成器：上传角色图像，调整帧数、帧率、循环、动画类型（呼吸/眨眼/摇摆/漂浮/心跳/发丝飘动/尾巴摇摆/魔法光芒）和缓动函数，一键生成动态角色 GIF。支持透明背景、自动抠图、面部锁定。',
-    announcementList2: '用户手册大更新：为角色 GIF 生成器新增完整文档，涵盖基本流程、GIF 动画技术原理、8 种动画类型详解、全部参数说明（含 Tips）、14 个按钮功能、18 条错误代码（从 API Key 缺失到内存不足）的详细排查步骤与预防措施。',
-    announcementList3: '30 语言文档同步：zh/en/ja/ru/ko 五语完整翻译，25 个骨架语言同步添加英文占位文档；所有语言的用户手册 intro 已从「7 个功能模块」更新为「8 个」。',
+    announcementDescription: 'v1.5.0 新增 IndexTTS 语音合成工具：新增 IndexTTS Voice Synthesis 页面，支持文本转语音、零样本音色克隆、情感控制、语速调节和多种输出格式；API 设置支持为 IndexTTS 独立配置自定义 API 通道；用户手册全面更新，新增 IndexTTS 的完整文档。',
+    announcementList1: '新增 IndexTTS 语音合成器：输入文本，上传 3~10 秒参考音频进行零样本音色克隆，调整 Temperature、Top P、语速、CFG、情感强度、情感描述、推理设备、输出格式和采样率等 13 项参数，一键生成高质量语音。支持 WAV/MP3 输出。',
+    announcementList2: 'API 通道扩展：自定义 API 设置现在支持为「IndexTTS」独立配置 API 通道，与转画风、Paper2Gal、角色 GIF 分开管理。',
+    announcementList3: '用户手册与文档同步：为 IndexTTS 生成器新增完整文档，涵盖基本流程、TTS 技术原理、13 个参数详解、10 个按钮功能、3 条错误代码的排查步骤；30 语言文档同步扩展，intro 已从「8 个功能模块」更新为「9 个」。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -597,6 +605,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageImageConverterDescription: '上传图片并转换为 PNG、JPG 格式，支持滤镜调整、质量控制和尺寸缩放。',
     pageGifTitle: '角色 GIF 生成',
     pageGifDescription: '上传角色图像、调整 GIF 动画参数（帧数、帧率、循环、动画类型），生成动态角色 GIF。',
+    pageIndexTtsTitle: 'IndexTTS 语音合成',
+    pageIndexTtsDescription: '输入文本、上传参考音频，使用 IndexTTS 模型进行零样本语音合成。支持情感控制、语速调节、音色克隆。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -838,6 +848,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featurePaper: 'paper2gal 素材',
     featureImageConverter: '画像フォーマット変換',
     featureGif: 'キャラクター GIF 生成',
+    featureIndexTts: 'IndexTTS 音声合成',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -863,6 +874,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal 素材生成',
     actionImageConverter: '画像フォーマット変換',
     actionGif: 'キャラクター GIF 生成',
+    actionIndexTts: 'IndexTTS 音声合成',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -938,6 +950,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiUseForStyleTransfer: 'このAPIの用途：スタイル転送',
     apiUseForPaper2Gal: 'このAPIの用途：Paper2Gal',
     apiUseForCharacterGif: 'このAPIの用途：キャラクターGIF',
+    apiUseForIndexTts: 'このAPIの用途：IndexTTS',
     shortcutsTitle: 'エディタショートカット',
     shortcutsHint: 'ここでは OC 設定エディタ用ショートカットを直接編集でき、変更はすぐローカル設定へ保存されます。',
     shortcutsReset: '既定ショートカットに戻す',
@@ -947,10 +960,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.4.0 「キャラクター GIF 生成」ツールとユーザーマニュアルの大規模更新：Character GIF Generator ページを新規追加。キャラクター画像を呼吸・まばたき・揺れ・浮遊など8種類の動的 GIF アニメーションに変換可能。ユーザーマニュアルも全面更新し、キャラクター GIF の完全ドキュメント（使用チュートリアル、ボタン説明、パラメータ詳細、18件のエラーコードと解決方法）を追加。30言語ドキュメントを同期拡張。',
-    announcementList1: 'キャラクター GIF 生成器の新規追加：キャラクター画像をアップロードし、フレーム数、FPS、ループ、アニメーションタイプ（呼吸/まばたき/揺れ/浮遊/鼓動/髪の揺れ/尻尾の振り/魔法の光）とイージングを調整して、動的なキャラクター GIF をワンクリック生成。透明背景、自動切り抜き、顔ロックに対応。',
-    announcementList2: 'ユーザーマニュアルの大規模更新：キャラクター GIF 生成器用の完全ドキュメントを新規追加。基本フロー、GIF アニメーション技術原理、8種類のアニメーションタイプ詳細、全パラメータ説明（Tips 付き）、14個のボタン機能、18件のエラーコード（API Key 不足からメモリ不足まで）の詳細なトラブルシューティング手順と予防策を網羅。',
-    announcementList3: '30言語ドキュメントの同期：zh/en/ja/ru/ko の5言語で完全翻訳、25のスケルトン言語にも英語プレースホルダードキュメントを同期追加。すべての言語のユーザーマニュアル intro を「7機能モジュール」から「8機能モジュール」に更新。',
+    announcementDescription: 'v1.5.0 IndexTTS 音声合成ツールを新規追加：IndexTTS Voice Synthesis ページを新規追加。テキスト読み上げ、ゼロショット音声クローニング、感情制御、話速調整、複数出力形式に対応。API 設定で「IndexTTS」専用のカスタム API チャネルを独立設定可能。ユーザーマニュアルも全面更新し、IndexTTS の完全ドキュメントを追加。',
+    announcementList1: 'IndexTTS 音声合成器の新規追加：テキストを入力し、3〜10秒の参照音声をアップロードしてゼロショット音声クローニングを実行。Temperature、Top P、話速、CFG、感情強度、感情説明、推論デバイス、出力形式、サンプリングレートなど13項のパラメータを調整して、高品質な音声をワンクリック生成。WAV/MP3 出力に対応。',
+    announcementList2: 'API チャネルの拡張：カスタム API 設定で「IndexTTS」を独立して設定可能に。スタイル転送、Paper2Gal、キャラクター GIF と分離して管理。',
+    announcementList3: 'ユーザーマニュアルとドキュメントの同期：IndexTTS 生成器用の完全ドキュメントを新規追加。基本フロー、TTS 技術原理、13個のパラメータ詳細、10個のボタン機能、3件のエラーコードのトラブルシューティング手順を網羅。30言語ドキュメントを同期拡張し、intro を「8機能モジュール」から「9機能モジュール」に更新。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -974,6 +987,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageImageConverterDescription: '画像をアップロードして PNG、JPG 形式に変換します。フィルター調整、品質制御、サイズ変更に対応。',
     pageGifTitle: 'キャラクター GIF 生成',
     pageGifDescription: 'キャラクター画像をアップロードし、GIF アニメーション パラメータ（フレーム数、FPS、ループ、アニメーション タイプ）を調整して、動的なキャラクター GIF を生成します。',
+    pageIndexTtsTitle: 'IndexTTS 音声合成',
+    pageIndexTtsDescription: 'テキストを入力し、参照音声をアップロードして、IndexTTS モデルでゼロショット音声合成を実行します。感情制御、話速調整、音色クローンに対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: '7つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1215,6 +1230,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featurePaper: 'paper2gal Assets',
     featureImageConverter: 'Image Converter',
     featureGif: 'Character GIF Generator',
+    featureIndexTts: 'IndexTTS Voice Synthesis',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1240,6 +1256,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal Asset Generation',
     actionImageConverter: 'Image Format Converter',
     actionGif: 'Character GIF Generator',
+    actionIndexTts: 'IndexTTS Voice Synthesis',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1315,6 +1332,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiUseForStyleTransfer: 'Use this API for: Style Transfer',
     apiUseForPaper2Gal: 'Use this API for: Paper2Gal',
     apiUseForCharacterGif: 'Use this API for: Character GIF',
+    apiUseForIndexTts: 'Use this API for: IndexTTS',
     shortcutsTitle: 'Editor shortcuts',
     shortcutsHint: 'Customize the OC card editor shortcuts here. Changes are saved to local settings immediately.',
     shortcutsReset: 'Reset to default shortcuts',
@@ -1324,10 +1342,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.4.0 New "Character GIF Generator" tool and major docs update: added Character GIF Generator page supporting conversion of character images into 8 animated GIF types (breathing, blinking, swaying, floating, heartbeat, hair-flow, tail-wag, magic-glow). Comprehensive docs update with full Character GIF documentation (tutorial, button guide, parameter details, 18 error codes with solutions). Synchronized across 30 languages.',
-    announcementList1: 'New Character GIF Generator: upload a character image, adjust frames, FPS, loop, motion type (breathing/blinking/swaying/floating/heartbeat/hair-flow/tail-wag/magic-glow) and easing function, then generate an animated character GIF in one click. Supports transparent background, auto cutout, and face lock.',
-    announcementList2: 'Major docs update: added complete documentation for the Character GIF Generator covering basic workflow, GIF animation technology, 8 motion type details, all parameter descriptions (with tips), 14 button functions, and 18 error codes (from API Key missing to memory exhaustion) with detailed troubleshooting steps and prevention measures.',
-    announcementList3: '30-language docs sync: full translations for zh/en/ja/ru/ko; English placeholder docs added for 25 skeleton languages. All language intros updated from "7 modules" to "8 modules".',
+    announcementDescription: 'v1.5.0 New IndexTTS Voice Synthesis tool: added IndexTTS Voice Synthesis page supporting text-to-speech, zero-shot voice cloning, emotion control, speed adjustment, and multiple output formats. API settings now support independent custom API channel configuration for IndexTTS. Comprehensive docs update with full IndexTTS documentation.',
+    announcementList1: 'New IndexTTS Voice Synthesizer: enter text, upload a 3~10 second reference audio clip for zero-shot voice cloning, adjust 13 parameters including Temperature, Top P, speed, CFG, emotion intensity, emotion description, inference device, output format, and sample rate, then generate high-quality speech in one click. Supports WAV/MP3 output.',
+    announcementList2: 'API channel expansion: custom API settings now support independent configuration for "IndexTTS", managed separately from Style Transfer, Paper2Gal, and Character GIF.',
+    announcementList3: 'Docs and manual sync: added complete documentation for the IndexTTS Generator covering basic workflow, TTS technology principles, 13 parameter details, 10 button functions, and 3 error code troubleshooting steps. Synchronized across 30 languages; intros updated from "8 modules" to "9 modules".',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1351,6 +1369,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageImageConverterDescription: 'Upload an image and convert it to PNG or JPG. Supports filter adjustments, quality control, and resizing.',
     pageGifTitle: 'Character GIF Generator',
     pageGifDescription: 'Upload a character image, adjust GIF animation parameters (frames, FPS, loop, motion type), and generate an animated character GIF.',
+    pageIndexTtsTitle: 'IndexTTS Voice Synthesis',
+    pageIndexTtsDescription: 'Enter text and upload a reference audio clip to perform zero-shot voice synthesis with the IndexTTS model. Supports emotion control, speed adjustment, and voice cloning.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all 7 tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1592,6 +1612,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featurePaper: 'paper2gal материалы',
     featureImageConverter: 'Конвертер изображений',
     featureGif: 'Генератор GIF персонажа',
+    featureIndexTts: 'IndexTTS Синтез речи',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1617,6 +1638,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionPaper2Gal: 'paper2gal генерация',
     actionImageConverter: 'Конвертер форматов',
     actionGif: 'Генератор GIF персонажа',
+    actionIndexTts: 'IndexTTS Синтез речи',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1692,6 +1714,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiUseForStyleTransfer: 'Использовать этот API для: стильного переноса',
     apiUseForPaper2Gal: 'Использовать этот API для: Paper2Gal',
     apiUseForCharacterGif: 'Использовать этот API для: Character GIF',
+    apiUseForIndexTts: 'Использовать этот API для: IndexTTS',
     shortcutsTitle: 'Горячие клавиши редактора',
     shortcutsHint: 'Здесь можно настроить сочетания клавиш для редактора карточек OC. Изменения сразу сохраняются локально.',
     shortcutsReset: 'Сбросить шорткаты',
@@ -1701,10 +1724,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.4.0 Новый инструмент «Генератор GIF персонажа» и масштабное обновление руководства: добавлена страница Character GIF Generator с поддержкой преобразования изображений персонажей в 8 типов анимированных GIF (дыхание, моргание, покачивание, парение, сердцебиение, развевание волос, виляние хвостом, магическое свечение). Крупное обновление документации с полным руководством по Character GIF ( tutorial, описание кнопок, параметры, 18 кодов ошибок с решениями). Синхронизировано на 30 языках.',
-    announcementList1: 'Новый генератор GIF персонажа: загрузите изображение персонажа, настройте кадры, FPS, цикл, тип движения (дыхание/моргание/покачивание/парение/сердцебиение/развевание волос/виляние хвостом/магическое свечение) и функцию сглаживания, затем сгенерируйте анимированный GIF персонажа одним щелчком. Поддерживает прозрачный фон, автоматическое вырезание и фиксацию лица.',
-    announcementList2: 'Масштабное обновление руководства: добавлена полная документация для генератора GIF персонажа, охватывающая базовый workflow, технологию GIF-анимации, 8 типов движения, все параметры (с советами), 14 функций кнопок и 18 кодов ошибок (от отсутствия API Key до нехватки памяти) с подробными шагами устранения и мерами предосторожности.',
-    announcementList3: 'Синхронизация на 30 языках: полные переводы для zh/en/ja/ru/ko; английские placeholder-документы добавлены для 25 скелетных языков. Все языковые intro обновлены с «7 модулей» на «8 модулей».',
+    announcementDescription: 'v1.5.0 Новый инструмент «IndexTTS Синтез речи»: добавлена страница IndexTTS Voice Synthesis с поддержкой преобразования текста в речь, клонирования голоса в режиме zero-shot, управления эмоциями, регулировки скорости и нескольких форматов вывода. Настройки API теперь поддерживают независимую конфигурацию пользовательского API-канала для IndexTTS. Крупное обновление документации с полным руководством по IndexTTS.',
+    announcementList1: 'Новый синтезатор речи IndexTTS: введите текст, загрузите образец голоса длительностью 3~10 секунд для клонирования в режиме zero-shot, настройте 13 параметров включая Temperature, Top P, скорость, CFG, интенсивность эмоций, описание эмоций, устройство вывода, формат вывода и частоту дискретизации, затем сгенерируйте высококачественную речь одним щелчком. Поддерживает вывод WAV/MP3.',
+    announcementList2: 'Расширение API-каналов: пользовательские настройки API теперь поддерживают независимую конфигурацию для «IndexTTS», управляемую отдельно от переноса стиля, Paper2Gal и генератора GIF персонажа.',
+    announcementList3: 'Синхронизация документации: добавлена полная документация для генератора IndexTTS, охватывающая базовый workflow, принципы TTS-технологии, 13 параметров, 10 функций кнопок и 3 кода ошибок с шагами устранения. Синхронизировано на 30 языках; intro обновлены с «8 модулей» на «9 модулей».',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1728,6 +1751,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageImageConverterDescription: 'Загрузите изображение и конвертируйте его в PNG или JPG. Поддержка настройки фильтров, качества и размера.',
     pageGifTitle: 'Генератор GIF персонажа',
     pageGifDescription: 'Загрузите изображение персонажа, настройте параметры GIF-анимации (кадры, FPS, цикл, тип движения) и сгенерируйте анимированный GIF персонажа.',
+    pageIndexTtsTitle: 'IndexTTS Синтез речи',
+    pageIndexTtsDescription: 'Введите текст и загрузите образец голоса для выполнения синтеза речи с клонированием голоса через модель IndexTTS. Поддерживает управление эмоциями, регулировку скорости и клонирование тембра.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем 7 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2387,9 +2412,9 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageStyleTitle: '스타일 변환',
     pagePromptTitle: 'OC 설정 에디터',
     pagePaperTitle: 'paper2gal 자산 생성',
-    announcementDescription: 'v1.4.0 「캐릭터 GIF 생성」도구 및 사용자 매뉴얼 대규모 업데이트: Character GIF Generator 페이지를 신규 추가하여 캐릭터 이미지를 호흡·깜빡임·흔들림·부유 등 8가지 동적 GIF 애니메이션으로 변환 가능. 사용자 매뉴얼도 전면 업데이트되어 캐릭터 GIF의 완전한 문서(사용 튜토리얼, 버튼 설명, 파라미터 상세, 18개 오류 코드와 해결 방법)를 추가. 30개 언어 문서를 동기 확장.',
+    announcementDescription: 'v1.5.0 IndexTTS 음성 합성 도구 신규 추가: IndexTTS Voice Synthesis 페이지를 신규 추가하여 텍스트 음성 변환, 제로샷 음성 클로닝, 감정 제어, 속도 조절 및 다양한 출력 형식을 지원. API 설정에서 IndexTTS 전용 사용자 정의 API 채널을 독립적으로 구성할 수 있음. 사용자 매뉴얼도 전면 업데이트되어 IndexTTS의 완전한 문서를 추가.',
     announcementList1: '캐릭터 GIF 생성기 신규 추가: 캐릭터 이미지를 업로드하고, 프레임 수, FPS, 루프, 애니메이션 타입(호흡/깜빡임/흔들림/부유/심장박동/머리카락 흔들림/꼬리 흔들림/마법 빛)과 이징 함수를 조정하여 동적인 캐릭터 GIF를 원클릭 생성. 투명 배경, 자동 컷아웃, 얼굴 잠금 지원.',
-    announcementList2: '사용자 매뉴얼 대규모 업데이트: 캐릭터 GIF 생성기용 완전 문서를 신규 추가. 기본 플로우, GIF 애니메이션 기술 원리, 8가지 애니메이션 타입 상세, 전체 파라미터 설명(Tips 포함), 14개 버튼 기능, 18개 오류 코드(API Key 부족부터 메모리 부족까지)의 상세 트러블슈팅 단계와 예방책을 망라.',
+    announcementList2: 'API 채널 확장: 사용자 정의 API 설정에서 이제 IndexTTS를 독립적으로 구성할 수 있음. 스타일 변환, Paper2Gal, 캐릭터 GIF와 별도로 관리.',
     announcementList3: '30개 언어 문서 동기화: zh/en/ja/ru/ko 5개 언어로 완전 번역, 25개 스켈레톤 언어에도 영어 placeholder 문서를 동기 추가. 모든 언어의 사용자 매뉴얼 intro를 「7개 기능 모듈」에서 「8개 기능 모듈」로 업데이트.'
   },
   fr: {
@@ -2581,6 +2606,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.5.0',
+    date: '2026-05-12',
+    title: '1.5.0 新增 IndexTTS 语音合成工具',
+    summary:
+      '新增 IndexTTS Voice Synthesis 页面，支持文本转语音、零样本音色克隆、情感控制、语速调节和多种输出格式；API 设置支持为 IndexTTS 独立配置自定义 API 通道；用户手册全面更新，新增 IndexTTS 的完整文档（基本流程、TTS 技术原理、13 个参数详解、10 个按钮功能、3 条错误代码）；30 语言文档同步扩展。',
+    details: [
+      '新增 IndexTTS 语音合成器：输入文本并上传 3~10 秒参考音频，即可执行零样本音色克隆。可调节 Temperature、Top P、语速、CFG、情感强度、情感描述、推理设备、输出格式、采样率等 13 个参数，一键生成高质量语音。支持 WAV/MP3 输出。',
+      'API 通道扩展：自定义 API 设置现在支持为「IndexTTS」独立配置 API 通道，与转画风、Paper2Gal、角色 GIF 分开管理。',
+      '用户手册大更新：为 IndexTTS 生成器新增完整文档，涵盖基本流程、TTS 技术原理、13 个参数详解（含 Tips）、10 个按钮功能、3 条错误代码的排查步骤与预防措施。',
+      '30 语言文档同步：zh/en/ja/ru/ko 五语完整翻译，25 个骨架语言同步添加英文占位文档；所有语言的用户手册 intro 已从「8 个功能模块」更新为「9 个」。',
+      '版本同步：VERSION 升级到 1.5.0，首页公告和公告历史同步更新，5 种基础语言全部覆盖。',
+    ],
+  },
   {
     version: '1.4.0',
     date: '2026-05-12',
@@ -3428,6 +3467,9 @@ const defaultSettings: SettingsState = {
   apiCustom3ForStyleTransfer: false,
   apiCustom3ForPaper2Gal: false,
   apiCustom3ForCharacterGif: false,
+  apiCustom1ForIndexTts: false,
+  apiCustom2ForIndexTts: false,
+  apiCustom3ForIndexTts: false,
   fontPreset: 'sans',
   shortcutMap: defaultShortcutMap,
   audio: { ...defaultAudioSettings },
@@ -3604,6 +3646,9 @@ function loadInitialSettings(): SettingsState {
     if (typeof nextSettings.apiCustom3ForStyleTransfer !== 'boolean') nextSettings.apiCustom3ForStyleTransfer = false;
     if (typeof nextSettings.apiCustom3ForPaper2Gal !== 'boolean') nextSettings.apiCustom3ForPaper2Gal = false;
     if (typeof nextSettings.apiCustom3ForCharacterGif !== 'boolean') nextSettings.apiCustom3ForCharacterGif = false;
+    if (typeof nextSettings.apiCustom1ForIndexTts !== 'boolean') nextSettings.apiCustom1ForIndexTts = false;
+    if (typeof nextSettings.apiCustom2ForIndexTts !== 'boolean') nextSettings.apiCustom2ForIndexTts = false;
+    if (typeof nextSettings.apiCustom3ForIndexTts !== 'boolean') nextSettings.apiCustom3ForIndexTts = false;
 
     updateAudioSettings(nextSettings.audio);
     return nextSettings;
@@ -3929,6 +3974,12 @@ function App() {
           pageTitle={messages.pageGifTitle}
           pageDescription={messages.pageGifDescription}
         />
+      ) : screen === 'index-tts' ? (
+        <IndexTtsPage
+          {...sharedPageProps}
+          pageTitle={messages.pageIndexTtsTitle}
+          pageDescription={messages.pageIndexTtsDescription}
+        />
       ) : screen === 'image-converter' ? (
         <ImageConverterPage
           {...sharedPageProps}
@@ -4103,6 +4154,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-gif')}>
                 <ActionIcon kind="character-gif" />
                 <span>{messages.featureGif}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('index-tts')}>
+                <ActionIcon kind="index-tts" />
+                <span>{messages.featureIndexTts}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5550,7 +5605,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -5615,6 +5670,14 @@ function ActionIcon({
         <path d="M14 24c2 3 6 3 8 0" />
         <path d="M10 10h4" />
         <path d="M26 10h4" />
+      </>
+    ),
+    'index-tts': (
+      <>
+        <rect x="16" y="4" width="8" height="16" rx="4" />
+        <path d="M10 18v2a10 10 0 0 0 20 0v-2" />
+        <path d="M20 34v4" />
+        <path d="M14 38h12" />
       </>
     ),
     docs: (
@@ -5706,6 +5769,10 @@ function StartModal({
             <ActionIcon kind="character-gif" />
             <strong>{messages.actionGif}</strong>
           </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('index-tts')}>
+            <ActionIcon kind="index-tts" />
+            <strong>{messages.actionIndexTts}</strong>
+          </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
             <strong>{messages.featureDocs}</strong>
@@ -5716,7 +5783,7 @@ function StartModal({
   );
 }
 
-type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif';
+type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts';
 
 function ImportModal({
   messages,
@@ -5829,6 +5896,7 @@ function ImportModal({
       'tts-export': 'tts-export',
       'image-converter': 'image-converter',
       'character-gif': 'character-gif',
+      'index-tts': 'index-tts',
     };
     requestClose();
     navigateTimerRef.current = window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
@@ -6846,6 +6914,7 @@ function SettingsModal({
                       const styleTransferKey = ch === 1 ? 'apiCustom1ForStyleTransfer' : ch === 2 ? 'apiCustom2ForStyleTransfer' : 'apiCustom3ForStyleTransfer';
                       const paper2GalKey = ch === 1 ? 'apiCustom1ForPaper2Gal' : ch === 2 ? 'apiCustom2ForPaper2Gal' : 'apiCustom3ForPaper2Gal';
                       const characterGifKey = ch === 1 ? 'apiCustom1ForCharacterGif' : ch === 2 ? 'apiCustom2ForCharacterGif' : 'apiCustom3ForCharacterGif';
+                      const indexTtsKey = ch === 1 ? 'apiCustom1ForIndexTts' : ch === 2 ? 'apiCustom2ForIndexTts' : 'apiCustom3ForIndexTts';
                       const title = ch === 1 ? messages.apiChannel1 : ch === 2 ? messages.apiChannel2 : messages.apiChannel3;
                       return (
                         <section className="settings-section" key={ch}>
@@ -6886,6 +6955,13 @@ function SettingsModal({
                               onClick={() => onUpdate({ [characterGifKey]: !(settings[characterGifKey as keyof SettingsState] as boolean) })}
                             >
                               {messages.apiUseForCharacterGif}
+                            </button>
+                            <button
+                              className={`palette-chip ${settings[indexTtsKey as keyof SettingsState] ? 'active' : ''}`}
+                              type="button"
+                              onClick={() => onUpdate({ [indexTtsKey]: !(settings[indexTtsKey as keyof SettingsState] as boolean) })}
+                            >
+                              {messages.apiUseForIndexTts}
                             </button>
                           </div>
                           <div className="tool-actions-row" style={{ marginTop: 8 }}>
@@ -7363,6 +7439,16 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         pipelineTitle: 'Generated GIF / Logs',
         todoOne: '补 GIF 帧数、帧率、循环与动画类型配置',
         todoTwo: '补角色图像输入与动态 GIF 生成导出',
+      };
+    case 'index-tts':
+      return {
+        title: messages.pageIndexTtsTitle,
+        description: messages.pageIndexTtsDescription,
+        workspaceTitle: 'IndexTTS Workspace',
+        panelTitle: 'Voice / Emotion / Format',
+        pipelineTitle: 'Generated Audio / Logs',
+        todoOne: '补文本输入、参考音频上传与音色克隆配置',
+        todoTwo: '补 IndexTTS 语音合成与音频导出',
       };
     case 'image-converter':
       return {

@@ -1133,6 +1133,109 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
       ],
     },
     {
+      id: 'index-tts',
+      title: 'IndexTTS 语音合成',
+      overview: `IndexTTS 语音合成工具使用零样本音色克隆技术，将文本转换为语音。上传 3~10 秒的参考音频即可克隆任意音色，也可以使用默认音色。支持情感控制、语速调节和多种输出格式。
+
+基本流程：
+1. 输入要合成的文本
+2. 上传参考音频（可选）
+3. 调整 TTS 参数（温度、语速、情感等）
+4. 点击「生成语音」
+5. 播放、复制或下载生成的音频
+
+【TTS 技术原理】
+IndexTTS 是基于 XTTS 和 Tortoise 的 GPT 风格文本转语音模型。支持中文拼音纠正和通过标点符号控制停顿。模型采用 conformer 条件编码器和基于 BigVGAN2 的 speechcode 解码器，输出高质量音频。
+
+【支持的参数】
+- 文本：要合成的输入文本（支持中文、英文等）
+- 参考音频：3~10 秒的音频片段，用于零样本音色克隆
+- 模型：index-tts-1.5 或 index-tts-2
+- Temperature（0.0~1.0）：控制随机性/创造性
+- Top P（0.0~1.0）：核采样阈值
+- Top K（1~128）：Top-k 采样
+- 语速（0.5~2.0）：播放速度倍数
+- CFG（1.0~14.0）：无分类器引导尺度
+- 情感强度（0.0~2.0）：情感表达强度
+- 情感描述：软情感指令（如「愤怒的 shouting」）
+- Seed：随机种子，用于可复现结果
+- 推理设备：GPU（快速）或 CPU（备用）
+- 输出格式：WAV 或 MP3
+- 采样率：22050 / 44100 / 48000 Hz
+- 降噪强度（0~100）：后处理降噪强度
+
+【输出格式】
+- WAV：未压缩，最高音质
+- MP3：压缩，文件更小
+- 典型文件大小：100KB ~ 5MB（取决于时长和格式）
+- 推荐采样率：48000 Hz 获得最佳音质`,
+      buttons: [
+        { name: '生成语音', description: '启动 TTS 生成工作流。验证输入文本和参数后向后端发送请求。' },
+        { name: '中止任务', description: '取消正在进行的 TTS 生成任务。' },
+        { name: '复制 JSON', description: '将当前参数配置以 JSON 格式复制到剪贴板。' },
+        { name: '下载 JSON', description: '将当前参数配置以 JSON 文件形式下载。' },
+        { name: '复制结果', description: '生成成功后，将音频复制到剪贴板（浏览器支持时）。' },
+        { name: '下载结果', description: '将生成的音频下载到本地。' },
+        { name: '打开文件', description: '在新标签页中打开生成的音频。' },
+        { name: '重做', description: '使用相同参数重新生成语音。' },
+        { name: '显示/隐藏详情', description: '展开或折叠参数面板和调试信息面板。' },
+        { name: '刷新', description: '将所有参数重置为默认值，清空文本和结果。' },
+      ],
+      parameters: [
+        { name: '模型', description: '选择 TTS 模型版本。', tips: 'index-tts-1.5 是稳定版；index-tts-2 具有高级情感控制功能。' },
+        { name: 'Temperature', description: '采样温度，控制随机性。范围 0~1，默认 0.8。', tips: '越低越稳定/可预测；越高越有创意但可能偏离。' },
+        { name: 'Top P', description: '核采样阈值。范围 0~1，默认 0.92。', tips: '越低多样性越低，一致性越高。' },
+        { name: 'Top K', description: 'Top-K 采样。范围 1~128，默认 48。', tips: '越低生成越保守。' },
+        { name: '语速', description: '播放速度倍数。范围 0.5~2.0，默认 1.0。', tips: '1.0 是正常速度；0.5 是半速；2.0 是双倍速。' },
+        { name: 'CFG', description: '无分类器引导尺度。范围 1~14，默认 6.8。', tips: '越高越遵循提示。7~10 是安全区间。' },
+        { name: '情感强度', description: '情感表达强度。范围 0.0~2.0，默认 1.0。', tips: '0.0 = 中性；1.0 = 平衡；2.0 = 非常富有表现力。' },
+        { name: '情感描述', description: '使用自然语言的软情感指令。', tips: '例如：「愤怒的 shouting」、「温柔低语」、「开心兴奋」。' },
+        { name: 'Seed', description: '随机种子，默认 240315。固定种子可实现可复现结果。', tips: '记录喜欢结果的种子以便复现。' },
+        { name: '推理设备', description: '推理设备：GPU（快速）或 CPU（备用）。', tips: '推荐使用 GPU 加速生成；CPU 可在任何机器上运行。' },
+        { name: '输出格式', description: '输出音频格式：WAV 或 MP3。', tips: 'WAV 音质最佳；MP3 更小更便携。' },
+        { name: '采样率', description: '输出采样率（Hz）。', tips: '48000 Hz 是 CD 音质；44100 Hz 是标准；22050 Hz 对语音可接受。' },
+        { name: '降噪强度', description: '后处理降噪强度。范围 0~100，默认 20。', tips: '越高去除越多背景噪声，但可能影响音质。' },
+      ],
+      errors: [
+        {
+          code: 'INDEX_TTS_TEXT_MISSING',
+          message: '未检测到输入文本。',
+          severity: 'error',
+          category: 'api/request',
+          cause: '启动工作流时文本输入框为空。',
+          location: 'IndexTTS 页面 → 文本输入卡片',
+          solution: '在点击「生成语音」之前输入要合成的文本。',
+          steps: ['点击文本输入区域', '输入或粘贴您的文本', '再次点击「生成语音」'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: '启动前始终确认文本输入包含有效内容。',
+        },
+        {
+          code: 'INDEX_TTS_REQUEST_FAILED',
+          message: 'IndexTTS 生成请求失败。',
+          severity: 'error',
+          category: 'api/request',
+          cause: '后端 API 返回错误或请求无法完成。',
+          location: 'IndexTTS 页面 → API 请求',
+          solution: '检查后端状态、API 配置和网络连接。',
+          steps: ['检查设置 → API 配置是否正确', '确认后端服务器正在运行', '查看浏览器控制台获取详细错误信息', '降低 Temperature/Top P 后重试'],
+          relatedCodes: ['INDEX_TTS_TEXT_MISSING', 'PLATO_NOT_CONFIGURED'],
+          prevention: '保持 Temperature 低于 0.9、Top P 低于 0.95 以获得稳定生成。',
+        },
+        {
+          code: 'INDEX_TTS_NOT_CONFIGURED',
+          message: 'IndexTTS 后端未配置。',
+          severity: 'error',
+          category: 'api/request',
+          cause: '后端没有配置 IndexTTS 提供商。',
+          location: '服务器 → /api/index-tts',
+          solution: '在后端 .env 文件中配置 IndexTTS 提供商。',
+          steps: ['设置 IndexTTS API 密钥（如 SiliconFlow）', '将提供商配置添加到后端 .env', '重启后端服务器'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: '使用工具前设置 IndexTTS 提供商。',
+        },
+      ],
+    },
+    {
       id: 'prompt-suite',
       title: '角色设卡 / 世界观编辑',
       overview: `PromptSuite 是一个富文本编辑器，用于整理角色设定卡（Character Sheet）、世界观设定（World Bible）、关系图谱（Relationship Map）和语言风格档案（Speech Profile）。支持字体、颜色、高亮、标题、列表、表格、代码块、引用框、图片插入等丰富排版功能。所有内容自动保存到本地浏览器。

@@ -347,15 +347,15 @@ export function buildApiHeaders(
 }
 
 export function getApiForFeature(
-  feature: 'style-transfer' | 'paper2gal' | 'llm' | 'character-gif',
-  settings: Pick<SettingsState, 'interfaceMode' | 'apiPreset' | 'apiBaseUrl' | 'apiBaseUrl2' | 'apiBaseUrl3' | 'apiKey' | 'apiKey2' | 'apiKey3' | 'apiCustom1ForStyleTransfer' | 'apiCustom1ForPaper2Gal' | 'apiCustom1ForCharacterGif' | 'apiCustom2ForStyleTransfer' | 'apiCustom2ForPaper2Gal' | 'apiCustom2ForCharacterGif' | 'apiCustom3ForStyleTransfer' | 'apiCustom3ForPaper2Gal' | 'apiCustom3ForCharacterGif'>,
+  feature: 'style-transfer' | 'paper2gal' | 'llm' | 'character-gif' | 'index-tts',
+  settings: Pick<SettingsState, 'interfaceMode' | 'apiPreset' | 'apiBaseUrl' | 'apiBaseUrl2' | 'apiBaseUrl3' | 'apiKey' | 'apiKey2' | 'apiKey3' | 'apiCustom1ForStyleTransfer' | 'apiCustom1ForPaper2Gal' | 'apiCustom1ForCharacterGif' | 'apiCustom1ForIndexTts' | 'apiCustom2ForStyleTransfer' | 'apiCustom2ForPaper2Gal' | 'apiCustom2ForCharacterGif' | 'apiCustom2ForIndexTts' | 'apiCustom3ForStyleTransfer' | 'apiCustom3ForPaper2Gal' | 'apiCustom3ForCharacterGif' | 'apiCustom3ForIndexTts'>,
 ): { baseUrl: string; apiKey: string; channel: 1 | 2 | 3 } | null {
   if (settings.interfaceMode === 'builtin') {
     const presetBase = getPresetApiBase(settings);
     return presetBase ? { baseUrl: presetBase, apiKey: '', channel: 1 } : null;
   }
 
-  const featureKey = feature === 'style-transfer' ? 'ForStyleTransfer' : feature === 'paper2gal' ? 'ForPaper2Gal' : feature === 'character-gif' ? 'ForCharacterGif' : 'ForStyleTransfer';
+  const featureKey = feature === 'style-transfer' ? 'ForStyleTransfer' : feature === 'paper2gal' ? 'ForPaper2Gal' : feature === 'character-gif' ? 'ForCharacterGif' : feature === 'index-tts' ? 'ForIndexTts' : 'ForStyleTransfer';
   const matches: { channel: 1 | 2 | 3; baseUrl: string; apiKey: string; condition: boolean }[] = [
     {
       channel: 1,

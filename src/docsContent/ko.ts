@@ -1,7 +1,7 @@
 import type { DocsContent } from './types';
 
 export const docsContent: DocsContent = {
-    intro: `Original Character Maker 사용자 가이드에 오신 것을 환영합니다!\n\n이 가이드는 8개 기능 모듈의 상세한 설명서와 전역 오류 사전이 포함되어 있습니다. 도구 사용 중 오류가 발생하거나 버튼/매개변수의 기능을 잘 모르겠다면 이 가이드를 열어 해당 장을 찾아보세요.\n\n가이드 구조:\n· 도구 가이드 — 각 도구별로 기능 개요, 버튼 설명, 매개변수 설명, 오류와 해결책을 포함한 독립 장이 있습니다\n· 오류 사전 — 전역 오류 인덱스, 카테고리(A~Z, 0~9)별로 정렬되어 사전처럼 빠르게 검색할 수 있습니다\n\n오류 사전 사용법:\n1. 오류 패널에 표시된 Code를 먼저 확인하세요(예: STYLE_TRANSFER_REQUEST_FAILED)\n2. 첫 글자에 해당하는 카테고리를 찾으세요(S → 시스템 및 워크플로우)\n3. 해당 카테고리 안에서 알파벳 순서로 항목을 찾으세요\n4. "위치"를 읽어 오류가 발생한 페이지와 영역을 확인하세요\n5. "해결 단계"에 따라 단계별로 문제를 해결하세요`,
+    intro: `Original Character Maker 사용자 가이드에 오신 것을 환영합니다!\n\n이 가이드는 9개 기능 모듈의 상세한 설명서와 전역 오류 사전이 포함되어 있습니다. 도구 사용 중 오류가 발생하거나 버튼/매개변수의 기능을 잘 모르겠다면 이 가이드를 열어 해당 장을 찾아보세요.\n\n가이드 구조:\n· 도구 가이드 — 각 도구별로 기능 개요, 버튼 설명, 매개변수 설명, 오류와 해결책을 포함한 독립 장이 있습니다\n· 오류 사전 — 전역 오류 인덱스, 카테고리(A~Z, 0~9)별로 정렬되어 사전처럼 빠르게 검색할 수 있습니다\n\n오류 사전 사용법:\n1. 오류 패널에 표시된 Code를 먼저 확인하세요(예: STYLE_TRANSFER_REQUEST_FAILED)\n2. 첫 글자에 해당하는 카테고리를 찾으세요(S → 시스템 및 워크플로우)\n3. 해당 카테고리 안에서 알파벳 순서로 항목을 찾으세요\n4. "위치"를 읽어 오류가 발생한 페이지와 영역을 확인하세요\n5. "해결 단계"에 따라 단계별로 문제를 해결하세요`,
     tools:
 [
       {
@@ -657,6 +657,109 @@ The tool includes 8 built-in animation effects:
           ],
           relatedCodes: ['FILE_TOO_LARGE'],
           prevention: 'Close tabs before large tasks; scale image to 1024; use 8 or fewer frames.',
+        },
+      ],
+    },
+    {
+      id: 'index-tts',
+      title: 'IndexTTS 음성 합성',
+      overview: `IndexTTS 음성 합성 도구는 제로샷 음성 클로닝 기술을 사용하여 텍스트를 음성으로 변환합니다. 3~10초의 참조 오디오를 업로드하면 모든 음색을 클론할 수 있으며, 기본 음색을 사용할 수도 있습니다. 감정 제어, 속도 조절 및 다양한 출력 형식을 지원합니다.
+
+기본 워크플로우:
+1. 합성할 텍스트 입력
+2. 참조 오디오 업로드 (선택사항)
+3. TTS 매개변수 조정 (온도, 속도, 감정 등)
+4. "음성 생성" 클릭
+5. 생성된 음성 재생, 복사 또는 다운로드
+
+【TTS 기술 원리】
+IndexTTS는 XTTS와 Tortoise를 기반으로 한 GPT 스타일 텍스트 음성 변환 모델입니다. 중국어 병음 발음 교정 및 구두점을 통한 일시 중지 제어를 지원합니다. 모델은 conformer 조건 인코더와 BigVGAN2 기반 speechcode 디코더를 사용하여 고품질 오디오를 출력합니다.
+
+【지원되는 매개변수】
+- 텍스트: 합성할 입력 텍스트 (중국어, 영어 등 지원)
+- 참조 오디오: 3~10초 오디오 클립, 제로샷 음성 클로닝용
+- 모델: index-tts-1.5 또는 index-tts-2
+- Temperature (0.0~1.0): 무작위성/창의성 제어
+- Top P (0.0~1.0): 핵 샘플링 임계값
+- Top K (1~128): Top-k 샘플링
+- 속도 (0.5~2.0): 재생 속도 배율
+- CFG (1.0~14.0): 분류기 자유 가이던스 스케일
+- 감정 강도 (0.0~2.0): 감정 표현 강도
+- 감정 설명: 소프트 감정 지시 (예: "화난 shouting")
+- Seed: 무작위 시드, 재현 가능한 결과용
+- 추론 장치: GPU (빠름) 또는 CPU (폴백)
+- 출력 형식: WAV 또는 MP3
+- 샘플링 레이트: 22050 / 44100 / 48000 Hz
+- 노이즈 감소 (0~100): 후처리 노이즈 감소 강도
+
+【출력 형식】
+- WAV: 무압축, 최고 음질
+- MP3: 압축, 파일 크기 작음
+- 일반적인 파일 크기: 100KB ~ 5MB (길이 및 형식에 따라 다름)
+- 권장 샘플링 레이트: 최고 음질을 위해 48000 Hz`,
+      buttons: [
+        { name: '음성 생성', description: 'TTS 생성 워크플로우를 시작합니다. 입력 텍스트와 매개변수를 검증한 후 백엔드에 요청을 전송합니다.' },
+        { name: '작업 중단', description: '진행 중인 TTS 생성 작업을 취소합니다.' },
+        { name: 'JSON 복사', description: '현재 매개변수 구성을 JSON 형식으로 클립보드에 복사합니다.' },
+        { name: 'JSON 다운로드', description: '현재 매개변수 구성을 JSON 파일로 다운로드합니다.' },
+        { name: '결과 복사', description: '생성 성공 후 오디오를 클립보드에 복사합니다(브라우저가 지원하는 경우).' },
+        { name: '결과 다운로드', description: '생성된 오디오를 로컬로 다운로드합니다.' },
+        { name: '파일 열기', description: '새 탭에서 생성된 오디오를 엽니다.' },
+        { name: '다시 하기', description: '동일한 매개변수를 사용하여 음성을 재생성합니다.' },
+        { name: '세부정보 표시/숨기기', description: '매개변수 패널과 디버그 정보 패널을 펼치거나 접습니다.' },
+        { name: '새로 고침', description: '모든 매개변수를 기본값으로 재설정하고 텍스트와 결과를 지웁니다.' },
+      ],
+      parameters: [
+        { name: '모델', description: 'TTS 모델 버전을 선택합니다.', tips: 'index-tts-1.5는 안정 버전; index-tts-2는 고급 감정 제어 기능이 있습니다.' },
+        { name: 'Temperature', description: '샘플링 온도, 무작위성을 제어합니다. 범위 0~1, 기본값 0.8.', tips: '낮을수록 안정적/예측 가능; 높을수록 창의적이지만 벗어날 수 있습니다.' },
+        { name: 'Top P', description: '핵 샘플링 임계값. 범위 0~1, 기본값 0.92.', tips: '낮을수록 다양성이 낮고 일관성이 높습니다.' },
+        { name: 'Top K', description: 'Top-K 샘플링. 범위 1~128, 기본값 48.', tips: '낮은 값은 생성을 보수적으로 만듭니다.' },
+        { name: '속도', description: '재생 속도 배율. 범위 0.5~2.0, 기본값 1.0.', tips: '1.0은 정상 속도; 0.5은 반 속도; 2.0은 2배 속도입니다.' },
+        { name: 'CFG', description: '분류기 자유 가이던스 스케일. 범위 1~14, 기본값 6.8.', tips: '높을수록 프롬프트 충실도가 높습니다. 7~10이 안전 구간입니다.' },
+        { name: '감정 강도', description: '감정 표현 강도. 범위 0.0~2.0, 기본값 1.0.', tips: '0.0 = 중립; 1.0 = 균형; 2.0 = 매우 표현력이 풍부합니다.' },
+        { name: '감정 설명', description: '자연어를 사용한 소프트 감정 지시.', tips: '예: "화난 shouting", "부드러운 속삭임", "행복하고 흥분된".' },
+        { name: 'Seed', description: '무작위 시드, 기본값 240315. 고정된 시드는 재현 가능한 결과를 제공합니다.', tips: '좋아하는 결과의 시드를 기록하여 쉽게 재현하세요.' },
+        { name: '추론 장치', description: '추론 장치: GPU (빠름) 또는 CPU (폴백).', tips: '빠른 생성을 위해 GPU 권장; CPU는 모든 기기에서 작동합니다.' },
+        { name: '출력 형식', description: '출력 오디오 형식: WAV 또는 MP3.', tips: 'WAV는 최고 음질; MP3는 더 작고 휴대하기 쉽습니다.' },
+        { name: '샘플링 레이트', description: '출력 샘플링 레이트(Hz).', tips: '48000 Hz는 CD 음질; 44100 Hz는 표준; 22050 Hz는 음성에 허용 가능합니다.' },
+        { name: '노이즈 감소', description: '후처리 노이즈 감소 강도. 범위 0~100, 기본값 20.', tips: '높을수록 배경 노이즈를 더 제거하지만 음질에 영향을 줄 수 있습니다.' },
+      ],
+      errors: [
+        {
+          code: 'INDEX_TTS_TEXT_MISSING',
+          message: '입력 텍스트가 감지되지 않았습니다.',
+          severity: 'error',
+          category: 'api/request',
+          cause: '워크플로우 시작 시 텍스트 입력란이 비어 있습니다.',
+          location: 'IndexTTS 페이지 → 텍스트 입력 카드',
+          solution: '"음성 생성"을 클릭하기 전에 합성할 텍스트를 입력하세요.',
+          steps: ['텍스트 입력 영역을 클릭', '텍스트를 입력하거나 붙여넣기', '다시 "음성 생성"을 클릭'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: '시작하기 전에 항상 텍스트 입력에 유효한 내용이 포함되어 있는지 확인하세요.',
+        },
+        {
+          code: 'INDEX_TTS_REQUEST_FAILED',
+          message: 'IndexTTS 생성 요청이 실패했습니다.',
+          severity: 'error',
+          category: 'api/request',
+          cause: '백엔드 API가 오류를 반환하거나 요청을 완료할 수 없었습니다.',
+          location: 'IndexTTS 페이지 → API 요청',
+          solution: '백엔드 상태, API 구성 및 네트워크 연결을 확인하세요.',
+          steps: ['설정 → API 구성이 올바른지 확인', '백엔드 서버가 실행 중인지 확인', '브라우저 콘솔에서 자세한 오류 메시지 확인', 'Temperature/Top P를 낮추고 재시도'],
+          relatedCodes: ['INDEX_TTS_TEXT_MISSING', 'PLATO_NOT_CONFIGURED'],
+          prevention: '안정적인 생성을 위해 Temperature를 0.9 미만, Top P를 0.95 미만으로 유지하세요.',
+        },
+        {
+          code: 'INDEX_TTS_NOT_CONFIGURED',
+          message: 'IndexTTS 백엔드가 구성되지 않았습니다.',
+          severity: 'error',
+          category: 'api/request',
+          cause: '백엔드에 IndexTTS 공급자가 구성되어 있지 않습니다.',
+          location: '서버 → /api/index-tts',
+          solution: '백엔드 .env 파일에 IndexTTS 공급자를 구성하세요.',
+          steps: ['IndexTTS API 키 설정(예: SiliconFlow)', '공급자 구성을 백엔드 .env에 추가', '백엔드 서버 재시작'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: '도구를 사용하기 전에 IndexTTS 공급자를 설정하세요.',
         },
       ],
     },

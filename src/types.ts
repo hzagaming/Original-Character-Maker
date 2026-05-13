@@ -61,7 +61,7 @@ export type FontPreset =
 export type InterfaceMode = 'builtin' | 'custom';
 export type ApiPreset = 'plato' | 'custom1' | 'custom2' | 'custom3';
 
-export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'character-gif' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'docs';
+export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'character-gif' | 'index-tts' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'docs';
 export type SettingsTab = 'style' | 'language' | 'audio' | 'animation' | 'performance' | 'api' | 'llm' | 'shortcuts' | 'others' | 'announcement' | 'about';
 export type StartModalStep = 'root' | null;
 
@@ -266,6 +266,9 @@ export interface SettingsState {
   apiCustom1ForCharacterGif: boolean;
   apiCustom2ForCharacterGif: boolean;
   apiCustom3ForCharacterGif: boolean;
+  apiCustom1ForIndexTts: boolean;
+  apiCustom2ForIndexTts: boolean;
+  apiCustom3ForIndexTts: boolean;
   shortcutMap: ShortcutMap;
   audio: AudioSettings;
   animation: AnimationSettings;

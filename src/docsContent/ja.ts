@@ -3,7 +3,7 @@ import type { DocsContent } from './types';
 export const docsContent: DocsContent = {
   intro: `Original Character Maker ユーザーマニュアルへようこそ！
 
-本マニュアルは7つの機能モジュールすべての詳細な説明と、グローバルエラー辞書を網羅しています。ツール使用中にエラーが発生したり、ボタンやパラメータの意味が不明な場合は、本マニュアルの該当章節を参照してください。
+本マニュアルは9つの機能モジュールすべての詳細な説明と、グローバルエラー辞書を網羅しています。ツール使用中にエラーが発生したり、ボタンやパラメータの意味が不明な場合は、本マニュアルの該当章節を参照してください。
 
 マニュアル構成：
 ・ツールマニュアル — 各ツールが独立した章を持ち、機能概要、ボタン説明、パラメータ説明、エラーと解決方法を含みます
@@ -572,6 +572,109 @@ The tool includes 8 built-in animation effects:
           ],
           relatedCodes: ['FILE_TOO_LARGE'],
           prevention: 'Close tabs before large tasks; scale image to 1024; use 8 or fewer frames.',
+        },
+      ],
+    },
+    {
+      id: 'index-tts',
+      title: 'IndexTTS 音声合成',
+      overview: `IndexTTS 音声合成ツールは、ゼロショット音声クローニング技術を使用してテキストを音声に変換します。3〜10秒の参照音声をアップロードすると任意の音色をクローンでき、デフォルトの音色を使用することも可能です。感情制御、話速調整、複数の出力形式に対応しています。
+
+基本フロー：
+1. 合成するテキストを入力
+2. 参照音声をアップロード（オプション）
+3. TTS パラメータを調整（温度、話速、感情など）
+4. 「音声を生成」をクリック
+5. 生成された音声を再生、コピー、またはダウンロード
+
+【TTS 技術原理】
+IndexTTS は XTTS と Tortoise をベースにした GPT スタイルのテキスト読み上げモデルです。中国語のピンインによる発音修正や、句読点による休止制御に対応しています。モデルは conformer 条件付きエンコーダーと BigVGAN2 ベースの speechcode デコーダーを採用し、高品質な音声を出力します。
+
+【対応パラメータ】
+- テキスト：合成する入力テキスト（中国語、英語などに対応）
+- 参照音声：3〜10秒の音声クリップ、ゼロショット音声クローニング用
+- モデル：index-tts-1.5 または index-tts-2
+- Temperature（0.0〜1.0）：ランダム性/創造性を制御
+- Top P（0.0〜1.0）：核サンプリング閾値
+- Top K（1〜128）：Top-k サンプリング
+- 話速（0.5〜2.0）：再生速度の倍率
+- CFG（1.0〜14.0）：分類器自由ガイダンス尺度
+- 感情強度（0.0〜2.0）：感情表現の強度
+- 感情説明：ソフトな感情指示（例：「怒った shouting」）
+- Seed：ランダムシード、再現可能な結果用
+- 推論デバイス：GPU（高速）または CPU（フォールバック）
+- 出力形式：WAV または MP3
+- サンプリングレート：22050 / 44100 / 48000 Hz
+- 降噪強度（0〜100）：後処理ノイズ除去の強度
+
+【出力形式】
+- WAV：非圧縮、最高音質
+- MP3：圧縮、ファイルサイズが小さい
+- 典型的なファイルサイズ：100KB〜5MB（長さと形式による）
+- 推奨サンプリングレート：48000 Hz で最高音質`,
+      buttons: [
+        { name: '音声を生成', description: 'TTS 生成ワークフローを開始。入力テキストとパラメータを検証してバックエンドにリクエストを送信。' },
+        { name: 'タスクを中止', description: '進行中の TTS 生成タスクをキャンセル。' },
+        { name: 'JSON をコピー', description: '現在のパラメータ設定を JSON 形式でクリップボードにコピー。' },
+        { name: 'JSON をダウンロード', description: '現在のパラメータ設定を JSON ファイルとしてダウンロード。' },
+        { name: '結果をコピー', description: '生成成功後、音声をクリップボードにコピー（ブラウザが対応する場合）。' },
+        { name: '結果をダウンロード', description: '生成された音声をローカルにダウンロード。' },
+        { name: 'ファイルを開く', description: '新しいタブで生成された音声を開く。' },
+        { name: 'やり直し', description: '同じパラメータで音声を再生成。' },
+        { name: '詳細を表示/非表示', description: 'パラメータパネルとデバッグ情報パネルを展開または折りたたむ。' },
+        { name: 'リセット', description: 'すべてのパラメータをデフォルトにリセットし、テキストと結果をクリア。' },
+      ],
+      parameters: [
+        { name: 'モデル', description: 'TTS モデルバージョンを選択。', tips: 'index-tts-1.5 は安定版；index-tts-2 は高度な感情制御機能を備える。' },
+        { name: 'Temperature', description: 'サンプリング温度、ランダム性を制御。範囲 0〜1、デフォルト 0.8。', tips: '低いほど安定/予測可能；高いほど創造的だが逸脱する可能性。' },
+        { name: 'Top P', description: '核サンプリング閾値。範囲 0〜1、デフォルト 0.92。', tips: '低いほど多様性が低く、一貫性が高い。' },
+        { name: 'Top K', description: 'Top-K サンプリング。範囲 1〜128、デフォルト 48。', tips: '低い値ほど生成が保守的。' },
+        { name: '話速', description: '再生速度の倍率。範囲 0.5〜2.0、デフォルト 1.0。', tips: '1.0 は通常速度；0.5 は半分；2.0 は倍速。' },
+        { name: 'CFG', description: '分類器自由ガイダンス尺度。範囲 1〜14、デフォルト 6.8。', tips: '高いほどプロンプトへの忠実度が高い。7〜10 が安全圏。' },
+        { name: '感情強度', description: '感情表現の強度。範囲 0.0〜2.0、デフォルト 1.0。', tips: '0.0 = ニュートラル；1.0 = バランス；2.0 = 非常に表現力豊か。' },
+        { name: '感情説明', description: '自然言語を使用したソフトな感情指示。', tips: '例：「怒った shouting」、「優しく囁く」、「楽しそうに興奮」。' },
+        { name: 'Seed', description: 'ランダムシード、デフォルト 240315。固定シードで再現可能な結果。', tips: 'お気に入りの結果のシードを記録して再現しやすくする。' },
+        { name: '推論デバイス', description: '推論デバイス：GPU（高速）または CPU（フォールバック）。', tips: '高速生成には GPU を推奨；CPU は任意のマシンで動作。' },
+        { name: '出力形式', description: '出力音声形式：WAV または MP3。', tips: 'WAV は最高音質；MP3 は小さく持ち運びしやすい。' },
+        { name: 'サンプリングレート', description: '出力サンプリングレート（Hz）。', tips: '48000 Hz は CD 音質；44100 Hz は標準；22050 Hz は音声に許容範囲。' },
+        { name: '降噪強度', description: '後処理ノイズ除去の強度。範囲 0〜100、デフォルト 20。', tips: '高いほど背景ノイズを除去するが、音質に影響する可能性。' },
+      ],
+      errors: [
+        {
+          code: 'INDEX_TTS_TEXT_MISSING',
+          message: '入力テキストが検出されませんでした。',
+          severity: 'error',
+          category: 'api/request',
+          cause: 'ワークフロー開始時にテキスト入力欄が空。',
+          location: 'IndexTTS ページ → テキスト入力カード',
+          solution: '「音声を生成」をクリックする前に合成するテキストを入力してください。',
+          steps: ['テキスト入力エリアをクリック', 'テキストを入力または貼り付け', '再度「音声を生成」をクリック'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: '開始前に必ずテキスト入力に有効な内容が含まれていることを確認。',
+        },
+        {
+          code: 'INDEX_TTS_REQUEST_FAILED',
+          message: 'IndexTTS 生成リクエストに失敗しました。',
+          severity: 'error',
+          category: 'api/request',
+          cause: 'バックエンド API がエラーを返したか、リクエストを完了できなかった。',
+          location: 'IndexTTS ページ → API リクエスト',
+          solution: 'バックエンド状態、API 設定、ネットワーク接続を確認。',
+          steps: ['設定 → API の設定が正しいか確認', 'バックエンドサーバーが実行中か確認', 'ブラウザコンソールで詳細なエラーメッセージを確認', 'Temperature/Top P を下げて再試行'],
+          relatedCodes: ['INDEX_TTS_TEXT_MISSING', 'PLATO_NOT_CONFIGURED'],
+          prevention: '安定した生成のため Temperature を 0.9 以下、Top P を 0.95 以下に保つ。',
+        },
+        {
+          code: 'INDEX_TTS_NOT_CONFIGURED',
+          message: 'IndexTTS バックエンドが構成されていません。',
+          severity: 'error',
+          category: 'api/request',
+          cause: 'バックエンドに IndexTTS プロバイダーが構成されていない。',
+          location: 'サーバー → /api/index-tts',
+          solution: 'バックエンド .env ファイルに IndexTTS プロバイダーを構成。',
+          steps: ['IndexTTS API キーを設定（例：SiliconFlow）', 'プロバイダー設定をバックエンド .env に追加', 'バックエンドサーバーを再起動'],
+          relatedCodes: ['INDEX_TTS_REQUEST_FAILED'],
+          prevention: 'ツール使用前に IndexTTS プロバイダーを設定する。',
         },
       ],
     },
