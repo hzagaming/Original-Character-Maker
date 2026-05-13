@@ -5762,25 +5762,6 @@ OC Maker uses a complete Design System ensuring visual and interaction consisten
           prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
         },
         {
-<<<<<<< HEAD
-=======
-          code: 'DATA_IMPORT_DUPLICATE_KEY',
-          message: 'Data import contains duplicate key',
-          severity: 'warning',
-          category: 'B. Config & Data',
-          location: 'Page: Any tool → Area: Configuration loading or data processing',
-          cause: 'The imported data contains an existing primary key or unique key value.',
-          solution: 'Use UPSERT mode for import, or delete duplicate data first.',
-          steps: [
-            'Check key values in the import data',
-            'Use UPSERT/REPLACE mode',
-            'Or clear the target table before importing',
-            'Add deduplication logic'
-          ],
-          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
-        },
-        {
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
           code: 'DATA_IMPORT_CONSTRAINT_VIOLATION',
           message: 'Data import violates constraints',
           severity: 'error',
@@ -9736,25 +9717,6 @@ OC Maker uses a complete Design System ensuring visual and interaction consisten
         prevention: 'Ensure all content has legal usage authorization.',
       },
       {
-<<<<<<< HEAD
-=======
-        code: '504_GATEWAY_TIMEOUT',
-        message: 'Gateway timeout (504)',
-        severity: 'error',
-
-        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
-        cause: 'Gateway or proxy timed out waiting for upstream server response.',
-        solution: 'Check upstream service status, increase timeout.',
-        steps: [
-          'Check upstream service health status',
-          'Increase gateway timeout configuration',
-          'Optimize upstream service response time',
-          'Check if upstream service is overloaded',
-        ],
-        prevention: 'Configure reasonable timeouts at each layer, upstream services provide health check endpoints.',
-      },
-      {
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
         code: '505_HTTP_VERSION_NOT_SUPPORTED',
         message: 'HTTP version not supported (505)',
         severity: 'error',
@@ -10305,43 +10267,6 @@ OC Maker uses a complete Design System ensuring visual and interaction consisten
           prevention: 'Follow API documentation and version compatibility guides.',
         },
         {
-<<<<<<< HEAD
-=======
-          code: '502_BAD_GATEWAY',
-          message: 'Bad Gateway (502)',
-          severity: 'error',
-          category: '0~9. HTTP Status Codes',
-          location: 'Page: Any tool → Area: network request',
-          cause: 'The server, while acting as a gateway or proxy, received an invalid response from the upstream server.',
-          solution: 'Retry after a short delay or check upstream service.',
-          steps: [
-            'Wait 30 seconds and retry',
-            'Check upstream service health',
-            'Contact admin if persistent',
-            'Use alternative gateway'
-          ],
-          relatedCodes: ['504_GATEWAY_TIMEOUT', '503_SERVICE_UNAVAILABLE'],
-          prevention: 'Monitor upstream service health; implement circuit breakers.',
-        },
-        {
-          code: '503_SERVICE_UNAVAILABLE',
-          message: 'Service Unavailable (503)',
-          severity: 'error',
-          category: '0~9. HTTP Status Codes',
-          location: 'Page: Any tool → Area: network request',
-          cause: 'The server is temporarily unable to handle the request due to maintenance or overload.',
-          solution: 'Retry after the Retry-After delay or during off-peak hours.',
-          steps: [
-            'Check Retry-After header',
-            'Wait specified duration',
-            'Retry request',
-            'Contact admin if prolonged'
-          ],
-          relatedCodes: ['502_BAD_GATEWAY', '429_TOO_MANY_REQUESTS'],
-          prevention: 'Implement graceful degradation and load balancing.',
-        },
-        {
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
           code: '506_VARIANT_ALSO_NEGOTIATES',
           message: 'Variant Also Negotiates (506)',
           severity: 'error',

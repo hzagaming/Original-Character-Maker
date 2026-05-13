@@ -4146,6 +4146,7 @@ export function StyleTransferPage({
     abortControllerRef.current = null;
     setStatus('idle');
     setProgress(0);
+    playSound('workflowFail');
     setLogs((current) => [...current, { time: timestamp(), level: 'error', text: 'Workflow aborted by the user.' }]);
   }
 
@@ -4399,9 +4400,9 @@ export function StyleTransferPage({
                   </div>
 
                   <div className="tool-actions-row" style={{ marginTop: 12 }}>
-                    <button className="primary-button" type="button" onClick={startWorkflow}>{transfer.start}</button>
-                    <button className="secondary-button" type="button" onClick={abortWorkflow}>{transfer.stop}</button>
-                    <button className="secondary-button" type="button" onClick={() => setConfig((current) => ({ ...current, prompt: '', negativePrompt: '' }))}>{copy.reset}</button>
+                    <button className="primary-button" type="button" onClick={startWorkflow} disabled={status === 'running'}>{transfer.start}</button>
+                    <button className="secondary-button" type="button" onClick={abortWorkflow} disabled={status !== 'running'}>{transfer.stop}</button>
+                    <button className="secondary-button" type="button" onClick={() => setConfig((current) => ({ ...current, prompt: '', negativePrompt: '' }))} disabled={status === 'running'}>{copy.reset}</button>
                   </div>
                 </>
               )}
@@ -4465,7 +4466,7 @@ export function StyleTransferPage({
                       <div className="tool-card" style={{ padding: 12 }}>
                         <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
                           <strong>{transfer.outputTitle}</strong>
-                          <button className="secondary-button small-button" type="button" onClick={() => window.open(String(outputUrl), '_blank', 'noopener,noreferrer')}>{transfer.openFile}</button>
+                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
                         </div>
                         <img
                           className="paper-output-image"
@@ -4501,8 +4502,8 @@ export function StyleTransferPage({
                     );
                   })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(resultJson)}>{copy.copyResult}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-result.json', resultJson, 'application/json')}>{copy.downloadResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
                     {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
@@ -4511,8 +4512,8 @@ export function StyleTransferPage({
                     {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => copyText(debugJson)}>{copy.copyDebug}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => downloadText('style-transfer-debug.json', debugJson, 'application/json')}>{copy.downloadDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
                   </>} />
                 </div>
               )}

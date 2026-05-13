@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.3.0';
+const VERSION = '1.3.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -562,14 +562,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.3.0 错误字典大扩容与虚拟工具指南：中文错误字典从约 40 条扩展至 600+ 条（全语言累计 4000+ 条），工具手册大幅扩展（含详细参数、按钮、故障排查），覆盖 7 大分类；新增「设置」「音频」「界面」3 个虚拟工具指南；侧边栏重新分为 4 个独立导航组；支持从错误面板一键直达对应错误条目并高亮显示。',
-<<<<<<< HEAD
-    announcementList1: '错误字典大扩容：中文错误字典扩展至 600+ 条，英文扩展至 560+ 条，日文 200+ 条，俄文 200+ 条，韩文 170+ 条，其余 25 种语言各 100+ 条，全语言累计 4000+ 条，覆盖 API & 网络、配置 & 数据、文件 & 上传、模型 & 生成、工作流 & 转换、系统 & 权限、HTTP 状态码 7 大分类。',
-=======
-    announcementList1: '错误字典大扩容：中文错误字典扩展至近 180 条，英文扩展至约 120 条，覆盖 API & 网络、配置 & 数据、文件 & 上传、模型 & 生成、工作流 & 转换、系统 & 权限、HTTP 状态码 7 大分类。',
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
-    announcementList2: '虚拟工具指南：新增「设置指南」「音频指南」「界面与体验指南」3 个虚拟工具手册，自动嵌入侧边栏和搜索，无需修改渲染逻辑。',
-    announcementList3: '侧边栏重新分组：用户手册侧边栏现在分为「欢迎使用」「工具手册」「指南与参考」「错误字典」4 个独立导航组；错误面板支持传递 docAnchor 实现精确错误导航。',
+    announcementDescription: 'v1.3.1 转画风结果优化与交互修复：转画风工作流结果区域新增图片预览卡片，支持打开文件、下载、复制到剪贴板和重做操作；修复中止工作流无音效、运行中按钮未禁用、结果面板按钮音效不一致等问题；清理文档构建残留标记。',
+    announcementList1: '转画风结果增强：结果区域新增 outputUrl 图片预览，配备打开文件（新标签页）、下载图片、复制到剪贴板、重做/重新生成四个操作按钮，与 Paper2Gal 结果卡片体验对齐。',
+    announcementList2: '交互与音效修复：中止工作流现在播放 workflowFail 音效；开始/停止/重置按钮在运行中状态正确禁用；结果、错误、调试三个面板的复制/下载按钮统一添加 copySound / downloadSound 音效。',
+    announcementList3: '稳定性清理：修复 v1.3.0 文档扩展过程中残留的 git merge conflict 标记（App.tsx / zh.ts / en.ts），恢复 TypeScript 编译零错误。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -938,14 +934,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.3.0 エラー辞書大規模拡張と仮想ツールガイド：中国語エラー辞書を約40件から約180件に拡張し、7大分類をカバー；「設定」「オーディオ」「インターフェース」3つの仮想ツールガイドを新設；サイドバーを4つの独立ナビゲーショングループに再編；エラーパネルから該当エラー項目へワンクリックで直接ジャンプしハイライト表示。',
-<<<<<<< HEAD
-    announcementList1: 'エラー辞書大規模拡張：中国語エラー辞書を約600件に、英語を約560件に、日本語を約200件に拡張。全言語で累計4000件以上。API & ネットワーク、設定 & データ、ファイル & アップロード、モデル & 生成、ワークフロー & 変換、システム & 権限、HTTP ステータスコードの7大分類をカバー。',
-=======
-    announcementList1: 'エラー辞書大規模拡張：中国語エラー辞書を約180件に、英語を約120件に拡張。API & ネットワーク、設定 & データ、ファイル & アップロード、モデル & 生成、ワークフロー & 変換、システム & 権限、HTTP ステータスコードの7大分類をカバー。',
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
-    announcementList2: '仮想ツールガイド：「設定ガイド」「オーディオガイド」「UI/UX ガイド」3つの仮想ツールマニュアルを新設。サイドバーと検索に自動統合され、レンダリングロジックの変更は不要。',
-    announcementList3: 'サイドバー再編：ユーザーマニュアルのサイドバーを「ようこそ」「ツールマニュアル」「ガイドと参考」「エラー辞書」の4つの独立グループに再編。エラーパネルは docAnchor による正確なエラーナビゲーションをサポート。',
+    announcementDescription: 'v1.3.1 画風変換結果の最適化とインタラクション修正：画風変換ワークフローの結果エリアに画像プレビューカードを追加し、ファイルを開く・ダウンロード・クリップボードにコピー・やり直し操作に対応；ワークフロー中止時の音響効果不足、実行中ボタンの無効化漏れ、結果パネルボタンの音響効果不統一を修正；ドキュメント構築時の git merge conflict マーカーを削除。',
+    announcementList1: '画風変換結果の強化：結果エリアに outputUrl 画像プレビューを追加。ファイルを開く（新規タブ）、画像をダウンロード、クリップボードにコピー、やり直し/再生成の4つの操作ボタンを配置し、Paper2Gal の結果カード体験と統一。',
+    announcementList2: 'インタラクションと音響効果の修正：ワークフロー中止時に workflowFail 音響効果を再生；実行中の開始/停止/リセットボタンを正しく無効化；結果・エラー・デバッグ3パネルのコピー/ダウンロードボタンに copySound / downloadSound 音響効果を統一追加。',
+    announcementList3: '安定性のクリーンアップ：v1.3.0 ドキュメント拡張時に残存した git merge conflict マーカー（App.tsx / zh.ts / en.ts）を削除し、TypeScript コンパイルをゼロエラーに復元。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1314,14 +1306,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.3.0 Massive Error Dictionary Expansion & Virtual Tool Guides: Chinese error dictionary expanded from ~40 to 600+ entries (4000+ across all languages), with massive tool manual expansion including detailed parameters, buttons, and troubleshooting; added 3 virtual tool guides for Settings, Audio, and UI/UX; sidebar reorganized into 4 independent navigation groups; error panel supports one-click precise navigation to the matching error entry with highlight.',
-<<<<<<< HEAD
-    announcementList1: 'Error dictionary expansion: Chinese expanded to ~600 entries, English to ~560, Japanese ~200, Russian ~200, Korean ~170, and 25 other languages ~100 each, totaling 4000+ across all languages. Covers API & Network, Config & Data, Files & Upload, Model & Generation, Workflow & Conversion, System & Permissions, and HTTP Status Codes.',
-=======
-    announcementList1: 'Error dictionary expansion: Chinese error dictionary expanded to ~180 entries, English to ~120, covering API & Network, Config & Data, Files & Upload, Model & Generation, Workflow & Conversion, System & Permissions, and HTTP Status Codes.',
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
-    announcementList2: 'Virtual tool guides: added Settings Guide, Audio Guide, and UI/UX Guide as virtual tool manuals, automatically embedded into sidebar and search with zero rendering logic changes.',
-    announcementList3: 'Sidebar reorganization: docs sidebar now has 4 independent groups: Welcome, Tool Manuals, Guides & References, and Error Dictionary. Error panel supports docAnchor for precise error-to-docs navigation.',
+    announcementDescription: 'v1.3.1 Style Transfer result optimization & interaction fixes: added image preview card to the Style Transfer workflow result area with open file, download, copy-to-clipboard, and redo actions; fixed missing sound on workflow abort, missing disabled states for running buttons, and inconsistent button sound effects across result panels; cleaned up git merge conflict markers from the v1.3.0 docs expansion.',
+    announcementList1: 'Style Transfer result enhancement: added outputUrl image preview to the result area with four action buttons—open file (new tab), download image, copy to clipboard, and redo/regenerate—aligning the experience with Paper2Gal result cards.',
+    announcementList2: 'Interaction & sound fixes: workflow abort now plays the workflowFail sound effect; start/stop/reset buttons are correctly disabled while running; copy/download buttons across result, error, and debug panels uniformly receive copySound / downloadSound effects.',
+    announcementList3: 'Stability cleanup: removed residual git merge conflict markers from the v1.3.0 documentation expansion (App.tsx / zh.ts / en.ts), restoring TypeScript compilation to zero errors.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1690,14 +1678,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.3.0 Масштабное расширение словаря ошибок и виртуальные руководства по инструментам: китайский словарь ошибок расширен с ~40 до 600+ записей (4000+ на всех языках), с масштабным расширением руководств по инструментам; добавлено 3 виртуальных руководства по настройкам, аудио и UI/UX; боковая панель реорганизована в 4 независимые группы навигации; панель ошибок поддерживает точный переход к соответствующей записи с подсветкой.',
-<<<<<<< HEAD
-    announcementList1: 'Расширение словаря ошибок: китайский словарь расширен до ~600 записей, английский до ~560, японский ~200, русский ~200, корейский ~170, и 25 других языков по ~100 каждый, всего 4000+ на всех языках. Охватывает API & сеть, конфигурацию & данные, файлы & загрузку, модели & генерацию, рабочие процессы & конвертацию, систему & права, и HTTP-коды состояния.',
-=======
-    announcementList1: 'Расширение словаря ошибок: китайский словарь расширен до ~180 записей, английский до ~120, охватывая API & сеть, конфигурацию & данные, файлы & загрузку, модели & генерацию, рабочие процессы & конвертацию, систему & права, и HTTP-коды состояния.',
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
-    announcementList2: 'Виртуальные руководства: добавлены руководства по настройкам, аудио и UI/UX как виртуальные инструменты, автоматически встроенные в боковую панель и поиск без изменений логики рендеринга.',
-    announcementList3: 'Реорганизация боковой панели: боковая панель руководства теперь имеет 4 независимые группы: Добро пожаловать, Руководства по инструментам, Руководства и справочники, Словарь ошибок. Панель ошибок поддерживает docAnchor для точной навигации.',
+    announcementDescription: 'v1.3.1 Оптимизация результатов переноса стиля и исправления взаимодействия: в область результатов рабочего процесса переноса стиля добавлена карточка предпросмотра изображения с кнопками открытия файла, скачивания, копирования в буфер обмена и повторной генерации; исправлено отсутствие звука при прерывании workflow, отсутствие состояния disabled для кнопок во время выполнения, несогласованность звуковых эффектов кнопок панели результатов; очищены остаточные маркеры git merge conflict из расширения документации v1.3.0.',
+    announcementList1: 'Улучшение результатов переноса стиля: добавлен предпросмотр изображения outputUrl в область результатов с четырьмя кнопками действий—открыть файл (новая вкладка), скачать изображение, копировать в буфер обмена и повторить/перегенерировать—приводя опыт в соответствие с карточками результатов Paper2Gal.',
+    announcementList2: 'Исправления взаимодействия и звука: прерывание workflow теперь воспроизводит звуковой эффект workflowFail; кнопки запуска/остановки/сброса корректно отключаются во время выполнения; кнопки копирования/скачивания в панелях результатов, ошибок и отладки получили единообразные звуковые эффекты copySound / downloadSound.',
+    announcementList3: 'Очистка стабильности: удалены остаточные маркеры git merge conflict из расширения документации v1.3.0 (App.tsx / zh.ts / en.ts), восстановлена компиляция TypeScript с нулевыми ошибками.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2378,13 +2362,9 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageStyleTitle: '스타일 변환',
     pagePromptTitle: 'OC 설정 에디터',
     pagePaperTitle: 'paper2gal 자산 생성',
-    announcementDescription: 'v1.3.0 오류 사전 대규모 확장 및 가상 도구 가이드: 중국어 오류 사전을 약 40개에서 600+개로 확장（전 언어 누적 4000+개）, 도구 매뉴얼도 대폭 확장（상세 매개변수·버튼·트러블슈팅 포함） 7개 대분류를 커버；「설정」「오디오」「인터페이스」3개 가상 도구 가이드를 신규 추가；사이드바를 4개 독립 네비게이션 그룹으로 재편；오류 패널에서 해당 오류 항목으로 원클릭 직접 이동 및 하이라이트 표시를 지원합니다.',
-<<<<<<< HEAD
-    announcementList1: '오류 사전 대규모 확장: 중국어 약 600개, 영어 약 560개, 일본어 약 200개, 러시아어 약 200개, 한국어 약 170개, 기타 25개 언어 각 약 100개, 전 언어 누적 4000+개. API & 네트워크, 설정 & 데이터, 파일 & 업로드, 모델 & 생성, 워크플로우 & 변환, 시스템 & 권한, HTTP 상태 코드 7개 대분류를 커버.',
-=======
-    announcementList1: '오류 사전 대규모 확장: 중국어 오류 사전을 약 180개로, 영어를 약 120개로 확장. API & 네트워크, 설정 & 데이터, 파일 & 업로드, 모델 & 생성, 워크플로우 & 변환, 시스템 & 권한, HTTP 상태 코드 7개 대분류를 커버.',
->>>>>>> 71713c9c8d8b46edb0c1c6965aeee2724da7a57a
-    announcementList2: '가상 도구 가이드: 「설정 가이드」「오디오 가이드」「UI/UX 가이드」3개 가상 도구 매뉴얼을 신규 추가. 사이드바와 검색에 자동 통합되며 렌더링 로직 변경은 불필요.',
+    announcementDescription: 'v1.3.1 스타일 변환 결과 최적화 및 인터랙션 수정: 스타일 변환 워크플로우 결과 영역에 이미지 미리보기 카드를 추가하여 파일 열기·다운로드·클립보드 복사·재실행 작업을 지원；워크플로우 중단 시 음향 효과 누락, 실행 중 버튼 비활성화 누락, 결과 패널 버튼 음향 효과 불일치 문제를 수정；v1.3.0 문서 확장 과정에서 남은 git merge conflict 마커를 제거합니다.',
+    announcementList1: '스타일 변환 결과 강화: 결과 영역에 outputUrl 이미지 미리보기를 추가하고 파일 열기(새 탭)·이미지 다운로드·클립보드 복사·재실행/재생성 4개의 작업 버튼을 배치하여 Paper2Gal 결과 카드 경험과 통일.',
+    announcementList2: '인터랙션 및 음향 효과 수정: 워크플로우 중단 시 workflowFail 음향 효과를 재생；실행 중 시작/중지/재설정 버튼을 정확히 비활성화；결과·오류·디버그 3개 패널의 복사/다운로드 버튼에 copySound / downloadSound 음향 효과를 통일적으로 추가.',
     announcementList3: '사이드바 재편: 사용자 매뉴얼 사이드바를「환영합니다」「도구 매뉴얼」「가이드 및 참고」「오류 사전」4개 독립 그룹으로 재편. 오류 패널은 docAnchor를 통한 정확한 오류 내비게이션을 지원.',
   },
   fr: {
@@ -2576,6 +2556,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.3.1',
+    date: '2026-05-12',
+    title: '1.3.1 转画风结果优化与交互修复',
+    summary:
+      '转画风工作流结果区域新增图片预览卡片，支持打开文件、下载、复制到剪贴板和重做操作；修复中止工作流无音效、运行中按钮未禁用、结果面板按钮音效不一致等问题；清理文档构建残留标记。',
+    details: [
+      '转画风结果增强：结果区域新增 outputUrl 图片预览，配备打开文件（新标签页）、下载图片、复制到剪贴板、重做/重新生成四个操作按钮，与 Paper2Gal 结果卡片体验对齐。',
+      '交互与音效修复：中止工作流现在播放 workflowFail 音效；开始/停止/重置按钮在运行中状态正确禁用；结果、错误、调试三个面板的复制/下载按钮统一添加 copySound / downloadSound 音效。',
+      '稳定性清理：修复 v1.3.0 文档扩展过程中残留的 git merge conflict 标记（App.tsx / zh.ts / en.ts），恢复 TypeScript 编译零错误。',
+      '版本同步：VERSION 升级到 1.3.1，首页公告和公告历史同步更新，5 种基础语言全部覆盖。',
+    ],
+  },
   {
     version: '1.3.0',
     date: '2026-05-12',
