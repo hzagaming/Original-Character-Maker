@@ -651,6 +651,449 @@ Supports uploading up to 10 images simultaneously for batch style transfer:
       ],
     },
     {
+      id: 'character-gif',
+      title: 'Character GIF Generator',
+      overview: `Character GIF Generator creates animated GIFs from static character images. Upload a PNG/JPG character image, adjust animation parameters (frames, FPS, loop, motion type, easing), and generate a dynamic GIF with effects like breathing, blinking, swaying, floating, heartbeat, hair-flow, tail-wag, and magic-glow. Supports automatic cutout, palette preservation, pose lock, face lock, and other advanced features. Requires internet connection and valid API Key.
+
+Basic Process:
+1. Upload a source character image
+2. Adjust GIF animation parameters (frames, FPS, motion type)
+3. Select model and style options
+4. Click "Generate GIF"
+5. View, copy, or download the animated GIF
+
+[GIF Animation Technology]
+Character GIF uses frame interpolation and motion synthesis. The backend generates intermediate frames between key poses based on the selected motion type and easing function. Loop and reverse-loop options control playback behavior.
+
+Content frames are generated through pose interpolation on the timeline: each frame is a slight deformation from the previous one, ensuring smooth and natural animation. Total frames determine animation smoothness; FPS controls playback speed.
+
+[Supported Motion Types]
+The tool includes 8 built-in animation effects:
+1. Breathing: Subtle chest expansion/contraction, simulating lifelike presence
+2. Blinking: Eye open/close cycle, ideal for portrait characters
+3. Swaying: Gentle left-right body movement, adding liveliness
+4. Floating: Up-down levitation effect, ideal for magical/fantasy characters
+5. Heartbeat: Pulsing glow or scale animation, enhancing emotional expression
+6. Hair-flow: Hair strands swaying in the wind, adding dynamic detail
+7. Tail-wag: Rhythmic tail movement for characters with tails
+8. Magic-glow: Pulsing magical aura effect
+
+[Parameter Details]
+- Frames (2~60): Total number of frames in the GIF. More frames = smoother animation but larger file size. 8-16 frames is typical for web GIFs.
+- FPS (1~60): Frames per second. 12 FPS is standard for web GIFs; 24+ for smoother animation.
+- Loop: Whether the GIF loops infinitely. Disable for one-shot animations.
+- Duration (10~1000ms): Display time per frame in milliseconds.
+- Motion Type: Select the animation style (breathing, blinking, swaying, etc.).
+- Easing: Linear, easeIn, easeOut, easeInOut, spring, or bounce.
+- Reverse Loop: Play forward then backward, creating a ping-pong loop.
+- Style Intensity (0~1): Controls stylization degree.
+- Line Art Style: clean, sketchy, thick, thin, or none.
+- Color Scheme: vibrant, pastel, muted, monochrome, neon, warm, or cool.
+- Background Type: simple, gradient, detailed, transparent, or blurred.
+- Lighting Style: dramatic, soft, neon, natural, studio, or backlight.
+- Camera Angle: three-quarter, front, profile, low-angle, high-angle, dutch, or over-shoulder.
+- Character Mood: calm, happy, serious, shy, confident, surprised, angry, or sad.
+- Outfit Detail: school uniform, casual wear, battle outfit, maid outfit, kimono, gothic lolita, sportswear, swimsuit, wedding dress, or idol costume.
+
+[Output Formats and Optimization]
+- GIF format, optimized for web use
+- Transparent background supported when cutout is enabled
+- Typical file size: 500KB ~ 5MB depending on frames and resolution
+- Output resolution controlled via Image Size parameter
+- Recommended: 512x512 or 1024x1024 for best balance`,
+      buttons: [
+        { name: 'Upload / Replace Image', description: 'Upload a character image file. Supports PNG and JPG. Recommend a single-character illustration or clear half-body image.' },
+        { name: 'Generate GIF', description: 'Starts the GIF generation workflow. Validates input and parameters, then sends the request to the backend.' },
+        { name: 'Abort Task', description: 'Cancels the ongoing GIF generation task.' },
+        { name: 'Copy JSON', description: 'Copies current parameter config as JSON to clipboard for sharing or backup.' },
+        { name: 'Download JSON', description: 'Downloads current parameter config as a JSON file.' },
+        { name: 'Copy Result', description: 'After successful generation, copies the GIF to clipboard (if browser supports).' },
+        { name: 'Download Result', description: 'Downloads the generated GIF to local machine.' },
+        { name: 'Open File', description: 'Opens the generated GIF in a new tab.' },
+        { name: 'Redo', description: 'Regenerates the GIF using the same parameters.' },
+        { name: 'Show / Hide Details', description: 'Expands or collapses the advanced parameters panel and debug info panel.' },
+        { name: 'Refresh', description: 'Resets all parameters to defaults, clears uploaded image and results.' },
+        { name: 'Positive Tag Library', description: 'Opens tag picker to quickly insert positive Prompt tags from categorized library.' },
+        { name: 'Negative Tag Library', description: 'Opens tag picker to quickly insert negative Prompt tags from categorized library.' },
+        { name: 'Advanced Params', description: 'Expands more professional parameters: aspect ratio, lighting, camera angle, mood, outfit, line art style, etc.' },
+      ],
+      parameters: [
+        { name: 'Model', description: 'Selects the AI image generation model. Built-in mode uses Plato backend; custom mode uses your configured external API.', tips: 'gpt-image-2 is the recommended default. Anime Transfer XL v4 performs better for anime styles.' },
+        { name: 'Prompt', description: 'Positive prompt describing desired art style, scene, and character features. Supports Positive Tag Library for quick insertion.', tips: 'Advanced parameters are automatically appended as English suffixes. View final effect in Effective Prompt Preview.' },
+        { name: 'Negative Prompt', description: 'Describes content you do not want. Supports Negative Tag Library for quick insertion.', tips: 'Common negative tags: low quality, extra fingers, deformed body, blurry, etc.' },
+        { name: 'Temperature', description: 'Sampling temperature controlling randomness. Range 0~2, default 0.78.', tips: 'Lower = more stable/predictable; higher = more creative but may deviate. GIF generation recommends 0.6~0.9.' },
+        { name: 'Top P', description: 'Nucleus sampling threshold. Range 0~1, default 0.92.', tips: 'Lower reduces diversity, increases consistency.' },
+        { name: 'Top K', description: 'Top-K sampling. Range 1~128, default 48.', tips: 'Lower values make generation more conservative.' },
+        { name: 'Seed', description: 'Random seed, default 240315. Fixed seed enables reproducible results.', tips: 'Record seeds of favorite results for easy reproduction.' },
+        { name: 'Steps', description: 'Denoising steps. Range 8~60. More steps = richer detail but longer time.', tips: 'GIF generation recommends 20~30 steps for quality-speed balance.' },
+        { name: 'CFG', description: 'Classifier-Free Guidance scale. Range 1~14, default 6.8.', tips: 'Higher = stronger prompt adherence. 7~10 is the safe zone.' },
+        { name: 'Frames', description: 'Total frames in GIF. Range 2~60, default 8.', tips: '8-16 frames is standard for web GIFs. More frames = smoother but larger file and longer generation.' },
+        { name: 'FPS', description: 'Frames per second. Range 1~60, default 12.', tips: '12 FPS is web standard; 24+ for smoother animation.' },
+        { name: 'Loop', description: 'Whether GIF loops infinitely.', tips: 'Disable for one-shot animations.' },
+        { name: 'Frame Duration (ms)', description: 'Display time per frame in milliseconds. Range 10~1000, default 100.', tips: '100ms = 10 FPS. Works with FPS to control playback speed.' },
+        { name: 'Motion Type', description: 'Animation style applied to the character.', tips: 'Breathing works best for static poses; blinking adds life to portraits; floating suits magical/fantasy characters.' },
+        { name: 'Easing', description: 'How animation accelerates/decelerates.', tips: 'easeInOut is most natural for breathing and swaying; spring suits heartbeat and tail-wag.' },
+        { name: 'Reverse Loop', description: 'Forward then backward playback, creating a ping-pong loop.', tips: 'Great for breathing and swaying; saves frames.' },
+        { name: 'Need Cutout', description: 'Whether to auto-remove background before generation. Enables transparent GIF.', tips: 'Transparent GIFs are ideal for web overlays and stickers.' },
+        { name: 'Keep Palette', description: 'Whether to force preservation of original image color scheme.', tips: 'Enable to ensure consistent character colors across frames.' },
+        { name: 'Preserve Pose', description: 'Whether to maintain original character pose and composition.', tips: 'Recommended to prevent pose distortion from animation.' },
+        { name: 'Face Lock', description: 'Whether to use facial feature locking for consistent face across frames.', tips: 'Strongly recommended, especially for blinking animations.' },
+        { name: 'Detail Boost', description: 'Whether to enhance detail for sharper output GIF.', tips: 'Improves edge clarity but increases generation time.' },
+        { name: 'Aspect Ratio', description: 'Output GIF aspect ratio preset (1:1, 2:3, 3:2, 16:9, etc.).', tips: 'Match source image ratio for best results.' },
+        { name: 'Image Size', description: 'Output GIF short-edge pixel count.', tips: '512x512 or 1024x1024 is the sweet spot.' },
+        { name: 'Style Intensity', description: 'Controls stylization degree. Range 0~1, default 0.75.', tips: '0.5~0.8 is the common range.' },
+        { name: 'Line Art Style', description: 'Output GIF line art processing style.', tips: 'clean suits most anime styles; sketchy for hand-drawn feel.' },
+        { name: 'Color Scheme', description: 'Forced color theme application.', tips: 'vibrant for vivid characters; pastel for soft styles.' },
+        { name: 'Background Type', description: 'Background processing method.', tips: 'transparent with cutout enables transparent GIFs.' },
+        { name: 'Lighting Style', description: 'Scene lighting effect.', tips: 'soft for everyday scenes; dramatic for theatrical characters.' },
+        { name: 'Camera Angle', description: 'Virtual camera shooting angle.', tips: 'three-quarter is the most common character display angle.' },
+        { name: 'Character Mood', description: 'Character emotional state.', tips: 'Mood affects facial expression and posture.' },
+        { name: 'Outfit Detail', description: 'Character clothing type.', tips: 'Detailed outfit descriptions yield more precise results.' },
+        { name: 'Eye Style', description: 'Character eye processing style.', tips: 'detailed for most anime characters; sparkling for moe characters.' },
+        { name: 'Hair Style', description: 'Character hairstyle type.', tips: 'Hairstyle affects overall character impression.' },
+        { name: 'Skin Texture', description: 'Character skin processing style.', tips: 'smooth for anime style; realistic for realistic style.' },
+      ],
+      errors: [
+        {
+          code: 'API_KEY_MISSING',
+          message: 'Clicking "Generate GIF" immediately shows API Key error',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'API Key not configured in Settings → API, or Key was cleared. Character GIF requires valid API Key.',
+          solution: 'Configure a valid API Key in Settings.',
+          steps: [
+            'Click "Open Settings" or use shortcut',
+            'Switch to "API" tab',
+            'Enter valid Key in "API Key" field',
+            'Save and close settings',
+            'Return to Character GIF and click "Generate GIF"',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
+          prevention: 'Before using any online tool, configure a valid API Key in Settings → API.',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'Request returns 401 or Key invalid',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'API Key expired, revoked, or quota exhausted.',
+          solution: 'Replace with a valid API Key.',
+          steps: [
+            'Open Settings → API',
+            'Delete current Key, enter new valid Key',
+            'Test Key validity in LLM Hub real-time test panel',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING', '401_UNAUTHORIZED'],
+          prevention: 'Regularly check API Key validity and quota; verify via LLM Hub real-time test.',
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: 'Request times out after long wait',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Character GIF → Area: error panel / progress bar',
+          cause: 'Backend generation too slow. GIF generation takes longer than single images, especially with many frames or large size.',
+          solution: 'Reduce frames, image size, or check network.',
+          steps: [
+            'Reduce Image Size to 1024 or below',
+            'Reduce Frames to 8~12',
+            'Reduce Steps to 20~28',
+            'Check network stability',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_TIMEOUT', 'BACKEND_UNAVAILABLE'],
+          prevention: 'GIF generation takes longer; reduce parameters (image size, frames, Steps) in advance.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Backend unavailable or cannot connect',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Backend not started, crashed, or API Base URL misconfigured.',
+          solution: 'Check backend status and API config.',
+          steps: [
+            'Open DevTools → Network tab',
+            'Click "Generate GIF", observe request and status code',
+            'If no request, check Settings → API → API Base URL',
+            'If 502/503, contact admin',
+            'If local, confirm backend running (npm start)',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', '502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: 'Ensure backend running (npm start) for local; confirm URL for remote.',
+        },
+        {
+          code: 'NETWORK_DISCONNECTED',
+          message: 'Network disconnected or no internet',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Device offline, Wi-Fi disconnected, or firewall blocking.',
+          solution: 'Restore network connection.',
+          steps: [
+            'Check device network status',
+            'Try other websites',
+            'Check proxy/VPN settings',
+            'Confirm API access on company/campus networks',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: 'Confirm network before using online tools; avoid unstable networks.',
+        },
+        {
+          code: 'FILE_FORMAT_UNSUPPORTED',
+          message: 'Upload shows "Unsupported file format"',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Character GIF → Area: upload button',
+          cause: 'Selected WEBP, GIF, BMP, TIFF, or other unsupported formats. Only PNG and JPG supported.',
+          solution: 'Convert to PNG or JPG.',
+          steps: [
+            'Use Image Converter (Home → Image Format Converter)',
+            'Or use system image viewer to export as PNG/JPG',
+            'Re-select converted file',
+          ],
+          relatedCodes: ['FILE_CORRUPTED', 'UPLOAD_FORMAT'],
+          prevention: 'Confirm PNG or JPG format before uploading.',
+        },
+        {
+          code: 'FILE_TOO_LARGE',
+          message: 'Upload fails or memory error during generation',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Character GIF → Area: preview area',
+          cause: 'Image too large (>4096x4096) or file exceeds limits. GIF generation requires more memory.',
+          solution: 'Compress or resize image before upload.',
+          steps: [
+            'Use Image Converter to scale longest side below 2048 or 1024',
+            'Convert PNG to JPG to reduce size',
+            'Re-upload',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Upload 1024×1024 ~ 2048×2048 images; GIF uses more memory.',
+        },
+        {
+          code: 'FILE_CORRUPTED',
+          message: 'Preview shows blank or corrupted',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Character GIF → Area: preview area',
+          cause: 'Image file corrupted or incomplete download.',
+          solution: 'Use another image or repair/re-download.',
+          steps: [
+            'Open in system image viewer to confirm',
+            'Repair or re-download if needed',
+            'Use another valid PNG/JPG',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'UPLOAD_FORMAT'],
+          prevention: 'Confirm image opens normally before uploading.',
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: 'Error shows "Model unavailable" or 404',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Model does not exist, removed, or Key lacks permission.',
+          solution: 'Switch to another available model.',
+          steps: [
+            'Select another model (e.g., gpt-image-2)',
+            'Confirm model ID spelling for custom API',
+            'Verify Key supports selected model in Settings → API',
+            'Retry',
+          ],
+          relatedCodes: ['403_FORBIDDEN', 'API_KEY_EXPIRED'],
+          prevention: 'Select known available models; check provider docs for custom API.',
+        },
+        {
+          code: 'PROMPT_BLOCKED',
+          message: 'Content policy violation or sensitive word interception',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Prompt or Negative Prompt contains words intercepted by safety filter.',
+          solution: 'Modify prompt, remove sensitive vocabulary.',
+          steps: [
+            'Check error details for intercepted keywords',
+            'Replace or remove sensitive words',
+            'Simplify prompt, test with basic description first',
+            'Add modifiers gradually to find trigger words',
+          ],
+          relatedCodes: ['403_FORBIDDEN'],
+          prevention: 'Avoid sensitive words; test default prompt first before customizing.',
+        },
+        {
+          code: 'PROMPT_TOO_LONG',
+          message: 'Prompt exceeds maximum length',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Character GIF → Area: prompt editor / error panel',
+          cause: 'Prompt + advanced parameter suffixes exceed backend model input limit.',
+          solution: 'Shorten prompt or reduce advanced parameters.',
+          steps: [
+            'View full prompt length in Effective Prompt Preview',
+            'Trim positive prompt, remove redundancy',
+            'Reduce number of advanced parameters',
+            'Retry',
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND'],
+        },
+        {
+          code: 'CHARACTER_GIF_INPUT_MISSING',
+          message: 'Clicking "Generate GIF" shows no image uploaded',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'No image uploaded, or invalid input file when clicking Generate.',
+          solution: 'Upload a valid image file.',
+          steps: [
+            'Click "Upload Image"',
+            'Select valid PNG/JPG file',
+            'Confirm preview shows thumbnail',
+            'Click "Generate GIF"',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'FILE_CORRUPTED'],
+          prevention: 'Confirm source image uploaded and preview normal before generating.',
+        },
+        {
+          code: 'CHARACTER_GIF_REQUEST_FAILED',
+          message: 'Error panel shows "CHARACTER_GIF_REQUEST_FAILED"',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Backend API request failed. Possible: network interruption, invalid Key, model unavailable, too many frames causing memory error, or server error.',
+          solution: 'Troubleshoot based on error details.',
+          steps: [
+            'Expand error panel for details (HTTP code, backend message)',
+            '401: Check API Key validity',
+            '404: Check model availability',
+            '429: Wait and retry, reduce frequency',
+            '500/502/503: Check backend status',
+            'Memory error: Reduce frames (below 8) and image size',
+            'Network error: Check connection',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'BACKEND_UNAVAILABLE', '429_TOO_MANY_REQUESTS'],
+          prevention: 'Confirm API Key valid, network normal, model available before generating; test with low frames (8) first.',
+        },
+        {
+          code: '429_TOO_MANY_REQUESTS',
+          message: 'Rate limit exceeded',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Too many requests in short time. GIF generation uses more resources, more likely to trigger rate limits.',
+          solution: 'Wait and retry.',
+          steps: [
+            'Check Retry-After hint in error details',
+            'Wait 60~120 seconds',
+            'Reduce frames and image size if frequent',
+            'Consider upgrading API plan',
+          ],
+          relatedCodes: ['API_RATE_LIMIT', 'CHARACTER_GIF_REQUEST_FAILED'],
+          prevention: 'GIF uses more resources; reduce request frequency; avoid rapid retries.',
+        },
+        {
+          code: '500_INTERNAL_ERROR',
+          message: 'Backend returns 500 Internal Server Error',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Backend internal exception. Possible: model load failure, GPU OOM (GIF uses more VRAM), or code bug.',
+          solution: 'Retry later or contact admin.',
+          steps: [
+            'Wait 1~2 minutes',
+            'Reduce image size, frames, and Steps',
+            'Contact admin if persistent',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: 'Reduce request scale (image size, frames, Steps); avoid high-load periods.',
+        },
+        {
+          code: '502_BAD_GATEWAY',
+          message: 'Backend returns 502 Bad Gateway',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Reverse proxy cannot connect to backend. Backend may have crashed.',
+          solution: 'Check backend status.',
+          steps: [
+            'Confirm backend running for local deploy',
+            'Check port conflicts',
+            'Review backend logs',
+            'Restart backend',
+          ],
+          relatedCodes: ['503_SERVICE_UNAVAILABLE', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Ensure backend running locally; check reverse proxy config.',
+        },
+        {
+          code: '503_SERVICE_UNAVAILABLE',
+          message: 'Backend returns 503 Service Unavailable',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Backend temporarily unavailable. May be under maintenance, restart, or overload protection.',
+          solution: 'Retry later.',
+          steps: [
+            'Wait 2~3 minutes',
+            'Check status page if available',
+            'Contact admin for maintenance info',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Avoid maintenance windows; reduce request frequency during high load.',
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: 'Import shows "Invalid JSON format"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Character GIF → Area: import config button',
+          cause: 'File corrupted, not JSON, or modified by other programs.',
+          solution: 'Verify valid UTF-8 text file.',
+          steps: [
+            'Open in text editor, check for garbled text',
+            'Confirm file contains "tool": "character-gif"',
+            'Validate with online JSON formatter',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH'],
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: 'Import shows "Tool type mismatch"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Character GIF → Area: import config button',
+          cause: 'Imported JSON tool field is not character-gif.',
+          solution: 'Confirm importing Character GIF config file.',
+          steps: [
+            'Open in text editor',
+            'Confirm tool field is "character-gif"',
+            'Find correct config or import from corresponding tool page',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+        },
+        {
+          code: 'DEVICE_MEMORY_LOW',
+          message: 'Browser tab crashes or becomes unresponsive',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Page: Character GIF → Area: entire page',
+          cause: 'Device memory insufficient. GIF generation requires more memory, especially with many frames.',
+          solution: 'Close other tabs, reduce image size/frames, or use device with more memory.',
+          steps: [
+            'Save current work',
+            'Close other browser tabs',
+            'Reduce image longest side to 1024 or below',
+            'Reduce frames to 8 or below',
+            'Restart browser and retry',
+          ],
+          relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: 'Close tabs before large tasks; scale image to 1024; use 8 or fewer frames.',
+        },
+      ],
+    },
+    {
       id: 'prompt-suite',
       title: 'Prompt Suite',
       overview: `Prompt Suite is a prompt management and generation tool. It contains 4 preset prompt categories (Character, Scene, Style, Action), each containing multiple sub-categories. Users can browse, copy, and favorite prompts, and can also create custom prompt combinations.

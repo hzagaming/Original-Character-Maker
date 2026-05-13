@@ -689,6 +689,450 @@ v0.6.4+ 新增全身预览：支持 4 种姿势（站立、抱臂、叉腰、挥
       ],
     },
     {
+      id: 'character-gif',
+      title: '角色 GIF 生成',
+      overview: `角色 GIF 生成工具用于将静态角色图像转换为动态 GIF 动画。上传 PNG/JPG 格式的角色图像后，通过调整帧数、帧率、循环模式、动画类型和缓动函数等参数，调用后端 API 生成带有呼吸、眨眼、摇摆、漂浮、心跳、发丝飘动、尾巴摇摆、魔法光芒等动画效果的动态 GIF。支持自动抠图、配色保持、姿势保留、面部锁定等高级功能。本工具需要联网并配置有效的 API Key 才能使用。
+
+基本流程：
+1. 上传角色源图像
+2. 调整 GIF 动画参数（帧数、帧率、动画类型）
+3. 选择模型和风格选项
+4. 点击「生成 GIF」
+5. 查看、复制或下载生成的 GIF 动画
+
+【GIF 动画技术原理】
+角色 GIF 生成基于帧插值和运动合成技术。后端根据选择的动画类型和缓动函数，在关键姿态之间生成中间帧。循环和反向循环选项控制播放行为。
+
+内容帧通过时间轴上的姿态插值生成：每一帧都是基于前一帧的微小变形，确保动画流畅自然。总帧数决定动画的细腻程度，帧率控制播放速度。
+
+【支持的动画类型】
+工具内置 8 种动画效果：
+1. 呼吸（Breathing）：胸部 subtle 扩张/收缩，模拟生命感
+2. 眨眼（Blinking）：眼睛开合循环，适合肖像类角色
+3. 摇摆（Swaying）：身体左右轻微摇摆，增加灵动感
+4. 漂浮（Floating）：上下悬浮效果，适合魔法/幻想角色
+5. 心跳（Heartbeat）：脉冲发光或缩放动画，增强情感表达
+6. 发丝飘动（Hair-flow）：头发随风摆动，增加动态细节
+7. 尾巴摇摆（Tail-wag）：有尾巴角色的节奏性摆动
+8. 魔法光芒（Magic-glow）：脉动的魔法光环效果
+
+【参数详解】
+- 帧数（2~60）：GIF 中的总帧数。更多帧 = 更流畅但文件更大。建议 8-16 帧用于网页 GIF。
+- 帧率（1~60 FPS）：每秒播放的帧数。12 FPS 是网页 GIF 的标准。
+- 循环播放：是否无限循环播放。关闭则只播放一次。
+- 单帧时长（10~1000ms）：每帧显示的时间（毫秒）。
+- 动画类型：选择动画风格（呼吸、眨眼、摇摆等）。
+- 缓动函数：Linear（线性）、easeIn（缓入）、easeOut（缓出）、easeInOut（缓入缓出）、spring（弹簧）、bounce（弹跳）。
+- 反向循环：正向播放后再反向播放，形成往返循环。
+- 风格强度（0~1）：控制风格化程度。
+- 线稿风格：clean（干净）、sketchy（素描）、thick（粗线）、thin（细线）、none（无线稿）。
+- 配色方案：vibrant（鲜艳）、pastel（柔和）、muted（低调）、monochrome（单色）、neon（霓虹）、warm（暖色）、cool（冷色）。
+- 背景类型：simple（简单）、gradient（渐变）、detailed（详细）、transparent（透明）、blurred（模糊）。
+- 光照风格：dramatic（戏剧化）、soft（柔和）、neon（霓虹）、natural（自然）、studio（工作室）、backlight（背光）。
+- 镜头角度：three-quarter（四分之三）、front（正面）、profile（侧面）、low-angle（低角度）、high-angle（高角度）、dutch（荷兰角）、over-shoulder（过肩）。
+- 角色情绪：calm（平静）、happy（开心）、serious（严肃）、shy（害羞）、confident（自信）、surprised（惊讶）、angry（生气）、sad（悲伤）。
+- 服装细节：school uniform（校服）、casual wear（休闲装）、battle outfit（战斗服）、maid outfit（女仆装）、kimono（和服）、gothic lolita（哥特萝莉）、sportswear（运动服）、swimsuit（泳装）、wedding dress（婚纱）、idol costume（偶像服）。
+
+【输出格式与优化】
+- GIF 格式，针对网页使用优化
+- 启用抠图时支持透明背景
+- 典型文件大小：500KB ~ 5MB（取决于帧数和分辨率）
+- 支持通过「图像尺寸」参数控制输出分辨率
+- 建议使用 512x512 或 1024x1024 以获得最佳平衡`,
+      buttons: [
+        { name: '选择图片 / 替换图片', description: '上传角色图像文件。支持 PNG 和 JPG 格式，推荐上传单人立绘或清晰半身图。' },
+        { name: '生成 GIF', description: '启动 GIF 生成流程。会先验证输入文件和参数，然后向后端发送生成请求。' },
+        { name: '中止任务', description: '取消正在进行的 GIF 生成任务。' },
+        { name: '复制 JSON', description: '将当前所有参数配置复制为 JSON 文本到剪贴板，方便分享或备份。' },
+        { name: '下载 JSON', description: '将当前参数配置下载为 JSON 文件。' },
+        { name: '复制结果', description: '生成成功后，将 GIF 复制到剪贴板（如果浏览器支持）。' },
+        { name: '下载结果', description: '将生成的 GIF 下载到本地。' },
+        { name: '打开文件', description: '在新标签页中打开生成的 GIF。' },
+        { name: '重做', description: '使用相同的参数重新生成 GIF。' },
+        { name: '展开详情 / 收起详情', description: '展开或折叠高级参数面板和调试信息面板。' },
+        { name: '重刷', description: '重置所有参数为默认值，清除上传的图片和结果。' },
+        { name: '正面提示词库', description: '打开标签选择器，从分类库中快速插入正面 Prompt Tag。' },
+        { name: '负面提示词库', description: '打开标签选择器，从分类库中快速插入负面 Prompt Tag。' },
+        { name: '高级参数', description: '展开更多专业参数：宽高比、光照、镜头角度、情绪、服装、线稿风格等。' },
+      ],
+      parameters: [
+        { name: '模型', description: '选择使用的 AI 图像生成模型。内置模式走 Plato 后端通道，自定义模式使用你配置的外部 API。', tips: 'gpt-image-2 是默认推荐模型，支持编辑和生成；Anime Transfer XL v4 在动漫风格方面表现更好。' },
+        { name: 'Prompt', description: '正面提示词，描述你想要的画风、场景和角色特征。支持使用「正面提示词库」快速插入常用 Tag。', tips: 'Prompt 会自动附加高级参数转换后的英文后缀，可在「实际 Prompt 预览」中查看最终效果。' },
+        { name: 'Negative Prompt', description: '负面提示词，描述你不希望出现的内容。支持使用「负面提示词库」快速插入。', tips: '常见负面 Tag：低质量、多余手指、变形身体、模糊等。' },
+        { name: 'Temperature', description: '采样温度，控制生成结果的随机性。范围 0~2，默认 0.78。', tips: '值越低结果越稳定可预测，值越高越有创意但可能偏离预期。GIF 生成建议 0.6~0.9。' },
+        { name: 'Top P', description: '核采样阈值，范围 0~1，默认 0.92。', tips: '降低可减少生成结果的多样性，提高一致性。' },
+        { name: 'Top K', description: 'Top-K 采样，范围 1~128，默认 48。', tips: '较低值使生成更保守。' },
+        { name: 'Seed', description: '随机种子，默认 240315。固定种子可获得可复现的结果。', tips: '记录喜欢的结果对应的 Seed，方便复现相同动画。' },
+        { name: 'Steps', description: '去噪步数，范围 8~60。步数越多细节越丰富但耗时越长。', tips: 'GIF 生成建议 20~30 步，平衡质量和速度。' },
+        { name: 'CFG', description: 'Classifier-Free Guidance 缩放因子，范围 1~14，默认 6.8。', tips: '值越大 Prompt 约束力越强。7~10 是安全区间。' },
+        { name: '帧数', description: 'GIF 中的总帧数，范围 2~60，默认 8。', tips: '8-16 帧是网页 GIF 的标准。帧数越多动画越流畅，但文件越大、生成时间越长。' },
+        { name: '帧率 (FPS)', description: '每秒播放的帧数，范围 1~60，默认 12。', tips: '12 FPS 是网页 GIF 的标准；24+ FPS 可获得更流畅的效果。' },
+        { name: '循环播放', description: '是否无限循环播放 GIF。', tips: '关闭则只播放一次，适合展示特定动作。' },
+        { name: '单帧时长 (ms)', description: '每帧显示的时间（毫秒），范围 10~1000，默认 100。', tips: '100ms = 10 FPS。与 FPS 参数联动控制播放速度。' },
+        { name: '动画类型', description: '选择应用于角色的动画风格。', tips: '呼吸适合静态姿势；眨眼为肖像增添生命力；漂浮适合魔法/幻想角色。' },
+        { name: '缓动函数', description: '动画的加速/减速方式。', tips: 'easeInOut 最适合呼吸和摇摆；spring 适合心跳和尾巴摇摆。' },
+        { name: '反向循环', description: '正向播放后再反向播放，形成往返循环。', tips: '适合呼吸、摇摆等往复运动，可节省帧数。' },
+        { name: '需要抠图', description: '是否在生成前自动移除背景。启用后 GIF 支持透明背景。', tips: '透明背景 GIF 更适合网页叠加和表情包使用。' },
+        { name: '保留原配色', description: '是否强制保留原始图像的配色方案。', tips: '开启可确保角色颜色在动画中保持一致。' },
+        { name: '保留姿态', description: '是否尽量保持原始角色的姿势和构图。', tips: '建议开启，避免动画导致姿势扭曲。' },
+        { name: '锁定五官', description: '是否使用面部特征锁定技术，确保动画中角色面部一致性。', tips: '强烈建议开启，尤其是眨眼动画。' },
+        { name: '细节增强', description: '是否启用细节增强处理，提升输出 GIF 的精细度。', tips: '开启可提升边缘清晰度，但会增加生成时间。' },
+        { name: '宽高比', description: '输出 GIF 的宽高比例预设（1:1、2:3、3:2、16:9 等）。', tips: '建议与源图像比例一致。' },
+        { name: '图像尺寸', description: '输出 GIF 的短边像素数。', tips: '512x512 或 1024x1024 是最佳平衡点。' },
+        { name: '风格强度', description: '控制风格化程度，范围 0~1，默认 0.75。', tips: '0.5~0.8 是常用区间。' },
+        { name: '线稿风格', description: '输出 GIF 的线稿处理风格。', tips: 'clean 适合大多数动漫风格；sketchy 适合手绘感。' },
+        { name: '配色方案', description: '强制应用的配色主题。', tips: 'vibrant 适合鲜艳角色；pastel 适合柔和风格。' },
+        { name: '背景类型', description: '背景处理方式。', tips: 'transparent 配合抠图可获得透明背景 GIF。' },
+        { name: '光照风格', description: '场景光照效果。', tips: 'soft 适合日常场景；dramatic 适合戏剧性角色。' },
+        { name: '镜头角度', description: '虚拟相机的拍摄角度。', tips: 'three-quarter 是最常用的角色展示角度。' },
+        { name: '角色情绪', description: '角色的情感状态。', tips: '情绪会影响面部表情和姿态。' },
+        { name: '服装细节', description: '角色的服装类型。', tips: '详细的服装描述可获得更精确的结果。' },
+        { name: '眼睛风格', description: '角色眼睛的处理风格。', tips: 'detailed 适合大多数动漫角色；sparkling 适合萌系角色。' },
+        { name: '发型', description: '角色的发型类型。', tips: '发型会影响角色的整体印象。' },
+        { name: '皮肤质感', description: '角色皮肤的处理风格。', tips: 'smooth 适合二次元风格；realistic 适合写实风格。' },
+      ],
+      errors: [
+        {
+          code: 'API_KEY_MISSING',
+          message: '点击「生成 GIF」后立刻报错，错误面板显示 API Key 相关错误',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '未在「设置 → API」中配置 API Key，或 Key 被清空。角色 GIF 生成需要有效的 API Key 才能调用后端图像生成服务。',
+          solution: '在设置面板中配置有效的 API Key。',
+          steps: [
+            '点击右上角「打开设置」或按对应快捷键',
+            '切换到「API」标签页',
+            '在「API Key」输入框中填入你的有效 Key',
+            '点击「保存」后关闭设置面板',
+            '返回角色 GIF 页面重新点击「生成 GIF」',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
+          prevention: '首次使用任何联网工具前，务必先在「设置 → API」中配置有效的 API Key。',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: '生成请求返回 401 或提示 Key 无效',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '配置的 API Key 已过期、被吊销、或额度已用完。',
+          solution: '更换有效的 API Key。',
+          steps: [
+            '打开「设置 → API」面板',
+            '删除当前 Key，填入新的有效 Key',
+            '如果不确定 Key 是否有效，可在 LLM Hub 的实时测试面板中先测试',
+            '保存后返回角色 GIF 重试',
+          ],
+          relatedCodes: ['API_KEY_MISSING', '401_UNAUTHORIZED'],
+          prevention: '定期检查 API Key 的有效期和剩余额度；在 LLM Hub 中通过实时测试快速验证 Key 是否有效。',
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: '请求长时间无响应，最终提示超时',
+          severity: 'error',
+          category: 'A. API 与网络',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板 / 进度条',
+          cause: '后端生成耗时过长，超过了前端设置的超时时间。GIF 生成比单张图片更耗时，尤其是高帧数或大尺寸时。',
+          solution: '降低帧数、图像尺寸或检查网络连接。',
+          steps: [
+            '在「高级参数」中降低「图像尺寸」（建议不超过 1024）',
+            '降低「帧数」（建议 8~12 帧）',
+            '降低「Steps」值（建议 20~28）',
+            '检查网络连接是否稳定',
+            '如果使用的是自定义 API，确认后端服务器状态正常',
+            '重试生成',
+          ],
+          relatedCodes: ['NETWORK_TIMEOUT', 'BACKEND_UNAVAILABLE'],
+          prevention: 'GIF 生成比单张图片耗时更长；提前降低参数规模（图像尺寸、帧数、Steps 等）；网络不稳定时增加超时设置。',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: '提示「后端不可用」或「无法连接到服务器」',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '后端服务器未启动、崩溃、或前端配置的 API Base URL 不正确。',
+          solution: '检查后端服务状态和 API 配置。',
+          steps: [
+            '打开浏览器开发者工具 → Network 标签页',
+            '重新点击「生成 GIF」，观察请求是否发出以及响应状态码',
+            '如果请求未发出，检查「设置 → API → API Base URL」是否正确',
+            '如果请求返回 502/503，联系后端管理员确认服务状态',
+            '如果是本地部署，确认后端进程是否在运行（npm start）',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', '502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '本地部署时确保后端进程已启动（npm start）；使用远程服务时确认 URL 配置正确。',
+        },
+        {
+          code: 'NETWORK_DISCONNECTED',
+          message: '提示网络断开或无法访问互联网',
+          severity: 'critical',
+          category: 'A. API 与网络',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '设备未连接网络、Wi-Fi 断开、或防火墙阻止了请求。',
+          solution: '恢复网络连接。',
+          steps: [
+            '检查设备的网络连接状态',
+            '尝试访问其他网站确认网络是否正常',
+            '如果使用代理/VPN，检查代理设置是否正确',
+            '如果是公司/校园网络，确认是否限制了 API 访问',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: '使用联网工具前确认网络连接正常；避免在网络波动大的环境下进行长时间工作流。',
+        },
+        {
+          code: 'FILE_FORMAT_UNSUPPORTED',
+          message: '上传时提示「不支持的文件格式」',
+          severity: 'warning',
+          category: 'C. 文件与输入',
+          location: '页面：角色 GIF 生成 → 区域：左栏「选择图片」按钮',
+          cause: '选择了 WEBP、GIF、BMP、TIFF 或其他不支持的格式。角色 GIF 生成仅支持 PNG 和 JPG。',
+          solution: '将图片转换为 PNG 或 JPG 格式。',
+          steps: [
+            '使用图片转换工具（主页 → 图片格式转换）将文件转为 PNG 或 JPG',
+            '或使用系统自带的图片预览/编辑工具导出为 PNG/JPG',
+            '重新在角色 GIF 页面选择转换后的文件',
+          ],
+          relatedCodes: ['FILE_CORRUPTED', 'UPLOAD_FORMAT'],
+          prevention: '确认文件格式是 PNG 或 JPG 后再上传。',
+        },
+        {
+          code: 'FILE_TOO_LARGE',
+          message: '上传后图片无法预览或生成时报内存错误',
+          severity: 'warning',
+          category: 'C. 文件与输入',
+          location: '页面：角色 GIF 生成 → 区域：左栏预览区',
+          cause: '上传的图片尺寸过大（超过 4096x4096 像素）或文件大小超过浏览器/后端限制。GIF 生成对内存要求更高。',
+          solution: '压缩或缩小图片后再上传。',
+          steps: [
+            '使用图片转换工具将图片最大边缩放到 2048 或 1024 像素以下',
+            '如果是 PNG，可转为 JPG 以减小文件大小',
+            '重新上传处理后的图片',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: '建议上传 1024×1024 ~ 2048×2048 的图片；GIF 生成时内存占用比单张图片更高。',
+        },
+        {
+          code: 'FILE_CORRUPTED',
+          message: '图片预览显示空白或损坏',
+          severity: 'warning',
+          category: 'C. 文件与输入',
+          location: '页面：角色 GIF 生成 → 区域：左栏预览区',
+          cause: '图片文件本身已损坏，或下载过程中数据不完整。',
+          solution: '使用其他图片或修复/重新下载该图片。',
+          steps: [
+            '尝试在系统图片查看器中打开该文件，确认是否能正常显示',
+            '如果无法显示，尝试用图片修复工具或重新下载/导出',
+            '更换为其他有效的 PNG/JPG 图片',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'UPLOAD_FORMAT'],
+          prevention: '上传前确认图片能在系统图片查看器中正常打开。',
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: '错误面板显示「模型不可用」或 404',
+          severity: 'error',
+          category: 'D. 模型与生成',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '选择的模型在后端不存在、已被下架、或当前 API Key 无权访问该模型。',
+          solution: '切换到其他可用模型。',
+          steps: [
+            '在「模型」下拉框中选择其他模型（如 gpt-image-2）',
+            '如果使用自定义 API，确认模型 ID 拼写正确',
+            '在「设置 → API」中确认当前 Key 支持所选模型',
+            '重试生成',
+          ],
+          relatedCodes: ['403_FORBIDDEN', 'API_KEY_EXPIRED'],
+          prevention: '从下拉列表选择已知可用的模型；使用自定义 API 时查阅服务商文档确认模型列表。',
+        },
+        {
+          code: 'PROMPT_BLOCKED',
+          message: '请求被拦截，提示「内容策略违规」或「sensitive words」',
+          severity: 'error',
+          category: 'D. 模型与生成',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: 'Prompt 或 Negative Prompt 中包含了后端服务商的安全过滤器拦截的词汇。',
+          solution: '修改 Prompt，移除或替换可能触发过滤器的词汇。',
+          steps: [
+            '查看错误详情中的具体提示信息，找出被拦截的关键词',
+            '将敏感词汇用同义词替换或删除',
+            '简化 Prompt，先使用最基础的描述测试是否能通过',
+            '逐步添加修饰词，找出具体触发拦截的词汇',
+          ],
+          relatedCodes: ['403_FORBIDDEN'],
+          prevention: '修改 Prompt 时避免使用敏感词汇；先用默认 Prompt 测试通过后再自定义。',
+        },
+        {
+          code: 'PROMPT_TOO_LONG',
+          message: '提示 Prompt 超出长度限制',
+          severity: 'warning',
+          category: 'D. 模型与生成',
+          location: '页面：角色 GIF 生成 → 区域：Prompt 输入框 / 左栏底部错误面板',
+          cause: 'Prompt + 高级参数自动附加的后缀总长度超过了后端模型的最大输入限制。',
+          solution: '缩短 Prompt 或减少高级参数。',
+          steps: [
+            '在「实际 Prompt 预览」中查看最终拼接的完整 Prompt 长度',
+            '精简正面 Prompt，删除冗余描述',
+            '减少高级参数的数量（每个参数都会附加英文后缀）',
+            '重试',
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND'],
+        },
+        {
+          code: 'CHARACTER_GIF_INPUT_MISSING',
+          message: '点击「生成 GIF」后立刻报错，提示未上传图片',
+          severity: 'warning',
+          category: 'C. 文件与输入',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '未上传图片，或上传后点击了「生成 GIF」但没有有效的输入文件。',
+          solution: '确认已上传有效的图片文件。',
+          steps: [
+            '点击「选择图片」按钮',
+            '在文件选择器中选择有效的 PNG/JPG 文件',
+            '确认预览区显示了图片缩略图',
+            '点击「生成 GIF」',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'FILE_CORRUPTED'],
+          prevention: '确认源图像已上传且预览正常后再生成 GIF。',
+        },
+        {
+          code: 'CHARACTER_GIF_REQUEST_FAILED',
+          message: '错误面板上显示「CHARACTER_GIF_REQUEST_FAILED」',
+          severity: 'error',
+          category: 'D. 模型与生成',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '后端 API 请求失败。可能是网络中断、API Key 无效、模型不可用、帧数过多导致内存不足、或服务器内部错误。',
+          solution: '根据错误详情中的具体信息排查。',
+          steps: [
+            '展开错误面板查看详细错误信息（HTTP 状态码、后端返回的消息）',
+            '如果是 401：检查 API Key 是否有效',
+            '如果是 404：检查模型是否可用',
+            '如果是 429：等待一段时间后重试，或降低请求频率',
+            '如果是 500/502/503：检查后端服务状态',
+            '如果是内存错误：降低帧数（建议 8 帧以下）和图像尺寸',
+            '如果是网络错误：检查网络连接',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'BACKEND_UNAVAILABLE', '429_TOO_MANY_REQUESTS'],
+          prevention: '开始生成前确认 API Key 有效、网络连接正常、模型可用；首次生成建议先用低帧数（8帧）测试。',
+        },
+        {
+          code: '429_TOO_MANY_REQUESTS',
+          message: '提示请求过于频繁（Rate Limit）',
+          severity: 'warning',
+          category: 'A. API 与网络',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '短时间内发送了过多请求，超过了服务商的速率限制。GIF 生成比单张图片更耗资源，更容易触发限流。',
+          solution: '等待一段时间后重试。',
+          steps: [
+            '查看错误详情中的 Retry-After 提示（如果有）',
+            '等待 60~120 秒后重试',
+            '如果频繁遇到此问题，降低帧数和图像尺寸',
+            '考虑升级 API 套餐以获得更高的速率限制',
+          ],
+          relatedCodes: ['API_RATE_LIMIT', 'CHARACTER_GIF_REQUEST_FAILED'],
+          prevention: 'GIF 生成消耗更多资源，适当降低请求频率；避免在短时间内多次重试。',
+        },
+        {
+          code: '500_INTERNAL_ERROR',
+          message: '后端返回 500 内部服务器错误',
+          severity: 'error',
+          category: '0~9. HTTP 状态码',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '后端服务在处理请求时发生内部异常。可能是模型加载失败、GPU 内存不足（GIF 生成更耗显存）、或代码 Bug。',
+          solution: '稍后重试或联系后端管理员。',
+          steps: [
+            '等待 1~2 分钟后重试',
+            '降低图像尺寸、帧数和 Steps 值，减少后端负载',
+            '如果问题持续，联系后端管理员查看服务器日志',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: '降低请求规模（图像尺寸、帧数、Steps 等）；避免在服务器高负载时提交大任务。',
+        },
+        {
+          code: '502_BAD_GATEWAY',
+          message: '后端返回 502 Bad Gateway',
+          severity: 'error',
+          category: '0~9. HTTP 状态码',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '反向代理（如 Nginx）无法连接到后端应用服务器。可能是后端进程崩溃或未启动。',
+          solution: '检查后端服务状态。',
+          steps: [
+            '如果是本地部署，确认后端进程是否在运行',
+            '检查后端服务端口是否被占用',
+            '查看后端日志确认是否有启动错误',
+            '重启后端服务后重试',
+          ],
+          relatedCodes: ['503_SERVICE_UNAVAILABLE', 'BACKEND_UNAVAILABLE'],
+          prevention: '本地部署时确认后端进程在运行；检查反向代理配置。',
+        },
+        {
+          code: '503_SERVICE_UNAVAILABLE',
+          message: '后端返回 503 Service Unavailable',
+          severity: 'error',
+          category: '0~9. HTTP 状态码',
+          location: '页面：角色 GIF 生成 → 区域：左栏底部错误面板',
+          cause: '后端服务暂时不可用，可能正在进行维护、重启、或过载保护。',
+          solution: '稍后重试。',
+          steps: [
+            '等待 2~3 分钟后重试',
+            '检查后端服务状态页面（如果有）',
+            '联系后端管理员确认是否在维护',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
+          prevention: '避开服务器维护时段操作；高负载时降低请求频率。',
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: '导入配置时提示「无效的 JSON 格式」',
+          severity: 'warning',
+          category: 'B. 配置与数据',
+          location: '页面：角色 GIF 生成 → 区域：顶部「导入配置」按钮',
+          cause: '文件内容损坏、不是 JSON 格式、或被其他程序修改过。',
+          solution: '检查文件是否为有效的 UTF-8 编码文本文件。',
+          steps: [
+            '用文本编辑器打开文件查看是否有乱码',
+            '确认文件顶部包含 "tool": "character-gif"',
+            '尝试用 JSON 在线格式化工具验证',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH'],
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: '导入配置时提示「工具类型不匹配」',
+          severity: 'warning',
+          category: 'B. 配置与数据',
+          location: '页面：角色 GIF 生成 → 区域：顶部「导入配置」按钮',
+          cause: '导入的 JSON 文件中 tool 字段不是 character-gif。',
+          solution: '确认导入的是角色 GIF 页面导出的配置文件。',
+          steps: [
+            '用文本编辑器打开文件',
+            '确认 tool 字段值为 "character-gif"',
+            '如果不是，找到正确的配置文件或从对应工具页面导入',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+        },
+        {
+          code: 'DEVICE_MEMORY_LOW',
+          message: '浏览器标签页崩溃或无响应',
+          severity: 'critical',
+          category: 'F. 系统与权限',
+          location: '页面：角色 GIF 生成 → 区域：整个页面',
+          cause: '设备内存不足，浏览器强制终止了标签页进程。GIF 生成对内存要求更高，尤其是高帧数时。',
+          solution: '关闭其他标签页、降低图片尺寸/帧数，或使用内存更大的设备。',
+          steps: [
+            '保存当前工作',
+            '关闭其他浏览器标签页',
+            '降低上传图片尺寸（建议最长边 1024）',
+            '降低帧数（建议 8 帧以下）',
+            '重启浏览器后重试',
+          ],
+          relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: '处理大文件前关闭其他标签页；将图片最长边缩放到 1024 以下；降低帧数到 8 以下。',
+        },
+      ],
+    },
+    {
       id: 'prompt-suite',
       title: '角色设卡 / 世界观编辑',
       overview: `PromptSuite 是一个富文本编辑器，用于整理角色设定卡（Character Sheet）、世界观设定（World Bible）、关系图谱（Relationship Map）和语言风格档案（Speech Profile）。支持字体、颜色、高亮、标题、列表、表格、代码块、引用框、图片插入等丰富排版功能。所有内容自动保存到本地浏览器。

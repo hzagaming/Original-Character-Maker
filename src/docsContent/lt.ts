@@ -3,7 +3,7 @@ import type { DocsContent } from './types';
 export const docsContent: DocsContent = {
   intro: `Sveiki atvykę į Original Character Maker naudotojo vadovą!
 
-Šiame vadove pateikiama išsami dokumentacija visiems 7 funkciniams moduliams ir globalus klaidų žodynas. Jei naudodami įrankį susiduriate su klaida arba nežinote mygtuko/parametro funkcijos, atverkite šį vadovą ir raskite atitinkamą skyrių.
+Šiame vadove pateikiama išsami dokumentacija visiems 8 funkciniams moduliams ir globalus klaidų žodynas. Jei naudodami įrankį susiduriate su klaida arba nežinote mygtuko/parametro funkcijos, atverkite šį vadovą ir raskite atitinkamą skyrių.
 
 Vadovo struktūra:
 · Įrankių vadovas — Kiekvienas įrankis turi atskirą skyrių su funkcijų apžvalga, mygtukų aprašymais, parametrų aprašymais ir klaidomis su sprendimais
@@ -82,6 +82,89 @@ Kaip naudotis klaidų žodynu:
           steps: ['Click Open Settings at top right', 'Switch to API tab', 'Enter valid Key', 'Click Save', 'Return to style transfer page and click Start again'],
           relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
           prevention: 'Before first use of any online tool, be sure to configure a valid API Key in Settings → API.',
+        },
+      ],
+    },
+    {
+      id: 'character-gif',
+      title: 'Character GIF',
+      overview: `Character GIF Generator creates animated GIFs from character images. Upload a PNG/JPG character image, adjust animation parameters (frames, FPS, loop, motion type), and generate a dynamic GIF. Supports breathing, blinking, swaying, floating, heartbeat, hair-flow, tail-wag, and magic-glow animations. Requires internet connection and valid API Key.
+
+Basic Process:
+1. Upload a source character image
+2. Adjust GIF parameters (frames, FPS, motion type)
+3. Select model and style options
+4. Click "Generate GIF"
+5. View, copy, or download the animated GIF
+
+[GIF Animation Technology]
+Character GIF uses frame interpolation and motion synthesis. The backend generates intermediate frames between key poses based on the selected motion type and easing function. Loop and reverse-loop options control playback behavior.
+
+[Supported Motion Types]
+1. Breathing: Subtle chest expansion/contraction
+2. Blinking: Eye open/close cycle
+3. Swaying: Gentle left-right body movement
+4. Floating: Up-down levitation effect
+5. Heartbeat: Pulsing glow or scale animation
+6. Hair-flow: Hair strands swaying in wind
+7. Tail-wag: Rhythmic tail movement
+8. Magic-glow: Pulsing magical aura effect
+
+[Parameter Details]
+- Frames (2~60): Total number of frames in the GIF. More frames = smoother animation but larger file size.
+- FPS (1~60): Frames per second. 12 FPS is standard for web GIFs.
+- Loop: Whether the GIF loops infinitely.
+- Duration (10~1000ms): Display time per frame in milliseconds.
+- Motion Type: Select the animation style.
+- Easing: Linear, easeIn, easeOut, easeInOut, spring, or bounce.
+- Reverse Loop: Play animation forward then backward.
+
+[Output]
+- GIF format, optimized for web use
+- Supports transparent background when cutout is enabled
+- Typical file size: 500KB ~ 5MB depending on frames and resolution`,
+      buttons: [
+        { name: 'Generate GIF', description: 'Submits the source image and GIF config to the backend to generate an animated GIF.' },
+        { name: 'Copy GIF', description: 'Copies the generated GIF to the clipboard.' },
+        { name: 'Download GIF', description: 'Downloads the generated GIF to the local machine.' },
+        { name: 'Open GIF', description: 'Opens the GIF in a new tab.' },
+        { name: 'Upload Image', description: 'Selects a local image file as the source. Supports PNG and JPG.' },
+        { name: 'Replace Image', description: 'Replaces the currently uploaded source image.' },
+        { name: 'Advanced Params', description: 'Expand advanced parameters: aspect ratio, lighting, camera angle, mood, outfit, etc.' },
+      ],
+      parameters: [
+        { name: 'Model', description: 'Selects the AI model used for GIF generation.', tips: 'gpt-image-2 is recommended for best quality.' },
+        { name: 'Frames', description: 'Total number of frames in the GIF.', tips: '8-16 frames is typical for web GIFs. More frames = smoother but larger.' },
+        { name: 'FPS', description: 'Frames per second.', tips: '12 FPS is standard. Use 24+ for smoother animation.' },
+        { name: 'Loop', description: 'Whether the GIF loops infinitely.', tips: 'Disable for one-shot animations.' },
+        { name: 'Motion Type', description: 'The animation style applied to the character.', tips: 'Breathing works best for static poses; blinking adds life to portraits.' },
+        { name: 'Easing', description: 'How the animation accelerates/decelerates.', tips: 'easeInOut is most natural for breathing and swaying.' },
+        { name: 'Style Prompt', description: 'Describes the desired art style.', tips: 'Same as Style Transfer prompts.' },
+      ],
+      errors: [
+        {
+          code: 'CHARACTER_GIF_INPUT_MISSING',
+          message: 'No source image uploaded',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Character GIF → Area: image upload',
+          cause: 'Clicked Generate without uploading a source image.',
+          solution: 'Upload a PNG/JPG character image first.',
+          steps: ['Click Upload Image', 'Select a valid PNG/JPG file', 'Confirm preview shows the image', 'Click Generate GIF'],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Always upload a source image before generating.',
+        },
+        {
+          code: 'CHARACTER_GIF_REQUEST_FAILED',
+          message: 'GIF generation request failed',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Character GIF → Area: error panel',
+          cause: 'Backend API error. Possible causes: invalid API Key, model unavailable, network error, or server error.',
+          solution: 'Check error details and retry.',
+          steps: ['Check API Key validity', 'Verify network connection', 'Try a different model', 'Reduce frames/FPS and retry'],
+          relatedCodes: ['API_KEY_MISSING', 'MODEL_NOT_FOUND', 'API_TIMEOUT'],
+          prevention: 'Verify API configuration before generating; test with low frames first.',
         },
       ],
     },
