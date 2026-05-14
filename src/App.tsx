@@ -2413,9 +2413,9 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pagePromptTitle: 'OC 설정 에디터',
     pagePaperTitle: 'paper2gal 자산 생성',
     announcementDescription: 'v1.5.0 IndexTTS 음성 합성 도구 신규 추가: IndexTTS Voice Synthesis 페이지를 신규 추가하여 텍스트 음성 변환, 제로샷 음성 클로닝, 감정 제어, 속도 조절 및 다양한 출력 형식을 지원. API 설정에서 IndexTTS 전용 사용자 정의 API 채널을 독립적으로 구성할 수 있음. 사용자 매뉴얼도 전면 업데이트되어 IndexTTS의 완전한 문서를 추가.',
-    announcementList1: '캐릭터 GIF 생성기 신규 추가: 캐릭터 이미지를 업로드하고, 프레임 수, FPS, 루프, 애니메이션 타입(호흡/깜빡임/흔들림/부유/심장박동/머리카락 흔들림/꼬리 흔들림/마법 빛)과 이징 함수를 조정하여 동적인 캐릭터 GIF를 원클릭 생성. 투명 배경, 자동 컷아웃, 얼굴 잠금 지원.',
+    announcementList1: 'IndexTTS 음성 합성기 신규 추가: 텍스트를 입력하고 3~10초 참조 오디오를 업로드하여 제로샷 음성 클로닝을 수행. Temperature, Top P, 속도, CFG, 감정 강도, 감정 설명, 추론 장치, 출력 형식, 샘플링 레이트 등 13개 파라미터를 조정하여 고품질 음성을 원클릭 생성. WAV/MP3 출력 지원.',
     announcementList2: 'API 채널 확장: 사용자 정의 API 설정에서 이제 IndexTTS를 독립적으로 구성할 수 있음. 스타일 변환, Paper2Gal, 캐릭터 GIF와 별도로 관리.',
-    announcementList3: '30개 언어 문서 동기화: zh/en/ja/ru/ko 5개 언어로 완전 번역, 25개 스켈레톤 언어에도 영어 placeholder 문서를 동기 추가. 모든 언어의 사용자 매뉴얼 intro를 「7개 기능 모듈」에서 「8개 기능 모듈」로 업데이트.'
+    announcementList3: '사용자 매뉴얼 및 문서 동기화: IndexTTS 생성기용 완전 문서를 신규 추가. 기본 플로우, TTS 기술 원리, 13개 파라미터 상세, 10개 버튼 기능, 3개 오류 코드의 트러블슈팅 단계를 망라. 30개 언어 문서를 동기 확장하고 intro를 「8개 기능 모듈」에서 「9개 기능 모듈」로 업데이트.'
   },
   fr: {
     ...translations.en,
