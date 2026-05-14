@@ -1098,38 +1098,101 @@ The tool includes 8 built-in animation effects:
       title: 'IndexTTS Voice Synthesis',
       overview: `IndexTTS Voice Synthesis generates speech from text using zero-shot voice cloning. Upload a reference audio clip (3~10 seconds) to clone a voice, or use the default voice. The tool supports emotion control, speed adjustment, and multiple output formats.
 
-Basic Workflow:
-1. Enter the text to synthesize
-2. Upload a reference audio clip (optional)
-3. Adjust TTS parameters (temperature, speed, emotion, etc.)
-4. Click "Generate Speech"
-5. Play, copy, or download the generated audio
+【User Guide】
 
-[TTS Technology]
+Step 1: Prepare the Text
+Enter the text to synthesize in the text input box. Supports Chinese, English, and other languages. Recommendations:
+- Keep single-segment text within 500 characters; overly long text may degrade generation quality
+- Use standard punctuation (commas, periods, question marks) to control pauses and intonation
+- Avoid rare Chinese characters; the model may not accurately pronounce some uncommon hanzi
+
+Step 2: Choose Reference Audio (Optional)
+Click the "Upload Reference Audio" button and select a 3~10 second audio file. Recommendations:
+- Format: WAV or MP3, sample rate 22050Hz or higher
+- Content: Clear single-speaker voice with minimal background noise
+- Length: 5~7 seconds is optimal; too short may yield poor cloning, too long increases processing time
+- Quality: Better audio quality produces closer voice cloning results
+- If no reference audio is uploaded, the default voice will be used
+
+Step 3: Adjust Parameters
+Adjust TTS parameters according to your needs:
+
+Basic Parameters:
+- Model: Select the TTS model version. index-tts-1.5 is the stable version suitable for most scenarios; index-tts-2 has advanced emotion control for rich emotional expression.
+- Temperature (0~1, default 0.8): Controls generation randomness. Lower values (0.5~0.7) suit formal, stable speech; higher values (0.8~1.0) suit more natural, varied speech.
+- Top P (0~1, default 0.92): Nucleus sampling threshold. Usually keep the default; lower to 0.85 for more stable output.
+- Top K (1~128, default 48): Top-k sampling. Usually no need to adjust.
+
+Voice Parameters:
+- Speed (0.5~2.0, default 1.0): Playback speed. 0.8 suits gentle slow speech; 1.2~1.5 suits fast broadcasting; 2.0 is maximum speed.
+- CFG (1~14, default 6.8): Classifier-Free Guidance scale. 7~10 is the safe zone; too high may cause voice distortion.
+
+Emotion Parameters:
+- Emotion Alpha (0~2.0, default 1.0): Emotion expression intensity. 0.5 suits plain narration; 1.0 is balanced; 1.5~2.0 suits dramatic expression.
+- Emotion Text: Use natural language to describe the desired emotional style. Examples: "gentle whisper", "angry shouting", "happy and excited speaking", "sad crying". Supports Chinese and English.
+
+Advanced Parameters:
+- Seed (default 240315): Fixed seed enables reproducible results. Record seeds of favorite outputs for later reproduction.
+- Device: GPU acceleration is fast but requires NVIDIA GPU support; CPU works on any device but is slower.
+- Format: WAV is lossless quality, suitable for post-editing; MP3 is smaller, suitable for direct sharing.
+- Sample Rate: 48000Hz is CD quality; 44100Hz is standard; 22050Hz is acceptable for speech.
+- Noise Reduction (0~100, default 20): Post-process noise reduction. Increase if reference audio has background noise; decrease if voice sounds unnatural.
+
+Step 4: Generate Speech
+Click the "Generate Speech" button. Generation time depends on text length and device performance:
+- GPU: ~5~15 seconds for 10 seconds of text
+- CPU: ~30~60 seconds for 10 seconds of text
+You can click "Abort Task" at any time during generation to cancel.
+
+Step 5: Process Results
+After generation completes, the result area displays an audio player. You can:
+- Click the play button to preview
+- Click "Download Result" to save locally
+- Click "Copy Result" to copy to clipboard (browser support varies)
+- Click "Open File" to open in a new tab
+- Click "Redo" to regenerate with the same parameters
+- Click "Copy JSON" to copy current configuration
+- Click "Download JSON" to save the config file for later reuse
+
+【TTS Technology】
 IndexTTS is a GPT-style text-to-speech model based on XTTS and Tortoise. It supports Chinese pinyin correction and pause control via punctuation marks. The model uses a conformer conditioning encoder and BigVGAN2-based speechcode decoder for high-quality audio output.
 
-[Supported Parameters]
-- Text: Input text to synthesize (supports Chinese, English, etc.)
-- Reference Audio: 3~10 second audio clip for zero-shot voice cloning
-- Model: index-tts-1.5 or index-tts-2
-- Temperature (0.0~1.0): Controls randomness/creativity
-- Top P (0.0~1.0): Nucleus sampling threshold
-- Top K (1~128): Top-k sampling
-- Speed (0.5~2.0): Playback speed multiplier
-- CFG (1.0~14.0): Classifier-free guidance scale
-- Emotion Alpha (0.0~2.0): Emotion intensity
-- Emotion Text: Soft emotion instruction (e.g., "angry shouting")
-- Seed: Random seed for reproducibility
-- Device: GPU (fast) or CPU (fallback)
-- Format: WAV or MP3
-- Sample Rate: 22050 / 44100 / 48000 Hz
-- Noise Reduction (0~100): Post-process noise reduction strength
+【Parameter Quick Reference】
+| Parameter | Range | Default | Description |
+|---|---|---|---|
+| Temperature | 0~1 | 0.8 | Randomness control |
+| Top P | 0~1 | 0.92 | Nucleus sampling |
+| Top K | 1~128 | 48 | Top-k sampling |
+| Speed | 0.5~2.0 | 1.0 | Playback speed |
+| CFG | 1~14 | 6.8 | Guidance strength |
+| Emotion Alpha | 0~2.0 | 1.0 | Emotion intensity |
+| Seed | Integer | 240315 | Random seed |
+| Noise Reduction | 0~100 | 20 | Noise reduction strength |
 
-[Output Formats]
-- WAV: Uncompressed, highest quality
-- MP3: Compressed, smaller file size
-- Typical file size: 100KB ~ 5MB depending on duration and format
-- Recommended sample rate: 48000 Hz for best quality`,
+【Output Formats】
+- WAV: Uncompressed, highest quality, suitable for post-editing
+- MP3: Lossy compression, smaller file, suitable for direct sharing
+- Typical file size: 100KB ~ 5MB (depends on duration and format)
+- Recommended sample rate: 48000 Hz for best quality
+
+【FAQ】
+Q: Why does the cloned voice differ from the original?
+A: Reference audio quality directly affects cloning results. Ensure the audio is clear, noise-free, and contains only one speaker. Adjusting Temperature and CFG can optimize similarity.
+
+Q: Generation is very slow. What should I do?
+A: Switch to GPU inference mode. If no NVIDIA GPU is available, try shortening the text length or lowering the sample rate.
+
+Q: The generated speech has noise.
+A: Increase the "Noise Reduction" parameter (suggested 30~50), or use a cleaner reference audio.
+
+Q: Emotion description doesn't take effect.
+A: Ensure you are using the index-tts-2 model and appropriately increase the "Emotion Alpha" parameter. Some emotion descriptions may need more specific phrasing.
+
+Q: How can I reproduce a previous result?
+A: Record the Seed value used during generation, then use the same Seed and parameters in subsequent generations.
+
+Q: Which languages are supported for text input?
+A: Primarily Chinese and English; other languages may vary in quality depending on model training data.`,
       buttons: [
         { name: 'Generate Speech', description: 'Starts the TTS generation workflow. Validates input text and parameters, then sends the request to the backend.' },
         { name: 'Abort Task', description: 'Cancels the ongoing TTS generation task.' },
