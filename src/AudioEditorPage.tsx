@@ -373,6 +373,16 @@ export function AudioEditorPage({
   const gainNodeRef = useRef<GainNode | null>(null);
   const panNodeRef = useRef<StereoPannerNode | null>(null);
 
+  /* ---- SFX throttle ---- */
+  const lastSliderSoundRef = useRef(0);
+  const playSliderSound = useCallback(() => {
+    const now = Date.now();
+    if (now - lastSliderSoundRef.current > 50) {
+      lastSliderSoundRef.current = now;
+      playSliderSound();
+    }
+  }, []);
+
   /* ---- Responsive ---- */
   const [isNarrow, setIsNarrow] = useState(false);
 
@@ -380,6 +390,9 @@ export function AudioEditorPage({
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStep, setLoadingStep] = useState('Initializing audio engine…');
+
+  /* ---- Drag & drop ---- */
+  const [isDragOver, setIsDragOver] = useState(false);
 
   /* ================================================================== */
   /*  Splash loading simulation                                          */
@@ -1171,6 +1184,33 @@ export function AudioEditorPage({
     [zoom, panOffset, duration]
   );
 
+  /* ---- Drag & drop handlers ---- */
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('audio/')) {
+      handleImport(file);
+    } else if (file) {
+      addLog('info', 'Dropped file is not an audio file');
+      playSound('error');
+    }
+  }, [handleImport, addLog]);
+
   /* ================================================================== */
   /*  Keyboard shortcuts                                                 */
   /* ================================================================== */
@@ -1267,11 +1307,22 @@ export function AudioEditorPage({
         <button className="settings-trigger" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }} aria-label={openSettings}>⚙</button>
       </header>
 
-      <main className="tool-workbench fade-up delay-2" style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20 }}>
+      <main
+        key={isLoading ? 'splash' : 'ready'}
+        className="tool-workbench fade-up delay-2"
+        style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20, opacity: isLoading ? 0 : 1 }}
+      >
         <div className="main-column">
           {/* ---- Import area ---- */}
           {!editBuffer && (
-            <div className="upload-zone" style={{ margin: '40px auto', maxWidth: 560, textAlign: 'center' }}>
+            <div
+              className="upload-zone"
+              style={{ margin: '40px auto', maxWidth: 560, textAlign: 'center' }}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               {isImporting ? (
                 <div style={{ padding: '48px 32px', borderRadius: 16, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }}>⏳</div>
@@ -1289,7 +1340,20 @@ export function AudioEditorPage({
                     hidden
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
                   />
-                  <label htmlFor="audio-import" className="upload-dropzone" style={{ cursor: 'pointer', display: 'block', padding: '48px 32px', border: '2px dashed var(--border)', borderRadius: 16, background: 'rgba(255,255,255,0.03)' }}>
+                  <label
+                    htmlFor="audio-import"
+                    className="upload-dropzone"
+                    onClick={() => playSound('buttonClick')}
+                    style={{
+                      cursor: 'pointer',
+                      display: 'block',
+                      padding: '48px 32px',
+                      border: isDragOver ? '2px solid var(--accent)' : '2px dashed var(--border)',
+                      borderRadius: 16,
+                      background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : 'rgba(255,255,255,0.03)',
+                      transition: 'border-color 200ms ease, background 200ms ease',
+                    }}
+                  >
                     <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
                     <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
                     <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
@@ -1328,7 +1392,7 @@ export function AudioEditorPage({
                 <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>🔊 Mono</button>
                 <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>🔄 Reset FX</button>
                 <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
-                <label htmlFor="audio-reimport" className="secondary-button small-button" style={{ cursor: 'pointer' }}>📁 New File</label>
+                <label htmlFor="audio-reimport" className="secondary-button small-button" style={{ cursor: 'pointer' }} onClick={() => playSound('buttonClick')}>📁 New File</label>
               </div>
 
               {/* ---- Time display ---- */}
@@ -1381,9 +1445,11 @@ export function AudioEditorPage({
                     {isExporting ? 'Exporting…' : exportProgress >= 100 ? 'Export complete' : 'Ready'}
                   </span>
                 </div>
-                <div className="progress-track" style={{ opacity: isExporting || exportProgress >= 100 ? 1 : 0, transition: 'opacity 300ms ease' }}>
-                  <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
-                </div>
+                {(isExporting || exportProgress > 0) && (
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
+                  </div>
+                )}
               </div>
 
               {/* ---- Effects Panel ---- */}
@@ -1392,13 +1458,13 @@ export function AudioEditorPage({
                 <div className="param-card fade-up delay-3" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔊 Volume & Pan</h4>
                   <ParamRow label="Volume" value={`${volume}%`}>
-                    <input type="range" min={0} max={200} value={volume} onChange={(e) => { playSound('sliderChange'); setVolume(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={200} value={volume} onChange={(e) => { playSliderSound(); setVolume(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Mute" value={isMuted ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isMuted ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setIsMuted((v) => !v); }}>{isMuted ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${isMuted ? 'active' : ''}`} type="button" onClick={() => { playSound(isMuted ? 'toggleOff' : 'toggleOn'); setIsMuted((v) => !v); }}>{isMuted ? 'On' : 'Off'}</button>
                   </ParamRow>
                   <ParamRow label="Pan (L/R)" value={`${pan > 0 ? '+' : ''}${pan}`}>
-                    <input type="range" min={-100} max={100} value={pan} onChange={(e) => { playSound('sliderChange'); setPan(Number(e.target.value)); }} />
+                    <input type="range" min={-100} max={100} value={pan} onChange={(e) => { playSliderSound(); setPan(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1406,16 +1472,16 @@ export function AudioEditorPage({
                 <div className="param-card fade-up delay-4" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>⚡ Speed & Pitch</h4>
                   <ParamRow label="Speed" value={`${speed}%`}>
-                    <input type="range" min={25} max={400} value={speed} onChange={(e) => { playSound('sliderChange'); setSpeed(Number(e.target.value)); }} />
+                    <input type="range" min={25} max={400} value={speed} onChange={(e) => { playSliderSound(); setSpeed(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Pitch (cents)" value={`${pitch > 0 ? '+' : ''}${pitch}`}>
-                    <input type="range" min={-1200} max={1200} step={10} value={pitch} onChange={(e) => { playSound('sliderChange'); setPitch(Number(e.target.value)); }} />
+                    <input type="range" min={-1200} max={1200} step={10} value={pitch} onChange={(e) => { playSliderSound(); setPitch(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Reverse" value={isReversed ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isReversed ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setIsReversed((v) => !v); }}>{isReversed ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${isReversed ? 'active' : ''}`} type="button" onClick={() => { playSound(isReversed ? 'toggleOff' : 'toggleOn'); setIsReversed((v) => !v); }}>{isReversed ? 'On' : 'Off'}</button>
                   </ParamRow>
                   <ParamRow label="Loop" value={isLoop ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isLoop ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setIsLoop((v) => !v); }}>{isLoop ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${isLoop ? 'active' : ''}`} type="button" onClick={() => { playSound(isLoop ? 'toggleOff' : 'toggleOn'); setIsLoop((v) => !v); }}>{isLoop ? 'On' : 'Off'}</button>
                   </ParamRow>
                 </div>
 
@@ -1423,10 +1489,10 @@ export function AudioEditorPage({
                 <div className="param-card fade-up delay-5" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>📉 Fade</h4>
                   <ParamRow label="Fade In" value={`${fadeIn}s`}>
-                    <input type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => { playSound('sliderChange'); setFadeIn(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => { playSliderSound(); setFadeIn(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Fade Out" value={`${fadeOut}s`}>
-                    <input type="range" min={0} max={10} step={0.1} value={fadeOut} onChange={(e) => { playSound('sliderChange'); setFadeOut(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={10} step={0.1} value={fadeOut} onChange={(e) => { playSliderSound(); setFadeOut(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1434,13 +1500,13 @@ export function AudioEditorPage({
                 <div className="param-card fade-up delay-6" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🎚 EQ</h4>
                   <ParamRow label="Low Gain" value={`${eqLow > 0 ? '+' : ''}${eqLow}dB`}>
-                    <input type="range" min={-12} max={12} value={eqLow} onChange={(e) => { playSound('sliderChange'); setEqLow(Number(e.target.value)); }} />
+                    <input type="range" min={-12} max={12} value={eqLow} onChange={(e) => { playSliderSound(); setEqLow(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Mid Gain" value={`${eqMid > 0 ? '+' : ''}${eqMid}dB`}>
-                    <input type="range" min={-12} max={12} value={eqMid} onChange={(e) => { playSound('sliderChange'); setEqMid(Number(e.target.value)); }} />
+                    <input type="range" min={-12} max={12} value={eqMid} onChange={(e) => { playSliderSound(); setEqMid(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="High Gain" value={`${eqHigh > 0 ? '+' : ''}${eqHigh}dB`}>
-                    <input type="range" min={-12} max={12} value={eqHigh} onChange={(e) => { playSound('sliderChange'); setEqHigh(Number(e.target.value)); }} />
+                    <input type="range" min={-12} max={12} value={eqHigh} onChange={(e) => { playSliderSound(); setEqHigh(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1448,16 +1514,16 @@ export function AudioEditorPage({
                 <div className="param-card fade-up delay-3" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔧 Compressor</h4>
                   <ParamRow label="Threshold" value={`${compThreshold}dB`}>
-                    <input type="range" min={-60} max={0} value={compThreshold} onChange={(e) => { playSound('sliderChange'); setCompThreshold(Number(e.target.value)); }} />
+                    <input type="range" min={-60} max={0} value={compThreshold} onChange={(e) => { playSliderSound(); setCompThreshold(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Ratio" value={`${compRatio}:1`}>
-                    <input type="range" min={1} max={20} value={compRatio} onChange={(e) => { playSound('sliderChange'); setCompRatio(Number(e.target.value)); }} />
+                    <input type="range" min={1} max={20} value={compRatio} onChange={(e) => { playSliderSound(); setCompRatio(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Attack" value={`${compAttack}ms`}>
-                    <input type="range" min={0} max={100} value={compAttack} onChange={(e) => { playSound('sliderChange'); setCompAttack(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={100} value={compAttack} onChange={(e) => { playSliderSound(); setCompAttack(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Release" value={`${compRelease}ms`}>
-                    <input type="range" min={0} max={500} value={compRelease} onChange={(e) => { playSound('sliderChange'); setCompRelease(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={500} value={compRelease} onChange={(e) => { playSliderSound(); setCompRelease(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1465,13 +1531,13 @@ export function AudioEditorPage({
                 <div className="param-card fade-up delay-4" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🌊 Reverb</h4>
                   <ParamRow label="Room Size" value={`${reverbSize}%`}>
-                    <input type="range" min={0} max={100} value={reverbSize} onChange={(e) => { playSound('sliderChange'); setReverbSize(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={100} value={reverbSize} onChange={(e) => { playSliderSound(); setReverbSize(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Damping" value={`${reverbDamp}%`}>
-                    <input type="range" min={0} max={100} value={reverbDamp} onChange={(e) => { playSound('sliderChange'); setReverbDamp(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={100} value={reverbDamp} onChange={(e) => { playSliderSound(); setReverbDamp(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Wet/Dry" value={`${reverbMix}%`}>
-                    <input type="range" min={0} max={100} value={reverbMix} onChange={(e) => { playSound('sliderChange'); setReverbMix(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={100} value={reverbMix} onChange={(e) => { playSliderSound(); setReverbMix(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1479,10 +1545,10 @@ export function AudioEditorPage({
                 <div className="param-card fade-up delay-5" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔇 Noise & Normalize</h4>
                   <ParamRow label="Noise Reduction" value={`${noiseReduction}%`}>
-                    <input type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSound('sliderChange'); setNoiseReduction(Number(e.target.value)); }} />
+                    <input type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSliderSound(); setNoiseReduction(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Normalize" value={doNormalize ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${doNormalize ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setDoNormalize((v) => !v); }}>{doNormalize ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${doNormalize ? 'active' : ''}`} type="button" onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>{doNormalize ? 'On' : 'Off'}</button>
                   </ParamRow>
                 </div>
               </div>
