@@ -376,6 +376,36 @@ export function AudioEditorPage({
   /* ---- Responsive ---- */
   const [isNarrow, setIsNarrow] = useState(false);
 
+  /* ---- Splash loading ---- */
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStep, setLoadingStep] = useState('Initializing audio engine…');
+
+  /* ================================================================== */
+  /*  Splash loading simulation                                          */
+  /* ================================================================== */
+  useEffect(() => {
+    const steps = [
+      { ms: 0, pct: 0, text: 'Initializing audio engine…' },
+      { ms: 350, pct: 15, text: 'Loading waveform renderer…' },
+      { ms: 700, pct: 30, text: 'Mounting effect processors…' },
+      { ms: 1050, pct: 48, text: 'Allocating memory buffers…' },
+      { ms: 1400, pct: 65, text: 'Connecting Web Audio API…' },
+      { ms: 1750, pct: 82, text: 'Calibrating canvas display…' },
+      { ms: 2200, pct: 96, text: 'Finalizing setup…' },
+      { ms: 2500, pct: 100, text: 'Ready' },
+    ];
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    steps.forEach(({ ms, pct, text }) => {
+      timers.push(setTimeout(() => {
+        setLoadingProgress(pct);
+        setLoadingStep(text);
+      }, ms));
+    });
+    timers.push(setTimeout(() => setIsLoading(false), 2700));
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   /* ================================================================== */
   /*  Lifecycle & Cleanup                                                */
   /* ================================================================== */
@@ -1169,6 +1199,63 @@ export function AudioEditorPage({
   /* ================================================================== */
   return (
     <div className="tool-page-shell">
+      {/* ---- Splash loading overlay ---- */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(10,10,14,0.96)',
+          backdropFilter: 'blur(12px)',
+          opacity: isLoading ? 1 : 0,
+          pointerEvents: isLoading ? 'auto' : 'none',
+          transition: 'opacity 600ms ease',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 'clamp(1.6rem, 4vw, 2.8rem)',
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            background: 'linear-gradient(90deg, #c084fc, #60a5fa, #34d399)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            margin: '0 0 10px',
+            textAlign: 'center',
+          }}
+        >
+          OriginalCharacterMaker
+        </h1>
+        <p
+          style={{
+            fontSize: 12,
+            color: 'var(--text-secondary)',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            margin: '0 0 40px',
+            textAlign: 'center',
+          }}
+        >
+          Hanazar projects / mirako company / ptg co ltd
+        </p>
+
+        <div style={{ width: 'min(420px, 80vw)', marginBottom: 16 }}>
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${loadingProgress}%`, transition: 'width 200ms linear' }} />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: 'min(420px, 80vw)', marginBottom: 8 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{loadingStep}</span>
+          <span style={{ fontSize: 12, color: 'var(--accent)', fontFamily: 'monospace', fontWeight: 600 }}>{loadingProgress}%</span>
+        </div>
+      </div>
+
       <header className="feature-header fade-up delay-1">
         <div className="header-left">
           <button className="back-button" type="button" onClick={() => { playSound('back'); onBack(); }} aria-label={backHome}>←</button>

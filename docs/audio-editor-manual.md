@@ -109,9 +109,34 @@
 
 布局自动切换为 **单栏堆叠**，侧边栏会移到底部，确保在平板和手机上也能够正常使用。
 
-### 入场动画
+### 启动画面（Splash Loading）
 
-页面加载时，所有区域会按顺序以淡入动画呈现：
+首次进入音频编辑器时，会显示一个全屏启动画面，持续约 **2.7 秒**：
+
+- **大标题**：`OriginalCharacterMaker`（渐变紫色→蓝色→青色文字）
+- **副标题**：`Hanazar projects / mirako company / ptg co ltd`
+- **加载步骤**：8 个阶段逐步显示，模拟真实初始化过程
+- **进度条**：`.progress-track` / `.progress-fill` 标准样式
+- **百分比**：实时更新，字体等宽
+
+**加载步骤时间线**：
+
+| 时间 | 进度 | 步骤文字 |
+|------|------|----------|
+| 0ms | 0% | Initializing audio engine… |
+| 350ms | 15% | Loading waveform renderer… |
+| 700ms | 30% | Mounting effect processors… |
+| 1050ms | 48% | Allocating memory buffers… |
+| 1400ms | 65% | Connecting Web Audio API… |
+| 1750ms | 82% | Calibrating canvas display… |
+| 2200ms | 96% | Finalizing setup… |
+| 2500ms | 100% | Ready |
+
+2.5 秒后进度达到 100%，启动画面以 600ms 淡出动画消失，主界面随后以 `fade-up` 入场动画呈现。
+
+### 页面入场动画
+
+启动画面消失后，所有区域会按顺序以淡入动画呈现：
 
 | 元素 | 动画类 | 延迟 |
 |------|--------|------|
