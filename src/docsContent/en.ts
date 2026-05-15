@@ -3317,7 +3317,7 @@ Special conversion scenarios:
     {
       id: 'audio-editor',
       title: 'Audio Editor',
-      overview: `The Audio Editor is a comprehensive waveform-based audio editing tool. Import audio files (MP3, WAV, OGG, FLAC, M4A, AAC, WEBM) and visualize the full waveform on an interactive canvas. Edit with precision using region selection, trim, split, duplicate, and delete operations. Apply a rich suite of real-time effects including volume/gain, playback speed, pitch shift, fade in/out, reverse, EQ, compressor, reverb, stereo panning, noise reduction, and normalization. Export the final result as a WAV file.
+      overview: `The Audio Editor is a comprehensive waveform-based audio editing tool. Import audio files (MP3, WAV, OGG, FLAC, M4A, AAC, WEBM) and visualize the full waveform on an interactive canvas. Edit with precision using region selection, trim, split, duplicate, and delete operations. Apply a rich suite of real-time effects including volume/gain, playback speed, pitch shift, fade in/out, reverse, EQ, compressor, reverb, stereo panning, noise reduction, and normalization.
 
 Key capabilities:
 · Waveform Visualization — Full audio waveform rendered on a high-resolution canvas with zoom (1x–50x) and pan support
@@ -3330,8 +3330,10 @@ Key capabilities:
 · Compressor — Threshold, ratio, attack, and release parameters for dynamic range control
 · Reverb — Room size, damping, and wet/dry mix for spatial ambience
 · Noise Reduction & Normalize — Reduce background noise and normalize peak levels
-· Keyboard Shortcuts — Space to play/pause, Ctrl+Z to undo, Ctrl+Shift+Z to redo
-· Export — Render all applied effects and download as WAV`,
+· Multi-Format Export — WAV (8/16/32-bit), WebM/Opus, OGG/Opus, MP3, MP4/AAC (browser-dependent)
+· Results Panel — Browse, preview, and re-download all exported files
+· Workflow Logs — Timestamped debug log of every import, edit, and export action
+· Keyboard Shortcuts — Space to play/pause, Ctrl+Z to undo, Ctrl+Shift+Z to redo`,
       buttons: [
         { name: 'Play / Pause', description: 'Start or pause playback from the current playhead position. Playback respects speed, pitch, loop, and mute settings.' },
         { name: 'Stop', description: 'Stop playback and reset the playhead to the beginning of the audio.' },
@@ -3345,7 +3347,7 @@ Key capabilities:
         { name: 'Fade', description: 'Apply the configured fade-in and fade-out curves to the entire audio buffer.' },
         { name: 'Normalize', description: 'Analyze the entire buffer and scale the amplitude so the loudest peak reaches 99.9% without clipping.' },
         { name: 'Mono', description: 'Mix all channels down to a single mono channel by averaging sample values.' },
-        { name: 'Export WAV', description: 'Render all applied effects (fade, reverse, normalize) into a new WAV file and trigger a browser download.' },
+        { name: 'Export', description: 'Render all applied effects into the selected format and trigger a browser download. Supported formats include WAV 8/16/32-bit, WebM/Opus, OGG/Opus, MP3, and MP4/AAC depending on browser capabilities.' },
         { name: 'New File', description: 'Import a new audio file to replace the current project. The previous edit history is cleared.' },
       ],
       parameters: [
@@ -3353,7 +3355,7 @@ Key capabilities:
         { name: 'Mute', description: 'Silences playback output without changing the underlying buffer data.', tips: 'Useful for A/B comparison when toggling effects.' },
         { name: 'Pan (L/R)', description: 'Stereo panning from -100 (full left) through 0 (center) to +100 (full right).', tips: 'Only audible on stereo systems or headphones.' },
         { name: 'Speed', description: 'Playback speed percentage from 25% (quarter speed) to 400% (quadruple speed).', tips: 'Changing speed also stretches or compresses time. Pitch can be controlled independently via the Pitch parameter.' },
-        { name: 'Pitch (cents)', description: 'Pitch shift in cents from -1200 (one octave down) to +1200 (one octave up).', tips: '100 cents = 1 semitone. Use small values (±50) for subtle tuning corrections.' },
+        { name: 'Pitch (cents)', description: 'Pitch shift in cents from -1200 (one octave down) to +1200 (one octave up).', tips: '100 cents = 1 semitone. Use small values (+/-50) for subtle tuning corrections.' },
         { name: 'Reverse', description: 'When enabled, the audio plays backwards from end to start.', tips: 'Destructive reverse is applied on export; real-time reverse is applied during playback.' },
         { name: 'Loop', description: 'When enabled, playback loops continuously within the selected region (or the full audio if no selection).', tips: 'Set loop boundaries by selecting a region before enabling loop.' },
         { name: 'Fade In', description: 'Duration of the linear fade-in ramp at the start of the audio, from 0 to 10 seconds.', tips: 'A gentle fade-in of 0.1–0.5s is recommended for voice to avoid plosive pops.' },
@@ -3368,8 +3370,9 @@ Key capabilities:
         { name: 'Reverb Room Size', description: 'Simulated room size percentage from 0% (no reverb) to 100% (cathedral-like).', tips: '30–50% simulates a small studio; 70–90% simulates a concert hall.' },
         { name: 'Reverb Damping', description: 'High-frequency absorption percentage from 0% (bright reflections) to 100% (dark/muffled).', tips: 'Higher damping simulates soft furnishings; lower damping simulates hard surfaces.' },
         { name: 'Reverb Wet/Dry', description: 'Blend between dry (original) signal and wet (reverberant) signal, from 0% to 100%.', tips: '20–30% wet mix adds subtle depth without washing out the source.' },
-        { name: 'Noise Reduction', description: 'Intensity of noise gate/suppression from 0% (off) to 100% (aggressive).', tips: 'High values may remove quiet details along with noise. Use sparingly.' },
+        { name: 'Noise Reduction', description: 'Intensity of noise gate/suppression from 0% (off) to 100% (aggressive). Applied during export.', tips: 'High values may remove quiet details along with noise. Use sparingly.' },
         { name: 'Normalize', description: 'When enabled, the exported audio is normalized to peak at 99.9% of digital full scale.', tips: 'Normalization is non-destructive preview; it is only baked into the exported file.' },
+        { name: 'Export Format', description: 'Choose the output file format. WAV variants are universally supported. WebM/Opus, OGG, MP3, and MP4 availability depends on the browser\'s MediaRecorder implementation.', tips: 'WAV 16-bit is the safest choice for maximum compatibility. WebM/Opus offers the best compression-to-quality ratio.' },
       ],
       errors: [
         {
@@ -3431,6 +3434,30 @@ Key capabilities:
           steps: ['Click the upload dropzone', 'Select an audio file', 'Wait for waveform to load'],
           relatedCodes: ['IMPORT_FAILED'],
           prevention: 'The export button is disabled when no audio is loaded; this error may appear from programmatic calls.',
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: 'Export failed',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Audio Editor → Area: Export section',
+          cause: 'The browser does not support the selected export format, or MediaRecorder failed to capture the audio stream.',
+          solution: 'Try a different format (WAV 16-bit is universally supported) or use a different browser.',
+          steps: ['Select WAV 16-bit format', 'Click Export again', 'If still failing, reload the page'],
+          relatedCodes: ['FORMAT_NOT_SUPPORTED', 'MEDIA_RECORDER_ERROR'],
+          prevention: 'Always check the browser\'s supported format list in the format dropdown before exporting.',
+        },
+        {
+          code: 'FORMAT_NOT_SUPPORTED',
+          message: 'Selected export format not supported',
+          severity: 'warning',
+          category: 'F. Browser & Performance',
+          location: 'Page: Audio Editor → Area: Export format dropdown',
+          cause: 'The browser does not implement the selected MIME type for MediaRecorder (e.g., MP3 on Safari).',
+          solution: 'Choose WAV 16-bit PCM, which is guaranteed to work on all browsers.',
+          steps: ['Open the Format dropdown', 'Select WAV 16-bit PCM', 'Click Export'],
+          relatedCodes: ['EXPORT_FAILED'],
+          prevention: 'WAV formats are native and do not rely on MediaRecorder; they are the safest choice.',
         },
         {
           code: 'UNDO_EMPTY',
