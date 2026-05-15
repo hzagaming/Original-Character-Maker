@@ -607,6 +607,19 @@ export function AudioConverterPage({
   const isDirty = sourceFile !== null || resultUrl !== '' || logs.length > 0;
   useBeforeUnloadGuard(isDirty);
 
+    /* ---- Responsive ---- */
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const check = () => setIsNarrow(window.innerWidth < 900);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  /* ---- Panel collapse ---- */
+  const [isResultOpen, setIsResultOpen] = useState(true);
+  const [isLogsOpen, setIsLogsOpen] = useState(true);
+
   /* ---- Render ---- */
   return (
     <main className="feature-shell tool-page-shell">
@@ -619,79 +632,100 @@ export function AudioConverterPage({
         </div>
       </header>
 
-      <section className="tool-workbench fade-up delay-2">
-        <div className="tool-header">
-          <div>
-            <p className="section-label">Audio Format Converter</p>
-            <h2>{pageTitle}</h2>
-            <p>{pageDescription}</p>
-          </div>
-          <div className="tool-header-actions">
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>🎵 Audio Editor</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); handleReset(); }}>Reset</button>
-          </div>
-        </div>
-
-        <div className="tool-grid transfer-grid">
-          <div className="tool-column">
-            {/* Source */}
-            <section className="tool-card">
-              <div className="tool-card-header">
+      <section
+        className="tool-workbench fade-up delay-2"
+        style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20 }}
+      >
+        {/* Left column */}
+        <div className="main-column">
+          {/* Source / Upload */}
+          {!sourceFile ? (
+            <div
+              className="upload-zone"
+              style={{ margin: '40px auto', maxWidth: 560, textAlign: 'center' }}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {isImporting ? (
+                <div style={{ padding: '48px 32px', borderRadius: 16, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }}>⏳</div>
+                  <span className="status-badge running" style={{ marginBottom: 12, display: 'inline-flex' }}>Decoding audio…</span>
+                </div>
+              ) : (
+                <label
+                  htmlFor="audio-converter-import"
+                  className="upload-dropzone"
+                  onClick={() => playSound('buttonClick')}
+                  style={{
+                    cursor: 'pointer',
+                    display: 'block',
+                    padding: '48px 32px',
+                    border: isDragOver ? '2px solid var(--accent)' : '2px dashed var(--border)',
+                    borderRadius: 16,
+                    background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : 'rgba(255,255,255,0.03)',
+                    transition: 'border-color 200ms ease, background 200ms ease',
+                  }}
+                >
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
+                  <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
+                  <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A, AAC, WEBM here</p>
+                </label>
+              )}
+            </div>
+          ) : (
+            <section
+              className="tool-card fade-up delay-3"
+              style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden', marginBottom: 16 }}
+            >
+              <div className="tool-card-header" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <span className="card-caption">Source Audio</span>
-                  <h3>Source Audio</h3>
+                  <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Source</span>
+                  <h3 style={{ margin: 0, fontSize: 15 }}>{sourceFile.name}</h3>
                 </div>
                 <button className="secondary-button small-button" type="button" disabled={isImporting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
-                  {isImporting ? 'Importing…' : sourceFile ? 'Replace' : 'Choose File'}
+                  {isImporting ? 'Importing…' : 'Replace'}
                 </button>
               </div>
-              <input ref={fileInputRef} type="file" accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImportFile(f); e.target.value = ''; }} />
-              <div
-                className="preview-surface"
-                onDragEnter={handleDragEnter}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                style={{
-                  border: isDragOver ? '2px solid var(--accent)' : undefined,
-                  background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : undefined,
-                  transition: 'border-color 200ms ease, background 200ms ease',
-                  minHeight: 80,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {sourceUrl ? (
-                  <audio controls src={sourceUrl} style={{ width: '100%' }} />
-                ) : isImporting ? (
-                  <div className="preview-empty">⏳ Importing audio…</div>
-                ) : (
-                  <div className="preview-empty">Drop audio file here or click Choose File</div>
-                )}
-              </div>
-              {sourceFile && (
-                <p className="tiny-copy">
-                  {sourceFile.name} ({formatBytes(sourceFile.size)}) · {sourceBuffer ? `${sourceBuffer.numberOfChannels}ch, ${sourceBuffer.sampleRate}Hz, ${formatTime(sourceBuffer.duration)}` : ''}
+              <div style={{ padding: '0 16px 16px' }}>
+                <audio controls src={sourceUrl} style={{ width: '100%', borderRadius: 8 }} />
+                <p className="tiny-copy" style={{ marginTop: 8, marginBottom: 0 }}>
+                  {formatBytes(sourceFile.size)} · {sourceBuffer ? `${sourceBuffer.numberOfChannels}ch, ${sourceBuffer.sampleRate}Hz, ${formatTime(sourceBuffer.duration)}` : ''}
                 </p>
-              )}
+              </div>
             </section>
+          )}
+          <input
+            id="audio-converter-import"
+            ref={fileInputRef}
+            type="file"
+            accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
+            hidden
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImportFile(f); e.target.value = ''; }}
+          />
 
-            {/* Settings */}
-            <section className="tool-card">
-              <span className="card-caption">Conversion Settings</span>
-              <h3>Conversion Settings</h3>
-              <div className="form-grid two-column">
-                <label className="field">
-                  <span>Output Format</span>
+          {/* Settings */}
+          <section
+            className="tool-card fade-up delay-3"
+            style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}
+          >
+            <div className="tool-card-header" style={{ padding: '12px 16px' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Settings</span>
+              <h3 style={{ margin: 0, fontSize: 15 }}>Conversion Parameters</h3>
+            </div>
+            <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Output Format</span>
                   <select className="settings-input tool-select" value={outputFormat} onChange={(e) => { playSound('buttonClick'); setOutputFormat(e.target.value as typeof outputFormat); }}>
                     {supportedFormats.map((f) => (
                       <option key={f.key} value={f.key}>{f.label}</option>
                     ))}
                   </select>
                 </label>
-                <label className="field">
-                  <span>Sample Rate</span>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Sample Rate</span>
                   <select className="settings-input tool-select" value={sampleRate} onChange={(e) => { playSound('buttonClick'); setSampleRate(e.target.value as typeof sampleRate); }}>
                     <option value="original">Original</option>
                     <option value="22050">22050 Hz</option>
@@ -701,108 +735,148 @@ export function AudioConverterPage({
                     <option value="192000">192000 Hz</option>
                   </select>
                 </label>
-                <label className="field">
-                  <span>Channels</span>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Channels</span>
                   <select className="settings-input tool-select" value={channels} onChange={(e) => { playSound('buttonClick'); setChannels(e.target.value as typeof channels); }}>
                     <option value="original">Original</option>
                     <option value="mono">Mono</option>
                     <option value="stereo">Stereo</option>
                   </select>
                 </label>
-                <label className="field">
-                  <span>Volume ({volume}%)</span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Volume ({volume}%)</span>
                   <input className="tool-range" type="range" min="50" max="200" step="1" value={volume} onChange={(e) => { playSound('sliderChange'); setVolume(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Speed ({speed}%)</span>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Speed ({speed}%)</span>
                   <input className="tool-range" type="range" min="25" max="400" step="1" value={speed} onChange={(e) => { playSound('sliderChange'); setSpeed(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Pitch ({pitch > 0 ? '+' : ''}{pitch} cents)</span>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Pitch ({pitch > 0 ? '+' : ''}{pitch} cents)</span>
                   <input className="tool-range" type="range" min="-1200" max="1200" step="10" value={pitch} onChange={(e) => { playSound('sliderChange'); setPitch(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Fade In ({fadeIn}s)</span>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Fade In ({fadeIn}s)</span>
                   <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeIn} onChange={(e) => { playSound('sliderChange'); setFadeIn(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Fade Out ({fadeOut}s)</span>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Fade Out ({fadeOut}s)</span>
                   <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeOut} onChange={(e) => { playSound('sliderChange'); setFadeOut(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Noise Reduction ({noiseReduction}%)</span>
+                <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Noise Reduction ({noiseReduction}%)</span>
                   <input className="tool-range" type="range" min="0" max="100" step="1" value={noiseReduction} onChange={(e) => { playSound('sliderChange'); setNoiseReduction(Number(e.target.value)); }} />
                 </label>
               </div>
-              <div className="toggle-grid" style={{ marginTop: 8 }}>
+
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <button className={`toggle-chip ${doNormalize ? 'active' : ''}`} type="button" aria-pressed={doNormalize} onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>
                   <span className="toggle-chip-dot" />
                   Normalize Peak
                 </button>
               </div>
-              <div className="tool-actions-row" style={{ marginTop: 12 }}>
+
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <button className="primary-button" type="button" onClick={handleConvert} disabled={!sourceBuffer || isConverting}>
                   {isConverting ? `Converting ${convertProgress}%…` : 'Convert'}
                 </button>
                 <button className="secondary-button" type="button" onClick={handleDownload} disabled={!resultUrl}>
                   Download
                 </button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>🎵 Audio Editor</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); handleReset(); }}>Reset</button>
               </div>
+
               {(isConverting || convertProgress > 0) && (
-                <div className="progress-track" style={{ marginTop: 12 }}>
+                <div className="progress-track">
                   <div className="progress-fill" style={{ width: `${convertProgress}%` }} />
                 </div>
               )}
-            </section>
-          </div>
+            </div>
+          </section>
+        </div>
 
-          <div className="tool-column side">
-            {/* Result */}
-            <section className="tool-card">
-              <span className="card-caption">Result</span>
-              <h3>Result</h3>
-              <div className="preview-surface" style={{ minHeight: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Right column */}
+        <div className="side-column" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Results panel */}
+          <section
+            className="tool-card fade-up delay-4"
+            style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}
+          >
+            <div
+              className="tool-card-header"
+              style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              onClick={() => { playSound('expand'); setIsResultOpen((v) => !v); }}
+              role="button"
+              tabIndex={0}
+            >
+              <div>
+                <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Results</span>
+                <h3 style={{ margin: 0, fontSize: 15 }}>{resultUrl ? 'Converted File' : 'No exports yet'}</h3>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isResultOpen ? '▲' : '▼'}</span>
+            </div>
+            {isResultOpen && (
+              <div style={{ padding: '0 16px 16px' }}>
                 {resultUrl ? (
-                  <audio controls src={resultUrl} style={{ width: '100%' }} />
+                  <>
+                    <audio controls src={resultUrl} style={{ width: '100%', borderRadius: 8 }} />
+                    <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 12 }}>
+                      <span style={{ color: 'var(--text-secondary)' }}>Format: <strong style={{ color: 'var(--text-primary)' }}>{resultFormat}</strong></span>
+                      <span style={{ color: 'var(--text-secondary)' }}>Size: <strong style={{ color: 'var(--text-primary)' }}>{formatBytes(resultBlob?.size || 0)}</strong></span>
+                    </div>
+                  </>
                 ) : (
-                  <div className="preview-empty">{isConverting ? 'Converting…' : 'Result will appear here'}</div>
+                  <p className="tiny-copy" style={{ margin: 0, opacity: 0.6 }}>Select a format and click Convert.</p>
                 )}
               </div>
-              {resultBlob && (
-                <div className="progress-meta" style={{ marginTop: 8 }}>
-                  <span>Format</span><strong>{resultFormat}</strong>
-                  <span>Size</span><strong>{formatBytes(resultBlob.size)}</strong>
-                </div>
-              )}
-            </section>
+            )}
+          </section>
 
-            {/* Logs */}
-            <section className="tool-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <div className="tool-card-header">
-                <div>
-                  <span className="card-caption">Logs</span>
-                  <h3>Logs</h3>
-                </div>
-                <div className="tool-header-actions">
+          {/* Logs panel */}
+          <section
+            className="tool-card fade-up delay-4"
+            style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden', flex: 1, minHeight: 200 }}
+          >
+            <div
+              className="tool-card-header"
+              style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              onClick={() => { playSound('expand'); setIsLogsOpen((v) => !v); }}
+              role="button"
+              tabIndex={0}
+            >
+              <div>
+                <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Debug</span>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Workflow Logs ({logs.length})</h3>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isLogsOpen ? '▲' : '▼'}</span>
+            </div>
+            {isLogsOpen && (
+              <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
                   <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
                   <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { playSound('deleteSound'); setLogs([]); }}>Clear</button>
+                </div>
+                <div className="log-scroll" style={{ maxHeight: 320, overflowY: 'auto' }}>
+                  {logs.length === 0 ? (
+                    <p className="tiny-copy" style={{ opacity: 0.6, margin: 0 }}>No logs yet.</p>
+                  ) : (
+                    logs.map((l, i) => (
+                      <div key={i} className={`log-line log-${l.level}`}>
+                        <span className="log-time">{l.time}</span>
+                        <span className={`log-badge ${l.level}`}>{l.level}</span>
+                        <span className="log-text">{l.text}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
-              <div className="log-scroll" style={{ flex: 1, minHeight: 120 }}>
-                {logs.length === 0 ? (
-                  <p className="tiny-copy" style={{ opacity: 0.6 }}>Waiting for operations…</p>
-                ) : (
-                  logs.map((l, i) => (
-                    <div key={i} className={`log-line log-${l.level}`}>
-                      <span className="log-time">{l.time}</span>
-                      <span className={`log-badge ${l.level}`}>{l.level}</span>
-                      <span className="log-text">{l.text}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-          </div>
+            )}
+          </section>
         </div>
       </section>
 
