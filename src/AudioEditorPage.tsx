@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AppLanguage, SettingsState } from './types';
 import { DraggableErrorPanel } from './components/DraggableErrorPanel';
+import { playSound } from './audioEngine';
 
 type SharedPageProps = {
   appSubtitle: string;
@@ -61,6 +62,7 @@ function formatBytes(bytes: number): string {
 }
 
 function generateWaveformData(buffer: AudioBuffer, width: number): number[] {
+  if (!buffer || width <= 0) return [];
   const channel = buffer.getChannelData(0);
   const step = Math.max(1, Math.floor(channel.length / width));
   const peaks: number[] = [];
@@ -79,8 +81,8 @@ function generateWaveformData(buffer: AudioBuffer, width: number): number[] {
 
 function trimAudioBuffer(buffer: AudioBuffer, start: number, end: number): AudioBuffer {
   const sampleRate = buffer.sampleRate;
-  const startSample = Math.floor(start * sampleRate);
-  const endSample = Math.floor(end * sampleRate);
+  const startSample = Math.max(0, Math.floor(start * sampleRate));
+  const endSample = Math.min(buffer.length, Math.floor(end * sampleRate));
   const len = Math.max(0, endSample - startSample);
   const trimmed = new AudioBuffer({ numberOfChannels: buffer.numberOfChannels, length: len, sampleRate });
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
@@ -91,11 +93,11 @@ function trimAudioBuffer(buffer: AudioBuffer, start: number, end: number): Audio
 
 function splitAt(buffer: AudioBuffer, time: number): [AudioBuffer, AudioBuffer] {
   const sampleRate = buffer.sampleRate;
-  const splitSample = Math.floor(time * sampleRate);
+  const splitSample = Math.max(0, Math.min(buffer.length, Math.floor(time * sampleRate)));
   const len1 = splitSample;
   const len2 = buffer.length - splitSample;
-  const left = new AudioBuffer({ numberOfChannels: buffer.numberOfChannels, length: Math.max(0, len1), sampleRate });
-  const right = new AudioBuffer({ numberOfChannels: buffer.numberOfChannels, length: Math.max(0, len2), sampleRate });
+  const left = new AudioBuffer({ numberOfChannels: buffer.numberOfChannels, length: len1, sampleRate });
+  const right = new AudioBuffer({ numberOfChannels: buffer.numberOfChannels, length: len2, sampleRate });
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
     const src = buffer.getChannelData(ch);
     if (len1 > 0) left.copyToChannel(src.subarray(0, splitSample), ch);
@@ -105,6 +107,7 @@ function splitAt(buffer: AudioBuffer, time: number): [AudioBuffer, AudioBuffer] 
 }
 
 function applyFade(buffer: AudioBuffer, fadeIn: number, fadeOut: number): AudioBuffer {
+  if (fadeIn <= 0 && fadeOut <= 0) return buffer;
   const sr = buffer.sampleRate;
   const inSamples = Math.floor(fadeIn * sr);
   const outSamples = Math.floor(fadeOut * sr);
@@ -115,7 +118,7 @@ function applyFade(buffer: AudioBuffer, fadeIn: number, fadeOut: number): AudioB
     for (let i = 0; i < src.length; i++) {
       let gain = 1;
       if (inSamples > 0 && i < inSamples) gain = i / inSamples;
-      if (outSamples > 0 && i > src.length - outSamples) gain = (src.length - i) / outSamples;
+      if (outSamples > 0 && i > src.length - outSamples) gain = Math.max(0, (src.length - i) / outSamples);
       dst[i] = src[i] * gain;
     }
   }
@@ -163,7 +166,7 @@ function normalizeBuffer(buffer: AudioBuffer): AudioBuffer {
 
 function applyNoiseReduction(buffer: AudioBuffer, intensity: number): AudioBuffer {
   if (intensity <= 0) return buffer;
-  const threshold = (intensity / 100) * 0.02; // Gate threshold
+  const threshold = (intensity / 100) * 0.02;
   const result = new AudioBuffer({ numberOfChannels: buffer.numberOfChannels, length: buffer.length, sampleRate: buffer.sampleRate });
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
     const src = buffer.getChannelData(ch);
@@ -171,7 +174,7 @@ function applyNoiseReduction(buffer: AudioBuffer, intensity: number): AudioBuffe
     for (let i = 0; i < src.length; i++) {
       const v = Math.abs(src[i]);
       if (v < threshold) {
-        dst[i] = src[i] * (v / threshold); // Soft gate
+        dst[i] = src[i] * (v / threshold);
       } else {
         dst[i] = src[i];
       }
@@ -180,7 +183,7 @@ function applyNoiseReduction(buffer: AudioBuffer, intensity: number): AudioBuffe
   return result;
 }
 
-/* ---- WAV Exporters (multiple bit depths) ---- */
+/* ---- WAV Exporters ---- */
 
 function audioBufferToWav(buffer: AudioBuffer, bitDepth: 8 | 16 | 32 = 16): Blob {
   const numOfChan = buffer.numberOfChannels;
@@ -201,7 +204,7 @@ function audioBufferToWav(buffer: AudioBuffer, bitDepth: 8 | 16 | 32 = 16): Blob
   writeString('WAVE');
   writeString('fmt ');
   writeUint32(16);
-  writeUint16(bitDepth === 32 ? 3 : 1); // 3 = IEEE float, 1 = PCM
+  writeUint16(bitDepth === 32 ? 3 : 1);
   writeUint16(numOfChan);
   writeUint32(buffer.sampleRate);
   writeUint32(buffer.sampleRate * blockAlign);
@@ -231,9 +234,10 @@ function audioBufferToWav(buffer: AudioBuffer, bitDepth: 8 | 16 | 32 = 16): Blob
   return new Blob([arr], { type: 'audio/wav' });
 }
 
-/* ---- MediaRecorder-based export for compressed formats ---- */
+/* ---- MediaRecorder-based export ---- */
 
 function getSupportedMimeTypes(): string[] {
+  if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return [];
   const types = [
     'audio/webm;codecs=opus',
     'audio/webm',
@@ -246,11 +250,10 @@ function getSupportedMimeTypes(): string[] {
   return types.filter((t) => MediaRecorder.isTypeSupported(t));
 }
 
-async function exportViaMediaRecorder(
-  buffer: AudioBuffer,
-  mimeType: string
-): Promise<Blob> {
-  const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Promise<Blob> {
+  const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AC) throw new Error('Web Audio API not supported');
+  const ctx = new AC();
   const source = ctx.createBufferSource();
   source.buffer = buffer;
 
@@ -264,19 +267,17 @@ async function exportViaMediaRecorder(
   return new Promise((resolve, reject) => {
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type: mimeType });
-      ctx.close();
+      ctx.close().catch(() => {});
       resolve(blob);
     };
     recorder.onerror = () => {
-      ctx.close();
+      ctx.close().catch(() => {});
       reject(new Error('MediaRecorder error'));
     };
 
     recorder.start();
     source.start(0);
-    source.onended = () => {
-      recorder.stop();
-    };
+    source.onended = () => recorder.stop();
   });
 }
 
@@ -293,8 +294,10 @@ export function AudioEditorPage({
   onOpenSettings,
   onOpenDocs,
 }: SharedPageProps) {
+  /* ---- Single shared AudioContext ---- */
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
   /* ---- Audio state ---- */
-  const [audioCtx, setAudioCtx] = useState<AudioContext | null>(null);
   const [sourceBuffer, setSourceBuffer] = useState<AudioBuffer | null>(null);
   const [editBuffer, setEditBuffer] = useState<AudioBuffer | null>(null);
   const [fileName, setFileName] = useState('');
@@ -350,6 +353,7 @@ export function AudioEditorPage({
   /* ---- Logs ---- */
   const [logs, setLogs] = useState<WorkflowLog[]>([]);
   const [isLogsOpen, setIsLogsOpen] = useState(true);
+  const MAX_LOGS = 500;
 
   /* ---- Export / Results ---- */
   const [exports, setExports] = useState<ExportRecord[]>([]);
@@ -357,19 +361,62 @@ export function AudioEditorPage({
   const [exportFormat, setExportFormat] = useState<'wav-16' | 'wav-8' | 'wav-32' | 'webm' | 'ogg' | 'mp3'>('wav-16');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+  const MAX_EXPORTS = 50;
 
   /* ---- Error panel ---- */
   const [errors, setErrors] = useState<{ code: string; message: string; hint: string }[]>([]);
 
-  /* ---- Refs for audio processing ---- */
+  /* ---- Refs for real-time nodes ---- */
   const gainNodeRef = useRef<GainNode | null>(null);
   const panNodeRef = useRef<StereoPannerNode | null>(null);
+
+  /* ---- Responsive ---- */
+  const [isNarrow, setIsNarrow] = useState(false);
+
+  /* ================================================================== */
+  /*  Lifecycle & Cleanup                                                */
+  /* ================================================================== */
+  useEffect(() => {
+    function onResize() {
+      setIsNarrow(window.innerWidth < 900);
+      // Redraw waveform on resize
+      if (editBuffer && canvasRef.current) {
+        const w = canvasRef.current.clientWidth || 800;
+        setPeaks(generateWaveformData(editBuffer, w));
+      }
+    }
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [editBuffer]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup audio context
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close().catch(() => {});
+      }
+      // Stop playback
+      if (sourceRef.current) {
+        try { sourceRef.current.stop(); } catch { /* ignore */ }
+        sourceRef.current.disconnect();
+      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      // Revoke all export URLs
+      exports.forEach((rec) => URL.revokeObjectURL(rec.url));
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ================================================================== */
   /*  Logging                                                            */
   /* ================================================================== */
   const addLog = useCallback((level: LogLevel, text: string) => {
-    setLogs((current) => [...current, { time: timestamp(), level, text }]);
+    setLogs((current) => {
+      const next = [...current, { time: timestamp(), level, text }];
+      if (next.length > MAX_LOGS) next.splice(0, next.length - MAX_LOGS);
+      return next;
+    });
   }, []);
 
   const clearLogs = useCallback(() => setLogs([]), []);
@@ -382,11 +429,16 @@ export function AudioEditorPage({
   const handleImport = useCallback(
     async (file: File) => {
       try {
+        playSound('uploadStart');
         addLog('info', `Importing: ${file.name} (${formatBytes(file.size)})`);
-        const ctx = new AudioContext();
+
+        let ctx = audioCtxRef.current;
+        if (!ctx || ctx.state === 'closed') {
+          ctx = new AudioContext();
+          audioCtxRef.current = ctx;
+        }
         const arrayBuffer = await file.arrayBuffer();
         const decoded = await ctx.decodeAudioData(arrayBuffer);
-        setAudioCtx(ctx);
         setSourceBuffer(decoded);
         setEditBuffer(decoded);
         setFileName(file.name);
@@ -396,18 +448,19 @@ export function AudioEditorPage({
         setSelection(null);
         setCurrentTime(0);
         setErrors([]);
+        playSound('uploadComplete');
         addLog('success', `Import complete: ${decoded.numberOfChannels}ch, ${decoded.sampleRate}Hz, ${formatTime(decoded.duration)}`);
 
         const canvas = canvasRef.current;
         if (canvas) {
-          const w = canvas.width || canvas.clientWidth || 800;
-          const newPeaks = generateWaveformData(decoded, w);
-          setPeaks(newPeaks);
+          const w = canvas.clientWidth || 800;
+          setPeaks(generateWaveformData(decoded, w));
         }
       } catch (err) {
         const msg = String(err);
         setErrors([{ code: 'IMPORT_FAILED', message: 'Failed to decode audio file', hint: msg }]);
         addLog('error', `Import failed: ${msg}`);
+        playSound('error');
       }
     },
     [addLog]
@@ -419,19 +472,26 @@ export function AudioEditorPage({
   const stopPlayback = useCallback(() => {
     if (sourceRef.current) {
       try { sourceRef.current.stop(); } catch { /* already stopped */ }
-      sourceRef.current.disconnect();
+      try { sourceRef.current.disconnect(); } catch { /* ignore */ }
       sourceRef.current = null;
     }
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
     setIsPlaying(false);
   }, []);
 
   const startPlayback = useCallback(
     (offset: number) => {
-      if (!audioCtx || !editBuffer) return;
+      const ctx = audioCtxRef.current;
+      if (!ctx || !editBuffer) return;
       stopPlayback();
 
-      const source = audioCtx.createBufferSource();
+      // Resume context if suspended (browser autoplay policy)
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      const source = ctx.createBufferSource();
       source.buffer = isReversed ? applyReverse(editBuffer) : editBuffer;
       source.playbackRate.value = speed / 100;
       source.detune.value = pitch;
@@ -442,35 +502,35 @@ export function AudioEditorPage({
       }
 
       // EQ chain
-      const eqLowNode = audioCtx.createBiquadFilter();
+      const eqLowNode = ctx.createBiquadFilter();
       eqLowNode.type = 'lowshelf';
       eqLowNode.frequency.value = 200;
       eqLowNode.gain.value = eqLow;
 
-      const eqMidNode = audioCtx.createBiquadFilter();
+      const eqMidNode = ctx.createBiquadFilter();
       eqMidNode.type = 'peaking';
       eqMidNode.frequency.value = 1000;
       eqMidNode.gain.value = eqMid;
 
-      const eqHighNode = audioCtx.createBiquadFilter();
+      const eqHighNode = ctx.createBiquadFilter();
       eqHighNode.type = 'highshelf';
       eqHighNode.frequency.value = 5000;
       eqHighNode.gain.value = eqHigh;
 
       // Compressor
-      const compNode = audioCtx.createDynamicsCompressor();
+      const compNode = ctx.createDynamicsCompressor();
       compNode.threshold.value = compThreshold;
       compNode.ratio.value = compRatio;
       compNode.attack.value = compAttack / 1000;
       compNode.release.value = compRelease / 1000;
 
-      // Reverb (ConvolverNode with generated impulse)
-      const convolver = audioCtx.createConvolver();
+      // Reverb
+      const convolver = ctx.createConvolver();
       if (reverbSize > 0) {
-        const sr = audioCtx.sampleRate;
+        const sr = ctx.sampleRate;
         const dur = 0.5 + (reverbSize / 100) * 3.5;
         const len = Math.floor(sr * dur);
-        const impulse = audioCtx.createBuffer(2, len, sr);
+        const impulse = ctx.createBuffer(2, len, sr);
         for (let ch = 0; ch < 2; ch++) {
           const data = impulse.getChannelData(ch);
           for (let i = 0; i < len; i++) {
@@ -481,18 +541,18 @@ export function AudioEditorPage({
         convolver.buffer = impulse;
       }
 
-      const dryGain = audioCtx.createGain();
+      const dryGain = ctx.createGain();
       dryGain.gain.value = 1 - (reverbMix / 100);
 
-      const wetGain = audioCtx.createGain();
+      const wetGain = ctx.createGain();
       wetGain.gain.value = reverbMix / 100;
 
       // Master gain & pan
-      const gain = audioCtx.createGain();
+      const gain = ctx.createGain();
       gain.gain.value = isMuted ? 0 : volume / 100;
       gainNodeRef.current = gain;
 
-      const panner = audioCtx.createStereoPanner();
+      const panner = ctx.createStereoPanner();
       panner.pan.value = pan;
       panNodeRef.current = panner;
 
@@ -500,18 +560,17 @@ export function AudioEditorPage({
       source.connect(eqLowNode).connect(eqMidNode).connect(eqHighNode).connect(compNode);
       compNode.connect(dryGain).connect(gain);
       compNode.connect(convolver).connect(wetGain).connect(gain);
-      gain.connect(panner).connect(audioCtx.destination);
+      gain.connect(panner).connect(ctx.destination);
 
       source.start(0, offset);
       sourceRef.current = source;
-      playStartTimeRef.current = audioCtx.currentTime;
+      playStartTimeRef.current = ctx.currentTime;
       playOffsetRef.current = offset;
       setIsPlaying(true);
-      addLog('debug', `Playback started at ${formatTime(offset)} (speed=${speed}%, pitch=${pitch}c)`);
 
       const tick = () => {
-        if (!audioCtx || !sourceRef.current) return;
-        const elapsed = audioCtx.currentTime - playStartTimeRef.current;
+        if (!audioCtxRef.current || !sourceRef.current) return;
+        const elapsed = audioCtxRef.current.currentTime - playStartTimeRef.current;
         const t = playOffsetRef.current + elapsed * (speed / 100);
         if (t >= editBuffer.duration && !isLoop) {
           stopPlayback();
@@ -530,17 +589,17 @@ export function AudioEditorPage({
         }
       };
     },
-    [audioCtx, editBuffer, speed, pitch, isLoop, selection, volume, isMuted, pan, stopPlayback, addLog, eqLow, eqMid, eqHigh, compThreshold, compRatio, compAttack, compRelease, reverbSize, reverbDamp, reverbMix, isReversed]
+    [editBuffer, speed, pitch, isLoop, selection, volume, isMuted, pan, stopPlayback, addLog, eqLow, eqMid, eqHigh, compThreshold, compRatio, compAttack, compRelease, reverbSize, reverbDamp, reverbMix, isReversed]
   );
 
   const togglePlay = useCallback(() => {
     if (isPlaying) {
       stopPlayback();
-      if (audioCtx) playOffsetRef.current = currentTime;
+      playOffsetRef.current = currentTime;
     } else {
       startPlayback(currentTime);
     }
-  }, [isPlaying, currentTime, audioCtx, startPlayback, stopPlayback]);
+  }, [isPlaying, currentTime, startPlayback, stopPlayback]);
 
   /* ---- Real-time parameter updates ---- */
   useEffect(() => {
@@ -568,7 +627,7 @@ export function AudioEditorPage({
       setDuration(buffer.duration);
       const canvas = canvasRef.current;
       if (canvas) {
-        const w = canvas.width || canvas.clientWidth || 800;
+        const w = canvas.clientWidth || 800;
         setPeaks(generateWaveformData(buffer, w));
       }
     },
@@ -583,26 +642,22 @@ export function AudioEditorPage({
       switch (name) {
         case 'trim': {
           if (!selection) return;
-          result = trimAudioBuffer(editBuffer, selection.start, selection.end);
+          if (selection.start >= selection.end || selection.start >= editBuffer.duration) {
+            addLog('info', 'Invalid selection for trim');
+            return;
+          }
+          result = trimAudioBuffer(editBuffer, selection.start, Math.min(selection.end, editBuffer.duration));
           setSelection(null);
           setCurrentTime(0);
-          addLog('success', `Trimmed to ${formatTime(result.duration)} (${formatTime(selection.start)}–${formatTime(selection.end)})`);
+          addLog('success', `Trimmed to ${formatTime(result.duration)} (${formatTime(selection.start)}–${formatTime(Math.min(selection.end, editBuffer.duration))})`);
+          playSound('success');
           break;
         }
         case 'split': {
           if (!selection) return;
-          const [left] = splitAt(editBuffer, selection.start);
-          result = left;
-          setSelection(null);
-          setCurrentTime(0);
-          addLog('success', `Split at ${formatTime(selection.start)}`);
-          break;
-        }
-        case 'delete': {
-          if (!selection) return;
-          const [left, right] = splitAt(editBuffer, selection.start);
-          const [, right2] = splitAt(editBuffer, selection.end);
-          void right2;
+          const splitTime = Math.max(0, Math.min(selection.start, editBuffer.duration));
+          const [left, right] = splitAt(editBuffer, splitTime);
+          // Concatenate left + right (split is effectively a marker, keeping both parts)
           const len = left.length + right.length;
           const merged = new AudioBuffer({ numberOfChannels: editBuffer.numberOfChannels, length: len, sampleRate: editBuffer.sampleRate });
           for (let ch = 0; ch < editBuffer.numberOfChannels; ch++) {
@@ -611,13 +666,41 @@ export function AudioEditorPage({
           }
           result = merged;
           setSelection(null);
-          setCurrentTime(0);
-          addLog('success', `Deleted region ${formatTime(selection.start)}–${formatTime(selection.end)}`);
+          setCurrentTime(splitTime);
+          addLog('success', `Split at ${formatTime(splitTime)}`);
+          playSound('success');
+          break;
+        }
+        case 'delete': {
+          if (!selection) return;
+          const s = Math.max(0, selection.start);
+          const e = Math.min(selection.end, editBuffer.duration);
+          if (s >= e) { addLog('info', 'Invalid selection for delete'); return; }
+          if (s <= 0 && e >= editBuffer.duration) {
+            addLog('info', 'Cannot delete entire audio');
+            return;
+          }
+          const [left] = splitAt(editBuffer, s);
+          const [, right] = splitAt(editBuffer, e);
+          const len = left.length + right.length;
+          const merged = new AudioBuffer({ numberOfChannels: editBuffer.numberOfChannels, length: len, sampleRate: editBuffer.sampleRate });
+          for (let ch = 0; ch < editBuffer.numberOfChannels; ch++) {
+            merged.getChannelData(ch).set(left.getChannelData(ch), 0);
+            merged.getChannelData(ch).set(right.getChannelData(ch), left.length);
+          }
+          result = merged;
+          setSelection(null);
+          setCurrentTime(s);
+          addLog('success', `Deleted region ${formatTime(s)}–${formatTime(e)}`);
+          playSound('deleteSound');
           break;
         }
         case 'duplicate': {
           if (!selection) return;
-          const selected = trimAudioBuffer(editBuffer, selection.start, selection.end);
+          const s = Math.max(0, selection.start);
+          const e = Math.min(selection.end, editBuffer.duration);
+          if (s >= e) { addLog('info', 'Invalid selection for duplicate'); return; }
+          const selected = trimAudioBuffer(editBuffer, s, e);
           const len = editBuffer.length + selected.length;
           const merged = new AudioBuffer({ numberOfChannels: editBuffer.numberOfChannels, length: len, sampleRate: editBuffer.sampleRate });
           for (let ch = 0; ch < editBuffer.numberOfChannels; ch++) {
@@ -626,27 +709,32 @@ export function AudioEditorPage({
           }
           result = merged;
           setSelection(null);
-          addLog('success', `Duplicated region ${formatTime(selection.start)}–${formatTime(selection.end)}`);
+          addLog('success', `Duplicated region ${formatTime(s)}–${formatTime(e)}`);
+          playSound('success');
           break;
         }
         case 'reverse': {
           result = applyReverse(editBuffer);
           addLog('success', 'Reversed audio');
+          playSound('success');
           break;
         }
         case 'fade': {
           result = applyFade(editBuffer, fadeIn, fadeOut);
           addLog('success', `Applied fade: in=${fadeIn}s, out=${fadeOut}s`);
+          playSound('success');
           break;
         }
         case 'normalize': {
           result = normalizeBuffer(editBuffer);
           addLog('success', 'Normalized peak levels');
+          playSound('success');
           break;
         }
         case 'mono': {
           result = mixToMono(editBuffer);
           addLog('success', `Mixed to mono (${result.numberOfChannels}ch)`);
+          playSound('success');
           break;
         }
         default:
@@ -665,6 +753,7 @@ export function AudioEditorPage({
       setEditBuffer(history[idx]);
       setDuration(history[idx].duration);
       addLog('info', `Undo: restored step ${idx}`);
+      playSound('undo');
     }
   }, [history, historyIdx, addLog]);
 
@@ -675,8 +764,35 @@ export function AudioEditorPage({
       setEditBuffer(history[idx]);
       setDuration(history[idx].duration);
       addLog('info', `Redo: restored step ${idx}`);
+      playSound('redo');
     }
   }, [history, historyIdx, addLog]);
+
+  const resetEffects = useCallback(() => {
+    setVolume(100);
+    setSpeed(100);
+    setPitch(0);
+    setFadeIn(0);
+    setFadeOut(0);
+    setIsMuted(false);
+    setIsReversed(false);
+    setIsLoop(false);
+    setNoiseReduction(0);
+    setDoNormalize(false);
+    setEqLow(0);
+    setEqMid(0);
+    setEqHigh(0);
+    setCompThreshold(-24);
+    setCompRatio(4);
+    setCompAttack(3);
+    setCompRelease(50);
+    setReverbSize(30);
+    setReverbDamp(50);
+    setReverbMix(20);
+    setPan(0);
+    addLog('info', 'All effect parameters reset to defaults');
+    playSound('resetSound');
+  }, [addLog]);
 
   /* ================================================================== */
   /*  Export                                                             */
@@ -694,7 +810,6 @@ export function AudioEditorPage({
       if (t.includes('mp4')) return { key: 'mp4', label: 'MP4 / AAC' };
       return { key: t, label: t };
     });
-    // deduplicate by key
     const seen = new Set<string>();
     const all = [...wav];
     for (const c of compressed) {
@@ -708,13 +823,16 @@ export function AudioEditorPage({
 
   const handleExport = useCallback(
     async () => {
-      if (!editBuffer) return;
+      if (!editBuffer) {
+        addLog('info', 'Cannot export: no audio loaded');
+        return;
+      }
       setIsExporting(true);
       setExportProgress(10);
       addLog('info', `Starting export: ${exportFormat.toUpperCase()}`);
+      playSound('exportStart');
 
       try {
-        // Build processed buffer
         let output = editBuffer;
         if (noiseReduction > 0) {
           output = applyNoiseReduction(output, noiseReduction);
@@ -769,10 +887,17 @@ export function AudioEditorPage({
           size: blob.size,
           createdAt: timestamp(),
         };
-        setExports((prev) => [record, ...prev]);
+        setExports((prev) => {
+          const next = [record, ...prev];
+          if (next.length > MAX_EXPORTS) {
+            const removed = next.splice(MAX_EXPORTS);
+            removed.forEach((r) => URL.revokeObjectURL(r.url));
+          }
+          return next;
+        });
         addLog('success', `Export complete: ${record.fileName} (${formatBytes(record.size)})`);
+        playSound('workflowComplete');
 
-        // Auto-download
         const a = document.createElement('a');
         a.href = url;
         a.download = record.fileName;
@@ -781,9 +906,10 @@ export function AudioEditorPage({
         const msg = String(err);
         setErrors([{ code: 'EXPORT_FAILED', message: 'Export failed', hint: msg }]);
         addLog('error', `Export failed: ${msg}`);
+        playSound('workflowFail');
       } finally {
         setIsExporting(false);
-        setExportProgress(0);
+        setTimeout(() => setExportProgress(0), 600);
       }
     },
     [editBuffer, exportFormat, fileName, fadeIn, fadeOut, isReversed, doNormalize, noiseReduction, addLog]
@@ -795,6 +921,7 @@ export function AudioEditorPage({
       if (rec) URL.revokeObjectURL(rec.url);
       return prev.filter((p) => p.id !== id);
     });
+    playSound('deleteSound');
   }, []);
 
   /* ================================================================== */
@@ -834,7 +961,7 @@ export function AudioEditorPage({
 
     // Waveform
     const totalVisible = Math.floor(peaks.length / zoom);
-    const startIdx = Math.floor((panOffset / duration) * peaks.length);
+    const startIdx = Math.max(0, Math.floor((panOffset / duration) * peaks.length));
     const endIdx = Math.min(startIdx + totalVisible, peaks.length);
     const samplesPerPixel = Math.max(1, (endIdx - startIdx) / w);
 
@@ -894,7 +1021,7 @@ export function AudioEditorPage({
       const x = clientX - rect.left;
       const ratio = x / rect.width;
       const totalVisible = Math.floor(peaks.length / zoom);
-      const startIdx = Math.floor((panOffset / duration) * peaks.length);
+      const startIdx = Math.max(0, Math.floor((panOffset / duration) * peaks.length));
       const sampleIdx = startIdx + ratio * totalVisible;
       return Math.max(0, Math.min(duration, (sampleIdx / peaks.length) * duration));
     },
@@ -975,6 +1102,11 @@ export function AudioEditorPage({
   /* ================================================================== */
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Ignore if user is typing in an input/textarea/select
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target as HTMLElement)?.isContentEditable) {
+        return;
+      }
       if (e.key === ' ') {
         e.preventDefault();
         togglePlay();
@@ -995,16 +1127,16 @@ export function AudioEditorPage({
     <div className="page-root">
       <header className="page-header">
         <div className="header-left">
-          <button className="back-button" type="button" onClick={onBack} aria-label={backHome}>←</button>
+          <button className="back-button" type="button" onClick={() => { playSound('back'); onBack(); }} aria-label={backHome}>←</button>
           <div>
             <h1 className="page-title">{pageTitle}</h1>
             <p className="page-subtitle">{pageDescription}</p>
           </div>
         </div>
-        <button className="settings-trigger" type="button" onClick={onOpenSettings} aria-label={openSettings}>⚙</button>
+        <button className="settings-trigger" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }} aria-label={openSettings}>⚙</button>
       </header>
 
-      <main className="page-body" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20 }}>
+      <main className="page-body" style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20 }}>
         <div className="main-column">
           {/* ---- Import area ---- */}
           {!editBuffer && (
@@ -1031,26 +1163,27 @@ export function AudioEditorPage({
                 <span className="file-label" style={{ fontSize: 13, color: 'var(--text-secondary)', marginRight: 8 }}>
                   {fileName} · {formatTime(duration)}
                 </span>
-                <button className="secondary-button small-button" type="button" onClick={togglePlay}>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
                   {isPlaying ? '⏸ Pause' : '▶ Play'}
                 </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { stopPlayback(); setCurrentTime(0); }}>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
                   ⏹ Stop
                 </button>
-                <button className="secondary-button small-button" type="button" onClick={undo} disabled={historyIdx <= 0}>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>
                   ↩ Undo
                 </button>
-                <button className="secondary-button small-button" type="button" onClick={redo} disabled={historyIdx >= history.length - 1}>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>
                   ↪ Redo
                 </button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('trim')} disabled={!selection}>✂ Trim</button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('split')} disabled={!selection}>✂ Split</button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('delete')} disabled={!selection}>🗑 Delete</button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('duplicate')} disabled={!selection}>📋 Duplicate</button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('reverse')}>🔀 Reverse</button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('fade')}>📉 Fade</button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('normalize')}>📈 Normalize</button>
-                <button className="secondary-button small-button" type="button" onClick={() => applyEdit('mono')}>🔊 Mono</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>✂ Trim</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>✂ Split</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>🗑 Delete</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>📋 Duplicate</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>🔀 Reverse</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>📉 Fade</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>📈 Normalize</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>🔊 Mono</button>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>🔄 Reset FX</button>
                 <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); }} />
                 <label htmlFor="audio-reimport" className="secondary-button small-button" style={{ cursor: 'pointer' }}>📁 New File</label>
               </div>
@@ -1098,7 +1231,7 @@ export function AudioEditorPage({
                       <option key={f.key} value={f.key}>{f.label}</option>
                     ))}
                   </select>
-                  <button className="primary-button small-button" type="button" onClick={handleExport} disabled={isExporting}>
+                  <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting}>
                     {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
                   </button>
                 </div>
@@ -1115,13 +1248,13 @@ export function AudioEditorPage({
                 <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔊 Volume & Pan</h4>
                   <ParamRow label="Volume" value={`${volume}%`}>
-                    <input type="range" min={0} max={200} value={volume} onChange={(e) => setVolume(Number(e.target.value))} />
+                    <input type="range" min={0} max={200} value={volume} onChange={(e) => { playSound('sliderChange'); setVolume(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Mute" value={isMuted ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isMuted ? 'active' : ''}`} type="button" onClick={() => setIsMuted((v) => !v)}>{isMuted ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${isMuted ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setIsMuted((v) => !v); }}>{isMuted ? 'On' : 'Off'}</button>
                   </ParamRow>
                   <ParamRow label="Pan (L/R)" value={`${pan > 0 ? '+' : ''}${pan}`}>
-                    <input type="range" min={-100} max={100} value={pan} onChange={(e) => setPan(Number(e.target.value))} />
+                    <input type="range" min={-100} max={100} value={pan} onChange={(e) => { playSound('sliderChange'); setPan(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1129,16 +1262,16 @@ export function AudioEditorPage({
                 <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>⚡ Speed & Pitch</h4>
                   <ParamRow label="Speed" value={`${speed}%`}>
-                    <input type="range" min={25} max={400} value={speed} onChange={(e) => setSpeed(Number(e.target.value))} />
+                    <input type="range" min={25} max={400} value={speed} onChange={(e) => { playSound('sliderChange'); setSpeed(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Pitch (cents)" value={`${pitch > 0 ? '+' : ''}${pitch}`}>
-                    <input type="range" min={-1200} max={1200} step={10} value={pitch} onChange={(e) => setPitch(Number(e.target.value))} />
+                    <input type="range" min={-1200} max={1200} step={10} value={pitch} onChange={(e) => { playSound('sliderChange'); setPitch(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Reverse" value={isReversed ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isReversed ? 'active' : ''}`} type="button" onClick={() => setIsReversed((v) => !v)}>{isReversed ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${isReversed ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setIsReversed((v) => !v); }}>{isReversed ? 'On' : 'Off'}</button>
                   </ParamRow>
                   <ParamRow label="Loop" value={isLoop ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isLoop ? 'active' : ''}`} type="button" onClick={() => setIsLoop((v) => !v)}>{isLoop ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${isLoop ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setIsLoop((v) => !v); }}>{isLoop ? 'On' : 'Off'}</button>
                   </ParamRow>
                 </div>
 
@@ -1146,10 +1279,10 @@ export function AudioEditorPage({
                 <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>📉 Fade</h4>
                   <ParamRow label="Fade In" value={`${fadeIn}s`}>
-                    <input type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => setFadeIn(Number(e.target.value))} />
+                    <input type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => { playSound('sliderChange'); setFadeIn(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Fade Out" value={`${fadeOut}s`}>
-                    <input type="range" min={0} max={10} step={0.1} value={fadeOut} onChange={(e) => setFadeOut(Number(e.target.value))} />
+                    <input type="range" min={0} max={10} step={0.1} value={fadeOut} onChange={(e) => { playSound('sliderChange'); setFadeOut(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1157,13 +1290,13 @@ export function AudioEditorPage({
                 <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🎚 EQ</h4>
                   <ParamRow label="Low Gain" value={`${eqLow > 0 ? '+' : ''}${eqLow}dB`}>
-                    <input type="range" min={-12} max={12} value={eqLow} onChange={(e) => setEqLow(Number(e.target.value))} />
+                    <input type="range" min={-12} max={12} value={eqLow} onChange={(e) => { playSound('sliderChange'); setEqLow(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Mid Gain" value={`${eqMid > 0 ? '+' : ''}${eqMid}dB`}>
-                    <input type="range" min={-12} max={12} value={eqMid} onChange={(e) => setEqMid(Number(e.target.value))} />
+                    <input type="range" min={-12} max={12} value={eqMid} onChange={(e) => { playSound('sliderChange'); setEqMid(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="High Gain" value={`${eqHigh > 0 ? '+' : ''}${eqHigh}dB`}>
-                    <input type="range" min={-12} max={12} value={eqHigh} onChange={(e) => setEqHigh(Number(e.target.value))} />
+                    <input type="range" min={-12} max={12} value={eqHigh} onChange={(e) => { playSound('sliderChange'); setEqHigh(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1171,16 +1304,16 @@ export function AudioEditorPage({
                 <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔧 Compressor</h4>
                   <ParamRow label="Threshold" value={`${compThreshold}dB`}>
-                    <input type="range" min={-60} max={0} value={compThreshold} onChange={(e) => setCompThreshold(Number(e.target.value))} />
+                    <input type="range" min={-60} max={0} value={compThreshold} onChange={(e) => { playSound('sliderChange'); setCompThreshold(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Ratio" value={`${compRatio}:1`}>
-                    <input type="range" min={1} max={20} value={compRatio} onChange={(e) => setCompRatio(Number(e.target.value))} />
+                    <input type="range" min={1} max={20} value={compRatio} onChange={(e) => { playSound('sliderChange'); setCompRatio(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Attack" value={`${compAttack}ms`}>
-                    <input type="range" min={0} max={100} value={compAttack} onChange={(e) => setCompAttack(Number(e.target.value))} />
+                    <input type="range" min={0} max={100} value={compAttack} onChange={(e) => { playSound('sliderChange'); setCompAttack(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Release" value={`${compRelease}ms`}>
-                    <input type="range" min={0} max={500} value={compRelease} onChange={(e) => setCompRelease(Number(e.target.value))} />
+                    <input type="range" min={0} max={500} value={compRelease} onChange={(e) => { playSound('sliderChange'); setCompRelease(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1188,13 +1321,13 @@ export function AudioEditorPage({
                 <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🌊 Reverb</h4>
                   <ParamRow label="Room Size" value={`${reverbSize}%`}>
-                    <input type="range" min={0} max={100} value={reverbSize} onChange={(e) => setReverbSize(Number(e.target.value))} />
+                    <input type="range" min={0} max={100} value={reverbSize} onChange={(e) => { playSound('sliderChange'); setReverbSize(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Damping" value={`${reverbDamp}%`}>
-                    <input type="range" min={0} max={100} value={reverbDamp} onChange={(e) => setReverbDamp(Number(e.target.value))} />
+                    <input type="range" min={0} max={100} value={reverbDamp} onChange={(e) => { playSound('sliderChange'); setReverbDamp(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Wet/Dry" value={`${reverbMix}%`}>
-                    <input type="range" min={0} max={100} value={reverbMix} onChange={(e) => setReverbMix(Number(e.target.value))} />
+                    <input type="range" min={0} max={100} value={reverbMix} onChange={(e) => { playSound('sliderChange'); setReverbMix(Number(e.target.value)); }} />
                   </ParamRow>
                 </div>
 
@@ -1202,10 +1335,10 @@ export function AudioEditorPage({
                 <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔇 Noise & Normalize</h4>
                   <ParamRow label="Noise Reduction" value={`${noiseReduction}%`}>
-                    <input type="range" min={0} max={100} value={noiseReduction} onChange={(e) => setNoiseReduction(Number(e.target.value))} />
+                    <input type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSound('sliderChange'); setNoiseReduction(Number(e.target.value)); }} />
                   </ParamRow>
                   <ParamRow label="Normalize" value={doNormalize ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${doNormalize ? 'active' : ''}`} type="button" onClick={() => setDoNormalize((v) => !v)}>{doNormalize ? 'On' : 'Off'}</button>
+                    <button className={`toggle-button ${doNormalize ? 'active' : ''}`} type="button" onClick={() => { playSound('toggleOn'); setDoNormalize((v) => !v); }}>{doNormalize ? 'On' : 'Off'}</button>
                   </ParamRow>
                 </div>
               </div>
@@ -1217,10 +1350,10 @@ export function AudioEditorPage({
         <div className="side-column" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Results */}
           <section className="tool-card" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}>
-            <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => setIsResultOpen((v) => !v)} role="button" tabIndex={0}>
+            <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { playSound('expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
               <div>
                 <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Results</span>
-                <h3 style={{ margin: 0, fontSize: 15 }}>Exported Files</h3>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Exported Files ({exports.length})</h3>
               </div>
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isResultOpen ? '▲' : '▼'}</span>
             </div>
@@ -1238,7 +1371,7 @@ export function AudioEditorPage({
                         </div>
                         <audio controls src={rec.url} style={{ width: '100%', height: 28, marginBottom: 6 }} />
                         <div style={{ display: 'flex', gap: 6 }}>
-                          <button className="secondary-button small-button" type="button" onClick={() => { const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
+                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
                           <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
                         </div>
                       </div>
@@ -1251,23 +1384,19 @@ export function AudioEditorPage({
 
           {/* Logs */}
           <section className="tool-card" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden', flex: 1, minHeight: 200 }}>
-            <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => setIsLogsOpen((v) => !v)} role="button" tabIndex={0}>
+            <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { playSound('expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
               <div>
                 <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Debug</span>
-                <h3 style={{ margin: 0, fontSize: 15 }}>Workflow Logs</h3>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Workflow Logs ({logs.length})</h3>
               </div>
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isLogsOpen ? '▲' : '▼'}</span>
             </div>
             {isLogsOpen && (
               <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
-                  <button className="secondary-button small-button" type="button" onClick={() => navigator.clipboard.writeText(logsText)}>Copy</button>
-                  <button className="secondary-button small-button" type="button" onClick={() => {
-                    const blob = new Blob([logsText], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url);
-                  }}>Download</button>
-                  <button className="secondary-button small-button" type="button" onClick={clearLogs}>Clear</button>
+                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText); }}>Copy</button>
+                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url); }}>Download</button>
+                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>
                 </div>
                 <div style={{ maxHeight: 320, overflowY: 'auto', fontSize: 11, fontFamily: 'monospace', lineHeight: 1.5 }}>
                   {logs.length === 0 ? (
