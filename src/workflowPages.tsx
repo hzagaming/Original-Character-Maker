@@ -10106,3 +10106,5 @@ export function IndexTtsPage({
     </main>
   );
 }
+
+export { AudioEditorPage } from './AudioEditorPage';

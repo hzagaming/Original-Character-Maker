@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -73,6 +73,7 @@ type Messages = {
   featureImageConverter: string;
   featureGif: string;
   featureIndexTts: string;
+  featureAudioEditor: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -99,6 +100,7 @@ type Messages = {
   actionImageConverter: string;
   actionGif: string;
   actionIndexTts: string;
+  actionAudioEditor: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -212,6 +214,8 @@ type Messages = {
   pageGifDescription: string;
   pageIndexTtsTitle: string;
   pageIndexTtsDescription: string;
+  pageAudioEditorTitle: string;
+  pageAudioEditorDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -467,6 +471,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureImageConverter: '图片格式转换',
     featureGif: '角色 GIF 生成',
     featureIndexTts: 'IndexTTS 语音合成',
+    featureAudioEditor: '音频剪辑',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -493,6 +498,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionImageConverter: '图片格式转换',
     actionGif: '角色 GIF 生成',
     actionIndexTts: 'IndexTTS 语音合成',
+    actionAudioEditor: '音频剪辑',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -607,6 +613,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageGifDescription: '上传角色图像、调整 GIF 动画参数（帧数、帧率、循环、动画类型），生成动态角色 GIF。',
     pageIndexTtsTitle: 'IndexTTS 语音合成',
     pageIndexTtsDescription: '输入文本、上传参考音频，使用 IndexTTS 模型进行零样本语音合成。支持情感控制、语速调节、音色克隆。',
+    pageAudioEditorTitle: '音频剪辑编辑器',
+    pageAudioEditorDescription: '导入音频文件，可视化波形编辑，支持裁剪、分割、淡入淡出、音量调节、变速变调、EQ均衡器、压缩器、混响等丰富效果。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -849,6 +857,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureImageConverter: '画像フォーマット変換',
     featureGif: 'キャラクター GIF 生成',
     featureIndexTts: 'IndexTTS 音声合成',
+    featureAudioEditor: 'オーディオ編集',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -875,6 +884,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionImageConverter: '画像フォーマット変換',
     actionGif: 'キャラクター GIF 生成',
     actionIndexTts: 'IndexTTS 音声合成',
+    actionAudioEditor: 'オーディオ編集',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -989,6 +999,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageGifDescription: 'キャラクター画像をアップロードし、GIF アニメーション パラメータ（フレーム数、FPS、ループ、アニメーション タイプ）を調整して、動的なキャラクター GIF を生成します。',
     pageIndexTtsTitle: 'IndexTTS 音声合成',
     pageIndexTtsDescription: 'テキストを入力し、参照音声をアップロードして、IndexTTS モデルでゼロショット音声合成を実行します。感情制御、話速調整、音色クローンに対応。',
+    pageAudioEditorTitle: 'オーディオエディター',
+    pageAudioEditorDescription: '音声ファイルをインポートし、波形を可視化して編集。トリミング、分割、フェード、音量調整、スピード/ピッチ変更、EQ、コンプレッサー、リバーブなど豊富なエフェクトに対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: '7つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1231,6 +1243,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureImageConverter: 'Image Converter',
     featureGif: 'Character GIF Generator',
     featureIndexTts: 'IndexTTS Voice Synthesis',
+    featureAudioEditor: 'Audio Editor',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1257,6 +1270,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionImageConverter: 'Image Format Converter',
     actionGif: 'Character GIF Generator',
     actionIndexTts: 'IndexTTS Voice Synthesis',
+    actionAudioEditor: 'Audio Editor',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1371,6 +1385,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageGifDescription: 'Upload a character image, adjust GIF animation parameters (frames, FPS, loop, motion type), and generate an animated character GIF.',
     pageIndexTtsTitle: 'IndexTTS Voice Synthesis',
     pageIndexTtsDescription: 'Enter text and upload a reference audio clip to perform zero-shot voice synthesis with the IndexTTS model. Supports emotion control, speed adjustment, and voice cloning.',
+    pageAudioEditorTitle: 'Audio Editor',
+    pageAudioEditorDescription: 'Import audio files, visualize waveforms, and edit with trim, split, fade, volume control, speed/pitch shift, EQ, compressor, reverb, and more effects.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all 7 tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1613,6 +1629,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureImageConverter: 'Конвертер изображений',
     featureGif: 'Генератор GIF персонажа',
     featureIndexTts: 'IndexTTS Синтез речи',
+    featureAudioEditor: 'Аудиоредактор',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1639,6 +1656,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionImageConverter: 'Конвертер форматов',
     actionGif: 'Генератор GIF персонажа',
     actionIndexTts: 'IndexTTS Синтез речи',
+    actionAudioEditor: 'Аудиоредактор',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1753,6 +1771,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageGifDescription: 'Загрузите изображение персонажа, настройте параметры GIF-анимации (кадры, FPS, цикл, тип движения) и сгенерируйте анимированный GIF персонажа.',
     pageIndexTtsTitle: 'IndexTTS Синтез речи',
     pageIndexTtsDescription: 'Введите текст и загрузите образец голоса для выполнения синтеза речи с клонированием голоса через модель IndexTTS. Поддерживает управление эмоциями, регулировку скорости и клонирование тембра.',
+    pageAudioEditorTitle: 'Аудиоредактор',
+    pageAudioEditorDescription: 'Импортируйте аудиофайлы, визуализируйте волновые формы и редактируйте: обрезка, разделение, fade, регулировка громкости, скорость/тон, эквалайзер, компрессор, реверберация и другие эффекты.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем 7 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2404,6 +2424,8 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureSeries: '시리즈 자산',
     featurePrompt: '프롬프트 + LLM / TTS',
     featurePaper: 'paper2gal 자산',
+    featureAudioEditor: '오디오 편집기',
+    actionAudioEditor: '오디오 편집기',
     backHome: '홈으로',
     openSettings: '설정 열기',
     announcementTitle: '공지',
@@ -2412,6 +2434,8 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageStyleTitle: '스타일 변환',
     pagePromptTitle: 'OC 설정 에디터',
     pagePaperTitle: 'paper2gal 자산 생성',
+    pageAudioEditorTitle: '오디오 편집기',
+    pageAudioEditorDescription: '오디오 파일을 가져와서 파형을 시각화하고 편집하세요. 자르기, 분할, 페이드, 볼륨 조절, 속도/피치 변경, EQ, 컴프레서, 리버브 등 다양한 효과를 지원합니다.',
     announcementDescription: 'v1.5.0 IndexTTS 음성 합성 도구 신규 추가: IndexTTS Voice Synthesis 페이지를 신규 추가하여 텍스트 음성 변환, 제로샷 음성 클로닝, 감정 제어, 속도 조절 및 다양한 출력 형식을 지원. API 설정에서 IndexTTS 전용 사용자 정의 API 채널을 독립적으로 구성할 수 있음. 사용자 매뉴얼도 전면 업데이트되어 IndexTTS의 완전한 문서를 추가.',
     announcementList1: 'IndexTTS 음성 합성기 신규 추가: 텍스트를 입력하고 3~10초 참조 오디오를 업로드하여 제로샷 음성 클로닝을 수행. Temperature, Top P, 속도, CFG, 감정 강도, 감정 설명, 추론 장치, 출력 형식, 샘플링 레이트 등 13개 파라미터를 조정하여 고품질 음성을 원클릭 생성. WAV/MP3 출력 지원.',
     announcementList2: 'API 채널 확장: 사용자 정의 API 설정에서 이제 IndexTTS를 독립적으로 구성할 수 있음. 스타일 변환, Paper2Gal, 캐릭터 GIF와 별도로 관리.',
@@ -3986,6 +4010,12 @@ function App() {
           pageTitle={messages.pageImageConverterTitle}
           pageDescription={messages.pageImageConverterDescription}
         />
+      ) : screen === 'audio-editor' ? (
+        <AudioEditorPage
+          {...sharedPageProps}
+          pageTitle={messages.pageAudioEditorTitle}
+          pageDescription={messages.pageAudioEditorDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4158,6 +4188,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('index-tts')}>
                 <ActionIcon kind="index-tts" />
                 <span>{messages.featureIndexTts}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('audio-editor')}>
+                <ActionIcon kind="audio-editor" />
+                <span>{messages.featureAudioEditor}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5605,7 +5639,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -5678,6 +5712,15 @@ function ActionIcon({
         <path d="M10 18v2a10 10 0 0 0 20 0v-2" />
         <path d="M20 34v4" />
         <path d="M14 38h12" />
+      </>
+    ),
+    'audio-editor': (
+      <>
+        <rect x="6" y="14" width="4" height="12" rx="1" />
+        <rect x="14" y="10" width="4" height="20" rx="1" />
+        <rect x="22" y="16" width="4" height="8" rx="1" />
+        <rect x="30" y="12" width="4" height="16" rx="1" />
+        <path d="M6 20h28" strokeDasharray="2 2" />
       </>
     ),
     docs: (
@@ -5773,6 +5816,10 @@ function StartModal({
             <ActionIcon kind="index-tts" />
             <strong>{messages.actionIndexTts}</strong>
           </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('audio-editor')}>
+            <ActionIcon kind="audio-editor" />
+            <strong>{messages.actionAudioEditor}</strong>
+          </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
             <strong>{messages.featureDocs}</strong>
@@ -5783,7 +5830,7 @@ function StartModal({
   );
 }
 
-type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts';
+type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor';
 
 function ImportModal({
   messages,
@@ -5897,6 +5944,7 @@ function ImportModal({
       'image-converter': 'image-converter',
       'character-gif': 'character-gif',
       'index-tts': 'index-tts',
+      'audio-editor': 'audio-editor',
     };
     requestClose();
     navigateTimerRef.current = window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
@@ -5911,6 +5959,7 @@ function ImportModal({
     { key: 'paper2gal', label: messages.featurePaper, icon: 'paper2gal' },
     { key: 'image-converter', label: messages.featureImageConverter, icon: 'image-converter' },
     { key: 'character-gif', label: messages.featureGif, icon: 'character-gif' },
+    { key: 'audio-editor', label: messages.featureAudioEditor, icon: 'audio-editor' },
   ];
 
   if (!isOpen) return null;
@@ -7459,6 +7508,16 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         pipelineTitle: 'Output / Download',
         todoOne: '补格式选择与质量调整',
         todoTwo: '补批量转换与尺寸调整',
+      };
+    case 'audio-editor':
+      return {
+        title: messages.pageAudioEditorTitle,
+        description: messages.pageAudioEditorDescription,
+        workspaceTitle: 'Audio Editor Workspace',
+        panelTitle: 'Waveform & Effects',
+        pipelineTitle: 'Export / Download',
+        todoOne: '补音频导入与波形可视化',
+        todoTwo: '补剪辑、效果处理与导出',
       };
     default:
       return {
