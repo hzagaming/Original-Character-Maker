@@ -10108,3 +10108,4 @@ export function IndexTtsPage({
 }
 
 export { AudioEditorPage } from './AudioEditorPage';
+export { AudioConverterPage } from './AudioConverterPage';

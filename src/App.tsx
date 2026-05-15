@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.6.0';
+const VERSION = '1.7.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -74,6 +74,7 @@ type Messages = {
   featureGif: string;
   featureIndexTts: string;
   featureAudioEditor: string;
+  featureAudioConverter: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -101,6 +102,7 @@ type Messages = {
   actionGif: string;
   actionIndexTts: string;
   actionAudioEditor: string;
+  actionAudioConverter: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -216,6 +218,8 @@ type Messages = {
   pageIndexTtsDescription: string;
   pageAudioEditorTitle: string;
   pageAudioEditorDescription: string;
+  pageAudioConverterTitle: string;
+  pageAudioConverterDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -472,6 +476,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureGif: '角色 GIF 生成',
     featureIndexTts: 'IndexTTS 语音合成',
     featureAudioEditor: '音频剪辑',
+    featureAudioConverter: '音频格式转换',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -499,6 +504,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionGif: '角色 GIF 生成',
     actionIndexTts: 'IndexTTS 语音合成',
     actionAudioEditor: '音频剪辑',
+    actionAudioConverter: '音频格式转换',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -584,10 +590,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.5.0 新增 IndexTTS 语音合成工具：新增 IndexTTS Voice Synthesis 页面，支持文本转语音、零样本音色克隆、情感控制、语速调节和多种输出格式；API 设置支持为 IndexTTS 独立配置自定义 API 通道；用户手册全面更新，新增 IndexTTS 的完整文档。',
-    announcementList1: '新增 IndexTTS 语音合成器：输入文本，上传 3~10 秒参考音频进行零样本音色克隆，调整 Temperature、Top P、语速、CFG、情感强度、情感描述、推理设备、输出格式和采样率等 13 项参数，一键生成高质量语音。支持 WAV/MP3 输出。',
-    announcementList2: 'API 通道扩展：自定义 API 设置现在支持为「IndexTTS」独立配置 API 通道，与转画风、Paper2Gal、角色 GIF 分开管理。',
-    announcementList3: '用户手册与文档同步：为 IndexTTS 生成器新增完整文档，涵盖基本流程、TTS 技术原理、13 个参数详解、10 个按钮功能、3 条错误代码的排查步骤；30 语言文档同步扩展，intro 已从「8 个功能模块」更新为「9 个」。',
+    announcementDescription: 'v1.7.0 新增音频格式转换器：全新的 Audio Converter 页面，支持 MP3/WAV/OGG/FLAC/M4A/AAC/WEBM 导入，输出 WAV（8/16/24/32-bit）、WebM/Opus、OGG/Opus、MP3、MP4/AAC 等格式；内置采样率调整、声道转换、音量/速度/音高调节、淡入淡出、降噪和峰值归一化；与音频编辑器无缝互操作；30 语言文档同步扩展。',
+    announcementList1: '新增音频格式转换器：导入主流音频格式，通过 7 步处理链（声道转换→音量→重采样/速度/音高→淡入淡出→降噪→归一化→编码）一键转换为多种输出格式。支持 22050~192000Hz 采样率、单声道/立体声切换、50%~200% 音量、25%~400% 速度、±1200cents 音高偏移。',
+    announcementList2: '音频编辑器互操作：转换器页面新增「🎵 Audio Editor」按钮，可一键跳转到波形编辑器进行高级剪辑；编辑器也同步接收 onSwitchTool prop，为双向跳转做好准备。',
+    announcementList3: '深度 bug 修复与 UX 增强：修复 AudioContext 内存泄漏、导入状态竞争、拖拽闪烁、日志无限增长、CONVERT_NO_AUDIO 错误码未使用、FLAC 扩展名不匹配等 9 项核心问题；为所有 select、slider、toggle、按钮补充 SFX 音效；新增 useBeforeUnloadGuard 防止意外刷新丢失进度。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -615,6 +621,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageIndexTtsDescription: '输入文本、上传参考音频，使用 IndexTTS 模型进行零样本语音合成。支持情感控制、语速调节、音色克隆。',
     pageAudioEditorTitle: '音频剪辑编辑器',
     pageAudioEditorDescription: '导入音频文件，可视化波形编辑，支持裁剪、分割、淡入淡出、音量调节、变速变调、EQ均衡器、压缩器、混响等丰富效果。',
+    pageAudioConverterTitle: '音频格式转换器',
+    pageAudioConverterDescription: '导入音频文件，批量转换格式、调整采样率、位深度、声道数，支持音量增益、速度变换、音调偏移、标准化、降噪等处理。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -858,6 +866,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureGif: 'キャラクター GIF 生成',
     featureIndexTts: 'IndexTTS 音声合成',
     featureAudioEditor: 'オーディオ編集',
+    featureAudioConverter: 'オーディオ変換',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -885,6 +894,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionGif: 'キャラクター GIF 生成',
     actionIndexTts: 'IndexTTS 音声合成',
     actionAudioEditor: 'オーディオ編集',
+    actionAudioConverter: 'オーディオ変換',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -970,10 +980,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.5.0 IndexTTS 音声合成ツールを新規追加：IndexTTS Voice Synthesis ページを新規追加。テキスト読み上げ、ゼロショット音声クローニング、感情制御、話速調整、複数出力形式に対応。API 設定で「IndexTTS」専用のカスタム API チャネルを独立設定可能。ユーザーマニュアルも全面更新し、IndexTTS の完全ドキュメントを追加。',
-    announcementList1: 'IndexTTS 音声合成器の新規追加：テキストを入力し、3〜10秒の参照音声をアップロードしてゼロショット音声クローニングを実行。Temperature、Top P、話速、CFG、感情強度、感情説明、推論デバイス、出力形式、サンプリングレートなど13項のパラメータを調整して、高品質な音声をワンクリック生成。WAV/MP3 出力に対応。',
-    announcementList2: 'API チャネルの拡張：カスタム API 設定で「IndexTTS」を独立して設定可能に。スタイル転送、Paper2Gal、キャラクター GIF と分離して管理。',
-    announcementList3: 'ユーザーマニュアルとドキュメントの同期：IndexTTS 生成器用の完全ドキュメントを新規追加。基本フロー、TTS 技術原理、13個のパラメータ詳細、10個のボタン機能、3件のエラーコードのトラブルシューティング手順を網羅。30言語ドキュメントを同期拡張し、intro を「8機能モジュール」から「9機能モジュール」に更新。',
+    announcementDescription: 'v1.7.0 オーディオフォーマット変換器を新規追加：MP3/WAV/OGG/FLAC/M4A/AAC/WEBM のインポートに対応し、WAV（8/16/24/32-bit）、WebM/Opus、OGG/Opus、MP3、MP4/AAC などへ変換可能。サンプリングレート変更、チャンネル変換、ボリューム/スピード/ピッチ調整、フェードイン/アウト、ノイズリダクション、ピーク正規化を内蔵。オーディオエディタとのシームレスな相互運用。30言語ドキュメントを同期拡張。',
+    announcementList1: 'オーディオフォーマット変換器の新規追加：主要オーディオフォーマットをインポートし、7ステップ処理チェーン（チャンネル変換→ボリューム→リサンプリング/スピード/ピッチ→フェード→ノイズリダクション→正規化→エンコード）でワンクリック変換。22050〜192000Hz のサンプリングレート、モノラル/ステレオ切替、50%〜200% ボリューム、25%〜400% スピード、±1200cents ピッチシフトに対応。',
+    announcementList2: 'オーディオエディタとの相互運用：変換器ページに「🎵 Audio Editor」ボタンを追加し、波形エディタへのワンクリック遷移が可能に。エディタ側も onSwitchTool prop を受け取るよう更新し、双方向ジャンプの準備を整備。',
+    announcementList3: '深度バグ修正と UX 強化：AudioContext メモリリーク、インポート状態競合、ドラッグのちらつき、ログの無限増加、CONVERT_NO_AUDIO エラーコード未使用、FLAC 拡張子不一致など 9 件の核心問題を修正。すべての select、slider、toggle、ボタンに SFX 効果音を追加。useBeforeUnloadGuard を新設し、意図しない更新による進捗喪失を防止。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1001,6 +1011,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageIndexTtsDescription: 'テキストを入力し、参照音声をアップロードして、IndexTTS モデルでゼロショット音声合成を実行します。感情制御、話速調整、音色クローンに対応。',
     pageAudioEditorTitle: 'オーディオエディター',
     pageAudioEditorDescription: '音声ファイルをインポートし、波形を可視化して編集。トリミング、分割、フェード、音量調整、スピード/ピッチ変更、EQ、コンプレッサー、リバーブなど豊富なエフェクトに対応。',
+    pageAudioConverterTitle: 'オーディオコンバーター',
+    pageAudioConverterDescription: '音声ファイルをインポートし、フォーマット変換、サンプリングレート/ビット深度/チャンネル数の調整、音量増幅、スピード変換、ピッチシフト、ノーマライズ、ノイズリダクションに対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: '7つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1244,6 +1256,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureGif: 'Character GIF Generator',
     featureIndexTts: 'IndexTTS Voice Synthesis',
     featureAudioEditor: 'Audio Editor',
+    featureAudioConverter: 'Audio Converter',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1271,6 +1284,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionGif: 'Character GIF Generator',
     actionIndexTts: 'IndexTTS Voice Synthesis',
     actionAudioEditor: 'Audio Editor',
+    actionAudioConverter: 'Audio Converter',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1356,10 +1370,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.5.0 New IndexTTS Voice Synthesis tool: added IndexTTS Voice Synthesis page supporting text-to-speech, zero-shot voice cloning, emotion control, speed adjustment, and multiple output formats. API settings now support independent custom API channel configuration for IndexTTS. Comprehensive docs update with full IndexTTS documentation.',
-    announcementList1: 'New IndexTTS Voice Synthesizer: enter text, upload a 3~10 second reference audio clip for zero-shot voice cloning, adjust 13 parameters including Temperature, Top P, speed, CFG, emotion intensity, emotion description, inference device, output format, and sample rate, then generate high-quality speech in one click. Supports WAV/MP3 output.',
-    announcementList2: 'API channel expansion: custom API settings now support independent configuration for "IndexTTS", managed separately from Style Transfer, Paper2Gal, and Character GIF.',
-    announcementList3: 'Docs and manual sync: added complete documentation for the IndexTTS Generator covering basic workflow, TTS technology principles, 13 parameter details, 10 button functions, and 3 error code troubleshooting steps. Synchronized across 30 languages; intros updated from "8 modules" to "9 modules".',
+    announcementDescription: 'v1.7.0 New Audio Converter tool: brand-new Audio Converter page supporting MP3/WAV/OGG/FLAC/M4A/AAC/WEBM import and export to WAV (8/16/24/32-bit), WebM/Opus, OGG/Opus, MP3, MP4/AAC. Built-in sample rate adjustment, channel conversion, volume/speed/pitch control, fade in/out, noise reduction, and peak normalization. Seamless interoperability with the Audio Editor. 30-language docs synchronized.',
+    announcementList1: 'New Audio Format Converter: import mainstream audio formats and convert them via a 7-step processing chain (channel conversion → volume → resampling/speed/pitch → fade → noise reduction → normalization → encoding). Supports 22050–192000Hz sample rates, mono/stereo switching, 50%–200% volume, 25%–400% speed, and ±1200cents pitch shift.',
+    announcementList2: 'Audio Editor interoperability: added a "🎵 Audio Editor" button on the converter page for one-click navigation to the waveform editor. The editor also now accepts the onSwitchTool prop, preparing for bidirectional jumping between tools.',
+    announcementList3: 'Deep bug fixes and UX enhancements: fixed 9 core issues including AudioContext memory leak, import state race condition, drag flicker, unbounded log growth, unused CONVERT_NO_AUDIO error code, FLAC extension mismatch. Added SFX to all selects, sliders, toggles, and buttons. Added useBeforeUnloadGuard to prevent accidental refresh from losing progress.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1387,6 +1401,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageIndexTtsDescription: 'Enter text and upload a reference audio clip to perform zero-shot voice synthesis with the IndexTTS model. Supports emotion control, speed adjustment, and voice cloning.',
     pageAudioEditorTitle: 'Audio Editor',
     pageAudioEditorDescription: 'Import audio files, visualize waveforms, and edit with trim, split, fade, volume control, speed/pitch shift, EQ, compressor, reverb, and more effects.',
+    pageAudioConverterTitle: 'Audio Converter',
+    pageAudioConverterDescription: 'Import audio files and convert formats, adjust sample rate, bit depth, and channel count. Supports volume gain, speed change, pitch shift, normalization, and noise reduction.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all 7 tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1630,6 +1646,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureGif: 'Генератор GIF персонажа',
     featureIndexTts: 'IndexTTS Синтез речи',
     featureAudioEditor: 'Аудиоредактор',
+    featureAudioConverter: 'Конвертер аудио',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1657,6 +1674,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionGif: 'Генератор GIF персонажа',
     actionIndexTts: 'IndexTTS Синтез речи',
     actionAudioEditor: 'Аудиоредактор',
+    actionAudioConverter: 'Конвертер аудио',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1742,10 +1760,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.5.0 Новый инструмент «IndexTTS Синтез речи»: добавлена страница IndexTTS Voice Synthesis с поддержкой преобразования текста в речь, клонирования голоса в режиме zero-shot, управления эмоциями, регулировки скорости и нескольких форматов вывода. Настройки API теперь поддерживают независимую конфигурацию пользовательского API-канала для IndexTTS. Крупное обновление документации с полным руководством по IndexTTS.',
-    announcementList1: 'Новый синтезатор речи IndexTTS: введите текст, загрузите образец голоса длительностью 3~10 секунд для клонирования в режиме zero-shot, настройте 13 параметров включая Temperature, Top P, скорость, CFG, интенсивность эмоций, описание эмоций, устройство вывода, формат вывода и частоту дискретизации, затем сгенерируйте высококачественную речь одним щелчком. Поддерживает вывод WAV/MP3.',
-    announcementList2: 'Расширение API-каналов: пользовательские настройки API теперь поддерживают независимую конфигурацию для «IndexTTS», управляемую отдельно от переноса стиля, Paper2Gal и генератора GIF персонажа.',
-    announcementList3: 'Синхронизация документации: добавлена полная документация для генератора IndexTTS, охватывающая базовый workflow, принципы TTS-технологии, 13 параметров, 10 функций кнопок и 3 кода ошибок с шагами устранения. Синхронизировано на 30 языках; intro обновлены с «8 модулей» на «9 модулей».',
+    announcementDescription: 'v1.7.0 Новый конвертер аудиоформатов: полностью новая страница Audio Converter с поддержкой импорта MP3/WAV/OGG/FLAC/M4A/AAC/WEBM и экспорта в WAV (8/16/24/32-бит), WebM/Opus, OGG/Opus, MP3, MP4/AAC. Встроенная регулировка частоты дискретизации, настройка каналов, управление громкостью/скоростью/высотой тона, fade in/out, шумоподавление и нормализация пиков. Бесшовная интеграция с аудиоредактором. Синхронизация документации на 30 языках.',
+    announcementList1: 'Новый конвертер аудиоформатов: импортируйте основные аудиоформаты и конвертируйте их через 7-ступенчатую цепочку обработки (конверсия каналов → громкость → ресемплинг/скорость/тон → fade → шумоподавление → нормализация → кодирование). Поддерживаются частоты дискретизации 22050–192000Гц, переключение моно/стерео, громкость 50%–200%, скорость 25%–400%, сдвиг тона ±1200 центов.',
+    announcementList2: 'Интеграция с аудиоредактором: на странице конвертера добавлена кнопка «🎵 Audio Editor» для перехода к редактору волновых форм в один клик. Редактор также теперь принимает prop onSwitchTool, подготавливая почву для двустороннего перехода между инструментами.',
+    announcementList3: 'Глубокие исправления багов и улучшения UX: исправлены 9 ключевых проблем, включая утечку памяти AudioContext, состояние гонки при импорте, мерцание при перетаскивании, неограниченный рост логов, неиспользуемый код ошибки CONVERT_NO_AUDIO, несоответствие расширения FLAC. Добавлены звуковые эффекты для всех select, slider, toggle и кнопок. Добавлен useBeforeUnloadGuard для предотвращения потери прогресса при случайном обновлении страницы.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1773,6 +1791,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageIndexTtsDescription: 'Введите текст и загрузите образец голоса для выполнения синтеза речи с клонированием голоса через модель IndexTTS. Поддерживает управление эмоциями, регулировку скорости и клонирование тембра.',
     pageAudioEditorTitle: 'Аудиоредактор',
     pageAudioEditorDescription: 'Импортируйте аудиофайлы, визуализируйте волновые формы и редактируйте: обрезка, разделение, fade, регулировка громкости, скорость/тон, эквалайзер, компрессор, реверберация и другие эффекты.',
+    pageAudioConverterTitle: 'Конвертер аудио',
+    pageAudioConverterDescription: 'Импортируйте аудиофайлы и конвертируйте форматы, настройте частоту дискретизации, битовую глубину и количество каналов. Поддерживает усиление громкости, изменение скорости, сдвиг тона, нормализацию и шумоподавление.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем 7 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2425,7 +2445,9 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featurePrompt: '프롬프트 + LLM / TTS',
     featurePaper: 'paper2gal 자산',
     featureAudioEditor: '오디오 편집기',
+    featureAudioConverter: '오디오 변환기',
     actionAudioEditor: '오디오 편집기',
+    actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
     openSettings: '설정 열기',
     announcementTitle: '공지',
@@ -2436,10 +2458,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pagePaperTitle: 'paper2gal 자산 생성',
     pageAudioEditorTitle: '오디오 편집기',
     pageAudioEditorDescription: '오디오 파일을 가져와서 파형을 시각화하고 편집하세요. 자르기, 분할, 페이드, 볼륨 조절, 속도/피치 변경, EQ, 컴프레서, 리버브 등 다양한 효과를 지원합니다.',
-    announcementDescription: 'v1.5.0 IndexTTS 음성 합성 도구 신규 추가: IndexTTS Voice Synthesis 페이지를 신규 추가하여 텍스트 음성 변환, 제로샷 음성 클로닝, 감정 제어, 속도 조절 및 다양한 출력 형식을 지원. API 설정에서 IndexTTS 전용 사용자 정의 API 채널을 독립적으로 구성할 수 있음. 사용자 매뉴얼도 전면 업데이트되어 IndexTTS의 완전한 문서를 추가.',
-    announcementList1: 'IndexTTS 음성 합성기 신규 추가: 텍스트를 입력하고 3~10초 참조 오디오를 업로드하여 제로샷 음성 클로닝을 수행. Temperature, Top P, 속도, CFG, 감정 강도, 감정 설명, 추론 장치, 출력 형식, 샘플링 레이트 등 13개 파라미터를 조정하여 고품질 음성을 원클릭 생성. WAV/MP3 출력 지원.',
-    announcementList2: 'API 채널 확장: 사용자 정의 API 설정에서 이제 IndexTTS를 독립적으로 구성할 수 있음. 스타일 변환, Paper2Gal, 캐릭터 GIF와 별도로 관리.',
-    announcementList3: '사용자 매뉴얼 및 문서 동기화: IndexTTS 생성기용 완전 문서를 신규 추가. 기본 플로우, TTS 기술 원리, 13개 파라미터 상세, 10개 버튼 기능, 3개 오류 코드의 트러블슈팅 단계를 망라. 30개 언어 문서를 동기 확장하고 intro를 「8개 기능 모듈」에서 「9개 기능 모듈」로 업데이트.'
+    pageAudioConverterTitle: '오디오 변환기',
+    pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
+    announcementDescription: 'v1.7.0 오디오 포맷 변환기 신규 추가: MP3/WAV/OGG/FLAC/M4A/AAC/WEBM 가져오기를 지원하고 WAV(8/16/24/32-bit), WebM/Opus, OGG/Opus, MP3, MP4/AAC 등으로 낼 수 있는全新的 Audio Converter 페이지. 샘플링 레이트 조정, 채널 전환, 볼륨/속도/피치 조절, 페이드 인/아웃, 노이즈 감소 및 피크 정규화 내장. 오디오 편집기와의 원활한 상호 운용. 30개 언어 문서 동기 확장.',
+    announcementList1: '오디오 포맷 변환기 신규 추가: 주요 오디오 포맷을 가져와 7단계 처리 체인(채널 전환→볼륨→리샘플링/속도/피치→페이드→노이즈 감소→정규화→인코딩)으로 원클릭 변환. 22050~192000Hz 샘플링 레이트, 모노/스테레오 전환, 50%~200% 볼륨, 25%~400% 속도, ±1200cents 피치 시프트 지원.',
+    announcementList2: '오디오 편집기 상호 운용: 변환기 페이지에 「🎵 Audio Editor」 버튼을 추가하여 파형 편집기로 원클릭 이동 가능. 편집기도 onSwitchTool prop을 수신하도록 업데이트되어 양방향 도구 전환 준비 완료.',
+    announcementList3: '심층 버그 수정 및 UX 향상: AudioContext 메모리 누수, 가져오기 상태 경쟁, 드래그 깜빡임, 로그 무한 증가, 미사용 CONVERT_NO_AUDIO 오류 코드, FLAC 확장자 불일치 등 9개 핵심 문제 수정. 모든 select, slider, toggle, 버튼에 SFX 사운드 효과 추가. useBeforeUnloadGuard를 추가하여 의도하지 않은 새로고침으로 인한 진행 상황 손실 방지.''
   },
   fr: {
     ...translations.en,
@@ -2630,6 +2654,36 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.0',
+    date: '2026-05-12',
+    title: '1.7.0 新增音频格式转换器与深度修复',
+    summary:
+      '新增 Audio Converter 音频格式转换器页面，支持 MP3/WAV/OGG/FLAC/M4A/AAC/WEBM 导入和多种格式导出；内置采样率调整、声道转换、音量/速度/音高调节、淡入淡出、降噪和峰值归一化；与音频编辑器无缝互操作；修复 AudioContext 内存泄漏、导入竞争、拖拽闪烁、日志无限增长等 9 项核心 bug；30 语言文档同步扩展。',
+    details: [
+      '新增音频格式转换器：导入主流音频格式，通过 7 步处理链一键转换为 WAV（8/16/24/32-bit）、WebM/Opus、OGG/Opus、MP3、MP4/AAC 等格式。支持 22050~192000Hz 采样率、单声道/立体声切换、50%~200% 音量、25%~400% 速度、±1200cents 音高偏移。',
+      '音频编辑器互操作：转换器页面新增「🎵 Audio Editor」按钮，可一键跳转到波形编辑器；编辑器同步接收 onSwitchTool prop，为双向跳转做好准备。',
+      '深度 bug 修复：修复 AudioContext 内存泄漏、导入状态竞争、拖拽闪烁、日志无限增长、CONVERT_NO_AUDIO 错误码未使用、FLAC 扩展名不匹配等 9 项核心问题。',
+      'UX 与 SFX 增强：为所有 select、slider、toggle、按钮补充 SFX 音效；新增 useBeforeUnloadGuard 防止意外刷新丢失进度；新增导入加载状态与视觉反馈。',
+      '用户手册与文档同步：为音频格式转换器新增 793 行完整用户手册，涵盖 16 个章节；30 语言 docsContent 同步扩展 audio-converter 条目。',
+      '版本同步：VERSION 升级到 1.7.0，首页公告和公告历史同步更新，5 种基础语言全部覆盖。',
+    ],
+  },
+  {
+    version: '1.6.0',
+    date: '2026-05-12',
+    title: '1.6.0 新增音频编辑器',
+    summary:
+      '新增 Audio Editor 音频波形编辑器页面，支持 MP3/WAV/OGG/FLAC/M4A/AAC/WEBM 导入；提供完整波形可视化、播放控制、区域选择、修剪/分割/删除/复制/反转/淡入淡出/标准化/单声道混合等编辑操作；实时效果链包括音量、声像、速度、音高、EQ、压缩器、混响、降噪；支持撤销/重做和多格式导出。',
+    details: [
+      '新增音频编辑器：基于 Web Audio API 的完整波形编辑器，支持导入 7 种主流音频格式，在 Canvas 上渲染可交互波形。',
+      '编辑操作：支持区域框选、修剪、分割、删除、复制、反转、淡入淡出、标准化峰值、单声道混合。',
+      '实时效果：音量（0%~200%）、声像（L/R）、速度（25%~400%）、音高（±1200 cents）、3 段 EQ、压缩器、混响、降噪。',
+      '导出支持：WAV（8/16/32-bit）、WebM/Opus、OGG/Opus、MP3、MP4/AAC（浏览器依赖）。',
+      '用户手册：新增 1000 行音频编辑器完整文档，涵盖 18 个章节。',
+      '版本同步：VERSION 升级到 1.6.0。',
+    ],
+  },
   {
     version: '1.5.0',
     date: '2026-05-12',
@@ -4015,6 +4069,14 @@ function App() {
           {...sharedPageProps}
           pageTitle={messages.pageAudioEditorTitle}
           pageDescription={messages.pageAudioEditorDescription}
+          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
+        />
+      ) : screen === 'audio-converter' ? (
+        <AudioConverterPage
+          {...sharedPageProps}
+          pageTitle={messages.pageAudioConverterTitle}
+          pageDescription={messages.pageAudioConverterDescription}
+          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
         />
       ) : screen === 'docs' ? (
         <DocsPage
@@ -4192,6 +4254,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('audio-editor')}>
                 <ActionIcon kind="audio-editor" />
                 <span>{messages.featureAudioEditor}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('audio-converter')}>
+                <ActionIcon kind="audio-converter" />
+                <span>{messages.featureAudioConverter}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5639,7 +5705,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -5721,6 +5787,15 @@ function ActionIcon({
         <rect x="22" y="16" width="4" height="8" rx="1" />
         <rect x="30" y="12" width="4" height="16" rx="1" />
         <path d="M6 20h28" strokeDasharray="2 2" />
+      </>
+    ),
+    'audio-converter': (
+      <>
+        <path d="M8 12h8v8H8z" />
+        <path d="M20 8h12v6H20z" />
+        <path d="M20 18h12v6H20z" />
+        <path d="M8 26h24v4H8z" />
+        <path d="M12 16h2M26 11h2M26 21h2" />
       </>
     ),
     docs: (
@@ -5820,6 +5895,10 @@ function StartModal({
             <ActionIcon kind="audio-editor" />
             <strong>{messages.actionAudioEditor}</strong>
           </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('audio-converter')}>
+            <ActionIcon kind="audio-converter" />
+            <strong>{messages.actionAudioConverter}</strong>
+          </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
             <strong>{messages.featureDocs}</strong>
@@ -5830,7 +5909,7 @@ function StartModal({
   );
 }
 
-type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor';
+type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter';
 
 function ImportModal({
   messages,
@@ -5945,6 +6024,7 @@ function ImportModal({
       'character-gif': 'character-gif',
       'index-tts': 'index-tts',
       'audio-editor': 'audio-editor',
+      'audio-converter': 'audio-converter',
     };
     requestClose();
     navigateTimerRef.current = window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
@@ -5960,6 +6040,7 @@ function ImportModal({
     { key: 'image-converter', label: messages.featureImageConverter, icon: 'image-converter' },
     { key: 'character-gif', label: messages.featureGif, icon: 'character-gif' },
     { key: 'audio-editor', label: messages.featureAudioEditor, icon: 'audio-editor' },
+    { key: 'audio-converter', label: messages.featureAudioConverter, icon: 'audio-converter' },
   ];
 
   if (!isOpen) return null;
@@ -7518,6 +7599,16 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         pipelineTitle: 'Export / Download',
         todoOne: '补音频导入与波形可视化',
         todoTwo: '补剪辑、效果处理与导出',
+      };
+    case 'audio-converter':
+      return {
+        title: messages.pageAudioConverterTitle,
+        description: messages.pageAudioConverterDescription,
+        workspaceTitle: 'Audio Converter Workspace',
+        panelTitle: 'Format & Parameters',
+        pipelineTitle: 'Convert / Download',
+        todoOne: '补音频导入与格式选择',
+        todoTwo: '补参数调整与批量转换',
       };
     default:
       return {

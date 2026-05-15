@@ -3478,6 +3478,134 @@ Key capabilities:
       ],
     },
     {
+      id: 'audio-converter',
+      title: 'オーディオフォーマット変換',
+      overview: `オーディオフォーマット変換は、専用の音声フォーマット変換ツールです。音声ファイル（MP3、WAV、OGG、FLAC、M4A、AAC、WEBM）をインポートし、エンコーディングパラメータを完全に制御してさまざまな出力フォーマットに変換できます。このツールは Web Audio API を使用してブラウザ内で完全に音声を処理します — サーバーへのアップロードは不要です。
+
+Key capabilities:
+· Multi-Format Import — Supports MP3, WAV, OGG, FLAC, M4A, AAC, and WEBM audio files
+· Output Format Selection — WAV 8/16/24/32-bit PCM, FLAC (WAV container), WebM/Opus, OGG/Opus, MP3, MP4/AAC (browser-dependent)
+· Sample Rate Control — Keep original or resample to 22050, 44100, 48000, 96000, or 192000 Hz
+· Channel Configuration — Preserve original channels, force mono, or force stereo
+· Volume Adjustment — Scale amplitude from 50% to 200% before export
+· Speed & Pitch — Adjust playback speed 25%–400% and pitch shift ±1200 cents (±1 octave)
+· Fade In/Out — Apply linear fade ramps from 0 to 10 seconds at the start and end
+· Noise Reduction — Reduce background noise with adjustable intensity (0–100%)
+· Peak Normalization — Normalize the loudest peak to 99.9% of digital full scale
+· Real-Time Preview — Preview the converted result before downloading
+· Progress Tracking — Visual progress bar during conversion with step-by-step logging
+· Workflow Logs — Timestamped log of every import, conversion, and download action
+· Error Panel — Detailed error messages with codes, causes, and solutions`,
+      buttons: [
+        { name: 'Choose File / Replace', description: 'Open the file picker to import an audio file, or replace the currently loaded file with a new one.' },
+        { name: 'Convert', description: 'Start the conversion process with the selected output format and processing parameters. Displays a progress bar during processing.' },
+        { name: 'Download', description: 'Save the converted audio file to your local device. Available after conversion completes successfully.' },
+        { name: 'Reset', description: 'Clear the current source file, conversion settings, and result. Returns the page to its initial empty state.' },
+        { name: 'Open Audio Editor', description: 'Switch to the Audio Editor page to perform advanced waveform-based editing on the current or a new audio file.' },
+        { name: 'Normalize Peak', description: 'Toggle peak normalization. When enabled, the audio is normalized so the loudest sample reaches 99.9% of full scale before export.' },
+        { name: 'Copy Logs', description: 'Copy the entire workflow log to the clipboard as plain text.' },
+        { name: 'Download Logs', description: 'Export the workflow log as a .txt file for troubleshooting or record keeping.' },
+      ],
+      parameters: [
+        { name: 'Output Format', description: 'Select the target audio format. WAV variants are universally supported. WebM/Opus, OGG/Opus, MP3, and MP4/AAC availability depends on the browser.', tips: 'WAV 16-bit PCM is the safest choice for maximum compatibility. FLAC preserves full quality with smaller file size.' },
+        { name: 'Sample Rate', description: 'Choose the output sample rate. "Original" preserves the source rate. Other options resample to the selected rate.', tips: 'CD quality is 44100 Hz. Use 48000 Hz for video production. Higher rates (96000+) are useful for archival but create larger files.' },
+        { name: 'Channels', description: 'Set the output channel layout. "Original" keeps the source channel count. "Mono" mixes all channels to one. "Stereo" duplicates mono to two channels or keeps stereo.', tips: 'Choose Mono for voice recordings to reduce file size. Choose Stereo for music and spatial content.' },
+        { name: 'Volume', description: 'Adjust the output amplitude from 50% (half volume) to 200% (double amplitude). Applied before export.', tips: 'Values above 100% may cause clipping if the source already peaks near 0dBFS. Use Normalize Peak to prevent clipping.' },
+        { name: 'Speed', description: 'Adjust playback speed from 25% (quarter speed) to 400% (quadruple speed). Changes duration proportionally.', tips: 'Speed adjustment uses time-stretching to preserve pitch unless Pitch is also changed.' },
+        { name: 'Pitch', description: 'Shift pitch in cents from -1200 (one octave down) to +1200 (one octave up).', tips: '100 cents = 1 semitone. Small values (+/-50) are useful for subtle tuning corrections.' },
+        { name: 'Fade In', description: 'Duration of the linear fade-in ramp at the start of the audio, from 0 to 10 seconds.', tips: 'A gentle fade-in of 0.1–0.5s is recommended for voice to avoid plosive pops.' },
+        { name: 'Fade Out', description: 'Duration of the linear fade-out ramp at the end of the audio, from 0 to 10 seconds.', tips: 'Match fade-out duration to reverb tail if using reverb to avoid abrupt cutoff.' },
+        { name: 'Noise Reduction', description: 'Intensity of noise suppression from 0% (off) to 100% (aggressive). Applied during conversion.', tips: 'High values may remove quiet details along with noise. Use sparingly (10–30%) for best results.' },
+        { name: 'Normalize Peak', description: 'When enabled, the audio is analyzed and scaled so the loudest peak reaches 99.9% of digital full scale.', tips: 'Normalization is applied after all other processing steps (volume, fade, noise reduction).' },
+      ],
+      errors: [
+        {
+          code: 'IMPORT_FAILED',
+          message: 'Failed to decode audio file',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Audio Converter → Area: Import dropzone',
+          cause: 'The selected file is not a valid audio format, is corrupted, or uses an unsupported codec.',
+          solution: 'Use a supported format (MP3, WAV, OGG, FLAC, M4A, AAC, WEBM) and ensure the file is not corrupted.',
+          steps: ['Check file extension', 'Try re-exporting from your DAW', 'Convert to WAV using an external tool'],
+          relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: 'Always verify audio files play correctly in a media player before importing.',
+        },
+        {
+          code: 'AUDIO_CONTEXT_FAILED',
+          message: 'Web Audio API initialization failed',
+          severity: 'critical',
+          category: 'F. Browser & Performance',
+          location: 'Page: Audio Converter → Area: Entire page',
+          cause: 'The browser blocked AudioContext creation due to autoplay policy, or the device lacks audio hardware.',
+          solution: 'Click anywhere on the page first to unlock audio, then reload.',
+          steps: ['Click on the page canvas', 'Check browser permissions', 'Reload the page'],
+          relatedCodes: ['BROWSER_NOT_SUPPORTED'],
+          prevention: 'Ensure the app is opened via a user gesture (click) rather than automatic redirect.',
+        },
+        {
+          code: 'CONVERT_NO_AUDIO',
+          message: 'Nothing to convert',
+          severity: 'warning',
+          category: 'B. Settings & Data',
+          location: 'Page: Audio Converter → Area: Convert button',
+          cause: 'The Convert button was clicked before any audio file was imported.',
+          solution: 'Import an audio file first using the dropzone or Choose File button.',
+          steps: ['Click the upload dropzone', 'Select an audio file', 'Wait for the source info to appear'],
+          relatedCodes: ['IMPORT_FAILED'],
+          prevention: 'The convert button is disabled when no audio is loaded; this error may appear from programmatic calls.',
+        },
+        {
+          code: 'CONVERT_FAILED',
+          message: 'Conversion failed',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Audio Converter → Area: Convert section',
+          cause: 'The browser does not support the selected output format, or MediaRecorder failed to capture the audio stream.',
+          solution: 'Try a different format (WAV 16-bit is universally supported) or use a different browser.',
+          steps: ['Select WAV 16-bit format', 'Click Convert again', 'If still failing, reload the page'],
+          relatedCodes: ['FORMAT_NOT_SUPPORTED', 'MEDIA_RECORDER_ERROR'],
+          prevention: "Always check the browser's supported format list in the format dropdown before converting.",
+        },
+        {
+          code: 'FORMAT_NOT_SUPPORTED',
+          message: 'Selected output format not supported',
+          severity: 'warning',
+          category: 'F. Browser & Performance',
+          location: 'Page: Audio Converter → Area: Output format dropdown',
+          cause: "The browser does not implement the selected MIME type for MediaRecorder (e.g., MP3 on Safari).",
+          solution: 'Choose WAV 16-bit PCM, which is guaranteed to work on all browsers.',
+          steps: ['Open the Format dropdown', 'Select WAV 16-bit PCM', 'Click Convert'],
+          relatedCodes: ['CONVERT_FAILED'],
+          prevention: 'WAV formats are native and do not rely on MediaRecorder; they are the safest choice.',
+        },
+        {
+          code: 'PLAYBACK_ERROR',
+          message: 'Playback failed',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Audio Converter → Area: Result preview',
+          cause: 'The audio element failed to play the converted file, usually due to an unsupported codec or corrupted output.',
+          solution: 'Try converting to a different format or reload the page.',
+          steps: ['Select WAV 16-bit format', 'Click Convert again', 'Check the browser console for errors'],
+          relatedCodes: ['CONVERT_FAILED'],
+          prevention: 'Preview the source file before converting to ensure the browser can decode it.',
+        },
+        {
+          code: 'STORAGE_FULL',
+          message: 'Browser storage full',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Audio Converter → Area: Export / Download',
+          cause: 'The browser disk quota is exceeded, preventing the converted audio blob from being created.',
+          solution: 'Free up disk space or use a different browser profile.',
+          steps: ['Clear browser cache', 'Close other tabs', 'Restart browser'],
+          relatedCodes: ['CONVERT_NO_AUDIO'],
+          prevention: 'Convert shorter clips or lower-bitrate formats when disk space is limited.',
+        },
+      ],
+    },
+    {
       id: 'settings-guide',
       title: 'Settings Panel Guide',
       overview: `

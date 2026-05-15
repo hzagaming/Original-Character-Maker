@@ -16,6 +16,7 @@ type SharedPageProps = {
   onOpenSettings: () => void;
   onNavigate?: (screen: 'image-converter' | 'docs') => void;
   onOpenDocs?: (toolId?: string, section?: string, errorCode?: string) => void;
+  onSwitchTool?: (toolId: string) => void;
 };
 
 /* ------------------------------------------------------------------ */

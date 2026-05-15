@@ -2955,6 +2955,11 @@ input[type='range']:active::-moz-range-thumb {
 .log-badge.error { background: rgba(244, 90, 90, 0.2); color: #f45a5a; }
 .log-badge.debug { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
 
+.log-line.info { border-left: 2px solid rgba(79, 157, 247, 0.4); padding-left: 6px; }
+.log-line.success { border-left: 2px solid rgba(74, 222, 128, 0.4); padding-left: 6px; }
+.log-line.error { border-left: 2px solid rgba(244, 90, 90, 0.4); padding-left: 6px; }
+.log-line.debug { border-left: 2px solid rgba(156, 163, 175, 0.4); padding-left: 6px; }
+
 .log-text {
   color: var(--text-main);
   word-break: break-word;
