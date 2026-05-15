@@ -3191,6 +3191,16 @@ input[type='range']:active::-moz-range-thumb {
   }
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes modalBackdropIn {
   from {
     opacity: 0;

@@ -362,6 +362,8 @@ export function AudioEditorPage({
   const [exportFormat, setExportFormat] = useState<'wav-16' | 'wav-8' | 'wav-32' | 'webm' | 'ogg' | 'mp3'>('wav-16');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
   const MAX_EXPORTS = 50;
 
   /* ---- Error panel ---- */
@@ -445,6 +447,8 @@ export function AudioEditorPage({
   const handleImport = useCallback(
     async (file: File) => {
       try {
+        setIsImporting(true);
+        setImportProgress(10);
         playSound('uploadStart');
         addLog('info', `Importing: ${file.name} (${formatBytes(file.size)})`);
 
@@ -453,8 +457,11 @@ export function AudioEditorPage({
           ctx = new AudioContext();
           audioCtxRef.current = ctx;
         }
+        setImportProgress(30);
         const arrayBuffer = await file.arrayBuffer();
+        setImportProgress(60);
         const decoded = await ctx.decodeAudioData(arrayBuffer);
+        setImportProgress(85);
         setSourceBuffer(decoded);
         setEditBuffer(decoded);
         setFileName(file.name);
@@ -464,6 +471,7 @@ export function AudioEditorPage({
         setSelection(null);
         setCurrentTime(0);
         setErrors([]);
+        setImportProgress(100);
         playSound('uploadComplete');
         addLog('success', `Import complete: ${decoded.numberOfChannels}ch, ${decoded.sampleRate}Hz, ${formatTime(decoded.duration)}`);
 
@@ -472,7 +480,10 @@ export function AudioEditorPage({
           const w = canvas.clientWidth || 800;
           setPeaks(generateWaveformData(decoded, w));
         }
+        setTimeout(() => setIsImporting(false), 400);
       } catch (err) {
+        setIsImporting(false);
+        setImportProgress(0);
         const msg = String(err);
         setErrors([{ code: 'IMPORT_FAILED', message: 'Failed to decode audio file', hint: msg }]);
         addLog('error', `Import failed: ${msg}`);
@@ -1157,8 +1168,8 @@ export function AudioEditorPage({
   /*  Render                                                             */
   /* ================================================================== */
   return (
-    <div className="page-root">
-      <header className="page-header">
+    <div className="tool-page-shell">
+      <header className="feature-header fade-up delay-1">
         <div className="header-left">
           <button className="back-button" type="button" onClick={() => { playSound('back'); onBack(); }} aria-label={backHome}>←</button>
           <div>
@@ -1169,23 +1180,35 @@ export function AudioEditorPage({
         <button className="settings-trigger" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }} aria-label={openSettings}>⚙</button>
       </header>
 
-      <main className="page-body" style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20 }}>
+      <main className="tool-workbench fade-up delay-2" style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20 }}>
         <div className="main-column">
           {/* ---- Import area ---- */}
           {!editBuffer && (
             <div className="upload-zone" style={{ margin: '40px auto', maxWidth: 560, textAlign: 'center' }}>
-              <input
-                type="file"
-                accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
-                id="audio-import"
-                hidden
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
-              />
-              <label htmlFor="audio-import" className="upload-dropzone" style={{ cursor: 'pointer', display: 'block', padding: '48px 32px', border: '2px dashed var(--border)', borderRadius: 16, background: 'rgba(255,255,255,0.03)' }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
-                <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
-                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
-              </label>
+              {isImporting ? (
+                <div style={{ padding: '48px 32px', borderRadius: 16, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }}>⏳</div>
+                  <span className={`status-badge running`} style={{ marginBottom: 12, display: 'inline-flex' }}>Decoding audio… {importProgress}%</span>
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: `${importProgress}%` }} />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="file"
+                    accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
+                    id="audio-import"
+                    hidden
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
+                  />
+                  <label htmlFor="audio-import" className="upload-dropzone" style={{ cursor: 'pointer', display: 'block', padding: '48px 32px', border: '2px dashed var(--border)', borderRadius: 16, background: 'rgba(255,255,255,0.03)' }}>
+                    <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
+                    <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
+                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
+                  </label>
+                </>
+              )}
             </div>
           )}
 
@@ -1229,7 +1252,7 @@ export function AudioEditorPage({
               </div>
 
               {/* ---- Waveform canvas ---- */}
-              <div className="waveform-container" style={{ position: 'relative', height: 220, borderRadius: 12, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', marginBottom: 16 }}>
+              <div className="waveform-container fade-up delay-3" style={{ position: 'relative', height: 220, borderRadius: 12, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', marginBottom: 16, transition: 'opacity 400ms ease, transform 400ms ease' }}>
                 <canvas
                   ref={canvasRef}
                   style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : 'crosshair' }}
@@ -1267,18 +1290,19 @@ export function AudioEditorPage({
                   <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting}>
                     {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
                   </button>
+                  <span className={`status-badge ${isExporting ? 'running' : exportProgress >= 100 ? 'success' : 'idle'}`}>
+                    {isExporting ? 'Exporting…' : exportProgress >= 100 ? 'Export complete' : 'Ready'}
+                  </span>
                 </div>
-                {isExporting && (
-                  <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ width: `${exportProgress}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s' }} />
-                  </div>
-                )}
+                <div className="progress-track" style={{ opacity: isExporting || exportProgress >= 100 ? 1 : 0, transition: 'opacity 300ms ease' }}>
+                  <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
+                </div>
               </div>
 
               {/* ---- Effects Panel ---- */}
               <div className="effects-panel" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
                 {/* Volume & Pan */}
-                <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="param-card fade-up delay-3" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔊 Volume & Pan</h4>
                   <ParamRow label="Volume" value={`${volume}%`}>
                     <input type="range" min={0} max={200} value={volume} onChange={(e) => { playSound('sliderChange'); setVolume(Number(e.target.value)); }} />
@@ -1292,7 +1316,7 @@ export function AudioEditorPage({
                 </div>
 
                 {/* Speed & Pitch */}
-                <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="param-card fade-up delay-4" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>⚡ Speed & Pitch</h4>
                   <ParamRow label="Speed" value={`${speed}%`}>
                     <input type="range" min={25} max={400} value={speed} onChange={(e) => { playSound('sliderChange'); setSpeed(Number(e.target.value)); }} />
@@ -1309,7 +1333,7 @@ export function AudioEditorPage({
                 </div>
 
                 {/* Fade */}
-                <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="param-card fade-up delay-5" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>📉 Fade</h4>
                   <ParamRow label="Fade In" value={`${fadeIn}s`}>
                     <input type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => { playSound('sliderChange'); setFadeIn(Number(e.target.value)); }} />
@@ -1320,7 +1344,7 @@ export function AudioEditorPage({
                 </div>
 
                 {/* EQ */}
-                <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="param-card fade-up delay-6" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🎚 EQ</h4>
                   <ParamRow label="Low Gain" value={`${eqLow > 0 ? '+' : ''}${eqLow}dB`}>
                     <input type="range" min={-12} max={12} value={eqLow} onChange={(e) => { playSound('sliderChange'); setEqLow(Number(e.target.value)); }} />
@@ -1334,7 +1358,7 @@ export function AudioEditorPage({
                 </div>
 
                 {/* Compressor */}
-                <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="param-card fade-up delay-3" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔧 Compressor</h4>
                   <ParamRow label="Threshold" value={`${compThreshold}dB`}>
                     <input type="range" min={-60} max={0} value={compThreshold} onChange={(e) => { playSound('sliderChange'); setCompThreshold(Number(e.target.value)); }} />
@@ -1351,7 +1375,7 @@ export function AudioEditorPage({
                 </div>
 
                 {/* Reverb */}
-                <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="param-card fade-up delay-4" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🌊 Reverb</h4>
                   <ParamRow label="Room Size" value={`${reverbSize}%`}>
                     <input type="range" min={0} max={100} value={reverbSize} onChange={(e) => { playSound('sliderChange'); setReverbSize(Number(e.target.value)); }} />
@@ -1365,7 +1389,7 @@ export function AudioEditorPage({
                 </div>
 
                 {/* Noise & Normalize */}
-                <div className="param-card" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="param-card fade-up delay-5" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                   <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔇 Noise & Normalize</h4>
                   <ParamRow label="Noise Reduction" value={`${noiseReduction}%`}>
                     <input type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSound('sliderChange'); setNoiseReduction(Number(e.target.value)); }} />
@@ -1382,7 +1406,7 @@ export function AudioEditorPage({
         {/* ---- Side panel: Logs & Results ---- */}
         <div className="side-column" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Results */}
-          <section className="tool-card" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}>
+          <section className="tool-card fade-up delay-3" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}>
             <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { playSound('expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
               <div>
                 <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Results</span>
@@ -1416,7 +1440,7 @@ export function AudioEditorPage({
           </section>
 
           {/* Logs */}
-          <section className="tool-card" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden', flex: 1, minHeight: 200 }}>
+          <section className="tool-card fade-up delay-4" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden', flex: 1, minHeight: 200 }}>
             <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { playSound('expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
               <div>
                 <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Debug</span>
