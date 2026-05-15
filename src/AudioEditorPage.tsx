@@ -322,6 +322,7 @@ export function AudioEditorPage({
   const dragStartXRef = useRef(0);
   const dragStartOffsetRef = useRef(0);
   const dragStartSelectionRef = useRef<{ start: number; end: number } | null>(null);
+  const didDragRef = useRef(false);
 
   /* ---- Effect parameters ---- */
   const [volume, setVolume] = useState(100);
@@ -376,19 +377,34 @@ export function AudioEditorPage({
   /* ================================================================== */
   /*  Lifecycle & Cleanup                                                */
   /* ================================================================== */
+  /* ---- Responsive layout ---- */
   useEffect(() => {
     function onResize() {
       setIsNarrow(window.innerWidth < 900);
-      // Redraw waveform on resize
+    }
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  /* ---- Redraw waveform on resize ---- */
+  useEffect(() => {
+    function onResize() {
       if (editBuffer && canvasRef.current) {
         const w = canvasRef.current.clientWidth || 800;
         setPeaks(generateWaveformData(editBuffer, w));
       }
     }
-    onResize();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, [editBuffer]);
+
+  /* ---- Clamp panOffset when zoom changes ---- */
+  useEffect(() => {
+    if (duration > 0) {
+      setPanOffset((prev) => Math.max(0, Math.min(duration - duration / zoom, prev)));
+    }
+  }, [zoom, duration]);
 
   useEffect(() => {
     return () => {
@@ -484,6 +500,7 @@ export function AudioEditorPage({
     (offset: number) => {
       const ctx = audioCtxRef.current;
       if (!ctx || !editBuffer) return;
+      offset = Math.max(0, Math.min(offset, editBuffer.duration));
       stopPlayback();
 
       // Resume context if suspended (browser autoplay policy)
@@ -715,12 +732,15 @@ export function AudioEditorPage({
         }
         case 'reverse': {
           result = applyReverse(editBuffer);
+          setIsReversed(false);
           addLog('success', 'Reversed audio');
           playSound('success');
           break;
         }
         case 'fade': {
           result = applyFade(editBuffer, fadeIn, fadeOut);
+          setFadeIn(0);
+          setFadeOut(0);
           addLog('success', `Applied fade: in=${fadeIn}s, out=${fadeOut}s`);
           playSound('success');
           break;
@@ -752,6 +772,11 @@ export function AudioEditorPage({
       setHistoryIdx(idx);
       setEditBuffer(history[idx]);
       setDuration(history[idx].duration);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const w = canvas.clientWidth || 800;
+        setPeaks(generateWaveformData(history[idx], w));
+      }
       addLog('info', `Undo: restored step ${idx}`);
       playSound('undo');
     }
@@ -763,6 +788,11 @@ export function AudioEditorPage({
       setHistoryIdx(idx);
       setEditBuffer(history[idx]);
       setDuration(history[idx].duration);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const w = canvas.clientWidth || 800;
+        setPeaks(generateWaveformData(history[idx], w));
+      }
       addLog('info', `Redo: restored step ${idx}`);
       playSound('redo');
     }
@@ -1041,6 +1071,7 @@ export function AudioEditorPage({
         dragStartSelectionRef.current = { start: t, end: t };
         setSelection({ start: t, end: t });
       }
+      didDragRef.current = false;
       setIsDragging(true);
     },
     [editBuffer, getTimeFromX, panOffset]
@@ -1057,6 +1088,7 @@ export function AudioEditorPage({
         const newOffset = dragStartOffsetRef.current - ratio * duration;
         setPanOffset(Math.max(0, Math.min(duration - duration / zoom, newOffset)));
       } else if (dragModeRef.current === 'select') {
+        didDragRef.current = true;
         const t = getTimeFromX(e.clientX);
         const start = dragStartSelectionRef.current?.start ?? t;
         setSelection({ start: Math.min(start, t), end: Math.max(start, t) });
@@ -1073,6 +1105,7 @@ export function AudioEditorPage({
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent) => {
       if (isDragging) return;
+      if (didDragRef.current) return;
       const t = getTimeFromX(e.clientX);
       setCurrentTime(t);
       if (isPlaying) startPlayback(t);
@@ -1146,7 +1179,7 @@ export function AudioEditorPage({
                 accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
                 id="audio-import"
                 hidden
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
               />
               <label htmlFor="audio-import" className="upload-dropzone" style={{ cursor: 'pointer', display: 'block', padding: '48px 32px', border: '2px dashed var(--border)', borderRadius: 16, background: 'rgba(255,255,255,0.03)' }}>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
@@ -1184,7 +1217,7 @@ export function AudioEditorPage({
                 <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>📈 Normalize</button>
                 <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>🔊 Mono</button>
                 <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>🔄 Reset FX</button>
-                <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); }} />
+                <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
                 <label htmlFor="audio-reimport" className="secondary-button small-button" style={{ cursor: 'pointer' }}>📁 New File</label>
               </div>
 
