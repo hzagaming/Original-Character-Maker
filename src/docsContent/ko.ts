@@ -1658,3353 +1658,7333 @@ A: 주로 중국어와 영어를 지원합니다. 다른 언어는 모델 학습
         ],
       },
     ],
-    errorDictionary:
-[
+  errorDictionary: [
+    {
+      id: 'A',
+      name: 'A. API & Network',
+      description: 'API Key issues, network disconnection, backend unavailability, request timeout, rate limiting, and other external dependency errors',
+      errors: [
+        {
+          code: 'API_BASE_INVALID',
+          message: 'API Base URL format is invalid',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Settings → API tab',
+          cause: 'URL format error or unreachable.',
+          solution: 'Check the URL format.',
+          steps: [
+            'Confirm the URL starts with http:// or https://',
+            'Confirm there is no extra path at the end (such as /api/workflows)',
+            'Ensure the URL can be accessed normally in the browser',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE'],
+          prevention: 'When configuring the API address, only enter the backend service\'s root domain and port; do not append any API paths.',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'API Key expired or invalid',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Global / All pages',
+          cause: 'The configured API Key has expired, been revoked, or its quota has been exhausted.',
+          solution: 'Replace with a new valid API Key.',
+          steps: [
+            'Open "Settings → API"',
+            'Delete the old Key and enter a new valid Key',
+            'Save settings',
+            'Retry the operation',
+          ],
+          relatedCodes: ['API_KEY_MISSING'],
+          prevention: 'Regularly check the API Key\'s validity period and remaining quota; quickly verify whether the Key is valid through real-time testing in LLM Hub.',
+        },
+        {
+          code: 'API_KEY_MISSING',
+          message: 'API Key not configured',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Global / All pages',
+          cause: 'The user has not configured an API Key in Settings → API, or the Key has been cleared.',
+          solution: 'Configure a valid API Key in the Settings panel.',
+          steps: [
+            'Open "Settings → API"',
+            'Enter your valid Key in the API Key input field',
+            'Save settings',
+            'Return to the corresponding tool page and retry the operation',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Before using any online tool for the first time, be sure to configure a valid API Key in "Settings → API".',
+        },
+        {
+          code: 'API_RATE_LIMIT',
+          message: 'API Rate Limit triggered',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Global / All pages',
+          cause: 'Request frequency is too high, exceeding the service provider\'s limit.',
+          solution: 'Slow down request frequency or switch providers.',
+          steps: [
+            'Reduce request frequency',
+            'Wait a while and retry',
+            'Consider switching to a provider with higher rate limits',
+          ],
+          relatedCodes: ['429_TOO_MANY_REQUESTS'],
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: 'API request timeout',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Global / All pages',
+          cause: 'Request processing time exceeds the set timeout.',
+          solution: 'Shorten content length, increase timeout, or retry.',
+          steps: [
+            'Reduce request content (shorten text, reduce image size)',
+            'Increase timeout setting (Settings → API → Timeout)',
+            'Retry the operation',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', 'BACKEND_UNAVAILABLE'],
+          prevention: 'When processing large images or large amounts of text, reduce parameter scale (image size, Max Tokens, etc.) in advance; increase timeout settings when the network is unstable.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Backend unavailable',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Global / All pages',
+          cause: 'Backend service is not started, has crashed, or is not configured correctly.',
+          solution: 'Check backend service status.',
+          steps: [
+            'Check API Base URL configuration',
+            'Confirm backend service is running',
+            'Check backend logs for startup errors',
+            'Restart the backend service and retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', '502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: 'When deploying locally, ensure the backend process is started (npm start); when using a remote service, confirm the URL is configured correctly.',
+        },
+        {
+          code: 'HOSTED_API_REQUIRED',
+          message: 'Static hosting requires custom API configuration',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal / Prompt Suite / others',
+          cause: 'Deployed to a pure static hosting environment (e.g., GitHub Pages), cannot directly access local backend.',
+          solution: 'Configure a remote custom API address.',
+          steps: [
+            'Open "Settings → API"',
+            'Switch "Interface Mode" to "Custom API"',
+            'Enter the backend root address in "API Address"',
+            'Enter the API Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Before using Paper2Gal in a static hosting environment, be sure to deploy the backend service and configure the correct API address and Key.',
+        },
+        {
+          code: 'NETWORK_DISCONNECTED',
+          message: 'Network disconnected',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Global / All pages',
+          cause: 'Device is not connected to the network, or network connection is interrupted.',
+          solution: 'Restore network connection.',
+          steps: [
+            'Check device network connection status',
+            'Try accessing other websites to confirm network is normal',
+            'Check proxy/VPN settings',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: 'Before using online tools, confirm the network connection is normal; avoid performing long workflows in environments with large network fluctuations.',
+        },
+        {
+          code: 'NETWORK_TIMEOUT',
+          message: 'Network request timeout',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Global / All pages',
+          cause: 'Network connection is unstable or the server response is too slow.',
+          solution: 'Check network or retry later.',
+          steps: [
+            'Check device network connection',
+            'Try accessing other websites',
+            'If using a proxy/VPN, check settings',
+            'Retry later',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', 'API_TIMEOUT'],
+          prevention: 'Use a stable network; avoid long operations when network is poor.',
+        },
       {
-        id: `A`,
-        name: `A. API 및 네트워크`,
-        description: `API Key, 네트워크 연결, 백엔드 서비스, 요청 시간 초과, 속도 제한 및 기타 외부 종속성과 관련된 오류입니다.`,
-        errors:
-[
-          {
-            code: `API_KEY_EXPIRED`,
-            message: `요청이 401을 반환하거나 Key가 유효하지 않거나 만료되었다고 표시됩니다`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 모든 온라인 도구 → 영역: 오류 패널 또는 출력 영역`,
-            cause: `설정된 API Key가 만료되었거나 취소되었거나 할당량이 소진되었습니다.`,
-            solution: `유효한 API Key로 교체하세요.`,
-            steps:
-[
-              `'설정 → API' 패널 열기`,
-              `현재 Key를 삭제하고 새로운 유효한 Key 입력`,
-              `저장 후 다시 시도`,
-            ],
-            relatedCodes:
-[
-              `API_KEY_MISSING`,
-              `401_UNAUTHORIZED`,
-            ],
-            prevention: `API Key의 만료일과 남은 할당량을 정기적으로 확인하세요.`,
-          },
-          {
-            code: `API_KEY_MISSING`,
-            message: `시작/보내기/생성을 누른 직후 오류가 발생하고 API Key가 설정되지 않았습니다`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 모든 온라인 도구 → 영역: 오류 패널 또는 출력 영역`,
-            cause: `'설정 → API'에서 API Key가 설정되지 않았습니다.`,
-            solution: `설정 패널에서 유효한 API Key를 설정하세요.`,
-            steps:
-[
-              `우측 상단 '설정 열기' 클릭`,
-              `'API' 탭으로 전환`,
-              `유효한 Key 입력`,
-              `'저장' 클릭`,
-              `돌아가서 작업 반복`,
-            ],
-            relatedCodes:
-[
-              `API_KEY_EXPIRED`,
-              `401_UNAUTHORIZED`,
-            ],
-            prevention: `처음 온라인 도구를 사용할 때 반드시 유효한 API Key를 설정하세요.`,
-          },
-          {
-            code: `BACKEND_UNAVAILABLE`,
-            message: `'백엔드를 사용할 수 없습니다', '서버에 연결할 수 없습니다' 또는 요청을 보낼 수 없습니다`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 모든 온라인 도구 → 영역: 오류 패널`,
-            cause: `백엔드 서버가 실행 중이지 않거나 충돌했거나 설정된 API Base URL이 잘못되었습니다.`,
-            solution: `백엔드 서비스 상태와 API 설정을 확인하세요.`,
-            steps:
-[
-              `브라우저 DevTools → Network 열기`,
-              `작업을 반복하고 요청 상태를 확인`,
-              `요청이 전송되지 않은 경우 '설정 → API → API Base URL' 확인`,
-              `502/503인 경우 관리자에게 문의`,
-              `로컬 배포 시 프로세스가 실행 중인지 확인`,
-            ],
-            relatedCodes:
-[
-              `NETWORK_DISCONNECTED`,
-              `502_BAD_GATEWAY`,
-              `503_SERVICE_UNAVAILABLE`,
-            ],
-            prevention: `로컬 배포 시 백엔드 프로세스를 실행하세요. 원격 서비스를 사용할 때 URL을 확인하세요.`,
-          },
-        
-          {
-            code: `API_001`,
-            message: `연결 시간 초과 오류가 발생했습니다 (API_001).`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
-            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_002`,
-              `API_003`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_002`,
-            message: `네트워크 불안정 오류가 발생했습니다 (API_002).`,
-            severity: `error`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `서버가 과부하 상태입니다.`,
-            solution: `잠시 후 다시 시도하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_003`,
-              `API_004`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_003`,
-            message: `DNS 확인 실패 오류가 발생했습니다 (API_003).`,
-            severity: `warning`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `DNS 설정이 잘못되었습니다.`,
-            solution: `DNS 설정을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_004`,
-              `API_005`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_004`,
-            message: `SSL 인증서 오류 오류가 발생했습니다 (API_004).`,
-            severity: `info`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `SSL 인증서가 만료되었습니다.`,
-            solution: `프록시 설정을 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_005`,
-              `API_006`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_005`,
-            message: `프록시 연결 실패 오류가 발생했습니다 (API_005).`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `프록시 설정이 올바르지 않습니다.`,
-            solution: `방화벽 규칙을 확인하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_006`,
-              `API_007`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_006`,
-            message: `방화벽 차단 오류가 발생했습니다 (API_006).`,
-            severity: `error`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
-            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_007`,
-              `API_008`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_007`,
-            message: `라우터 재설정 필요 오류가 발생했습니다 (API_007).`,
-            severity: `warning`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `서버가 과부하 상태입니다.`,
-            solution: `잠시 후 다시 시도하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_008`,
-              `API_009`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_008`,
-            message: `대역폭 초과 오류가 발생했습니다 (API_008).`,
-            severity: `info`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `DNS 설정이 잘못되었습니다.`,
-            solution: `DNS 설정을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_009`,
-              `API_010`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_009`,
-            message: `서버 다운 오류가 발생했습니다 (API_009).`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `SSL 인증서가 만료되었습니다.`,
-            solution: `프록시 설정을 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_010`,
-              `API_001`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_010`,
-            message: `로드 밸런서 오류 오류가 발생했습니다 (API_010).`,
-            severity: `error`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `프록시 설정이 올바르지 않습니다.`,
-            solution: `방화벽 규칙을 확인하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_001`,
-              `API_002`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_011`,
-            message: `연결 시간 초과 오류가 발생했습니다 (API_011).`,
-            severity: `warning`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
-            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_002`,
-              `API_003`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_012`,
-            message: `네트워크 불안정 오류가 발생했습니다 (API_012).`,
-            severity: `info`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `서버가 과부하 상태입니다.`,
-            solution: `잠시 후 다시 시도하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_003`,
-              `API_004`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_013`,
-            message: `DNS 확인 실패 오류가 발생했습니다 (API_013).`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `DNS 설정이 잘못되었습니다.`,
-            solution: `DNS 설정을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_004`,
-              `API_005`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_014`,
-            message: `SSL 인증서 오류 오류가 발생했습니다 (API_014).`,
-            severity: `error`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `SSL 인증서가 만료되었습니다.`,
-            solution: `프록시 설정을 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_005`,
-              `API_006`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_015`,
-            message: `프록시 연결 실패 오류가 발생했습니다 (API_015).`,
-            severity: `warning`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `프록시 설정이 올바르지 않습니다.`,
-            solution: `방화벽 규칙을 확인하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_006`,
-              `API_007`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_016`,
-            message: `방화벽 차단 오류가 발생했습니다 (API_016).`,
-            severity: `info`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `네트워크 연결이 불안정하거나 끊어졌습니다.`,
-            solution: `네트워크 연결을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_007`,
-              `API_008`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_017`,
-            message: `라우터 재설정 필요 오류가 발생했습니다 (API_017).`,
-            severity: `critical`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `서버가 과부하 상태입니다.`,
-            solution: `잠시 후 다시 시도하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_008`,
-              `API_009`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_018`,
-            message: `대역폭 초과 오류가 발생했습니다 (API_018).`,
-            severity: `error`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `DNS 설정이 잘못되었습니다.`,
-            solution: `DNS 설정을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_009`,
-              `API_010`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_019`,
-            message: `서버 다운 오류가 발생했습니다 (API_019).`,
-            severity: `warning`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `SSL 인증서가 만료되었습니다.`,
-            solution: `프록시 설정을 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_010`,
-              `API_001`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },
-          {
-            code: `API_020`,
-            message: `로드 밸런서 오류 오류가 발생했습니다 (API_020).`,
-            severity: `info`,
-            category: `A. API 및 네트워크`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `프록시 설정이 올바르지 않습니다.`,
-            solution: `방화벽 규칙을 확인하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `API_001`,
-              `API_002`
-            ],
-            prevention: `네트워크 상태를 정기적으로 모니터링하고 안정적인 연결을 유지하세요. API Key의 유효 기간과 할당량을 주기적으로 확인하세요.`,
-          },],
+        code: 'API_DNS_RESOLUTION_FAILED',
+        message: 'DNS resolution failed, unable to connect to API server',
+        severity: 'error',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Domain name resolution failed, possibly due to DNS misconfiguration, non-existent domain, or network disconnection.',
+        solution: 'Check domain spelling, change DNS server, or contact domain administrator.',
+        steps: [
+          'Confirm domain spelling is correct',
+          'Try accessing directly via IP address',
+          'Change DNS server to 8.8.8.8 or 1.1.1.1',
+          'Check local network connection',
+        ],
+        prevention: 'Use reliable DNS services and avoid unstable domains.',
       },
       {
-        id: `B`,
-        name: `B. 설정 및 데이터`,
-        description: `설정 가져오기/내보내기, localStorage, 데이터 손상, 저장되지 않은 변경 사항 경고와 관련된 오류입니다.`,
-        errors:
-[
-          {
-            code: `CONFIG_CORRUPTED`,
-            message: `설정 불러오기가 비정상적이고 인터페이스가 불완전하게 표시되거나 기능이 작동하지 않습니다`,
-            severity: `error`,
-            category: `B. 설정 및 데이터`,
-            location: `페이지: 모든 도구 → 영역: 전체 페이지 또는 특정 기능 영역`,
-            cause: `브라우저 로컬 스토리지의 설정 데이터가 손상되었습니다.`,
-            solution: `설정을 초기화하고 localStorage를 지우세요.`,
-            steps:
-[
-              `'초기화' 버튼 클릭`,
-              `대화 상자에서 확인`,
-              `필요 시 Local Storage의 키 삭제`,
-              `페이지 새로고침`,
-            ],
-            relatedCodes:
-[
-              `IMPORT_INVALID_JSON`,
-              `STORAGE_READ_ONLY`,
-            ],
-            prevention: `로컬 스토리지 데이터를 수동으로 수정하지 마세요.`,
-          },
-          {
-            code: `STORAGE_READ_ONLY`,
-            message: `저장 작업이 반응하지 않고 새로고침 후 데이터가 손실됩니다`,
-            severity: `critical`,
-            category: `B. 설정 및 데이터`,
-            location: `페이지: 모든 도구 → 영역: '저장' 버튼`,
-            cause: `브라우저가 시크릿 모드이거나 localStorage가 비활성화되었거나 디스크가 꽉 찼습니다.`,
-            solution: `시크릿 모드를 종료하거나 디스크 공간을 확보하세요.`,
-            steps:
-[
-              `시크릿 모드가 아닌지 확인`,
-              `디스크 공간 확인`,
-              `일반 창에서 앱 열기`,
-              `필요 시 '낮추기'를 대안으로 사용`,
-            ],
-            relatedCodes:
-[
-              `LOCAL_STORAGE_FULL`,
-            ],
-            prevention: `개인 모드에서 이 앱을 사용하지 마세요. 설정을 정기적으로 로컬 파일로 낮추세요.`,
-          },
-        
-          {
-            code: `CONFIG_001`,
-            message: `설정 손상 오류가 발생했습니다 (CONFIG_001).`,
-            severity: `critical`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
-            solution: `설정을 초기화하고 다시 구성하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_002`,
-              `CONFIG_003`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_002`,
-            message: `데이터베이스 접근 거부 오류가 발생했습니다 (CONFIG_002).`,
-            severity: `error`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `브라우저 저장 공간이 가득 찼습니다.`,
-            solution: `브라우저 캐시를 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_003`,
-              `CONFIG_004`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_003`,
-            message: `구성 파일 누락 오류가 발생했습니다 (CONFIG_003).`,
-            severity: `warning`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `구성 스키마가 업데이트되었습니다.`,
-            solution: `백업에서 설정을 복원하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_004`,
-              `CONFIG_005`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_004`,
-            message: `스키마 불일치 오류가 발생했습니다 (CONFIG_004).`,
-            severity: `info`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
-            solution: `파일 형식을 확인하고 다시 가져오세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_005`,
-              `CONFIG_006`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_005`,
-            message: `백업 복원 실패 오류가 발생했습니다 (CONFIG_005).`,
-            severity: `critical`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `동기화 서버에 연결할 수 없습니다.`,
-            solution: `수동으로 설정을 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_006`,
-              `CONFIG_007`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_006`,
-            message: `버전 충돌 오류가 발생했습니다 (CONFIG_006).`,
-            severity: `error`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
-            solution: `설정을 초기화하고 다시 구성하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_007`,
-              `CONFIG_008`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_007`,
-            message: `임포트 형식 오류 오류가 발생했습니다 (CONFIG_007).`,
-            severity: `warning`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `브라우저 저장 공간이 가득 찼습니다.`,
-            solution: `브라우저 캐시를 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_008`,
-              `CONFIG_009`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_008`,
-            message: `익스포트 실패 오류가 발생했습니다 (CONFIG_008).`,
-            severity: `info`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `구성 스키마가 업데이트되었습니다.`,
-            solution: `백업에서 설정을 복원하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_009`,
-              `CONFIG_010`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_009`,
-            message: `캐시 손상 오류가 발생했습니다 (CONFIG_009).`,
-            severity: `critical`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
-            solution: `파일 형식을 확인하고 다시 가져오세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_010`,
-              `CONFIG_001`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_010`,
-            message: `동기화 오류 오류가 발생했습니다 (CONFIG_010).`,
-            severity: `error`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `동기화 서버에 연결할 수 없습니다.`,
-            solution: `수동으로 설정을 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_001`,
-              `CONFIG_002`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_011`,
-            message: `설정 손상 오류가 발생했습니다 (CONFIG_011).`,
-            severity: `warning`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
-            solution: `설정을 초기화하고 다시 구성하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_002`,
-              `CONFIG_003`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_012`,
-            message: `데이터베이스 접근 거부 오류가 발생했습니다 (CONFIG_012).`,
-            severity: `info`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `브라우저 저장 공간이 가득 찼습니다.`,
-            solution: `브라우저 캐시를 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_003`,
-              `CONFIG_004`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_013`,
-            message: `구성 파일 누락 오류가 발생했습니다 (CONFIG_013).`,
-            severity: `critical`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `구성 스키마가 업데이트되었습니다.`,
-            solution: `백업에서 설정을 복원하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_004`,
-              `CONFIG_005`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_014`,
-            message: `스키마 불일치 오류가 발생했습니다 (CONFIG_014).`,
-            severity: `error`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
-            solution: `파일 형식을 확인하고 다시 가져오세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_005`,
-              `CONFIG_006`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_015`,
-            message: `백업 복원 실패 오류가 발생했습니다 (CONFIG_015).`,
-            severity: `warning`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `동기화 서버에 연결할 수 없습니다.`,
-            solution: `수동으로 설정을 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_006`,
-              `CONFIG_007`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_016`,
-            message: `버전 충돌 오류가 발생했습니다 (CONFIG_016).`,
-            severity: `info`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `설정 파일이 손상되었거나 누락되었습니다.`,
-            solution: `설정을 초기화하고 다시 구성하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_007`,
-              `CONFIG_008`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_017`,
-            message: `임포트 형식 오류 오류가 발생했습니다 (CONFIG_017).`,
-            severity: `critical`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `브라우저 저장 공간이 가득 찼습니다.`,
-            solution: `브라우저 캐시를 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_008`,
-              `CONFIG_009`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_018`,
-            message: `익스포트 실패 오류가 발생했습니다 (CONFIG_018).`,
-            severity: `error`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `구성 스키마가 업데이트되었습니다.`,
-            solution: `백업에서 설정을 복원하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_009`,
-              `CONFIG_010`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_019`,
-            message: `캐시 손상 오류가 발생했습니다 (CONFIG_019).`,
-            severity: `warning`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `가져오기 파일 형식이 올바르지 않습니다.`,
-            solution: `파일 형식을 확인하고 다시 가져오세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_010`,
-              `CONFIG_001`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },
-          {
-            code: `CONFIG_020`,
-            message: `동기화 오류 오류가 발생했습니다 (CONFIG_020).`,
-            severity: `info`,
-            category: `B. 구성 및 데이터`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `동기화 서버에 연결할 수 없습니다.`,
-            solution: `수동으로 설정을 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONFIG_001`,
-              `CONFIG_002`
-            ],
-            prevention: `설정을 정기적으로 백업하고 버전 관리를 하세요. 브라우저 저장 공간을 모니터링하고 캐시를 정기적으로 정리하세요.`,
-          },],
+        code: 'API_SSL_CERTIFICATE_INVALID',
+        message: 'SSL certificate invalid or expired',
+        severity: 'error',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server SSL certificate is expired, self-signed, or domain name mismatch.',
+        solution: 'Update server certificate, or temporarily allow insecure connections (development only).',
+        steps: [
+          'Check certificate validity period',
+          'Confirm certificate domain matches access domain',
+          'Re-apply and deploy certificate',
+          'Development environments can temporarily bypass certificate verification',
+        ],
+        prevention: 'Use automated certificate management tools (e.g., certbot) for regular updates.',
       },
       {
-        id: `C`,
-        name: `C. 파일 및 입력`,
-        description: `이미지/오디오 파일 업로드, 지원되지 않는 형식, 손상된 파일, 너무 큰 파일과 관련된 오류입니다.`,
-        errors:
-[
-          {
-            code: `FILE_FORMAT_UNSUPPORTED`,
-            message: `업로드 시 '지원되지 않는 파일 형식'이 표시됩니다`,
-            severity: `warning`,
-            category: `C. 파일 및 입력`,
-            location: `페이지: 업로드가 있는 모든 도구 → 영역: '파일 선택' 버튼`,
-            cause: `도구에서 지원하지 않는 파일 형식을 선택했습니다.`,
-            solution: `지원되는 형식으로 파일을 변환하세요.`,
-            steps:
-[
-              `지원되는 형식 목록 확인`,
-              `파일 변환`,
-              `다시 업로드`,
-            ],
-            relatedCodes:
-[
-              `FILE_CORRUPTED`,
-              `UPLOAD_FORMAT`,
-            ],
-          },
-          {
-            code: `FILE_TOO_LARGE`,
-            message: `업로드 후 미리보기가 작동하지 않거나 처리 중 메모리 오류가 발생합니다`,
-            severity: `warning`,
-            category: `C. 파일 및 입력`,
-            location: `페이지: 업로드가 있는 모든 도구 → 영역: 미리보기 영역`,
-            cause: `업로드한 파일 크기가 도구 또는 브라우저 제한을 초과했습니다.`,
-            solution: `업로드 전 파일을 압축하거나 축소하세요.`,
-            steps:
-[
-              `파일 압축`,
-              `이미지의 경우 최대 변을 2048 또는 4096으로 축소`,
-              `오디오의 경우 샘플링 레이트 감소`,
-              `다시 업로드`,
-            ],
-            relatedCodes:
-[
-              `DEVICE_MEMORY_LOW`,
-              `FILE_FORMAT_UNSUPPORTED`,
-            ],
-          },
-        
-          {
-            code: `CONTENT_001`,
-            message: `입력 길이 초과 오류가 발생했습니다 (CONTENT_001).`,
-            severity: `critical`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
-            solution: `입력 내용을 줄이고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_002`,
-              `CONTENT_003`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_002`,
-            message: `지원되지 않는 형식 오류가 발생했습니다 (CONTENT_002).`,
-            severity: `error`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `파일 형식이 지원되지 않습니다.`,
-            solution: `지원되는 파일 형식으로 변환하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_003`,
-              `CONTENT_004`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_003`,
-            message: `인코딩 오류 오류가 발생했습니다 (CONTENT_003).`,
-            severity: `warning`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `문자 인코딩이 올바르지 않습니다.`,
-            solution: `필수 필드를 모두 입력하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_004`,
-              `CONTENT_005`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_004`,
-            message: `금지된 문자 포함 오류가 발생했습니다 (CONTENT_004).`,
-            severity: `info`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `필수 입력 필드가 비어 있습니다.`,
-            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_005`,
-              `CONTENT_006`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_005`,
-            message: `필수 필드 누락 오류가 발생했습니다 (CONTENT_005).`,
-            severity: `critical`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
-            solution: `파일 크기를 줄이세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_006`,
-              `CONTENT_007`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_006`,
-            message: `유효성 검사 실패 오류가 발생했습니다 (CONTENT_006).`,
-            severity: `error`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
-            solution: `입력 내용을 줄이고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_007`,
-              `CONTENT_008`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_007`,
-            message: `파일 크기 초과 오류가 발생했습니다 (CONTENT_007).`,
-            severity: `warning`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `파일 형식이 지원되지 않습니다.`,
-            solution: `지원되는 파일 형식으로 변환하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_008`,
-              `CONTENT_009`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_008`,
-            message: `이미지 해상도 불일치 오류가 발생했습니다 (CONTENT_008).`,
-            severity: `info`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `문자 인코딩이 올바르지 않습니다.`,
-            solution: `필수 필드를 모두 입력하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_009`,
-              `CONTENT_010`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_009`,
-            message: `프롬프트 주입 감지 오류가 발생했습니다 (CONTENT_009).`,
-            severity: `critical`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `필수 입력 필드가 비어 있습니다.`,
-            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_010`,
-              `CONTENT_001`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_010`,
-            message: `콘텐츠 정책 위반 오류가 발생했습니다 (CONTENT_010).`,
-            severity: `error`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
-            solution: `파일 크기를 줄이세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_001`,
-              `CONTENT_002`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_011`,
-            message: `입력 길이 초과 오류가 발생했습니다 (CONTENT_011).`,
-            severity: `warning`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
-            solution: `입력 내용을 줄이고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_002`,
-              `CONTENT_003`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_012`,
-            message: `지원되지 않는 형식 오류가 발생했습니다 (CONTENT_012).`,
-            severity: `info`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `파일 형식이 지원되지 않습니다.`,
-            solution: `지원되는 파일 형식으로 변환하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_003`,
-              `CONTENT_004`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_013`,
-            message: `인코딩 오류 오류가 발생했습니다 (CONTENT_013).`,
-            severity: `critical`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `문자 인코딩이 올바르지 않습니다.`,
-            solution: `필수 필드를 모두 입력하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_004`,
-              `CONTENT_005`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_014`,
-            message: `금지된 문자 포함 오류가 발생했습니다 (CONTENT_014).`,
-            severity: `error`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `필수 입력 필드가 비어 있습니다.`,
-            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_005`,
-              `CONTENT_006`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_015`,
-            message: `필수 필드 누락 오류가 발생했습니다 (CONTENT_015).`,
-            severity: `warning`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
-            solution: `파일 크기를 줄이세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_006`,
-              `CONTENT_007`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_016`,
-            message: `유효성 검사 실패 오류가 발생했습니다 (CONTENT_016).`,
-            severity: `info`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `입력 내용이 시스템 제한을 초과했습니다.`,
-            solution: `입력 내용을 줄이고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_007`,
-              `CONTENT_008`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_017`,
-            message: `파일 크기 초과 오류가 발생했습니다 (CONTENT_017).`,
-            severity: `critical`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `파일 형식이 지원되지 않습니다.`,
-            solution: `지원되는 파일 형식으로 변환하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_008`,
-              `CONTENT_009`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_018`,
-            message: `이미지 해상도 불일치 오류가 발생했습니다 (CONTENT_018).`,
-            severity: `error`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `문자 인코딩이 올바르지 않습니다.`,
-            solution: `필수 필드를 모두 입력하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_009`,
-              `CONTENT_010`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_019`,
-            message: `프롬프트 주입 감지 오류가 발생했습니다 (CONTENT_019).`,
-            severity: `warning`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `필수 입력 필드가 비어 있습니다.`,
-            solution: `콘텐츠를 검토하고 정책을 준수하도록 수정하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_010`,
-              `CONTENT_001`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },
-          {
-            code: `CONTENT_020`,
-            message: `콘텐츠 정책 위반 오류가 발생했습니다 (CONTENT_020).`,
-            severity: `info`,
-            category: `C. 콘텐츠 및 입력`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `콘텐츠가 사용 정책을 위반했습니다.`,
-            solution: `파일 크기를 줄이세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `CONTENT_001`,
-              `CONTENT_002`
-            ],
-            prevention: `입력 내용의 길이와 형식을 사전에 확인하세요. 지원되는 파일 형식과 크기 제한을 숙지하세요.`,
-          },],
+        code: 'API_CONNECTION_RESET',
+        message: 'Connection reset by server',
+        severity: 'error',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server actively closed the connection, possibly due to firewall, security group, or server overload.',
+        solution: 'Check server firewall rules, confirm port is open, reduce request frequency.',
+        steps: [
+          'Check server firewall and security group rules',
+          'Confirm target port is open',
+          'Check server load status',
+          'Reduce concurrent request count',
+        ],
+        prevention: 'Configure reasonable connection pools and timeout strategies to avoid sudden high concurrency.',
       },
       {
-        id: `D`,
-        name: `D. 모델 및 생성`,
-        description: `AI 모델 사용 불가, 콘텐츠 필터링, 프롬프트 너무 김, 생성 실패와 관련된 오류입니다.`,
-        errors:
-[
-          {
-            code: `MODEL_NOT_FOUND`,
-            message: `백엔드가 404를 반환하고 모델을 찾을 수 없습니다`,
-            severity: `error`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 모든 온라인 도구 → 영역: 오류 패널`,
-            cause: `모델 ID가 잘못 입력되었거나 모델이 지원 중단되었습니다.`,
-            solution: `모델 ID를 수정하거나 다른 모델을 선택하세요.`,
-            steps:
-[
-              `모델 ID 철자 확인`,
-              `목록에서 알려진 사용 가능한 모델 선택`,
-              `사용자 정의 API 사용 시 문서 확인`,
-              `다시 시도`,
-            ],
-            relatedCodes:
-[
-              `LLM_MODEL_UNAVAILABLE`,
-            ],
-            prevention: `목록에서 알려진 사용 가능한 모델을 선택하세요.`,
-          },
-          {
-            code: `PROMPT_BLOCKED`,
-            message: `콘텐츠가 보안 필터에 의해 차단되었습니다`,
-            severity: `error`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 모든 AI 생성 도구 → 영역: 오류 패널`,
-            cause: `프롬프트에 플랫폼 보안 정책에 의해 차단된 단어가 포함되어 있습니다.`,
-            solution: `프롬프트를 수정하고 잠재적으로 문제가 되는 단어를 제거하거나 교체하세요.`,
-            steps:
-[
-              `오류 세부 정보에서 키워드 식별`,
-              `민감한 단어를 동의어로 교체`,
-              `프롬프트 단순화`,
-              `점진적으로 수정자 추가`,
-            ],
-            relatedCodes:
-[
-              `403_FORBIDDEN`,
-            ],
-            prevention: `프롬프트를 수정할 때 민감한 단어를 피하세요.`,
-          },
-        
-          {
-            code: `MODEL_001`,
-            message: `모델 로딩 실패 오류가 발생했습니다 (MODEL_001).`,
-            severity: `critical`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `GPU 메모리가 부족합니다.`,
-            solution: `배치 크기를 줄이세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_002`,
-              `MODEL_003`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_002`,
-            message: `VRAM 부족 오류가 발생했습니다 (MODEL_002).`,
-            severity: `error`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `모델 파일이 손상되었습니다.`,
-            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_003`,
-              `MODEL_004`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_003`,
-            message: `CUDA 오류 오류가 발생했습니다 (MODEL_003).`,
-            severity: `warning`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `학습 매개변수가 부적절합니다.`,
-            solution: `학습률을 조정하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_004`,
-              `MODEL_005`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_004`,
-            message: `체크포인트 손상 오류가 발생했습니다 (MODEL_004).`,
-            severity: `info`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `기본 모델 버전이 호환되지 않습니다.`,
-            solution: `모델 파일을 다시 다운로드하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_005`,
-              `MODEL_006`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_005`,
-            message: `배치 크기 초과 오류가 발생했습니다 (MODEL_005).`,
-            severity: `critical`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `CUDA 드라이버가 오래되었습니다.`,
-            solution: `CUDA 드라이버를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_006`,
-              `MODEL_007`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_006`,
-            message: `학습률 너무 높음 오류가 발생했습니다 (MODEL_006).`,
-            severity: `error`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `GPU 메모리가 부족합니다.`,
-            solution: `배치 크기를 줄이세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_007`,
-              `MODEL_008`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_007`,
-            message: `과적합 오류가 발생했습니다 (MODEL_007).`,
-            severity: `warning`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `모델 파일이 손상되었습니다.`,
-            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_008`,
-              `MODEL_009`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_008`,
-            message: `수렴 실패 오류가 발생했습니다 (MODEL_008).`,
-            severity: `info`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `학습 매개변수가 부적절합니다.`,
-            solution: `학습률을 조정하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_009`,
-              `MODEL_010`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_009`,
-            message: `추론 시간 초과 오류가 발생했습니다 (MODEL_009).`,
-            severity: `critical`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `기본 모델 버전이 호환되지 않습니다.`,
-            solution: `모델 파일을 다시 다운로드하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_010`,
-              `MODEL_001`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_010`,
-            message: `모델 버전 불일치 오류가 발생했습니다 (MODEL_010).`,
-            severity: `error`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `CUDA 드라이버가 오래되었습니다.`,
-            solution: `CUDA 드라이버를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_001`,
-              `MODEL_002`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_011`,
-            message: `모델 로딩 실패 오류가 발생했습니다 (MODEL_011).`,
-            severity: `warning`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `GPU 메모리가 부족합니다.`,
-            solution: `배치 크기를 줄이세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_002`,
-              `MODEL_003`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_012`,
-            message: `VRAM 부족 오류가 발생했습니다 (MODEL_012).`,
-            severity: `info`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `모델 파일이 손상되었습니다.`,
-            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_003`,
-              `MODEL_004`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_013`,
-            message: `CUDA 오류 오류가 발생했습니다 (MODEL_013).`,
-            severity: `critical`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `학습 매개변수가 부적절합니다.`,
-            solution: `학습률을 조정하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_004`,
-              `MODEL_005`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_014`,
-            message: `체크포인트 손상 오류가 발생했습니다 (MODEL_014).`,
-            severity: `error`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `기본 모델 버전이 호환되지 않습니다.`,
-            solution: `모델 파일을 다시 다운로드하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_005`,
-              `MODEL_006`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_015`,
-            message: `배치 크기 초과 오류가 발생했습니다 (MODEL_015).`,
-            severity: `warning`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `CUDA 드라이버가 오래되었습니다.`,
-            solution: `CUDA 드라이버를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_006`,
-              `MODEL_007`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_016`,
-            message: `학습률 너무 높음 오류가 발생했습니다 (MODEL_016).`,
-            severity: `info`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `GPU 메모리가 부족합니다.`,
-            solution: `배치 크기를 줄이세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_007`,
-              `MODEL_008`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_017`,
-            message: `과적합 오류가 발생했습니다 (MODEL_017).`,
-            severity: `critical`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `모델 파일이 손상되었습니다.`,
-            solution: `VRAM을 확보하기 위해 다른 프로그램을 닫으세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_008`,
-              `MODEL_009`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_018`,
-            message: `수렴 실패 오류가 발생했습니다 (MODEL_018).`,
-            severity: `error`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `학습 매개변수가 부적절합니다.`,
-            solution: `학습률을 조정하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_009`,
-              `MODEL_010`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_019`,
-            message: `추론 시간 초과 오류가 발생했습니다 (MODEL_019).`,
-            severity: `warning`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `기본 모델 버전이 호환되지 않습니다.`,
-            solution: `모델 파일을 다시 다운로드하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_010`,
-              `MODEL_001`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },
-          {
-            code: `MODEL_020`,
-            message: `모델 버전 불일치 오류가 발생했습니다 (MODEL_020).`,
-            severity: `info`,
-            category: `D. 모델 및 생성`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `CUDA 드라이버가 오래되었습니다.`,
-            solution: `CUDA 드라이버를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `MODEL_001`,
-              `MODEL_002`
-            ],
-            prevention: `GPU 메모리와 온도를 모니터링하세요. 적절한 학습 매개변수를 사용하고 정규화 이미지를 활용하세요.`,
-          },],
+        code: 'API_PROXY_AUTHENTICATION_REQUIRED',
+        message: 'Proxy server requires authentication',
+        severity: 'error',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Network accesses through a proxy server but lacks proxy authentication information.',
+        solution: 'Configure proxy authentication in requests, or change network environment.',
+        steps: [
+          'Check system proxy settings',
+          'Confirm proxy username and password are correct',
+          'Configure proxy authentication in app settings',
+          'Try direct connection to bypass proxy',
+        ],
+        prevention: 'Pre-configure proxy authentication in enterprise networks.',
       },
       {
-        id: `E`,
-        name: `E. 워크플로우 및 변환`,
-        description: `워크플로우 실행, 이미지 변환, 단계 실패, 워크플로우 취소와 관련된 오류입니다.`,
-        errors:
-[
-          {
-            code: `P2G_WORKFLOW_ERROR`,
-            message: `Paper2Gal 워크플로우 실행 오류`,
-            severity: `error`,
-            category: `E. 워크플로우 및 변환`,
-            location: `페이지: paper2gal → 영역: 오류 패널`,
-            cause: `워크플로우 단계가 실패했습니다. 입력 검증 실패, 모델 사용 불가, Key 만료, 콘텐츠 필터링, 네트워크 중단 등이 원인일 수 있습니다.`,
-            solution: `오류 세부 정보를 기반으로 단계별로 문제를 해결하세요.`,
-            steps:
-[
-              `오류 세부 정보 읽기`,
-              `PNG/JPG 이미지 확인`,
-              `네트워크 확인`,
-              `프롬프트 민감 단어 변경`,
-              `백엔드 실행 확인`,
-              `단계를 다시 시도하거나 워크플로우 초기화`,
-            ],
-            relatedCodes:
-[
-              `API_KEY_MISSING`,
-              `API_KEY_EXPIRED`,
-              `MODEL_NOT_FOUND`,
-              `PROMPT_BLOCKED`,
-            ],
-            prevention: `시작 전 이미지, 네트워크, 프롬프트, API Key를 확인하세요.`,
-          },
-          {
-            code: `STYLE_TRANSFER_REQUEST_FAILED`,
-            message: `스타일 전이 요청 오류`,
-            severity: `error`,
-            category: `E. 워크플로우 및 변환`,
-            location: `페이지: 스타일 전이 → 영역: 오류 패널`,
-            cause: `백엔드 API 요청 오류. 네트워크 중단, 잘못된 API Key, 모델 사용 불가, 서버 내부 오류 등이 원인일 수 있습니다.`,
-            solution: `오류 세부 정보를 기반으로 문제를 해결하세요.`,
-            steps:
-[
-              `오류 세부 정보 확인`,
-              `401: API Key 확인`,
-              `404: 모델 확인`,
-              `429: 대기`,
-              `500/502/503: 백엔드 확인`,
-              `네트워크 오류: 연결 확인`,
-            ],
-            relatedCodes:
-[
-              `API_KEY_MISSING`,
-              `API_KEY_EXPIRED`,
-              `MODEL_NOT_FOUND`,
-              `BACKEND_UNAVAILABLE`,
-            ],
-            prevention: `시작 전 API Key, 네트워크, 모델 가용성을 확인하세요.`,
-          },
-        
-          {
-            code: `WORKFLOW_001`,
-            message: `변환 실패 오류가 발생했습니다 (WORKFLOW_001).`,
-            severity: `critical`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `입력 파일이 손상되었습니다.`,
-            solution: `입력 파일을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_002`,
-              `WORKFLOW_003`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_002`,
-            message: `코덱 미지원 오류가 발생했습니다 (WORKFLOW_002).`,
-            severity: `error`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `변환 코덱을 사용할 수 없습니다.`,
-            solution: `다른 출력 형식을 선택하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_003`,
-              `WORKFLOW_004`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_003`,
-            message: `프레임 추출 오류 오류가 발생했습니다 (WORKFLOW_003).`,
-            severity: `warning`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
-            solution: `디스크 공간을 확보하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_004`,
-              `WORKFLOW_005`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_004`,
-            message: `압축 손상 오류가 발생했습니다 (WORKFLOW_004).`,
-            severity: `info`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
-            solution: `워크플로 단계를 재구성하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_005`,
-              `WORKFLOW_006`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_005`,
-            message: `워크플로 중단 오류가 발생했습니다 (WORKFLOW_005).`,
-            severity: `critical`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
-            solution: `누락된 라이브러리를 설치하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_006`,
-              `WORKFLOW_007`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_006`,
-            message: `단계 건패 오류가 발생했습니다 (WORKFLOW_006).`,
-            severity: `error`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `입력 파일이 손상되었습니다.`,
-            solution: `입력 파일을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_007`,
-              `WORKFLOW_008`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_007`,
-            message: `의존성 누락 오류가 발생했습니다 (WORKFLOW_007).`,
-            severity: `warning`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `변환 코덱을 사용할 수 없습니다.`,
-            solution: `다른 출력 형식을 선택하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_008`,
-              `WORKFLOW_009`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_008`,
-            message: `출력 경로 오류 오류가 발생했습니다 (WORKFLOW_008).`,
-            severity: `info`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
-            solution: `디스크 공간을 확보하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_009`,
-              `WORKFLOW_010`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_009`,
-            message: `임시 파일 삭제 실패 오류가 발생했습니다 (WORKFLOW_009).`,
-            severity: `critical`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
-            solution: `워크플로 단계를 재구성하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_010`,
-              `WORKFLOW_001`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_010`,
-            message: `포맷 호환성 없음 오류가 발생했습니다 (WORKFLOW_010).`,
-            severity: `error`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
-            solution: `누락된 라이브러리를 설치하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_001`,
-              `WORKFLOW_002`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_011`,
-            message: `변환 실패 오류가 발생했습니다 (WORKFLOW_011).`,
-            severity: `warning`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `입력 파일이 손상되었습니다.`,
-            solution: `입력 파일을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_002`,
-              `WORKFLOW_003`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_012`,
-            message: `코덱 미지원 오류가 발생했습니다 (WORKFLOW_012).`,
-            severity: `info`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `변환 코덱을 사용할 수 없습니다.`,
-            solution: `다른 출력 형식을 선택하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_003`,
-              `WORKFLOW_004`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_013`,
-            message: `프레임 추출 오류 오류가 발생했습니다 (WORKFLOW_013).`,
-            severity: `critical`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
-            solution: `디스크 공간을 확보하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_004`,
-              `WORKFLOW_005`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_014`,
-            message: `압축 손상 오류가 발생했습니다 (WORKFLOW_014).`,
-            severity: `error`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
-            solution: `워크플로 단계를 재구성하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_005`,
-              `WORKFLOW_006`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_015`,
-            message: `워크플로 중단 오류가 발생했습니다 (WORKFLOW_015).`,
-            severity: `warning`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
-            solution: `누락된 라이브러리를 설치하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_006`,
-              `WORKFLOW_007`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_016`,
-            message: `단계 건패 오류가 발생했습니다 (WORKFLOW_016).`,
-            severity: `info`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `입력 파일이 손상되었습니다.`,
-            solution: `입력 파일을 확인하고 다시 시도하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_007`,
-              `WORKFLOW_008`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_017`,
-            message: `의존성 누락 오류가 발생했습니다 (WORKFLOW_017).`,
-            severity: `critical`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `변환 코덱을 사용할 수 없습니다.`,
-            solution: `다른 출력 형식을 선택하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_008`,
-              `WORKFLOW_009`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_018`,
-            message: `출력 경로 오류 오류가 발생했습니다 (WORKFLOW_018).`,
-            severity: `error`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `디스크 공간이 부족하여 출력할 수 없습니다.`,
-            solution: `디스크 공간을 확보하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_009`,
-              `WORKFLOW_010`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_019`,
-            message: `임시 파일 삭제 실패 오류가 발생했습니다 (WORKFLOW_019).`,
-            severity: `warning`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `워크플로 단계 간 데이터 형식이 불일치합니다.`,
-            solution: `워크플로 단계를 재구성하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_010`,
-              `WORKFLOW_001`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },
-          {
-            code: `WORKFLOW_020`,
-            message: `포맷 호환성 없음 오류가 발생했습니다 (WORKFLOW_020).`,
-            severity: `info`,
-            category: `E. 워크플로 및 변환`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `필수 의존성 라이브러리가 누락되었습니다.`,
-            solution: `누락된 라이브러리를 설치하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `WORKFLOW_001`,
-              `WORKFLOW_002`
-            ],
-            prevention: `변환 전 파일 형식과 호환성을 확인하세요. 충분한 디스크 공간을 확보하고 워크플로를 단계별로 테스트하세요.`,
-          },],
+        code: 'API_IPV6_NOT_SUPPORTED',
+        message: 'Current network environment does not support IPv6',
+        severity: 'warning',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server or client only supports IPv4/IPv6 single stack, and the network environment does not match.',
+        solution: 'Switch network protocol stack, or use dual-stack server.',
+        steps: [
+          'Check IP protocol support of network interfaces',
+          'Try disabling IPv6 to force IPv4',
+          'Contact network administrator to confirm protocol support',
+          'Change to a network environment that supports dual-stack',
+        ],
+        prevention: 'Ensure servers support IPv4/IPv6 dual-stack during deployment.',
       },
       {
-        id: `F`,
-        name: `F. 시스템 및 권한`,
-        description: `브라우저 호환성, 메모리 부족, 권한 제한, 낮추기 실패 등 시스템 수준의 문제입니다.`,
-        errors:
-[
-          {
-            code: `DEVICE_MEMORY_LOW`,
-            message: `브라우저 탭이 충돌하거나 멈추거나 반응하지 않습니다`,
-            severity: `critical`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 모든 도구 → 영역: 전체 페이지`,
-            cause: `장치 메모리가 부족하여 브라우저가 탭 프로세스를 강제 종료했습니다.`,
-            solution: `다른 탭을 닫거나 데이터 크기를 줄이거나 더 많은 메모리를 가진 장치를 사용하세요.`,
-            steps:
-[
-              `현재 작업 저장`,
-              `다른 탭 닫기`,
-              `이미지 크기 축소`,
-              `브라우저 다시 시작`,
-              `더 많은 메모리가 있는 장치 사용`,
-            ],
-            relatedCodes:
-[
-              `FILE_TOO_LARGE`,
-            ],
-            prevention: `큰 파일을 처리하기 전에 다른 탭을 닫으세요. 이미지를 2048로 축소하세요.`,
-          },
-          {
-            code: `EXPORT_FAILED`,
-            message: `낮추기 버튼을 누른 후 반응이 없습니다`,
-            severity: `error`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 모든 도구 → 영역: 낮추기 버튼`,
-            cause: `브라우저가 낮추기 팝업을 차단했거나 콘텐츠가 너무 커서 Blob를 생성할 수 없습니다.`,
-            solution: `브라우저 낮추기 설정을 확인하거나 분할 낮추기를 사용하세요.`,
-            steps:
-[
-              `브라우저가 팝업을 차단하는지 확인`,
-              `팝업 허용`,
-              `많은 이미지가 있는 경우 일부 삭제 후 낮추기`,
-              `'복사하기'를 임시 대안으로 사용`,
-            ],
-            relatedCodes:
-[
-              `DEVICE_MEMORY_LOW`,
-            ],
-            prevention: `브라우저 팝업을 허용하세요. 큰 문서에서는 낮추기 전 일부 이미지를 삭제하세요.`,
-          },
-        
-          {
-            code: `SYSTEM_001`,
-            message: `메모리 부족 오류가 발생했습니다 (SYSTEM_001).`,
-            severity: `critical`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `시스템 메모리가 부족합니다.`,
-            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_002`,
-              `SYSTEM_003`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_002`,
-            message: `디스크 공간 부족 오류가 발생했습니다 (SYSTEM_002).`,
-            severity: `error`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `디스크 공간이 부족합니다.`,
-            solution: `디스크 공간을 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_003`,
-              `SYSTEM_004`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_003`,
-            message: `권한 거부 오류가 발생했습니다 (SYSTEM_003).`,
-            severity: `warning`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
-            solution: `관리자 권한으로 실행하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_004`,
-              `SYSTEM_005`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_004`,
-            message: `프로세스 충돌 오류가 발생했습니다 (SYSTEM_004).`,
-            severity: `info`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `시스템 자원 한도에 도달했습니다.`,
-            solution: `시스템 자원 한도를 늘리세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_005`,
-              `SYSTEM_006`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_005`,
-            message: `세마포어 초과 오류가 발생했습니다 (SYSTEM_005).`,
-            severity: `critical`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `운영 체제 버전이 지원되지 않습니다.`,
-            solution: `운영 체제를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_006`,
-              `SYSTEM_007`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_006`,
-            message: `시스템 호출 실패 오류가 발생했습니다 (SYSTEM_006).`,
-            severity: `error`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `시스템 메모리가 부족합니다.`,
-            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_007`,
-              `SYSTEM_008`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_007`,
-            message: `커널 버전 불일치 오류가 발생했습니다 (SYSTEM_007).`,
-            severity: `warning`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `디스크 공간이 부족합니다.`,
-            solution: `디스크 공간을 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_008`,
-              `SYSTEM_009`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_008`,
-            message: `SELinux 차단 오류가 발생했습니다 (SYSTEM_008).`,
-            severity: `info`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
-            solution: `관리자 권한으로 실행하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_009`,
-              `SYSTEM_010`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_009`,
-            message: `cgroups 제한 오류가 발생했습니다 (SYSTEM_009).`,
-            severity: `critical`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `시스템 자원 한도에 도달했습니다.`,
-            solution: `시스템 자원 한도를 늘리세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_010`,
-              `SYSTEM_001`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_010`,
-            message: `oom_killer 활성화 오류가 발생했습니다 (SYSTEM_010).`,
-            severity: `error`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `운영 체제 버전이 지원되지 않습니다.`,
-            solution: `운영 체제를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_001`,
-              `SYSTEM_002`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_011`,
-            message: `메모리 부족 오류가 발생했습니다 (SYSTEM_011).`,
-            severity: `warning`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `시스템 메모리가 부족합니다.`,
-            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_002`,
-              `SYSTEM_003`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_012`,
-            message: `디스크 공간 부족 오류가 발생했습니다 (SYSTEM_012).`,
-            severity: `info`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `디스크 공간이 부족합니다.`,
-            solution: `디스크 공간을 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_003`,
-              `SYSTEM_004`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_013`,
-            message: `권한 거부 오류가 발생했습니다 (SYSTEM_013).`,
-            severity: `critical`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
-            solution: `관리자 권한으로 실행하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_004`,
-              `SYSTEM_005`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_014`,
-            message: `프로세스 충돌 오류가 발생했습니다 (SYSTEM_014).`,
-            severity: `error`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `시스템 자원 한도에 도달했습니다.`,
-            solution: `시스템 자원 한도를 늘리세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_005`,
-              `SYSTEM_006`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_015`,
-            message: `세마포어 초과 오류가 발생했습니다 (SYSTEM_015).`,
-            severity: `warning`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `운영 체제 버전이 지원되지 않습니다.`,
-            solution: `운영 체제를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_006`,
-              `SYSTEM_007`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_016`,
-            message: `시스템 호출 실패 오류가 발생했습니다 (SYSTEM_016).`,
-            severity: `info`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `시스템 메모리가 부족합니다.`,
-            solution: `불필요한 프로그램을 닫고 메모리를 확보하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_007`,
-              `SYSTEM_008`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_017`,
-            message: `커널 버전 불일치 오류가 발생했습니다 (SYSTEM_017).`,
-            severity: `critical`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `디스크 공간이 부족합니다.`,
-            solution: `디스크 공간을 정리하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_008`,
-              `SYSTEM_009`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_018`,
-            message: `SELinux 차단 오류가 발생했습니다 (SYSTEM_018).`,
-            severity: `error`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `현재 사용자에게 필요한 권한이 없습니다.`,
-            solution: `관리자 권한으로 실행하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_009`,
-              `SYSTEM_010`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_019`,
-            message: `cgroups 제한 오류가 발생했습니다 (SYSTEM_019).`,
-            severity: `warning`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `시스템 자원 한도에 도달했습니다.`,
-            solution: `시스템 자원 한도를 늘리세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_010`,
-              `SYSTEM_001`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },
-          {
-            code: `SYSTEM_020`,
-            message: `oom_killer 활성화 오류가 발생했습니다 (SYSTEM_020).`,
-            severity: `info`,
-            category: `F. 시스템 및 권한`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `운영 체제 버전이 지원되지 않습니다.`,
-            solution: `운영 체제를 업데이트하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `SYSTEM_001`,
-              `SYSTEM_002`
-            ],
-            prevention: `시스템 자원 사용량을 모니터링하고 여유 공간을 유지하세요. 필요한 권한을 미리 설정하세요.`,
-          },],
+        code: 'API_WEBSOCKET_UPGRADE_FAILED',
+        message: 'WebSocket upgrade failed',
+        severity: 'error',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server does not support WebSocket, or intermediate proxy blocked protocol upgrade.',
+        solution: 'Confirm server supports WebSocket, check proxy configuration.',
+        steps: [
+          'Confirm server-side WebSocket support is implemented',
+          'Check if reverse proxy supports WebSocket forwarding',
+          'Confirm request header contains Upgrade: websocket',
+          'Try using alternative transport protocols',
+        ],
+        prevention: 'Use servers and reverse proxy configurations that support WebSocket.',
       },
       {
-        id: `0`,
-        name: `0~9. HTTP 상태 코드`,
-        description: `HTTP 상태 코드별로 분류된 일반적인 백엔드 오류입니다.`,
-        errors:
-[
-          {
-            code: `401_UNAUTHORIZED`,
-            message: `백엔드가 401 Unauthorized를 반환합니다`,
-            severity: `critical`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 모든 온라인 도구 → 영역: 오류 패널`,
-            cause: `API Key가 유효하지 않거나 만료되었거나 취소되었습니다.`,
-            solution: `유효한 API Key로 교체하세요.`,
-            steps:
-[
-              `'설정 → API' 열기`,
-              `새로운 유효한 Key로 교체`,
-              `저장 후 다시 시도`,
-            ],
-            relatedCodes:
-[
-              `API_KEY_EXPIRED`,
-              `API_KEY_MISSING`,
-            ],
-            prevention: `API Key의 만료일을 정기적으로 확인하세요.`,
-          },
-          {
-            code: `429_TOO_MANY_REQUESTS`,
-            message: `백엔드가 429 Too Many Requests를 반환합니다`,
-            severity: `warning`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 모든 온라인 도구 → 영역: 오류 패널`,
-            cause: `짧은 시간에 너무 많은 요청을 보내서 공급자의 속도 제한을 초과했습니다.`,
-            solution: `잠시 기다렸다가 다시 시도하세요.`,
-            steps:
-[
-              `Retry-After 힌트 확인`,
-              `30~60초 대기`,
-              `요청 빈도 감소`,
-            ],
-            relatedCodes:
-[
-              `API_RATE_LIMIT`,
-            ],
-          },
-          {
-            code: `500_INTERNAL_ERROR`,
-            message: `백엔드가 500 Internal Server Error를 반환합니다`,
-            severity: `error`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 모든 온라인 도구 → 영역: 오류 패널`,
-            cause: `백엔드 서비스가 요청 처리 중 내부 예외를 발생시켰습니다.`,
-            solution: `잠시 후 다시 시도하거나 백엔드 관리자에게 문의하세요.`,
-            steps:
-[
-              `1~2분 대기`,
-              `요청 크기 축소`,
-              `문제가 지속되면 백엔드 관리자에게 문의`,
-            ],
-            relatedCodes:
-[
-              `502_BAD_GATEWAY`,
-              `503_SERVICE_UNAVAILABLE`,
-            ],
-            prevention: `요청 크기를 축소하세요. 서버가 높은 부하일 때 큰 작업을 보내지 마세요.`,
-          },
-        
-          {
-            code: `HTTP_001`,
-            message: `400 잘못된 요청 오류가 발생했습니다 (HTTP_001).`,
-            severity: `critical`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `클라이언트 요청이 잘못되었습니다.`,
-            solution: `요청 매개변수를 확인하고 수정하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_002`,
-              `HTTP_003`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_002`,
-            message: `401 인증 실패 오류가 발생했습니다 (HTTP_002).`,
-            severity: `error`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `인증 정보가 유효하지 않습니다.`,
-            solution: `인증 정보를 갱신하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_003`,
-              `HTTP_004`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_003`,
-            message: `403 접근 금지 오류가 발생했습니다 (HTTP_003).`,
-            severity: `warning`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `서버에서 요청을 거부했습니다.`,
-            solution: `요청 권한을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_004`,
-              `HTTP_005`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_004`,
-            message: `404 찾을 수 없음 오류가 발생했습니다 (HTTP_004).`,
-            severity: `info`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `요청한 리소스를 찾을 수 없습니다.`,
-            solution: `요청한 리소스가 존재하는지 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_005`,
-              `HTTP_006`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_005`,
-            message: `408 요청 시간 초과 오류가 발생했습니다 (HTTP_005).`,
-            severity: `critical`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `서버 낭부 오류가 발생했습니다.`,
-            solution: `서버 관리자에게 문의하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_006`,
-              `HTTP_007`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_006`,
-            message: `409 충돌 오류가 발생했습니다 (HTTP_006).`,
-            severity: `error`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `클라이언트 요청이 잘못되었습니다.`,
-            solution: `요청 매개변수를 확인하고 수정하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_007`,
-              `HTTP_008`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_007`,
-            message: `422 처리할 수 없음 오류가 발생했습니다 (HTTP_007).`,
-            severity: `warning`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `인증 정보가 유효하지 않습니다.`,
-            solution: `인증 정보를 갱신하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_008`,
-              `HTTP_009`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_008`,
-            message: `429 너무 많은 요청 오류가 발생했습니다 (HTTP_008).`,
-            severity: `info`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `서버에서 요청을 거부했습니다.`,
-            solution: `요청 권한을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_009`,
-              `HTTP_010`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_009`,
-            message: `500 낭부 서버 오류 오류가 발생했습니다 (HTTP_009).`,
-            severity: `critical`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `요청한 리소스를 찾을 수 없습니다.`,
-            solution: `요청한 리소스가 존재하는지 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_010`,
-              `HTTP_001`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_010`,
-            message: `502 불량 게이트웨이 오류가 발생했습니다 (HTTP_010).`,
-            severity: `error`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `서버 낭부 오류가 발생했습니다.`,
-            solution: `서버 관리자에게 문의하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_001`,
-              `HTTP_002`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_011`,
-            message: `400 잘못된 요청 오류가 발생했습니다 (HTTP_011).`,
-            severity: `warning`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 얼굴 만들기 → 영역: 버튼`,
-            cause: `클라이언트 요청이 잘못되었습니다.`,
-            solution: `요청 매개변수를 확인하고 수정하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_002`,
-              `HTTP_003`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_012`,
-            message: `401 인증 실패 오류가 발생했습니다 (HTTP_012).`,
-            severity: `info`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 스타일 변환 → 영역: 입력`,
-            cause: `인증 정보가 유효하지 않습니다.`,
-            solution: `인증 정보를 갱신하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_003`,
-              `HTTP_004`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_013`,
-            message: `403 접근 금지 오류가 발생했습니다 (HTTP_013).`,
-            severity: `critical`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 프롬프트 → 영역: 출력`,
-            cause: `서버에서 요청을 거부했습니다.`,
-            solution: `요청 권한을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_004`,
-              `HTTP_005`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_014`,
-            message: `404 찾을 수 없음 오류가 발생했습니다 (HTTP_014).`,
-            severity: `error`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: LLM → 영역: 패널`,
-            cause: `요청한 리소스를 찾을 수 없습니다.`,
-            solution: `요청한 리소스가 존재하는지 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_005`,
-              `HTTP_006`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_015`,
-            message: `408 요청 시간 초과 오류가 발생했습니다 (HTTP_015).`,
-            severity: `warning`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: TTS → 영역: 캔버스`,
-            cause: `서버 낭부 오류가 발생했습니다.`,
-            solution: `서버 관리자에게 문의하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_006`,
-              `HTTP_007`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_016`,
-            message: `409 충돌 오류가 발생했습니다 (HTTP_016).`,
-            severity: `info`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: paper2gal → 영역: 버튼`,
-            cause: `클라이언트 요청이 잘못되었습니다.`,
-            solution: `요청 매개변수를 확인하고 수정하세요.`,
-            steps:
-[
-              `확인 단계를 수행하세요.`,
-              `수정 작업을 진행하세요.`,
-              `저장 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_007`,
-              `HTTP_008`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_017`,
-            message: `422 처리할 수 없음 오류가 발생했습니다 (HTTP_017).`,
-            severity: `critical`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 이미지 변환 → 영역: 입력`,
-            cause: `인증 정보가 유효하지 않습니다.`,
-            solution: `인증 정보를 갱신하세요.`,
-            steps:
-[
-              `진단 단계를 수행하세요.`,
-              `조정 작업을 진행하세요.`,
-              `적용 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_008`,
-              `HTTP_009`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_018`,
-            message: `429 너무 많은 요청 오류가 발생했습니다 (HTTP_018).`,
-            severity: `error`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 설정 → 영역: 출력`,
-            cause: `서버에서 요청을 거부했습니다.`,
-            solution: `요청 권한을 확인하세요.`,
-            steps:
-[
-              `분석 단계를 수행하세요.`,
-              `변경 작업을 진행하세요.`,
-              `확인 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_009`,
-              `HTTP_010`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_019`,
-            message: `500 낭부 서버 오류 오류가 발생했습니다 (HTTP_019).`,
-            severity: `warning`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: 오디오 → 영역: 패널`,
-            cause: `요청한 리소스를 찾을 수 없습니다.`,
-            solution: `요청한 리소스가 존재하는지 확인하세요.`,
-            steps:
-[
-              `검사 단계를 수행하세요.`,
-              `업데이트 작업을 진행하세요.`,
-              `테스트 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_010`,
-              `HTTP_001`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },
-          {
-            code: `HTTP_020`,
-            message: `502 불량 게이트웨이 오류가 발생했습니다 (HTTP_020).`,
-            severity: `info`,
-            category: `0~9. HTTP 상태 코드`,
-            location: `페이지: UI → 영역: 캔버스`,
-            cause: `서버 낭부 오류가 발생했습니다.`,
-            solution: `서버 관리자에게 문의하세요.`,
-            steps:
-[
-              `테스트 단계를 수행하세요.`,
-              `재설정 작업을 진행하세요.`,
-              `검증 후 다시 시도하세요.`
-            ],
-            relatedCodes:
-[
-              `HTTP_001`,
-              `HTTP_002`
-            ],
-            prevention: `요청에 재시도 및 백오프 메커니즘을 구현하세요. API 속도 제한을 준수하고 캐싱을 활용하세요.`,
-          },],
+        code: 'API_CHUNKED_ENCODING_ERROR',
+        message: 'Chunked transfer encoding error',
+        severity: 'error',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server or intermediate proxy encountered format errors during chunked transfer.',
+        solution: 'Disable chunked transfer, or check intermediate proxy configuration.',
+        steps: [
+          'Check Transfer-Encoding in response headers',
+          'Try disabling chunked transfer',
+          'Check reverse proxy chunk support',
+          'Check server logs for encoding errors',
+        ],
+        prevention: 'Ensure all intermediate nodes support HTTP/1.1 chunked transfer.',
       },
-    ],
-  };
+      {
+        code: 'API_CONTENT_LENGTH_MISMATCH',
+        message: 'Content-Length does not match actual body length',
+        severity: 'warning',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Content-Length header returned by server does not match actual response body length.',
+        solution: 'Ignore Content-Length header, or use Transfer-Encoding: chunked.',
+        steps: [
+          'Check if server correctly calculates content length',
+          'Confirm intermediate proxy did not modify response body',
+          'Try using chunked transfer',
+          'Update server framework to latest version',
+        ],
+        prevention: 'Use reliable web frameworks and avoid manually setting Content-Length.',
+      },
+      {
+        code: 'API_HTTPS_ONLY_REQUIRED',
+        message: 'Server enforces HTTPS only',
+        severity: 'warning',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server is configured with HSTS or only allows HTTPS access.',
+        solution: 'Use HTTPS protocol, or disable forced HTTPS configuration on server.',
+        steps: [
+          'Change http:// to https://',
+          'Check server HSTS configuration',
+          'Confirm SSL certificate is properly installed',
+          'Development environments can temporarily disable forced HTTPS',
+        ],
+        prevention: 'Always use HTTPS in production, use self-signed certificates in development.',
+      },
+      {
+        code: 'API_RESPONSE_COMPRESSION_FAILED',
+        message: 'Response decompression failed',
+        severity: 'warning',
+        category: 'A. API & Network',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server returned gzip/br compressed content, but client cannot decompress properly.',
+        solution: 'Disable compression, or ensure client supports corresponding compression algorithm.',
+        steps: [
+          'Check Accept-Encoding request header',
+          'Confirm client supports gzip/brotli',
+          'Try disabling compression and retry',
+          'Update client decompression library',
+        ],
+        prevention: 'Ensure both client and server support common compression algorithms.',
+      },
+      
+        {
+          code: 'DNS_RESOLUTION_FAILED',
+          message: 'DNS resolution failed, unable to connect to server',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Domain name resolution failed. Possible causes: DNS server failure, domain does not exist, or local DNS cache corruption.',
+          solution: 'Check domain spelling, flush DNS cache, or switch to a public DNS server.',
+          steps: [
+            'Check if the domain name is spelled correctly',
+            'Run ipconfig /flushdns or sudo dscacheutil -flushcache',
+            'Switch to a public DNS like 8.8.8.8 or 1.1.1.1',
+            'Check if the hosts file has been tampered with',
+            'Restart network equipment'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'TLS_CERT_EXPIRED',
+          message: 'TLS certificate has expired, connection refused',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server SSL/TLS certificate has expired, or the local system time is incorrect causing certificate validation to fail.',
+          solution: 'Contact the administrator to update the certificate, or check the local system time.',
+          steps: [
+            'Check if the local system time is correct',
+            'Try accessing the API address directly in a browser to check certificate info',
+            'Contact the service provider to update the certificate',
+            'Temporarily bypass: disable certificate verification in development (not recommended for production)'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'TLS_CERT_UNTRUSTED',
+          message: 'TLS certificate is not trusted',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server uses a self-signed certificate, intermediate certificate is missing, or the certificate chain is incomplete.',
+          solution: 'Install the root certificate, or contact the administrator to fix the certificate chain.',
+          steps: [
+            'Download and install the server root certificate',
+            'Check if the certificate chain is complete',
+            'Ensure the system CA store is up to date',
+            'If using a self-signed certificate, add it to the trust store'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'TLS_HANDSHAKE_FAILED',
+          message: 'TLS handshake failed',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The TLS version or cipher suites supported by the client and server are incompatible.',
+          solution: 'Upgrade the client TLS version, or contact the server administrator to enable compatible cipher suites.',
+          steps: [
+            'Check the TLS versions supported by the client (at least 1.2)',
+            'Use openssl s_client to test the handshake',
+            'Contact the administrator to enable TLS 1.2/1.3',
+            'Update the operating system and browser'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'PROXY_AUTHENTICATION_REQUIRED',
+          message: 'Proxy server requires authentication',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'When accessing the internet through a proxy server, the proxy requires a username and password.',
+          solution: 'Configure proxy authentication information in system or application settings.',
+          steps: [
+            'Check system proxy settings',
+            'Configure proxy username and password in application settings',
+            'Confirm the proxy server address and port are correct',
+            'Contact the network administrator for proxy credentials'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'PROXY_CONNECTION_REFUSED',
+          message: 'Proxy server connection refused',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The configured proxy server address is incorrect or the proxy service is not running.',
+          solution: 'Check proxy settings and confirm the proxy server is available.',
+          steps: [
+            'Confirm the proxy server address and port are correct',
+            'Test direct connection (bypass proxy)',
+            'Check if the proxy service is running',
+            'Contact the network administrator'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'WEBSOCKET_CONNECTION_FAILED',
+          message: 'WebSocket connection failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'WebSocket server is not running, firewall is blocking the WebSocket port, or the URL path is incorrect.',
+          solution: 'Check the WebSocket server status and confirm firewall rules.',
+          steps: [
+            'Check if the WebSocket URL is correct',
+            'Confirm the server-side WebSocket service is running',
+            'Check if the firewall is blocking ws/wss ports',
+            'Check browser console network logs'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'WEBSOCKET_CLOSED_UNEXPECTEDLY',
+          message: 'WebSocket closed unexpectedly',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Network instability, server restart, or heartbeat timeout caused the connection to drop.',
+          solution: 'Implement automatic reconnection and increase the heartbeat interval.',
+          steps: [
+            'Check network stability',
+            'Implement exponential backoff reconnection logic',
+            'Increase heartbeat packet frequency',
+            'Check server logs for disconnect reasons'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'CDN_RESOURCE_UNAVAILABLE',
+          message: 'CDN resource unavailable',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'CDN node failure, resource deleted, or cache expired.',
+          solution: 'Refresh CDN cache or switch to a backup CDN source.',
+          steps: [
+            'Try accessing the origin directly to confirm the resource exists',
+            'Refresh the CDN cache',
+            'Check if the CDN configuration is correct',
+            'Switch to a backup CDN domain'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'CDN_CACHE_STALE',
+          message: 'CDN returned stale cached content',
+          severity: 'info',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'CDN cache was not refreshed in time, causing the client to receive an old version of the resource.',
+          solution: 'Force refresh CDN cache or add a version number parameter.',
+          steps: [
+            'Add ?v=timestamp to the URL to force refresh',
+            'Contact the CDN provider to refresh the cache',
+            'Check the cache TTL configuration',
+            'Use filename hashing for long-term caching'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'LOAD_BALANCER_UNAVAILABLE',
+          message: 'Load balancer has no available backends',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'All backend servers are unavailable or health checks have failed.',
+          solution: 'Check backend server status, repair or scale out.',
+          steps: [
+            'Check the health status of all backend servers',
+            'Review load balancer logs',
+            'Restart failed backend instances',
+            'Temporarily reduce load or enable degradation strategy'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'IPv6_CONNECTIVITY_ISSUE',
+          message: 'IPv6 connectivity issue',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The client prefers IPv6 but the network does not support it, causing connection timeout before fallback to IPv4.',
+          solution: 'Disable IPv6 or fix IPv6 network configuration.',
+          steps: [
+            'Test IPv6 connectivity (test-ipv6.com)',
+            'Temporarily disable IPv6 in system settings',
+            'Check router IPv6 configuration',
+            'Contact ISP to confirm IPv6 support'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'FIREWALL_BLOCKED_REQUEST',
+          message: 'Firewall blocked the request',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Enterprise firewall, ISP blocking, or regional network restrictions prevented the outbound request.',
+          solution: 'Use a VPN, switch networks, or contact the network administrator.',
+          steps: [
+            'Test if other devices on the same network can access',
+            'Try using a VPN or proxy',
+            'Contact the network administrator to add a whitelist',
+            'Check if the request triggered WAF rules'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'MAN_IN_THE_MIDDLE_DETECTED',
+          message: 'Man-in-the-middle attack detected',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The HTTPS connection was intercepted and tampered with by an intermediate device (e.g., corporate proxy, malware).',
+          solution: 'Stop operations immediately and check the security of the network environment.',
+          steps: [
+            'Do not continue operations to avoid leaking sensitive data',
+            'Check if unknown certificates are installed on the system',
+            'Run antivirus software',
+            'Switch to a secure network environment (e.g., mobile hotspot)',
+            'Contact the security team'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'COOKIE_BLOCKED_THIRD_PARTY',
+          message: 'Third-party cookie blocked',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Browser privacy settings or extensions blocked third-party cookies, affecting cross-domain authentication.',
+          solution: 'Adjust browser privacy settings or use SameSite=None; Secure.',
+          steps: [
+            'Check if the browser has "Block third-party cookies" enabled',
+            'Add a website exception in browser settings',
+            'Set Cookie SameSite attribute to None with Secure on the backend',
+            'Consider using Token instead of Cookie'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'CORS_PREFLIGHT_FAILED',
+          message: 'CORS preflight request failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The OPTIONS preflight request did not return the correct Access-Control-Allow headers.',
+          solution: 'Add OPTIONS route on the backend and return correct CORS headers.',
+          steps: [
+            'Check if the backend correctly handles OPTIONS requests',
+            'Confirm Access-Control-Allow-Methods includes the actual method used',
+            'Confirm Access-Control-Allow-Headers includes custom headers',
+            'Check Access-Control-Max-Age configuration'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'CORS_CREDENTIALS_NOT_ALLOWED',
+          message: 'CORS does not allow credentials',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The frontend set withCredentials=true but the backend did not return Access-Control-Allow-Credentials: true.',
+          solution: 'Add Access-Control-Allow-Credentials: true header on the backend.',
+          steps: [
+            'Set Access-Control-Allow-Credentials: true on the backend',
+            'Confirm Access-Control-Allow-Origin is not wildcard *',
+            'Check if the frontend correctly set the credentials option',
+            'Test the request without credentials'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_VERSION_DEPRECATED',
+          message: 'API version is deprecated',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The API version used has been marked as deprecated and will be removed in the future.',
+          solution: 'Migrate to the latest API version.',
+          steps: [
+            'Check the API documentation for version migration guide',
+            'Update the request URL to the new version',
+            'Test the new version API response format differences',
+            'Update related parsing code'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_VERSION_REMOVED',
+          message: 'API version has been removed',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The API version used has been completely removed and is no longer available.',
+          solution: 'Urgently migrate to a supported API version.',
+          steps: [
+            'Check the API provider version support timeline',
+            'Upgrade to the latest stable version',
+            'Test all affected features comprehensively',
+            'Update client code and documentation'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_ENDPOINT_CHANGED',
+          message: 'API endpoint address has changed',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The service provider changed the API endpoint domain or path structure.',
+          solution: 'Update the API Base URL and endpoint paths.',
+          steps: [
+            'Check the API provider official announcement',
+            'Update the API Base URL in configuration',
+            'Check if all endpoint paths need adjustment',
+            'Test all API calls'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_SCHEMA_CHANGED',
+          message: 'API response structure changed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The API returned data structure does not match expectations, possibly due to a backend upgrade causing field changes.',
+          solution: 'Update frontend parsing logic to adapt to the new response structure.',
+          steps: [
+            'Check the API changelog',
+            'Update TypeScript type definitions',
+            'Add field existence checks to avoid undefined access',
+            'Use optional chaining ?. for safe field access'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_RESPONSE_MALFORMED_JSON',
+          message: 'API returned malformed JSON',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server returned non-JSON content (e.g., HTML error page, BOM header, truncated response).',
+          solution: 'Check backend logs and confirm the response format is correct.',
+          steps: [
+            'Check the raw response content in browser network panel',
+            'Check if the backend threw an uncaught exception',
+            'Confirm the response header Content-Type is application/json',
+            'Check if a proxy modified the response content'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_RESPONSE_TOO_LARGE',
+          message: 'API response body too large',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The API returned an oversized response body, exceeding frontend or proxy reception limits.',
+          solution: 'Request paginated data or use streaming transmission.',
+          steps: [
+            'Check the response body size',
+            'Implement paginated request logic',
+            'Use Range requests for chunked retrieval',
+            'Enable compression (gzip/brotli) for transmission'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_REQUEST_TOO_LARGE',
+          message: 'API request body too large',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The uploaded data (e.g., image Base64, long text) exceeded the server reception limit.',
+          solution: 'Compress data, use chunked upload, or increase server limits.',
+          steps: [
+            'Compress images before re-uploading',
+            'Split large requests into multiple small requests',
+            'Contact the administrator to increase server body-parser limit',
+            'Use streaming upload instead of one-time upload'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_QUERY_PARAM_TOO_LONG',
+          message: 'Query parameter too long',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The URL query string exceeded the browser or server limit (typically 2048 characters).',
+          solution: 'Use POST request body instead of query parameters.',
+          steps: [
+            'Move data from URL parameters to POST body',
+            'Use form data or JSON body',
+            'Shorten parameter names or values',
+            'Check for duplicate parameters'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_HEADER_TOO_LARGE',
+          message: 'Request header too large',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'A custom header (e.g., Authorization Bearer token) is too long, exceeding server limits.',
+          solution: 'Shorten the token length or reduce the number of custom headers.',
+          steps: [
+            'Check the length of the Authorization header',
+            'Remove unnecessary custom headers',
+            'Contact the administrator to increase large_client_header_buffers',
+            'Use cookies instead of overly long headers'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'OAUTH_TOKEN_EXPIRED',
+          message: 'OAuth access token expired',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The OAuth 2.0 access_token has expired and needs to be refreshed using refresh_token.',
+          solution: 'Use refresh_token to obtain a new access_token.',
+          steps: [
+            'Check the token expiration time',
+            'Use refresh_token to call the token endpoint',
+            'Update the stored access_token',
+            'Implement automatic refresh logic'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'OAUTH_REFRESH_TOKEN_EXPIRED',
+          message: 'OAuth refresh token expired',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The refresh_token has also expired, requiring re-authorization.',
+          solution: 'Guide the user through the OAuth authorization flow again.',
+          steps: [
+            'Clear locally stored token information',
+            'Redirect the user to the OAuth authorization page',
+            'Store the new token pair after user completes authorization',
+            'Set reminders to refresh before token expiration'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'OAUTH_SCOPE_INSUFFICIENT',
+          message: 'OAuth scope insufficient',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The current access_token scope does not include the permission required for this operation.',
+          solution: 'Request authorization with a larger scope, or contact the administrator to assign permissions.',
+          steps: [
+            'Check the current token scope list',
+            'Add missing scopes to the authorization request',
+            'Guide the user to re-authorize',
+            'Contact the administrator to confirm permission configuration'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'OAUTH_STATE_MISMATCH',
+          message: 'OAuth state parameter mismatch',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The CSRF protection state parameter does not match during the authorization callback, possibly a CSRF attack.',
+          solution: 'Re-initiate the authorization request and ensure the state parameter is correctly passed.',
+          steps: [
+            'Clear the current authorization flow state',
+            'Regenerate a random state parameter',
+            'Ensure state is consistent between request and callback',
+            'Check if an intermediate page tampered with the state'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'JWT_SIGNATURE_INVALID',
+          message: 'JWT signature invalid',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The JWT token signature does not match the key, the token may have been tampered with.',
+          solution: 'Re-obtain a valid JWT token.',
+          steps: [
+            'Check if the token is complete (three parts base64)',
+            'Confirm the key used matches the one at issuance',
+            'Re-login to get a new token',
+            'Check if the token was truncated during transmission'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'JWT_TOKEN_EXPIRED',
+          message: 'JWT token expired',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The JWT exp claim has expired.',
+          solution: 'Use refresh mechanism or re-login to get a new token.',
+          steps: [
+            'Check the token exp timestamp',
+            'If refresh is supported, call the refresh interface',
+            'Otherwise guide the user to re-login',
+            'Implement automatic refresh before token expiration'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'JWT_ISSUER_MISMATCH',
+          message: 'JWT issuer mismatch',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The JWT iss claim does not match the expected issuer.',
+          solution: 'Check the token source and ensure the correct authentication service is used.',
+          steps: [
+            'Verify the JWT iss field',
+            'Confirm the correct authentication server is used',
+            'Check if multiple authentication services coexist',
+            'Contact the administrator to confirm issuer configuration'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'JWT_AUDIENCE_MISMATCH',
+          message: 'JWT audience mismatch',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The JWT aud claim does not match the current application.',
+          solution: 'Confirm the token was issued for the current application.',
+          steps: [
+            'Check the JWT aud field',
+            'Confirm the application client_id matches aud',
+            'If multi-tenant, check tenant configuration',
+            'Re-obtain the correct token'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_KEY_FORMAT_INVALID',
+          message: 'API Key format invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The entered API Key does not match the expected format (e.g., length, prefix, character set).',
+          solution: 'Check if the API Key was copied correctly and remove extra spaces.',
+          steps: [
+            'Check if the Key contains leading or trailing spaces',
+            'Confirm the Key length matches the provider requirement',
+            'Check for illegal characters (e.g., line breaks)',
+            'Re-copy the Key from the provider dashboard'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_KEY_REVOKED',
+          message: 'API Key has been revoked',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The API Key has been actively revoked by the user or administrator.',
+          solution: 'Generate a new API Key and update the configuration.',
+          steps: [
+            'Log in to the provider dashboard to check Key status',
+            'Confirm if the Key was accidentally revoked',
+            'Generate a new API Key',
+            'Update all configurations using that Key'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_KEY_QUOTA_EXHAUSTED',
+          message: 'API Key quota exhausted',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The monthly/annual call quota for the API Key has been fully consumed.',
+          solution: 'Upgrade the plan or wait for quota reset.',
+          steps: [
+            'Log in to the provider dashboard to check quota usage',
+            'Consider upgrading to a higher quota plan',
+            'Optimize call frequency to reduce waste',
+            'Set quota usage alerts'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_KEY_IP_RESTRICTED',
+          message: 'API Key has IP whitelist restriction',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The API Key is bound to a specific IP, and the current request source IP is not in the whitelist.',
+          solution: 'Add the current IP to the whitelist in the provider dashboard, or switch to an unrestricted Key.',
+          steps: [
+            'Check the current public IP (whatismyipaddress.com)',
+            'Log in to the provider dashboard to add IP whitelist',
+            'Or generate a new Key without IP restrictions',
+            'If using a proxy, confirm the proxy exit IP'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_KEY_REGION_BLOCKED',
+          message: 'API Key restricted in current region',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The provider blocks API calls from this region based on geographic restrictions.',
+          solution: 'Use a VPN to switch to an allowed region, or contact the provider to lift the restriction.',
+          steps: [
+            'Confirm if the current region is on the restriction list',
+            'Use a VPN to switch to an allowed region',
+            'Contact the provider to request region restriction removal',
+            'Consider using a provider in another region'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_RETRY_EXHAUSTED',
+          message: 'API retry attempts exhausted',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'All retry strategies have been executed but still failed, possibly a persistent failure.',
+          solution: 'Check network and service status, retry later, or contact support.',
+          steps: [
+            'Check the provider status page',
+            'Check if the network connection is normal',
+            'Wait a few minutes and retry manually',
+            'Contact the provider technical support'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_CIRCUIT_BREAKER_OPEN',
+          message: 'Circuit breaker is open',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Consecutive failure count exceeded the threshold, the circuit breaker entered open state, rejecting subsequent requests.',
+          solution: 'Wait for the circuit breaker timeout to auto-recover, or manually reset.',
+          steps: [
+            'Wait for the circuit breaker cooldown period (typically 30-60s)',
+            'Check and fix the root cause of consecutive failures',
+            'Manually reset the circuit breaker state (if management interface exists)',
+            'Monitor failure rate to avoid triggering again'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_THROTTLING_BURST_LIMIT',
+          message: 'API burst traffic limit',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Request volume in a short time exceeded the burst limit, even if the average rate did not exceed.',
+          solution: 'Smooth request sending frequency, use token bucket or leaky bucket algorithm for rate limiting.',
+          steps: [
+            'Implement client request queue and rate limiting',
+            'Use token bucket algorithm to smooth requests',
+            'Increase request interval',
+            'Contact the provider to increase burst limit'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_THROTTLING_STEADY_LIMIT',
+          message: 'API steady rate limit',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Sustained request rate exceeded the steady limit.',
+          solution: 'Reduce sustained request frequency, or upgrade the plan.',
+          steps: [
+            'Calculate the current average request rate',
+            'Reduce to a frequency below the limit',
+            'Implement adaptive rate control',
+            'Consider upgrading the plan or requesting a limit increase'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_CONCURRENT_LIMIT_EXCEEDED',
+          message: 'API concurrent request limit exceeded',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The number of simultaneous requests exceeded the provider concurrent limit.',
+          solution: 'Use connection pool or request queue to limit concurrency.',
+          steps: [
+            'Check the current number of concurrent requests',
+            'Implement request queue and max concurrency limit',
+            'Use Promise.allSettled instead of Promise.all',
+            'Reduce the number of simultaneous operations'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_CONTENT_MODERATION_BLOCKED',
+          message: 'API content moderation blocked',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Request content triggered the provider content safety policy (e.g., sensitive words, prohibited images).',
+          solution: 'Modify request content to comply with content policy, or contact the provider to appeal.',
+          steps: [
+            'Check if the request content contains sensitive information',
+            'Modify or delete content that triggers moderation',
+            'If误判, contact the provider to appeal',
+            'Read the provider content policy documentation'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_CONTENT_MODERATION_ERROR',
+          message: 'API content moderation service error',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The content moderation service itself malfunctioned and could not complete moderation.',
+          solution: 'Retry later, or temporarily bypass moderation (if business allows).',
+          steps: [
+            'Wait a few minutes and retry',
+            'Check the provider status page',
+            'If business allows, temporarily disable content moderation',
+            'Contact the provider to report the issue'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_RESPONSE_ENCODING_ERROR',
+          message: 'API response encoding error',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server returned non-UTF-8 encoded content, or the Content-Type header does not match the content encoding.',
+          solution: 'Check backend encoding configuration and ensure UTF-8 is returned.',
+          steps: [
+            'Check the charset declaration in the response header',
+            'Use TextDecoder to specify encoding',
+            'Contact the backend team to confirm encoding settings',
+            'Unify to UTF-8 encoding'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_RESPONSE_COMPRESSION_ERROR',
+          message: 'API response decompression failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server returned gzip/brotli compressed content but decompression failed (e.g., data corruption).',
+          solution: 'Disable compression transmission, or check compressed data integrity.',
+          steps: [
+            'Remove Accept-Encoding from the request header',
+            'Check if the proxy modified the compressed data',
+            'Test with raw uncompressed data',
+            'Contact the provider to check compression implementation'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_CHUNKED_TRANSFER_ERROR',
+          message: 'Chunked transfer error',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Connection interrupted during Chunked Transfer-Encoding or data chunk format error.',
+          solution: 'Check network stability, or disable chunked transfer.',
+          steps: [
+            'Check if the network connection is stable',
+            'Disable chunked transfer on the server side',
+            'Increase connection keep-alive time',
+            'Use Content-Length instead of chunked'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_KEEPALIVE_TIMEOUT',
+          message: 'Keep-Alive connection timeout',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'HTTP Keep-Alive connection idle time was too long and was closed by the server or middleware.',
+          solution: 'Reduce Keep-Alive idle time, or send heartbeat requests.',
+          steps: [
+            'Reduce client Keep-Alive idle timeout',
+            'Periodically send heartbeat requests to keep the connection alive',
+            'Use connection pool to automatically manage connection lifecycle',
+            'Check connection status before requests'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_HTTP2_STREAM_ERROR',
+          message: 'HTTP/2 stream error',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'An error occurred in a stream within the HTTP/2 connection (e.g., stream reset, window overflow).',
+          solution: 'Downgrade to HTTP/1.1, or fix HTTP/2 configuration.',
+          steps: [
+            'Disable HTTP/2 on the client',
+            'Check the server HTTP/2 settings',
+            'Increase flow control window size',
+            'Check HTTP/2 error code (RST_STREAM)'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_HTTP2_GOAWAY',
+          message: 'HTTP/2 GOAWAY frame received',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server sent a GOAWAY frame, indicating the connection is about to close.',
+          solution: 'Retry requests on a new connection, implement graceful connection migration.',
+          steps: [
+            'Capture the GOAWAY event',
+            'Retry incomplete requests on a new connection',
+            'Check the server maximum stream limit',
+            'Implement connection warm-up to avoid cold start'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_HTTP3_CONNECTION_ERROR',
+          message: 'HTTP/3 connection error',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'HTTP/3 connection based on QUIC failed to establish (e.g., UDP blocked).',
+          solution: 'Downgrade to HTTP/2 or HTTP/1.1, or open UDP ports.',
+          steps: [
+            'Check if the firewall is blocking UDP',
+            'Disable HTTP/3 on the client',
+            'Confirm the server supports HTTP/3',
+            'Use a library version that supports HTTP/3'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_GRAPHQL_VALIDATION_ERROR',
+          message: 'GraphQL query validation failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'GraphQL query syntax error, field does not exist, or type mismatch.',
+          solution: 'Check query syntax, use GraphQL documentation validation tools.',
+          steps: [
+            'Use GraphQL Playground to validate the query',
+            'Check if field names and types match the schema',
+            'Confirm query variable types are correct',
+            'Check the path information in GraphQL error details'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_GRAPHQL_EXECUTION_ERROR',
+          message: 'GraphQL execution error',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'GraphQL query encountered an error during execution (e.g., resolver threw an exception).',
+          solution: 'Check the path and extension information in GraphQL error details, fix the corresponding resolver.',
+          steps: [
+            'Check the path in the errors array to locate the problem field',
+            'Check resolver logs',
+            'Confirm if data sources (database, API) are normal',
+            'Add error handling to resolvers'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_GRAPHQL_RATE_LIMITED',
+          message: 'GraphQL query complexity limit exceeded',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'GraphQL query complexity score exceeded the server limit (e.g., nesting too deep, too many returned fields).',
+          solution: 'Simplify the query, reduce nesting levels and the number of returned fields.',
+          steps: [
+            'Use query complexity analysis tools',
+            'Reduce query nesting levels',
+            'Use pagination instead of full query',
+            'Split large queries into multiple small queries'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_WEBHOOK_DELIVERY_FAILED',
+          message: 'Webhook delivery failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server attempted to send an event to the configured Webhook URL but failed (e.g., URL unreachable, returned non-2xx).',
+          solution: 'Check Webhook URL availability and ensure the endpoint returns 2xx.',
+          steps: [
+            'Test if the Webhook URL is reachable',
+            'Ensure the endpoint can respond quickly (< 30 seconds)',
+            'Return 2xx status code to confirm receipt',
+            'Check Webhook delivery logs and retry records'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_WEBHOOK_SIGNATURE_INVALID',
+          message: 'Webhook signature validation failed',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The Webhook request signature does not match the locally computed result, possibly a forged request.',
+          solution: 'Check the signature algorithm and key, ensure the correct secret is used.',
+          steps: [
+            'Confirm the secret used matches the configuration',
+            'Check the signature algorithm (HMAC-SHA256, etc.)',
+            'Verify the timestamp is within the allowed window',
+            'Do not rely on webhook request body for critical operations'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_IDEMPOTENCY_KEY_REUSE',
+          message: 'Idempotency key already used',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The same idempotency key (Idempotency-Key) was used but the request content is different.',
+          solution: 'Generate a unique idempotency key for each new request.',
+          steps: [
+            'Use UUID to generate a unique idempotency key',
+            'Ensure the idempotency key is consistent for the same business operation',
+            'Check the storage and reuse logic of idempotency keys',
+            'Read the provider idempotency documentation'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_IDEMPOTENCY_KEY_EXPIRED',
+          message: 'Idempotency key expired',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The idempotency key validity period has passed, the server no longer recognizes the key.',
+          solution: 'Regenerate the idempotency key and initiate the request.',
+          steps: [
+            'Understand the provider idempotency key validity period',
+            'Complete the operation within the validity period',
+            'Regenerate a new idempotency key',
+            'Implement automatic idempotency key refresh mechanism'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_BATCH_PARTIAL_FAILURE',
+          message: 'Batch request partial failure',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Some sub-requests in the batch API request failed, others succeeded.',
+          solution: 'Process successful results, retry failed sub-requests individually.',
+          steps: [
+            'Parse each sub-result in the batch response',
+            'Extract failed sub-requests',
+            'Retry failed sub-requests individually',
+            'Record failure reasons for subsequent analysis'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_BATCH_SIZE_EXCEEDED',
+          message: 'Batch request size exceeded',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The number of sub-requests in the batch request exceeded the server limit.',
+          solution: 'Split large batches into multiple small batches.',
+          steps: [
+            'Check the provider batch size limit',
+            'Split requests into multiple batches',
+            'Implement batch queue and sequential processing',
+            'Monitor the processing results of each batch'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_PAGINATION_CURSOR_INVALID',
+          message: 'Pagination cursor invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The pagination cursor used has expired or is in incorrect format.',
+          solution: 'Re-fetch the first page of data, use a new cursor.',
+          steps: [
+            'Re-request the first page to get a new cursor',
+            'Check if the cursor was truncated or tampered',
+            'Confirm the cursor encoding format is correct',
+            'Implement automatic fallback when cursor expires'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_PAGINATION_OFFSET_TOO_LARGE',
+          message: 'Pagination offset too large',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'When using offset pagination, the offset exceeded the maximum value supported by the server.',
+          solution: 'Use cursor-based pagination instead of offset pagination.',
+          steps: [
+            'Understand the maximum offset limit',
+            'Migrate to cursor-based pagination',
+            'If offset must be used, reduce page size',
+            'Consider using search filters to reduce total data volume'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_SORT_PARAMETER_INVALID',
+          message: 'Sort parameter invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The sort field specified in the request does not exist or does not support sorting.',
+          solution: 'Check the available sort field list, use the correct field name.',
+          steps: [
+            'Check the sort field list in API documentation',
+            'Confirm the field name is spelled correctly',
+            'Check if an unsupported sort direction (asc/desc) was used',
+            'Remove illegal sort parameters'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_FILTER_PARAMETER_INVALID',
+          message: 'Filter parameter invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The filter condition specified in the request has incorrect format or the field does not exist.',
+          solution: 'Check the filter parameter format, refer to the filter syntax in API documentation.',
+          steps: [
+            'Check the filter syntax in API documentation',
+            'Confirm filter field names and operators are correct',
+            'Check if the filter value type matches',
+            'Simplify filter conditions and test step by step'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_FIELD_SELECTION_INVALID',
+          message: 'Field selection parameter invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The returned field specified in the request does not exist or is not accessible.',
+          solution: 'Check the available field list, remove illegal fields.',
+          steps: [
+            'Check the field list in API documentation',
+            'Confirm the field name is spelled correctly',
+            'Check if specific permissions are required to access certain fields',
+            'Use wildcards or default field sets'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_EXPAND_PARAMETER_INVALID',
+          message: 'Expand parameter invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The associated resource attempted to be expanded in the request does not exist or does not support expansion.',
+          solution: 'Check the list of expandable associated resources.',
+          steps: [
+            'Check the expand support list in API documentation',
+            'Confirm the associated resource name is correct',
+            'Check if there is permission to access the associated resource',
+            'Reduce expansion levels to avoid performance issues'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_INCLUDE_PARAMETER_INVALID',
+          message: 'Include parameter invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The included resource specified in the request does not exist.',
+          solution: 'Check the available include options list.',
+          steps: [
+            'Check the include support list in API documentation',
+            'Confirm the resource name is spelled correctly',
+            'Check the difference between include and expand',
+            'Remove illegal include parameters'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_EMBED_PARAMETER_INVALID',
+          message: 'Embed parameter invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The resource type attempted to be embedded in the request does not support embedding.',
+          solution: 'Check the list of embeddable resource types.',
+          steps: [
+            'Check the embed support list in API documentation',
+            'Confirm the embedded resource type is correct',
+            'Consider using expand or include as alternatives',
+            'Check embed depth limits'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_AGGREGATION_NOT_SUPPORTED',
+          message: 'Aggregation query not supported',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The request used aggregation operations (e.g., count, sum, avg) but the endpoint does not support them.',
+          solution: 'Use client-side aggregation, or call a dedicated aggregation endpoint.',
+          steps: [
+            'Check API documentation to confirm aggregation support',
+            'Aggregate returned data on the client side',
+            'Use dedicated statistics/reporting endpoints',
+            'Contact the provider to request aggregation features'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_SEARCH_QUERY_SYNTAX_ERROR',
+          message: 'Search query syntax error',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The search query string contains syntax errors (e.g., unclosed quotes, illegal operators).',
+          solution: 'Check the search syntax, refer to the search engine query syntax documentation.',
+          steps: [
+            'Check if quotes are paired and closed',
+            'Confirm operators (AND/OR/NOT) are used correctly',
+            'Escape special characters',
+            'Use simple keyword search for testing'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_SEARCH_INDEX_NOT_READY',
+          message: 'Search index not ready',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The search service is rebuilding the index and cannot provide accurate results temporarily.',
+          solution: 'Wait for index rebuild to complete, or return partial results.',
+          steps: [
+            'Check the search service status',
+            'Wait for the index rebuild to complete',
+            'Use direct database query as a fallback',
+            'Implement search result caching'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_REALTIME_CONNECTION_LIMIT',
+          message: 'Real-time connection limit exceeded',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The number of simultaneous real-time connections (WebSocket/SSE) exceeded the limit.',
+          solution: 'Close unnecessary connections, or use connection multiplexing.',
+          steps: [
+            'Check the current number of active real-time connections',
+            'Close connections that are not needed',
+            'Use a single connection to subscribe to multiple topics',
+            'Implement connection pool management'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_SSE_CONNECTION_FAILED',
+          message: 'SSE connection failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Server-Sent Events connection could not be established, possibly because the server does not support it or middleware is blocking.',
+          solution: 'Check server SSE support, confirm the proxy allows text/event-stream.',
+          steps: [
+            'Confirm the server implements SSE endpoints',
+            'Check the response header Content-Type: text/event-stream',
+            'Confirm the proxy and firewall allow long connections',
+            'Test a simple SSE endpoint'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_SSE_RECONNECT_FAILED',
+          message: 'SSE reconnection failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'SSE connection disconnected and automatic reconnection failed multiple times.',
+          solution: 'Check network and service status, implement exponential backoff reconnection.',
+          steps: [
+            'Implement exponential backoff reconnection logic',
+            'Check if the server is still running',
+            'Confirm last-event-id is correctly passed',
+            'If multiple failures occur, prompt the user to manually refresh'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_LONG_POLLING_TIMEOUT',
+          message: 'Long polling timeout',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The long polling request timed out before receiving new data.',
+          solution: 'This is normal behavior, the client should automatically initiate a new long polling request.',
+          steps: [
+            'Catch the timeout error',
+            'Immediately initiate a new long polling request',
+            'Maintain last-seen state',
+            'Do not display this error to the user'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_PUSH_NOTIFICATION_FAILED',
+          message: 'Push notification sending failed',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Failed to send push notification to the client (e.g., device offline, token invalid).',
+          solution: 'Update the device token, or retry after the device comes online.',
+          steps: [
+            'Check if the device token is valid',
+            'Confirm push service (FCM/APNs) configuration is correct',
+            'Remove expired device tokens',
+            'Implement push retry queue'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_PUSH_NOTIFICATION_TOKEN_INVALID',
+          message: 'Push notification token invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The device push token has expired or is in incorrect format.',
+          solution: 'Request the client to re-register the push token.',
+          steps: [
+            'Remove expired tokens from the database',
+            'Notify the client to re-obtain the token',
+            'Update the stored token',
+            'Check if the token format matches FCM/APNs requirements'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_FILE_UPLOAD_URL_EXPIRED',
+          message: 'File upload presigned URL expired',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The obtained presigned upload URL (e.g., S3 presigned URL) has expired.',
+          solution: 'Request a new presigned URL.',
+          steps: [
+            'Re-call the interface to get the upload URL',
+            'Check the URL validity period configuration',
+            'Complete the upload before expiration',
+            'Implement URL refresh mechanism'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_FILE_UPLOAD_URL_INVALID',
+          message: 'File upload presigned URL invalid',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The presigned URL format is incorrect or has already been used.',
+          solution: 'Request a new presigned URL.',
+          steps: [
+            'Check if the URL is complete',
+            'Confirm the URL was not reused',
+            'Request a new upload URL',
+            'Check the URL generation logic'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_MULTIPART_UPLOAD_INIT_FAILED',
+          message: 'Multipart upload initialization failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'The server could not create a multipart upload task (e.g., insufficient bucket permissions).',
+          solution: 'Check storage service configuration and permissions.',
+          steps: [
+            'Check bucket write permissions',
+            'Confirm the multipart upload interface is available',
+            'Check server-side logs',
+            'Contact the administrator to check storage configuration'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_MULTIPART_UPLOAD_PART_FAILED',
+          message: 'Multipart upload part failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Upload of a specific part failed (e.g., network interruption, signature expired).',
+          solution: 'Retry only the failed part, no need to re-upload all parts.',
+          steps: [
+            'Record the failed part number',
+            'Re-upload that part individually',
+            'Confirm the ETag of that part matches',
+            'Continue to complete the multipart merge'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_MULTIPART_UPLOAD_COMPLETE_FAILED',
+          message: 'Multipart upload merge failed',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'After all parts were uploaded, the server merge failed (e.g., missing parts, incorrect order).',
+          solution: 'Check if all parts were uploaded successfully, retry the merge request.',
+          steps: [
+            'List the uploaded parts',
+            'Confirm no parts are missing',
+            'Check if the part order is correct',
+            'Re-call the completion interface'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },
+        {
+          code: 'API_MULTIPART_UPLOAD_ABORT_FAILED',
+          message: 'Multipart upload abort failed',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Any network-dependent tool → Area: Network request layer',
+          cause: 'Attempt to cancel the multipart upload task failed, may lead to wasted storage space.',
+          solution: 'Manually clean up incomplete uploads, or configure automatic cleanup policy.',
+          steps: [
+            'Manually call the abort interface',
+            'Check if the server has an automatic cleanup policy',
+            'Periodically clean up incomplete multipart uploads',
+            'Monitor incomplete uploads in the storage bucket'
+          ],
+          prevention: 'Regularly check API configuration, network environment, and certificate validity.',
+        },],
+    },
+    {
+      id: 'B',
+      name: 'B. Config & Data',
+      description: 'Local storage issues, configuration import/export errors, data conflicts',
+      errors: [
+        {
+          code: 'CONFIG_CORRUPTED',
+          message: 'Config corrupted, editor shows blank or garbled text',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Face Maker / Prompt Suite → Area: editor',
+          cause: 'The config in browser localStorage is corrupted, possibly due to manual data editing, version incompatibility, etc.',
+          solution: 'Reset the editor or manually clear localStorage.',
+          steps: [
+            'Click the "Reset" button',
+            'Confirm in the dialog and refresh',
+            'If still abnormal, press Ctrl+Shift+I → Application → Local Storage, delete relevant keys',
+            'Refresh the page',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY', 'LOCAL_STORAGE_FULL'],
+          prevention: 'Do not manually edit localStorage data; regularly export configs as backups.',
+        },
+        {
+          code: 'IMPORT_INVALID_CONFIG',
+          message: 'Config file content is incomplete or corrupted',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Prompt Suite / TTS Export / Paper2Gal / LLM Hub',
+          cause: 'The configuration file is missing necessary fields.',
+          solution: 'Confirm the file was exported from the correct tool page.',
+          steps: [
+            'Open the file in a text editor',
+            'Confirm it contains the fields required by the corresponding tool',
+            'Re-export from the correct tool page',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON', 'IMPORT_TOOL_MISMATCH'],
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: 'Imported JSON format is invalid',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Global / All pages',
+          cause: 'File is corrupted or is not a valid JSON file.',
+          solution: 'Check and fix JSON file.',
+          steps: [
+            'Open the file in a text editor',
+            'Validate with a JSON formatting tool',
+            'Fix syntax errors and re-import',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH', 'IMPORT_INVALID_CONFIG'],
+          prevention: 'Keep exported configuration files safe; do not modify them with non-text editors.',
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: 'Imported config file tool type mismatch',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Global / All pages',
+          cause: 'The config file was exported from another tool, not the current tool.',
+          solution: 'Import the correct config file.',
+          steps: [
+            'Confirm the file was exported from the current tool',
+            'Find the correct config file and re-import',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+          prevention: 'Only config files exported from the corresponding tool page contain the correct tool field.',
+        },
+        {
+          code: 'LOCAL_STORAGE_FULL',
+          message: 'Browser localStorage is full',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Global / All pages',
+          cause: 'Stored data exceeds the browser\'s limit (usually 5~10MB).',
+          solution: 'Clean up unnecessary data or export backup.',
+          steps: [
+            'Export current configuration as a JSON file',
+            'Open DevTools → Application → Local Storage',
+            'Delete unnecessary large data',
+            'Save again',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: 'Regularly clean up data no longer needed from browser localStorage; for large files, do not save directly in the editor—use the export function instead.',
+        },
+        {
+          code: 'STORAGE_READ_ONLY',
+          message: 'Browser storage is read-only',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Global / All pages',
+          cause: 'Browser is in incognito mode, or storage is disabled by system policy.',
+          solution: 'Exit incognito mode or use a normal window.',
+          steps: [
+            'Confirm the browser is not in incognito/private mode',
+            'Check whether browser storage permissions are disabled',
+            'Export configuration as a local file as an alternative',
+          ],
+          relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: 'Avoid using this app in browser incognito/private mode; regularly export configurations to local files as backups.',
+        },
+        {
+          code: 'UNSAVED_WARNING',
+          message: 'There are unsaved changes',
+          severity: 'info',
+          category: 'B. Config & Data',
+          location: 'Global / All pages',
+          cause: 'User modified configuration but has not saved it.',
+          solution: 'Save or discard changes.',
+          steps: [
+            'Click "Save"',
+            'Or click "Confirm Return" to discard',
+          ],
+        },
+      {
+        code: 'CONFIG_JSON_PARSE_ERROR',
+        message: 'Configuration file JSON parse error',
+        severity: 'error',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Configuration file contains illegal JSON syntax such as trailing commas or unclosed quotes.',
+        solution: 'Use JSON validation tool to check and fix syntax errors.',
+        steps: [
+          'Paste configuration into online JSON validator',
+          'Check for trailing commas',
+          'Confirm all quotes are closed',
+          'Check special character escaping',
+        ],
+        prevention: 'Use IDE JSON syntax checking, avoid manually editing complex configurations.',
+      },
+      {
+        code: 'CONFIG_REQUIRED_FIELD_MISSING',
+        message: 'Configuration file missing required field',
+        severity: 'error',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Configuration object is missing required fields that the application needs.',
+        solution: 'Add all required fields according to documentation.',
+        steps: [
+          'Check missing fields mentioned in error prompt',
+          'Cross-reference configuration documentation for required items',
+          'Copy missing fields from default config template',
+          'Save and reload application',
+        ],
+        prevention: 'Use configuration Schema validation, or start from a complete template.',
+      },
+      {
+        code: 'CONFIG_TYPE_MISMATCH',
+        message: 'Configuration field type mismatch',
+        severity: 'warning',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Configuration field value type does not match expectation, such as string where number is expected.',
+        solution: 'Convert field value to correct type.',
+        steps: [
+          'Check field mentioned in error prompt',
+          'Confirm whether field should be string/number/boolean',
+          'Modify value type and save',
+          'Reload application to verify',
+        ],
+        prevention: 'Use TypeScript interfaces or JSON Schema to validate configuration types.',
+      },
+      {
+        code: 'CONFIG_ENV_VARIABLE_NOT_FOUND',
+        message: 'Environment variable not found',
+        severity: 'error',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Environment variable that application depends on is not set or misspelled.',
+        solution: 'Set correct environment variable, or check variable name spelling.',
+        steps: [
+          'Check .env file or system environment variables',
+          'Confirm variable name case is correct',
+          'Restart application for environment variables to take effect',
+          'Use default values as fallback',
+        ],
+        prevention: 'Check all required environment variables in startup scripts.',
+      },
+      {
+        code: 'CONFIG_CROSS_ORIGIN_BLOCKED',
+        message: 'Cross-origin configuration blocked operation',
+        severity: 'error',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Browser same-origin policy blocked cross-origin configuration read/write.',
+        solution: 'Ensure frontend and backend are same-origin, or properly configure CORS.',
+        steps: [
+          'Check frontend and backend domain/port',
+          'Confirm CORS configuration allows current domain',
+          'Avoid operating configuration in cross-origin iframes',
+          'Use postMessage for cross-domain communication',
+        ],
+        prevention: 'Ensure frontend and backend use same-origin policy or properly configure CORS during deployment.',
+      },
+      {
+        code: 'DATA_EXPORT_TIMEOUT',
+        message: 'Data export timeout',
+        severity: 'warning',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Exported data volume is too large causing operation timeout.',
+        solution: 'Export in batches, or increase timeout duration.',
+        steps: [
+          'Reduce single export data volume',
+          'Export multiple small files in batches',
+          'Increase export operation timeout settings',
+          'Use background tasks for large exports',
+        ],
+        prevention: 'Provide batch export options for large data volumes.',
+      },
+      {
+        code: 'DATA_IMPORT_DUPLICATE_KEY',
+        message: 'Imported data contains duplicate keys',
+        severity: 'warning',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Imported JSON contains duplicate key names.',
+        solution: 'Clean duplicate keys, or use deduplication strategy.',
+        steps: [
+          'Check imported file for duplicate keys',
+          'Decide which value to keep',
+          'Manually remove duplicate keys',
+          'Re-import',
+        ],
+        prevention: 'Ensure unique key names during export, validate before import.',
+      },
+      {
+        code: 'DATA_SCHEMA_VERSION_TOO_OLD',
+        message: 'Data schema version too old',
+        severity: 'error',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Imported data uses outdated schema version incompatible with current application.',
+        solution: 'Use data migration tool to upgrade schema version.',
+        steps: [
+          'Confirm current application supported schema version',
+          'Find migration script for corresponding version',
+          'Run migration script to upgrade data',
+          'Re-import upgraded data',
+        ],
+        prevention: 'Include schema version information in exports, provide migration tools.',
+      },
+      {
+        code: 'STORAGE_INDEXEDDB_BLOCKED',
+        message: 'IndexedDB blocked by browser',
+        severity: 'error',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Browser privacy mode or settings blocked IndexedDB access.',
+        solution: 'Exit privacy mode, or adjust browser storage settings.',
+        steps: [
+          'Confirm not in private/incognito mode',
+          'Check browser settings for storage permissions',
+          'Clear browser data and retry',
+          'Try using localStorage as alternative',
+        ],
+        prevention: 'Avoid using features requiring persistent storage in privacy mode.',
+      },
+      {
+        code: 'STORAGE_QUOTA_EXCEEDED',
+        message: 'Storage quota exceeded',
+        severity: 'error',
+        category: 'B. Config & Data',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Application storage usage exceeded browser or device quota limit.',
+        solution: 'Clean old data, or request larger storage quota.',
+        steps: [
+          'Check current storage usage',
+          'Delete unnecessary historical data',
+          'Compress stored data',
+          'Request persistent storage permission',
+        ],
+        prevention: 'Regularly clean expired data, use compressed storage.',
+      },
+      
+        {
+          code: 'ENV_FILE_MISSING',
+          message: 'Environment variable file .env is missing',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The .env file is missing from the project root directory, causing all environment variables to fail to load.',
+          solution: 'Copy .env.example to .env and fill in the necessary configuration.',
+          steps: [
+            'Copy .env.example to .env',
+            'Fill in all required environment variables',
+            'Restart the application to apply the configuration',
+            'Check logs to confirm configuration is loaded'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'ENV_VARIABLE_EMPTY',
+          message: 'Environment variable value is empty',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The .env file contains a key but no value, or the value contains only whitespace characters.',
+          solution: 'Provide valid values for all required environment variables.',
+          steps: [
+            'Check the .env file for empty values',
+            'Provide valid values for missing variables',
+            'Remove unnecessary empty lines',
+            'Restart the application'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'ENV_VARIABLE_SYNTAX_ERROR',
+          message: 'Environment variable syntax error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The .env file contains syntax errors (e.g., spaces around the equals sign, values containing spaces without quotes).',
+          solution: 'Fix the .env file syntax, use quotes to wrap values containing spaces.',
+          steps: [
+            'Check for spaces around the equals sign',
+            'Wrap values containing spaces in double quotes',
+            'Remove illegal characters',
+            'Use dotenv parser to validate'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'ENV_VARIABLE_TYPE_MISMATCH',
+          message: 'Environment variable type mismatch',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The environment variable was parsed as the wrong type (e.g., numeric variable contains non-numeric characters, boolean variable is not true/false).',
+          solution: 'Check the environment variable format and ensure it matches the type expected by the code.',
+          steps: [
+            'Check the actual value of the variable',
+            'Confirm the type expected by the code',
+            'Perform necessary type conversion',
+            'Add input validation'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CONFIG_FILE_PARSE_ERROR',
+          message: 'Configuration file parse error',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'JSON/YAML/TOML configuration file format is incorrect (e.g., missing commas, mismatched brackets, incorrect indentation).',
+          solution: 'Use a format validation tool to check and fix the configuration file.',
+          steps: [
+            'Use JSON/YAML validation tool to check the file',
+            'Find and fix syntax errors',
+            'Restore to the last known good version',
+            'Reload the configuration'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CONFIG_FILE_NOT_FOUND',
+          message: 'Configuration file not found',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The specified configuration file path does not exist or the filename is misspelled.',
+          solution: 'Confirm the configuration file path is correct, or create a default configuration file.',
+          steps: [
+            'Check if the file path is correct',
+            'Confirm the filename is spelled correctly',
+            'Create the missing configuration file',
+            'Update the configuration loading path'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CONFIG_SCHEMA_VALIDATION_FAILED',
+          message: 'Configuration schema validation failed',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The configuration file content does not match the expected schema (e.g., missing required fields, incorrect field types, values out of range).',
+          solution: 'Fix configuration values according to the schema definition.',
+          steps: [
+            'Review schema validation error details',
+            'Fix missing or incorrect fields',
+            'Confirm field types and value ranges',
+            'Re-validate the configuration'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CONFIG_VERSION_INCOMPATIBLE',
+          message: 'Configuration version incompatible',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The current configuration file version does not match the version expected by the application.',
+          solution: 'Upgrade or downgrade the configuration file, or run a migration script.',
+          steps: [
+            'Check the current configuration version',
+            'Check the application expected configuration version',
+            'Run configuration migration script',
+            'Manually adjust incompatible fields'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CONFIG_CIRCULAR_REFERENCE',
+          message: 'Configuration contains circular reference',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The configuration file uses variable references that form a circular dependency (A references B, B references A).',
+          solution: 'Refactor the configuration to eliminate circular references.',
+          steps: [
+            'Identify the circular reference chain',
+            'Refactor the configuration structure',
+            'Use absolute paths instead of relative references',
+            'Add configuration parsing depth limits'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CONFIG_OVERRIDE_CONFLICT',
+          message: 'Configuration override conflict',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Multiple configuration sources (file, environment variable, command line parameter) provide different values for the same key.',
+          solution: 'Clarify configuration priority and ensure the expected value is used.',
+          steps: [
+            'Understand the configuration loading priority order',
+            'Check values from each configuration source',
+            'Explicitly specify the final effective configuration value',
+            'Unify configuration management approach'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_CONNECTION_STRING_INVALID',
+          message: 'Database connection string invalid',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The database URL format is incorrect (e.g., missing protocol, wrong port, illegal characters).',
+          solution: 'Correct the connection string format according to the database documentation.',
+          steps: [
+            'Check the connection string format',
+            'Confirm the protocol is correct (postgresql://, mongodb://, etc.)',
+            'Validate hostname, port, and database name',
+            'Test the connection string'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_CONNECTION_TIMEOUT',
+          message: 'Database connection timeout',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The database server is unresponsive, possibly due to network issues, database overload, or firewall blocking.',
+          solution: 'Check database service status and network connectivity.',
+          steps: [
+            'Test network connectivity to the database server',
+            'Check if the database service is running',
+            'Confirm the firewall allows the database port',
+            'Increase connection timeout settings'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_AUTH_FAILED',
+          message: 'Database authentication failed',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The database username or password is incorrect, or the user does not have access to the database.',
+          solution: 'Check database credentials and confirm user permissions.',
+          steps: [
+            'Confirm the username and password are correct',
+            'Check if the user has database access permissions',
+            'Reset the database password',
+            'Check database logs'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_SSL_REQUIRED',
+          message: 'Database requires SSL connection',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The database server enforces SSL/TLS connections, but the client has not enabled it.',
+          solution: 'Enable SSL in the connection configuration.',
+          steps: [
+            'Add sslmode=require to the connection string',
+            'Configure SSL certificate paths',
+            'Check the database server SSL configuration',
+            'Test the SSL connection'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_POOL_EXHAUSTED',
+          message: 'Database connection pool exhausted',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'All database connections are occupied and not released in time, causing new requests to fail to obtain a connection.',
+          solution: 'Increase the connection pool size, or check for connection leaks.',
+          steps: [
+            'Increase the maximum number of connections in the pool',
+            'Check if connections are being properly released',
+            'Optimize queries to reduce connection hold time',
+            'Implement connection timeout auto-recovery'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_QUERY_TIMEOUT',
+          message: 'Database query timeout',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'SQL query execution time is too long, exceeding the set timeout threshold.',
+          solution: 'Optimize query statements, add indexes, or increase the timeout.',
+          steps: [
+            'Analyze query execution plan',
+            'Add appropriate indexes',
+            'Rewrite inefficient queries',
+            'Increase query timeout settings'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_DEADLOCK_DETECTED',
+          message: 'Database deadlock detected',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Two or more transactions are waiting for each other to release locks, forming a deadlock.',
+          solution: 'The database will automatically roll back one of the transactions, the application layer should catch the error and retry.',
+          steps: [
+            'Catch deadlock errors and retry transactions',
+            'Adjust the order in which tables are accessed in transactions',
+            'Reduce the time transactions hold locks',
+            'Use finer-grained locks'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_UNIQUE_CONSTRAINT_VIOLATION',
+          message: 'Database unique constraint violation',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Inserting or updating data violates a uniqueness constraint (e.g., duplicate primary key, unique index).',
+          solution: 'Check if the data already exists, use UPSERT or query before inserting.',
+          steps: [
+            'Query to confirm if the data already exists',
+            'Use INSERT ... ON CONFLICT (UPSERT)',
+            'Or DELETE first then INSERT',
+            'Check the unique index definition'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_FOREIGN_KEY_VIOLATION',
+          message: 'Database foreign key constraint violation',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Inserting or updating data references a non-existent foreign key value.',
+          solution: 'Ensure the referenced data exists, or disable foreign key checks (not recommended).',
+          steps: [
+            'Confirm the referenced foreign key value exists in the related table',
+            'Insert data into the related table first, then into the primary table',
+            'Check the foreign key constraint definition',
+            'Only temporarily disable foreign keys when necessary'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_CHECK_CONSTRAINT_VIOLATION',
+          message: 'Database check constraint violation',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The data value does not satisfy the CHECK constraint condition (e.g., age must be greater than 0).',
+          solution: 'Correct the data value to satisfy the constraint condition.',
+          steps: [
+            'Review the CHECK constraint definition',
+            'Correct the data value',
+            'Or modify the constraint condition when necessary',
+            'Add application-layer data validation'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_MIGRATION_FAILED',
+          message: 'Database migration failed',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Executing database migration script failed (e.g., SQL syntax error, constraint conflict, table already exists).',
+          solution: 'Review migration logs, fix SQL errors, or manually roll back.',
+          steps: [
+            'Review migration error logs',
+            'Fix SQL syntax errors',
+            'If partial migration has been executed, manually clean up',
+            'Re-run the migration'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_MIGRATION_LOCK_HELD',
+          message: 'Database migration lock is held',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Another process is executing the migration, the current process cannot obtain the migration lock.',
+          solution: 'Wait for other migrations to complete, or manually release the migration lock.',
+          steps: [
+            'Check if another process is running the migration',
+            'Wait for the migration to complete',
+            'If the migration process has crashed, manually clean up the lock table',
+            'Re-run the migration'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATABASE_MIGRATION_DIRTY_STATE',
+          message: 'Database migration in dirty state',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The previous migration failed, leaving the database in an inconsistent state.',
+          solution: 'Manually fix the database state, or reset the migration records.',
+          steps: [
+            'Review the migration history table',
+            'Identify the failed migration step',
+            'Manually execute or roll back the failed migration',
+            'Update the migration records table'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_CONNECTION_FAILED',
+          message: 'Cache service connection failed',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Redis/Memcached and other cache servers are not running or the network is unreachable.',
+          solution: 'Check cache service status and confirm connection configuration is correct.',
+          steps: [
+            'Check if the cache server is running',
+            'Test network connectivity',
+            'Confirm the connection address and port are correct',
+            'Check authentication password'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_KEY_TOO_LARGE',
+          message: 'Cache key too large',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The cache key length exceeds the cache server limit (Redis max 512MB key, but recommended much smaller).',
+          solution: 'Use a hash function to shorten the key name, or refactor the caching strategy.',
+          steps: [
+            'Calculate the actual length of the key',
+            'Use MD5/SHA256 hash to shorten the key',
+            'Refactor cache key naming strategy',
+            'Avoid using the entire query as the key'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_VALUE_TOO_LARGE',
+          message: 'Cache value too large',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The cache value size exceeds the recommended limit, affecting performance and memory usage.',
+          solution: 'Compress the cache value, or split large data into multiple small caches.',
+          steps: [
+            'Check the cache value size',
+            'Use compression algorithms (e.g., gzip)',
+            'Split large data into multiple small keys',
+            'Or avoid caching and query directly'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_TTL_INVALID',
+          message: 'Cache TTL invalid',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The set TTL (time-to-live) is negative or exceeds the maximum value supported by the cache server.',
+          solution: 'Set a reasonable TTL value (positive integer, typically in seconds).',
+          steps: [
+            'Check if the TTL value is positive',
+            'Confirm the unit is correct (seconds vs milliseconds)',
+            'Set a reasonable expiration time',
+            'For permanent caching, use a special value or do not set TTL'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_SERIALIZATION_ERROR',
+          message: 'Cache serialization error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The object attempted to be cached cannot be properly serialized (e.g., contains circular references, functions, Symbol).',
+          solution: 'Ensure the cache object is JSON serializable, or use a dedicated serialization library.',
+          steps: [
+            'Check if the object can be JSON.stringify',
+            'Remove functions, Symbols, and circular references',
+            'Use binary serialization like msgpack',
+            'Or only cache simple data types'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_DESERIALIZATION_ERROR',
+          message: 'Cache deserialization error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Data read from the cache cannot be properly deserialized (e.g., data corruption, version incompatibility).',
+          solution: 'Check cache data integrity and confirm serialization version consistency.',
+          steps: [
+            'Check the integrity of cache data',
+            'Confirm serialization/deserialization versions are consistent',
+            'Add data version numbers',
+            'Fallback to the data source when deserialization fails'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_STAMPEDE_DETECTED',
+          message: 'Cache stampede detected',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Large amounts of cache expire simultaneously, causing all requests to hit the database at once.',
+          solution: 'Use locks or mutex mechanisms to prevent simultaneous cache rebuilds.',
+          steps: [
+            'Add random offsets to cache expiration times',
+            'Use mutex locks to ensure only one request rebuilds the cache',
+            'Implement proactive async refresh mechanisms',
+            'Increase database connection pool to handle burst traffic'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_PENETRATION_DETECTED',
+          message: 'Cache penetration detected',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Large numbers of requests query non-existent data, bypassing the cache and directly querying the database.',
+          solution: 'Also cache empty results for non-existent data (with shorter TTL).',
+          steps: [
+            'Also write cache for empty query results',
+            'Set a short TTL for empty values',
+            'Use Bloom filter to predict if data exists',
+            'Add request rate limiting'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CACHE_BREAKDOWN_DETECTED',
+          message: 'Cache breakdown detected',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'At the moment a hot data item expires, large numbers of requests simultaneously query that data.',
+          solution: 'Use mutex locks or logical expiration to prevent simultaneous rebuilds.',
+          steps: [
+            'Keep hot data permanently cached or use logical expiration',
+            'Use mutex locks to rebuild cache',
+            'Proactively async refresh hot data about to expire',
+            'Use multi-level caching (local + remote)'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'JSON_PARSE_ERROR',
+          message: 'JSON parse error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The string is not valid JSON format (e.g., missing quotes, extra commas, illegal characters).',
+          solution: 'Use a JSON validation tool to check and fix the format.',
+          steps: [
+            'Use tools like JSONLint to validate',
+            'Check if quotes are paired',
+            'Remove extra commas',
+            'Ensure there are no comments (JSON does not support comments)'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'JSON_STRINGIFY_ERROR',
+          message: 'JSON stringify error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The object contains values that cannot be serialized (e.g., circular references, BigInt, functions).',
+          solution: 'Clean up the object, remove non-serializable properties.',
+          steps: [
+            'Check if the object has circular references',
+            'Convert BigInt to string',
+            'Remove functions and Symbols',
+            'Use a custom replacer function'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'XML_PARSE_ERROR',
+          message: 'XML parse error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The string is not valid XML format (e.g., unclosed tags, illegal characters, encoding errors).',
+          solution: 'Use an XML validation tool to check and fix the format.',
+          steps: [
+            'Check if tags are properly closed',
+            'Confirm XML declaration and encoding',
+            'Escape special characters (<, >, &)',
+            'Use XML parser error location'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'YAML_PARSE_ERROR',
+          message: 'YAML parse error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'YAML file format is incorrect (e.g., indentation errors, illegal characters, circular references).',
+          solution: 'Use a YAML validation tool to check and fix the format.',
+          steps: [
+            'Check if indentation uses spaces (not tabs)',
+            'Confirm key-value pair format is correct',
+            'Check for circular references',
+            'Use YAML parser detailed error messages'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'CSV_PARSE_ERROR',
+          message: 'CSV parse error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'CSV file format is incorrect (e.g., mismatched quotes, inconsistent delimiters, newline issues).',
+          solution: 'Use a CSV validation tool, or specify the correct delimiter and quote rules.',
+          steps: [
+            'Check if quotes are paired and closed',
+            'Confirm delimiter consistency (comma/semicolon/tab)',
+            'Handle fields containing newlines',
+            'Use CSV parser library configuration options'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_VALIDATION_FAILED',
+          message: 'Data validation failed',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Input data does not match the expected validation rules (e.g., required fields missing, format errors, values out of range).',
+          solution: 'Fix data according to validation error information.',
+          steps: [
+            'Review validation error details',
+            'Fix missing or incorrect fields',
+            'Confirm data type and format',
+            'Add client-side pre-validation'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_TYPE_CONVERSION_ERROR',
+          message: 'Data type conversion error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Attempting to convert data from one type to another failed (e.g., string to number contains letters).',
+          solution: 'Ensure the source data format is correct, or use safe conversion methods.',
+          steps: [
+            'Check the actual format of the source data',
+            'Use safe conversions like Number(), parseInt()',
+            'Validate the conversion result',
+            'Use type guard functions'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_TRUNCATION_ERROR',
+          message: 'Data truncation error',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Data length exceeds the maximum limit of the target field, causing truncation or rejection.',
+          solution: 'Shorten the data length, or increase the field limit.',
+          steps: [
+            'Check the actual length of the data',
+            'Shorten the data or store in segments',
+            'Increase database field length limit',
+            'Add length validation at the application layer'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_ENCRYPTION_ERROR',
+          message: 'Data encryption error',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'An error occurred during encryption (e.g., invalid key, unsupported algorithm, incorrect data format).',
+          solution: 'Check the key and algorithm configuration, ensure the data format is correct.',
+          steps: [
+            'Confirm the key length matches the algorithm requirements',
+            'Check if the encryption algorithm is supported',
+            'Confirm the data is a Buffer or string',
+            'Check the encryption library error details'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_DECRYPTION_ERROR',
+          message: 'Data decryption error',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'An error occurred during decryption (e.g., wrong key, data corruption, algorithm mismatch).',
+          solution: 'Confirm the correct key and algorithm are used, check data integrity.',
+          steps: [
+            'Confirm the decryption key matches the encryption key',
+            'Check if the encryption algorithm matches',
+            'Confirm the data has not been truncated or tampered',
+            'Check if the IV/Nonce was properly passed'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_HASH_MISMATCH',
+          message: 'Data hash mismatch',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The data checksum/hash does not match the expected value, indicating the data was tampered with during transmission or storage.',
+          solution: 'Re-transmit the data, or restore from backup.',
+          steps: [
+            'Re-calculate the data hash',
+            'Compare with the expected hash',
+            'If they match, the expected value may be wrong',
+            'If they do not match, the data is corrupted and needs to be re-fetched'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_INTEGRITY_CHECK_FAILED',
+          message: 'Data integrity check failed',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Data integrity validation failed (e.g., checksum, digital signature, Merkle tree verification failed).',
+          solution: 'Re-fetch data from a trusted source, or repair corrupted data.',
+          steps: [
+            'Confirm the validation algorithm and parameters are correct',
+            'Re-fetch data from backup or original source',
+            'Check if the storage medium has bad sectors',
+            'Implement redundant validation mechanisms'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_MIGRATION_INCOMPLETE',
+          message: 'Data migration incomplete',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Data migration was interrupted, some data has been migrated but some has not, leading to data inconsistency.',
+          solution: 'Roll back to the pre-migration state, or fill in the missing data.',
+          steps: [
+            'Check migration logs to confirm executed steps',
+            'Compare source and target data volumes',
+            'Fill in missing data',
+            'Or roll back and re-execute the complete migration'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_BACKUP_CORRUPTED',
+          message: 'Data backup corrupted',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Backup file is corrupted or checksum failed, cannot be used for recovery.',
+          solution: 'Use another backup copy, or re-create the backup.',
+          steps: [
+            'Check the backup file integrity checksum',
+            'Try using another backup copy',
+            'If all backups are corrupted, try data recovery tools',
+            'Establish a multi-copy backup strategy'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_REPLICATION_LAG',
+          message: 'Data replication lag too large',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Master-slave replication delay exceeds the acceptable range, reading from the slave may return stale data.',
+          solution: 'Check replication performance, optimize queries, or force reads from the master.',
+          steps: [
+            'Check replication delay monitoring',
+            'Optimize slow queries on the slave',
+            'Increase slave resources or add read replicas',
+            'For strong consistency requirements, force reads from the master'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_REPLICATION_CONFLICT',
+          message: 'Data replication conflict',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'In multi-master replication or bidirectional synchronization, the same data was modified simultaneously on different nodes, causing a conflict.',
+          solution: 'Implement conflict detection and resolution strategies (last-write-wins, merge, manual intervention).',
+          steps: [
+            'Review conflict logs and data',
+            'Choose a conflict resolution strategy',
+            'Merge data or keep a specific version',
+            'Implement automatic conflict detection and notification'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_SEEDING_FAILED',
+          message: 'Data seed initialization failed',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'Initial data loading during application startup failed (e.g., seed file missing, format error).',
+          solution: 'Check the seed file, fix the format, or manually insert initial data.',
+          steps: [
+            'Check if the seed file exists',
+            'Validate the seed file format',
+            'Manually insert necessary initial data',
+            'Disable seed loading (development environment only)'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_EXPORT_FORMAT_ERROR',
+          message: 'Data export format error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The format specified for data export is not supported or parameters are incorrect.',
+          solution: 'Check the supported export format list, use the correct format parameters.',
+          steps: [
+            'Review supported export formats (CSV/JSON/XML/Excel)',
+            'Check format parameter spelling',
+            'Confirm the export field list is correct',
+            'Test with a small data volume'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_IMPORT_FORMAT_ERROR',
+          message: 'Data import format error',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The import file format is incorrect or contains data that cannot be parsed.',
+          solution: 'Check the import file format and ensure it matches the expected template.',
+          steps: [
+            'Review the import template format',
+            'Validate if the import file matches the template',
+            'Check if required fields are complete',
+            'Test with a small data volume'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },
+        {
+          code: 'DATA_IMPORT_CONSTRAINT_VIOLATION',
+          message: 'Data import violates constraints',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Any tool → Area: Configuration loading or data processing',
+          cause: 'The imported data violates database constraints (e.g., foreign key, check constraint, not-null constraint).',
+          solution: 'Clean the import data to ensure it satisfies all constraint conditions.',
+          steps: [
+            'Review the specific constraint violation details',
+            'Clean or fix data that violates constraints',
+            'Temporarily disable constraints (not recommended for production)',
+            'Import in batches and validate'
+          ],
+          prevention: 'Use configuration validation tools, regularly back up data, implement schema version control.',
+        },],
+    },
+    {
+      id: 'C',
+      name: 'C. File & Input',
+      description: 'File upload, unsupported format, size exceeded, parsing failure',
+      errors: [
+        {
+          code: 'FILE_CORRUPTED',
+          message: 'Image file is corrupted',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Style Transfer / Image Converter → Area: image upload',
+          cause: 'The selected image file is corrupted or encoded in an unsupported format.',
+          solution: 'Replace with a valid image file.',
+          steps: [
+            'Open the image in a system image viewer to confirm it displays normally',
+            'If corrupted, use image repair tools or replace with another image',
+            'Re-upload',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Confirm the image can be opened normally in the system\'s built-in image viewer before uploading.',
+        },
+        {
+          code: 'FILE_FORMAT_UNSUPPORTED',
+          message: 'File format is not supported',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Paper2Gal / Image Converter / Face Maker / Style Transfer',
+          cause: 'File format does not meet requirements.',
+          solution: 'Replace with a supported format file.',
+          steps: [
+            'Confirm the tool\'s supported format list',
+            'Use the Image Converter tool to convert',
+            'Re-upload',
+          ],
+          relatedCodes: ['UPLOAD_FORMAT'],
+        },
+        {
+          code: 'FILE_TOO_LARGE',
+          message: 'File size exceeds limit',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Paper2Gal / Image Converter / Style Transfer',
+          cause: 'File dimensions are too large or file size exceeds limit.',
+          solution: 'Compress or resize the image.',
+          steps: [
+            'Use the Image Converter tool to scale the image',
+            'Convert PNG to JPG to reduce file size',
+            'Re-upload',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Recommended to upload images of 1024×1024 ~ 2048×2048, balancing quality and processing speed.',
+        },
+        {
+          code: 'UPLOAD_FORMAT',
+          message: 'Uploaded file format is not supported',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Image Converter / Paper2Gal',
+          cause: 'File format is not within the supported list.',
+          solution: 'Convert the file to a supported format.',
+          steps: [
+            'Confirm the required file format for the target tool',
+            'Use an image processing tool to convert the format',
+            'Re-upload',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Confirm the file format is in the supported list before uploading.',
+        },
+      {
+        code: 'FILE_UPLOAD_INTERRUPTED',
+        message: 'File upload interrupted',
+        severity: 'warning',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Network interruption, user cancellation, or browser closure caused incomplete upload.',
+        solution: 'Re-upload file, or use resumable upload.',
+        steps: [
+          'Check network connection status',
+          'Re-select file and upload',
+          'Use upload component that supports resumable upload',
+          'Upload large files in chunks',
+        ],
+        prevention: 'Use resumable upload or chunked upload mechanisms.',
+      },
+      {
+        code: 'FILE_MIME_TYPE_MISMATCH',
+        message: 'File MIME type does not match extension',
+        severity: 'warning',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'File extension does not match actual content type, such as renaming .png to .jpg.',
+        solution: 'Use correct file extension, or determine true type via content detection.',
+        steps: [
+          'Use file detection tool to confirm true MIME type',
+          'Change file extension to correct type',
+          'Re-export file to ensure consistency',
+          'Perform MIME type validation during upload',
+        ],
+        prevention: 'Check MIME type and extension consistency before upload.',
+      },
+      {
+        code: 'FILE_VIRUS_SCAN_FAILED',
+        message: 'File virus scan failed',
+        severity: 'error',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Uploaded file did not pass virus scan, or scan service is unavailable.',
+        solution: 'Use files from trusted sources, or change scan service.',
+        steps: [
+          'Confirm file source is trusted',
+          'Scan file with local antivirus software',
+          'Try changing file source',
+          'Contact administrator to check scan service status',
+        ],
+        prevention: 'Only upload files from trusted sources.',
+      },
+      {
+        code: 'FILE_NAME_TOO_LONG',
+        message: 'File name too long',
+        severity: 'warning',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'File name exceeded system or application maximum length limit.',
+        solution: 'Shorten file name and re-upload.',
+        steps: [
+          'Shorten file name to under 100 characters',
+          'Remove special characters from file name',
+          'Use simple alphanumeric naming',
+          'Re-upload',
+        ],
+        prevention: 'Automatically truncate or rename overly long file names before upload.',
+      },
+      {
+        code: 'FILE_PATH_TRAVERSAL_DETECTED',
+        message: 'Path traversal attack detected',
+        severity: 'critical',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'File name contains path traversal characters like ../, possibly malicious attack.',
+        solution: 'Reject upload and sanitize path characters from file name.',
+        steps: [
+          'Immediately reject this file upload',
+          'Log security event',
+          'Sanitize all path separators from file name',
+          'Notify security team',
+        ],
+        prevention: 'Strictly validate file names, prohibit path separator characters.',
+      },
+      {
+        code: 'FILE_TEMPORARY_UNAVAILABLE',
+        message: 'Temporary file unavailable',
+        severity: 'error',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server temp directory is full or lacks permissions, cannot create temporary files.',
+        solution: 'Clean temp directory, or check directory permissions.',
+        steps: [
+          'Check server temp directory disk space',
+          'Clean old temporary files',
+          'Confirm temp directory has write permissions',
+          'Change temp directory path',
+        ],
+        prevention: 'Regularly clean temp directory, monitor disk space.',
+      },
+      {
+        code: 'FILE_BATCH_UPLOAD_PARTIAL_FAILURE',
+        message: 'Batch upload partial failure',
+        severity: 'warning',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Some files in batch upload failed while others succeeded.',
+        solution: 'Retry failed files, or upload individually.',
+        steps: [
+          'View list of failed files',
+          'Individually retry each failed file',
+          'Check format and size of failed files',
+          'Reduce number of simultaneous uploads per batch',
+        ],
+        prevention: 'Provide detailed status feedback and retry mechanism for batch uploads.',
+      },
+      {
+        code: 'FILE_WATERMARK_DETECTION_FAILED',
+        message: 'File watermark detection failed',
+        severity: 'info',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Uploaded image could not be correctly identified or have watermark removed.',
+        solution: 'Use original image without watermark, or manually remove watermark.',
+        steps: [
+          'Confirm whether image has watermark',
+          'Try using higher quality original image',
+          'Manually remove watermark and re-upload',
+          'Disable automatic watermark detection feature',
+        ],
+        prevention: 'Use watermark-free materials from official channels.',
+      },
+      {
+        code: 'FILE_METADATA_STRIP_FAILED',
+        message: 'File metadata strip failed',
+        severity: 'info',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Unable to clear EXIF and other metadata information from image.',
+        solution: 'Use professional tools to manually clear metadata.',
+        steps: [
+          'Use exiftool or similar to view metadata',
+          'Manually clear GPS, camera model and other sensitive info',
+          'Re-save image to remove metadata',
+          'Confirm metadata is cleared before upload',
+        ],
+        prevention: 'Automatically strip all sensitive metadata before upload.',
+      },
+      {
+        code: 'FILE_THUMBNAIL_GENERATION_FAILED',
+        message: 'Thumbnail generation failed',
+        severity: 'warning',
+        category: 'C. Files & Upload',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Image format not supported or dimensions too large, unable to generate thumbnail.',
+        solution: 'Convert image format, or reduce image resolution.',
+        steps: [
+          'Check if image format is supported',
+          'Try converting to JPEG/PNG',
+          'Reduce image resolution and retry',
+          'Use alternative image as thumbnail',
+        ],
+        prevention: 'Automatically convert and compress images for thumbnail generation during upload.',
+      },
+      
+        {
+          code: 'FILE_CORRUPTED',
+          message: 'File is corrupted',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'File was corrupted during transmission or storage (e.g., network interruption, disk bad sectors, memory errors).',
+          solution: 'Re-download or re-generate the file, check storage medium health status.',
+          steps: [
+            'Try to re-download/upload the file',
+            'Check if the file hash matches the original',
+            'Use file repair tools',
+            'Check disk health status (SMART)'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_INCOMPLETE_DOWNLOAD',
+          message: 'File download incomplete',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The download was interrupted during the process, only part of the file was downloaded.',
+          solution: 'Re-download the file, or use resume support.',
+          steps: [
+            'Delete the incomplete file',
+            'Re-download',
+            'If supported, use Range request to resume',
+            'Check network stability'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_ENCODING_MISMATCH',
+          message: 'File encoding mismatch',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The actual file encoding does not match the declared encoding (e.g., declared UTF-8 but actually GBK).',
+          solution: 'Re-read the file using the correct encoding, or use an encoding detection tool.',
+          steps: [
+            'Use a file encoding detection tool (e.g., chardet)',
+            'Try opening with different encodings',
+            'Convert the file to the correct encoding',
+            'Explicitly specify encoding in code'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_BOM_CONFLICT',
+          message: 'File BOM header conflict',
+          severity: 'warning',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'UTF-8 file contains a BOM header, but the parser did not handle it correctly, causing the first character parsing error.',
+          solution: 'Remove the BOM header, or configure the parser to handle BOM correctly.',
+          steps: [
+            'Use an editor to check if there is a BOM',
+            'Remove the BOM header (e.g., using sed)',
+            'Configure the parser to automatically handle BOM',
+            'Unify team file encoding standards'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_LINE_ENDING_MISMATCH',
+          message: 'File line ending mismatch',
+          severity: 'warning',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'Windows (CRLF) and Unix (LF) line endings are mixed, causing script or parser behavior anomalies.',
+          solution: 'Unify line endings to LF, or use tools that support both line endings.',
+          steps: [
+            'Use dos2unix or unix2dos to convert',
+            'Configure the editor to automatically handle line endings',
+            'Specify line endings in .gitattributes',
+            'Use parsers that support CRLF/LF'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_HIDDEN_ATTRIBUTE',
+          message: 'File is set to hidden',
+          severity: 'info',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file has the hidden attribute and is not visible in the default file browser.',
+          solution: 'Show hidden files, or remove the hidden attribute.',
+          steps: [
+            'Show hidden files in the file browser',
+            'Use command line to remove hidden attribute (attrib -h)',
+            'Check file permissions',
+            'Confirm the file was not hidden by malware'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_SYSTEM_READONLY',
+          message: 'File system is read-only',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file system is mounted as read-only, or the disk encountered an error and automatically switched to read-only mode.',
+          solution: 'Check disk health, remount as read-write, or repair the file system.',
+          steps: [
+            'Check disk mount options',
+            'Run file system check (fsck/chkdsk)',
+            'Check disk SMART status',
+            'Back up data and replace faulty disk'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_HARD_LINK_LIMIT',
+          message: 'File hard link limit reached',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The number of hard links for the file system has reached the limit (e.g., ext4 default 65000).',
+          solution: 'Delete unnecessary hard links, or use symbolic links instead.',
+          steps: [
+            'Check the number of hard links for the file (ls -l)',
+            'Delete unnecessary hard links',
+            'Use symbolic links (soft links) instead',
+            'Consider using a file system that supports more hard links'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_SYMBOLIC_LINK_BROKEN',
+          message: 'Symbolic link is broken',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The target file or directory pointed to by the symbolic link no longer exists.',
+          solution: 'Delete the broken symbolic link, or re-create it pointing to the correct target.',
+          steps: [
+            'Check if the symbolic link target exists',
+            'Delete the broken link (rm linkname)',
+            'Re-create the symbolic link (ln -s)',
+            'Check if the target path is correct'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_SYMBOLIC_LINK_LOOP',
+          message: 'Symbolic link loop',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'Symbolic links form a circular reference (A points to B, B points to A).',
+          solution: 'Delete the symbolic links causing the loop and reorganize the directory structure.',
+          steps: [
+            'Use find -follow to detect loops',
+            'Delete the links causing the loop',
+            'Re-plan the directory structure',
+            'Use absolute paths when creating links'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_NAME_TOO_LONG',
+          message: 'File name too long',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file name or path length exceeds the file system limit (e.g., ext4 255 chars, NTFS 260 chars).',
+          solution: 'Shorten the file name or path, or use a file system that supports long paths.',
+          steps: [
+            'Shorten the file name',
+            'Move the file to a shallower directory',
+            'On Windows, enable long path support',
+            'Use a file system that supports long paths'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_PATH_TOO_DEEP',
+          message: 'Directory nesting too deep',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file path directory levels are too deep, exceeding the operating system or file system limit.',
+          solution: 'Reduce directory nesting levels, or move files to shallower locations.',
+          steps: [
+            'Reduce directory levels',
+            'Use a flattened directory structure',
+            'Move deep files closer to the root',
+            'Check the operating system path length limit'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_ILLEGAL_CHARACTERS',
+          message: 'File name contains illegal characters',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file name contains characters not supported by the file system (e.g., /  : * ? " < > |).',
+          solution: 'Remove illegal characters, use safe file names.',
+          steps: [
+            'Check for illegal characters in the file name',
+            'Remove or replace with underscore/hyphen',
+            'Use a file name sanitization function',
+            'Validate the file name before saving'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_RESERVED_NAME',
+          message: 'Used system reserved file name',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file name conflicts with a system reserved name (e.g., Windows CON, PRN, AUX, NUL, COM1, etc.).',
+          solution: 'Use a different file name, avoid system reserved names.',
+          steps: [
+            'Check if it is a system reserved name',
+            'Modify the file name',
+            'Add a prefix or suffix to distinguish',
+            'Refer to the operating system reserved name list'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_CASE_SENSITIVITY_CONFLICT',
+          message: 'File name case conflict',
+          severity: 'warning',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'On case-insensitive file systems (e.g., macOS default APFS, Windows NTFS), File.txt and file.txt are treated as the same file.',
+          solution: 'Unify file name case conventions, or migrate to a case-sensitive file system.',
+          steps: [
+            'Unify to lowercase file names',
+            'Use kebab-case or snake_case',
+            'Avoid file names that differ only in case',
+            'Develop on a case-sensitive file system'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_PERMISSION_DENIED_READ',
+          message: 'File read permission denied',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The current user does not have permission to read the file.',
+          solution: 'Modify file permissions, or run as a user with permissions.',
+          steps: [
+            'Check file permissions (ls -l)',
+            'Use chmod to add read permission',
+            'Confirm the file owner is correct',
+            'Run as administrator/root'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_PERMISSION_DENIED_WRITE',
+          message: 'File write permission denied',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The current user does not have permission to write the file.',
+          solution: 'Modify file permissions, or move the file to a writable directory.',
+          steps: [
+            'Check file and directory write permissions',
+            'Use chmod to add write permission',
+            'Move the file to a user-writable directory',
+            'Check if the directory is mounted read-only'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_PERMISSION_DENIED_EXECUTE',
+          message: 'File execute permission denied',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The current user does not have permission to execute the file (common for scripts and binaries).',
+          solution: 'Add execute permission, or check if the file is actually executable.',
+          steps: [
+            'Use chmod +x to add execute permission',
+            'Check the file header to confirm it is an executable format',
+            'Confirm the file is not corrupted',
+            'Check file system mount options (noexec)'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_LOCKED_BY_ANOTHER_PROCESS',
+          message: 'File locked by another process',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'Another process is using the file and holding a lock, the current process cannot access it.',
+          solution: 'Close the process occupying the file, or wait for it to release the lock.',
+          steps: [
+            'Find the process occupying the file (lsof/fuser)',
+            'Terminate the occupying process',
+            'Wait for the file to be released',
+            'Use file lock timeout mechanism'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_QUOTA_EXCEEDED',
+          message: 'User disk quota exceeded',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The current user disk usage exceeds the quota limit set by the administrator.',
+          solution: 'Delete unnecessary files, or contact the administrator to increase the quota.',
+          steps: [
+            'Check current disk usage (du)',
+            'Delete large or old files',
+            'Compress files to save space',
+            'Contact the administrator to increase the quota'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_INODE_EXHAUSTED',
+          message: 'File system inode exhausted',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The number of files created in the file system has reached the inode limit (common with large numbers of small files).',
+          solution: 'Delete unnecessary files, or reformat the file system with more inodes.',
+          steps: [
+            'Check inode usage (df -i)',
+            'Delete large numbers of small files',
+            'Merge small files into archives',
+            'Recreate the file system and increase inode count'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_SYSTEM_FULL',
+          message: 'File system is full',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'Disk partition usage has reached 100%, unable to write new data.',
+          solution: 'Clean up disk space, delete unnecessary files, or expand disk capacity.',
+          steps: [
+            'Check disk usage (df -h)',
+            'Find large files and delete or archive them',
+            'Clean up logs and temporary files',
+            'Expand the disk partition'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_TEMP_DIRECTORY_UNWRITABLE',
+          message: 'Temporary directory not writable',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The system temporary directory (/tmp, C:\Windows\Temp) is not writable or is full.',
+          solution: 'Clean up the temporary directory, or specify another writable temporary directory.',
+          steps: [
+            'Check temporary directory write permissions',
+            'Clean up temporary files',
+            'Set TMPDIR/TEMP environment variable to point to a writable directory',
+            'Restart the application'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_UPLOAD_INTERRUPTED',
+          message: 'File upload interrupted',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The upload was interrupted due to network disconnection, browser closure, or user cancellation.',
+          solution: 'Re-upload the file, or use resume support.',
+          steps: [
+            'Check network connection',
+            'Re-select the file to upload',
+            'If resume is supported, continue the upload',
+            'Monitor upload progress'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_UPLOAD_SIZE_MISMATCH',
+          message: 'Uploaded file size mismatch',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file size declared by the client does not match the actually uploaded size.',
+          solution: 'Re-upload the file, or check if the file was modified during transmission.',
+          steps: [
+            'Re-upload the file',
+            'Check if the file was compressed or modified during transmission',
+            'Verify file integrity',
+            'Check if the proxy modified the request'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_UPLOAD_CHECKSUM_MISMATCH',
+          message: 'Uploaded file checksum mismatch',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'After upload, the server-calculated checksum does not match the client-provided one, indicating data corruption during transmission.',
+          solution: 'Re-upload the file, or check network stability.',
+          steps: [
+            'Re-upload the file',
+            'Check network stability',
+            'Use a stronger checksum algorithm',
+            'If multiple failures occur, check network card or cable'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_UPLOAD_VIRUS_DETECTED',
+          message: 'Uploaded file contains a virus',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The file was detected to contain malicious code by antivirus software after upload.',
+          solution: 'Delete the file, use files from trusted sources, or check if it is a false positive.',
+          steps: [
+            'Immediately delete the infected file',
+            'Cross-validate with other antivirus software',
+            'If it is a false positive, add to whitelist',
+            'Only download files from trusted sources'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_UPLOAD_CONTENT_TYPE_SPOOFED',
+          message: 'Uploaded file content type spoofed',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The uploaded file extension does not match its actual content (e.g., renaming .exe to .jpg).',
+          solution: 'Server-side validation of file magic number, not just extension.',
+          steps: [
+            'Server-side check of file magic number instead of extension',
+            'Reject files with mismatched content types',
+            'Use file type detection libraries',
+            'Log and audit suspicious uploads'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_UPLOAD_PATH_TRAVERSAL',
+          message: 'Upload path traversal attack',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The uploaded file name contains path traversal characters (e.g., ../) attempting to write the file to an unexpected directory.',
+          solution: 'Strictly filter file names, only allow legal characters, store files in an isolated directory.',
+          steps: [
+            'Filter path separators and .. in file names',
+            'Use UUID as the storage file name',
+            'Store uploaded files in an isolated directory',
+            'Prohibit determining storage path based on user input'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_DOWNLOAD_INTERRUPTED',
+          message: 'File download interrupted',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The download was interrupted due to network disconnection, browser closure, or insufficient disk space.',
+          solution: 'Re-download the file, or use resume support.',
+          steps: [
+            'Check network connection',
+            'Confirm there is sufficient disk space',
+            'Re-download',
+            'Use a download tool that supports resume'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_DOWNLOAD_REDIRECT_LOOP',
+          message: 'File download redirect loop',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The download URL has a circular redirect (A → B → A).',
+          solution: 'Check the download link, manually follow the redirect chain.',
+          steps: [
+            'Use curl -v to view the redirect chain',
+            'Check server redirect configuration',
+            'Use a direct download link',
+            'Limit the maximum number of redirects'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_DOWNLOAD_MIME_TYPE_MISMATCH',
+          message: 'Downloaded file MIME type mismatch',
+          severity: 'warning',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The downloaded file Content-Type does not match the file extension.',
+          solution: 'Verify the actual file content, do not rely solely on extension or MIME type.',
+          steps: [
+            'Check the response header Content-Type',
+            'Verify the file magic number',
+            'If the content is normal, ignore the warning',
+            'If it is a malicious file, delete it'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_ARCHIVE_CORRUPTED',
+          message: 'Archive file is corrupted',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The archive file (zip/rar/7z) was corrupted during transmission or the download is incomplete.',
+          solution: 'Re-download the archive file, or attempt to repair it.',
+          steps: [
+            'Re-download the archive file',
+            'Try the repair function of the compression software',
+            'Check the file hash value',
+            'Use a more reliable transmission method'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_ARCHIVE_PASSWORD_REQUIRED',
+          message: 'Archive file requires password',
+          severity: 'info',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The archive file is password protected and cannot be extracted directly.',
+          solution: 'Enter the correct extraction password.',
+          steps: [
+            'Obtain the password for the archive file',
+            'Enter the password in the extraction tool',
+            'If the password is forgotten, try contacting the file provider',
+            'Do not use brute force on others files'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_ARCHIVE_UNSUPPORTED_FORMAT',
+          message: 'Unsupported archive format',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The archive file uses an unsupported format (e.g., rar5, lzma2).',
+          solution: 'Use extraction software that supports the format, or ask the provider to use a standard format.',
+          steps: [
+            'Confirm the archive file format',
+            'Install software that supports the format',
+            'Ask the provider to use zip format',
+            'Use an online conversion tool'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_IMAGE_DECOMPRESSION_BOMB',
+          message: 'Image decompression bomb detected',
+          severity: 'critical',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The uploaded image is a compression bomb (image version of zip bomb), consuming extremely large amounts of memory after decompression.',
+          solution: 'Limit the maximum decompressed image size, reject suspicious files.',
+          steps: [
+            'Limit the maximum image pixel size',
+            'Check if the image compression ratio is abnormal',
+            'Use streaming decoding to avoid one-time loading',
+            'Reject images with abnormally high compression ratios'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_AUDIO_UNSUPPORTED_CODEC',
+          message: 'Unsupported audio codec',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The audio file uses a codec not supported by the browser or application (e.g., FLAC, ALAC).',
+          solution: 'Convert the audio to a supported format (MP3, AAC, OGG, WAV).',
+          steps: [
+            'Confirm the encoding format of the audio file',
+            'Use FFmpeg to convert to MP3/AAC',
+            'Check the browser supported audio format list',
+            'Provide multiple formats for user selection'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_VIDEO_UNSUPPORTED_CODEC',
+          message: 'Unsupported video codec',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The video file uses a codec not supported by the browser or application (e.g., H.265/HEVC, AV1).',
+          solution: 'Convert the video to a supported format (H.264, VP9).',
+          steps: [
+            'Confirm the encoding format of the video file',
+            'Use FFmpeg to convert to H.264',
+            'Check the browser supported video format list',
+            'Provide multiple formats or transcoding services'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_DOCUMENT_MALFORMED',
+          message: 'Document format corrupted',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The document file (PDF, DOCX, etc.) structure is corrupted and cannot be properly parsed.',
+          solution: 'Try opening with other software, or restore from backup.',
+          steps: [
+            'Try opening with different software',
+            'Use document repair tools',
+            'Restore from backup',
+            'Re-generate the document'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },
+        {
+          code: 'FILE_SCAN_OCR_FAILED',
+          message: 'Scanned document OCR recognition failed',
+          severity: 'error',
+          category: 'C. Files & Input',
+          location: 'Page: Any tool involving file operations → Area: File upload/download/processing',
+          cause: 'The scanned image quality is poor, text is blurry, or the language is not supported, causing OCR to fail.',
+          solution: 'Increase scan resolution, ensure text is clear, or use an OCR engine that supports the language.',
+          steps: [
+            'Increase scan resolution (at least 300 DPI)',
+            'Ensure text is clear and not blurry',
+            'Check if OCR supports the language',
+            'Preprocess the image (denoise, binarize)'
+          ],
+          prevention: 'Validate file format and size, use safe file name handling, regularly clean temporary files.',
+        },],
+    },
+    {
+      id: 'D',
+      name: 'D. Model & Generation',
+      description: 'Model loading failure, image generation errors, content interception',
+      errors: [
+        {
+          code: 'IMG_PROMPT_TOO_LONG',
+          message: 'Image generation prompt exceeds maximum length',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer / Face Maker',
+          cause: 'The prompt text entered is too long, exceeding the backend model\'s limit.',
+          solution: 'Shorten the prompt.',
+          steps: [
+            'Delete secondary descriptive vocabulary',
+            'Retain core subject and style description',
+            'Retry',
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND'],
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: 'Model not found or unavailable',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer / Paper2Gal / Prompt Suite / LLM Hub',
+          cause: 'Model is not configured on the backend, has been removed, or the Key does not have access permission.',
+          solution: 'Contact the backend administrator or replace the Key.',
+          steps: [
+            'View the specific model information in the error details',
+            'Contact the backend administrator to confirm model status',
+            'Or replace with an API Key that has permission',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED', '403_FORBIDDEN'],
+          prevention: 'Ensure the model configured on the backend is available and the current Key has permission to access it; regularly verify Key permissions.',
+        },
+        {
+          code: 'PROMPT_BLOCKED',
+          message: 'Content policy violation or sensitive word interception',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Paper2Gal / Prompt Suite / Style Transfer',
+          cause: 'Content in the prompt was intercepted by the safety filter.',
+          solution: 'Modify the prompt, remove sensitive vocabulary.',
+          steps: [
+            'Check the error details for the specific intercepted content',
+            'Modify the prompt, replacing or removing sensitive vocabulary',
+            'Retry',
+          ],
+          relatedCodes: ['403_FORBIDDEN', 'P2G_WORKFLOW_ERROR'],
+          prevention: 'Avoid using sensitive vocabulary when modifying prompts; test with the default prompt first, then customize after it passes.',
+        },
+        {
+          code: 'PROMPT_TOO_LONG',
+          message: 'Prompt exceeds maximum length',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer / Face Maker',
+          cause: 'The prompt text entered is too long, exceeding the backend model\'s limit.',
+          solution: 'Shorten the prompt.',
+          steps: [
+            'Delete secondary descriptive vocabulary',
+            'Retain core subject and style description',
+            'Retry',
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND'],
+        },
+        {
+          code: 'STYLE_TRANSFER_REQUEST_FAILED',
+          message: 'Style transfer request failed',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer',
+          cause: 'Backend returns an error.',
+          solution: 'Check error details and retry.',
+          steps: [
+            'View specific error information',
+            'Check API Key and backend status',
+            'Modify prompt and retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED'],
+        },
+        {
+          code: 'TTS_AUDIO_GENERATION_FAILED',
+          message: 'TTS audio generation failed',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: TTS Export',
+          cause: 'Backend TTS service exception.',
+          solution: 'Check backend status, reference audio, and text content.',
+          steps: [
+            'Check specific error information',
+            'Confirm reference audio format is correct',
+            'Simplify text',
+            'Switch voice preset',
+            'Retry',
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'API_TIMEOUT'],
+          prevention: 'Simplify text and remove special symbols; confirm reference audio format is correct; select known available voice presets.',
+        },
+        {
+          code: 'TTS_REFERENCE_INVALID',
+          message: 'Reference audio is invalid',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: TTS Export',
+          cause: 'Reference audio format is not supported or file is too large.',
+          solution: 'Replace with a valid audio file.',
+          steps: [
+            'Confirm format is WAV/MP3/OGG',
+            'Confirm file size is within limit',
+            'Re-upload',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'FILE_TOO_LARGE'],
+        },
+      {
+        code: 'RENDER_DOM_TOO_DEEP',
+        message: 'DOM tree nesting too deep',
+        severity: 'warning',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Component nesting levels too many, causing rendering performance degradation.',
+        solution: 'Refactor components to reduce nesting levels.',
+        steps: [
+          'Use React DevTools to inspect component hierarchy',
+          'Extract deep nesting into independent components',
+          'Use virtual lists for rendering large numbers of elements',
+          'Reduce unnecessary wrapper components',
+        ],
+        prevention: 'Keep component hierarchy under 10 levels, use flattened structure.',
+      },
+      {
+        code: 'RENDER_STYLE_RECALCULATION_STORM',
+        message: 'Style recalculation storm',
+        severity: 'warning',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Frequent style modifications causing browser to constantly reflow and repaint.',
+        solution: 'Batch style modifications, use CSS variables or transform.',
+        steps: [
+          'Use DevTools Performance panel for analysis',
+          'Hide element before batch DOM modifications',
+          'Use CSS transform instead of position properties',
+          'Throttle style updates with requestAnimationFrame',
+        ],
+        prevention: 'Avoid frequently modifying styles in loops, use CSS variables for unified control.',
+      },
+      {
+        code: 'RENDER_IFRAME_SANDBOX_VIOLATION',
+        message: 'iframe sandbox policy violation',
+        severity: 'error',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'iframe sandbox attributes blocked necessary operations like script execution or form submission.',
+        solution: 'Adjust sandbox attributes to allow necessary permissions.',
+        steps: [
+          'Check iframe sandbox attributes',
+          'Add allow-scripts or allow-forms',
+          'Confirm parent and child pages are same-origin',
+          'Use postMessage for cross-domain communication',
+        ],
+        prevention: 'Design with clear iframe permission requirements, minimize sandbox restrictions.',
+      },
+      {
+        code: 'RENDER_SHADOW_DOM_SLOT_MISMATCH',
+        message: 'Shadow DOM slot mismatch',
+        severity: 'warning',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Content inserted into Shadow DOM does not match defined slot names.',
+        solution: 'Check slot names, ensure content corresponds to slots.',
+        steps: [
+          'Check custom element slot definitions',
+          'Confirm slot attribute of inserted content',
+          'Use default slot as fallback',
+          'View Shadow DOM tree in browser DevTools',
+        ],
+        prevention: 'Clearly define all slot names and purposes in documentation.',
+      },
+      {
+        code: 'RENDER_WEB_COMPONENT_UNDEFINED',
+        message: 'Custom element undefined',
+        severity: 'error',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Used tag for unregistered custom element.',
+        solution: 'Import and register corresponding custom element.',
+        steps: [
+          'Confirm custom element JS file is loaded',
+          'Check customElements.define call',
+          'Confirm element tag name spelling is correct',
+          'Wait for script to finish loading before use',
+        ],
+        prevention: 'Ensure custom element definition is registered before use.',
+      },
+      {
+        code: 'RENDER_SVG_VIEWBOX_INVALID',
+        message: 'SVG viewBox attribute invalid',
+        severity: 'warning',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'SVG viewBox attribute format incorrect or values unreasonable.',
+        solution: 'Fix viewBox attribute to correct format.',
+        steps: [
+          'Check viewBox="x y width height" format',
+          'Confirm all values are valid numbers',
+          'Re-export SVG from design tool',
+          'Manually fix viewBox values',
+        ],
+        prevention: 'Export standard format SVG from design tools.',
+      },
+      {
+        code: 'RENDER_CANVAS_CONTEXT_LOST',
+        message: 'Canvas context lost',
+        severity: 'error',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Browser lost Canvas context due to insufficient memory or GPU reset.',
+        solution: 'Listen for contextlost event and reinitialize Canvas.',
+        steps: [
+          'Add canvas.addEventListener("webglcontextlost")',
+          'Save current state in event handler',
+          'Add webglcontextrestored listener',
+          'Redraw content after restoration',
+        ],
+        prevention: 'Avoid creating too many Canvases simultaneously, release unused contexts promptly.',
+      },
+      {
+        code: 'RENDER_CSS_GRID_OVERFLOW',
+        message: 'CSS Grid content overflow',
+        severity: 'warning',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Grid cell content exceeds defined dimensions.',
+        solution: 'Adjust grid template, or use minmax() and auto sizing.',
+        steps: [
+          'Check grid-template-columns/rows definitions',
+          'Use minmax(200px, 1fr) instead of fixed sizes',
+          'Add overflow: hidden or scroll',
+          'Adjust content size to fit grid',
+        ],
+        prevention: 'Use responsive grid definitions, avoid fixed dimensions.',
+      },
+      {
+        code: 'RENDER_ACCESSIBILITY_TREE_BROKEN',
+        message: 'Accessibility tree structure broken',
+        severity: 'warning',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'DOM structure prevents screen readers from correctly parsing page.',
+        solution: 'Fix semantic HTML structure, add correct ARIA attributes.',
+        steps: [
+          'Use axe DevTools to check accessibility',
+          'Ensure heading hierarchy is continuous',
+          'Add correct role to interactive elements',
+          'Fix label and input associations',
+        ],
+        prevention: 'Use accessibility checking tools during development, follow WCAG standards.',
+      },
+      {
+        code: 'RENDER_PRINT_STYLESHEET_MISSING',
+        message: 'Print stylesheet missing',
+        severity: 'info',
+        category: 'D. Model & Generation',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Page lacks @media print styles, causing poor print output.',
+        solution: 'Add print styles, hide unnecessary elements.',
+        steps: [
+          'Add @media print style rules',
+          'Hide navigation bars, buttons and other interactive elements',
+          'Adjust font sizes and colors for print',
+          'Use print preview to check results',
+        ],
+        prevention: 'Consider print scenarios during design, add print styles.',
+      },
+      
+        {
+          code: 'MODEL_LOAD_TIMEOUT',
+          message: 'Model loading timed out',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: model selection / generation',
+          cause: 'The AI model took too long to load from the backend, possibly due to large model size or slow network.',
+          solution: 'Retry with a different model or check backend connectivity.',
+          steps: [
+            'Select a smaller or lighter model',
+            'Check network connection stability',
+            'Refresh the page and retry',
+            'Contact backend admin if issue persists'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'API_TIMEOUT'],
+          prevention: 'Use models with known fast load times; ensure stable network before generation.',
+        },
+        {
+          code: 'MODEL_INFERENCE_FAILED',
+          message: 'Model inference failed during generation',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer / LLM Hub',
+          cause: 'The model encountered an internal error during inference, such as NaN values or layer mismatch.',
+          solution: 'Switch to a different model version or restart the backend service.',
+          steps: [
+            'Check backend error logs for model stack trace',
+            'Switch to an alternative model',
+            'Restart the backend inference service',
+            'Retry generation with simplified input'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'GPU_OUT_OF_MEMORY'],
+          prevention: 'Keep models updated; monitor backend inference health regularly.',
+        },
+        {
+          code: 'GPU_OUT_OF_MEMORY',
+          message: 'GPU ran out of memory during inference',
+          severity: 'critical',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: generation panel',
+          cause: 'The model inference request exceeded available GPU VRAM, especially with large images or batch sizes.',
+          solution: 'Reduce image size, batch size, or switch to CPU inference.',
+          steps: [
+            'Reduce image resolution to 512x512 or lower',
+            'Set batch size to 1',
+            'Enable CPU offload if backend supports it',
+            'Close other GPU-intensive applications'
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Monitor GPU memory usage; use smaller resolutions for tests.',
+        },
+        {
+          code: 'TOKEN_LIMIT_EXCEEDED',
+          message: 'Input tokens exceed model maximum context length',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: prompt editor',
+          cause: 'The combined system prompt and user message exceed the model\'s maximum token limit.',
+          solution: 'Shorten the prompt or increase Max Tokens within model limits.',
+          steps: [
+            'Count tokens using a tokenizer tool',
+            'Shorten system prompt to essential instructions',
+            'Split long input into multiple messages',
+            'Select a model with larger context window'
+          ],
+          relatedCodes: ['PROMPT_TOO_LONG', 'LLM_MODEL_UNAVAILABLE'],
+          prevention: 'Estimate token count before sending; use models with adequate context windows.',
+        },
+        {
+          code: 'FINETUNE_DATA_INVALID',
+          message: 'Fine-tuning dataset format is invalid',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: fine-tune panel',
+          cause: 'The uploaded JSONL file for fine-tuning does not conform to the required schema.',
+          solution: 'Validate and correct the dataset format before uploading.',
+          steps: [
+            'Open the JSONL file in a text editor',
+            'Ensure each line has "prompt" and "completion" fields',
+            'Validate JSON syntax on each line',
+            'Re-upload the corrected file'
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON', '400_BAD_REQUEST'],
+          prevention: 'Use the provided dataset template; validate JSONL before upload.',
+        },
+        {
+          code: 'FINETUNE_JOB_FAILED',
+          message: 'Fine-tuning job failed on backend',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: fine-tune panel',
+          cause: 'The fine-tuning process crashed due to insufficient resources, invalid hyperparameters, or corrupted data.',
+          solution: 'Review job logs, fix parameters, and resubmit.',
+          steps: [
+            'Open job logs on the backend dashboard',
+            'Check for out-of-memory or data errors',
+            'Adjust learning rate and batch size',
+            'Resubmit with corrected configuration'
+          ],
+          relatedCodes: ['FINETUNE_DATA_INVALID', 'GPU_OUT_OF_MEMORY'],
+          prevention: 'Start with small datasets and conservative hyperparameters.',
+        },
+        {
+          code: 'SAMPLING_TEMP_INVALID',
+          message: 'Sampling temperature parameter out of range',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: parameters panel',
+          cause: 'Temperature value is set outside the valid range (typically 0 to 2).',
+          solution: 'Adjust temperature to a value within the supported range.',
+          steps: [
+            'Set Temperature to 0.7 as a safe default',
+            'Ensure value is between 0.0 and 2.0',
+            'Save configuration and retry'
+          ],
+          relatedCodes: ['MODEL_INFERENCE_FAILED'],
+          prevention: 'Use UI sliders with clamped values to prevent out-of-range inputs.',
+        },
+        {
+          code: 'TOP_P_INVALID',
+          message: 'Top-p (nucleus sampling) parameter invalid',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: parameters panel',
+          cause: 'Top-p value is outside the valid 0 to 1 range.',
+          solution: 'Set top-p to a valid value between 0 and 1.',
+          steps: [
+            'Change Top-p to 1.0 for full sampling',
+            'Ensure value is between 0.0 and 1.0',
+            'Retry the request'
+          ],
+          relatedCodes: ['SAMPLING_TEMP_INVALID'],
+          prevention: 'Validate parameter ranges client-side before sending requests.',
+        },
+        {
+          code: 'MAX_TOKENS_TOO_HIGH',
+          message: 'Max Tokens exceeds model capacity',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: parameters panel',
+          cause: 'The requested Max Tokens is larger than the model\'s maximum output capacity.',
+          solution: 'Reduce Max Tokens to within the model\'s supported limit.',
+          steps: [
+            'Check model documentation for max output tokens',
+            'Set Max Tokens to half the context length',
+            'Retry generation'
+          ],
+          relatedCodes: ['TOKEN_LIMIT_EXCEEDED', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Display model-specific token limits in the UI.',
+        },
+        {
+          code: 'MODEL_QUANTIZATION_ERROR',
+          message: 'Quantized model failed to load',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: model dropdown',
+          cause: 'The quantized model file is incompatible with the current inference engine or corrupted.',
+          solution: 'Re-download or regenerate the quantized model weights.',
+          steps: [
+            'Verify quantization format matches backend (GGUF, ONNX, etc.)',
+            'Re-download model weights from official source',
+            'Try unquantized version if available',
+            'Update inference engine to latest version'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'MODEL_LOAD_TIMEOUT'],
+          prevention: 'Use officially supported quantization formats and versions.',
+        },
+        {
+          code: 'LORA_LOAD_FAILED',
+          message: 'LoRA adapter failed to load',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The LoRA weights file is incompatible with the base model or corrupted.',
+          solution: 'Use a LoRA compatible with the selected base model.',
+          steps: [
+            'Confirm LoRA is trained for the selected base model',
+            'Check LoRA file size and format',
+            'Re-download LoRA if corrupted',
+            'Try generation without LoRA'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Only use LoRAs explicitly compatible with the base model version.',
+        },
+        {
+          code: 'CONTROLNET_INCOMPATIBLE',
+          message: 'ControlNet model incompatible with base model',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer',
+          cause: 'The ControlNet architecture does not match the base diffusion model version.',
+          solution: 'Select a ControlNet variant built for the current base model.',
+          steps: [
+            'Check ControlNet model card for compatibility',
+            'Download matching ControlNet version',
+            'Reload the backend with correct models',
+            'Retry style transfer'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Maintain a compatibility matrix for ControlNet and base models.',
+        },
+        {
+          code: 'VAE_DECODE_ERROR',
+          message: 'VAE decode produced corrupted output',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The VAE failed to decode latent representations into a valid image.',
+          solution: 'Switch to a different VAE or regenerate with new seed.',
+          steps: [
+            'Try a different VAE model',
+            'Change random seed and retry',
+            'Check GPU memory and temperature',
+            'Restart backend inference service'
+          ],
+          relatedCodes: ['GPU_OUT_OF_MEMORY', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Use VAEs validated with the base model; monitor GPU health.',
+        },
+        {
+          code: 'SCHEDULER_STEP_ERROR',
+          message: 'Diffusion scheduler step computation failed',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The noise scheduler encountered a numerical error during denoising steps.',
+          solution: 'Change scheduler type or reduce inference steps.',
+          steps: [
+            'Switch from DPM++ to Euler scheduler',
+            'Reduce number of inference steps to 20',
+            'Check for NaN values in model weights',
+            'Retry with a different seed'
+          ],
+          relatedCodes: ['MODEL_INFERENCE_FAILED', 'GPU_OUT_OF_MEMORY'],
+          prevention: 'Use stable schedulers; avoid extreme step counts.',
+        },
+        {
+          code: 'NEGATIVE_PROMPT_TOO_LONG',
+          message: 'Negative prompt exceeds token limit',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The negative prompt text is too long and was truncated, reducing its effectiveness.',
+          solution: 'Shorten the negative prompt to essential terms only.',
+          steps: [
+            'Remove redundant negative terms',
+            'Keep only the most important exclusions',
+            'Count tokens and verify under limit',
+            'Retry generation'
+          ],
+          relatedCodes: ['PROMPT_TOO_LONG', 'TOKEN_LIMIT_EXCEEDED'],
+          prevention: 'Keep negative prompts concise; avoid copy-pasting long lists.',
+        },
+        {
+          code: 'CLIP_TEXT_ENCODE_FAILED',
+          message: 'CLIP text encoder failed to process prompt',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The CLIP model encountered an error encoding the prompt, possibly due to special characters.',
+          solution: 'Remove special characters and retry with plain text.',
+          steps: [
+            'Remove emojis and unusual Unicode characters',
+            'Use standard ASCII punctuation only',
+            'Simplify prompt grammar',
+            'Retry encoding'
+          ],
+          relatedCodes: ['PROMPT_BLOCKED', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Sanitize prompts before submission; reject unusual Unicode.',
+        },
+        {
+          code: 'IMAGE_SEED_INVALID',
+          message: 'Random seed value is invalid',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The seed value is outside the valid integer range or contains decimals.',
+          solution: 'Enter a valid non-negative integer seed.',
+          steps: [
+            'Set seed to -1 for random',
+            'Or enter an integer between 0 and 2147483647',
+            'Remove decimal points',
+            'Retry generation'
+          ],
+          relatedCodes: ['MODEL_INFERENCE_FAILED'],
+          prevention: 'Use integer input fields with validation for seed values.',
+        },
+        {
+          code: 'BATCH_SIZE_UNSUPPORTED',
+          message: 'Batch size not supported by model',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The requested batch size exceeds what the backend can process with current memory.',
+          solution: 'Reduce batch size to 1 and retry.',
+          steps: [
+            'Set batch size to 1',
+            'Close other generation tasks',
+            'Check backend memory usage',
+            'Retry with smaller batch'
+          ],
+          relatedCodes: ['GPU_OUT_OF_MEMORY', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Limit batch size in UI based on backend capacity.',
+        },
+        {
+          code: 'CHECKPOINT_MERGE_FAILED',
+          message: 'Model checkpoint merge failed',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: model management',
+          cause: 'Merging two model checkpoints produced incompatible weights or shape mismatches.',
+          solution: 'Ensure checkpoints have identical architectures before merging.',
+          steps: [
+            'Verify both checkpoints use same base architecture',
+            'Check layer shapes match exactly',
+            'Use merge tools that validate compatibility',
+            'Fallback to single checkpoint if merge fails'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Only merge checkpoints known to share the same architecture.',
+        },
+        {
+          code: 'DIFFUSION_PIPELINE_INIT_FAILED',
+          message: 'Diffusion pipeline initialization failed',
+          severity: 'critical',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The diffusion pipeline could not initialize due to missing components or version mismatch.',
+          solution: 'Reinstall pipeline dependencies and verify model cache.',
+          steps: [
+            'Clear the model cache directory',
+            'Reinstall diffusers/transformers libraries',
+            'Verify Python environment versions',
+            'Restart backend service'
+          ],
+          relatedCodes: ['MODEL_LOAD_TIMEOUT', 'MODEL_NOT_FOUND'],
+          prevention: 'Pin dependency versions; use containerized deployments.',
+        },
+        {
+          code: 'TEXT_ENCODER_OOM',
+          message: 'Text encoder ran out of memory',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: generation panel',
+          cause: 'The text encoding phase exceeded available memory due to very long input.',
+          solution: 'Truncate input or enable gradient checkpointing on backend.',
+          steps: [
+            'Shorten the input prompt',
+            'Enable memory-efficient attention if available',
+            'Switch to a smaller text encoder model',
+            'Retry with chunked input'
+          ],
+          relatedCodes: ['TOKEN_LIMIT_EXCEEDED', 'GPU_OUT_OF_MEMORY'],
+          prevention: 'Set input length limits; use memory-efficient attention.',
+        },
+        {
+          code: 'UNET_INFERENCE_ERROR',
+          message: 'U-Net inference returned invalid latents',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The U-Net model produced NaN or Inf values during denoising.',
+          solution: 'Adjust guidance scale or use a different model.',
+          steps: [
+            'Reduce CFG scale to 7 or lower',
+            'Switch to a different checkpoint',
+            'Check for mixed precision conflicts',
+            'Retry with float32 precision'
+          ],
+          relatedCodes: ['MODEL_INFERENCE_FAILED', 'GPU_OUT_OF_MEMORY'],
+          prevention: 'Use stable guidance scales; validate model weights integrity.',
+        },
+        {
+          code: 'MODEL_CACHED_CORRUPTED',
+          message: 'Cached model weights are corrupted',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: model loading',
+          cause: 'Previously downloaded model weights were incomplete or corrupted during download.',
+          solution: 'Clear model cache and re-download.',
+          steps: [
+            'Locate backend model cache directory',
+            'Delete corrupted model folder',
+            'Trigger re-download from official source',
+            'Verify checksum after download'
+          ],
+          relatedCodes: ['MODEL_LOAD_TIMEOUT', 'MODEL_NOT_FOUND'],
+          prevention: 'Verify model checksums after download; use atomic downloads.',
+        },
+        {
+          code: 'PRECISION_MISMATCH',
+          message: 'Model precision mismatch with backend',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: model loading',
+          cause: 'The model was saved in fp16 but backend expects fp32, or vice versa.',
+          solution: 'Convert model precision or configure backend to match.',
+          steps: [
+            'Check model precision metadata',
+            'Convert weights using conversion script',
+            'Or set backend precision flag to match',
+            'Reload model'
+          ],
+          relatedCodes: ['MODEL_INFERENCE_FAILED', 'MODEL_LOAD_TIMEOUT'],
+          prevention: 'Standardize on fp16 with fp32 fallback; document precision requirements.',
+        },
+        {
+          code: 'INPAINT_MASK_INVALID',
+          message: 'Inpainting mask format is invalid',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer → Area: mask editor',
+          cause: 'The uploaded mask image does not match the source dimensions or has invalid channel format.',
+          solution: 'Use a mask with exact same dimensions as source image.',
+          steps: [
+            'Verify mask width and height match source',
+            'Convert mask to single-channel grayscale',
+            'Upload PNG mask with transparency or black/white',
+            'Retry inpainting'
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Auto-resize masks to source dimensions; validate format on upload.',
+        },
+        {
+          code: 'UPSCALE_MODEL_MISSING',
+          message: 'Upscaling model not found',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Image Format Converter',
+          cause: 'The Real-ESRGAN or similar upscaling model is missing from backend.',
+          solution: 'Download the upscaling model or disable upscaling.',
+          steps: [
+            'Check backend model directory for upscaler weights',
+            'Download Real-ESRGAN model from official release',
+            'Place in correct models folder',
+            'Restart backend'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'MODEL_LOAD_TIMEOUT'],
+          prevention: 'Bundle common upscaling models with backend deployment.',
+        },
+        {
+          code: 'TTS_VOICE_CLONE_FAILED',
+          message: 'Voice cloning reference audio rejected',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: TTS Export → Area: reference upload',
+          cause: 'The reference audio contains too much noise, multiple speakers, or is too short.',
+          solution: 'Use clean, single-speaker audio of at least 10 seconds.',
+          steps: [
+            'Record in quiet environment',
+            'Ensure only one speaker is present',
+            'Trim audio to 10-30 seconds',
+            'Re-upload clean audio'
+          ],
+          relatedCodes: ['TTS_REFERENCE_INVALID', 'TTS_AUDIO_GENERATION_FAILED'],
+          prevention: 'Provide audio recording guidelines in the UI.',
+        },
+        {
+          code: 'EMBEDDING_LOAD_FAILED',
+          message: 'Textual inversion embedding failed to load',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The textual inversion embedding file is incompatible with the current model or corrupted.',
+          solution: 'Use embeddings trained for the exact base model version.',
+          steps: [
+            'Check embedding model version compatibility',
+            'Re-download embedding if corrupted',
+            'Try generation without the embedding',
+            'Verify file extension (.pt or .safetensors)'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Maintain embedding compatibility lists; validate on upload.',
+        },
+        {
+          code: 'HYPERNETWORK_INCOMPATIBLE',
+          message: 'Hypernetwork incompatible with model',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The hypernetwork was trained on a different base model architecture.',
+          solution: 'Disable hypernetwork or switch to a compatible one.',
+          steps: [
+            'Check hypernetwork training base model',
+            'Disable hypernetwork in settings',
+            'Find hypernetwork for current model',
+            'Retry generation'
+          ],
+          relatedCodes: ['MODEL_INFERENCE_FAILED', 'CHECKPOINT_MERGE_FAILED'],
+          prevention: 'Tag hypernetworks with compatible base model versions.',
+        },
+        {
+          code: 'DYNAMIC_PROMPT_PARSE_ERROR',
+          message: 'Dynamic prompt syntax error',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Prompt Suite → Area: prompt editor',
+          cause: 'The dynamic prompt syntax (e.g., {red|blue}) is malformed or nested incorrectly.',
+          solution: 'Fix dynamic prompt syntax according to documentation.',
+          steps: [
+            'Check brace matching in prompt',
+            'Avoid nesting dynamic syntax too deeply',
+            'Use preview mode to test variants',
+            'Simplify syntax and retry'
+          ],
+          relatedCodes: ['PROMPT_TOO_LONG', 'CLIP_TEXT_ENCODE_FAILED'],
+          prevention: 'Provide syntax highlighting and validation for dynamic prompts.',
+        },
+        {
+          code: 'MODEL_BLACKLISTED',
+          message: 'Selected model is blacklisted',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: model dropdown',
+          cause: 'The selected model has been removed from the allowlist due to policy or quality issues.',
+          solution: 'Select a different approved model.',
+          steps: [
+            'Check model status in admin panel',
+            'Select an alternative model from the list',
+            'Contact admin if model should be reinstated'
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND', '403_FORBIDDEN'],
+          prevention: 'Maintain clear model policies; notify users of blacklisted models.',
+        },
+        {
+          code: 'INFERENCE_QUEUE_FULL',
+          message: 'Inference queue is full',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: generation button',
+          cause: 'Too many concurrent inference requests; the backend queue has reached capacity.',
+          solution: 'Wait and retry, or reduce concurrent generation requests.',
+          steps: [
+            'Wait 30 seconds and retry',
+            'Cancel non-essential generation tasks',
+            'Contact admin to scale backend workers',
+            'Retry during off-peak hours'
+          ],
+          relatedCodes: ['429_TOO_MANY_REQUESTS', 'API_TIMEOUT'],
+          prevention: 'Implement client-side rate limiting; scale backend based on demand.',
+        },
+        {
+          code: 'TOKENIZER_MISMATCH',
+          message: 'Tokenizer version mismatch with model',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: generation panel',
+          cause: 'The tokenizer vocab file does not match the model weights version.',
+          solution: 'Update tokenizer files to match model version.',
+          steps: [
+            'Check tokenizer_config.json version',
+            'Download matching tokenizer from model repo',
+            'Clear cache and reload',
+            'Restart backend service'
+          ],
+          relatedCodes: ['MODEL_INFERENCE_FAILED', 'MODEL_LOAD_TIMEOUT'],
+          prevention: 'Always deploy tokenizer and model from the same model release.',
+        },
+        {
+          code: 'ADAPTER_CONFLICT',
+          message: 'Multiple adapters conflict with each other',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: model settings',
+          cause: 'Two or more LoRA/adapter weights interfere, producing garbage output.',
+          solution: 'Use only one adapter at a time or merge adapters beforehand.',
+          steps: [
+            'Disable all but one adapter',
+            'Test each adapter individually',
+            'Merge adapters offline if combination is needed',
+            'Retry with single adapter'
+          ],
+          relatedCodes: ['LORA_LOAD_FAILED', 'MODEL_INFERENCE_FAILED'],
+          prevention: 'Warn users when multiple adapters are selected; recommend merging.',
+        },
+        {
+          code: 'MODEL_DOWNLOAD_INTERRUPTED',
+          message: 'Model download was interrupted',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Any tool → Area: model loading',
+          cause: 'Network interruption caused incomplete model download.',
+          solution: 'Resume or restart the model download.',
+          steps: [
+            'Check network connection',
+            'Delete partial download file',
+            'Restart download from official source',
+            'Verify file integrity after completion'
+          ],
+          relatedCodes: ['MODEL_CACHED_CORRUPTED', 'MODEL_LOAD_TIMEOUT'],
+          prevention: 'Use resumable downloads; verify checksums after transfer.',
+        },],
+    },
+    {
+      id: 'E',
+      name: 'E. Workflow & Conversion',
+      description: 'Workflow step failure, conversion errors, progress exceptions',
+      errors: [
+        {
+          code: 'CONVERT_ERROR',
+          message: 'Conversion shows "CONVERT_ERROR"',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter → Area: bottom conversion result area',
+          cause: 'An exception occurred during image conversion. Possible causes: source image corrupted, unsupported Canvas 2D filter, or insufficient memory.',
+          solution: 'Retry with a different image or browser.',
+          steps: [
+            'Confirm the source image is not corrupted and displays normally',
+            'Try refreshing the page and re-uploading',
+            'Check if the image is corrupted',
+            'Try turning off filters that the browser does not support',
+            'Try using a different browser',
+          ],
+          relatedCodes: ['FILE_CORRUPTED', 'DEVICE_MEMORY_LOW'],
+        },
+        {
+          code: 'CONVERT_FILTER_UNSUPPORTED',
+          message: 'Applying certain filters causes exceptions (all on/all off)',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter → Area: filter preview / conversion result area',
+          cause: 'The current browser\'s Canvas 2D filter does not support certain values. For example, some older versions of Safari have known issues with filter support.',
+          solution: 'Turn off unsupported filters or switch browsers.',
+          steps: [
+            'Reset filter values to defaults (brightness/contrast/saturation=100, blur/hue rotation/grayscale=0)',
+            'Adjust filters one by one to find the one causing the exception',
+            'Turn off the problematic filter',
+            'Try Chrome/Firefox/Edge',
+          ],
+          relatedCodes: ['CONVERT_ERROR'],
+          prevention: 'For filter adjustments, test incrementally; use mainstream browsers (Chrome/Firefox/Edge).',
+        },
+        {
+          code: 'P2G_WORKFLOW_ERROR',
+          message: 'Paper2Gal workflow error',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'A step in the workflow failed to execute.',
+          solution: 'Troubleshoot according to error details and retry.',
+          steps: [
+            'View human-readable error info, possible causes, and fix hints',
+            'Check input image',
+            'Check network',
+            'Modify prompt',
+            'Retry or redo individual steps',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED', 'WORKFLOW_STEP_FAILED'],
+          prevention: 'Before starting the workflow, confirm the image is valid, network is stable, prompt contains no sensitive vocabulary, and API Key is valid.',
+        },
+        {
+          code: 'REDO_CONFLICT',
+          message: 'Redo conflict',
+          severity: 'info',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'The current step or another step in its conflict group is already being redone.',
+          solution: 'Wait for the current redo to complete.',
+          steps: [
+            'Observe the redo progress message',
+            'Wait for the step status to change to Success or Failed',
+            'If stuck for a long time, refresh the page and retry',
+          ],
+          relatedCodes: ['WORKFLOW_STEP_FAILED'],
+          prevention: 'Do not initiate multiple redo requests for steps within the same conflict group simultaneously; wait for one to complete before initiating the next.',
+        },
+        {
+          code: 'WORKFLOW_CANCELLED',
+          message: 'Workflow was cancelled',
+          severity: 'info',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'User cancelled or backend cancelled due to resource constraints.',
+          solution: 'Restart the workflow.',
+          steps: [
+            'Confirm whether you cancelled it yourself',
+            'If not, it may be due to insufficient backend resources',
+            'Wait a few minutes and restart',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR'],
+        },
+        {
+          code: 'WORKFLOW_NOT_FOUND',
+          message: 'Workflow record no longer exists',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'Backend storage was cleared or the workflow record expired.',
+          solution: 'Start a new workflow.',
+          steps: [
+            'The old workflow cannot be recovered',
+            'Start a new workflow with the current image',
+            'Configure persistent storage to prevent recurrence',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', 'BACKEND_UNAVAILABLE'],
+          prevention: 'When using serverless platforms like Zeabur, be sure to configure persistent storage mounts; after generating important assets, promptly click "Download All" to back up to local.',
+        },
+        {
+          code: 'WORKFLOW_STEP_FAILED',
+          message: 'A workflow step failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'An error occurred during execution of a specific step.',
+          solution: 'View step error details and retry individually.',
+          steps: [
+            'Click the failed step card',
+            'View error details',
+            'Troubleshoot as prompted',
+            'Click "Retry Step"',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', 'API_TIMEOUT', 'PROMPT_BLOCKED'],
+          prevention: 'After a step fails, view error details and retry after modifying the corresponding prompt or checking the network as prompted.',
+        },
+      {
+        code: 'PERFORMANCE_MAIN_THREAD_BLOCKED',
+        message: 'Main thread blocked for extended time',
+        severity: 'error',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'JavaScript execution too long, causing page freeze or unresponsiveness.',
+        solution: 'Split long tasks into smaller tasks, or use Web Worker.',
+        steps: [
+          'Use Performance panel to locate long tasks',
+          'Split calculations into multiple setTimeout/setImmediate',
+          'Move complex calculations to Web Worker',
+          'Use requestIdleCallback for low-priority tasks',
+        ],
+        prevention: 'Avoid synchronous tasks over 50ms on main thread.',
+      },
+      {
+        code: 'PERFORMANCE_LAYOUT_THRASHING',
+        message: 'Layout thrashing',
+        severity: 'warning',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Alternating reads and writes of DOM geometric properties causing browser to repeatedly reflow.',
+        solution: 'Batch reads and writes, use libraries like FastDOM.',
+        steps: [
+          'Use FastDOM or similar library for batched read/write',
+          'Read all needed geometric properties first',
+          'Then batch write all modifications',
+          'Use CSS transform instead of position modifications',
+        ],
+        prevention: 'Follow read-before-write principle, avoid alternating DOM reads/writes in loops.',
+      },
+      {
+        code: 'PERFORMANCE_MEMORY_LEAK_DETECTED',
+        message: 'Memory leak detected',
+        severity: 'error',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Unreleased references in application causing memory to continuously grow.',
+        solution: 'Use memory analysis tools to locate leak source, clean unused references.',
+        steps: [
+          'Take heap snapshot using Memory panel',
+          'Compare memory before and after operations',
+          'Check uncleaned event listeners',
+          'Check large object references held in closures',
+        ],
+        prevention: 'Clean all timers, listeners and references when component unmounts.',
+      },
+      {
+        code: 'PERFORMANCE_FORCED_SYNCHRONOUS_LAYOUT',
+        message: 'Forced synchronous layout',
+        severity: 'warning',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Reading geometric properties immediately after style modification forces browser to synchronously calculate layout.',
+        solution: 'Separate style modifications from geometric property reads.',
+        steps: [
+          'Use Performance panel to locate forced layouts',
+          'Move read operations before writes',
+          'Use requestAnimationFrame to delay reads',
+          'Cache geometric properties to avoid repeated reads',
+        ],
+        prevention: 'Avoid reading offsetWidth/Height immediately after modifying styles.',
+      },
+      {
+        code: 'PERFORMANCE_LONG_TASK_ON_TTI',
+        message: 'Long task before Time to Interactive (TTI)',
+        severity: 'warning',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Long tasks during page load blocked user interaction.',
+        solution: 'Defer non-critical script execution, split long tasks.',
+        steps: [
+          'Use Lighthouse to measure TTI',
+          'Mark non-critical scripts as async/defer',
+          'Code splitting, load modules on demand',
+          'Use PerformanceObserver to monitor long tasks',
+        ],
+        prevention: 'Only load necessary resources on critical path, defer all other scripts.',
+      },
+      {
+        code: 'PERFORMANCE_CUMULATIVE_LAYOUT_SHIFT',
+        message: 'Cumulative Layout Shift (CLS) too high',
+        severity: 'warning',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Page elements shifted visibly during loading.',
+        solution: 'Reserve fixed dimensions for images and containers, avoid content pushing layout after loading.',
+        steps: [
+          'Set width/height attributes for images',
+          'Reserve fixed space for ads and iframes',
+          'Use CSS aspect-ratio to maintain proportions',
+          'Avoid inserting new elements above existing content',
+        ],
+        prevention: 'Reserve space for all dynamic content during design, use skeleton screens.',
+      },
+      {
+        code: 'PERFORMANCE_FIRST_INPUT_DELAY_HIGH',
+        message: 'First Input Delay (FID) too high',
+        severity: 'warning',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Main thread busy when user first interacted, unable to respond promptly.',
+        solution: 'Reduce main thread load, split long tasks.',
+        steps: [
+          'Reduce number of third-party scripts',
+          'Move non-critical calculations to Web Worker',
+          'Use code splitting to reduce initial bundle size',
+          'Defer loading non-critical modules',
+        ],
+        prevention: 'Keep main thread free, ensure critical interaction paths are unobstructed.',
+      },
+      {
+        code: 'PERFORMANCE_SERVICE_WORKER_UPDATE_FAILED',
+        message: 'Service Worker update failed',
+        severity: 'warning',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'New Service Worker installation or activation failed.',
+        solution: 'Check Service Worker script, clear cache and retry.',
+        steps: [
+          'Check Service Worker registration code',
+          'View SW status in DevTools Application panel',
+          'Clear site data and re-register',
+          'Check SW script for syntax errors',
+        ],
+        prevention: 'Use mature libraries like Workbox to manage Service Workers.',
+      },
+      {
+        code: 'PERFORMANCE_PUSH_NOTIFICATION_BLOCKED',
+        message: 'Push notification blocked',
+        severity: 'info',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'User or browser settings blocked push notification permission request.',
+        solution: 'Guide user to allow notifications in browser settings.',
+        steps: [
+          'Check Notification.permission status',
+          'Guide user to allow notifications in browser settings',
+          'Provide clear value proposition for notifications',
+          'Do not request permission too frequently',
+        ],
+        prevention: 'Request notification permission after user completes valuable actions.',
+      },
+      {
+        code: 'PERFORMANCE_OFFLINE_CACHE_STALE',
+        message: 'Offline cache data stale',
+        severity: 'warning',
+        category: 'E. Workflow & Conversion',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Service Worker cached data version too old.',
+        solution: 'Update cache strategy, or force refresh cache.',
+        steps: [
+          'Check Service Worker cache version',
+          'Update CACHE_NAME to force refresh',
+          'Set maximum age when using Cache-First strategy',
+          'Provide manual cache refresh button',
+        ],
+        prevention: 'Use versioned cache names, implement automatic update mechanism.',
+      },
+      
+        {
+          code: 'AUDIO_CONVERT_FAILED',
+          message: 'Audio format conversion failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: TTS Export → Area: output settings',
+          cause: 'The target audio format is unsupported or the encoder failed.',
+          solution: 'Select a supported output format and retry.',
+          steps: [
+            'Select WAV or MP3 as target format',
+            'Check sample rate is supported',
+            'Remove special characters from filename',
+            'Retry conversion'
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'CONVERT_ERROR'],
+          prevention: 'Only show supported formats in the dropdown; validate before conversion.',
+        },
+        {
+          code: 'VIDEO_ENCODE_FAILED',
+          message: 'Video encoding failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Workflow → Area: video export',
+          cause: 'The video encoder crashed due to unsupported codec or resolution.',
+          solution: 'Change codec or reduce resolution and retry.',
+          steps: [
+            'Switch to H.264 codec',
+            'Reduce resolution to 1080p or lower',
+            'Check available disk space',
+            'Retry encoding'
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW', 'CONVERT_ERROR'],
+          prevention: 'Validate codec support and disk space before encoding.',
+        },
+        {
+          code: 'ARCHIVE_EXTRACT_FAILED',
+          message: 'Archive extraction failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Import / Export → Area: archive upload',
+          cause: 'The ZIP or TAR archive is corrupted, password-protected, or uses an unsupported compression.',
+          solution: 'Re-create the archive with standard ZIP and no password.',
+          steps: [
+            'Verify archive opens in system file manager',
+            'Re-compress as standard ZIP',
+            'Remove password protection',
+            'Re-upload'
+          ],
+          relatedCodes: ['FILE_CORRUPTED', 'IMPORT_INVALID_JSON'],
+          prevention: 'Standardize on passwordless ZIP; validate archives before upload.',
+        },
+        {
+          code: 'ARCHIVE_CREATE_FAILED',
+          message: 'Archive creation failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: batch download',
+          cause: 'The backend failed to create a ZIP archive due to file size or permission issues.',
+          solution: 'Reduce batch size or export files individually.',
+          steps: [
+            'Reduce number of files in batch',
+            'Export files one by one',
+            'Check backend temp directory permissions',
+            'Retry archive creation'
+          ],
+          relatedCodes: ['EXPORT_FAILED', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Limit batch size; monitor temp directory permissions.',
+        },
+        {
+          code: 'PDF_RENDER_FAILED',
+          message: 'PDF rendering failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Document Viewer → Area: PDF preview',
+          cause: 'The PDF file is corrupted, password-protected, or uses unsupported features.',
+          solution: 'Use a different PDF file or repair the current one.',
+          steps: [
+            'Open PDF in another viewer to verify',
+            'Remove password if protected',
+            'Flatten complex layers',
+            'Re-upload repaired PDF'
+          ],
+          relatedCodes: ['FILE_CORRUPTED', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Recommend simple, unprotected PDFs; validate on upload.',
+        },
+        {
+          code: 'PDF_TEXT_EXTRACTION_FAILED',
+          message: 'PDF text extraction failed',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Document Viewer → Area: text panel',
+          cause: 'The PDF contains scanned images instead of embedded text.',
+          solution: 'Use OCR on the PDF or provide a text-based PDF.',
+          steps: [
+            'Run OCR on scanned pages',
+            'Export as text-based PDF from source',
+            'Use image-to-text tool',
+            'Re-upload processed document'
+          ],
+          relatedCodes: ['PDF_RENDER_FAILED', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Warn users when uploading scanned PDFs; suggest OCR tools.',
+        },
+        {
+          code: 'IMAGE_RESIZE_FAILED',
+          message: 'Image resize operation failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter',
+          cause: 'The resize algorithm failed due to extreme aspect ratio or memory limits.',
+          solution: 'Use a different resize method or reduce dimensions.',
+          steps: [
+            'Try bilinear instead of nearest-neighbor',
+            'Reduce dimensions in steps',
+            'Maintain aspect ratio',
+            'Retry resize'
+          ],
+          relatedCodes: ['CONVERT_ERROR', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Set maximum dimension limits; use memory-safe resize libraries.',
+        },
+        {
+          code: 'COLOR_SPACE_CONVERSION_FAILED',
+          message: 'Color space conversion failed',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter',
+          cause: 'Converting between color spaces (sRGB, CMYK, LAB) produced invalid values.',
+          solution: 'Convert via an intermediate color space or use ICC profiles.',
+          steps: [
+            'Convert to sRGB first',
+            'Embed ICC profile in output',
+            'Use professional color management tool',
+            'Retry conversion'
+          ],
+          relatedCodes: ['CONVERT_ERROR', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Use standard sRGB for web workflows; validate ICC profiles.',
+        },
+        {
+          code: 'ANIMATION_EXPORT_FAILED',
+          message: 'Animated image export failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: GIF/WebP export',
+          cause: 'The animation frames exceeded memory limits or frame count limits.',
+          solution: 'Reduce frame count, resolution, or colors.',
+          steps: [
+            'Reduce frames to 50 or fewer',
+            'Lower resolution to 480px width',
+            'Reduce color palette to 128',
+            'Retry export'
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW', 'EXPORT_FAILED'],
+          prevention: 'Set frame count and resolution limits for animated exports.',
+        },
+        {
+          code: 'SVG_RASTERIZE_FAILED',
+          message: 'SVG rasterization failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: image export',
+          cause: 'The SVG contains external references, scripts, or unsupported elements.',
+          solution: 'Sanitize SVG by inlining resources and removing scripts.',
+          steps: [
+            'Inline all external images in SVG',
+            'Remove script tags',
+            'Convert text to paths',
+            'Retry rasterization'
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'CONVERT_ERROR'],
+          prevention: 'Sanitize SVGs on upload; warn about external references.',
+        },
+        {
+          code: 'WORKFLOW_LOOP_DETECTED',
+          message: 'Workflow contains a cyclic dependency',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: workflow editor',
+          cause: 'Two or more workflow steps depend on each other, creating an infinite loop.',
+          solution: 'Break the cycle by removing or restructuring one dependency.',
+          steps: [
+            'Review step dependency graph',
+            'Identify the circular reference',
+            'Remove redundant dependency edge',
+            'Validate workflow acyclicity'
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', 'WORKFLOW_STEP_FAILED'],
+          prevention: 'Validate workflow DAG before execution; reject cyclic graphs.',
+        },
+        {
+          code: 'WORKFLOW_TIMEOUT',
+          message: 'Workflow execution exceeded time limit',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'The total workflow execution time exceeded the configured timeout.',
+          solution: 'Optimize slow steps or increase workflow timeout.',
+          steps: [
+            'Identify slowest step from logs',
+            'Reduce image resolution for slow steps',
+            'Increase workflow timeout in settings',
+            'Retry workflow'
+          ],
+          relatedCodes: ['API_TIMEOUT', 'WORKFLOW_STEP_FAILED'],
+          prevention: 'Set per-step timeouts; optimize bottleneck steps.',
+        },
+        {
+          code: 'WORKFLOW_STEP_SKIPPED',
+          message: 'Required workflow step was skipped',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'A step marked as required was skipped due to a condition or manual override.',
+          solution: 'Re-run the skipped step or adjust step conditions.',
+          steps: [
+            'Review workflow conditions',
+            'Manually execute skipped step',
+            'Adjust condition logic',
+            'Re-run full workflow'
+          ],
+          relatedCodes: ['WORKFLOW_STEP_FAILED', 'P2G_WORKFLOW_ERROR'],
+          prevention: 'Require explicit confirmation before skipping required steps.',
+        },
+        {
+          code: 'DOCUMENT_MERGE_FAILED',
+          message: 'Document merge operation failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: document assembly',
+          cause: 'Merging multiple documents failed due to format mismatch or page size differences.',
+          solution: 'Normalize all documents to same format before merging.',
+          steps: [
+            'Convert all docs to same format',
+            'Standardize page sizes',
+            'Merge in smaller batches',
+            'Retry merge'
+          ],
+          relatedCodes: ['PDF_RENDER_FAILED', 'CONVERT_ERROR'],
+          prevention: 'Auto-normalize documents before merge; validate compatibility.',
+        },
+        {
+          code: 'SUBTITLE_SYNC_FAILED',
+          message: 'Subtitle synchronization failed',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: TTS Export → Area: subtitle panel',
+          cause: 'The subtitle timestamps do not align with audio duration.',
+          solution: 'Regenerate subtitles or manually adjust timestamps.',
+          steps: [
+            'Regenerate subtitles from audio',
+            'Check TTS speed settings',
+            'Manually adjust first and last timestamps',
+            'Export synchronized subtitles'
+          ],
+          relatedCodes: ['TTS_AUDIO_GENERATION_FAILED', 'CONVERT_ERROR'],
+          prevention: 'Generate subtitles directly from TTS output metadata.',
+        },
+        {
+          code: 'FONT_LOAD_FAILED',
+          message: 'Custom font failed to load',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: text overlay',
+          cause: 'The custom font file is corrupted or in an unsupported format.',
+          solution: 'Use a standard TTF or OTF font file.',
+          steps: [
+            'Verify font opens in system font viewer',
+            'Convert to TTF if needed',
+            'Upload standard web-safe font',
+            'Retry text overlay'
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'FILE_CORRUPTED'],
+          prevention: 'Whitelist standard font formats; validate on upload.',
+        },
+        {
+          code: 'WATERMARK_APPLY_FAILED',
+          message: 'Watermark application failed',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: image export',
+          cause: 'The watermark image or text overlay could not be composited.',
+          solution: 'Simplify watermark or use a supported image format.',
+          steps: [
+            'Use PNG watermark with transparency',
+            'Reduce watermark dimensions',
+            'Position watermark within image bounds',
+            'Retry export'
+          ],
+          relatedCodes: ['CONVERT_ERROR', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Validate watermark dimensions and format before applying.',
+        },
+        {
+          code: 'CROP_OUT_OF_BOUNDS',
+          message: 'Crop region exceeds image boundaries',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter',
+          cause: 'The specified crop coordinates are larger than the source image.',
+          solution: 'Adjust crop coordinates to fit within image dimensions.',
+          steps: [
+            'Check source image dimensions',
+            'Set crop x + width <= image width',
+            'Set crop y + height <= image height',
+            'Retry crop'
+          ],
+          relatedCodes: ['CONVERT_ERROR', 'IMAGE_RESIZE_FAILED'],
+          prevention: 'Constrain crop UI to image bounds; validate coordinates.',
+        },
+        {
+          code: 'ROTATE_DEGREE_INVALID',
+          message: 'Rotation degree is invalid',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter',
+          cause: 'The rotation angle is not supported by the converter (e.g., non-90 multiple).',
+          solution: 'Use angles that are multiples of 90 degrees.',
+          steps: [
+            'Set rotation to 90, 180, or 270',
+            'For arbitrary angles use external editor',
+            'Retry with valid angle'
+          ],
+          relatedCodes: ['CONVERT_ERROR'],
+          prevention: 'Restrict rotation input to 90-degree increments.',
+        },
+        {
+          code: 'METASTRIP_FAILED',
+          message: 'Metadata stripping failed',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter',
+          cause: 'The tool could not remove EXIF or other metadata from the image.',
+          solution: 'Use an alternative metadata removal tool.',
+          steps: [
+            'Try export as PNG (metadata-free)',
+            'Use external EXIF removal tool',
+            'Re-save image in paint program',
+            'Retry conversion'
+          ],
+          relatedCodes: ['CONVERT_ERROR', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Use libraries that support metadata manipulation for target formats.',
+        },
+        {
+          code: 'THUMBNAIL_GENERATION_FAILED',
+          message: 'Thumbnail generation failed',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Any tool → Area: image preview',
+          cause: 'The thumbnail generation process failed due to corrupted source or extreme dimensions.',
+          solution: 'Regenerate from original or use a placeholder.',
+          steps: [
+            'Verify original image is valid',
+            'Regenerate thumbnail at smaller size',
+            'Use generic placeholder if regeneration fails',
+            'Re-upload original if corrupted'
+          ],
+          relatedCodes: ['IMAGE_RESIZE_FAILED', 'FILE_CORRUPTED'],
+          prevention: 'Generate thumbnails asynchronously with fallback placeholders.',
+        },
+        {
+          code: 'LAYER_COMPOSITE_FAILED',
+          message: 'Layer composite operation failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Style Transfer → Area: layer panel',
+          cause: 'Blending layers with incompatible color modes or dimensions failed.',
+          solution: 'Ensure all layers have same dimensions and color mode.',
+          steps: [
+            'Check all layer dimensions match',
+            'Convert to RGBA if needed',
+            'Flatten image before composite',
+            'Retry operation'
+          ],
+          relatedCodes: ['CONVERT_ERROR', 'COLOR_SPACE_CONVERSION_FAILED'],
+          prevention: 'Auto-flatten or resize layers to match on import.',
+        },
+        {
+          code: 'MASK_APPLY_FAILED',
+          message: 'Mask application failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Style Transfer → Area: mask editor',
+          cause: 'The mask dimensions or bit depth do not match the target image.',
+          solution: 'Resize mask to match image and use 8-bit grayscale.',
+          steps: [
+            'Resize mask to exact image dimensions',
+            'Convert mask to 8-bit grayscale',
+            'Invert mask if needed',
+            'Retry application'
+          ],
+          relatedCodes: ['CROP_OUT_OF_BOUNDS', 'INPAINT_MASK_INVALID'],
+          prevention: 'Auto-resize masks to target; validate bit depth on upload.',
+        },
+        {
+          code: 'AUDIO_MIX_FAILED',
+          message: 'Audio mixing operation failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: TTS Export → Area: post-processing',
+          cause: 'Mixing multiple audio tracks failed due to sample rate mismatch or clipped output.',
+          solution: 'Normalize sample rates and levels before mixing.',
+          steps: [
+            'Convert all tracks to same sample rate',
+            'Normalize volume levels',
+            'Apply limiter to prevent clipping',
+            'Retry mix'
+          ],
+          relatedCodes: ['AUDIO_CONVERT_FAILED', 'CONVERT_ERROR'],
+          prevention: 'Auto-normalize sample rates and levels on import.',
+        },
+        {
+          code: 'CHAPTER_SPLIT_FAILED',
+          message: 'Audio chapter split failed',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: TTS Export → Area: export settings',
+          cause: 'The chapter markers are invalid or out of audio duration bounds.',
+          solution: 'Adjust chapter markers to valid timestamps.',
+          steps: [
+            'Review chapter timestamp values',
+            'Ensure last chapter <= audio duration',
+            'Remove overlapping chapter markers',
+            'Retry split'
+          ],
+          relatedCodes: ['TTS_AUDIO_GENERATION_FAILED', 'SUBTITLE_SYNC_FAILED'],
+          prevention: 'Validate chapter markers against audio duration before split.',
+        },
+        {
+          code: 'WORKFLOW_IMPORT_INVALID',
+          message: 'Imported workflow definition is invalid',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: import button',
+          cause: 'The workflow JSON is missing required fields or has invalid step references.',
+          solution: 'Validate workflow JSON against schema and re-import.',
+          steps: [
+            'Validate JSON syntax',
+            'Check all step IDs are unique',
+            'Verify step dependencies exist',
+            'Re-import corrected workflow'
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON', 'P2G_WORKFLOW_ERROR'],
+          prevention: 'Provide workflow schema validation in import dialog.',
+        },
+        {
+          code: 'WORKFLOW_EXPORT_CORRUPTED',
+          message: 'Exported workflow file is corrupted',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: export button',
+          cause: 'The export process wrote incomplete JSON due to disk space or memory issues.',
+          solution: 'Re-export after freeing resources.',
+          steps: [
+            'Check available disk space',
+            'Close other applications',
+            'Re-export workflow',
+            'Validate exported JSON'
+          ],
+          relatedCodes: ['EXPORT_FAILED', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Check disk space before export; write to temp file first.',
+        },
+        {
+          code: 'TEMPLATE_RENDER_FAILED',
+          message: 'Template rendering failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: document template',
+          cause: 'The template engine encountered a syntax error or missing variable.',
+          solution: 'Fix template syntax and ensure all variables are defined.',
+          steps: [
+            'Check template for syntax errors',
+            'Provide default values for optional variables',
+            'Validate variable names match data keys',
+            'Retry render'
+          ],
+          relatedCodes: ['DOCUMENT_MERGE_FAILED', 'PDF_RENDER_FAILED'],
+          prevention: 'Use strict template linting; provide variable autocomplete.',
+        },
+        {
+          code: 'BATCH_PROCESS_FAILED',
+          message: 'Batch processing job failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Any tool → Area: batch operations',
+          cause: 'One or more items in the batch failed, causing the entire job to abort.',
+          solution: 'Process items individually to identify failures.',
+          steps: [
+            'Review batch error logs',
+            'Identify failing item(s)',
+            'Process failing items individually',
+            'Re-run batch with corrected items'
+          ],
+          relatedCodes: ['WORKFLOW_STEP_FAILED', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Implement per-item error handling; allow partial batch success.',
+        },
+        {
+          code: 'STREAM_MUX_FAILED',
+          message: 'Media stream multiplexing failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: video export',
+          cause: 'Combining audio and video streams failed due to codec incompatibility.',
+          solution: 'Use compatible codec pairs (e.g., H.264 + AAC).',
+          steps: [
+            'Select H.264 for video',
+            'Select AAC for audio',
+            'Ensure container supports both codecs',
+            'Retry mux'
+          ],
+          relatedCodes: ['VIDEO_ENCODE_FAILED', 'AUDIO_CONVERT_FAILED'],
+          prevention: 'Recommend validated codec combinations in the UI.',
+        },
+        {
+          code: 'TIMELINE_EXPORT_FAILED',
+          message: 'Timeline export failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Export → Area: timeline',
+          cause: 'The timeline contains unsupported effects or transitions.',
+          solution: 'Simplify timeline by removing complex effects.',
+          steps: [
+            'Remove unsupported transitions',
+            'Bake effects into clips',
+            'Export as simpler format',
+            'Retry export'
+          ],
+          relatedCodes: ['VIDEO_ENCODE_FAILED', 'EXPORT_FAILED'],
+          prevention: 'Validate timeline effects against export format capabilities.',
+        },
+        {
+          code: 'OCR_ENGINE_FAILED',
+          message: 'OCR engine failed to recognize text',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Document Viewer → Area: OCR panel',
+          cause: 'The OCR engine crashed or the image quality was too low.',
+          solution: 'Improve image quality or use a different OCR engine.',
+          steps: [
+            'Increase image resolution to 300 DPI',
+            'Ensure high contrast between text and background',
+            'Deskew image if tilted',
+            'Retry OCR'
+          ],
+          relatedCodes: ['PDF_TEXT_EXTRACTION_FAILED', 'FILE_CORRUPTED'],
+          prevention: 'Pre-process images for OCR: deskew, binarize, upscale.',
+        },
+        {
+          code: 'HASH_VERIFY_FAILED',
+          message: 'File hash verification failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Import / Export → Area: file transfer',
+          cause: 'The file checksum does not match, indicating corruption or tampering.',
+          solution: 'Re-transfer the file and verify hash again.',
+          steps: [
+            'Re-download or re-upload file',
+            'Compute hash locally',
+            'Compare with expected hash',
+            'If mismatch persists, check source file'
+          ],
+          relatedCodes: ['FILE_CORRUPTED', 'IMPORT_INVALID_JSON'],
+          prevention: 'Always compute and compare hashes for critical transfers.',
+        },
+        {
+          code: 'ENCRYPTION_DECRYPT_FAILED',
+          message: 'File decryption failed',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Import → Area: encrypted file',
+          cause: 'The password is incorrect or the encrypted file is corrupted.',
+          solution: 'Enter the correct password or obtain an uncorrupted file.',
+          steps: [
+            'Double-check password spelling and case',
+            'Try password without extra spaces',
+            'Obtain file from original source',
+            'Retry decryption'
+          ],
+          relatedCodes: ['FILE_CORRUPTED', 'IMPORT_INVALID_JSON'],
+          prevention: 'Store passwords securely; verify file integrity before encryption.',
+        },
+        {
+          code: 'WORKFLOW_STEP_TIMEOUT',
+          message: 'Individual workflow step timed out',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal',
+          cause: 'A single workflow step exceeded its allocated execution time.',
+          solution: 'Increase per-step timeout or optimize the step.',
+          steps: [
+            'Identify the slow step from logs',
+            'Simplify input or reduce resolution',
+            'Increase step timeout in settings',
+            'Retry the step individually'
+          ],
+          relatedCodes: ['WORKFLOW_TIMEOUT', 'WORKFLOW_STEP_FAILED'],
+          prevention: 'Set generous per-step timeouts; optimize heavy operations.',
+        },],
+    },
+    {
+      id: 'F',
+      name: 'F. System & Permissions',
+      description: 'Device memory insufficient, browser permission denied, browser-side cutout failure',
+      errors: [
+        {
+          code: 'CONVERSION_FAILED',
+          message: 'Image conversion failed',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Image Format Converter',
+          cause: 'Unsupported format or browser does not support canvas conversion.',
+          solution: 'Try switching the target format.',
+          steps: [
+            'Confirm the original image is not corrupted',
+            'Try switching the target format',
+            'Use a modern browser',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+        },
+        {
+          code: 'CURSOR_JUMP',
+          message: 'Cursor jumps during editing',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Page: Prompt Suite → Area: prompt editor',
+          cause: 'In earlier versions, real-time rendering using dangerouslySetInnerHTML caused DOM and React state to be out of sync. This has been fixed in the current version.',
+          solution: 'Refresh the page to restore auto-saved content.',
+          steps: [
+            'Press Ctrl+S to manually save current content',
+            'Refresh the page (F5 or Ctrl+R)',
+            'After page reload, auto-saved content will be restored',
+          ],
+        },
+        {
+          code: 'DEVICE_MEMORY_LOW',
+          message: 'Device memory insufficient',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'Device memory is insufficient and the browser forcibly terminated the tab process.',
+          solution: 'Close other tabs, reduce image size, or use a device with more memory.',
+          steps: [
+            'Save current work',
+            'Close other browser tabs',
+            'Reduce the uploaded image size',
+            'Restart the browser and retry',
+          ],
+          relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: 'Close other browser tabs before processing large files; scale the image\'s longest side to below 2048; on low-memory devices it is recommended to disable AI concurrency.',
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: 'Export failed',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Prompt Suite → Area: top right export button',
+          cause: 'Browser blocked the download, or the generated file is too large.',
+          solution: 'Check browser download permissions or reduce content size.',
+          steps: [
+            'Check whether the browser blocked the download (upper right download icon)',
+            'If blocked, allow this site to download files',
+            'If the file is too large, split into multiple exports or reduce image size',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Regularly export and back up; for large files, split exports.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_EXECUTION_FAILED',
+          message: 'Browser-side cutout execution failed',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal',
+          cause: 'An error occurred during browser-side cutout processing.',
+          solution: 'Replace the image or refresh the page and retry.',
+          steps: [
+            'Confirm the source image was successfully generated',
+            'Re-upload a new image',
+            'Click "Redo" to retry',
+            'If it keeps failing, contact the backend administrator to switch the provider',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_SPAWN_FAILED', 'FRONTEND_CUTOUT_TIMEOUT'],
+          prevention: 'Upload standard format PNG/JPG images; avoid using special encoding or corrupted image files.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_OUTPUT_MISSING',
+          message: 'Browser-side cutout did not generate output',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal',
+          cause: 'Cutout processing was abnormal.',
+          solution: 'Replace the image or refresh the page and retry.',
+          steps: [
+            'Confirm the source image was successfully generated',
+            'Refresh the page',
+            'If it still fails, start a new workflow',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
+          prevention: 'Ensure input image format is correct; avoid using corrupted or special encoding images.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_SOURCE_MISSING',
+          message: 'Browser-side cutout source image not found',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal',
+          cause: 'Upstream expression generation step failed.',
+          solution: 'First fix the expression generation error, then retry cutout.',
+          steps: [
+            'Check the error information of expression generation steps',
+            'Fix the expression generation issue',
+            'After confirming success, click "Redo" on the cutout step',
+          ],
+          relatedCodes: ['WORKFLOW_STEP_FAILED'],
+          prevention: 'Ensure expression generation steps succeed before performing cutout; the workflow automatically executes in order—do not skip steps.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_SPAWN_FAILED',
+          message: 'Browser-side cutout resources cannot be loaded',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal',
+          cause: 'Browser-side IMG.LY model resources cannot be loaded, or the browser does not support WebGL/WASM.',
+          solution: 'Refresh the page and retry, or use a modern browser.',
+          steps: [
+            'Refresh the page',
+            'Use Chrome/Firefox/Edge',
+            'Check whether WebGL or WASM is disabled',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
+          prevention: 'Use a modern browser (Chrome/Firefox/Edge latest version); do not disable WebGL or WASM.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_TIMEOUT',
+          message: 'Browser-side cutout timed out',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal',
+          cause: 'Image too large or device performance insufficient.',
+          solution: 'Shrink the image or improve device performance.',
+          steps: [
+            'Re-upload an image with longest side not exceeding 2048',
+            'Close other browser tabs',
+            'Turn off AI concurrency',
+            'Retry',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Compress images to reasonable size before uploading (recommended 1024~2048px); ensure the device has sufficient memory.',
+        },
+        {
+          code: 'PASTE_FORMAT_LOSS',
+          message: 'Pasted content lost formatting',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Page: Prompt Suite → Area: prompt editor',
+          cause: 'The editor uses plain text mode; pasted rich text (Word, web pages) will lose formatting such as colors and fonts.',
+          solution: 'Paste as plain text or manually adjust formatting.',
+          steps: [
+            'Use Ctrl+Shift+V to paste as plain text',
+            'Or paste into Notepad first, then copy to the editor',
+          ],
+          prevention: 'The editor only supports plain text; for formatted content, use Markdown syntax.',
+        },
+      {
+        code: 'WORKFLOW_CONCURRENCY_LIMIT_EXCEEDED',
+        message: 'Workflow concurrency limit exceeded',
+        severity: 'error',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Number of simultaneously running workflows exceeded system configured limit.',
+        solution: 'Wait for existing workflows to complete, or increase concurrency limit.',
+        steps: [
+          'View list of currently running workflows',
+          'Wait for some workflows to complete',
+          'Cancel unnecessary workflows',
+          'Contact administrator to increase concurrency limit',
+        ],
+        prevention: 'Configure reasonable concurrency limits, provide queue mechanism.',
+      },
+      {
+        code: 'WORKFLOW_DEPENDENCY_CYCLE',
+        message: 'Workflow has circular dependency',
+        severity: 'critical',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Circular references between workflow steps, unable to determine execution order.',
+        solution: 'Check and break circular dependencies, redesign workflow.',
+        steps: [
+          'Use workflow visualization tool to check dependency graph',
+          'Identify steps in the cycle',
+          'Extract common logic to eliminate cycle',
+          'Redesign workflow as DAG',
+        ],
+        prevention: 'Ensure no circular dependencies in workflow design, validate with topological sort.',
+      },
+      {
+        code: 'WORKFLOW_STEP_TIMEOUT_CASCADE',
+        message: 'Workflow step timeout cascade',
+        severity: 'error',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'One step timeout caused all subsequent dependent steps to fail.',
+        solution: 'Increase timeout duration, or design degradation strategy.',
+        steps: [
+          'Identify the first step that timed out',
+          'Increase timeout for that step',
+          'Design degradation plan for critical steps',
+          'Add step-level retry mechanism',
+        ],
+        prevention: 'Set reasonable timeouts for each step, design independent degradation strategies.',
+      },
+      {
+        code: 'WORKFLOW_STATE_CORRUPTION',
+        message: 'Workflow state corruption',
+        severity: 'critical',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Workflow state file was accidentally modified or partially written.',
+        solution: 'Restore state from backup, or restart workflow from beginning.',
+        steps: [
+          'Check state file integrity',
+          'Try restoring from automatic backup',
+          'If unable to recover, reset workflow',
+          'Check disk and filesystem health',
+        ],
+        prevention: 'Use transactional writes for state, automatic backups on schedule.',
+      },
+      {
+        code: 'WORKFLOW_RETRY_EXHAUSTED',
+        message: 'Workflow retry attempts exhausted',
+        severity: 'error',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Step failed and retries reached maximum count but still failed.',
+        solution: 'Check failure cause, fix and manually retry.',
+        steps: [
+          'View detailed error from last failure',
+          'Fix the issue causing failure',
+          'Manually trigger workflow retry',
+          'Contact support if issue persists',
+        ],
+        prevention: 'Set reasonable retry strategy, distinguish between retryable and non-retryable errors.',
+      },
+      {
+        code: 'WORKFLOW_INPUT_VALIDATION_FAILED',
+        message: 'Workflow input validation failed',
+        severity: 'error',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Workflow input parameters do not satisfy validation rules.',
+        solution: 'Correct input parameters according to error prompt.',
+        steps: [
+          'View failed fields and rules from validation error',
+          'Modify input values to satisfy rules',
+          'Confirm all required fields are filled',
+          'Check field types and formats',
+        ],
+        prevention: 'Provide real-time input validation on frontend with clear error messages.',
+      },
+      {
+        code: 'WORKFLOW_OUTPUT_ARTIFACT_MISSING',
+        message: 'Workflow output artifact missing',
+        severity: 'error',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'After workflow completion, expected output file or data does not exist.',
+        solution: 'Check workflow execution logs, confirm output step succeeded.',
+        steps: [
+          'View workflow execution logs',
+          'Confirm status of output steps',
+          'Check output directory permissions',
+          'Manually re-execute output step',
+        ],
+        prevention: 'Verify artifact existence after each output step.',
+      },
+      {
+        code: 'WORKFLOW_NOTIFICATION_DELIVERY_FAILED',
+        message: 'Workflow notification delivery failed',
+        severity: 'warning',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Workflow completion or failure notification could not be sent to user.',
+        solution: 'Check notification configuration, confirm notification channel is available.',
+        steps: [
+          'Check notification configuration (email/push/webhook)',
+          'Test notification channel connectivity',
+          'View notification service logs',
+          'Update notification configuration and retry',
+        ],
+        prevention: 'Provide multiple notification channels, configure failure notification alerts.',
+      },
+      {
+        code: 'WORKFLOW_SCHEDULER_MISFIRE',
+        message: 'Workflow scheduler misfire',
+        severity: 'warning',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Scheduled workflow did not execute as planned.',
+        solution: 'Check scheduler status, manually compensate execution.',
+        steps: [
+          'Check if scheduler service is running',
+          'View scheduler logs to confirm trigger records',
+          'Manually trigger missed workflows',
+          'Check system time accuracy',
+        ],
+        prevention: 'Use reliable scheduling service, configure misfire handling strategy.',
+      },
+      {
+        code: 'WORKFLOW_DEAD_LETTER_QUEUE_FULL',
+        message: 'Dead letter queue full',
+        severity: 'error',
+        category: 'F. System & Permissions',
+        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Failed workflow messages accumulated, dead letter queue reached capacity limit.',
+        solution: 'Clean dead letter queue, analyze failure causes.',
+        steps: [
+          'View dead letter queue accumulation status',
+          'Batch clean or archive old dead letters',
+          'Analyze common failure patterns in dead letters',
+          'Reprocess after fixing root cause',
+        ],
+        prevention: 'Monitor dead letter queue depth, set alerts and automatic cleanup.',
+      },
+      
+        {
+          code: 'MEMORY_PRESSURE_CRITICAL',
+          message: 'System memory pressure critical',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'Available system RAM has dropped below safe thresholds, risking OOM kills.',
+          solution: 'Close applications, reduce workload, or restart the system.',
+          steps: [
+            'Save all current work',
+            'Close unused browser tabs and applications',
+            'Reduce image resolution or batch size',
+            'Restart the application or system'
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW', 'GPU_OUT_OF_MEMORY'],
+          prevention: 'Monitor memory usage; set automatic warnings at 80% usage.',
+        },
+        {
+          code: 'CPU_THROTTLING',
+          message: 'CPU thermal throttling detected',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'CPU temperature exceeded safe limits and was downclocked.',
+          solution: 'Improve cooling or reduce CPU-intensive tasks.',
+          steps: [
+            'Check CPU temperature in system monitor',
+            'Clean dust from fans and heatsinks',
+            'Close CPU-intensive background apps',
+            'Use cooling pad or improve ventilation'
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Ensure adequate cooling; avoid sustained 100% CPU loads.',
+        },
+        {
+          code: 'DISK_FULL',
+          message: 'Disk space is full',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The storage device has no free space left for writes.',
+          solution: 'Free up disk space or expand storage.',
+          steps: [
+            'Delete temporary files and caches',
+            'Move large files to external storage',
+            'Empty recycle bin/trash',
+            'Expand disk partition if possible'
+          ],
+          relatedCodes: ['EXPORT_FAILED', 'LOCAL_STORAGE_FULL'],
+          prevention: 'Monitor disk usage; set alerts at 85% capacity.',
+        },
+        {
+          code: 'DISK_QUOTA_EXCEEDED',
+          message: 'User disk quota exceeded',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The user has exceeded their allocated disk quota on the server.',
+          solution: 'Delete files or request a quota increase.',
+          steps: [
+            'Review and delete unnecessary files',
+            'Archive old data to offline storage',
+            'Contact admin to request quota increase',
+            'Retry operation'
+          ],
+          relatedCodes: ['DISK_FULL', 'EXPORT_FAILED'],
+          prevention: 'Track per-user quotas; notify users at 80% usage.',
+        },
+        {
+          code: 'FILE_DESCRIPTOR_LIMIT',
+          message: 'Too many open files',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'The process reached the maximum number of open file descriptors.',
+          solution: 'Close unused files or increase the file descriptor limit.',
+          steps: [
+            'Identify and close leaking file handles',
+            'Increase ulimit -n value',
+            'Restart the process',
+            'Review code for unclosed streams'
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Use try-finally blocks for file handles; monitor fd usage.',
+        },
+        {
+          code: 'SELINUX_DENIED',
+          message: 'SELinux policy denied operation',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'SELinux blocked a file access or network bind due to policy violation.',
+          solution: 'Adjust SELinux context or create an exception policy.',
+          steps: [
+            'Check audit logs for AVC denials',
+            'Run semanage to add exception',
+            'Or temporarily set permissive mode',
+            'Apply permanent policy module if needed'
+          ],
+          relatedCodes: ['PERMISSION_DENIED'],
+          prevention: 'Package SELinux policy modules with the application.',
+        },
+        {
+          code: 'APPARMOR_DENIED',
+          message: 'AppArmor profile denied operation',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'AppArmor blocked a system call or file access outside the allowed profile.',
+          solution: 'Update AppArmor profile or switch to complain mode.',
+          steps: [
+            'Check syslog for AppArmor denials',
+            'Update profile to allow required paths',
+            'Or run in complain mode to identify needs',
+            'Reload AppArmor profile'
+          ],
+          relatedCodes: ['SELINUX_DENIED', 'PERMISSION_DENIED'],
+          prevention: 'Ship tested AppArmor profiles with the application.',
+        },
+        {
+          code: 'DOCKER_CONTAINER_OOM',
+          message: 'Docker container killed by OOM',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'The container exceeded its memory limit and was terminated by the OOM killer.',
+          solution: 'Increase container memory limit or optimize memory usage.',
+          steps: [
+            'Increase docker run --memory limit',
+            'Optimize application memory footprint',
+            'Enable swap for container if acceptable',
+            'Monitor memory trends'
+          ],
+          relatedCodes: ['MEMORY_PRESSURE_CRITICAL', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Set memory limits with headroom; monitor container metrics.',
+        },
+        {
+          code: 'KUBERNETES_POD_EVICTED',
+          message: 'Kubernetes pod was evicted',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'The pod was evicted due to node pressure (disk, memory, or PID limits).',
+          solution: 'Address node pressure or add cluster capacity.',
+          steps: [
+            'Check node conditions with kubectl describe node',
+            'Clean up node disk/images',
+            'Scale cluster nodes',
+            'Re-schedule pod to healthy node'
+          ],
+          relatedCodes: ['DOCKER_CONTAINER_OOM', 'DISK_FULL'],
+          prevention: 'Set resource requests/limits; use pod disruption budgets.',
+        },
+        {
+          code: 'KUBERNETES_IMAGE_PULL_FAILED',
+          message: 'Kubernetes image pull failed',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'The container image could not be pulled due to registry auth or network issues.',
+          solution: 'Check image name, registry credentials, and network.',
+          steps: [
+            'Verify image tag exists in registry',
+            'Check imagePullSecrets configuration',
+            'Confirm network access to registry',
+            'Retry deployment'
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'NETWORK_DISCONNECTED'],
+          prevention: 'Use image pull secrets; mirror images to local registry.',
+        },
+        {
+          code: 'KUBERNETES_CRASH_LOOP',
+          message: 'Pod stuck in CrashLoopBackOff',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'The container repeatedly crashes on startup, exceeding the restart threshold.',
+          solution: 'Check container logs and fix the underlying error.',
+          steps: [
+            'View pod logs with kubectl logs',
+            'Check for missing environment variables',
+            'Verify config files are mounted',
+            'Fix application startup error'
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'DOCKER_CONTAINER_OOM'],
+          prevention: 'Implement health checks; validate config before startup.',
+        },
+        {
+          code: 'KUBERNETES_RESOURCE_LIMIT',
+          message: 'Pod exceeded Kubernetes resource limit',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'CPU or memory usage exceeded the configured resource limits.',
+          solution: 'Increase resource limits or optimize resource usage.',
+          steps: [
+            'Edit deployment to raise limits',
+            'Profile application for hotspots',
+            'Optimize memory/CPU usage',
+            'Re-deploy with new limits'
+          ],
+          relatedCodes: ['DOCKER_CONTAINER_OOM', 'CPU_THROTTLING'],
+          prevention: 'Benchmark workloads to set accurate limits.',
+        },
+        {
+          code: 'INODE_EXHAUSTED',
+          message: 'Filesystem inode limit exhausted',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'Too many small files have exhausted the filesystem inode table.',
+          solution: 'Delete small files or reformat with more inodes.',
+          steps: [
+            'Find and delete empty/small files',
+            'Consolidate files into archives',
+            'Reformat filesystem with higher inode count',
+            'Move data to new partition'
+          ],
+          relatedCodes: ['DISK_FULL', 'EXPORT_FAILED'],
+          prevention: 'Monitor inode usage; archive small files regularly.',
+        },
+        {
+          code: 'SWAP_EXHAUSTED',
+          message: 'System swap space exhausted',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'Physical RAM and swap are both full, causing severe performance degradation.',
+          solution: 'Kill memory-hungry processes or add swap space.',
+          steps: [
+            'Identify top memory consumers',
+            'Kill non-essential processes',
+            'Add swap file if on Linux',
+            'Restart system if unresponsive'
+          ],
+          relatedCodes: ['MEMORY_PRESSURE_CRITICAL', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Configure adequate swap; monitor memory usage trends.',
+        },
+        {
+          code: 'PERMISSION_DENIED_FILE',
+          message: 'File permission denied',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Any tool → Area: file save/load',
+          cause: 'The user does not have read/write permission for the target file or directory.',
+          solution: 'Change file permissions or run with appropriate privileges.',
+          steps: [
+            'Check file ownership and permissions',
+            'Use chmod/chown to fix permissions',
+            'Run application with correct user',
+            'Select a writable directory'
+          ],
+          relatedCodes: ['SELINUX_DENIED', 'APPARMOR_DENIED'],
+          prevention: 'Check directory writability before file operations.',
+        },
+        {
+          code: 'PERMISSION_DENIED_CAMERA',
+          message: 'Camera access permission denied',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Page: Any tool → Area: camera input',
+          cause: 'The browser or OS denied camera access.',
+          solution: 'Grant camera permission in browser or system settings.',
+          steps: [
+            'Click allow when browser prompts',
+            'Check browser site permissions',
+            'Check OS privacy settings for camera',
+            'Retry camera access'
+          ],
+          relatedCodes: ['PERMISSION_DENIED_FILE'],
+          prevention: 'Guide users through permission granting before camera use.',
+        },
+        {
+          code: 'PERMISSION_DENIED_MICROPHONE',
+          message: 'Microphone access permission denied',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Page: TTS Export → Area: voice recording',
+          cause: 'The browser or OS denied microphone access.',
+          solution: 'Grant microphone permission in browser or system settings.',
+          steps: [
+            'Click allow when browser prompts',
+            'Check browser site permissions',
+            'Check OS privacy settings for microphone',
+            'Retry recording'
+          ],
+          relatedCodes: ['PERMISSION_DENIED_CAMERA'],
+          prevention: 'Request microphone permission only when needed.',
+        },
+        {
+          code: 'BROWSER_POPUP_BLOCKED',
+          message: 'Popup window was blocked',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The browser blocked a popup or new window.',
+          solution: 'Allow popups for this site.',
+          steps: [
+            'Check browser popup blocker icon',
+            'Allow popups for current site',
+            'Retry the action that opened popup',
+            'Disable popup blocker if needed'
+          ],
+          relatedCodes: ['EXPORT_FAILED'],
+          prevention: 'Use modal dialogs instead of popups where possible.',
+        },
+        {
+          code: 'CLIPBOARD_ACCESS_DENIED',
+          message: 'Clipboard access denied',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The browser denied clipboard access due to insecure context or user preference.',
+          solution: 'Use HTTPS or interact with the page first.',
+          steps: [
+            'Ensure page is served over HTTPS',
+            'Click on the page before copying',
+            'Use keyboard shortcut Ctrl+C as fallback',
+            'Check browser clipboard permissions'
+          ],
+          relatedCodes: ['BROWSER_POPUP_BLOCKED', 'PERMISSION_DENIED_FILE'],
+          prevention: 'Require user interaction before clipboard operations; use HTTPS.',
+        },
+        {
+          code: 'SERVICE_WORKER_REGISTRATION_FAILED',
+          message: 'Service Worker registration failed',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The browser could not register the Service Worker due to path or MIME type issues.',
+          solution: 'Check sw.js path and server MIME type configuration.',
+          steps: [
+            'Verify sw.js is accessible at root path',
+            'Check server serves JS with correct MIME type',
+            'Clear site data and re-register',
+            'Retry registration'
+          ],
+          relatedCodes: ['PERFORMANCE_SERVICE_WORKER_UPDATE_FAILED'],
+          prevention: 'Serve sw.js from root with correct Content-Type.',
+        },
+        {
+          code: 'INDEXEDDB_CORRUPTED',
+          message: 'IndexedDB database is corrupted',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The browser\'s IndexedDB storage was corrupted, possibly by disk errors.',
+          solution: 'Delete and recreate the IndexedDB database.',
+          steps: [
+            'Open DevTools → Application → IndexedDB',
+            'Delete corrupted database',
+            'Refresh page to recreate',
+            'Re-import any lost data'
+          ],
+          relatedCodes: ['CONFIG_CORRUPTED', 'LOCAL_STORAGE_FULL'],
+          prevention: 'Regularly export critical data; handle DB errors gracefully.',
+        },
+        {
+          code: 'INDEXEDDB_QUOTA_EXCEEDED',
+          message: 'IndexedDB quota exceeded',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The stored data exceeds the browser\'s origin storage quota.',
+          solution: 'Delete old data or use external storage.',
+          steps: [
+            'Export and delete old projects',
+            'Clear image caches',
+            'Use file system API for large files',
+            'Retry operation'
+          ],
+          relatedCodes: ['LOCAL_STORAGE_FULL', 'DISK_QUOTA_EXCEEDED'],
+          prevention: 'Monitor storage quota; prompt users to archive old data.',
+        },
+        {
+          code: 'WEBGL_NOT_SUPPORTED',
+          message: 'WebGL is not supported',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The browser or device does not support WebGL, required for some image operations.',
+          solution: 'Use a modern browser or enable hardware acceleration.',
+          steps: [
+            'Switch to Chrome, Firefox, or Edge',
+            'Enable hardware acceleration in browser settings',
+            'Update graphics drivers',
+            'Retry operation'
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Detect WebGL support early; show fallback options.',
+        },
+        {
+          code: 'WEBGPU_NOT_SUPPORTED',
+          message: 'WebGPU is not supported',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Page: Face Maker / Style Transfer',
+          cause: 'The browser does not yet support WebGPU.',
+          solution: 'Use a browser with WebGPU support or fallback to WebGL.',
+          steps: [
+            'Update to latest Chrome/Edge Canary',
+            'Enable WebGPU flag if available',
+            'Fallback to WebGL or CPU path',
+            'Retry operation'
+          ],
+          relatedCodes: ['WEBGL_NOT_SUPPORTED'],
+          prevention: 'Feature-detect WebGPU and provide graceful fallback.',
+        },
+        {
+          code: 'NOTIFICATION_PERMISSION_DENIED',
+          message: 'Notification permission denied',
+          severity: 'info',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'User denied notification permission or OS has Do Not Disturb enabled.',
+          solution: 'Request permission again or check OS settings.',
+          steps: [
+            'Check browser notification settings',
+            'Check OS Do Not Disturb mode',
+            'Guide user to allow notifications',
+            'Retry permission request'
+          ],
+          relatedCodes: ['PERFORMANCE_PUSH_NOTIFICATION_BLOCKED'],
+          prevention: 'Request notifications after user completes valuable action.',
+        },
+        {
+          code: 'BATTERY_SAVER_ENABLED',
+          message: 'Battery saver mode may affect performance',
+          severity: 'info',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The device is in battery saver mode, throttling CPU and background tasks.',
+          solution: 'Disable battery saver or plug in the device.',
+          steps: [
+            'Plug in power adapter',
+            'Disable battery saver in system settings',
+            'Reduce workload',
+            'Retry operation'
+          ],
+          relatedCodes: ['CPU_THROTTLING'],
+          prevention: 'Warn users when battery saver may impact generation tasks.',
+        },
+        {
+          code: 'OFFLINE_MODE_DETECTED',
+          message: 'Device is in offline mode',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The device has no network connectivity.',
+          solution: 'Restore network connection or use offline-capable features.',
+          steps: [
+            'Check Wi-Fi or Ethernet connection',
+            'Toggle airplane mode off',
+            'Restart router if needed',
+            'Use offline tools if available'
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'Implement offline detection and graceful degradation.',
+        },
+        {
+          code: 'CORS_POLICY_BLOCKED',
+          message: 'CORS policy blocked request',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The browser blocked a cross-origin request due to missing CORS headers.',
+          solution: 'Configure server CORS headers or use a proxy.',
+          steps: [
+            'Add Access-Control-Allow-Origin header',
+            'Include necessary preflight headers',
+            'Use backend proxy for external APIs',
+            'Retry request'
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'NETWORK_DISCONNECTED'],
+          prevention: 'Configure proper CORS on all API endpoints.',
+        },
+        {
+          code: 'PROXY_AUTHENTICATION_REQUIRED',
+          message: 'Proxy authentication required',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The network proxy requires credentials that were not provided.',
+          solution: 'Configure proxy credentials in system or browser settings.',
+          steps: [
+            'Check system proxy settings',
+            'Enter proxy username and password',
+            'Contact network admin for credentials',
+            'Retry connection'
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', 'CORS_POLICY_BLOCKED'],
+          prevention: 'Document proxy requirements for enterprise deployments.',
+        },
+        {
+          code: 'FIREWALL_BLOCKED',
+          message: 'Firewall blocked connection',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'A network firewall is blocking outgoing or incoming connections.',
+          solution: 'Whitelist the application or port in firewall rules.',
+          steps: [
+            'Check OS firewall settings',
+            'Add exception for application or port',
+            'Contact network admin',
+            'Retry connection'
+          ],
+          relatedCodes: ['PROXY_AUTHENTICATION_REQUIRED', 'NETWORK_DISCONNECTED'],
+          prevention: 'Document required ports and domains for IT teams.',
+        },
+        {
+          code: 'TIME_SYNC_ERROR',
+          message: 'System clock is out of sync',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The system time is incorrect, causing SSL/TLS certificate validation failures.',
+          solution: 'Synchronize system clock with NTP.',
+          steps: [
+            'Check system time settings',
+            'Enable automatic time sync',
+            'Sync with time.nist.gov or pool.ntp.org',
+            'Retry connection'
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_KEY_EXPIRED'],
+          prevention: 'Enable automatic time synchronization on all devices.',
+        },
+        {
+          code: 'DNS_RESOLUTION_FAILED',
+          message: 'DNS resolution failed',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'The domain name could not be resolved to an IP address.',
+          solution: 'Check DNS settings or use alternative DNS server.',
+          steps: [
+            'Check internet connectivity',
+            'Switch to 8.8.8.8 or 1.1.1.1 DNS',
+            'Flush DNS cache',
+            'Retry after DNS propagation'
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Use reliable DNS servers; implement retry with IP fallback.',
+        },
+        {
+          code: 'TEMP_DIRECTORY_UNWRITABLE',
+          message: 'Temporary directory is not writable',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'The application cannot write to the system temp directory.',
+          solution: 'Fix temp directory permissions or change temp path.',
+          steps: [
+            'Check temp directory exists',
+            'Verify write permissions',
+            'Set TMPDIR environment variable',
+            'Restart application'
+          ],
+          relatedCodes: ['PERMISSION_DENIED_FILE', 'DISK_FULL'],
+          prevention: 'Validate temp directory on startup with a test write.',
+        },
+        {
+          code: 'PROCESS_SPAWN_FAILED',
+          message: 'Failed to spawn child process',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Page: Backend / Server',
+          cause: 'The OS denied process creation due to resource limits or missing executable.',
+          solution: 'Check executable path and system resource limits.',
+          steps: [
+            'Verify binary exists and is executable',
+            'Check ulimit for max user processes',
+            'Free system memory',
+            'Retry operation'
+          ],
+          relatedCodes: ['FILE_DESCRIPTOR_LIMIT', 'MEMORY_PRESSURE_CRITICAL'],
+          prevention: 'Verify binaries at install; monitor process limits.',
+        },
+        {
+          code: 'SECURITY_POLICY_VIOLATION',
+          message: 'Content Security Policy blocked resource',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Global / All pages',
+          cause: 'A script, style, or other resource was blocked by the Content-Security-Policy header.',
+          solution: 'Update CSP headers or load resources from allowed origins.',
+          steps: [
+            'Check browser console for CSP violation details',
+            'Add resource origin to CSP allowlist',
+            'Use nonce or hash for inline scripts',
+            'Retry after updating headers'
+          ],
+          relatedCodes: ['CORS_POLICY_BLOCKED'],
+          prevention: 'Define accurate CSP headers during deployment.',
+        },],
+    },
+    {
+      id: '0~9',
+      name: '0~9. HTTP Status Codes',
+      description: 'HTTP status codes returned by the backend or API service',
+      errors: [
+        {
+          code: '400_BAD_REQUEST',
+          message: '400 Bad Request',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'Request parameters are incorrect or incomplete.',
+          solution: 'Check request parameters.',
+          steps: [
+            'Check whether the uploaded file format is correct',
+            'Check whether request parameters conform to the API documentation',
+            'Modify parameters and retry',
+          ],
+          relatedCodes: ['401_UNAUTHORIZED', '422_UNPROCESSABLE_ENTITY'],
+          prevention: 'Ensure all required parameters are filled in correctly; confirm uploaded files meet the format requirements.',
+        },
+        {
+          code: '401_UNAUTHORIZED',
+          message: '401 Unauthorized',
+          severity: 'critical',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'API Key is invalid or has expired.',
+          solution: 'Replace with a valid API Key.',
+          steps: [
+            'Open "Settings → API"',
+            'Replace the Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED', '403_FORBIDDEN'],
+          prevention: 'Regularly check the API Key\'s validity; test whether the Key is valid in advance through LLM Hub.',
+        },
+        {
+          code: '403_FORBIDDEN',
+          message: '403 Forbidden',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'The Key does not have permission to access the resource, or the content was intercepted by the safety filter.',
+          solution: 'Check Key permissions or modify content.',
+          steps: [
+            'Confirm the Key has permission to access the current model/service',
+            'If content was intercepted, modify the prompt and retry',
+          ],
+          relatedCodes: ['401_UNAUTHORIZED', 'PROMPT_BLOCKED'],
+          prevention: 'Ensure the Key has sufficient permissions; avoid using sensitive vocabulary in prompts.',
+        },
+        {
+          code: '404_NOT_FOUND',
+          message: '404 Not Found',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'The requested resource does not exist or the URL is incorrect.',
+          solution: 'Check the URL or resource path.',
+          steps: [
+            'Check whether the API Base URL is correct',
+            'Confirm the backend service is running',
+            'Check whether the requested resource exists',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE'],
+        },
+        {
+          code: '422_UNPROCESSABLE_ENTITY',
+          message: '422 Unprocessable Entity',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'Request format is correct but content is semantically incorrect.',
+          solution: 'Check request content.',
+          steps: [
+            'Check whether the uploaded file is corrupted',
+            'Check whether request parameters conform to the API specification',
+            'Modify and retry',
+          ],
+          relatedCodes: ['400_BAD_REQUEST'],
+        },
+        {
+          code: '429_TOO_MANY_REQUESTS',
+          message: '429 Too Many Requests',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'Request frequency is too high, exceeding the rate limit.',
+          solution: 'Slow down request frequency.',
+          steps: [
+            'Reduce request frequency',
+            'Wait a while and retry',
+            'Consider switching to a provider with higher rate limits',
+          ],
+          relatedCodes: ['API_RATE_LIMIT'],
+          prevention: 'When using an API Key with strict rate limits, it is recommended to disable AI concurrency; avoid repeatedly starting multiple workflows in a short time.',
+        },
+        {
+          code: '500_INTERNAL_ERROR',
+          message: '500 Internal Server Error',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'An internal exception occurred in the backend service.',
+          solution: 'Retry later or contact the backend administrator.',
+          steps: [
+            'Wait a few minutes',
+            'Reduce request scale and retry',
+            'If the problem persists, contact the backend administrator',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: 'Reduce request scale (image size); avoid submitting large tasks when the server is under high load.',
+        },
+        {
+          code: '502_BAD_GATEWAY',
+          message: '502 Bad Gateway',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'Reverse proxy cannot connect to the backend server.',
+          solution: 'Check backend service status.',
+          steps: [
+            'Confirm the backend process is running',
+            'Check whether the port is occupied',
+            'Check backend logs',
+            'Restart the backend service',
+          ],
+          relatedCodes: ['503_SERVICE_UNAVAILABLE', 'BACKEND_UNAVAILABLE'],
+          prevention: 'When deploying locally, confirm the backend process is running; check reverse proxy configuration.',
+        },
+        {
+          code: '503_SERVICE_UNAVAILABLE',
+          message: '503 Service Unavailable',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'Backend service is temporarily unavailable.',
+          solution: 'Retry later.',
+          steps: [
+            'Wait a few minutes and retry',
+            'Check backend service status',
+            'Contact the backend administrator',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Avoid operating during server maintenance windows; reduce request frequency during high load.',
+        },
+        {
+          code: '504_GATEWAY_TIMEOUT',
+          message: '504 Gateway Timeout',
+          severity: 'error',
+
+        category: '0~9. HTTP Status Codes',
+          location: 'Global / All pages',
+          cause: 'Reverse proxy or load balancer timed out waiting for the backend response.',
+          solution: 'Increase timeout setting or retry later.',
+          steps: [
+            'Increase timeout setting in Settings → API',
+            'Reduce request scale',
+            'Retry later',
+          ],
+          relatedCodes: ['API_TIMEOUT', '500_INTERNAL_ERROR'],
+        },
+      {
+        code: '400_BAD_REQUEST_BODY',
+        message: 'Request body format error (400)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Request body is not valid JSON, or missing required fields.',
+        solution: 'Check request body format, ensure it is valid JSON.',
+        steps: [
+          'Confirm Content-Type is application/json',
+          'Use JSON validator to check request body',
+          'Cross-reference API documentation for required fields',
+          'Check field types match',
+        ],
+        prevention: 'Use client SDK to auto-generate requests, avoid manual construction.',
+      },
+      {
+        code: '401_TOKEN_EXPIRED',
+        message: 'Token expired (401)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Authentication token has exceeded validity period.',
+        solution: 'Refresh token, or use long-lived token.',
+        steps: [
+          'Call refresh token endpoint to get new token',
+          'Check token validity period configuration',
+          'Implement automatic refresh mechanism',
+          'Use refresh_token to exchange for new access_token',
+        ],
+        prevention: 'Implement automatic token refresh, update before expiration.',
+      },
+      {
+        code: '403_RESOURCE_FORBIDDEN',
+        message: 'Access to resource forbidden (403)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Has authentication but insufficient permissions for specific resource.',
+        solution: 'Apply for resource access permissions, or switch to authorized account.',
+        steps: [
+          'Confirm current user identity',
+          'Check resource access control list',
+          'Contact resource owner for authorization',
+          'Use account with permissions to operate',
+        ],
+        prevention: 'Design fine-grained permission model, perform permission checks in advance.',
+      },
+      {
+        code: '404_ENDPOINT_REMOVED',
+        message: 'API endpoint removed (404)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Accessed API path has been deleted or renamed in latest version.',
+        solution: 'Consult API changelog, use new endpoint.',
+        steps: [
+          'Consult API version changelog',
+          'Confirm if endpoint was renamed',
+          'Upgrade to API version that supports this endpoint',
+          'Modify code to use new endpoint path',
+        ],
+        prevention: 'Follow API version update announcements, use versioned API paths.',
+      },
+      {
+        code: '406_NOT_ACCEPTABLE',
+        message: 'Cannot provide acceptable content (406)',
+        severity: 'warning',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Request Accept header does not match formats server can provide.',
+        solution: 'Modify Accept header, or request server to support that format.',
+        steps: [
+          'Check Accept header in request',
+          'Confirm supported response formats on server',
+          'Modify Accept to server-supported format',
+          'Contact dev team if specific format is required',
+        ],
+        prevention: 'Client requests include multiple acceptable formats.',
+      },
+      {
+        code: '408_REQUEST_TIMEOUT',
+        message: 'Request timeout (408)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server timed out waiting for complete request.',
+        solution: 'Check network connection, reduce request body size, or increase timeout.',
+        steps: [
+          'Check network connection stability',
+          'Reduce request body size',
+          'Increase client request timeout settings',
+          'Use chunked transfer for large request bodies',
+        ],
+        prevention: 'Maintain stable network, use chunked or streaming transfer for large requests.',
+      },
+      {
+        code: '409_RESOURCE_CONFLICT',
+        message: 'Resource conflict (409)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Request conflicts with current resource state, such as concurrent modification of same resource.',
+        solution: 'Get latest resource state and retry, or implement optimistic locking.',
+        steps: [
+          'Re-fetch latest resource state',
+          'Merge conflicting modifications',
+          'Use If-Match header for optimistic locking',
+          'Retry request',
+        ],
+        prevention: 'Use optimistic or pessimistic locking to avoid concurrent conflicts.',
+      },
+      {
+        code: '410_RESOURCE_GONE',
+        message: 'Resource permanently deleted (410)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Requested resource has been permanently deleted and will not be restored.',
+        solution: 'Stop requesting this resource, update references to new resource.',
+        steps: [
+          'Confirm resource was permanently deleted',
+          'Find alternative resource',
+          'Update all places referencing this resource',
+          'Notify user resource is unavailable',
+        ],
+        prevention: 'Provide migration guides and alternatives when deleting resources.',
+      },
+      {
+        code: '412_PRECONDITION_FAILED',
+        message: 'Precondition failed (412)',
+        severity: 'warning',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Preconditions such as If-Match/If-None-Match in request not satisfied.',
+        solution: 'Get latest resource state, update conditions and retry.',
+        steps: [
+          'Re-fetch resource ETag or Last-Modified',
+          'Update conditional headers in request',
+          'Retry request',
+          'Check logic if conditions keep failing',
+        ],
+        prevention: 'Always fetch latest resource state before modifications.',
+      },
+      {
+        code: '416_RANGE_NOT_SATISFIABLE',
+        message: 'Requested range not satisfiable (416)',
+        severity: 'warning',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Requested Range header exceeds actual resource size.',
+        solution: 'Check resource size, adjust Range.',
+        steps: [
+          'Get actual resource size (Content-Length)',
+          'Adjust Range header within valid range',
+          'Use full resource request as fallback',
+          'Implement adaptive chunked download',
+        ],
+        prevention: 'Confirm total resource size before chunked download.',
+      },
+      {
+        code: '422_VALIDATION_ERROR',
+        message: 'Request semantic error (422)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Request format is correct, but content semantics do not satisfy business rules.',
+        solution: 'Correct request content according to error prompt.',
+        steps: [
+          'View detailed validation errors in response body',
+          'Fix field values that do not comply with rules',
+          'Confirm business rule constraints',
+          'Resend request',
+        ],
+        prevention: 'Client performs complete business rule validation before submission.',
+      },
+      {
+        code: '423_RESOURCE_LOCKED',
+        message: 'Resource locked (423)',
+        severity: 'warning',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Resource currently locked by other operation, temporarily inaccessible.',
+        solution: 'Wait for lock release and retry, or force release lock.',
+        steps: [
+          'Check resource lock status',
+          'Wait for locking operation to complete',
+          'Force release if lock has timed out',
+          'Retry request',
+        ],
+        prevention: 'Set reasonable lock timeout, provide lock status query interface.',
+      },
+      {
+        code: '424_FAILED_DEPENDENCY',
+        message: 'Failed dependency (424)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Current operation depends on prerequisite operation that failed.',
+        solution: 'Check and fix prerequisite operation, then retry.',
+        steps: [
+          'View dependent operation from error prompt',
+          'Check prerequisite operation failure cause',
+          'Fix prerequisite operation',
+          'Re-execute in correct order',
+        ],
+        prevention: 'Design idempotent operations, ensure clear dependency relationships.',
+      },
+      {
+        code: '429_RETRY_AFTER_MISSING',
+        message: '429 response missing Retry-After header',
+        severity: 'warning',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server returned 429 but did not provide Retry-After time.',
+        solution: 'Use exponential backoff strategy and retry.',
+        steps: [
+          'Implement exponential backoff retry strategy',
+          'Wait 1 second first time',
+          'Double wait time after each failure',
+          'Set maximum wait time cap',
+        ],
+        prevention: 'Client implements intelligent backoff retry mechanism.',
+      },
+      {
+        code: '451_UNAVAILABLE_FOR_LEGAL_REASONS',
+        message: 'Unavailable for legal reasons (451)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Content blocked due to copyright, regional restrictions and other legal reasons.',
+        solution: 'Change content source, or contact legal department.',
+        steps: [
+          'Confirm legal status of content',
+          'Find alternative content sources',
+          'Contact legal team to confirm compliance',
+          'Appeal if content was mistakenly blocked',
+        ],
+        prevention: 'Ensure all content has legal usage authorization.',
+      },
+      {
+        code: '505_HTTP_VERSION_NOT_SUPPORTED',
+        message: 'HTTP version not supported (505)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server does not support HTTP protocol version used in request.',
+        solution: 'Use HTTP version supported by server (typically HTTP/1.1).',
+        steps: [
+          'Check HTTP version used in request',
+          'Downgrade to HTTP/1.1',
+          'Confirm server supports HTTP/2',
+          'Update server software',
+        ],
+        prevention: 'Client defaults to HTTP/1.1, server supports multiple versions.',
+      },
+      {
+        code: '507_INSUFFICIENT_STORAGE',
+        message: 'Insufficient storage (507)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Server disk space is full, unable to process request.',
+        solution: 'Clean server storage, or expand disk.',
+        steps: [
+          'Check server disk usage',
+          'Clean logs and temporary files',
+          'Delete unnecessary old data',
+          'Expand disk or add storage',
+        ],
+        prevention: 'Monitor disk usage rate, set alerts and automatic cleanup.',
+      },
+      {
+        code: '508_LOOP_DETECTED',
+        message: 'Infinite loop detected (508)',
+        severity: 'error',
+
+        category: '0~9. HTTP Status Codes',        location: 'Page: Any tool → Area: Error panel',
+        cause: 'Request processing detected infinite redirect or loop.',
+        solution: 'Check redirect configuration, break the loop.',
+        steps: [
+          'Check server redirect rules',
+          'Confirm no circular redirects',
+          'Use absolute URLs to avoid relative path issues',
+          'Limit maximum redirect count',
+        ],
+        prevention: 'Redirect configurations use absolute paths, limit maximum jump count.',
+      },
+
+      
+        {
+          code: '100_CONTINUE',
+          message: 'Continue (100)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server has received the request headers and the client should proceed to send the request body.',
+          solution: 'Proceed with sending the request body.',
+          steps: [
+            'Send the remainder of the request',
+            'Expect final response after body transmission',
+            'Handle normally in HTTP clients'
+          ],
+          prevention: 'HTTP clients handle 100-continue automatically.',
+        },
+        {
+          code: '101_SWITCHING_PROTOCOLS',
+          message: 'Switching Protocols (101)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server agrees to switch protocols as requested by the Upgrade header.',
+          solution: 'Complete the protocol upgrade handshake.',
+          steps: [
+            'Send protocol upgrade request',
+            'Verify server supports target protocol',
+            'Switch to WebSocket or HTTP/2',
+            'Resume communication'
+          ],
+          prevention: 'Verify protocol support before requesting upgrade.',
+        },
+        {
+          code: '102_PROCESSING',
+          message: 'Processing (102)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server has received and is processing the request, but no response is available yet.',
+          solution: 'Wait for the final response.',
+          steps: [
+            'Maintain connection open',
+            'Wait for follow-up response',
+            'Do not resend request'
+          ],
+          relatedCodes: ['100_CONTINUE'],
+          prevention: 'Implement timeout handling for long-running requests.',
+        },
+        {
+          code: '103_EARLY_HINTS',
+          message: 'Early Hints (103)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server is likely to send a final response with the header fields included in the informational response.',
+          solution: 'Preload linked resources optimistically.',
+          steps: [
+            'Parse Link headers from 103 response',
+            'Preload CSS/JS resources',
+            'Wait for final 200 response',
+            'Render page'
+          ],
+          relatedCodes: ['200_OK'],
+          prevention: 'Servers should send accurate early hints to avoid wasted preloads.',
+        },
+        {
+          code: '200_OK',
+          message: 'OK (200)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The request has succeeded.',
+          solution: 'No action needed; process the response normally.',
+          steps: [
+            'Parse response body',
+            'Update UI with results',
+            'Cache response if applicable'
+          ],
+          prevention: 'Standard success response; no prevention needed.',
+        },
+        {
+          code: '201_CREATED',
+          message: 'Created (201)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The request has succeeded and a new resource has been created.',
+          solution: 'Process the newly created resource.',
+          steps: [
+            'Read Location header for new resource URI',
+            'Fetch created resource if needed',
+            'Update UI to reflect creation'
+          ],
+          relatedCodes: ['200_OK'],
+          prevention: 'Validate creation input to avoid duplicate resources.',
+        },
+        {
+          code: '202_ACCEPTED',
+          message: 'Accepted (202)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The request has been accepted for processing but the processing has not been completed.',
+          solution: 'Poll the status endpoint or wait for callback.',
+          steps: [
+            'Record the operation ID',
+            'Poll status endpoint periodically',
+            'Or wait for webhook callback',
+            'Update UI when processing completes'
+          ],
+          relatedCodes: ['102_PROCESSING'],
+          prevention: 'Implement idempotent operations for async processing.',
+        },
+        {
+          code: '204_NO_CONTENT',
+          message: 'No Content (204)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server successfully processed the request and is not returning any content.',
+          solution: 'Update UI state without expecting a response body.',
+          steps: [
+            'Confirm operation succeeded',
+            'Update local state',
+            'Do not attempt to parse empty body'
+          ],
+          relatedCodes: ['200_OK'],
+          prevention: 'Ensure client handles empty bodies gracefully.',
+        },
+        {
+          code: '206_PARTIAL_CONTENT',
+          message: 'Partial Content (206)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server is delivering only part of the resource due to a Range header.',
+          solution: 'Assemble partial chunks into complete resource.',
+          steps: [
+            'Store received byte range',
+            'Request remaining ranges if needed',
+            'Assemble complete file',
+            'Verify integrity'
+          ],
+          relatedCodes: ['416_RANGE_NOT_SATISFIABLE'],
+          prevention: 'Request valid ranges; handle assembly correctly.',
+        },
+        {
+          code: '301_MOVED_PERMANENTLY',
+          message: 'Moved Permanently (301)',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The requested resource has been permanently moved to a new URL.',
+          solution: 'Update bookmarks and code to use the new URL.',
+          steps: [
+            'Read Location header for new URL',
+            'Update stored URL references',
+            'Retry request to new URL',
+            'Monitor for further redirects'
+          ],
+          relatedCodes: ['302_FOUND'],
+          prevention: 'Update client code when APIs change endpoints.',
+        },
+        {
+          code: '302_FOUND',
+          message: 'Found (302)',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The resource temporarily resides under a different URL.',
+          solution: 'Follow the redirect but keep original URL for future requests.',
+          steps: [
+            'Read Location header',
+            'Follow redirect with same method if safe',
+            'Do not update permanent bookmarks',
+            'Retry original URL later'
+          ],
+          relatedCodes: ['301_MOVED_PERMANENTLY'],
+          prevention: 'Implement robust redirect following in HTTP client.',
+        },
+        {
+          code: '304_NOT_MODIFIED',
+          message: 'Not Modified (304)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The resource has not been modified since the version specified by If-None-Match or If-Modified-Since.',
+          solution: 'Use cached version of the resource.',
+          steps: [
+            'Serve from local cache',
+            'Do not re-download content',
+            'Update cache metadata',
+            'Proceed with cached data'
+          ],
+          relatedCodes: ['200_OK'],
+          prevention: 'Implement proper caching headers and ETag handling.',
+        },
+        {
+          code: '307_TEMPORARY_REDIRECT',
+          message: 'Temporary Redirect (307)',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The resource temporarily resides under a different URL; the request method must not change.',
+          solution: 'Repeat the request to the URL given in the Location header.',
+          steps: [
+            'Read Location header',
+            'Repeat request with same HTTP method',
+            'Do not update permanent references',
+            'Retry original URL later'
+          ],
+          relatedCodes: ['302_FOUND'],
+          prevention: 'Handle 307 without method change in HTTP client.',
+        },
+        {
+          code: '308_PERMANENT_REDIRECT',
+          message: 'Permanent Redirect (308)',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The resource has been permanently moved to a new URL; the request method must not change.',
+          solution: 'Update references and repeat request to new URL.',
+          steps: [
+            'Read Location header',
+            'Update stored URLs permanently',
+            'Repeat request with same method',
+            'Monitor for issues'
+          ],
+          relatedCodes: ['301_MOVED_PERMANENTLY'],
+          prevention: 'Update client code when API endpoints permanently move.',
+        },
+        {
+          code: '400_INVALID_PARAMETER',
+          message: 'Invalid parameter (400)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'A specific request parameter failed validation.',
+          solution: 'Correct the invalid parameter and retry.',
+          steps: [
+            'Check error response for parameter name',
+            'Review API docs for valid values',
+            'Correct parameter value',
+            'Retry request'
+          ],
+          relatedCodes: ['400_BAD_REQUEST', '422_VALIDATION_ERROR'],
+          prevention: 'Client-side validate parameters before submission.',
+        },
+        {
+          code: '402_PAYMENT_REQUIRED',
+          message: 'Payment Required (402)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'Payment is required to access this resource or API.',
+          solution: 'Add payment method or purchase credits.',
+          steps: [
+            'Check account billing status',
+            'Add payment method',
+            'Purchase API credits or subscription',
+            'Retry request'
+          ],
+          relatedCodes: ['401_UNAUTHORIZED'],
+          prevention: 'Monitor billing dashboard; set low-balance alerts.',
+        },
+        {
+          code: '405_METHOD_NOT_ALLOWED',
+          message: 'Method Not Allowed (405)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The HTTP method is not supported for the requested resource.',
+          solution: 'Use an allowed HTTP method.',
+          steps: [
+            'Check Allow header for permitted methods',
+            'Switch to GET, POST, PUT, etc. as appropriate',
+            'Update client code',
+            'Retry with correct method'
+          ],
+          relatedCodes: ['404_NOT_FOUND'],
+          prevention: 'Follow API documentation for correct HTTP methods.',
+        },
+        {
+          code: '407_PROXY_AUTH_REQUIRED',
+          message: 'Proxy Authentication Required (407)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The client must first authenticate itself with the proxy.',
+          solution: 'Provide proxy authentication credentials.',
+          steps: [
+            'Configure proxy username and password',
+            'Include Proxy-Authorization header',
+            'Check proxy settings',
+            'Retry request'
+          ],
+          relatedCodes: ['401_UNAUTHORIZED', 'PROXY_AUTHENTICATION_REQUIRED'],
+          prevention: 'Configure proxy credentials in application settings.',
+        },
+        {
+          code: '411_LENGTH_REQUIRED',
+          message: 'Length Required (411)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server refuses to accept the request without a defined Content-Length.',
+          solution: 'Include Content-Length header in request.',
+          steps: [
+            'Calculate request body size',
+            'Add Content-Length header',
+            'Or use chunked encoding if supported',
+            'Retry request'
+          ],
+          relatedCodes: ['400_BAD_REQUEST'],
+          prevention: 'Always include Content-Length or use chunked transfer.',
+        },
+        {
+          code: '413_PAYLOAD_TOO_LARGE',
+          message: 'Payload Too Large (413)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The request entity is larger than limits defined by the server.',
+          solution: 'Reduce payload size or compress data.',
+          steps: [
+            'Reduce file size or batch size',
+            'Compress request body',
+            'Split into multiple requests',
+            'Retry with smaller payload'
+          ],
+          relatedCodes: ['400_BAD_REQUEST', 'FILE_TOO_LARGE'],
+          prevention: 'Check size limits before uploading; compress large payloads.',
+        },
+        {
+          code: '414_URI_TOO_LONG',
+          message: 'URI Too Long (414)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The URI requested by the client is longer than the server is willing to interpret.',
+          solution: 'Use POST with body parameters instead of long query strings.',
+          steps: [
+            'Move parameters to request body',
+            'Use POST instead of GET',
+            'Shorten parameter values',
+            'Retry request'
+          ],
+          relatedCodes: ['400_BAD_REQUEST'],
+          prevention: 'Avoid extremely long URLs; use POST for complex queries.',
+        },
+        {
+          code: '415_UNSUPPORTED_MEDIA_TYPE',
+          message: 'Unsupported Media Type (415)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The media format of the requested data is not supported by the server.',
+          solution: 'Convert data to a supported format.',
+          steps: [
+            'Check API docs for supported Content-Types',
+            'Convert file to supported format',
+            'Update Content-Type header',
+            'Retry upload'
+          ],
+          relatedCodes: ['400_BAD_REQUEST', 'FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Validate file format against API supported types before upload.',
+        },
+        {
+          code: '417_EXPECTATION_FAILED',
+          message: 'Expectation Failed (417)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server cannot meet the requirements specified in the Expect request-header field.',
+          solution: 'Remove or adjust the Expect header.',
+          steps: [
+            'Remove Expect header from request',
+            'Simplify request requirements',
+            'Retry without expectation',
+            'Check server capabilities'
+          ],
+          relatedCodes: ['400_BAD_REQUEST'],
+          prevention: 'Only use Expect headers when server explicitly supports them.',
+        },
+        {
+          code: '418_IM_A_TEAPOT',
+          message: 'I am a teapot (418)',
+          severity: 'info',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'Easter egg status code indicating the server refuses to brew coffee because it is a teapot.',
+          solution: 'No action needed; this is a joke response.',
+          steps: [
+            'Acknowledge the joke',
+            'Do not attempt to brew coffee',
+            'Use appropriate endpoint for actual requests'
+          ],
+          prevention: 'Not applicable; this is a humorous Easter egg.',
+        },
+        {
+          code: '421_MISDIRECTED_REQUEST',
+          message: 'Misdirected Request (421)',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The request was directed at a server that is not able to produce a response.',
+          solution: 'Retry the request or connect to a different server.',
+          steps: [
+            'Retry request',
+            'Check DNS resolves to correct server',
+            'Contact admin if persistent',
+            'Use alternative endpoint'
+          ],
+          relatedCodes: ['502_BAD_GATEWAY'],
+          prevention: 'Ensure proper load balancer and DNS configuration.',
+        },
+        {
+          code: '426_UPGRADE_REQUIRED',
+          message: 'Upgrade Required (426)',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server refuses to perform the request using the current protocol.',
+          solution: 'Upgrade to the required protocol version.',
+          steps: [
+            'Check Upgrade header in response',
+            'Switch to TLS/1.3 or HTTP/2',
+            'Retry with upgraded protocol',
+            'Update client libraries'
+          ],
+          relatedCodes: ['505_HTTP_VERSION_NOT_SUPPORTED'],
+          prevention: 'Keep client libraries updated to support modern protocols.',
+        },
+        {
+          code: '428_PRECONDITION_REQUIRED',
+          message: 'Precondition Required (428)',
+          severity: 'warning',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The origin server requires the request to be conditional to prevent lost update problems.',
+          solution: 'Include If-Match or If-Unmodified-Since header.',
+          steps: [
+            'Fetch current resource ETag',
+            'Include If-Match header with ETag',
+            'Retry conditional request',
+            'Handle 412 if resource changed'
+          ],
+          relatedCodes: ['412_PRECONDITION_FAILED'],
+          prevention: 'Always use conditional requests for state-modifying operations.',
+        },
+        {
+          code: '431_REQUEST_HEADER_FIELDS_TOO_LARGE',
+          message: 'Request Header Fields Too Large (431)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server is unwilling to process the request because its header fields are too large.',
+          solution: 'Reduce cookie size, authorization header, or custom headers.',
+          steps: [
+            'Remove unnecessary cookies',
+            'Shorten authorization token',
+            'Remove large custom headers',
+            'Retry request'
+          ],
+          relatedCodes: ['400_BAD_REQUEST'],
+          prevention: 'Keep headers minimal; use body for large data.',
+        },
+        {
+          code: '500_INTERNAL_SERVER_ERROR',
+          message: 'Internal Server Error (500)',
+          severity: 'critical',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server encountered an unexpected condition that prevented it from fulfilling the request.',
+          solution: 'Retry after a short delay; contact support if persistent.',
+          steps: [
+            'Wait 30 seconds',
+            'Retry the request',
+            'Check server status page',
+            'Contact support if error persists'
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: 'Server-side error; monitor logs and health metrics.',
+        },
+        {
+          code: '501_NOT_IMPLEMENTED',
+          message: 'Not Implemented (501)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server does not support the functionality required to fulfill the request.',
+          solution: 'Use an alternative endpoint or method.',
+          steps: [
+            'Check API documentation',
+            'Use supported endpoint',
+            'Contact API provider for feature availability',
+            'Implement workaround'
+          ],
+          relatedCodes: ['405_METHOD_NOT_ALLOWED'],
+          prevention: 'Follow API documentation and version compatibility guides.',
+        },
+        {
+          code: '506_VARIANT_ALSO_NEGOTIATES',
+          message: 'Variant Also Negotiates (506)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The server has an internal configuration error with transparent content negotiation.',
+          solution: 'Contact server administrator.',
+          steps: [
+            'Check server configuration',
+            'Disable content negotiation if misconfigured',
+            'Contact admin',
+            'Retry later'
+          ],
+          relatedCodes: ['500_INTERNAL_SERVER_ERROR'],
+          prevention: 'Properly configure content negotiation on server.',
+        },
+        {
+          code: '510_NOT_EXTENDED',
+          message: 'Not Extended (510)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'Further extensions to the request are required for the server to fulfill it.',
+          solution: 'Provide required policy or extension information.',
+          steps: [
+            'Check response for required extensions',
+            'Add required policy headers',
+            'Retry with extended request',
+            'Contact admin if unclear'
+          ],
+          relatedCodes: ['501_NOT_IMPLEMENTED'],
+          prevention: 'Follow server policy documentation for required extensions.',
+        },
+        {
+          code: '599_NETWORK_CONNECT_TIMEOUT',
+          message: 'Network Connect Timeout Error (599)',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Any tool → Area: network request',
+          cause: 'The proxy server timed out while connecting to the upstream server.',
+          solution: 'Check upstream server availability and network path.',
+          steps: [
+            'Check upstream server status',
+            'Verify network path',
+            'Increase proxy timeout',
+            'Retry request'
+          ],
+          relatedCodes: ['504_GATEWAY_TIMEOUT', '502_BAD_GATEWAY'],
+          prevention: 'Monitor upstream connectivity; configure appropriate timeouts.',
+        },],
+    },
+  ],
+
+};
