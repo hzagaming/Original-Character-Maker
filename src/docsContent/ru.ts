@@ -19,93 +19,590 @@ export const docsContent: DocsContent = {
   tools: [
     {
       id: 'face-maker',
-      title: 'Создание персонажа (лицо)',
-      overview: `Входной инструмент OC Maker. Выбирайте прически, формы глаз, брови, носы, рты, формы лица, уши, аксессуары, позы, верх и низ из библиотеки ассетов слева, затем точно настраивайте пропорции, цвета и положение с помощью 16 числовых ползунков справа. Реальное время предпросмотра на центральном холсте. Все настройки выполняются локально — изображения и данные не загружаются.`,
+      title: 'Face Maker',
+      overview: `Face Maker is a character face generation tool. Enter a prompt, choose a model and image size, and click "Generate" to generate a character face image through AI. Supports prompt editor, random prompt generation, batch generation, and local model selection.
+
+Basic Process:
+1. Enter or generate a prompt in the prompt editor
+2. Select a generation model and image size
+3. Click "Generate" to wait for the AI to generate the image
+4. After generation, the image is displayed in the preview area, supporting copy, download, and re-generation
+
+
+[Layer System]
+The Face Maker uses a multi-layer SVG vector rendering architecture with 12 independent layers: background, back hair, back body, bottom wear, top wear, front body, ears, face shape, eyebrows, eyes, nose, mouth, front hair, and accessories. Each layer renders independently without interfering with others. The layer order is carefully designed so front hair occludes ears and tops occlude the body.
+
+[Asset Library]
+The asset library contains over 80 interchangeable parts:
+- Hairstyles: 20 types (short, long, twin tails, ponytail, ahoge, curly, straight, wolf cut, hime cut, bob, etc.)
+- Eye shapes: 16 types (round, phoenix, droopy, upturned, cat eyes, peach blossom, squint, etc.)
+- Eyebrow shapes: 10 types (willow, straight, sword, arched, thick, thin, etc.)
+- Nose shapes: 6 types (small, standard, high, flat, upturned, hooked)
+- Mouth shapes: 12 types (smile, open, pursed, pout, crooked, laugh, surprised, etc.)
+- Face shapes: 8 types (round, oval, heart, square, long, diamond, etc.)
+- Ears: 4 types (human, elf, cat, rabbit)
+- Accessories: 14 types (round glasses, square glasses, sunglasses, headband, hairpin, bow, hat, mask, earrings, necklace, etc.)
+- Poses: 4 types (standing, arms crossed, hand on hip, waving)
+- Tops: 5 types (T-shirt, hoodie, suit, sailor uniform, none)
+- Bottoms: 4 types (skirt, long pants, shorts, none)
+
+Each part is in vector SVG format for lossless scaling. Colors are controlled uniformly through HSL hue rotation to ensure tonal harmony.
+
+[Advanced Tips]
+1. Quick color matching: Set skin tone first, then hair and eye colors for contrast. Use colors 120° apart on the hue wheel.
+2. Proportion harmony: Head scale 55 and face length 50 are standard values. Cute styles: head 60+, face 45-. Mature styles: head 50, face 60+.
+3. Accessory stacking: Multiple accessories can be worn simultaneously, but keep it under 3 to avoid visual clutter.
+4. Pose and outfit pairing: Arms crossed suits formal wear; hand on hip suits energetic styles; waving suits full-body display.
+5. Export settings: PNG export supports transparent background. Fixed resolution is 1024x1024 pixels.
+
+[Performance Notes]
+- First load preloads all SVG parts, requiring ~2-5MB bandwidth. Use Wi-Fi for first-time setup.
+- Low-end devices may experience slight lag during rapid part switching.
+- Private/incognito mode may disable localStorage, making "Save Draft" unavailable. Use manual JSON export for backup.
+
+[Version History]
+- v0.5.0: Initial version with head customization and basic parts
+- v0.6.0: Added body, poses, and clothing system
+- v0.6.4: Added full-body preview, 4 poses, 5 tops, 4 bottoms
+- v1.0.0: UI overhaul with theme system
+- v1.1.0: Added independent accessory color control
+- v1.2.0: Added import/export configuration
+- v1.3.0: Optimized rendering performance, added error prompts and documentation`,
       buttons: [
-        { name: 'Сохранить черновик', description: 'Сохраните текущий выбор частей и значения параметров в локальное хранилище браузера. После успешного сохранения индикатор состояния изменится с желтого «Несохранено» на зеленое «Сохранено».' },
-        { name: 'Экспорт', description: 'Экспортируйте текущую конфигурацию лица как JSON-файл (oc-face-maker-config.json), содержащий все части и значения параметров.' },
-        { name: 'Экспорт PNG', description: 'Экспортируйте изображение персонажа на текущем холсте как PNG (oc-character.png), включая полную иллюстрацию головы, тела, позы и одежды.' },
-        { name: 'Импорт конфигурации', description: 'Выберите ранее экспортированный JSON-файл конфигурации для восстановления выбора частей и значений параметров.' },
-        { name: 'Сброс', description: 'Сбросьте все параметры на значения по умолчанию и восстановите части в исходное состояние. Перед операцией появится диалог подтверждения.' },
-      ],
+        { name: 'Generate', description: 'Submits the prompt to the backend model to generate an image. After clicking, the button shows "Generating..." and is disabled until completion.' },
+        { name: 'Copy Image', description: 'Copies the currently generated image to the clipboard. If the browser does not support the Clipboard API, a prompt will appear.' },
+        { name: 'Download Image', description: 'Downloads the currently generated image to the local machine.' },
+        { name: 'Open Image', description: 'Opens the image in a new tab to view the original image.' },
+        { name: 'Random Prompt', description: 'Automatically generates a random face description prompt and fills it into the prompt editor.' },
+        { name: 'Clear Prompt', description: 'Clears all content in the prompt editor.' },
+        { name: 'Toggle History', description: 'Expands or collapses the history panel below the prompt editor to view previously generated prompts and images.' },
+      
+        { name: 'Randomize', description: 'Randomly combine all parts and parameters to quickly generate a new character. All sliders will automatically jump to random values. Click repeatedly for inspiration.' },
+        { name: 'Undo', description: 'Undo the last operation, up to 20 steps. Supports Ctrl+Z shortcut.' },
+        { name: 'Redo', description: 'Restore undone operations. Supports Ctrl+Y / Ctrl+Shift+Z shortcuts.' },
+        { name: 'Zoom Preview', description: 'Expand the central canvas to fullscreen mode for detail inspection. Press Esc or click close to exit.' },
+        { name: 'Screenshot', description: 'Copy current canvas content to clipboard for pasting into chat apps or image editors.' },
+        { name: 'Share Link', description: 'Generate a URL containing current configuration parameters. Others opening the link will see the exact same character.' },
+        { name: 'Dark Mode Toggle', description: 'Toggle canvas background between dark and transparent to check dark area details.' },],
       parameters: [
-        { name: 'Масштаб головы', description: 'Настройте общий размер головы. Диапазон 40~70. Большие значения делают голову больше.', tips: 'Рекомендуется настраивать вместе с длиной лица, чтобы избежать дисбаланса пропорций.' },
-        { name: 'Длина лица', description: 'Настройте длину лица. Диапазон 30~70. Влияет на общий переход от круглого лица к длинному.' },
-        { name: 'Цвет кожи', description: 'Настройте оттенок кожи. Диапазон 0~100. Реализует изменения цвета кожи от светлого к темному через сдвиг оттенка HSL.' },
-        { name: 'Цвет волос', description: 'Настройте цвет волос. Диапазон 0~100. Реализует радужные изменения цвета волос через вращение оттенка.' },
-        { name: 'Размер глаз', description: 'Настройте общий масштаб глаз. Диапазон 38~62.' },
-        { name: 'Поза', description: 'Выберите позу всего тела персонажа: стоя, скрестив руки, рука на бедре, махание рукой.', tips: 'Лучший эффект предпросмотра при сочетании позы с одеждой.' },
-        { name: 'Верх', description: 'Выберите верх персонажа: футболка, худи, костюм, моряцкая форма, или без одежды.', tips: 'Цвет верха следует за ползунком «Цвет аксессуаров».' },
-      ],
+        { name: 'Model', description: 'Selects the AI image generation model used.', tips: 'Different models have different styles and quality. It is recommended to try multiple models to find the one that best suits your needs.' },
+        { name: 'Size', description: 'Sets the resolution (width x height in pixels) of the generated image.', tips: '1024x1024 is the standard square size; larger sizes take longer to generate and consume more API tokens.' },
+        { name: 'Prompt Editor', description: 'Enter the image generation prompt here. Supports multi-line input.', tips: 'Detailed prompts generate more precise images; you can use the "Random Prompt" button to get inspiration.' },
+      
+        { name: 'Eyebrow Angle', description: 'Adjust eyebrow tilt angle, range -30~30 degrees. Positive for upturned (angry/surprised), negative for droopy (sad/confused).', tips: 'Pair with eye corner angle to reinforce expression emotion.' },
+        { name: 'Eye Openness', description: 'Adjust eye opening size, range 30~100. Low values for squinting or closed eyes, high values for wide eyes.', tips: 'Sleeping: 5-15, Surprised: 90-100.' },
+        { name: 'Eyelash Length', description: 'Adjust eyelash prominence, range 0~100. Higher values for dense, long lashes, more suitable for female characters.', tips: 'Male characters: 20-40, Female characters: 60-90.' },
+        { name: 'Pupil Size', description: 'Adjust pupil proportion within eyes, range 30~70. Large pupils appear more innocent; small pupils appear more mature and sharp.', tips: 'Anime style typically larger (60+), realistic style moderate (45-55).' },
+        { name: 'Nose Width', description: 'Adjust nose wing width, range 30~70. Small values for delicate nose, large values for broad nose.', tips: 'Use with nose height to avoid proportion imbalance.' },
+        { name: 'Lip Thickness', description: 'Adjust lip fullness, range 30~70. Low values for thin lips, high values for thick lips.', tips: 'Thin lips suit cool characters, thick lips suit sexy characters.' },
+        { name: 'Ear Size', description: 'Adjust ear proportion relative to head, range 30~70. Elf ears can be enlarged to emphasize racial traits.', tips: 'Animal ears (cat/rabbit) are not affected by this parameter.' },
+        { name: 'Cheek Blush', description: 'Adjust cheek blush intensity, range 0~100. High values for obvious blush, suitable for shy or fever scenes.', tips: 'Blush color auto-adjusts based on skin tone with warm tint.' },
+        { name: 'Expression Intensity', description: 'Overall amplitude adjustment for all expression-related parameters, range 0~100. Acts as a global expression multiplier.', tips: '0 = expressionless, 100 = most exaggerated expression.' },
+        { name: 'Shadow Depth', description: 'Adjust facial shadow contrast, range 0~100. High values for strong 3D effect, low values for flat appearance.', tips: 'Cel-shaded style: 60-80, painterly style: 30-50.' },
+        { name: 'Highlight Intensity', description: 'Adjust brightness of eye and hair highlights, range 0~100. Highlights make characters more lively.', tips: 'Realistic style: 70-90, minimalist style: 30-50.' },
+        { name: 'Outline Width', description: 'Adjust character outer outline thickness, range 0~100. 0 = no line art, painterly effect.', tips: 'Cel animation: 60-80, watercolor: 10-30.' },],
       errors: [
         {
-          code: 'CONFIG_CORRUPTED',
-          message: 'Загрузка конфигурации лица ненормальна, отображение холста неполное или ползунки параметров не работают',
+          code: 'API_KEY_MISSING',
+          message: 'API Key not configured',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Face Maker → Area: prompt editor / generate button area',
+          cause: 'API Key is not configured.',
+          solution: 'Configure the Key in the Settings panel.',
+          steps: [
+            'Open "Settings → API"',
+            'Enter a valid Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Before using any online tool for the first time, be sure to configure a valid API Key in "Settings → API".',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'Request returns 401',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Face Maker → Area: prompt editor / generate button area',
+          cause: 'Key has expired.',
+          solution: 'Replace the Key.',
+          steps: [
+            'Open "Settings → API"',
+            'Replace with a new Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING'],
+          prevention: 'Regularly check the API Key\'s validity period and remaining quota; quickly verify whether the Key is valid through real-time testing in LLM Hub.',
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: 'Request timed out',
           severity: 'error',
-          category: 'B. Конфигурация и данные',
-          location: 'Страница: Создание персонажа (лицо) → Область: Центральный холст / Панель параметров справа',
-          cause: 'Данные конфигурации face-maker, сохраненные в локальном хранилище браузера, повреждены.',
-          solution: 'Сбросьте конфигурацию и пересоздайте лицо.',
-          steps: ['Нажмите кнопку «Сброс» внизу слева', 'Нажмите «Подтвердить сброс» в диалоге', 'Если все еще ненормально, откройте DevTools → Application → Local Storage и удалите ключи, начинающиеся с face-maker', 'Обновите страницу и начните сначала'],
-          relatedCodes: ['IMPORT_INVALID_JSON', 'STORAGE_READ_ONLY'],
-          prevention: 'Не изменяйте данные в localStorage вручную.',
+          category: 'A. API & Network',
+          location: 'Page: Face Maker → Area: prompt editor / generate button area',
+          cause: 'Generation took too long.',
+          solution: 'Reduce image size or increase timeout.',
+          steps: [
+            'Reduce image size',
+            'Increase timeout setting',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When processing large images or large amounts of text, reduce parameter scale (image size, Max Tokens, etc.) in advance; increase timeout settings when the network is unstable.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Backend unavailable',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Face Maker → Area: prompt editor / generate button area',
+          cause: 'Backend not started or configuration error.',
+          solution: 'Check backend status.',
+          steps: [
+            'Check API Base URL',
+            'Confirm backend service is running',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When deploying locally, ensure the backend process is started (npm start); when using a remote service, confirm the URL is configured correctly.',
+        },
+        {
+          code: 'CONFIG_CORRUPTED',
+          message: 'Config corrupted, editor shows blank or garbled text',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Face Maker → Area: prompt editor / right panel',
+          cause: 'The face-maker config in browser localStorage is corrupted, possibly due to manual data editing, version incompatibility, etc.',
+          solution: 'Reset the editor or manually clear localStorage.',
+          steps: [
+            'Click the "Reset" button in the upper right',
+            'Confirm in the dialog and refresh',
+            'If still abnormal, press Ctrl+Shift+I to open DevTools → Application → Local Storage, delete keys starting with face-maker',
+            'Refresh the page',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY', 'LOCAL_STORAGE_FULL'],
+          prevention: 'Do not manually edit localStorage data; regularly export configs as backups.',
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: 'Importing config shows "Invalid JSON format"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Face Maker → Area: bottom left "Import Config" button',
+          cause: 'File is corrupted, not in JSON format, or was modified by another program. It is also possible that a non-face-maker config file was selected.',
+          solution: 'Check file validity and re-import.',
+          steps: [
+            'Open the JSON file to import in a text editor',
+            'Confirm the file contains "tool": "face-maker"',
+            'Confirm the file is valid UTF-8 encoding, with no garbled text',
+            'If the file is corrupted, try to restore from historical backup',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH'],
+          prevention: 'Keep exported configuration files safe; do not modify them with non-text editors.',
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: 'Importing config shows "Tool type mismatch"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Face Maker → Area: bottom left "Import Config" button',
+          cause: 'The tool field in the imported JSON file is not face-maker.',
+          solution: 'Import the correct config file.',
+          steps: [
+            'Confirm the file was exported from the Face Maker page',
+            'Find the correct config file and re-import',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+          prevention: 'Only config files exported from the corresponding tool page contain the correct tool field.',
+        },
+        {
+          code: 'LOCAL_STORAGE_FULL',
+          message: 'Save failed, browser storage space insufficient',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Face Maker → Area: top right "Save" button',
+          cause: 'Browser localStorage storage space is full (usually about 5~10MB).',
+          solution: 'Clean up browser storage space or export configuration to a local file.',
+          steps: [
+            'Export current configuration as a JSON file',
+            'Open DevTools → Application → Local Storage',
+            'Delete unnecessary large data',
+            'Save again',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: 'Regularly clean up data no longer needed from browser localStorage; for large files, do not save directly in the editor—use the export function instead.',
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: 'Model unavailable',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Face Maker → Area: model dropdown',
+          cause: 'Model does not exist or Key has no permission.',
+          solution: 'Switch models or replace the Key.',
+          steps: [
+            'Select another model',
+            'Or replace the API Key',
+            'Retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Ensure the model configured on the backend is available and the current Key has permission to access it; regularly verify Key permissions.',
         },
         {
           code: 'STORAGE_READ_ONLY',
-          message: 'Операция сохранения не реагирует, данные теряются после обновления',
+          message: 'Save operation has no response, data lost after refresh',
           severity: 'critical',
-          category: 'B. Конфигурация и данные',
-          location: 'Страница: Создание персонажа (лицо) → Область: Кнопка «Сохранить черновик» внизу слева',
-          cause: 'Браузер находится в приватном/инкогнито-режиме, или localStorage отключен системной политикой.',
-          solution: 'Выйдите из приватного режима или освободите место на диске.',
-          steps: ['Убедитесь, что браузер не в режиме инкогнито', 'Проверьте, не заполнена ли система диском', 'Попробуйте открыть приложение в обычном окне', 'Если проблема persists, используйте функцию «Экспорт» как альтернативу'],
+          category: 'B. Config & Data',
+          location: 'Page: Face Maker → Area: top right "Save" button',
+          cause: 'Browser is in incognito mode, or localStorage is disabled by system policy.',
+          solution: 'Exit incognito mode or use a normal window.',
+          steps: [
+            'Confirm the browser is not in incognito/private mode',
+            'Check whether browser storage permissions are disabled',
+            'Export configuration as a local file as an alternative',
+          ],
           relatedCodes: ['LOCAL_STORAGE_FULL'],
-          prevention: 'Не используйте это приложение в режиме инкогнито браузера. Регулярно экспортируйте конфигурацию в локальный файл.',
+          prevention: 'Avoid using this app in browser incognito/private mode; regularly export configurations to local files as backups.',
+        },
+        {
+          code: 'UNSAVED_WARNING',
+          message: 'There are unsaved changes',
+          severity: 'info',
+          category: 'B. Config & Data',
+          location: 'Page: Face Maker → Area: upper-left "Back to Home" button',
+          cause: 'User modified configuration but has not saved it.',
+          solution: 'Save or discard changes.',
+          steps: [
+            'Click "Save"',
+            'Or click "Confirm Return" to discard',
+          ],
         },
       ],
     },
     {
       id: 'style-transfer',
-      title: 'Перенос стиля',
-      overview: `Инструмент для преобразования изображений персонажей в указанный художественный стиль. После загрузки изображения персонажа в формате PNG/JPG выберите модель ИИ, напишите Prompt и настройте дополнительные параметры для вызова API бэкенда. Поддерживает автоматическое вырезание, сохранение цветовой схемы, фиксацию позы, блокировку лица и другие дополнительные функции. Требуется подключение к интернету и действительный API Key.`,
+      title: 'Style Transfer',
+      overview: `Style Transfer generates images in the specified art style based on a source image and a style description prompt. Upload a reference image, enter a style prompt (e.g., "oil painting style, Van Gogh brushstrokes"), select a model and size, and click "Generate" to get a style-transferred image.
+
+Basic Process:
+1. Upload a source image
+2. Enter a style description prompt
+3. Select a model and size
+4. Click "Generate"
+5. View, copy, or download the generated image
+
+
+[Style Transfer Technology]
+The Style Transfer tool is based on Neural Style Transfer (NST) technology, using a pre-trained VGG-19 convolutional neural network to extract feature representations from both content and style images. By minimizing Content Loss and Style Loss, the tool migrates artistic features from the target style to the original image while preserving its structural content.
+
+Content loss measures differences between generated and original images at high-level convolutional features, ensuring pose, expression, and composition remain unchanged. Style loss uses Gram matrices to capture texture, color, and brushstroke characteristics. Total loss: L_total = α * L_content + β * L_style + γ * L_tv, where TV loss smooths the image and reduces noise.
+
+[Supported Models and Styles]
+The tool includes 8 pre-trained style models:
+1. Anime: Based on AnimeGANv2, ideal for converting photos to anime style
+2. Oil Painting: Simulates Van Gogh, Monet impressionist brushstrokes
+3. Watercolor: Soft edges and translucent color overlay effects
+4. Sketch: Pencil line drawing preserving light/shadow relationships
+5. Pixel Art: 8-bit/16-bit retro game style
+6. Cyberpunk: High contrast, neon tones, tech aesthetic
+7. Ink Wash: Traditional Chinese ink painting effect
+8. 3D Render: Simulates Blender/C4D three-dimensional rendering quality
+
+[Parameter Details]
+- Style Strength (0~100): Controls stylization degree. Low (20-40) preserves more original detail; high (70-100) strongly stylizes.
+- Content Preservation (0~100): Controls original content retention. Inversely related to style strength.
+- Iterations (50~500): Computation steps for style transfer. More iterations yield finer results but linearly increase processing time.
+- Output Size (256~2048): Final image resolution. Use integer multiples of original size to avoid scaling artifacts.
+
+[Batch Processing Mode]
+Supports uploading up to 10 images simultaneously for batch style transfer:
+- All images use the same style model and parameters
+- Results can be downloaded as a ZIP file
+- Each image processes independently; failures don't affect others
+- Test with a single image before batch processing
+
+[GPU Acceleration and Performance]
+- WebGL acceleration can improve processing speed 5-10x
+- 4K image processing requires at least 4GB VRAM; otherwise falls back to CPU
+- Real-time progress display with cancel option
+- Long processing (>30s) supports background mode allowing tab switching
+
+[Output Formats and Quality]
+- PNG: Preserves alpha channel, suitable for secondary editing
+- JPEG: Adjustable quality (60-100), smaller file size
+- WebP: 25-35% smaller than JPEG at same quality
+- Optional metadata preservation (EXIF, ICC color profile)`,
       buttons: [
-        { name: 'Выбрать изображение / Заменить изображение', description: 'Загрузите файл изображения персонажа. Поддерживаются форматы PNG и JPG. Рекомендуется загружать одиночную стоячую иллюстрацию или четкое полуторное изображение.' },
-        { name: 'Начать', description: 'Запустите процесс переноса стиля. После проверки входного файла и параметров отправьте запрос на преобразование в бэкенд.' },
-        { name: 'Скопировать JSON', description: 'Скопируйте все текущие параметры конфигурации как JSON-текст в буфер обмена.' },
-        { name: 'Скачать результат', description: 'Скачайте преобразованное результирующее изображение локально.' },
-        { name: 'Сброс', description: 'Сбросьте все параметры на значения по умолчанию, очистите загруженное изображение и результаты.' },
-      ],
+        { name: 'Generate', description: 'Submits the source image and style prompt to the backend to generate a style-transferred image.' },
+        { name: 'Copy Image', description: 'Copies the generated image to the clipboard.' },
+        { name: 'Download Image', description: 'Downloads the generated image to the local machine.' },
+        { name: 'Open Image', description: 'Opens the image in a new tab.' },
+        { name: 'Upload Image', description: 'Selects a local image file as the source image. Supports PNG and JPG formats.' },
+        { name: 'Replace Image', description: 'Replaces the currently uploaded source image.' },
+      
+        { name: 'Preview', description: 'Quickly generate a low-resolution preview (256px) before full processing to confirm style selection.' },
+        { name: 'Compare View', description: 'Display original and stylized images side by side with a draggable slider for transition viewing.' },
+        { name: 'History', description: 'View recent 20 style transfer histories. Reload parameters or delete records.' },
+        { name: 'Favorite Style', description: 'Save current style model and parameters to favorites for quick future access.' },
+        { name: 'Adjust Canvas', description: 'Crop, rotate, or flip input images before style transfer.' },
+        { name: 'Advanced Params', description: 'Expand more professional parameters: content weight, style weight, TV weight, initialization method.' },
+        { name: 'GPU Monitor', description: 'Real-time display of GPU memory usage and temperature to judge device load.' },],
       parameters: [
-        { name: 'Модель', description: 'Выберите модель генерации изображений ИИ для использования. Встроенный режим использует канал бэкенда Plato; пользовательский режим использует настроенный внешний API.', tips: 'gpt-image-2 — модель по умолчанию. claude-4-sonnet лучше проявляет себя в согласованности персонажа.' },
-        { name: 'Prompt', description: 'Положительный промпт, описывающий желаемый художественный стиль, сцену и особенности персонажа.', tips: 'Prompt автоматически добавляет английские суффиксы, преобразованные из дополнительных параметров.' },
-        { name: 'Negative Prompt', description: 'Негативный промпт, описывающий контент, который вы не хотите видеть.', tips: 'Общие негативные теги: низкое качество, лишние пальцы, деформированное тело, размытие.' },
-        { name: 'Temperature', description: 'Температура сэмплирования, контролирует случайность результатов генерации. Диапазон 0~2, по умолчанию 0.7.', tips: 'Низкие значения дают более стабильные результаты; высокие — более креативные, но могут отклоняться от ожиданий.' },
-        { name: 'Strength', description: 'Сила стиля/амплитуда перерисовки. Диапазон 0~1. Большие значения сохраняют меньше оригинального изображения.', tips: '0.4~0.6 — обычно используемый диапазон. Можно менять стиль, сохраняя черты персонажа.' },
-      ],
+        { name: 'Model', description: 'Selects the AI image generation model used for style transfer.', tips: 'Some models perform better in specific styles; it is recommended to experiment.' },
+        { name: 'Size', description: 'Resolution of the generated image.', tips: 'It is recommended to be consistent with or close to the source image size to avoid distortion.' },
+        { name: 'Style Prompt', description: 'Describes the desired target style, such as "cyberpunk style, neon lighting".', tips: 'Detailed style descriptions yield better results; you can refer to the prompts in Prompt Suite.' },
+        { name: 'Source Image', description: 'The image to be style-transferred.', tips: 'It is recommended to use images with clear subjects and simple backgrounds for better results.' },
+      
+        { name: 'Noise Strength', description: 'Control random noise in generated images, range 0~100. Appropriate noise adds texture quality.', tips: 'Oil/sketch style: 20-40, anime style: 5-15.' },
+        { name: 'Edge Preservation', description: 'Preserve original image edge contours, range 0~100. High values keep more original structure; low values let style fully reshape contours.', tips: 'Portraits: 70-90, landscape/abstract: 30-60.' },
+        { name: 'Color Saturation', description: 'Adjust output image color vividness, range 0~200. 100 = original saturation, >100 enhances, <100 reduces.', tips: 'Cyberpunk: 120-150, ink wash: 40-60.' },
+        { name: 'Brightness Offset', description: 'Overall brightness adjustment, range -50~50. Positive brightens, negative darkens.', tips: 'Oil painting usually slightly darker (-10 to -20), watercolor slightly brighter (+10 to +20).' },
+        { name: 'Contrast Enhancement', description: 'Adjust light/dark contrast, range 0~200. 100 = original, >100 enhances contrast.', tips: 'High contrast styles (cyberpunk, poster): 130-160, soft styles: 80-100.' },
+        { name: 'Style Blend Ratio', description: 'Control blend weights when multiple styles are selected. Only effective when Multi-Style Overlay is enabled.', tips: 'Main style 60-80%, auxiliary style 20-40%.' },
+        { name: 'Multi-Style Overlay', description: 'Enable simultaneous application of 2-3 style models. Control individual weights via Style Blend Ratio.', tips: 'Style compatibility varies; preview before batch processing.' },
+        { name: 'Region Mask', description: 'Upload a black-and-white mask image. White regions apply style transfer; black regions preserve original. Enables localized stylization.', tips: 'Mask dimensions should match input. PNG alpha channel supported as mask.' },
+        { name: 'Post Sharpening', description: 'Sharpening filter strength after style transfer, range 0~100. Compensates for blur caused by stylization.', tips: 'Pixel art: 0, oil painting: 20-40, photo: 50-70.' },
+        { name: 'Color Quantization', description: 'Reduce output color count, range 0~64. Non-zero values produce posterization or retro game effects.', tips: 'Pixel art: 16-32, pop art: 8-16, others: 0.' },
+        { name: 'Canvas Texture', description: 'Overlay paper or canvas texture, range 0~100. Suitable for watercolor, oil painting and other media-requiring styles.', tips: 'Watercolor: 60-80, oil painting: 40-60, digital: 0.' },],
       errors: [
         {
           code: 'API_KEY_MISSING',
-          message: 'После нажатия «Начать» немедленно появляется ошибка, панель ошибок показывает ошибку, связанную с API Key',
+          message: 'API Key not configured',
           severity: 'critical',
-          category: 'A. API и сеть',
-          location: 'Страница: Перенос стиля → Область: Нижняя панель ошибок слева',
-          cause: 'API Key не настроен в «Настройки → API» или Key был очищен.',
-          solution: 'Настройте действительный API Key в панели настроек.',
-          steps: ['Нажмите «Открыть настройки» вверху справа', 'Переключитесь на вкладку «API»', 'Введите действительный Key', 'Нажмите «Сохранить»', 'Вернитесь на страницу переноса стиля и нажмите «Начать» снова'],
-          relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
-          prevention: 'Перед первым использованием любого онлайн-инструмента обязательно настройте действительный API Key в «Настройки → API».',
+          category: 'A. API & Network',
+          location: 'Page: Style Transfer → Area: left column prompt area',
+          cause: 'API Key is not configured.',
+          solution: 'Configure the Key in the Settings panel.',
+          steps: [
+            'Open "Settings → API"',
+            'Enter a valid Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Before using any online tool for the first time, be sure to configure a valid API Key in "Settings → API".',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'Request returns 401',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Style Transfer → Area: left column prompt area',
+          cause: 'Key has expired.',
+          solution: 'Replace the Key.',
+          steps: [
+            'Open "Settings → API"',
+            'Replace with a new Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING'],
+          prevention: 'Regularly check the API Key\'s validity period and remaining quota; quickly verify whether the Key is valid through real-time testing in LLM Hub.',
         },
         {
           code: 'API_TIMEOUT',
-          message: 'Запрос долго не отвечает, в конечном итоге появляется тайм-аут',
+          message: 'Request timed out',
           severity: 'error',
-          category: 'A. API и сеть',
-          location: 'Страница: Перенос стиля → Область: Нижняя панель ошибок слева / прогресс-бар',
-          cause: 'Генерация на бэкенде занимает слишком много времени, превышая тайм-аут фронтенда.',
-          solution: 'Уменьшите размер изображения или проверьте сетевое подключение.',
-          steps: ['Уменьшите «Размер изображения» (рекомендуется не более 2048)', 'Уменьшите значение «Steps» (рекомендуется 20~30)', 'Проверьте стабильность сетевого подключения', 'Повторите преобразование'],
-          relatedCodes: ['NETWORK_TIMEOUT', 'BACKEND_UNAVAILABLE'],
-          prevention: 'При обработке больших изображений заранее уменьшайте масштаб параметров.',
+          category: 'A. API & Network',
+          location: 'Page: Style Transfer → Area: left column prompt area',
+          cause: 'Generation took too long.',
+          solution: 'Reduce image size or increase timeout.',
+          steps: [
+            'Reduce image size',
+            'Increase timeout setting',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When processing large images or large amounts of text, reduce parameter scale (image size, Max Tokens, etc.) in advance; increase timeout settings when the network is unstable.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Backend unavailable',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Style Transfer → Area: left column prompt area',
+          cause: 'Backend not started or configuration error.',
+          solution: 'Check backend status.',
+          steps: [
+            'Check API Base URL',
+            'Confirm backend service is running',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When deploying locally, ensure the backend process is started (npm start); when using a remote service, confirm the URL is configured correctly.',
+        },
+        {
+          code: 'DEVICE_MEMORY_LOW',
+          message: 'Browser tab crashes or becomes unresponsive',
+          severity: 'critical',
+          category: 'F. System & Permissions',
+          location: 'Page: Style Transfer → Area: entire page',
+          cause: 'Device memory is insufficient and the browser forcibly terminated the tab process. Usually occurs when processing ultra-large images (>4096 resolution).',
+          solution: 'Close other tabs, reduce image size, or use a device with more memory.',
+          steps: [
+            'Save current work',
+            'Close other browser tabs',
+            'Reduce the uploaded image dimensions',
+            'Restart the browser and retry',
+          ],
+          relatedCodes: ['FILE_TOO_LARGE'],
+          prevention: 'Close other browser tabs before processing large files; scale the image\'s longest side to below 2048.',
+        },
+        {
+          code: 'FILE_CORRUPTED',
+          message: 'Image file is corrupted',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Style Transfer → Area: image upload / preview area',
+          cause: 'The selected image file is corrupted or encoded in an unsupported format.',
+          solution: 'Replace with a valid image file.',
+          steps: [
+            'Open the image in a system image viewer to confirm it displays normally',
+            'If corrupted, use image repair tools or replace with another image',
+            'Re-upload',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Confirm the image can be opened normally in the system\'s built-in image viewer before uploading.',
+        },
+        {
+          code: 'FILE_FORMAT_UNSUPPORTED',
+          message: 'Upload shows "Unsupported file format"',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Style Transfer → Area: image selection button',
+          cause: 'Selected WEBP, GIF, BMP, TIFF, or other unsupported formats. Style Transfer only supports PNG and JPG.',
+          solution: 'Convert the image to PNG or JPG format.',
+          steps: [
+            'Use the Image Format Converter tool (Home → Image Format Converter) to convert the file to PNG or JPG',
+            'Or use the system\'s built-in image preview/editor to export as PNG/JPG',
+            'Re-select the converted file on the Style Transfer page',
+          ],
+          relatedCodes: ['UPLOAD_FORMAT'],
+          prevention: 'Confirm the file format is PNG or JPG before uploading.',
+        },
+        {
+          code: 'FILE_TOO_LARGE',
+          message: 'Upload preview fails or generation reports error',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Style Transfer → Area: preview area',
+          cause: 'Uploaded image dimensions are too large (exceeding 4096x4096 pixels) or the file size exceeds browser/backend limits.',
+          solution: 'Compress or resize the image before uploading.',
+          steps: [
+            'Use the Image Converter tool to scale the image\'s longest side to below 2048 or 4096 pixels',
+            'If it is a PNG, convert to JPG to reduce file size',
+            'Re-upload the processed image',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Recommended to upload images of 1024×1024 ~ 2048×2048, balancing quality and processing speed.',
+        },
+        {
+          code: 'IMG_PROMPT_TOO_LONG',
+          message: 'Image generation prompt exceeds maximum length',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer → Area: left column prompt editor',
+          cause: 'The prompt text entered is too long, exceeding the backend model\'s limit.',
+          solution: 'Shorten the prompt.',
+          steps: [
+            'Delete secondary descriptive vocabulary',
+            'Retain core style description',
+            'Retry',
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND'],
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: 'Model unavailable',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer → Area: model dropdown',
+          cause: 'Model does not exist or Key has no permission.',
+          solution: 'Switch models or replace the Key.',
+          steps: [
+            'Select another model',
+            'Or replace the API Key',
+            'Retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Ensure the model configured on the backend is available and the current Key has permission to access it; regularly verify Key permissions.',
+        },
+        {
+          code: 'NETWORK_DISCONNECTED',
+          message: 'Network disconnected, unable to load model list',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Style Transfer → Area: bottom model dropdown',
+          cause: 'Device is not connected to the network, Wi-Fi is disconnected, or a firewall is blocking the request.',
+          solution: 'Restore network connection.',
+          steps: [
+            'Check the device\'s network connection status',
+            'Try accessing other websites to confirm the network is normal',
+            'If using a proxy/VPN, check whether the proxy settings are correct',
+            'If on a company/campus network, confirm whether API access is restricted',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: 'Before using online tools, confirm the network connection is normal; avoid performing long workflows in environments with large network fluctuations.',
+        },
+        {
+          code: 'PROMPT_BLOCKED',
+          message: 'Content policy violation or sensitive word interception',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer → Area: left column prompt area',
+          cause: 'Content in the prompt was intercepted by the safety filter.',
+          solution: 'Modify the prompt, remove sensitive vocabulary.',
+          steps: [
+            'Check the error details for the specific intercepted content',
+            'Modify the prompt, replacing or removing sensitive vocabulary',
+            'Retry',
+          ],
+          relatedCodes: ['403_FORBIDDEN', 'P2G_WORKFLOW_ERROR'],
+          prevention: 'Avoid using sensitive vocabulary when modifying prompts; test with the default prompt first, then customize after it passes.',
+        },
+        {
+          code: 'PROMPT_TOO_LONG',
+          message: 'Prompt exceeds maximum length',
+          severity: 'warning',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer → Area: left column prompt editor',
+          cause: 'The prompt text entered is too long, exceeding the backend model\'s limit.',
+          solution: 'Shorten the prompt.',
+          steps: [
+            'Delete secondary descriptive vocabulary',
+            'Retain core subject and style description',
+            'Retry',
+          ],
+          relatedCodes: ['MODEL_NOT_FOUND'],
+        },
+        {
+          code: 'STYLE_TRANSFER_INPUT_MISSING',
+          message: 'Style transfer source image not uploaded',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Style Transfer → Area: left column image upload area',
+          cause: 'Clicked "Generate" without uploading a source image.',
+          solution: 'Upload a source image first.',
+          steps: [
+            'Click "Upload Image"',
+            'Select a local image file',
+            'After the preview appears, click "Generate"',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Confirm the source image is uploaded and the preview is displayed before generating.',
+        },
+        {
+          code: 'STYLE_TRANSFER_REQUEST_FAILED',
+          message: 'Style transfer request failed',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Style Transfer → Area: left column prompt area',
+          cause: 'Backend returns an error.',
+          solution: 'Check error details and retry.',
+          steps: [
+            'View specific error information',
+            'Check API Key and backend status',
+            'Modify prompt and retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED'],
         },
       ],
     },
@@ -936,387 +1433,2177 @@ IndexTTS — это модель преобразования текста в р
     },
     {
       id: 'prompt-suite',
-      title: 'Карта персонажа / Редактор мира',
-      overview: `PromptSuite — это редактор форматированного текста для организации карт персонажей, описаний мира, карт отношений и профилей речи. Поддерживает форматирование шрифтов, цветов, выделений, заголовков, списков, таблиц, блоков кода, цитат и вставки изображений. Весь контент автоматически сохраняется в локальном браузере.`,
+      title: 'Prompt Suite',
+      overview: `Prompt Suite is a prompt management and generation tool. It contains 4 preset prompt categories (Character, Scene, Style, Action), each containing multiple sub-categories. Users can browse, copy, and favorite prompts, and can also create custom prompt combinations.
+
+Basic Process:
+1. Select a prompt category on the left
+2. Browse prompts in the sub-category list on the right
+3. Click the copy button to copy a single prompt to the clipboard
+4. Or check multiple prompts and click "Combine & Copy" to generate a combined prompt
+
+
+[Character Profile System]
+The Character Profile is one of OC Maker's core features, allowing creators to record character information in a structured way. Profiles include:
+
+Basic Info Module:
+- Character name, aliases, codenames
+- Age, birthday, zodiac, blood type
+- Height, weight, measurements (optional)
+- Race, nationality, native language
+- Occupation, identity, social class
+
+Appearance Module:
+- Hairstyle, hair color, eye color, skin tone
+- Body type, posture, distinguishing features (moles, scars, tattoos)
+- Multiple outfit sets (casual, combat, formal)
+- Accessories, weapons, props
+
+Personality & Psychology Module:
+- MBTI type, Enneagram
+- Personality keywords (up to 10 tags)
+- Strengths, weaknesses, psychological trauma
+- Values, beliefs, motivations
+- Fears, likes, dislikes
+
+Background Story Module:
+- Family origin, upbringing environment
+- Key life events (timeline)
+- Relationship network (family, friends, enemies, lovers)
+- Affiliated organizations, factions, stance
+- Goals and dreams
+
+Ability Settings Module:
+- Combat abilities, special skills, magic system
+- Ability source, limitations, side effects
+- Attribute panel (STR/AGI/INT/CON RPG stats)
+- Skill tree, advancement routes
+
+[World Building Editor]
+Supports multi-layered structure:
+- World: Top level (e.g., "Eorzea", "Cyberpunk 2077")
+- Region: Countries, cities, terrain within continents
+- Faction: Nations, organizations, gangs, religions
+- Race: Humans, elves, orcs, machine life, etc.
+- History: Chronicle, timeline, calendar system
+- Rules: Physical laws, magic systems, social institutions
+
+[Template System]
+Built-in 20+ professional templates:
+- Basic Character Card (beginner-friendly)
+- Detailed Character Card (all modules)
+- Light Novel Card (focus on moe attributes and relationships)
+- TRPG Character Card (with stats and skills)
+- Game Character Design Doc (art requirements and action descriptions)
+- Animation Character Design (expression and color specifications)
+- World Setting Book (complete world-building document)
+
+Templates support variable substitution like {{characterName}}, {{age}}, etc.
+
+[Export Formats]
+- Markdown: For forums and blogs
+- JSON: Structured data for programmatic reading
+- PDF: Beautiful layout for printing and sharing
+- HTML: Rich text with image embedding
+- BBCode: For Discuz!, NGA and similar forums
+- Plain text: Most universal format
+
+[Collaboration and Versioning]
+- Multi-user collaborative editing (requires cloud sync)
+- Automatic version history with point-in-time recovery
+- Diff comparison highlighting changes
+- Comment and annotation system for team communication`,
       buttons: [
-        { name: 'Сохранить документ', description: 'Сохраните текущий HTML-контент редактора и состояние панели инструментов в локальное хранилище.' },
-        { name: 'Сброс', description: 'Очистите текущий документ и восстановите шаблон по умолчанию. Перед операцией появится диалог подтверждения.' },
-        { name: 'Импорт конфигурации', description: 'Импортируйте ранее экспортированный JSON-файл конфигурации PromptSuite.' },
-        { name: 'Экспорт HTML', description: 'Экспортируйте текущий документ как автономный HTML-файл с встроенными стилями.' },
-      ],
+        { name: 'Copy', description: 'Copies a single prompt text to the clipboard.' },
+        { name: 'Favorite', description: 'Adds the prompt to the favorites list for quick access later.' },
+        { name: 'Combine & Copy', description: 'Combines the selected multiple prompts and copies them to the clipboard, separated by commas.' },
+        { name: 'Clear Selection', description: 'Clears all currently selected prompts.' },
+        { name: 'Expand / Collapse Category', description: 'Expands or collapses a prompt category to show or hide sub-categories.' },
+      
+        { name: 'New Character', description: 'Create a new blank character card. Choose from templates or fully customize.' },
+        { name: 'Duplicate Character', description: 'Copy all content of the current character card to an independently editable duplicate.' },
+        { name: 'Delete Character', description: 'Permanently delete current character card. Requires double confirmation; exported files are unaffected.' },
+        { name: 'Import Character', description: 'Import character data from JSON, Markdown, or CSV files. Supports batch import.' },
+        { name: 'Template Market', description: 'Browse and download community-shared custom templates. Upload your own templates.' },
+        { name: 'Relationship Map', description: 'Visualize relationship networks between all characters in the world (family, friends, enemies, lovers).' },
+        { name: 'Timeline', description: 'Create event timelines for characters or worlds. Add events, dates, descriptions, and related characters.' },
+        { name: 'Compare Mode', description: 'Select two character cards for side-by-side comparison. Highlights differences to check setting conflicts.' },],
       parameters: [
-        { name: 'Выбор шаблона', description: 'Быстро переключайте предустановленные шаблоны: Описание мира, Карта персонажа, Карта отношений, Профиль речи, Таймлайн.' },
-        { name: 'Шрифт', description: 'Установите семейство шрифтов основного текста редактора.' },
-        { name: 'Размер шрифта', description: 'Установите базовый размер шрифта, поддерживаются единицы px/rem.' },
-        { name: 'Цвет текста', description: 'Установите цвет текущего выделенного текста.' },
-        { name: 'Жирный / Курсив / Подчеркнутый / Зачеркнутый', description: 'Базовые кнопки форматирования текста.' },
-      ],
+        { name: 'Search Prompts', description: 'Search box, supports searching prompt content by keyword.', tips: 'Enter keywords such as "cyberpunk" or "blue hair" to quickly find relevant prompts.' },
+        { name: 'Category Filter', description: 'Filters prompt categories displayed on the left.', tips: 'Quickly locate the desired prompt type when there are many categories.' },
+      
+        { name: 'Tag Count Limit', description: 'Maximum tags retained during auto-tagging, range 5~50. More tags = more detailed but potentially noisier.', tips: 'Character training: 20-30, style training: 10-15.' },
+        { name: 'Tag Confidence Threshold', description: 'Minimum confidence for auto-tags, range 0~100. Tags below threshold are filtered out.', tips: 'Recommended 30-50; too high loses useful tags.' },
+        { name: 'World Tier Depth', description: 'Control world editor tier expansion depth, range 1~5. Deep tiers for complex settings; shallow for quick browsing.', tips: 'Beginners: 2-3, experienced: 4-5.' },
+        { name: 'Auto-Save Interval', description: 'Auto-save draft interval in minutes, range 1~30. Set 0 to disable.', tips: 'Recommended 3-5 minutes; too short may cause lag, too long risks progress loss.' },
+        { name: 'Export Image Quality', description: 'Image compression quality for documents with images, range 60~100. High = better quality but larger files.', tips: 'Web sharing: 80-85, printing: 95-100.' },
+        { name: 'Collaboration Cursors', description: 'Show other users\' cursor positions and usernames during multi-user collaboration.', tips: 'Large teams: enable. Personal use: disable to reduce distraction.' },
+        { name: 'Diff Highlight Mode', description: 'Version comparison highlight method: line-level (whole line) or word-level (only differing words).', tips: 'Major changes: line-level, minor tweaks: word-level.' },
+        { name: 'Template Strict Mode', description: 'When enabled, required fields in templates must be filled before export or sharing.', tips: 'Formal projects: enable. Draft phase: disable.' },
+        { name: 'Max Relationship Connections', description: 'Maximum relationship connections per character, range 5~50. Prevents overly complex relationship graphs.', tips: 'Light novel: 10-15, TRPG: 20-30.' },],
       errors: [
         {
-          code: 'CONFIG_CORRUPTED',
-          message: 'После открытия редактора контент пустой или форматирование искажено',
+          code: 'API_KEY_MISSING',
+          message: 'API Key not configured',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Prompt Suite → Area: prompt generation area',
+          cause: 'API Key is not configured.',
+          solution: 'Configure the Key in the Settings panel.',
+          steps: [
+            'Open "Settings → API"',
+            'Enter a valid Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Before using any online tool for the first time, be sure to configure a valid API Key in "Settings → API".',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'Request returns 401',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Prompt Suite → Area: prompt generation area',
+          cause: 'Key has expired.',
+          solution: 'Replace the Key.',
+          steps: [
+            'Open "Settings → API"',
+            'Replace with a new Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING'],
+          prevention: 'Regularly check the API Key\'s validity period and remaining quota; quickly verify whether the Key is valid through real-time testing in LLM Hub.',
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: 'Request timed out',
           severity: 'error',
-          category: 'B. Конфигурация и данные',
-          location: 'Страница: Карта персонажа / Редактор мира → Область: Центральная область редактора',
-          cause: 'Данные конфигурации PromptSuite, сохраненные в локальном хранилище браузера, повреждены.',
-          solution: 'Сбросьте редактор или очистите localStorage вручную.',
-          steps: ['Нажмите кнопку «Сброс»', 'Нажмите «Подтвердить сброс»', 'Если все еще ненормально, удалите ключи prompt-suite в localStorage', 'Обновите страницу'],
-          relatedCodes: ['IMPORT_INVALID_JSON', 'STORAGE_READ_ONLY'],
-          prevention: 'Не изменяйте данные localStorage вручную.',
+          category: 'A. API & Network',
+          location: 'Page: Prompt Suite → Area: prompt generation area',
+          cause: 'Generation took too long.',
+          solution: 'Increase timeout or retry.',
+          steps: [
+            'Increase timeout setting',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When processing large images or large amounts of text, reduce parameter scale (image size, Max Tokens, etc.) in advance; increase timeout settings when the network is unstable.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Backend unavailable',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Prompt Suite → Area: prompt generation area',
+          cause: 'Backend not started or configuration error.',
+          solution: 'Check backend status.',
+          steps: [
+            'Check API Base URL',
+            'Confirm backend service is running',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When deploying locally, ensure the backend process is started (npm start); when using a remote service, confirm the URL is configured correctly.',
+        },
+        {
+          code: 'CONFIG_CORRUPTED',
+          message: 'Editor data blank or garbled when opened',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Prompt Suite → Area: prompt editor / right panel',
+          cause: 'The PromptSuite config in browser localStorage is corrupted.',
+          solution: 'Refresh the editor or manually clear localStorage.',
+          steps: [
+            'Click the refresh button',
+            'Confirm in the dialog and refresh',
+            'If still abnormal, press Ctrl+Shift+I → Application → Local Storage, delete prompt-suite keys',
+            'Refresh the page',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY', 'LOCAL_STORAGE_FULL'],
+          prevention: 'Do not manually edit localStorage data; regularly export configs as backups.',
+        },
+        {
+          code: 'CURSOR_JUMP',
+          message: 'Cursor jumps during editing',
+          severity: 'warning',
+          category: 'F. System & Permissions',
+          location: 'Page: Prompt Suite → Area: prompt editor / right panel',
+          cause: 'In earlier versions, real-time rendering using dangerouslySetInnerHTML caused DOM and React state to be out of sync. This has been fixed in the current version.',
+          solution: 'Refresh the page to restore auto-saved content.',
+          steps: [
+            'Press Ctrl+S to manually save current content',
+            'Refresh the page (F5 or Ctrl+R)',
+            'After page reload, auto-saved content will be restored',
+          ],
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: 'Export failed',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Prompt Suite → Area: top right export button',
+          cause: 'Browser blocked the download, or the generated file is too large.',
+          solution: 'Check browser download permissions or reduce content size.',
+          steps: [
+            'Check whether the browser blocked the download (upper right download icon)',
+            'If blocked, allow this site to download files',
+            'If the file is too large, split into multiple exports or reduce image size',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Regularly export and back up; for large files, split exports.',
+        },
+        {
+          code: 'HOSTED_API_REQUIRED',
+          message: 'Static hosting requires custom API configuration',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Prompt Suite → Area: prompt generation area',
+          cause: 'Deployed to a pure static hosting environment, cannot directly access local backend.',
+          solution: 'Configure a remote custom API address.',
+          steps: [
+            'Open "Settings → API"',
+            'Switch "Interface Mode" to "Custom API"',
+            'Enter the backend root address',
+            'Enter the API Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Before using Paper2Gal in a static hosting environment, be sure to deploy the backend service and configure the correct API address and Key.',
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: 'Model unavailable',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Prompt Suite → Area: model dropdown',
+          cause: 'Model does not exist or Key has no permission.',
+          solution: 'Switch models or replace the Key.',
+          steps: [
+            'Select another model',
+            'Or replace the API Key',
+            'Retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Ensure the model configured on the backend is available and the current Key has permission to access it; regularly verify Key permissions.',
+        },
+        {
+          code: 'PASTE_FORMAT_LOSS',
+          message: 'Pasted content lost formatting',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Prompt Suite → Area: prompt editor',
+          cause: 'The editor uses plain text mode; pasted rich text (Word, web pages) will lose formatting such as colors and fonts.',
+          solution: 'Paste as plain text or manually adjust formatting.',
+          steps: [
+            'Use Ctrl+Shift+V to paste as plain text',
+            'Or paste into Notepad first, then copy to the editor',
+          ],
+          prevention: 'The editor only supports plain text; for formatted content, use Markdown syntax.',
+        },
+        {
+          code: 'PROMPT_BLOCKED',
+          message: 'Content policy violation',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Prompt Suite → Area: prompt generation area',
+          cause: 'Generated content was intercepted by the safety filter.',
+          solution: 'Modify the prompt, remove sensitive vocabulary.',
+          steps: [
+            'Check the error details for the specific intercepted content',
+            'Modify the prompt, replacing or removing sensitive vocabulary',
+            'Retry',
+          ],
+          relatedCodes: ['403_FORBIDDEN', 'P2G_WORKFLOW_ERROR'],
+          prevention: 'Avoid using sensitive vocabulary when modifying prompts; test with the default prompt first, then customize after it passes.',
         },
       ],
     },
     {
       id: 'llm-hub',
-      title: 'LLM Текстовый доступ',
-      overview: `LLM Hub — это инструмент настройки параметров больших языковых моделей и их тестирования в реальном времени. Вы можете настраивать выбор модели, параметры сэмплирования, системные промпты и т.д., а затем проводить многоходовые диалоги с ИИ через панель тестирования в реальном времени. Поддерживает сохранение нескольких пресетов конфигурации для быстрого переключения между различными творческими сценариями.`,
+      title: 'LLM Hub',
+      overview: `LLM Hub is a multi-model AI dialogue and testing tool. It supports simultaneously connecting to multiple LLM (Large Language Model) service providers, sending the same question to different models and comparing their answers. Supports streaming output, Markdown rendering, and conversation history management.
+
+Basic Process:
+1. Select one or more models to enable in the model list on the left
+2. Enter a question in the input box at the bottom
+3. Click "Send" or press Enter
+4. View the replies from each model in the dialogue area on the right
+5. Click "Compare" to place the answers of multiple models side by side for comparison
+
+
+[Supported Models and Providers]
+LLM Hub currently supports the following major language models:
+
+OpenAI Series:
+- GPT-4o: Latest flagship model, strong multimodal capabilities
+- GPT-4o-mini: Lightweight version, fast and cost-effective
+- GPT-4-turbo: 128K context for long document processing
+- GPT-3.5-turbo: Economical for daily conversations
+
+Google Series:
+- Gemini 1.5 Pro: Ultra-long context (2M tokens), video and code analysis
+- Gemini 1.5 Flash: Fast response for real-time applications
+
+Anthropic Series:
+- Claude 3.5 Sonnet: Strong writing and creativity, gentle personality
+- Claude 3 Opus: Deep reasoning for academic and programming tasks
+
+Local Models (via Ollama / LM Studio):
+- Llama 3.1 (8B/70B/405B)
+- Mistral 7B / Mixtral 8x7B
+- Qwen 2.5 (7B/14B/72B)
+- DeepSeek V2
+
+[API Configuration Guide]
+Each provider requires separate API Key configuration:
+1. Click "Add Provider", select the corresponding platform
+2. Enter API Key (obtained from the provider's developer dashboard)
+3. Optional: Custom Base URL (for proxies or self-hosted services)
+4. Optional: Set request timeout (default 30 seconds)
+5. Test connection to confirm availability
+
+[Context Management]
+- System Prompt: Defines AI role and behavior guidelines
+- Conversation History: Automatically maintains recent N turns (configurable)
+- Context Window: Shows current token usage / max tokens
+- Long Conversation Optimization: Auto-summarizes early conversation when approaching limits
+
+[Streaming Response]
+Enabling streaming output displays AI responses word by word:
+- Supports pause/resume generation
+- Supports mid-generation stop
+- Real-time generation speed display (tokens/sec)
+- Real-time syntax highlighting for code blocks
+
+[Advanced Features]
+- Temperature (0~2): Controls randomness. Low (0.1-0.3) for factual answers; high (0.8-1.2) for creative writing
+- Top-p (Nucleus Sampling): 0~1, works with temperature to control diversity
+- Max Generation Length: Limits tokens per response
+- Frequency Penalty: Reduces repetitive wording
+- Presence Penalty: Encourages introducing new topics
+- Function Calling: Allows AI to call external tools and APIs
+
+[Usage Examples]
+1. Roleplay: Set system prompt as character personality for immersive dialogue
+2. World Building: Input existing settings, let AI fill details and check consistency
+3. Plot Creation: Provide outline, let AI generate specific chapters
+4. Code Assistance: Explain code, generate scripts, debug errors
+5. Translation & Polishing: Translate rough settings into fluent target languages`,
       buttons: [
-        { name: 'Сохранить документ', description: 'Сохраните текущую конфигурацию LLM в локальное хранилище.' },
-        { name: 'Сброс', description: 'Сбросьте все параметры на значения по умолчанию.' },
-        { name: 'Импорт конфигурации', description: 'Импортируйте ранее экспортированный JSON-файл конфигурации LLM Hub.' },
-        { name: 'Отправить', description: 'Отправьте введенное сообщение ИИ на панели тестирования в реальном времени.' },
-        { name: 'Очистить', description: 'Очистите текущую историю разговора и выходное содержимое.' },
-        { name: 'Сохранить как пресет', description: 'Сохраните текущие все параметры как именованный пресет.' },
-      ],
+        { name: 'Send', description: 'Sends the current question to all enabled models.' },
+        { name: 'Clear Conversation', description: 'Clears all dialogue records in the current conversation.' },
+        { name: 'Export Conversation', description: 'Exports the current conversation as a JSON or Markdown file.' },
+        { name: 'Compare', description: 'Enters comparison mode, displaying answers from multiple models side by side.' },
+        { name: 'Copy Answer', description: 'Copies a single model\'s answer to the clipboard.' },
+        { name: 'Regenerate', description: 'Resends the question to a specific model to get a new answer.' },
+        { name: 'Toggle Model', description: 'Enables or disables a model. Only enabled models will receive questions.' },
+        { name: 'Test API', description: 'Tests whether the currently configured API Key and address are valid.' },
+      
+        { name: 'Clear Chat', description: 'Clear all history messages in current conversation while preserving system prompt and model config.' },
+        { name: 'Export Chat', description: 'Export current conversation as Markdown, JSON, or plain text file.' },
+        { name: 'Import Chat', description: 'Import conversation history from file. Supports continuing previous conversations.' },
+        { name: 'Share Chat', description: 'Generate a read-only share link for the conversation. Optionally include system prompt.' },
+        { name: 'Token Stats', description: 'Display current conversation token usage details: system prompt, user messages, AI responses.' },
+        { name: 'Preset Prompts', description: 'Load preset system prompt templates (roleplay, coding assistant, creative writing, etc.).' },
+        { name: 'Multi-Model Compare', description: 'Send the same question to multiple models simultaneously. Display responses side by side.' },
+        { name: 'Voice Input', description: 'Enable microphone voice input. Supports Chinese, English, and Japanese speech recognition.' },
+        { name: 'Code Interpreter', description: 'Let AI execute Python code in a sandbox environment and return results.' },],
       parameters: [
-        { name: 'Модель', description: 'Выберите большую языковую модель для использования.', tips: 'gpt-5.4 — рекомендация по умолчанию. gpt-5.4-mini быстрее. claude-4-sonnet отлично справляется с творческим письмом.' },
-        { name: 'Temperature', description: 'Контролирует случайность результатов генерации. Диапазон 0~2.', tips: 'Творческое письмо: 0.7~1.0. Дополнение настроек персонажа: 0.3~0.5.' },
-        { name: 'Макс. токенов', description: 'Максимальная длина генерации для одного ответа. Диапазон 1~8192.', tips: 'Генерация настроек персонажа: 1024~2048. Короткие разговоры: 512.' },
-        { name: 'Формат ответа', description: 'Укажите формат вывода ИИ: text или json_object.', tips: 'При выборе json_object в Prompt необходимо четко объяснить ожидаемую структуру JSON.' },
-        { name: 'Системный промпт', description: 'Глобальный промпт, определяющий роль и поведенческие рекомендации ИИ.', tips: 'Это самый важный параметр, влияющий на качество вывода.' },
-      ],
+        { name: 'Model', description: 'Selects the LLM model to use.', tips: 'Different models have different capabilities and response styles; it is recommended to choose according to the task type.' },
+        { name: 'Temperature', description: 'Controls the randomness of the output, range 0~2.', tips: 'Lower values (0.2~0.5) produce more deterministic answers; higher values (0.8~1.2) produce more creative answers.' },
+        { name: 'Max Tokens', description: 'Maximum number of tokens for the reply.', tips: 'Higher values allow longer answers but consume more API tokens.' },
+        { name: 'System Prompt', description: 'System-level prompt to set the model\'s role and behavior.', tips: 'For example: "You are a helpful assistant" or "You are an expert in character design".' },
+        { name: 'API Address', description: 'The API endpoint address for the model.', tips: 'The default is the provider\'s official address; custom addresses can be configured for local deployments.' },
+        { name: 'API Key', description: 'API Key for accessing the model service.', tips: 'Each model provider requires a separate Key; Keys will not be displayed in plaintext on the page.' },
+        { name: 'Timeout', description: 'Request timeout (seconds).', tips: 'Increase this value when the network is poor or the model response is slow.' },
+      
+        { name: 'System Prompt Length Limit', description: 'Max tokens for system prompt, range 100~4000. Prevents overly long prompts from consuming conversation space.', tips: 'Roleplay: 500-1000, complex settings: 1500-2500.' },
+        { name: 'Conversation History Rounds', description: 'Recent conversation rounds to retain, range 1~50. More rounds = more complete context but more tokens.', tips: 'Simple Q&A: 3-5, roleplay: 10-20, deep discussion: 20-30.' },
+        { name: 'Retry Count', description: 'Auto-retry count for failed API requests, range 0~5. Increase for unstable networks.', tips: 'Overseas API from China: 2-3, local models: 0-1.' },
+        { name: 'Streaming Delay Threshold', description: 'Minimum character delay for streaming output in ms, range 0~100. Higher = smoother display; lower = faster response.', tips: 'Reading comfort: 20-40, speed priority: 0-10.' },
+        { name: 'Code Block Auto-Collapse', description: 'Auto-collapse code blocks exceeding N lines, range 5~100. Set 0 to never collapse.', tips: 'Recommended 20-30 lines; long code better collapsed.' },
+        { name: 'Auto Conversation Naming', description: 'Auto-generate conversation titles based on content. Off = "New Conversation" + number.', tips: 'Many conversations: enable for easier searching.' },
+        { name: 'Multi-Model Parallel Count', description: 'Simultaneous model requests in multi-model comparison, range 2~5. Limited by API concurrency.', tips: 'Free API: 2, paid API: 3-4.' },
+        { name: 'Voice Input Language', description: 'Speech recognition target language: auto-detect, Chinese, English, Japanese.', tips: 'Multilingual conversations: auto-detect.' },
+        { name: 'Function Call Confirmation', description: 'Require user confirmation before AI executes external tool calls.', tips: 'Sensitive operations (email, data modification): enable.' },],
       errors: [
         {
           code: 'API_KEY_MISSING',
-          message: 'Сразу после отправки сообщения появляется ошибка, API Key не настроен',
+          message: 'API Key not configured',
           severity: 'critical',
-          category: 'A. API и сеть',
-          location: 'Страница: LLM Текстовый доступ → Область: Панель вывода тестирования в реальном времени',
-          cause: 'API Key не настроен в «Настройки → API».',
-          solution: 'Настройте API Key в панели настроек.',
-          steps: ['Нажмите «Открыть настройки» вверху справа', 'Переключитесь на вкладку «API»', 'Введите действительный API Key', 'Сохраните и закройте', 'Вернитесь в LLM Hub и отправьте снова'],
-          relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
-          prevention: 'Перед первым использованием любого онлайн-инструмента обязательно настройте действительный API Key.',
+          category: 'A. API & Network',
+          location: 'Page: LLM Hub → Area: model card / send button area',
+          cause: 'API Key is not configured.',
+          solution: 'Configure the Key in the Settings panel.',
+          steps: [
+            'Open "Settings → API"',
+            'Enter a valid Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Before using any online tool for the first time, be sure to configure a valid API Key in "Settings → API".',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'Request returns 401',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: LLM Hub → Area: model card / send button area',
+          cause: 'Key has expired.',
+          solution: 'Replace the Key.',
+          steps: [
+            'Open "Settings → API"',
+            'Replace with a new Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING'],
+          prevention: 'Regularly check the API Key\'s validity period and remaining quota; quickly verify whether the Key is valid through real-time testing in LLM Hub.',
+        },
+        {
+          code: 'API_RATE_LIMIT',
+          message: 'API Rate Limit triggered',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: LLM Hub → Area: model card / send button area',
+          cause: 'Request frequency is too high, exceeding the service provider\'s limit.',
+          solution: 'Slow down request frequency or switch providers.',
+          steps: [
+            'Reduce request frequency',
+            'Wait a while and retry',
+            'Consider switching to a provider with higher rate limits',
+          ],
+          relatedCodes: ['429_TOO_MANY_REQUESTS'],
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: 'Request timed out',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: LLM Hub → Area: model card / send button area',
+          cause: 'Model response took too long.',
+          solution: 'Increase timeout or reduce Max Tokens.',
+          steps: [
+            'Increase timeout setting',
+            'Or reduce Max Tokens',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', 'BACKEND_UNAVAILABLE'],
+          prevention: 'When processing large images or large amounts of text, reduce parameter scale (image size, Max Tokens, etc.) in advance; increase timeout settings when the network is unstable.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Backend unavailable',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: LLM Hub → Area: model card / send button area',
+          cause: 'Backend not started or configuration error.',
+          solution: 'Check backend status.',
+          steps: [
+            'Check API Base URL',
+            'Confirm backend service is running',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When deploying locally, ensure the backend process is started (npm start); when using a remote service, confirm the URL is configured correctly.',
+        },
+        {
+          code: 'IMPORT_INVALID_CONFIG',
+          message: 'Config file content is incomplete or corrupted',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: LLM Hub → Area: import button',
+          cause: 'The configuration file is missing necessary fields (such as llmConfig).',
+          solution: 'Confirm the file was exported from the correct tool page.',
+          steps: [
+            'Open the file in a text editor',
+            'Confirm it contains the fields required by the corresponding tool',
+            'Re-export from the correct tool page',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON', 'IMPORT_TOOL_MISMATCH'],
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: 'Imported JSON format is invalid',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: LLM Hub → Area: import button',
+          cause: 'File is corrupted or is not a valid JSON file.',
+          solution: 'Check and fix JSON file.',
+          steps: [
+            'Open the file in a text editor',
+            'Validate with a JSON formatting tool',
+            'Fix syntax errors and re-import',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH', 'IMPORT_INVALID_CONFIG'],
+          prevention: 'Keep exported configuration files safe; do not modify them with non-text editors.',
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: 'Imported config file tool type mismatch',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: LLM Hub → Area: import button',
+          cause: 'The config file was exported from another tool, not the current tool.',
+          solution: 'Import the correct config file.',
+          steps: [
+            'Confirm the file was exported from the current tool',
+            'Find the correct config file and re-import',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+          prevention: 'Only config files exported from the corresponding tool page contain the correct tool field.',
         },
         {
           code: 'LLM_MODEL_UNAVAILABLE',
-          message: 'Модель недоступна',
+          message: 'Model unavailable',
           severity: 'error',
-          category: 'D. Модели и генерация',
-          location: 'Страница: LLM Текстовый доступ → Область: Панель вывода тестирования в реальном времени',
-          cause: 'Выбранная модель не существует на бэкенде или текущий Key не имеет доступа.',
-          solution: 'Переключитесь на другую модель.',
-          steps: ['Выберите другую модель в выпадающем списке', 'Проверьте правильность написания ID модели', 'Убедитесь, что текущий Key поддерживает выбранную модель', 'Повторите попытку'],
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: real-time test panel / model list',
+          cause: 'The selected model does not exist on the backend or the current Key does not have permission to access it.',
+          solution: 'Switch to another model.',
+          steps: [
+            'Select another model in the "Model" dropdown',
+            'Confirm the model ID spelling is correct',
+            'Confirm the current Key supports the selected model',
+            'Retry',
+          ],
           relatedCodes: ['MODEL_NOT_FOUND', '403_FORBIDDEN'],
-          prevention: 'Выбирайте из списка известных доступных моделей.',
+          prevention: 'Select from the known model list; confirm the Key has access permission for the target model.',
+        },
+        {
+          code: 'LLM_TEST_ERROR',
+          message: 'Real-time test shows "LLM_TEST_ERROR"',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: real-time test panel / model list',
+          cause: 'API request failed. Possible causes: network issue, invalid API Key, expired Key, model unavailable, or request timeout.',
+          solution: 'Troubleshoot step by step according to error details.',
+          steps: [
+            'View detailed error information in the error panel',
+            'Check network connection',
+            'Confirm API Key is valid',
+            'Try switching models',
+            'Increase timeout setting or reduce Max Tokens',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'API_TIMEOUT'],
+          prevention: 'Before testing, confirm the network is stable, API Key is valid, and the model exists.',
+        },
+        {
+          code: 'LOCAL_STORAGE_FULL',
+          message: 'Browser localStorage is full',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: LLM Hub → Area: save button',
+          cause: 'Stored data exceeds the browser\'s limit (usually 5~10MB).',
+          solution: 'Clean up unnecessary data or export backup.',
+          steps: [
+            'Export current configuration as a JSON file',
+            'Open DevTools → Application → Local Storage',
+            'Delete unnecessary large data',
+            'Save again',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: 'Regularly clean up data no longer needed from browser localStorage; for large files, do not save directly in the editor—use the export function instead.',
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: 'Model unavailable',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: LLM Hub → Area: model list',
+          cause: 'Model does not exist or Key has no permission.',
+          solution: 'Switch models or replace the Key.',
+          steps: [
+            'Select another model',
+            'Or replace the API Key',
+            'Retry',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED'],
+          prevention: 'Ensure the model configured on the backend is available and the current Key has permission to access it; regularly verify Key permissions.',
+        },
+        {
+          code: 'STORAGE_READ_ONLY',
+          message: 'Browser storage is read-only',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: LLM Hub → Area: save button',
+          cause: 'Browser is in incognito mode, or storage is disabled by system policy.',
+          solution: 'Exit incognito mode or use a normal window.',
+          steps: [
+            'Confirm the browser is not in incognito/private mode',
+            'Check whether browser storage permissions are disabled',
+            'Export configuration as a local file as an alternative',
+          ],
+          relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: 'Avoid using this app in browser incognito/private mode; regularly export configurations to local files as backups.',
         },
       ],
     },
     {
       id: 'tts-export',
-      title: 'TTS Экспорт голоса',
-      overview: `Инструмент настройки параметров синтеза речи и генерации голосовых ассетов персонажа. Поддерживает настройку голоса, языка, скорости, высоты тона, громкости и других базовых параметров, а также дополнительных параметров: дыхание, четкость, выразительность, интенсивность пауз. Можно загрузить эталонное аудио как источник клонирования голоса, поддерживает постобработку аудио и коррекцию произношения.`,
+      title: 'TTS Export',
+      overview: `The TTS Export tool configures speech synthesis parameters and generates character voice assets. Supports adjusting voice, language, speed, pitch, volume, and other basic parameters, as well as advanced parameters such as breathiness, clarity, expressiveness, and pause intensity. Can upload reference audio as a voice cloning source, supports audio post-processing (noise reduction, EQ, compression), and pronunciation fine-tuning (custom replacement rules).
+
+
+[Supported Voice Engines]
+TTS Voice Export integrates multiple industry-leading speech synthesis engines:
+
+Edge TTS (Microsoft Azure Speech Services):
+- Supports 140+ languages and dialects
+- 400+ voice personas (male, female, child, elderly)
+- Neural voices approaching human quality
+- Voice style adjustment (cheerful, sad, angry, excited)
+- Speech rate (-50%~+100%), pitch (-20Hz~+20Hz), volume control
+
+Bark (Open-source Generative TTS):
+- Supports multilingual code-switching
+- Can generate laughter, sighs, crying and other non-speech sounds
+- Voice cloning with 5-10 second reference audio
+- Fully local operation, no internet required
+
+Piper (Lightweight Open-source TTS):
+- VITS-based architecture with excellent quality
+- Compact model size (50-200MB)
+- Fast inference (RTF < 0.1)
+- Ideal for batch generation and real-time applications
+
+[Character Voice Settings]
+Bind exclusive voice configurations for each OC character:
+- Select voice persona best matching character personality
+- Set default speech rate (energetic characters faster, calm characters slower)
+- Set default pitch (high for child/young, low for adult/mature)
+- Save multiple emotion variants (normal, happy, angry, sad, surprised)
+
+[Audio Export Formats]
+- MP3 (128/192/320 kbps): Universal format compatible with all devices
+- WAV (16-bit/44.1kHz or 24-bit/48kHz): Lossless quality for post-processing
+- OGG Vorbis: Open format, 20% smaller than MP3 at same quality
+- FLAC: Lossless compression for archiving
+- WebM: Web-specific format
+
+[Batch Voice Generation]
+Supports importing dialogue lists from text files for batch audio generation:
+- CSV format support (dialogue, character, emotion, filename)
+- Automatic grouping by character using corresponding voice config
+- Progress bar display with background operation support
+- ZIP download after completion
+
+[Audio Post-processing]
+Built-in basic audio editing:
+- Fade in/out: Smooth start/end effects
+- Volume normalization: Unified loudness (LUFS) across all audio
+- Noise reduction: Remove background noise (requires noise sample upload)
+- Concatenation: Merge multiple audio clips in sequence
+- Format conversion: Batch transcode to different formats
+
+[SSML Advanced Markup]
+Supports Speech Synthesis Markup Language for fine control:
+- <break time="500ms"/>: Insert pauses
+- <emphasis level="strong">text</emphasis>: Emphasis
+- <prosody rate="slow" pitch="+5Hz">text</prosody>: Rate and pitch
+- <say-as interpret-as="characters">ABC</say-as>: Spell out
+- <audio src="..."/>: Insert background music or sound effects`,
       buttons: [
-        { name: 'Сохранить', description: 'Сохраните текущую конфигурацию TTS в локальное хранилище.' },
-        { name: 'Сброс', description: 'Сбросьте все параметры на значения по умолчанию, очистите эталонное аудио и логи.' },
-        { name: 'Импорт конфигурации', description: 'Импортируйте ранее экспортированный JSON-файл конфигурации TTS.' },
-        { name: 'Скачать JSON', description: 'Скачайте текущую конфигурацию TTS как JSON-файл.' },
-        { name: 'Загрузить эталонное аудио', description: 'Выберите и загрузите эталонное аудио (WAV/MP3/FLAC, не более 10 МБ) для клонирования голоса.' },
-        { name: 'Копировать логи', description: 'Скопируйте содержимое панели логов справа в буфер обмена.' },
-      ],
+        { name: 'Save', description: 'Saves the current TTS configuration to local storage. After a successful save, the status indicator changes from "Unsaved" to "Saved".' },
+        { name: 'Reset', description: 'Resets all parameters to default values, clears reference audio and logs. A confirmation dialog will appear to prevent accidental triggering.' },
+        { name: 'Import Config', description: 'Imports a previously exported TTS JSON configuration file to restore all parameter settings.' },
+        { name: 'Download JSON', description: 'Downloads the current TTS configuration as a JSON file (oc-tts-config.json), which can be used for backup or cross-device migration.' },
+        { name: 'Copy JSON', description: 'Copies the current TTS configuration as JSON text to the clipboard.' },
+        { name: 'Upload Reference Audio', description: 'Selects and uploads a reference audio clip (WAV/MP3/FLAC, no more than 10MB) for voice cloning. The file name will be displayed after upload.' },
+        { name: 'Expand / Collapse Advanced Parameters', description: 'Expands or collapses the advanced parameters panel (pause intensity, intonation curve, emphasis mode).' },
+        { name: 'Expand / Collapse Audio Post-processing', description: 'Expands or collapses the audio post-processing panel (noise reduction, EQ, compression).' },
+        { name: 'Expand / Collapse Pronunciation Fine-tuning', description: 'Expands or collapses the pronunciation fine-tuning panel (text preprocessing, replacement rules).' },
+        { name: 'Copy Logs', description: 'Copies the right-side log panel content to the clipboard.' },
+        { name: 'Download Logs', description: 'Downloads the log content as a text file (tts-logs.txt).' },
+      
+        { name: 'Preview', description: 'Synthesize and play only the first 100 characters of current input for quick voice effect confirmation.' },
+        { name: 'Batch Import', description: 'Import dialogue lists from text files or CSV for automatic audio file generation.' },
+        { name: 'Voice Clone', description: 'Upload 5-10 seconds of reference audio to clone a specific person\'s voice for synthesis.' },
+        { name: 'Audio Editor', description: 'Open basic audio editing interface for cropping, concatenation, fade in/out.' },
+        { name: 'Voice Library', description: 'Manage all saved character voice configs. Quickly switch and preview.' },
+        { name: 'SSML Editor', description: 'Open visual SSML markup editor. Add pauses, emphasis without handwriting XML.' },
+        { name: 'Subtitle Generator', description: 'Automatically generate SRT subtitle files from audio content. Supports timeline adjustment.' },],
       parameters: [
-        { name: 'Голос', description: 'Выберите предустановленный тембр голоса.', tips: 'Hanazora — женский голос по умолчанию. Mirako — энергичный женский голос. Rin — голос юноши.' },
-        { name: 'Язык', description: 'Целевой язык для синтезированной речи.', tips: 'При переключении глобального языка интерфейса это поле автоматически синхронизируется.' },
-        { name: 'Скорость', description: 'Коэффициент скорости воспроизведения речи. Диапазон 0.6~1.6.', tips: '1.0 — нормальная скорость. При эмоциональном возбуждении персонажа можно установить 1.2~1.4.' },
-        { name: 'Высота тона', description: 'Смещение высоты тона. Диапазон -12~12 (полутона).', tips: 'Положительные значения выше и ярче; отрицательные ниже и глубже.' },
-        { name: 'Громкость', description: 'Процент выходной громкости. Диапазон 40~140.', tips: '100 — исходная громкость. При большом фоновом шуме можно установить 110~120.' },
-        { name: 'Дыхание', description: 'Контролирует интенсивность дыхания в речи. Диапазон 0~100.', tips: 'Более высокие значения звучат более естественно, но слишком высокие создают ощущение запыханности.' },
-        { name: 'Четкость', description: 'Контролирует четкость произношения. Диапазон 0~100.', tips: 'Более высокие значения дают более четкое произношение, но могут звучать механически.' },
-      ],
+        { name: 'Voice', description: 'Selects a preset voice timbre.', tips: 'Hanazora is the default female voice; Mirako is an energetic female voice; Rin is a youthful male voice.' },
+        { name: 'Language', description: 'Target language for synthesized speech.', tips: 'This field automatically syncs when switching the global interface language.' },
+        { name: 'Speed', description: 'Speech playback speed multiplier, range 0.6~1.6.', tips: '1.0 is normal speed; when the character is emotionally excited, it can be set to 1.2~1.4.' },
+        { name: 'Emotion', description: 'Describes the desired emotional style tag, such as "gentle", "firm", "melancholy", etc.', tips: 'Some backend models support emotion tags, which will be appended to the synthesis prompt.' },
+        { name: 'Pitch', description: 'Pitch offset, range -12~12 (semitone units).', tips: 'Positive values sound higher and brighter; negative values sound lower and deeper.' },
+        { name: 'Volume', description: 'Output volume percentage, range 40~140.', tips: '100 is the original volume; when there is more background sound, it can be set to 110~120.' },
+        { name: 'Sample Rate', description: 'Output audio sample rate (Hz).', tips: '24000 is standard voice quality; 44100/48000 provides higher quality but larger files.' },
+        { name: 'Breathiness', description: 'Controls the breath intensity in the voice, range 0~100.', tips: 'Higher values sound more like natural human breathing, but too high will sound panting.' },
+        { name: 'Clarity', description: 'Controls pronunciation clarity, range 0~100.', tips: 'Higher values mean clearer enunciation, but may sound mechanical.' },
+        { name: 'Expressiveness', description: 'Controls emotional expressiveness intensity, range 0~100.', tips: 'Higher values produce richer intonation changes, suitable for dramatic scenes.' },
+        { name: 'Speed Variation', description: 'Controls the natural fluctuation degree of speech speed, range 0~100.', tips: 'Higher values sound more like the natural speed variation when real people talk.' },
+        { name: 'Pause Intensity', description: 'Controls the length of pauses between sentences, range 0~100.', tips: 'Can be appropriately increased when reciting poetry or serious content.' },
+        { name: 'Intonation Curve', description: 'Preset intonation change patterns: flat, natural, dramatic, melodic.', tips: '"Natural" is suitable for daily dialogue; "Dramatic" is suitable for animation dubbing; "Melodic" is suitable for singing or recitation.' },
+        { name: 'Emphasis Mode', description: 'Keyword emphasis intensity: normal, strong, subtle.', tips: '"Strong" makes the AI place stress on keywords; "Subtle" provides a slight hint.' },
+        { name: 'Noise Reduction', description: 'Noise reduction intensity of the output audio, range 0~100.', tips: 'Increase this value when the reference audio has background noise.' },
+        { name: 'EQ Preset', description: 'Equalizer preset: flat, warm, bright, broadcast, clear.', tips: '"Warm" is suitable for narration; "Bright" is suitable for young female characters; "Broadcast" is suitable for voice-over.' },
+        { name: 'Compression', description: 'Dynamic range compression intensity, range 0~100.', tips: 'Compression makes volume more uniform, preventing sudden loudness changes.' },
+        { name: 'Post-processing Master Switch', description: 'Whether to enable audio post-processing (noise reduction + EQ + compression).', tips: 'Turning off post-processing yields raw synthesis quality, but may have background noise.' },
+        { name: 'Text Preprocessing', description: 'Whether to perform normalization on text before synthesis.', tips: 'Recommended to enable; can automatically handle number pronunciation, English abbreviations, etc.' },
+        { name: 'Custom Replacement Rules', description: 'Enter replacement rules, one per line, in the format "original=replacement".', tips: 'For example, "OC=Oushi" will make the synthesis pronounce "OC" as "Oushi".' },
+      
+        { name: 'Audio Sample Rate', description: 'Output audio sample rate: 22050Hz, 44100Hz, 48000Hz. Higher = better quality but larger files.', tips: 'Voice dialogue: 22050Hz sufficient, music/post-processing: 44100Hz or 48000Hz.' },
+        { name: 'Audio Bit Depth', description: 'Output audio bit depth: 16-bit, 24-bit. 24-bit has larger dynamic range.', tips: 'General use: 16-bit, professional audio: 24-bit.' },
+        { name: 'Voice Pause Interval', description: 'Auto-inserted pause between sentences in ms, range 100~2000. Affects speech rhythm.', tips: 'Normal dialogue: 300-500ms, reading/speech: 500-800ms.' },
+        { name: 'Emotion Intensity', description: 'Voice emotion tag intensity multiplier, range 0.5~2.0. 1.0 = normal, >1 more exaggerated, <1 more restrained.', tips: 'Animation dubbing: 1.2-1.5, audiobooks: 0.8-1.0.' },
+        { name: 'Batch Thread Count', description: 'Simultaneous processing threads for batch generation, range 1~8. More threads = faster but more resource usage.', tips: '8+ core CPU: 4-6, 4-core: 2-3.' },
+        { name: 'Reference Audio Length', description: 'Reference audio length for voice cloning in seconds, range 3~30. Longer usually = more stable cloning.', tips: 'Bark: 5-10s, other engines: 10-20s.' },
+        { name: 'Clone Similarity', description: 'Similarity weight to original voice during cloning, range 0~100. High = more like original but may retain noise.', tips: 'Clean recordings: 80-90, noisy recordings: 60-70.' },
+        { name: 'Subtitle Time Offset', description: 'Generated subtitle timeline overall offset in ms, range -5000~5000. For precise video alignment.', tips: 'Usually not needed; adjust when audio-video sync issues occur.' },
+        { name: 'SSML Validation Level', description: 'SSML markup validation strictness: loose (allow unknown tags), standard (known tags only), strict (complete syntax required).', tips: 'Beginners: loose, production: standard or strict.' },],
       errors: [
         {
           code: 'API_KEY_MISSING',
-          message: 'При генерации голоса показывает, что API Key не настроен',
+          message: 'API Key not configured',
           severity: 'critical',
-          category: 'A. API и сеть',
-          location: 'Страница: TTS Экспорт голоса → Область: Панель вывода слева',
-          cause: 'API Key не настроен.',
-          solution: 'Настройте Key в панели настроек.',
-          steps: ['Откройте «Настройки → API»', 'Введите действительный Key', 'Сохраните и повторите попытку'],
+          category: 'A. API & Network',
+          location: 'Page: TTS Export → Area: left column output area',
+          cause: 'API Key is not configured.',
+          solution: 'Configure the Key in the Settings panel.',
+          steps: [
+            'Open "Settings → API"',
+            'Enter a valid Key',
+            'Save and retry',
+          ],
           relatedCodes: ['API_KEY_EXPIRED'],
-          prevention: 'Перед первым использованием любого онлайн-инструмента настройте действительный API Key.',
+          prevention: 'Before using any online tool for the first time, be sure to configure a valid API Key in "Settings → API".',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'Request returns 401',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: TTS Export → Area: left column output area',
+          cause: 'Key has expired.',
+          solution: 'Replace the Key.',
+          steps: [
+            'Open "Settings → API"',
+            'Replace with a new Key',
+            'Save and retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING'],
+          prevention: 'Regularly check the API Key\'s validity period and remaining quota; quickly verify whether the Key is valid through real-time testing in LLM Hub.',
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: 'Request timed out',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: TTS Export → Area: left column output area',
+          cause: 'Synthesis took too long.',
+          solution: 'Shorten text or increase timeout.',
+          steps: [
+            'Reduce the length of text to synthesize',
+            'Increase timeout setting',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When processing large images or large amounts of text, reduce parameter scale (image size, Max Tokens, etc.) in advance; increase timeout settings when the network is unstable.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Backend unavailable',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: TTS Export → Area: left column output area',
+          cause: 'Backend not started or configuration error.',
+          solution: 'Check backend status.',
+          steps: [
+            'Check API Base URL',
+            'Confirm backend service is running',
+            'Retry',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED'],
+          prevention: 'When deploying locally, ensure the backend process is started (npm start); when using a remote service, confirm the URL is configured correctly.',
+        },
+        {
+          code: 'IMPORT_INVALID_CONFIG',
+          message: 'Importing config prompts "Invalid configuration data"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: TTS Export → Area: top "Import Config" button',
+          cause: 'Missing ttsConfig field.',
+          solution: 'Confirm that a TTS configuration file is being imported.',
+          steps: [
+            'Open the file in a text editor',
+            'Confirm it contains "tool": "tts-export"',
+            'Re-import',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: 'Importing config prompts "Invalid JSON format"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: TTS Export → Area: top "Import Config" button',
+          cause: 'File is corrupted.',
+          solution: 'Check file validity.',
+          steps: [
+            'Open the file in a text editor',
+            'Validate with a JSON formatting tool',
+            'Re-import',
+          ],
+          relatedCodes: ['IMPORT_INVALID_CONFIG'],
+        },
+        {
+          code: 'LOCAL_STORAGE_FULL',
+          message: 'Save failed',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: TTS Export → Area: top "Save" button',
+          cause: 'Storage space insufficient.',
+          solution: 'Clean up or export backup.',
+          steps: [
+            'Click "Download JSON" to back up',
+            'Clean up localStorage',
+            'Save again',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: 'Regularly clean up data no longer needed from browser localStorage; for large files, do not save directly in the editor—use the export function instead.',
+        },
+        {
+          code: 'STORAGE_READ_ONLY',
+          message: 'Save has no response',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: TTS Export → Area: top "Save" button',
+          cause: 'Incognito mode.',
+          solution: 'Exit incognito mode.',
+          steps: [
+            'Confirm you are not in incognito mode',
+            'Export backup',
+            'Reopen in a normal window',
+          ],
+          relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: 'Avoid using this app in browser incognito/private mode; regularly export configurations to local files as backups.',
         },
         {
           code: 'TTS_AUDIO_GENERATION_FAILED',
-          message: 'Синтез речи не удался',
+          message: 'Speech synthesis failed',
           severity: 'error',
-          category: 'D. Модели и генерация',
-          location: 'Страница: TTS Экспорт голоса → Область: Панель вывода слева',
-          cause: 'Исключение в сервисе TTS бэкенда. Возможно, сбой загрузки модели, неподдерживаемый формат эталонного аудио или текст содержит несинтезируемые символы.',
-          solution: 'Проверьте состояние бэкенда, эталонное аудио и содержимое текста.',
-          steps: ['Проверьте детали ошибки', 'Убедитесь, что формат эталонного аудио — WAV/MP3/OGG', 'Упростите текст, удалите специальные символы', 'Попробуйте переключить пресет голоса', 'Повторите попытку'],
+          category: 'D. Model & Generation',
+          location: 'Page: TTS Export → Area: left column output area',
+          cause: 'Backend TTS service exception. Possible causes: model loading failure, unsupported reference audio format, or text containing characters that cannot be synthesized.',
+          solution: 'Check backend status, reference audio, and text content.',
+          steps: [
+            'Check the specific information in the error details',
+            'If reference audio is used, confirm the format is WAV/MP3/OGG',
+            'Simplify text, removing special symbols and emojis',
+            'Try switching the voice preset',
+            'Retry',
+          ],
           relatedCodes: ['MODEL_NOT_FOUND', 'API_TIMEOUT'],
-          prevention: 'Упростите текст, удалите специальные символы. Убедитесь, что формат эталонного аудио корректен.',
+          prevention: 'Simplify text and remove special symbols; confirm reference audio format is correct; select known available voice presets.',
+        },
+        {
+          code: 'TTS_REFERENCE_INVALID',
+          message: 'Reference audio upload failed',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: TTS Export → Area: reference audio upload area',
+          cause: 'File format is not supported or file is too large.',
+          solution: 'Replace with a valid audio file.',
+          steps: [
+            'Confirm the audio file format is WAV, MP3, or OGG',
+            'Confirm the file size does not exceed 10MB',
+            'Re-upload',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'FILE_TOO_LARGE'],
+        },
+        {
+          code: 'UNSAVED_WARNING',
+          message: 'Returning to home page prompts unsaved changes',
+          severity: 'info',
+          category: 'B. Config & Data',
+          location: 'Page: TTS Export → Area: upper-left "Back to Home" button',
+          cause: 'There are unsaved changes.',
+          solution: 'Save or discard.',
+          steps: [
+            'Click "Save"',
+            'Or click "Confirm Return" to discard',
+          ],
         },
       ],
     },
     {
       id: 'paper2gal',
-      title: 'paper2gal Генерация изображений',
-      overview: `Paper2Gal — это основной инструмент рабочего процесса Original Character Maker. Подключается к бэкенду p2g-character-workflow для пакетной генерации ассетов персонажа по принципу «одно изображение на входе, несколько ассетов на выходе». После загрузки референсного изображения персонажа рабочий процесс автоматически выполняет 10 шагов, генерируя 8 финальных ассетов и 5 файлов метаданных.
+      title: 'Paper2Gal Image Asset Generation',
+      overview: `Paper2Gal is the core workflow tool of Original Character Maker, connecting to the p2g-character-workflow backend to achieve "single image in, multiple assets out" batch character asset generation. After uploading a character reference image, the workflow automatically executes 10 steps, generating 8 final assets and 5 metadata files.
 
-**Финальные ассеты (8 изображений)**
-· Изображения выражений ×3: thinking (размышление), surprise (удивление), angry (гнев) — вертикальная композиция
-· CG-сцены ×2: CG01, CG02 — горизонтальная композиция 16:9
-· Прозрачные вырезки ×3: PNG с прозрачным фоном
+**Final Output Assets (8 images total)**
+· Expression images ×3: thinking, surprise, angry — portrait composition
+· CG scene images ×2: CG01, CG02 — landscape 16:9 composition, single-character all-ages daily story scene
+· Transparent cutouts ×3: transparent-background PNGs corresponding to the three expressions above
 
-**Метаданные (5 файлов)**
-· manifest: Полный манифест рабочего процесса
-· character_profile: Профиль анализа персонажа
-· prompts: Записи финальных промптов
-· character_pack: Упаковочный файл персонажа
-· p2g_handoff: Файл передачи paper2gal
+**Metadata Files (5 total)**
+· manifest: Complete workflow manifest
+· character_profile: Character analysis profile
+· prompts: Final prompt records used in each step
+· character_pack: Character package
+· p2g_handoff: Paper2Gal handoff file
 
-**Порядок выполнения (10 шагов)**
-1. validate_input — Проверка формата и размера входного изображения
-2. analyze_character — AI анализирует черты персонажа
-3-5. expression_* — Генерация выражений
-6-7. cg_* — Генерация CG-сцен
-8-10. cutout_expression_* — Прозрачные вырезки
+**Workflow Execution Order (10 steps)**
+1. validate_input — Validates input image format and dimensions
+2. analyze_character — AI analyzes character features and generates a character description for reuse in subsequent steps
+3. expression_thinking — Generates thinking expression image
+4. expression_surprise — Generates surprise expression image
+5. expression_angry — Generates angry expression image
+6. cg_01 — Generates the first CG scene image
+7. cg_02 — Generates the second CG scene image
+8. cutout_expression_thinking — Transparent cutout of the thinking expression
+9. cutout_expression_surprise — Transparent cutout of the surprise expression
+10. cutout_expression_angry — Transparent cutout of the angry expression
 
-**Система переопределения промптов**
-Каждый шаг генерации поддерживает пользовательское переопределение промптов. Встроены строгие ограничения на согласованность персонажа и безопасные границы.
+**Prompt Override System**
+Each generation step supports custom Prompt overrides. The default prompts already include strict character consistency constraints (identity, face shape, hairstyle, clothing, color scheme, art style remain consistent) and safety boundaries (prohibiting sexualization, revealing clothing, suggestive poses, adult implications). You can fine-tune expression descriptions and scene atmosphere according to character traits, but it is recommended to retain the constraint portions in the default prompts to ensure output quality.
 
-**Система повторного выполнения (v1.0.0+)**
-Поддерживает повторное выполнение отдельных результатов параллельно. Повторное выполнение выражения автоматически синхронизирует соответствующую вырезку.
+**Redo System (v1.0.0+)**
+Supports redoing individual results; different expressions and CGs can be redone in parallel. During redo, the page displays a "Redoing" status and automatically syncs backend progress. Note: Redoing an expression will automatically sync redo the corresponding cutout (they belong to the same conflict group).
 
-**Решение для вырезки**
-Когда провайдер remove_background установлен на frontend, браузер выполняет AI-вырезку локально (без дополнительного API Key; первый запуск загружает модельные ресурсы, около 1-2 минут). При неудаче — откат к обнаружению цвета краев.
+**Cutout Solution**
+Cutout is uniformly scheduled by the backend. When the backend sets the remove_background provider to frontend, the browser automatically executes AI cutout (based on the IMG.LY background-removal model). Browser cutout runs locally without requiring an additional API Key; the first run requires downloading model resources (about 1-2 minutes). If browser cutout fails, it will automatically fall back to an edge color detection fallback solution.
 
-**Персистентность состояния**
-Страница автоматически сохраняет состояние рабочего процесса, переопределения промптов и настройки параллелизма в локальное хранилище. Прогресс восстанавливается после обновления.`,
+**State Persistence**
+The page automatically saves the current workflow state, Prompt override configuration, and concurrency settings to browser local storage. Progress can be restored after refreshing the page. Unsaved changes will show a yellow "Unsaved" indicator, and a confirmation prompt will appear before leaving the page.
+
+
+[Training Pipeline]
+The complete LoRA training pipeline consists of the following stages:
+
+1. Data Preparation
+   - Image preprocessing: Auto-detect and crop face regions, resize to 512x512 or 768x768
+   - Data augmentation: Random horizontal flip, slight rotation, color jitter, Gaussian noise
+   - Tag generation: Use WD 1.4 Tagger for automatic tagging
+   - Manual verification: Check auto-tag accuracy and fix errors
+   - Dataset split: 80% training, 10% validation, 10% test
+
+2. Model Configuration
+   - Select base model: SD 1.5, SDXL, SD 3.0, or custom model
+   - Set LoRA dimension (Rank): 4/8/16/32/64/128
+   - Configure training parameters: learning rate, batch size, steps, save interval
+   - Set regularization images to prevent overfitting
+
+3. Training Execution
+   - Supports Full Fine-tune and LoRA training
+   - Real-time loss curve and learning rate decay display
+   - Auto-save checkpoints every N steps
+   - Resume from checkpoint support
+   - Multi-GPU distributed training (requires accelerate config)
+
+4. Model Validation
+   - Evaluate with validation set
+   - Generate comparison images: original vs fine-tuned
+   - Calculate FID (Fréchet Inception Distance) score
+   - Manual quality review
+
+5. Model Deployment
+   - Export to standard LoRA format (.safetensors)
+   - Generate Model Card with trigger words, recommended parameters, example images
+   - One-click upload to Civitai, Hugging Face
+
+[Advanced Training Tips]
+- Learning rate schedule: Cosine Annealing for most scenarios; Warmup + Cosine for large datasets
+- Regularization: Use 10-20 generic images as regularization set
+- Tag strategy: Remove character tags for style training; keep character feature tags for character training
+- Resolution: SDXL recommend 1024x1024; SD 1.5 recommend 512x512 or 768x768
+- Multi-concept: Use <concept1>, <concept2> instance prompts for multiple characters
+
+[Model Format Notes]
+- .safetensors: Safe format, no code execution risk, recommended
+- .ckpt: Traditional format, good compatibility but security risk
+- Diffusers: Hugging Face directory format for inference deployment`,
       buttons: [
-        { name: 'Назад на главную', description: 'Покинуть страницу paper2gal и вернуться на главную. При несохраненных изменениях появится диалог подтверждения.' },
-        { name: 'Открыть настройки', description: 'Открыть глобальную панель настроек. Наиболее часто используемые: вкладка API и вкладка Производительность.' },
-        { name: 'Сохранить конфигурацию', description: 'Сохранить текущие переопределения промптов и настройки AI-параллелизма. После сохранения диалог при уходе со страницы не появится.' },
-        { name: 'Сбросить рабочий процесс', description: 'Очистить все состояние рабочего процесса, изображения, результаты и конфигурацию. Эта операция необратима.' },
-        { name: 'Импорт конфигурации', description: 'Импортировать ранее экспортированный JSON-файл конфигурации paper2gal.' },
-        { name: 'Выбрать изображение / Заменить изображение', description: 'Загрузить референсное изображение персонажа. Только PNG и JPG. Рекомендуется: одиночная стоячая иллюстрация, 1024×1024 ~ 2048×2048.' },
-        { name: 'Начать', description: 'Отправить изображение в бэкенд для запуска полного рабочего процесса paper2gal. Страница опрашивает прогресс каждую секунду.' },
-        { name: 'Повторить рабочий процесс', description: 'Перезапустить рабочий процесс с тем же загруженным изображением. Используйте при недовольстве результатами или после изменения промптов.' },
-        { name: 'Скачать всё', description: 'Скачать ZIP со всеми сгенерированными ассетами и метаданными ({workflowId}-outputs.zip). Доступно только после запуска рабочего процесса.' },
-        { name: 'Карточка шага — Открыть файл', description: 'Открыть сгенерированное изображение в новой вкладке после завершения шага.' },
-        { name: 'Карточка шага — Повторить / Переtry', description: 'Повторно попробовать неудачные шаги или повторить успешные. Разные шаги можно повторять параллельно.' },
-      ],
+        { name: 'Back to Home', description: 'Leaves the Paper2Gal page and returns to the home page. If there are unsaved configuration modifications (Prompt overrides or concurrency settings), a confirmation dialog will appear first, allowing you to choose "Continue Editing" to save before leaving, or "Confirm Return" to discard modifications.' },
+        { name: 'Open Settings', description: 'Opens the global settings panel. The most commonly used settings in Paper2Gal are the "API" tab (configure backend address and Key) and the "Performance" tab (adjust image preview quality, maximum concurrent requests).' },
+        { name: 'Unsaved / Saved', description: 'Status indicator. When Prompt override text or the AI concurrency toggle is modified, the indicator shows yellow "Unsaved". After clicking "Save Config" it turns green "Saved". This state also determines whether a leave confirmation dialog appears.' },
+        { name: 'Save Config', description: 'Saves the current Prompt override configuration and AI concurrency setting as a snapshot. After saving, the "Unsaved" indicator becomes "Saved", and no dialog prompt appears when leaving the page. Note: This operation only saves configuration, not workflow state (workflow state is automatically persisted by the page).' },
+        { name: 'Reset Workflow', description: 'Clears all workflow state, uploaded images, generated results, and configuration, restoring the initial blank state. This operation cannot be undone; generated asset images, step progress, and debug logs will all be lost. A confirmation dialog will appear before the operation.' },
+        { name: 'Import Config', description: 'Imports a previously exported Paper2Gal JSON configuration file to restore Prompt overrides and AI concurrency settings. Supports two formats: standard format (containing tool: "paper2gal" and a config object) and compatible format (directly containing promptOverrides and aiConcurrencyEnabled fields). If the file format is incorrect, a prompt will appear.' },
+        { name: 'Copy JSON', description: 'Copies the current workflow\'s complete debug information (including message status, workflow object, active API address, Prompt overrides, etc.) as JSON text to the clipboard. Used to provide context when reporting issues to developers.' },
+        { name: 'Download JSON', description: 'Downloads the current workflow debug JSON file (paper2gal-workflow.json), with the same content as "Copy JSON".' },
+        { name: 'Export Package Config', description: 'Downloads a streamlined JSON file containing only Prompt overrides and AI concurrency settings (paper2gal-config.json), without workflow state. This file can be restored via "Import Config", facilitating cross-device migration of configurations or sharing Prompt templates.' },
+        { name: 'Source Image Panel — Expand/Collapse', description: 'Click the panel title to expand or collapse the source image area. When expanded, it shows the image preview, file name, and format converter shortcut entry.' },
+        { name: 'Select Image / Replace Image', description: 'Opens the system file picker to upload a character reference image. Only accepts PNG and JPG formats. Supports repeatedly selecting the same file (the file input is automatically reset after each selection). It is recommended to upload a single-character standing art or clear half-body image, with recommended dimensions of 1024×1024 ~ 2048×2048.' },
+        { name: 'Format Converter', description: 'A shortcut button to jump to the "Image Format Converter" tool. If the current image format or size is not suitable, you can first go to the converter tool to process it, then return to upload.' },
+        { name: 'Settings Panel — Expand/Collapse', description: 'Click the panel title to expand or collapse the settings area. When expanded, it shows source file info, current step, AI concurrency toggle, operation buttons, and hint text.' },
+        { name: 'Start', description: 'Submits the character image to the backend to launch the complete Paper2Gal workflow. Before submission, it checks whether an image has been selected. After the workflow starts, the page automatically polls progress (once per second), and the right-side progress area updates each step\'s status in real time.' },
+        { name: 'Redo Workflow', description: 'Restarts the workflow using the currently uploaded same image. Equivalent to a "quick do-over", without needing to reselect the file. If the workflow is completed but you are dissatisfied with the results, or want to regenerate after changing Prompt overrides, you can use this button.' },
+        { name: 'Download All', description: 'Downloads a ZIP archive containing all generated assets and metadata files (file name format: {workflowId}-outputs.zip). This button is only available when the workflow has been started (a workflowId exists).' },
+        { name: 'Prompt Override Panel — Expand/Collapse', description: 'Click the panel title to expand or fold the Prompt override editing area. Collapsed by default; expand when custom prompts are needed. When expanded, it shows 5 text editing boxes corresponding to the 3 expressions and 2 CGs.' },
+        { name: 'Step Card — Open File', description: 'When a step successfully generates output, an "Open File" button appears on its step card. Clicking it opens the step\'s output image URL in a new tab, allowing direct viewing of the original image.' },
+        { name: 'Step Card — Redo / Retry', description: 'For redoable steps (expression_thinking / expression_surprise / expression_angry / cg_01 / cg_02 and corresponding cutout steps), a redo button is displayed on the step card. Failed steps show "Retry Step"; successful steps show "Redo Current Result". Clicking submits a redo request to the backend, and the page continues polling for new progress. Different steps can be redone in parallel, but steps within the same conflict group (e.g., expression and corresponding cutout) are mutually exclusive.' },
+        { name: 'Result Area — Open File', description: 'On each output card in the right-side result grid, click "Open File" to view the original image in a new tab.' },
+        { name: 'Result Area — Download', description: 'Downloads a single output image to the local machine, using the preset file name (e.g., expression-thinking.png, cg-01.png, etc.).' },
+        { name: 'Result Area — Copy Asset', description: 'Copies a single output image to the system clipboard (if the browser supports the ClipboardItem API). After a successful copy, the button text briefly changes to "Copied".' },
+        { name: 'Result Area — Redo Current Result', description: 'Directly initiates a redo for an output image on the result card, with the same functionality as the redo on the step card.' },
+        { name: 'Metadata Operation — Open Manifest', description: 'After workflow completion, click this button to open the manifest.json file in a new tab, viewing the workflow\'s complete execution record and output manifest.' },
+        { name: 'Metadata Operation — Open Character Profile', description: 'Opens the character_profile file to view the AI\'s analysis results of the uploaded character (appearance features, clothing, color scheme, etc.).' },
+        { name: 'Metadata Operation — Open Prompt Records', description: 'Opens the prompts file to view the final prompts actually used in each step (including the merged result of default prompts and your Prompt overrides).' },
+        { name: 'Metadata Operation — Open Character Pack', description: 'Opens the character_pack file to view the character package data.' },
+        { name: 'Metadata Operation — Open P2G Handoff', description: 'Opens the p2g_handoff file to view the handoff data for downstream Paper2Gal processes.' },
+        { name: 'Log Panel — Copy Logs', description: 'Copies all step status logs of the current workflow to the clipboard. The log format includes each step\'s status, provider, output URL, and error information.' },
+        { name: 'Log Panel — Download Logs', description: 'Downloads the log content as a text file (paper2gal-logs.txt).' },
+        { name: 'Result Summary — Copy Result', description: 'Copies the result summary JSON (outputs object) to the clipboard.' },
+        { name: 'Result Summary — Download Result', description: 'Downloads the result summary JSON file (paper2gal-result.json).' },
+        { name: 'Latest Error — Copy / Download', description: 'Copies or downloads the current latest error details JSON, containing human-readable error information, possible causes, fix hints, and debug data.' },
+        { name: 'Latest Error — Open Detail Panel', description: 'Opens a draggable error detail floating window, displaying error code, stage, message, hints, and detailed data in a structured way.' },
+        { name: 'Debug Panel — Copy Debug / Download Debug', description: 'Copies or downloads the complete debug JSON (paper2gal-debug.json), containing messages, workflow state, active API address, interface mode, input file name, concurrency settings, and Prompt overrides. Used to provide complete context to developers when troubleshooting in depth.' },
+      
+        { name: 'Dataset Analysis', description: 'Analyze current dataset tag distribution, image size distribution, color distribution statistics.' },
+        { name: 'Tag Editor', description: 'Batch edit all image tags. Supports find/replace, regex, and autocomplete.' },
+        { name: 'Training Monitor', description: 'Real-time display of GPU utilization, VRAM usage, loss curve, learning rate changes.' },
+        { name: 'Model Comparison', description: 'Select two checkpoints for A/B testing. Generate comparison images with identical prompts.' },
+        { name: 'Trigger Word Suggestion', description: 'Auto-generate recommended trigger word combinations and negative prompts based on training data.' },
+        { name: 'Model Quantization', description: 'Quantize FP32/FP16 models to INT8 or INT4. Reduce VRAM usage and inference time.' },],
       parameters: [
-        { name: 'AI-параллелизм', description: 'При включении шаги генерации AI (выражения ×3 + CG ×2) выполняются параллельно, значительно сокращая общее время.', tips: 'Включение параллелизма может увеличить затраты на API; на серверах с ограниченной конфигурацией или строгими лимитами скорости рекомендуется отключить.' },
-        { name: 'Переопределение промпта — Выражение размышления', description: 'Переопределить промпт генерации выражения «размышление». По умолчанию требуется строгая согласованность персонажа и вертикальная композиция.', tips: 'Сохраняйте части ограничений; изменяйте только описания действий выражения. Пустое поле использует промпт по умолчанию.' },
-        { name: 'Переопределение промпта — Выражение удивления', description: 'Переопределить промпт генерации выражения «удивление». Выражение удивления легко генерирует преувеличенные деформации.', tips: 'Добавьте ограничения типа «естественное и сдержанное».' },
-        { name: 'Переопределение промпта — Выражение гнева', description: 'Переопределить промпт генерации выражения «гнев». Избегайте генерации насильственных элементов.', tips: 'В промпте по умолчанию уже есть сбалансированное ограничение гнева.' },
-        { name: 'Переопределение промпта — CG01', description: 'Переопределить промпт первой CG-сцены. По умолчанию: одиночная ежедневная сцена для всех возрастов, горизонтальная композиция 16:9.', tips: 'Указывайте конкретные сцены или атмосферу, сохраняя ограничения согласованности персонажа.' },
-        { name: 'Входное изображение', description: 'Исходное изображение для рабочего процесса. Только PNG и JPG. Рекомендуется: четкое изображение одного персонажа.', tips: 'Рекомендуемый размер 1024×1024 ~ 2048×2048. Слишком большое (>4096) увеличивает время; слишком маленькое (<512) влияет на качество.' },
-        { name: 'ID рабочего процесса', description: 'Уникальный идентификатор только для чтения. До запуска отображается «paper2gal-idle». Используется для отслеживания на бэкенде.', tips: 'Скопируйте этот ID для поиска соответствующей записи в логах бэкенда.' },
-        { name: 'Провайдер вырезки', description: 'Название движка удаления фона только для чтения. Автоматически распределяется бэкендом.', tips: '«frontend» означает AI-вырезку на стороне браузера; другие значения означают бэкенд-сервис.' },
-      ],
+        { name: 'AI Concurrency', description: 'Toggle parameter. When enabled, AI generation steps in the workflow (expressions ×3 + CGs ×2) can execute in parallel, significantly shortening total time. When disabled, all steps execute serially, taking longer but with smoother API calls.', tips: 'When concurrency is enabled, the backend schedules multiple model requests simultaneously, which may increase API costs; low-configuration servers or Keys with strict rate limits are recommended to disable it. Whether browser-side cutout steps participate in concurrency is controlled by the backend.' },
+        { name: 'Prompt Override — Thinking Expression', description: 'Overrides the default Prompt for the "thinking" expression generation step. The default prompt requires strict character consistency and specifies portrait composition, natural thinking state (lightly resting chin, gaze shifted sideways, etc.).', tips: 'It is recommended to retain the constraint portions such as "strictly maintain... consistency" and "portrait composition" in the default prompt, only modifying the expression action description. If the text box is cleared, the backend will use the default prompt.' },
+        { name: 'Prompt Override — Surprise Expression', description: 'Overrides the default Prompt for the "surprise" expression generation step. The default prompt requires slightly widened eyes, light shoulder lift, hands slightly raised, and other natural restrained surprise actions.', tips: 'Surprise expressions are prone to generating exaggerated deformations; you can add constraints such as "natural and restrained actions, do not exaggerate deformation" in the override.' },
+        { name: 'Prompt Override — Angry Expression', description: 'Overrides the default Prompt for the "angry" expression generation step. The default prompt requires eyebrows, eyes, and mouth shape to clearly show dissatisfaction, with slight forward lean, arms crossed, or small fist clench; anger level follows the character\'s temperament naturally.', tips: 'Be careful to avoid generating violent elements. The default prompt already includes the balanced constraint "do not let all characters just be slightly angry, nor go into exaggerated rampages".' },
+        { name: 'Prompt Override — CG01', description: 'Overrides the generation Prompt for the first CG scene image. The default prompt requires generating a single-character all-ages daily story scene based on the same character, landscape 16:9, prohibiting adding other characters, and prohibiting sexualization, revealing clothing, suggestive poses, and adult implications.', tips: 'On the premise of retaining character consistency constraints, you can specify specific scenes (e.g., "classroom", "park", "rainy street") or atmosphere (e.g., "warm", "tense", "leisurely").' },
+        { name: 'Prompt Override — CG02', description: 'Overrides the generation Prompt for the second CG scene image. The default constraints are the same as CG01.', tips: 'It is recommended to keep the character and art style consistent with CG01, only changing the scene, camera angle, pose, or emotion to create a series feel.' },
+        { name: 'Input Image', description: 'The source image for the workflow. Only supports PNG and JPG formats. The image content should contain a clear character image; a single-character standing art or half-body image is recommended.', tips: 'Recommended dimensions: 1024×1024 ~ 2048×2048. Too large (>4096) will significantly increase generation and cutout time; too small (<512) will affect character detail quality.' },
+        { name: 'Source File Info', description: 'Read-only information displaying the current uploaded file name.', tips: null },
+        { name: 'Current Step', description: 'Read-only information displaying the name of the step currently being executed by the workflow (Chinese label). Displays "—" when the workflow is not started.', tips: null },
+        { name: 'Workflow ID', description: 'Read-only information displaying the unique identifier of the current workflow. Displays "paper2gal-idle" when the workflow is not started. This ID is used for backend tracking and downloading all assets.', tips: 'If you need to find the corresponding record in backend logs, you can copy this ID and provide it to the backend administrator.' },
+        { name: 'Cutout Provider', description: 'Read-only information displaying the name of the background removal engine currently used by the workflow (e.g., frontend, sharp, aliyun, etc.). Automatically assigned by the backend based on available resources.', tips: 'When displayed as frontend, cutout is executed by the browser-side AI model; when displayed as other values, it is executed by backend services.' },
+        { name: 'Expression Provider / CG Provider', description: 'Read-only information displaying the backend service provider for expression generation and CG generation. Automatically assigned by the backend based on configuration.', tips: null },
+      
+        { name: 'Training Resolution', description: 'Target resolution for training images: 512x512, 768x768, 1024x1024. Higher requires more VRAM.', tips: 'SD 1.5: 512 or 768, SDXL: 1024.' },
+        { name: 'Batch Size', description: 'Images processed simultaneously per step, range 1~8. Larger batches train more stably but need more VRAM.', tips: '8GB VRAM: 1-2, 16GB: 2-4, 24GB+: 4-8.' },
+        { name: 'Learning Rate', description: 'Model parameter update step size, range 1e-6~1e-3. Too high = unstable; too low = slow convergence.', tips: 'LoRA: 1e-4~5e-4, full fine-tune: 1e-5~1e-4.' },
+        { name: 'LoRA Dimension', description: 'LoRA low-rank dimension: 4, 8, 16, 32, 64, 128. Higher = more expressive power.', tips: 'Simple concepts: 4-8, characters: 16-32, complex styles: 64-128.' },
+        { name: 'Alpha Value', description: 'LoRA scaling parameter, usually half or equal to dimension. Controls LoRA influence on base model.', tips: 'Generally set to Rank/2 or equal to Rank.' },
+        { name: 'Training Steps', description: 'Total training iterations, range 500~20000. Steps = image count × repeat count × epochs.', tips: '10-20 images: 1000-2000 steps, 50-100 images: 3000-5000 steps.' },
+        { name: 'Save Interval', description: 'Save checkpoint every N steps, range 100~2000. Frequent saves use disk space but preserve more intermediate states.', tips: 'Recommended 500-1000 steps; fewer total steps: 250-500.' },
+        { name: 'Regularization Weight', description: 'Regularization image loss weight, range 0~2.0. Higher prevents overfitting but may weaken learning.', tips: 'Recommended 0.5-1.0; small datasets: 1.0-1.5.' },
+        { name: 'Noise Offset', description: 'Random noise added to images during training, range 0~1.0. Appropriate noise improves generated image contrast.', tips: 'Recommended 0.05-0.1; 0 = disabled.' },
+        { name: 'Optimizer', description: 'Optimizer algorithm: AdamW (general), AdamW8bit (saves VRAM), Lion (fast convergence with large LR), DAdaptation (adaptive LR).', tips: 'Beginners: AdamW, tight VRAM: AdamW8bit.' },
+        { name: 'Scheduler', description: 'Learning rate scheduler: constant, cosine, linear, polynomial.', tips: 'Cosine works best for most scenarios.' },
+        { name: 'Mixed Precision', description: 'Enable FP16/BF16 mixed precision training to reduce 40-50% VRAM usage.', tips: 'RTX 20 series+: FP16, RTX 30/40 series: BF16.' },],
       errors: [
         {
           code: 'API_KEY_MISSING',
-          message: 'Сразу после запуска рабочего процесса ошибка, API Key не настроен',
+          message: 'Starting workflow immediately reports error, prompting API Key not configured',
           severity: 'critical',
-          category: 'A. API и сеть',
-          location: 'Страница: paper2gal → Область: Верхняя панель сообщений / Панель ошибок справа',
-          cause: 'API Key не настроен в «Настройки → API» или Key был очищен.',
-          solution: 'Настройте действительный API Key в панели настроек.',
-          steps: ['Нажмите «Открыть настройки» вверху справа', 'Переключитесь на вкладку «API»', 'Введите действительный Key', 'Сохраните', 'Вернитесь и нажмите «Начать» снова'],
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'API Key is not configured in "Settings → API", or the Key has been cleared. Paper2Gal needs to call the backend image generation service and must have a valid API Key configured.',
+          solution: 'Configure a valid API Key in the Settings panel.',
+          steps: [
+            'Click "Open Settings" in the upper right or press the corresponding shortcut',
+            'Switch to the "API" tab',
+            'Enter your valid Key in the "API Key" input field',
+            'Click "Save" and close the settings panel',
+            'Return to the Paper2Gal page and click "Start" again',
+          ],
           relatedCodes: ['API_KEY_EXPIRED', '401_UNAUTHORIZED'],
-          prevention: 'Перед первым использованием любого онлайн-инструмента настройте действительный API Key.',
+          prevention: 'Before using any online tool for the first time, be sure to configure a valid API Key in "Settings → API".',
+        },
+        {
+          code: 'API_KEY_EXPIRED',
+          message: 'Request returns 401 or indicates Key is invalid',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'The configured API Key has expired, been revoked, or its quota has been exhausted.',
+          solution: 'Replace with a valid API Key.',
+          steps: [
+            'Open the "Settings → API" panel',
+            'Delete the current Key and enter a new valid Key',
+            'If unsure whether the Key is valid, test it first in the LLM Hub real-time test panel',
+            'Save and return to Paper2Gal to retry',
+          ],
+          relatedCodes: ['API_KEY_MISSING'],
+          prevention: 'Regularly check the API Key\'s validity period and remaining quota; quickly verify whether the Key is valid through real-time testing in LLM Hub.',
         },
         {
           code: 'HOSTED_API_REQUIRED',
-          message: '«Текущая среда — статический хостинг, необходимо настроить пользовательский API»',
+          message: 'Prompts "Currently in a static hosting environment, custom API must be configured"',
           severity: 'critical',
-          category: 'A. API и сеть',
-          location: 'Страница: paper2gal → Область: Верхняя панель сообщений',
-          cause: 'Страница развернута в статической среде хостинга (GitHub Pages и т.д.), не может получить прямой доступ к локальному бэкенду.',
-          solution: 'Настройте удаленный адрес API в настройках.',
-          steps: ['Откройте «Настройки → API»', 'Переключите «Режим интерфейса» на «Пользовательский API»', 'Введите корневой адрес бэкенда', 'Введите API Key', 'Сохраните и повторите попытку'],
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: top message bar',
+          cause: 'The current page is deployed in a pure static hosting environment such as GitHub Pages, Alibaba Cloud OSS/CDN, and cannot directly access the local backend. A remote custom API address must be configured to use workflow functionality.',
+          solution: 'Configure a remote API address in settings.',
+          steps: [
+            'Open "Settings → API"',
+            'Switch "Interface Mode" to "Custom API"',
+            'Enter the deployed backend root address in "API Address" (e.g., https://your-backend.example.com)',
+            'Enter the corresponding API Key',
+            'Save and retry',
+          ],
           relatedCodes: ['API_KEY_MISSING', 'BACKEND_UNAVAILABLE'],
-          prevention: 'Разверните бэкенд и настройте адрес API перед использованием paper2gal в статической среде.',
+          prevention: 'Before using Paper2Gal in a static hosting environment, be sure to deploy the backend service and configure the correct API address and Key.',
+        },
+        {
+          code: 'DIRECT_MODEL_ENDPOINT',
+          message: 'Prompts "What you entered appears to be a model endpoint, not a workflow backend root address"',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: Settings panel API tab / top message bar',
+          cause: 'In "Settings → API → API Address", an address like https://api.example.com/v1/chat/completions was entered, which is a model interface address, not a workflow backend root address (e.g., https://your-backend.example.com). Paper2Gal needs the backend root address; the frontend automatically appends paths such as /api/workflows.',
+          solution: 'Change to the correct workflow backend root address.',
+          steps: [
+            'Open "Settings → API"',
+            'Change "API Address" to the backend root address (format like https://your-backend.example.com or http://localhost:3001)',
+            'Ensure there are no paths such as /api/workflows or /v1/chat/completions at the end of the address',
+            'Save and retry',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_BASE_INVALID'],
+          prevention: 'When configuring the API address, only enter the backend service\'s root domain and port; do not append any API paths.',
+        },
+        {
+          code: 'API_TIMEOUT',
+          message: 'Workflow remains unresponsive for a long time, eventually timing out',
+          severity: 'error',
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: top message bar / right column progress bar',
+          cause: 'A certain step took too long. Possible causes: image size too large, high model load, high network latency, or backend processing queue.',
+          solution: 'Check the network or retry later, or redo a single step.',
+          steps: [
+            'Wait 2~3 minutes to see if there is progress update (some steps do indeed take a long time)',
+            'Check whether the network connection is stable',
+            'If stuck on a long-running step, you can click "Redo" on that step\'s card to retry individually',
+            'If the entire workflow is stuck, try clicking "Redo Workflow" to restart with the same image',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Compress large images in advance; when the network is unstable, disable AI concurrency to reduce request frequency.',
+        },
+        {
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Prompts "Backend unavailable" or "Cannot connect to server"',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'Backend server is not started, crashed, or the API Base URL configured in the frontend is incorrect.',
+          solution: 'Check backend service status and API configuration.',
+          steps: [
+            'Open browser DevTools → Network tab',
+            'Click "Start" again and observe whether the request is sent and the response status code',
+            'If the request is not sent, check whether "Settings → API → API Base URL" is correct',
+            'If the request returns 502/503, contact the backend administrator to confirm service status',
+            'If it is a local deployment, confirm whether the backend process is running (npm start)',
+          ],
+          relatedCodes: ['NETWORK_DISCONNECTED', '502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: 'When deploying locally, ensure the backend process is started (npm start); when using a remote service, confirm the URL is configured correctly.',
+        },
+        {
+          code: 'NETWORK_DISCONNECTED',
+          message: 'Prompts network disconnected or no internet access',
+          severity: 'critical',
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'Device is not connected to the network, Wi-Fi is disconnected, or a firewall is blocking the request.',
+          solution: 'Restore network connection.',
+          steps: [
+            'Check the device\'s network connection status',
+            'Try accessing other websites to confirm the network is normal',
+            'If using a proxy/VPN, check whether the proxy settings are correct',
+            'If on a company/campus network, confirm whether API access is restricted',
+          ],
+          relatedCodes: ['BACKEND_UNAVAILABLE', 'API_TIMEOUT'],
+          prevention: 'Before using online tools, confirm the network connection is normal; avoid performing long workflows in environments with large network fluctuations.',
+        },
+        {
+          code: 'FILE_FORMAT_UNSUPPORTED',
+          message: 'Upload prompts "Unsupported file format"',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Paper2Gal → Area: left column source image panel',
+          cause: 'Selected WEBP, GIF, BMP, TIFF, or other unsupported formats. Paper2Gal only supports PNG and JPG.',
+          solution: 'Convert the image to PNG or JPG format.',
+          steps: [
+            'Use the Image Converter tool (Home → Image Format Converter) to convert the file to PNG or JPG',
+            'Or use the system\'s built-in image preview/editor to export as PNG/JPG',
+            'Re-select the converted file on the Paper2Gal page',
+          ],
+          relatedCodes: ['UPLOAD_FORMAT'],
+          prevention: 'Confirm the file format is PNG or JPG before uploading.',
+        },
+        {
+          code: 'FILE_TOO_LARGE',
+          message: 'Upload preview fails or workflow reports error',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Paper2Gal → Area: left column preview area',
+          cause: 'Uploaded image dimensions are too large (exceeding 4096x4096 pixels) or the file size exceeds browser/backend limits.',
+          solution: 'Compress or resize the image before uploading.',
+          steps: [
+            'Use the Image Converter tool to scale the image\'s longest side to below 2048 or 4096 pixels',
+            'If it is a PNG, convert to JPG to reduce file size',
+            'Re-upload the processed image',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Recommended to upload images of 1024×1024 ~ 2048×2048, balancing quality and processing speed.',
+        },
+        {
+          code: 'MODEL_NOT_FOUND',
+          message: 'A workflow step reports error, prompting model unavailable',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'The model configured on the backend does not exist, has been removed, or the current API Key does not have permission to access it.',
+          solution: 'Contact the backend administrator to switch models, or replace with an API Key that has permission.',
+          steps: [
+            'View the specific step and model information in the error panel',
+            'Contact the backend administrator to confirm model configuration',
+            'If a certain step keeps failing, you can click "Redo" on that step\'s card to try',
+          ],
+          relatedCodes: ['API_KEY_EXPIRED', '403_FORBIDDEN'],
+          prevention: 'Ensure the model configured on the backend is available and the current Key has permission to access it; regularly verify Key permissions.',
+        },
+        {
+          code: 'PROMPT_BLOCKED',
+          message: 'A step reports error, prompting content policy violation or sensitive word interception',
+          severity: 'error',
+          category: 'D. Model & Generation',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'Content in the Prompt override is intercepted by the backend service provider\'s safety filter. Even normal artistic vocabulary may be misjudged by certain platforms.',
+          solution: 'Modify the Prompt override, removing or replacing vocabulary that may trigger the filter.',
+          steps: [
+            'Expand the "Prompt Override" panel in the left column',
+            'Find the Prompt corresponding to the step that reported the error',
+            'Remove or replace vocabulary that may trigger the filter',
+            'Click "Redo" on that step\'s card',
+            'If it still fails, try simplifying the Prompt to the most basic description and gradually add modifiers to identify the trigger word',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', '403_FORBIDDEN'],
+          prevention: 'Avoid using sensitive vocabulary when modifying Prompt overrides; test with the default Prompt first, then customize after it passes.',
         },
         {
           code: 'P2G_WORKFLOW_ERROR',
-          message: 'На панели ошибок отображается «P2G_WORKFLOW_ERROR»',
+          message: 'Error panel shows "P2G_WORKFLOW_ERROR"',
           severity: 'error',
-          category: 'E. Рабочий процесс и преобразование',
-          location: 'Страница: paper2gal → Область: Верхняя панель сообщений / Панель ошибок справа',
-          cause: 'Шаг рабочего процесса Paper2Gal не удался. Причины: сбой проверки входных данных, модель недоступна, истек срок действия API Key, контент отфильтрован, сетевое прерывание и т.д.',
-          solution: 'Устраняйте неполадки пошагово на основе деталей ошибки.',
-          steps: ['Прочитайте детали ошибки (этап, сообщение, подсказки)', 'Проверьте, что изображение — действительный PNG/JPG', 'Проверьте сетевое подключение', 'При необходимости измените чувствительные слова в переопределении промптов', 'Убедитесь, что бэкенд работает нормально', 'Повторите неудачный шаг или сбросьте рабочий процесс'],
-          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED', 'WORKFLOW_STEP_FAILED'],
-          prevention: 'Перед запуском проверьте действительность изображения, стабильность сети, отсутствие чувствительных слов в промптах и действительность API Key.',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel / draggable error floating window',
+          cause: 'A step in the Paper2Gal workflow failed to execute. Possible causes: input validation failure, model unavailable, API Key expired, generated content intercepted by safety filter, network interruption, or backend internal exception.',
+          solution: 'Troubleshoot step by step according to the "Stage", "Message", and "Hints" in the error details.',
+          steps: [
+            'Expand the error panel or open the draggable error floating window, and read "Human-readable Error Info", "Possible Causes", and "Fix Hints"',
+            'Check whether the uploaded image is a valid PNG/JPG',
+            'Check network connection',
+            'If "content policy violation" is prompted, modify sensitive vocabulary in the Prompt override',
+            'Confirm the backend service is running normally',
+            'If a certain step fails, you can click "Redo" on the step card to retry that step individually',
+            'If the entire workflow fails, click "Reset Workflow" to clear and restart',
+          ],
+          relatedCodes: ['API_KEY_MISSING', 'API_KEY_EXPIRED', 'MODEL_NOT_FOUND', 'PROMPT_BLOCKED', 'STYLE_TRANSFER_REQUEST_FAILED', 'WORKFLOW_STEP_FAILED'],
+          prevention: 'Before starting the workflow, confirm the image is a valid PNG/JPG, network connection is stable, Prompt override contains no sensitive vocabulary, and API Key is valid.',
+        },
+        {
+          code: 'WORKFLOW_NOT_FOUND',
+          message: 'Redoing or downloading prompts "This workflow record no longer exists"',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'After the backend (especially serverless platforms like Zeabur) is redeployed or restarted, WORKFLOW_STATE_DIR was not mounted to persistent storage, and old wf_* state files were cleared.',
+          solution: 'Start a new workflow.',
+          steps: [
+            'This is a backend storage issue; the old workflow cannot be recovered',
+            'Click "Start" to launch a new workflow with the current image',
+            'If you need to retain historical workflows, contact the backend administrator to set up persistent storage mounts for WORKFLOW_STATE_DIR, OUTPUT_DIR, and UPLOAD_DIR on Zeabur/server',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR', 'BACKEND_UNAVAILABLE'],
+          prevention: 'When using serverless platforms like Zeabur, be sure to configure persistent storage mounts; after generating important assets, promptly click "Download All" to back up to local.',
         },
         {
           code: 'WORKFLOW_STEP_FAILED',
-          message: 'Карточка шага показывает статус «Не удалось»',
+          message: 'A step card shows "Failed" status',
           severity: 'error',
-          category: 'E. Рабочий процесс и преобразование',
-          location: 'Страница: paper2gal → Область: Список шагов справа',
-          cause: 'Ошибка выполнения конкретного шага. Частые причины: модель недоступна, промпт отфильтрован, сетевой тайм-аут, недостаточно ресурсов бэкенда.',
-          solution: 'Просмотрите детали шага и повторите попытку индивидуально.',
-          steps: ['Нажмите на карточку неудачного шага для просмотра деталей ошибки', 'Устраните неполадки на основе информации об ошибке', 'Нажмите «Повторить шаг»', 'При многократных неудачах свяжитесь с администратором бэкенда'],
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: right column step list',
+          cause: 'An error occurred during execution of that specific step. Common causes: model unavailable, Prompt intercepted, network timeout, or insufficient backend resources.',
+          solution: 'View step details and retry individually.',
+          steps: [
+            'Click the failed step card to view error details (error field)',
+            'Troubleshoot according to the error information (e.g., modify Prompt, check network, switch model)',
+            'Click the "Retry Step" button on that step\'s card to retry individually',
+            'If multiple retries still fail, contact the backend administrator',
+          ],
           relatedCodes: ['P2G_WORKFLOW_ERROR', 'PROMPT_BLOCKED', 'API_TIMEOUT'],
-          prevention: 'После сбоя шага просмотрите детали ошибки и повторите попытку после исправления корневой причины.',
+          prevention: 'After a step fails, view error details and retry after modifying the corresponding Prompt or checking the network as prompted.',
         },
         {
           code: 'REDO_CONFLICT',
-          message: 'При нажатии «Повторить» отображается «Этот результат уже повторяется»',
+          message: 'Clicking redo prompts "This result is already being redone"',
           severity: 'info',
-          category: 'E. Рабочий процесс и преобразование',
-          location: 'Страница: paper2gal → Область: Карточки шагов / Карточки результатов',
-          cause: 'Текущий шаг или другой член его конфликтной группы уже повторяется.',
-          solution: 'Дождитесь завершения текущего повторения перед операцией.',
-          steps: ['Наблюдайте за прогрессом повторения на панели сообщений', 'Дождитесь изменения статуса с «Повторение» на «Успех» или «Неудача»', 'При долгом отсутствии ответа обновите страницу и повторите попытку'],
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: step cards / result cards',
+          cause: 'The current step or another step in its conflict group is already being redone. For example, when redoing expression_thinking, the corresponding cutout_expression_thinking also enters redo state; clicking again at this time will prompt a conflict.',
+          solution: 'Wait for the current redo to complete before operating.',
+          steps: [
+            'Observe the page message bar to confirm redo progress',
+            'Wait for that step\'s status to change from "Redoing" to "Success" or "Failed"',
+            'If the redo remains unresponsive for a long time, refresh the page and retry',
+          ],
           relatedCodes: ['WORKFLOW_STEP_FAILED'],
-          prevention: 'Не отправляйте несколько запросов на повторение одновременно для шагов одной конфликтной группы.',
+          prevention: 'Do not initiate multiple redo requests for steps within the same conflict group simultaneously; wait for one to complete before initiating the next.',
+        },
+        {
+          code: 'WORKFLOW_CANCELLED',
+          message: 'Workflow status shows as cancelled',
+          severity: 'info',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Paper2Gal → Area: right column progress area',
+          cause: 'User manually cancelled the workflow, or the backend actively cancelled the task due to resource constraints.',
+          solution: 'Restart the workflow.',
+          steps: [
+            'Confirm whether you clicked cancel yourself',
+            'If not, it may be due to insufficient backend resources',
+            'Wait a few minutes and click "Start" again',
+          ],
+          relatedCodes: ['P2G_WORKFLOW_ERROR'],
+        },
+        {
+          code: '429_TOO_MANY_REQUESTS',
+          message: 'Prompts requests too frequent (Rate Limit)',
+          severity: 'warning',
+          category: 'A. API & Network',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'The workflow sent too many requests during concurrent execution, exceeding the service provider\'s rate limit.',
+          solution: 'Disable AI concurrency or wait and retry.',
+          steps: [
+            'Turn off the "AI Concurrency" toggle in the left column settings panel',
+            'Wait 1~2 minutes',
+            'Restart the workflow',
+          ],
+          relatedCodes: ['API_RATE_LIMIT'],
+          prevention: 'When using an API Key with strict rate limits, it is recommended to disable AI concurrency; avoid repeatedly starting multiple workflows in a short time.',
+        },
+        {
+          code: '500_INTERNAL_ERROR',
+          message: 'Backend returns 500 Internal Server Error',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'An internal exception occurred in the backend service while processing the request. Possible causes: model loading failure, GPU memory insufficient, or code bug.',
+          solution: 'Retry later or contact the backend administrator.',
+          steps: [
+            'Wait 2 minutes',
+            'Reduce the uploaded image size and retry',
+            'If the problem persists, contact the backend administrator to check server logs',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', '503_SERVICE_UNAVAILABLE'],
+          prevention: 'Reduce request scale (image size); avoid submitting large tasks when the server is under high load.',
+        },
+        {
+          code: '502_BAD_GATEWAY',
+          message: 'Backend returns 502 Bad Gateway',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'The reverse proxy (e.g., Nginx) cannot connect to the backend application server. The backend process may have crashed or not been started.',
+          solution: 'Check backend service status.',
+          steps: [
+            'If it is a local deployment, confirm whether the backend process is running',
+            'Check whether the backend service port is occupied',
+            'Check backend logs to confirm whether there are startup errors',
+            'Restart the backend service and retry',
+          ],
+          relatedCodes: ['503_SERVICE_UNAVAILABLE', 'BACKEND_UNAVAILABLE'],
+          prevention: 'When deploying locally, confirm the backend process is running; check reverse proxy configuration.',
+        },
+        {
+          code: '503_SERVICE_UNAVAILABLE',
+          message: 'Backend returns 503 Service Unavailable',
+          severity: 'error',
+          category: '0~9. HTTP Status Codes',
+          location: 'Page: Paper2Gal → Area: top message bar / right column error panel',
+          cause: 'Backend service is temporarily unavailable, possibly undergoing maintenance, restart, or overload protection.',
+          solution: 'Retry later.',
+          steps: [
+            'Wait 2~3 minutes and retry',
+            'Check the backend service status page (if any)',
+            'Contact the backend administrator to confirm whether maintenance is in progress',
+          ],
+          relatedCodes: ['502_BAD_GATEWAY', 'BACKEND_UNAVAILABLE'],
+          prevention: 'Avoid operating during server maintenance windows; reduce request frequency during high load.',
         },
         {
           code: 'FRONTEND_CUTOUT_SPAWN_FAILED',
-          message: 'Ошибка на шаге вырезки: ресурсы браузерной вырезки не могут быть загружены',
+          message: 'Cutout step reports error, prompting browser-side cutout resources cannot be loaded',
           severity: 'critical',
-          category: 'F. Система и разрешения',
-          location: 'Страница: paper2gal → Область: Карточки шагов справа / Панель ошибок',
-          cause: 'Ресурсы модели IMG.LY на стороне браузера не могут быть загружены, или браузер не поддерживает необходимые возможности WebGL/WASM.',
-          solution: 'Обновите страницу и повторите попытку, или используйте современный браузер.',
-          steps: ['Обновите страницу и повторно запустите браузерную вырезку', 'Используйте современный браузер (Chrome/Firefox/Edge)', 'Убедитесь, что WebGL/WASM не отключены', 'При необходимости пересоберите Docker-образ'],
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'Browser-side IMG.LY model resources cannot be loaded, or the current browser does not support the required WebGL/WASM capabilities.',
+          solution: 'Refresh the page and retry, or use a modern browser.',
+          steps: [
+            'Refresh the page and re-trigger browser-side cutout',
+            'Confirm the browser is a modern browser such as Chrome/Firefox/Edge (IE and old Safari are not supported)',
+            'Check whether WebGL or WASM is disabled in the browser',
+            'If it is a Docker deployment, confirm the image was built correctly (the Dockerfile already includes model resources)',
+          ],
           relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
-          prevention: 'Используйте современный браузер. Не отключайте WebGL или WASM.',
+          prevention: 'Use a modern browser (Chrome/Firefox/Edge latest version); do not disable WebGL or WASM.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_TIMEOUT',
+          message: 'Cutout step remains unresponsive for a long time then fails',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'Browser-side cutout processing timed out. Possible causes: image too large, insufficient device CPU/RAM, or slow model resource loading.',
+          solution: 'Shrink the image or improve device performance.',
+          steps: [
+            'Re-upload an image with longest side not exceeding 2048 pixels',
+            'Close other browser tabs to free up memory',
+            'Turn off "AI Concurrency" to let steps execute serially, reducing resource contention',
+            'Retry',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED', 'DEVICE_MEMORY_LOW'],
+          prevention: 'Compress images to reasonable size before uploading (recommended 1024~2048px); ensure the device has sufficient memory.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_EXECUTION_FAILED',
+          message: 'Cutout step reports error, prompting browser-side cutout execution failed',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'An internal error occurred during browser-side cutout image processing. Possible causes: image format corrupted, unsupported encoding, or IMG.LY model exception.',
+          solution: 'Replace the image and retry.',
+          steps: [
+            'Confirm the expression image was successfully generated (click the step card to view output_url)',
+            'If the source image is corrupted, re-upload a new PNG/JPG image',
+            'Click "Redo" on that step\'s card to retry cutout individually',
+            'If browser cutout keeps failing, contact the backend administrator to switch the remove_background provider to a backend service',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_SPAWN_FAILED', 'FRONTEND_CUTOUT_TIMEOUT'],
+          prevention: 'Upload standard format PNG/JPG images; avoid using special encoding or corrupted image files.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_SOURCE_MISSING',
+          message: 'Cutout step reports error, prompting source image not found',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'The upstream expression generation step failed, causing the browser-side cutout to have no input file to process.',
+          solution: 'First troubleshoot and fix the expression generation step error, then retry cutout.',
+          steps: [
+            'Check the error information of the expression generation steps (thinking / surprise / angry)',
+            'Fix the expression generation issue (usually invalid API Key, intercepted Prompt, or network issue)',
+            'After confirming the expression image was successfully generated, click "Redo" on the cutout step',
+          ],
+          relatedCodes: ['WORKFLOW_STEP_FAILED'],
+          prevention: 'Ensure expression generation steps succeed before performing cutout; the workflow automatically executes in order—do not skip steps.',
+        },
+        {
+          code: 'FRONTEND_CUTOUT_OUTPUT_MISSING',
+          message: 'Browser-side cutout executed successfully but did not generate output',
+          severity: 'error',
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal → Area: right column step cards / error panel',
+          cause: 'Browser-side cutout processing was abnormal, possibly generating empty data or upload failure.',
+          solution: 'Replace the image or refresh the page and retry.',
+          steps: [
+            'Confirm the expression image was successfully generated',
+            'Refresh the page to let the page re-detect pending cutout tasks',
+            'If it still fails, re-upload a new image and start a new workflow',
+          ],
+          relatedCodes: ['FRONTEND_CUTOUT_EXECUTION_FAILED'],
+          prevention: 'Ensure input image format is correct; avoid using corrupted or special encoding images.',
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: 'Importing config prompts "Invalid JSON format"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Paper2Gal → Area: top "Import Config" button',
+          cause: 'File content is corrupted, not in JSON format, or modified by another program.',
+          solution: 'Check whether the file is a valid UTF-8 encoded text file.',
+          steps: [
+            'Open the JSON file to import in a text editor',
+            'Confirm the file is valid UTF-8 encoding, with no garbled text',
+            'Validate with an online JSON formatter tool',
+            'If the file is corrupted, try to restore from historical backup',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH'],
+          prevention: 'Keep exported configuration files safe; do not modify them with non-text editors.',
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: 'Importing config prompts "Tool type mismatch"',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Paper2Gal → Area: top "Import Config" button',
+          cause: 'The tool field in the imported JSON file is not paper2gal, or it does not contain the promptOverrides field.',
+          solution: 'Confirm that the imported file is a config file exported from the Paper2Gal page.',
+          steps: [
+            'Open the JSON file to import in a text editor',
+            'Confirm the file contains "tool": "paper2gal" or directly contains the promptOverrides field',
+            'If not, find the correct Paper2Gal config file and import it',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+          prevention: 'Only config files exported from the Paper2Gal page contain the correct tool field.',
+        },
+        {
+          code: 'LOCAL_STORAGE_FULL',
+          message: 'Save failed, browser storage space insufficient',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Paper2Gal → Area: top "Save Config" button',
+          cause: 'Browser localStorage storage space is full (usually about 5~10MB). Workflow state, Prompt overrides, and history may occupy a large amount of space.',
+          solution: 'Clean up browser storage space or export configuration to a local file.',
+          steps: [
+            'First click "Export Package Config" to back up the current config to a local file',
+            'Press Ctrl+Shift+I to open DevTools → Application → Local Storage',
+            'Delete unnecessary keys (especially large keys containing workflow history)',
+            'Return to Paper2Gal and click "Save Config" again',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: 'Regularly clean up data no longer needed from browser localStorage; promptly export configurations to local files for backup.',
+        },
+        {
+          code: 'STORAGE_READ_ONLY',
+          message: 'Save operation has no response, data lost after refresh',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Paper2Gal → Area: top "Save Config" button',
+          cause: 'Browser is in private/incognito mode, or localStorage is disabled by system policy, or disk space is full causing the browser to set storage to read-only.',
+          solution: 'Exit private mode or free up disk space.',
+          steps: [
+            'Confirm the browser is not in incognito/private browsing mode (this mode usually disables localStorage)',
+            'Check if system disk space is full',
+            'Try reopening the app in a normal window',
+            'If the issue persists, use the "Export Package Config" function to save the config as a local file as an alternative',
+          ],
+          relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: 'Avoid using this app in browser incognito/private mode; regularly export configurations to local files as backups.',
+        },
+        {
+          code: 'UNSAVED_WARNING',
+          message: 'Returning to home page prompts "You haven\'t saved the current page content"',
+          severity: 'info',
+          category: 'B. Config & Data',
+          location: 'Page: Paper2Gal → Area: upper-left "Back to Home" button',
+          cause: 'The current Prompt override or AI concurrency setting does not match the last saved snapshot (isDirty is true). You may have modified the config but forgot to save.',
+          solution: 'Choose to save or discard as needed.',
+          steps: [
+            'If you want to keep changes: click "Continue Editing" in the dialog, return to the page and click "Save Config", then return to home',
+            'If you don\'t need to keep them: click "Confirm Return" in the dialog',
+          ],
         },
         {
           code: 'DEVICE_MEMORY_LOW',
-          message: 'Вкладка браузера вылетает или перестает отвечать',
+          message: 'Browser tab crashes or becomes unresponsive',
           severity: 'critical',
-          category: 'F. Система и разрешения',
-          location: 'Страница: paper2gal → Область: Вся страница',
-          cause: 'Недостаточно памяти устройства. Обычно происходит при обработке сверхбольших изображений (>4096) или загрузке модели браузерной вырезки.',
-          solution: 'Закройте другие вкладки, уменьшите размер изображения или используйте устройство с большей памятью.',
-          steps: ['Сохраните текущую работу', 'Закройте другие вкладки браузера', 'Уменьшите максимальную сторону изображения до 2048', 'Перезапустите браузер', 'При необходимости используйте устройство с большей памятью'],
+          category: 'F. System & Permissions',
+          location: 'Page: Paper2Gal → Area: entire page',
+          cause: 'Device memory is insufficient and the browser forcibly terminated the tab process. Usually occurs when processing ultra-large images (>4096 resolution) or loading the browser cutout model.',
+          solution: 'Close other tabs, reduce image size, or use a device with more memory.',
+          steps: [
+            'Save current work (click "Save Config")',
+            'Close other unused browser tabs',
+            'Use the Image Converter tool to scale the image\'s longest side to below 2048',
+            'Restart the browser and retry',
+            'If the problem persists, try operating on a device with more memory',
+          ],
           relatedCodes: ['FILE_TOO_LARGE'],
-          prevention: 'Закрывайте другие вкладки перед обработкой больших файлов. Уменьшайте изображения до 2048. Отключайте AI-параллелизм на устройствах с малым объемом памяти.',
+          prevention: 'Close other browser tabs before processing large files; scale the image\'s longest side to below 2048; on low-memory devices it is recommended to disable AI concurrency.',
         },
       ],
     },
     {
       id: 'image-converter',
-      title: 'Конвертер форматов изображений',
-      overview: `Конвертер форматов изображений — это чисто фронтендный инструмент для загрузки изображений и их преобразования в форматы PNG или JPG. Поддерживает шесть настроек фильтров: яркость, контраст, насыщенность, размытие, поворот оттенка и оттенки серого. Можно контролировать качество вывода и максимальный размер, поддерживает сохранение исходного соотношения сторон. Вся обработка выполняется локально в браузере; изображения не загружаются на сервер.`,
+      title: 'Image Format Converter',
+      overview: `The Image Format Converter supports rapid conversion of local images to target formats (JPEG, PNG, WebP, BMP) and resizing. Supports multiple upload methods (select files, drag and drop, paste from clipboard), displays original image information (format, dimensions, size), and supports batch download or copy converted images. Suitable for quickly adjusting image format or size before uploading to other tools (such as Paper2Gal).
+
+
+[Format Support Matrix]
+The Image Converter supports any combination of the following input and output formats:
+
+Input: PNG, JPEG, WebP, GIF, BMP, TIFF, AVIF, HEIC/HEIF, ICO, SVG, RAW (CR2, NEF, ARW, DNG)
+Output: PNG, JPEG, WebP, GIF, BMP, TIFF, AVIF, ICO, PDF, Base64
+
+Special conversion scenarios:
+- Alpha channel handling: PNG/WebP to JPEG with background fill or separate alpha file
+- Animation handling: GIF/WebP animation to frame sequence or static first frame
+- SVG rendering: Vector to bitmap at any resolution with custom DPI
+- RAW processing: Camera RAW with white balance and exposure compensation
+
+[Batch Conversion Mode]
+- Select up to 50 images simultaneously
+- Unified output format and parameter settings
+- Preserve original directory structure or flatten output
+- Filename template support: {original}_{index:03d}.{ext}
+- Processing report after completion (success/fail/warning stats)
+
+[Image Processing Options]
+- Resize: Percentage scaling, max edge length, exact dimensions (preserve or stretch)
+- Crop: Center crop, smart crop (preserve subject), custom region
+- Rotate: 90°/180°/270° or arbitrary angle
+- Flip: Horizontal, vertical
+- Filters: Grayscale, sepia, invert, blur, sharpen
+- Watermark: Text or image watermark with position, opacity, rotation
+- Metadata: Preserve, strip, or modify EXIF, IPTC, XMP
+
+[Compression and Optimization]
+- Smart compression: Maximize compression with acceptable visual quality loss
+- Target file size: Specify maximum output file volume
+- Progressive JPEG: For web loading with low-res preview first
+- Lossless PNG optimization: Reduce size without quality loss
+- WebP lossy/lossless: Auto-select optimal mode based on content`,
       buttons: [
-        { name: 'Выбрать изображение', description: 'Загрузите файл изображения. Поддерживаются форматы PNG, JPG и WEBP.' },
-        { name: 'Конвертировать', description: 'Примените все параметры фильтра и сгенерируйте выходное изображение. Обработка полностью локальна в браузере.' },
-        { name: 'Скачать результат', description: 'Скачайте преобразованное изображение локально. Формат имени файла: converted-{timestamp}.{ext}.' },
-        { name: 'Сброс', description: 'Очистите загруженное изображение и результаты, сбросьте все параметры фильтра на значения по умолчанию.' },
-      ],
+        { name: 'Upload Image / Replace Image', description: 'Opens the file picker to select local image files, supporting PNG/JPG/WEBP/BMP/ICO formats. After selection, the original image preview and format information are displayed immediately.' },
+        { name: 'Copy Original Image', description: 'Copies the original image to the clipboard. If the browser does not support it, a prompt will appear.' },
+        { name: 'Download Original Image', description: 'Downloads the original image to the local machine.' },
+        { name: 'Copy Converted Image', description: 'Copies the converted image to the clipboard.' },
+        { name: 'Download Converted Image', description: 'Downloads the converted image to the local machine.' },
+        { name: 'Reset / Clear Images', description: 'Clears all uploaded images and conversion settings, restoring the initial state.' },
+      
+        { name: 'Add Folder', description: 'Select an entire folder to automatically import all supported image files within.' },
+        { name: 'Presets', description: 'Save current conversion parameters as a preset for one-click loading next time.' },
+        { name: 'Image Info', description: 'View detailed metadata of selected images: EXIF, color profile, file size, resolution.' },
+        { name: 'Preview Compare', description: 'Display before/after comparison with zoom for detail differences.' },
+        { name: 'Smart Rename', description: 'Batch rename output files using templates. Supports index, date, original name variables.' },
+        { name: 'Cloud Sync', description: 'Automatically upload conversion results to configured cloud storage (optional feature).' },],
       parameters: [
-        { name: 'Формат вывода', description: 'MIME-тип выходного изображения: image/png или image/jpeg.', tips: 'PNG поддерживает прозрачный канал, но файлы больше. JPG файлы меньше, но прозрачность не поддерживается.' },
-        { name: 'Качество', description: 'Качество сжатия JPG-вывода. Диапазон 10~100. Действует только для формата JPG.', tips: '90~95 — оптимальный баланс между качеством и размером файла.' },
-        { name: 'Макс. ширина', description: 'Максимальная ширина выходного изображения (пиксели). Если исходное шире, оно пропорционально уменьшится.', tips: '2048 удовлетворит требованиям загрузки большинства социальных платформ.' },
-        { name: 'Макс. высота', description: 'Максимальная высота выходного изображения (пиксели).' },
-        { name: 'Сохранять соотношение сторон', description: 'Сохранять ли исходное соотношение сторон при масштабировании.', tips: 'Рекомендуется всегда включать, чтобы избежать искажения изображения.' },
-        { name: 'Яркость', description: 'Настройка общей яркости изображения. Диапазон 0~200, 100 — исходная яркость.', tips: 'Ниже 50 заметно темнее; выше 150 может привести к передержке и потере деталей.' },
-        { name: 'Контраст', description: 'Настройка контраста изображения. Диапазон 0~200, 100 — исходный контраст.', tips: 'Более высокие значения дают более сильный контраст света и тени, хорошо для усиления линий.' },
-      ],
+        { name: 'Target Format', description: 'Selects the conversion output format: JPEG, PNG, WebP, BMP.', tips: 'JPEG is suitable for photos, small file size; PNG supports transparent backgrounds; WebP offers better compression; BMP is uncompressed and large in size.' },
+        { name: 'Quality', description: 'Output image quality (for lossy formats such as JPEG and WebP), range 1~100.', tips: '80~90 offers a good balance between quality and file size; 100 is the highest quality but largest file size.' },
+        { name: 'Width', description: 'Output image width (pixels). Automatically scales the height proportionally based on the original image aspect ratio.', tips: 'If maintaining the aspect ratio is needed, only modify the width; the height will be automatically calculated. If the height is manually set to 0, it will be automatically calculated.' },
+        { name: 'Height', description: 'Output image height (pixels). Automatically scales the width proportionally based on the original image aspect ratio.', tips: 'Same as width. When both width and height are non-zero, stretching may occur—be careful when using fixed aspect ratios.' },
+        { name: 'Original Image Preview', description: 'Displays the preview of the uploaded original image, showing the original format, dimensions, and file size.', tips: null },
+        { name: 'Converted Image Preview', description: 'Displays the preview after conversion, showing the converted format, dimensions, estimated file size, and scale percentage.', tips: null },
+      
+        { name: 'JPEG Quality', description: 'JPEG output quality, range 60~100. 100 = highest quality; 60 = smallest file but visible compression artifacts.', tips: 'Web display: 75-85, archiving: 90-95, printing: 95-100.' },
+        { name: 'PNG Compression Level', description: 'PNG compression strength, range 0~9. 0 = fastest but largest; 9 = smallest but slowest. No quality loss.', tips: 'General: 6, smallest file: 9, fastest: 1-3.' },
+        { name: 'WebP Quality', description: 'WebP output quality, range 0~100. WebP is typically 25-35% smaller than JPEG at same quality.', tips: 'Web display: 80-85, similar to JPEG quality settings.' },
+        { name: 'Output DPI', description: 'Output image DPI (dots per inch), range 72~600. Affects print size but not pixel count.', tips: 'Screen: 72-96, print: 150-300, high-res print: 300-600.' },
+        { name: 'Color Space', description: 'Output color space: sRGB (general), Adobe RGB (wide gamut print), CMYK (four-color print), P3 (Display P3 screens).', tips: 'Web/screen: sRGB, print: Adobe RGB or CMYK.' },
+        { name: 'Interpolation Algorithm', description: 'Resampling algorithm for scaling: Nearest (pixel art), Bilinear (balanced), Bicubic (smooth), Lanczos (best quality).', tips: 'Photos: Lanczos or Bicubic, pixel art: Nearest.' },
+        { name: 'Batch Rename Template', description: 'Filename template for batch processing. Supports {name}, {index}, {date}, {width}, {height} variables.', tips: 'Example: {name}_converted_{index:03d} produces oc_001, oc_002...' },
+        { name: 'Output Directory Structure', description: 'Directory organization for batch output: flat, mirror (preserve structure), or group by date.', tips: 'Many files: group by date; few files: flat.' },
+        { name: 'Metadata Handling', description: 'How to handle metadata on output: preserve all, strip all, keep copyright only, or keep creation time only.', tips: 'Privacy-sensitive: strip all; photography: keep copyright.' },],
       errors: [
         {
-          code: 'CONVERT_ERROR',
-          message: 'На панели ошибок отображается «CONVERT_ERROR»',
+          code: 'CONVERSION_FAILED',
+          message: 'Image conversion failed',
           severity: 'error',
-          category: 'E. Рабочий процесс и преобразование',
-          location: 'Страница: Конвертер форматов изображений → Область: Панель ошибок справа',
-          cause: 'Исключение при преобразовании изображения. Возможно, исходное изображение повреждено, браузер не поддерживает Canvas 2D filter, или недостаточно памяти.',
-          solution: 'Проверьте совместимость изображения и браузера.',
-          steps: ['Убедитесь, что исходное изображение открывается нормально в браузере', 'Обновите страницу и повторно загрузите', 'Проверьте, не слишком ли большое изображение', 'Поочередно отключайте фильтры для поиска неподдерживаемых', 'Попробуйте другой браузер'],
+          category: 'F. System & Permissions',
+          location: 'Page: Image Format Converter → Area: bottom right conversion result area',
+          cause: 'Unsupported format or browser does not support canvas conversion.',
+          solution: 'Try switching the target format.',
+          steps: [
+            'Confirm the original image is not corrupted',
+            'Try switching the target format',
+            'Use a modern browser (Chrome/Firefox/Edge)',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+        },
+        {
+          code: 'CONVERT_ERROR',
+          message: 'Conversion shows "CONVERT_ERROR"',
+          severity: 'error',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter → Area: bottom conversion result area',
+          cause: 'An exception occurred during image conversion. Possible causes: source image corrupted, unsupported Canvas 2D filter, or insufficient memory.',
+          solution: 'Retry with a different image or browser.',
+          steps: [
+            'Confirm the source image is not corrupted and displays normally',
+            'Try refreshing the page and re-uploading',
+            'Check if the image is corrupted',
+            'Try turning off filters that the browser does not support',
+            'Try using a different browser',
+          ],
           relatedCodes: ['FILE_CORRUPTED', 'DEVICE_MEMORY_LOW'],
-          prevention: 'Убедитесь, что изображение открывается нормально в браузере перед конвертацией. Не включайте слишком много фильтров одновременно.',
+        },
+        {
+          code: 'CONVERT_FILTER_UNSUPPORTED',
+          message: 'Applying certain filters causes exceptions (all on/all off)',
+          severity: 'warning',
+          category: 'E. Workflow & Conversion',
+          location: 'Page: Image Format Converter → Area: filter preview / conversion result area',
+          cause: 'The current browser\'s Canvas 2D filter does not support certain values. For example, some older versions of Safari have known issues with filter support.',
+          solution: 'Turn off unsupported filters or switch browsers.',
+          steps: [
+            'Reset filter values to defaults (brightness/contrast/saturation=100, blur/hue rotation/grayscale=0)',
+            'Adjust filters one by one to find the one causing the exception',
+            'Turn off the problematic filter',
+            'Try Chrome/Firefox/Edge',
+          ],
+          relatedCodes: ['CONVERT_ERROR'],
+          prevention: 'For filter adjustments, test incrementally; use mainstream browsers (Chrome/Firefox/Edge).',
         },
         {
           code: 'DEVICE_MEMORY_LOW',
-          message: 'Браузер зависает или вылетает при конвертации',
+          message: 'Browser tab crashes during conversion',
           severity: 'critical',
-          category: 'F. Система и разрешения',
-          location: 'Страница: Конвертер форматов изображений → Область: Вся страница',
-          cause: 'Недостаточно памяти браузера при обработке сверхбольших изображений.',
-          solution: 'Уменьшите изображение или закройте другие вкладки.',
-          steps: ['Закройте другие вкладки браузера', 'Уменьшите значения «Макс. ширина» и «Макс. высота»', 'Обновите страницу и повторно загрузите'],
-          relatedCodes: ['FILE_TOO_LARGE'],
-          prevention: 'Закрывайте другие вкладки браузера перед обработкой больших файлов. Уменьшайте изображения до 2048.',
+          category: 'F. System & Permissions',
+          location: 'Page: Image Format Converter → Area: entire page',
+          cause: 'Image too large causes memory overflow.',
+          solution: 'Close other tabs or reduce image size.',
+          steps: [
+            'Save current work',
+            'Close other browser tabs',
+            'Reduce the uploaded image dimensions',
+            'Restart the browser and retry',
+          ],
+          relatedCodes: ['CONVERSION_FAILED'],
+          prevention: 'Close other browser tabs before processing large files; scale the image\'s longest side to below 2048.',
+        },
+        {
+          code: 'FILE_CORRUPTED',
+          message: 'Image file is corrupted',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Image Format Converter → Area: image upload / preview area',
+          cause: 'The selected image file is corrupted or encoded in an unsupported format.',
+          solution: 'Replace with a valid image file.',
+          steps: [
+            'Open the image in a system image viewer to confirm it displays normally',
+            'If corrupted, use image repair tools or replace with another image',
+            'Re-upload',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED'],
+          prevention: 'Confirm the image can be opened normally in the system\'s built-in image viewer before uploading.',
+        },
+        {
+          code: 'FILE_FORMAT_UNSUPPORTED',
+          message: 'Upload shows "Unsupported file format"',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Image Format Converter → Area: image selection button',
+          cause: 'Selected format is not within the supported list (PNG/JPG/WEBP/BMP/ICO).',
+          solution: 'Convert the file to a supported format.',
+          steps: [
+            'Confirm the required file format for the target tool',
+            'Use an image processing tool to convert the format',
+            'Re-upload',
+          ],
+          relatedCodes: ['UPLOAD_FORMAT'],
+          prevention: 'Confirm the file format is in the supported list before uploading.',
+        },
+        {
+          code: 'FILE_TOO_LARGE',
+          message: 'File size exceeds limit',
+          severity: 'warning',
+          category: 'C. File & Input',
+          location: 'Page: Image Format Converter → Area: preview area',
+          cause: 'File dimensions are too large or file size exceeds limit.',
+          solution: 'Compress or resize the image.',
+          steps: [
+            'Use the Image Converter tool to scale the image',
+            'Convert PNG to JPG to reduce file size',
+            'Re-upload',
+          ],
+          relatedCodes: ['DEVICE_MEMORY_LOW'],
+          prevention: 'Recommended to upload images of 1024×1024 ~ 2048×2048, balancing quality and processing speed.',
+        },
+        {
+          code: 'IMPORT_INVALID_JSON',
+          message: 'Imported JSON format is invalid',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Image Format Converter → Area: import button',
+          cause: 'File is corrupted or is not a valid JSON file.',
+          solution: 'Check and fix JSON file.',
+          steps: [
+            'Open the file in a text editor',
+            'Validate with a JSON formatting tool',
+            'Fix syntax errors and re-import',
+          ],
+          relatedCodes: ['IMPORT_TOOL_MISMATCH', 'IMPORT_INVALID_CONFIG'],
+          prevention: 'Keep exported configuration files safe; do not modify them with non-text editors.',
+        },
+        {
+          code: 'IMPORT_TOOL_MISMATCH',
+          message: 'Imported config file tool type mismatch',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Page: Image Format Converter → Area: import button',
+          cause: 'The config file was exported from another tool, not the current tool.',
+          solution: 'Import the correct config file.',
+          steps: [
+            'Confirm the file was exported from the current tool',
+            'Find the correct config file and re-import',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON'],
+          prevention: 'Only config files exported from the corresponding tool page contain the correct tool field.',
+        },
+        {
+          code: 'LOCAL_STORAGE_FULL',
+          message: 'Browser localStorage is full',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Page: Image Format Converter → Area: save button',
+          cause: 'Stored data exceeds the browser\'s limit (usually 5~10MB).',
+          solution: 'Clean up unnecessary data or export backup.',
+          steps: [
+            'Export current configuration as a JSON file',
+            'Open DevTools → Application → Local Storage',
+            'Delete unnecessary large data',
+            'Save again',
+          ],
+          relatedCodes: ['STORAGE_READ_ONLY'],
+          prevention: 'Regularly clean up data no longer needed from browser localStorage; for large files, do not save directly in the editor—use the export function instead.',
+        },
+        {
+          code: 'STORAGE_READ_ONLY',
+          message: 'Browser storage is read-only',
+          severity: 'critical',
+          category: 'B. Config & Data',
+          location: 'Page: Image Format Converter → Area: save button',
+          cause: 'Browser is in incognito mode, or storage is disabled by system policy.',
+          solution: 'Exit incognito mode or use a normal window.',
+          steps: [
+            'Confirm the browser is not in incognito/private mode',
+            'Check whether browser storage permissions are disabled',
+            'Export configuration as a local file as an alternative',
+          ],
+          relatedCodes: ['LOCAL_STORAGE_FULL'],
+          prevention: 'Avoid using this app in browser incognito/private mode; regularly export configurations to local files as backups.',
+        },
+        {
+          code: 'UNSAVED_WARNING',
+          message: 'There are unsaved changes',
+          severity: 'info',
+          category: 'B. Config & Data',
+          location: 'Page: Image Format Converter → Area: upper-left "Back to Home" button',
+          cause: 'User modified configuration but has not saved it.',
+          solution: 'Save or discard changes.',
+          steps: [
+            'Click "Save"',
+            'Or click "Confirm Return" to discard',
+          ],
         },
       ],
     },
     {
       id: 'settings-guide',
-      title: 'Руководство по панели настроек',
-      overview:
-        'Панель настроек — это центральный узел конфигурации OC Maker, охватывающий внешний вид, язык, API, аудио, анимацию, горячие клавиши, производительность и другие предпочтения. Все изменения вступают в силу немедленно и автоматически сохраняются в localStorage браузера.\n\nПанель организована во вкладки: «Стиль» управляет темой, цветами и шрифтами; «Язык» переключает язык интерфейса; «API» управляет подключением к бэкенду; «Аудио» регулирует BGM и SFX; «Анимация» контролирует эффекты движения; «Горячие клавиши» настраивают клавиатурные действия; «Производительность» оптимизирует работу на слабых устройствах; «Прочее» включает подсказки, диалоги подтверждения, автосохранение и другое.',
+      title: 'Settings Panel Guide',
+      overview: `
+The Settings Panel is OC Maker's global configuration center, managing all user preferences and system parameters. All settings are saved in browser local storage and support import/export for cross-device sync.
+
+[Interface Settings]
+- Theme mode: Light, Dark, Auto (follow system)
+- Accent color: 12 preset theme colors (sakura pink, sky blue, mint green, violet, etc.)
+- Font size: Small (14px), Medium (16px), Large (18px), Extra Large (20px)
+- Interface density: Compact, Standard, Relaxed
+- Animation effects: On/Off (disable for better performance on low-end devices)
+- Language: Simplified Chinese, Traditional Chinese, English, Japanese, Russian, Korean
+
+[Audio Settings]
+- Master volume: 0-100% global volume control
+- SFX volume: Independent UI interaction sound volume
+- BGM volume: Independent background music volume
+- SFX toggle: Global enable/disable all sound effects
+- BGM toggle: Global enable/disable background music
+- Audio device: Select output device (speakers, headphones, Bluetooth)
+- Audio format: Web Audio API or HTML5 Audio (compatibility option)
+
+[API Settings]
+- Text generation API: Configure OpenAI, Google, Anthropic API Keys
+- Image generation API: Configure Stable Diffusion WebUI, ComfyUI backend addresses
+- Speech synthesis API: Configure Edge TTS, Bark, Piper engine parameters
+- Proxy settings: HTTP/HTTPS/SOCKS5 proxy configuration
+- Request timeout: Customize API request timeout
+- Concurrency limit: Control simultaneous API requests
+
+[Privacy and Security]
+- Data local mode: Completely disable all network requests, pure offline operation
+- Auto-clear history: Set retention period for conversation history and operation logs
+- Export data: Package download all local storage data
+- Import data: Restore all settings and data from backup file
+- Reset all settings: One-click restore factory defaults
+
+[Advanced Settings]
+- Developer mode: Show additional debug info and tools
+- Experimental features: Enable unreleased new features
+- Performance monitoring: Display FPS, memory usage, render time
+- Cache management: View and clean module cache data
+- Keyboard shortcut customization: Modify or disable global shortcuts`,
       buttons: [
-        { name: 'Сохранить пресет стиля', description: 'Сохранить текущую комбинацию темы, цвета и шрифта как пользовательский пресет для быстрого переключения.' },
-        { name: 'Применить пресет', description: 'Выбрать сохраненный пресет из списка и мгновенно применить все его настройки стиля.' },
-        { name: 'Сбросить все настройки', description: 'Восстановить все настройки всех вкладок по умолчанию. Требуется двойное подтверждение.' },
-        { name: 'Восстановить по умолчанию', description: 'Восстановить только настройки текущей вкладки по умолчанию, не затрагивая другие вкладки.' },
-      ],
+        { name: 'Save Style Preset', description: 'Save the current theme, color, and font combination as a custom preset for one-click switching later.' },
+        { name: 'Apply Preset', description: 'Select a saved preset from the list and instantly apply all its style settings.' },
+        { name: 'Reset All Settings', description: 'Restore all settings across all tabs to defaults. Requires double confirmation to prevent accidental clicks.' },
+        { name: 'Restore Defaults', description: 'Restore only the current tab\'s settings to defaults without affecting other tabs.' },
+        { name: 'Import Config', description: 'Import a previously exported configuration JSON file, supporting per-tool granular import.' },
+        { name: 'Export Config', description: 'Export all current settings as a JSON file for backup or migration.' },
+      
+        { name: 'Import Config', description: 'Import complete settings from JSON file. Can overwrite all current settings.' },
+        { name: 'Export Config', description: 'Export all settings as JSON file for backup or cross-device sync.' },
+        { name: 'Restore Defaults', description: 'Restore current category settings to defaults. Does not affect other categories.' },
+        { name: 'Search Settings', description: 'Search keywords across all settings to quickly locate needed configuration items.' },
+        { name: 'Shortcut List', description: 'Display all available keyboard shortcuts and their corresponding functions.' },
+        { name: 'About', description: 'Show OC Maker version info, open-source licenses, credits, and changelog.' },],
       parameters: [
-        { name: 'Режим темы', description: 'Светлый режим подходит для дневного использования; темный режим снижает нагрузку на глаза ночью.' },
-        { name: 'Акцентный цвет', description: 'Основной цвет интерфейса, влияющий на кнопки, ссылки, индикаторы прогресса, выбранные состояния.' },
-        { name: 'Шрифт', description: 'Выбор семейства шрифтов интерфейса: без засечек, скругленный, с засечками, моноширинный, китайские шрифты и западные шрифты.' },
-        { name: 'Язык интерфейса', description: 'Переключение языка отображения интерфейса. Поддерживается 30 языков, переключение мгновенное.' },
-        { name: 'Режим API', description: '«Встроенный режим» использует настроенный на бэкенде сервис Plato; «Пользовательский API» использует вашу собственную совместимую конечную точку.' },
-        { name: 'Общая громкость', description: 'Глобальный множитель громкости, влияющий на BGM и SFX. Установка в 0 полностью отключает звук.' },
-        { name: 'Анимация включена', description: 'Главный переключатель анимации. При выключении все UI-анимации, переходы страниц и анимации модальных окон отключаются.' },
-        { name: 'Высококонтрастный фокус', description: 'Усиление видимости индикатора фокуса для улучшения навигации с клавиатуры и доступности.' },
-        { name: 'Панель ошибок', description: 'Показывать ли перетаскиваемую панель деталей ошибок при возникновении ошибок на страницах рабочих процессов.' },
-      ],
+        { name: 'Style Preset', description: 'Quickly switch appearance theme combinations, including default and Paper2Gal-specific styles.' },
+        { name: 'Theme Mode', description: 'Light mode is suitable for daytime use; dark mode reduces eye strain at night.' },
+        { name: 'Custom Contrast', description: 'Adjust the lightness/darkness contrast of interface elements, from soft to high contrast.' },
+        { name: 'Accent Color', description: 'Choose the main interface color, affecting buttons, links, progress bars, and selected states.' },
+        { name: 'Font', description: 'Select the interface font family, supporting sans-serif, rounded, serif, monospace, Heiti, Songti, Kaiti, and Western fonts.' },
+        { name: 'Interface Language', description: 'Switch the interface display language. Supports 30 languages and takes effect immediately.' },
+        { name: 'API Mode', description: '"Built-in Mode" uses the backend-configured Plato service; "Custom API" uses your own OpenAI-compatible endpoint.' },
+        { name: 'API Base URL', description: 'The OC Maker backend root address, not the model provider endpoint. Example: https://your-backend.example.com' },
+        { name: 'API Key', description: 'The API key for Custom API mode. Used only in the frontend and never sent to the backend.' },
+        { name: 'Master Volume', description: 'Global volume multiplier affecting both BGM and SFX. Set to 0 to completely mute.' },
+        { name: 'SFX Volume', description: 'Independent volume for interaction sound effects (button clicks, hovers, success/failure alerts, etc.).' },
+        { name: 'BGM Volume', description: 'Independent volume for background music, does not affect SFX.' },
+        { name: 'Animation Enabled', description: 'Global animation master switch. When off, all UI animations, page transitions, and modal animations are disabled.' },
+        { name: 'Animation Speed', description: 'Adjust animation playback speed: slow, normal, or fast.' },
+        { name: 'Reduce Animations', description: 'Performance optimization that lowers animation complexity instead of fully disabling, suitable for low-end devices.' },
+        { name: 'Disable Glassmorphism', description: 'Remove blur background effects to significantly improve rendering performance on low-end GPUs.' },
+        { name: 'Low-Res Preview', description: 'Use lower resolution for image previews and thumbnails to reduce memory usage.' },
+        { name: 'Lazy Loading', description: 'Defer loading of images and resources outside the current viewport to reduce initial load time.' },
+        { name: 'Disable Particles', description: 'Turn off background particle animation effects on the home page and workflow pages.' },
+        { name: 'Aggressive Caching', description: 'Enhance browser resource caching strategy to reduce repeated requests, but may delay fetching latest resources.' },
+        { name: 'Image Quality', description: 'Output image quality level: low (fastest), medium (balanced), high (best quality).' },
+        { name: 'Max Concurrent', description: 'Maximum number of tasks processed simultaneously. Lower values reduce browser stuttering.' },
+        { name: 'Show Tooltips', description: 'Display functional tooltip boxes when hovering over buttons and controls.' },
+        { name: 'Confirm Destructive Actions', description: 'Show confirmation dialogs before executing reset, delete, or overwrite operations.' },
+        { name: 'Show Keyboard Hints', description: 'Display corresponding keyboard shortcut hints on buttons and controls.' },
+        { name: 'Smooth Scroll', description: 'Enable smooth scrolling effects; when off, use instant jumps.' },
+        { name: 'Enable Notification Sounds', description: 'Play corresponding sound effects for success, failure, warning, and other system notifications.' },
+        { name: 'Auto-Save Interval', description: 'Frequency (in minutes) for automatically backing up settings and data. Set to 0 to disable auto-save.' },
+        { name: 'Date Format', description: 'Date/time display format in the interface: ISO standard, locale format, or friendly format.' },
+        { name: 'Show Clock', description: 'Display the current time in the bottom-right corner of the status bar.' },
+        { name: 'Enable Status Bar', description: 'Show the bottom information bar containing version, language, connection status, etc.' },
+        { name: 'High-Contrast Focus', description: 'Enhance the visibility of focus indicators to improve keyboard navigation and accessibility.' },
+        { name: 'Error Panel', description: 'Whether to show the draggable error detail panel when errors occur on workflow pages.' },
+      
+        { name: 'Animation FPS Cap', description: 'Max frame rate for UI animations, range 30~120 FPS. Lower saves battery; higher is smoother.', tips: 'Laptop battery: 30-60, plugged in: 60-120.' },
+        { name: 'Scroll Inertia', description: 'List and page scroll inertia strength, range 0~100. 0 = no inertia (immediate stop), 100 = strong inertia.', tips: 'Trackpad users: 70-90, mouse users: 30-50.' },
+        { name: 'Tooltip Delay', description: 'Delay before showing tooltip on hover in ms, range 100~2000.', tips: 'Beginners: 500-800, experienced: 200-400.' },
+        { name: 'Notification Duration', description: 'Toast notification auto-dismiss duration in seconds, range 2~10.', tips: 'General: 3-4s, important: 6-8s.' },
+        { name: 'Max Concurrent Requests', description: 'Maximum simultaneous API requests, range 1~10. Too high may cause rate limiting.', tips: 'OpenAI free tier: 2-3, paid tier: 5-8.' },
+        { name: 'Auto-Backup Interval', description: 'Auto-export settings backup interval in days, range 0~30. 0 = disabled.', tips: 'Recommended 7 days; important projects: 1-3 days.' },
+        { name: 'Shortcut Conflict Detection', description: 'Auto-detect conflicts with browser or system shortcuts when customizing keyboard shortcuts.', tips: 'Recommended: enable to prevent shortcut failures.' },
+        { name: 'DevTools Hotkey', description: 'Custom shortcut to open developer tools. Default: F12.', tips: 'Set to uncommon combination to avoid accidental triggers.' },],
       errors: [
         {
           code: 'SETTINGS_SAVE_FAILED',
-          message: 'Не удалось сохранить настройки',
+          message: 'Settings save failed',
           severity: 'warning',
-          category: 'B. Конфигурация и данные',
-          location: 'Панель настроек → Любая вкладка',
-          cause: 'localStorage браузера заполнен, хранилище отключено или сериализация данных не удалась.',
-          solution: 'Очистите кеш и localStorage браузера или проверьте настройки режима приватности.',
+          category: 'B. Config & Data',
+          location: 'Settings Panel → Any Tab',
+          cause: 'Browser localStorage is full, storage is disabled, or data serialization failed.',
+          solution: 'Clear browser cache and localStorage, or check privacy mode settings.',
           steps: [
-            'Откройте DevTools → Application → Local Storage и удалите старые ключи oc-maker.',
-            'Отключите «Блокировать сторонние файлы cookie» или аналогичные настройки конфиденциальности и повторите попытку.',
+            'Open DevTools → Application → Local Storage and delete old oc-maker keys.',
+            'Disable "Block third-party cookies" or similar privacy settings and retry.',
+            'If using Private/Incognito mode, switch to normal browsing mode.',
           ],
           relatedCodes: ['LOCAL_STORAGE_VERSION_MISMATCH', 'CONFIG_CORRUPTED'],
+        },
+        {
+          code: 'SETTINGS_IMPORT_INVALID',
+          message: 'Imported configuration file format is invalid',
+          severity: 'error',
+          category: 'B. Config & Data',
+          location: 'Settings Panel → Import Config',
+          cause: 'The imported file is not valid JSON, missing required fields, or version-incompatible.',
+          solution: 'Use a configuration JSON file exported by this app, or manually fix the format.',
+          steps: [
+            'Confirm the file extension is .json and the content is JSON.parse-able.',
+            'Check that the file contains top-level keys such as language, style, api, audio, animation, others.',
+            'If importing across major versions, reset settings first and then manually reconfigure.',
+          ],
+          relatedCodes: ['IMPORT_INVALID_JSON', 'IMPORT_INVALID_CONFIG'],
+        },
+        {
+          code: 'SETTINGS_RESET_CANCELLED',
+          message: 'User cancelled the reset operation',
+          severity: 'info',
+          category: 'B. Config & Data',
+          location: 'Settings Panel → Reset Button',
+          cause: 'User clicked "Reset All Settings" but chose Cancel in the double-confirmation dialog.',
+          solution: 'No action needed. Current settings remain unchanged.',
+        },
+        {
+          code: 'SETTINGS_PRESET_NOT_FOUND',
+          message: 'Selected style preset does not exist or is corrupted',
+          severity: 'warning',
+          category: 'B. Config & Data',
+          location: 'Settings Panel → Style → Preset',
+          cause: 'Preset data was lost, corrupted, or manually edited in localStorage.',
+          solution: 'Save a new preset, or restore default style settings.',
+          steps: [
+            'Manually adjust the desired theme, color, and font first.',
+            'Click "Save Style Preset" and enter a new name.',
+            'Delete the old corrupted preset if it still appears.',
+          ],
         },
       ],
     },
     {
       id: 'audio-guide',
-      title: 'Руководство по аудиосистеме',
-      overview:
-        'Аудиосистема OC Maker построена на Web Audio API и предоставляет богатые звуковые эффекты взаимодействия (SFX) и фоновую музыку (BGM). Система включает 15+ пресетов SFX, 20+ пресетов BGM и поддерживает загрузку пользовательских аудиофайлов.\n\nИз-за политики автовоспроизведения браузера аудио может быть отключено после загрузки страницы. Щелчок по любой кнопке или области страницы разблокирует воспроизведение аудио.',
+      title: 'Audio System Guide',
+      overview: `
+[Audio Engine Architecture]
+OC Maker's audio system uses a layered architecture:
+
+1. Audio Resource Layer
+   - Manages all audio file loading, decoding, and caching
+   - Supported formats: MP3, WAV, OGG, AAC, FLAC, WebM
+   - Automatic format fallback: Prefer compressed, fallback to compatible
+   - Preload strategy: Smart preloading based on usage frequency
+
+2. Audio Control Layer
+   - Global volume: Master × category (SFX/BGM/Voice)
+   - Audio context management: Auto-handle AudioContext suspended/resumed states
+   - Multi-track mixing: Up to 16 simultaneous audio tracks
+   - 3D audio positioning: Simple pan control
+
+3. Audio Output Layer
+   - Web Audio API: High performance, low latency, preferred
+   - HTML5 Audio: Compatibility fallback
+   - MediaStream API: For speech synthesis and recording
+
+[Sound Effects System]
+Built-in 60+ UI sound effects categorized by scenario:
+
+Interaction Feedback:
+- Click: Standard button click
+- Hover: Mouse hover hint
+- Toggle: Switch state change
+- Slider: Slider drag feedback
+- Type: Keyboard typing
+
+Operation Results:
+- Success: Operation success
+- Fail: Operation failure or error
+- Warning: Attention needed
+- Complete: Long task completion
+- Cancel: Operation cancelled
+
+System Notifications:
+- Notification: New message or reminder
+- Message: Chat message alert
+- Connect: Network connection success
+- Disconnect: Network connection lost
+
+[Background Music System]
+- Playlist management with local audio file support
+- Loop modes: single, list, shuffle
+- Fade in/out: Smooth transitions between tracks
+- Smart volume: Auto-reduce BGM when voice detected (ducking)
+- Scene music: Auto-switch BGM based on current page/tool
+
+[Voice Synthesis Integration]
+- Seamless integration with TTS export module
+- Real-time voice preview (synthesize as you type)
+- Voice emotion tags: normal, happy, angry, sad, surprised
+- Batch voice queue management`,
       buttons: [
-        { name: 'Воспроизведение/Пауза BGM', description: 'Переключение состояния воспроизведения фоновой музыки. Первое воспроизведение может потребовать щелчка пользователя.' },
-        { name: 'Тест SFX', description: 'Воспроизведение образца текущего выбранного пресета SFX для предварительного прослушивания.' },
-        { name: 'Тест BGM', description: 'Воспроизведение фрагмента текущего выбранного пресета BGM для предварительного прослушивания.' },
-      ],
+        { name: 'Play/Pause BGM', description: 'Toggle background music playback. First playback may require a user click to unlock.' },
+        { name: 'SFX Test', description: 'Play a sample of the currently selected SFX preset for preview.' },
+        { name: 'BGM Test', description: 'Play a sample clip of the currently selected BGM preset for preview.' },
+        { name: 'Upload Custom SFX', description: 'Upload your own audio file as an SFX preset. Supports WAV, MP3, and OGG formats.' },
+        { name: 'Upload Custom BGM', description: 'Upload your own audio file as a BGM preset. Supports WAV, MP3, and OGG formats.' },
+        { name: 'Remove Custom Audio', description: 'Delete uploaded custom SFX or BGM files and revert to system presets.' },
+        { name: 'Reset SFX', description: 'Restore SFX settings to default preset and default volume.' },
+        { name: 'Reset BGM', description: 'Restore BGM settings to default preset and default volume.' },
+      
+        { name: 'Sound Library', description: 'Browse and manage all built-in sound effects by category. Supports search and favorites.' },
+        { name: 'Playlists', description: 'Create and manage BGM playlists. Supports drag sorting and loop mode settings.' },
+        { name: 'Equalizer', description: 'Open 10-band graphic equalizer. Customize gain values for each frequency band.' },
+        { name: 'Recording', description: 'Use microphone to record audio for voice cloning or adding custom sound effects.' },
+        { name: 'Visualizer', description: 'Enable audio waveform visualization showing spectrum of currently playing audio.' },
+        { name: 'Device Detection', description: 'Detect all available audio input/output devices in the system and show their status.' },
+        { name: 'Spatial Audio', description: 'Enable virtual surround sound simulating 3D spatial sound source positioning (requires headphones).' },],
       parameters: [
-        { name: 'Общая громкость', description: 'Глобальный множитель громкости (0%~100%), влияющий на BGM и SFX.' },
-        { name: 'Громкость SFX', description: 'Независимая громкость звуковых эффектов взаимодействия: щелчки кнопок, наведение, оповещения об успехе/неудаче.' },
-        { name: 'Громкость BGM', description: 'Независимая громкость фоновой музыки, не влияет на громкость SFX.' },
-        { name: 'Пресет SFX', description: '15+ стилей процедурных звуковых эффектов.' },
-        { name: 'Пресет BGM', description: '20+ стилей фоновой музыки.' },
-      ],
+        { name: 'Master Volume', description: 'Global volume multiplier (0%~100%), affecting both SFX and BGM.' },
+        { name: 'SFX Volume', description: 'Independent volume for interaction sound effects including button clicks, hovers, and success/failure alerts.' },
+        { name: 'BGM Volume', description: 'Independent volume for background music, does not interfere with SFX volume.' },
+        { name: 'SFX Preset', description: '15+ procedural sound effect styles: Classic, Electronic, Retro, Xylophone, Bell, Space, Drum, Piano, Synthwave, Chiptune, Strings, Wind, Jazz, Percussion, Ambient, Sci-Fi, Cartoon, Horror, Nature, Mechanical.' },
+        { name: 'BGM Preset', description: '20+ background music styles: Orchestral, Ambient, Electronic, Piano, Synthwave, Nature, Jazz, Meditation, Cyber, LoFi, Rock, Blues, Folk, Reggae, Funk, Soul, Gospel, Country, Celtic, Oriental, Tribal, Space, Underwater, Rain, Windchime, Fireplace, Night, Sunrise, Dreamy, Energetic, Battle, Adventure, Mystery, Romantic, Nostalgic, Hopeful, Epic, Chill, Study, Focus.' },
+        { name: 'SFX Pitch', description: 'Base pitch offset for sound effects, adjustable in semitones.' },
+        { name: 'SFX Duration', description: 'Duration of the sound effect in milliseconds, affecting the decay envelope length.' },
+        { name: 'SFX Filter', description: 'Low-pass / high-pass / band-pass filter cutoff frequency, shaping the brightness of the tone.' },
+        { name: 'SFX Detune', description: 'Microtonal offset for sound effects, used to create dissonance or thickness.' },
+        { name: 'SFX Reverb', description: 'Add spatial reverb to sound effects, simulating different acoustic environments.' },
+        { name: 'BGM Pitch', description: 'Overall pitch offset for background music without affecting playback speed.' },
+        { name: 'BGM Tempo', description: 'Background music playback speed multiplier (0.5x~2.0x), also affects pitch.' },
+        { name: 'BGM Stereo Width', description: 'Expand or narrow the BGM stereo soundstage. 0% is mono, 200% is ultra-wide.' },
+      
+        { name: 'Master Volume', description: 'Global volume for all audio, range 0~100.', tips: 'Adjust based on environment: quiet 30-50, noisy 70-100.' },
+        { name: 'SFX Volume', description: 'UI interaction sound volume, range 0~100. Independent of master and BGM volume.', tips: 'Recommended 60-80% of master volume to avoid harsh sounds.' },
+        { name: 'BGM Volume', description: 'Background music volume, range 0~100. Independent of master and SFX volume.', tips: 'Recommended 40-60% of master volume as background.' },
+        { name: 'Voice Ducking Strength', description: 'BGM auto-reduce amount when voice detected in dB, range 0~20. 0 = no ducking.', tips: 'Audiobooks/dubbing: 10-15dB, background music: 5-10dB.' },
+        { name: 'SFX Pitch Randomization', description: 'Add tiny pitch variation to consecutive identical sounds, range 0~100. Adds naturalness.', tips: 'Typing sounds: 20-30, notification sounds: 0-10.' },
+        { name: 'Spatial Audio Width', description: 'Virtual surround sound field width, range 0~100. Higher = stronger source positioning.', tips: 'Music appreciation: 60-80, gaming/movies: 80-100.' },
+        { name: 'Recording Sample Rate', description: 'Microphone recording sample rate: 22050Hz, 44100Hz, 48000Hz.', tips: 'Voice: 44100Hz sufficient, music: 48000Hz.' },
+        { name: 'Recording Bit Depth', description: 'Microphone recording bit depth: 16-bit, 24-bit.', tips: 'General: 16-bit, professional: 24-bit.' },
+        { name: 'Audio Buffer Size', description: 'Audio playback buffer size in samples: 256, 512, 1024, 2048, 4096.', tips: 'Low latency: 256-512, stability priority: 1024-2048.' },
+        { name: 'Equalizer Preset', description: 'Quick-load equalizer presets: flat, bass boost, vocal boost, classical, rock, electronic.', tips: 'Switch based on current content type.' },],
       errors: [
         {
           code: 'AUDIO_CONTEXT_SUSPENDED',
-          message: 'Аудио автоматически приостановлено браузером',
+          message: 'Audio suspended by browser autoplay policy',
           severity: 'info',
-          category: 'F. Браузер и производительность',
-          location: 'Любая страница → Воспроизведение аудио',
-          cause: 'Политика автовоспроизведения современных браузеров требует взаимодействия пользователя со страницей перед запуском аудио.',
-          solution: 'Щелкните в любом месте страницы или по любой кнопке, чтобы возобновить воспроизведение аудио.',
-          prevention: 'Приложение включает attachAudioResumeHandler, который автоматически возобновляет AudioContext при первом взаимодействии пользователя.',
+          category: 'F. Browser & Performance',
+          location: 'Any Page → Audio Playback',
+          cause: 'Modern browser autoplay policies require user interaction before starting audio. The AudioContext is in suspended state after page load.',
+          solution: 'Click anywhere on the page or any button to resume audio playback.',
+          steps: [
+            'Click any button or blank area on the page.',
+            'If BGM still does not play, check the browser address bar for a mute icon.',
+            'iOS Safari requires additional user gestures; try clicking the "Play BGM" button.',
+          ],
+          prevention: 'The app includes attachAudioResumeHandler which automatically resumes AudioContext on first user interaction.',
+        },
+        {
+          code: 'AUDIO_DECODE_FAILED',
+          message: 'Custom audio file decoding failed',
+          severity: 'error',
+          category: 'C. Files & Upload',
+          location: 'Settings Panel → Audio → Custom Upload',
+          cause: 'The uploaded file is not a valid audio format, uses an unsupported codec, or is corrupted.',
+          solution: 'Re-upload using a standard-encoded WAV, MP3, or OGG file.',
+          steps: [
+            'Confirm the file extension is .wav, .mp3, or .ogg.',
+            'Test the file in your system media player.',
+            'Try re-exporting as 44100Hz stereo MP3 using audio editing software.',
+            'File size should not exceed 5MB.',
+          ],
+          relatedCodes: ['FILE_FORMAT_UNSUPPORTED', 'IMAGE_DECODE_FAILED'],
+        },
+        {
+          code: 'AUDIO_FILE_TOO_LARGE',
+          message: 'Uploaded audio file is too large',
+          severity: 'warning',
+          category: 'C. Files & Upload',
+          location: 'Settings Panel → Audio → Custom Upload',
+          cause: 'The audio file exceeds the browser or app processing limit, causing decoding and storage issues.',
+          solution: 'Compress the audio file or trim it to a shorter clip.',
+          steps: [
+            'Use audio editing software to compress the file below 5MB.',
+            'For BGM, recommended duration is 30~120 seconds with loop playback.',
+            'Lower the sample rate to 44100Hz or 22050Hz.',
+            'Use VBR MP3 encoding for smaller file size.',
+          ],
+        },
+        {
+          code: 'AUDIO_AUTOPLAY_BLOCKED',
+          message: 'Browser blocked autoplay',
+          severity: 'info',
+          category: 'F. Browser & Performance',
+          location: 'Home or Workflow Page → BGM Autoplay',
+          cause: 'Browser autoplay policy prohibits audio playback without user interaction, especially for audible media.',
+          solution: 'Audio will automatically resume after user interaction; no extra action needed.',
+          steps: [
+            'Click any button or area on the page.',
+            'Check browser settings to allow autoplay media for the current site.',
+            'Chrome users can click the site icon in the address bar → Site Settings → Sound → Allow.',
+          ],
+          prevention: 'The app delays audio initialization until after user interaction, but browser policies may still intercept.',
+        },
+        {
+          code: 'AUDIO_WEB_AUDIO_UNSUPPORTED',
+          message: 'Browser does not support Web Audio API',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Any Page',
+          cause: 'The current browser version is too old, or is in a restricted mode (e.g., some enterprise security browser lockdown modes).',
+          solution: 'Upgrade to a modern browser (Chrome 90+, Firefox 90+, Edge 90+, Safari 15+).',
+          steps: [
+            'Confirm the browser is not IE or legacy Edge (non-Chromium).',
+            'Check if the browser is in "Safe Mode" or "Incognito with strict protection".',
+            'Try opening the app in a standard window (not Incognito).',
+          ],
+          relatedCodes: ['BROWSER_MEMORY_EXHAUSTED'],
         },
       ],
     },
