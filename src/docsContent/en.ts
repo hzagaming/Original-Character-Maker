@@ -3531,7 +3531,7 @@ Key capabilities:
 · Output Format Selection — WAV 8/16/24/32-bit PCM, FLAC (WAV container), WebM/Opus, OGG/Opus, MP3, MP4/AAC (browser-dependent)
 · Sample Rate Control — Keep original or resample to 22050, 44100, 48000, 96000, or 192000 Hz
 · Channel Configuration — Preserve original channels, force mono, or force stereo
-· Volume Adjustment — Scale amplitude from 50% to 200% before export
+· Volume Adjustment — Scale amplitude from 0% to 200% before export
 · Speed & Pitch — Adjust playback speed 25%–400% and pitch shift ±1200 cents (±1 octave)
 · Fade In/Out — Apply linear fade ramps from 0 to 10 seconds at the start and end
 · Noise Reduction — Reduce background noise with adjustable intensity (0–100%)
@@ -3554,7 +3554,7 @@ Key capabilities:
         { name: 'Output Format', description: 'Select the target audio format. WAV variants are universally supported. WebM/Opus, OGG/Opus, MP3, and MP4/AAC availability depends on the browser.', tips: 'WAV 16-bit PCM is the safest choice for maximum compatibility. FLAC preserves full quality with smaller file size.' },
         { name: 'Sample Rate', description: 'Choose the output sample rate. "Original" preserves the source rate. Other options resample to the selected rate.', tips: 'CD quality is 44100 Hz. Use 48000 Hz for video production. Higher rates (96000+) are useful for archival but create larger files.' },
         { name: 'Channels', description: 'Set the output channel layout. "Original" keeps the source channel count. "Mono" mixes all channels to one. "Stereo" duplicates mono to two channels or keeps stereo.', tips: 'Choose Mono for voice recordings to reduce file size. Choose Stereo for music and spatial content.' },
-        { name: 'Volume', description: 'Adjust the output amplitude from 50% (half volume) to 200% (double amplitude). Applied before export.', tips: 'Values above 100% may cause clipping if the source already peaks near 0dBFS. Use Normalize Peak to prevent clipping.' },
+        { name: 'Volume', description: 'Adjust the output amplitude from 0% (silent) to 200% (double amplitude). Applied before export.', tips: 'Values above 100% may cause clipping if the source already peaks near 0dBFS. Use Normalize Peak to prevent clipping.' },
         { name: 'Speed', description: 'Adjust playback speed from 25% (quarter speed) to 400% (quadruple speed). Changes duration proportionally.', tips: 'Speed adjustment uses time-stretching to preserve pitch unless Pitch is also changed.' },
         { name: 'Pitch', description: 'Shift pitch in cents from -1200 (one octave down) to +1200 (one octave up).', tips: '100 cents = 1 semitone. Small values (+/-50) are useful for subtle tuning corrections.' },
         { name: 'Fade In', description: 'Duration of the linear fade-in ramp at the start of the audio, from 0 to 10 seconds.', tips: 'A gentle fade-in of 0.1–0.5s is recommended for voice to avoid plosive pops.' },

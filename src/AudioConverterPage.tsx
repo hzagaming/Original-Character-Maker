@@ -57,15 +57,15 @@ function timestamp(): string {
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes <= 0 || !isFinite(bytes)) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 function formatTime(seconds: number): string {
-  if (!isFinite(seconds) || seconds < 0) return '0:00';
+  if (!isFinite(seconds) || seconds < 0) return '0:00.000';
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   const ms = Math.floor((seconds % 1) * 1000);
@@ -86,7 +86,7 @@ function applyFade(buffer: AudioBuffer, fadeIn: number, fadeOut: number): AudioB
     for (let i = 0; i < src.length; i++) {
       let gain = 1;
       if (inSamples > 0 && i < inSamples) gain *= i / inSamples;
-      if (outSamples > 0 && i > src.length - outSamples) gain *= Math.max(0, (src.length - i) / outSamples);
+      if (outSamples > 0 && i >= src.length - outSamples) gain *= Math.max(0, (src.length - 1 - i) / (outSamples - 1 || 1));
       dst[i] = src[i] * gain;
     }
   }
@@ -267,9 +267,14 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
       ctx.close().catch(() => {});
       reject(new Error('MediaRecorder error'));
     };
-    recorder.start();
-    source.start(0);
-    source.onended = () => recorder.stop();
+    try {
+      recorder.start();
+      source.start(0);
+      source.onended = () => recorder.stop();
+    } catch (err) {
+      ctx.close().catch(() => {});
+      reject(err);
+    }
   });
 }
 
@@ -334,6 +339,8 @@ export function AudioConverterPage({
     return () => {
       if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
+      if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
+      if (sliderThrottleRef.current) window.clearTimeout(sliderThrottleRef.current);
     };
   }, []);
 
@@ -517,7 +524,8 @@ export function AudioConverterPage({
       setShowErrorPanel(true);
     } finally {
       setIsConverting(false);
-      setTimeout(() => setConvertProgress(0), 800);
+      if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
+      progressTimeoutRef.current = window.setTimeout(() => setConvertProgress(0), 800);
     }
   }, [sourceBuffer, outputFormat, sampleRate, channels, volume, speed, pitch, doNormalize, fadeIn, fadeOut, noiseReduction, addLog]);
 
@@ -563,6 +571,14 @@ export function AudioConverterPage({
     setFadeIn(0);
     setFadeOut(0);
     setNoiseReduction(0);
+    setIsImporting(false);
+    setIsConverting(false);
+    setConvertProgress(0);
+    setIsResultOpen(true);
+    setIsLogsOpen(true);
+    setIsDragOver(false);
+    dragCounter.current = 0;
+    if (progressTimeoutRef.current) { window.clearTimeout(progressTimeoutRef.current); progressTimeoutRef.current = null; }
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
@@ -584,7 +600,8 @@ export function AudioConverterPage({
       setIsDragOver(false);
     }
   }, []);
-  const isAudioFile = (file: File) => {
+  const isAudioFile = (file: File | undefined) => {
+    if (!file) return false;
     if (file.type.startsWith('audio/')) return true;
     const ext = file.name.split('.').pop()?.toLowerCase();
     return ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'webm'].includes(ext || '');
@@ -593,15 +610,19 @@ export function AudioConverterPage({
     e.preventDefault();
     dragCounter.current = 0;
     setIsDragOver(false);
+    if (isConverting) {
+      addLog('info', 'Cannot import while converting');
+      return;
+    }
     const file = e.dataTransfer.files?.[0];
     if (file && isAudioFile(file)) {
-      playSound('uploadStart');
+      if (!isImporting) playSound('uploadStart');
       handleImportFile(file);
     } else if (file) {
       addLog('info', 'Dropped file is not an audio file');
       playSound('error');
     }
-  }, [handleImportFile, addLog]);
+  }, [handleImportFile, addLog, isImporting, isConverting]);
 
   /* ---- Dirty state guard ---- */
   const isDirty = sourceFile !== null || resultUrl !== '' || logs.length > 0;
@@ -619,20 +640,39 @@ export function AudioConverterPage({
   /* ---- Panel collapse ---- */
   const [isResultOpen, setIsResultOpen] = useState(true);
   const [isLogsOpen, setIsLogsOpen] = useState(true);
+  const progressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /* ---- Slider throttle ---- */
+  const sliderThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const playSliderThrottled = useCallback(() => {
+    if (sliderThrottleRef.current) return;
+    playSound('sliderChange');
+    sliderThrottleRef.current = window.setTimeout(() => { sliderThrottleRef.current = null; }, 50);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (sliderThrottleRef.current) window.clearTimeout(sliderThrottleRef.current);
+    };
+  }, []);
 
   /* ---- Render ---- */
   return (
-    <main className="feature-shell tool-page-shell">
+    <div className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button" type="button" onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
+        <button className="secondary-button small-button" type="button" aria-label={backHome} onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
+        <div style={{ flex: 1, minWidth: 0, marginLeft: 16 }}>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{pageTitle}</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.4 }}>{pageDescription}</p>
+        </div>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
+          <button className="secondary-button small-button" type="button" aria-label="Help" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
+          <button className="secondary-button small-button" type="button" aria-label="Tutorial" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
+          <button className="secondary-button small-button" type="button" aria-label={openSettings} onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
 
-      <section
+      <main
         className="tool-workbench fade-up delay-2"
         style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20 }}
       >
@@ -650,7 +690,7 @@ export function AudioConverterPage({
             >
               {isImporting ? (
                 <div style={{ padding: '48px 32px', borderRadius: 16, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }}>⏳</div>
+                  <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }} aria-hidden="true">⏳</div>
                   <span className="status-badge running" style={{ marginBottom: 12, display: 'inline-flex' }}>Decoding audio…</span>
                 </div>
               ) : (
@@ -668,7 +708,7 @@ export function AudioConverterPage({
                     transition: 'border-color 200ms ease, background 200ms ease',
                   }}
                 >
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
+                  <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden="true">🎵</div>
                   <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
                   <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A, AAC, WEBM here</p>
                 </label>
@@ -684,7 +724,7 @@ export function AudioConverterPage({
                   <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Source</span>
                   <h3 style={{ margin: 0, fontSize: 15 }}>{sourceFile.name}</h3>
                 </div>
-                <button className="secondary-button small-button" type="button" disabled={isImporting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
+                <button className="secondary-button small-button" type="button" disabled={isImporting || isConverting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
                   {isImporting ? 'Importing…' : 'Replace'}
                 </button>
               </div>
@@ -715,7 +755,7 @@ export function AudioConverterPage({
               <h3 style={{ margin: 0, fontSize: 15 }}>Conversion Parameters</h3>
             </div>
             <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 1fr', gap: 12 }}>
                 <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Output Format</span>
                   <select className="settings-input tool-select" value={outputFormat} onChange={(e) => { playSound('buttonClick'); setOutputFormat(e.target.value as typeof outputFormat); }}>
@@ -748,27 +788,27 @@ export function AudioConverterPage({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Volume ({volume}%)</span>
-                  <input className="tool-range" type="range" min="50" max="200" step="1" value={volume} onChange={(e) => { playSound('sliderChange'); setVolume(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="200" step="1" value={volume} onChange={(e) => { playSliderThrottled(); setVolume(Number(e.target.value)); }} />
                 </label>
                 <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Speed ({speed}%)</span>
-                  <input className="tool-range" type="range" min="25" max="400" step="1" value={speed} onChange={(e) => { playSound('sliderChange'); setSpeed(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="25" max="400" step="1" value={speed} onChange={(e) => { playSliderThrottled(); setSpeed(Number(e.target.value)); }} />
                 </label>
                 <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Pitch ({pitch > 0 ? '+' : ''}{pitch} cents)</span>
-                  <input className="tool-range" type="range" min="-1200" max="1200" step="10" value={pitch} onChange={(e) => { playSound('sliderChange'); setPitch(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="-1200" max="1200" step="10" value={pitch} onChange={(e) => { playSliderThrottled(); setPitch(Number(e.target.value)); }} />
                 </label>
                 <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Fade In ({fadeIn}s)</span>
-                  <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeIn} onChange={(e) => { playSound('sliderChange'); setFadeIn(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeIn} onChange={(e) => { playSliderThrottled(); setFadeIn(Number(e.target.value)); }} />
                 </label>
                 <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Fade Out ({fadeOut}s)</span>
-                  <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeOut} onChange={(e) => { playSound('sliderChange'); setFadeOut(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeOut} onChange={(e) => { playSliderThrottled(); setFadeOut(Number(e.target.value)); }} />
                 </label>
                 <label className="field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Noise Reduction ({noiseReduction}%)</span>
-                  <input className="tool-range" type="range" min="0" max="100" step="1" value={noiseReduction} onChange={(e) => { playSound('sliderChange'); setNoiseReduction(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="100" step="1" value={noiseReduction} onChange={(e) => { playSliderThrottled(); setNoiseReduction(Number(e.target.value)); }} />
                 </label>
               </div>
 
@@ -786,8 +826,8 @@ export function AudioConverterPage({
                 <button className="secondary-button" type="button" onClick={handleDownload} disabled={!resultUrl}>
                   Download
                 </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>🎵 Audio Editor</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); handleReset(); }}>Reset</button>
+                <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>🎵 Audio Editor</button>
+                <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('resetSound'); handleReset(); }}>Reset</button>
               </div>
 
               {(isConverting || convertProgress > 0) && (
@@ -810,8 +850,11 @@ export function AudioConverterPage({
               className="tool-card-header"
               style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               onClick={() => { playSound('expand'); setIsResultOpen((v) => !v); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('expand'); setIsResultOpen((v) => !v); } }}
               role="button"
               tabIndex={0}
+              aria-expanded={isResultOpen}
+              aria-controls="converter-results-content"
             >
               <div>
                 <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Results</span>
@@ -820,7 +863,7 @@ export function AudioConverterPage({
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isResultOpen ? '▲' : '▼'}</span>
             </div>
             {isResultOpen && (
-              <div style={{ padding: '0 16px 16px' }}>
+              <div id="converter-results-content" style={{ padding: '0 16px 16px' }}>
                 {resultUrl ? (
                   <>
                     <audio controls src={resultUrl} style={{ width: '100%', borderRadius: 8 }} />
@@ -845,8 +888,11 @@ export function AudioConverterPage({
               className="tool-card-header"
               style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               onClick={() => { playSound('expand'); setIsLogsOpen((v) => !v); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('expand'); setIsLogsOpen((v) => !v); } }}
               role="button"
               tabIndex={0}
+              aria-expanded={isLogsOpen}
+              aria-controls="converter-logs-content"
             >
               <div>
                 <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Debug</span>
@@ -855,7 +901,7 @@ export function AudioConverterPage({
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isLogsOpen ? '▲' : '▼'}</span>
             </div>
             {isLogsOpen && (
-              <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div id="converter-logs-content" style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
                   <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
                   <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
@@ -878,24 +924,20 @@ export function AudioConverterPage({
             )}
           </section>
         </div>
-      </section>
+      </main>
 
-      {_settings.others.showErrorPanel && showErrorPanel && error && (
+      {_settings.others?.showErrorPanel && showErrorPanel && error && (
         <DraggableErrorPanel
           error={{ code: error.code, stage: 'audio-converter', message: error.message, hint: error.hint, details: {} }}
           labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
-          onClose={() => setShowErrorPanel(false)}
-          onCopy={() => navigator.clipboard.writeText(`${error.code}: ${error.message}`)}
-          onDownload={() => {
-            const blob = new Blob([JSON.stringify(error, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'audio-converter-error.json'; a.click(); URL.revokeObjectURL(url);
-          }}
-          onRetry={() => { setShowErrorPanel(false); handleConvert(); }}
-          onOpenDocs={(code) => onOpenDocs?.('audio-converter', 'errors', code)}
+          onClose={() => { playSound('back'); setShowErrorPanel(false); }}
+          onCopy={() => { playSound('copySound'); navigator.clipboard.writeText(`${error.code}: ${error.message}`); }}
+          onDownload={() => { playSound('downloadSound'); const blob = new Blob([JSON.stringify(error, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-converter-error.json'; a.click(); window.setTimeout(() => URL.revokeObjectURL(url), 100); }}
+          onRetry={() => { playSound('confirm'); setShowErrorPanel(false); handleConvert(); }}
+          onOpenDocs={(code) => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'errors', code); }}
           docAnchor={error.code}
         />
       )}
-    </main>
+    </div>
   );
 }

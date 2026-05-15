@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.0';
+const VERSION = '1.7.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -590,10 +590,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.0 新增音频格式转换器：全新的 Audio Converter 页面，支持 MP3/WAV/OGG/FLAC/M4A/AAC/WEBM 导入，输出 WAV（8/16/24/32-bit）、WebM/Opus、OGG/Opus、MP3、MP4/AAC 等格式；内置采样率调整、声道转换、音量/速度/音高调节、淡入淡出、降噪和峰值归一化；与音频编辑器无缝互操作；30 语言文档同步扩展。',
-    announcementList1: '新增音频格式转换器：导入主流音频格式，通过 7 步处理链（声道转换→音量→重采样/速度/音高→淡入淡出→降噪→归一化→编码）一键转换为多种输出格式。支持 22050~192000Hz 采样率、单声道/立体声切换、50%~200% 音量、25%~400% 速度、±1200cents 音高偏移。',
-    announcementList2: '音频编辑器互操作：转换器页面新增「🎵 Audio Editor」按钮，可一键跳转到波形编辑器进行高级剪辑；编辑器也同步接收 onSwitchTool prop，为双向跳转做好准备。',
-    announcementList3: '深度 bug 修复与 UX 增强：修复 AudioContext 内存泄漏、导入状态竞争、拖拽闪烁、日志无限增长、CONVERT_NO_AUDIO 错误码未使用、FLAC 扩展名不匹配等 9 项核心问题；为所有 select、slider、toggle、按钮补充 SFX 音效；新增 useBeforeUnloadGuard 防止意外刷新丢失进度。',
+    announcementDescription: 'v1.7.1 UI 全面重构与深度 bug 修复：音频格式转换器页面 UI 已与音频编辑器完全对齐，采用 grid 布局、可折叠 Results/Debug 面板、中央大上传区域；修复 handleReset 状态泄漏、progress timeout 未清理、pageTitle 未渲染、slider SFX 连发、applyFade 边界误差等 14 项核心问题；增强无障碍支持（aria-label、aria-expanded、键盘折叠）。',
+    announcementList1: 'UI 全面重构：转换器页面 UI 与音频编辑器对齐。采用 grid 布局（1fr / 360px）+ 响应式窄屏折叠；中央大虚线框上传区域带 🎵 图标和 Import Audio 标题；右侧 Results / Debug 面板支持 ▲/▼ 折叠；日志面板新增 Clear 按钮；Settings 使用 param-card 卡片风格。',
+    announcementList2: '深度 bug 修复（14 项）：修复 handleReset 遗漏 7 个状态（isImporting/isConverting/convertProgress 等）；progress timeout 未清理导致内存泄漏；pageTitle/pageDescription 未在 header 渲染；slider SFX 无节制连发（新增 50ms 节流）；Volume 最小值从 50% 放宽到 0%；applyFade 淡出 off-by-one；formatTime/formatBytes 边界错误。',
+    announcementList3: '无障碍与语义增强：所有按钮添加 aria-label；折叠面板添加 aria-expanded、aria-controls 和 Enter/Space 键盘支持；修复 `<main>` 包裹 `<header>` 的语义 HTML 错误；_settings.others 添加可选链安全访问；importToolConfig 新增 audio-editor/audio-converter case。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -624,7 +624,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterTitle: '音频格式转换器',
     pageAudioConverterDescription: '导入音频文件，批量转换格式、调整采样率、位深度、声道数，支持音量增益、速度变换、音调偏移、标准化、降噪等处理。',
     pageDocsTitle: '用户手册',
-    pageDocsDescription: '查看全部 7 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
+    pageDocsDescription: '查看全部 11 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
     docsNavTools: '工具手册',
     docsNavGuides: '指南与参考',
@@ -980,10 +980,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.0 オーディオフォーマット変換器を新規追加：MP3/WAV/OGG/FLAC/M4A/AAC/WEBM のインポートに対応し、WAV（8/16/24/32-bit）、WebM/Opus、OGG/Opus、MP3、MP4/AAC などへ変換可能。サンプリングレート変更、チャンネル変換、ボリューム/スピード/ピッチ調整、フェードイン/アウト、ノイズリダクション、ピーク正規化を内蔵。オーディオエディタとのシームレスな相互運用。30言語ドキュメントを同期拡張。',
-    announcementList1: 'オーディオフォーマット変換器の新規追加：主要オーディオフォーマットをインポートし、7ステップ処理チェーン（チャンネル変換→ボリューム→リサンプリング/スピード/ピッチ→フェード→ノイズリダクション→正規化→エンコード）でワンクリック変換。22050〜192000Hz のサンプリングレート、モノラル/ステレオ切替、50%〜200% ボリューム、25%〜400% スピード、±1200cents ピッチシフトに対応。',
-    announcementList2: 'オーディオエディタとの相互運用：変換器ページに「🎵 Audio Editor」ボタンを追加し、波形エディタへのワンクリック遷移が可能に。エディタ側も onSwitchTool prop を受け取るよう更新し、双方向ジャンプの準備を整備。',
-    announcementList3: '深度バグ修正と UX 強化：AudioContext メモリリーク、インポート状態競合、ドラッグのちらつき、ログの無限増加、CONVERT_NO_AUDIO エラーコード未使用、FLAC 拡張子不一致など 9 件の核心問題を修正。すべての select、slider、toggle、ボタンに SFX 効果音を追加。useBeforeUnloadGuard を新設し、意図しない更新による進捗喪失を防止。',
+    announcementDescription: 'v1.7.1 UI 全面リファクタリングと深度バグ修正：オーディオフォーマット変換器ページの UI をオーディオエディタと完全に統一。grid レイアウト、折りたたみ可能な Results/Debug パネル、中央の大きなアップロードエリアを採用。handleReset 状態リーク、progress timeout 未クリーンアップ、pageTitle 未レンダリング、slider SFX 連発、applyFade 境界誤差など 14 件の核心問題を修正。アクセシビリティを強化（aria-label、aria-expanded、キーボード折りたたみ）。',
+    announcementList1: 'UI 全面リファクタリング：変換器ページの UI をオーディオエディタに統一。grid レイアウト（1fr / 360px）＋ レスポンシブ窄画面折りたたみ；中央の大きな点線枠アップロードエリアに 🎵 アイコンと Import Audio タイトル；右側 Results / Debug パネルは ▲/▼ で折りたたみ可能；ログパネルに Clear ボタンを追加；Settings は param-card スタイル。',
+    announcementList2: '深度バグ修正（14 件）：handleReset で 7 つの状態（isImporting/isConverting/convertProgress など）がリセットされていない問題を修正；progress timeout の未クリーンアップによるメモリリーク；pageTitle/pageDescription のヘッダー未レンダリング；slider SFX の無制限連発（50ms スロットル追加）；Volume 最小値を 50% から 0% に緩和；applyFade フェードアウトの off-by-one；formatTime/formatBytes の境界エラー。',
+    announcementList3: 'アクセシビリティとセマンティクス強化：すべてのボタンに aria-label を追加；折りたたみパネルに aria-expanded、aria-controls、Enter/Space キーボードサポートを追加；`<main>` が `<header>` を含むセマンティック HTML エラーを修正；_settings.others にオプショナルチェーン安全アクセスを追加；importToolConfig に audio-editor/audio-converter の case を追加。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1014,7 +1014,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterTitle: 'オーディオコンバーター',
     pageAudioConverterDescription: '音声ファイルをインポートし、フォーマット変換、サンプリングレート/ビット深度/チャンネル数の調整、音量増幅、スピード変換、ピッチシフト、ノーマライズ、ノイズリダクションに対応。',
     pageDocsTitle: 'ユーザーマニュアル',
-    pageDocsDescription: '7つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
+    pageDocsDescription: '11つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
     docsNavTools: 'ツールマニュアル',
     docsNavGuides: 'ガイドと参考',
@@ -1370,10 +1370,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.7.0 New Audio Converter tool: brand-new Audio Converter page supporting MP3/WAV/OGG/FLAC/M4A/AAC/WEBM import and export to WAV (8/16/24/32-bit), WebM/Opus, OGG/Opus, MP3, MP4/AAC. Built-in sample rate adjustment, channel conversion, volume/speed/pitch control, fade in/out, noise reduction, and peak normalization. Seamless interoperability with the Audio Editor. 30-language docs synchronized.',
-    announcementList1: 'New Audio Format Converter: import mainstream audio formats and convert them via a 7-step processing chain (channel conversion → volume → resampling/speed/pitch → fade → noise reduction → normalization → encoding). Supports 22050–192000Hz sample rates, mono/stereo switching, 50%–200% volume, 25%–400% speed, and ±1200cents pitch shift.',
-    announcementList2: 'Audio Editor interoperability: added a "🎵 Audio Editor" button on the converter page for one-click navigation to the waveform editor. The editor also now accepts the onSwitchTool prop, preparing for bidirectional jumping between tools.',
-    announcementList3: 'Deep bug fixes and UX enhancements: fixed 9 core issues including AudioContext memory leak, import state race condition, drag flicker, unbounded log growth, unused CONVERT_NO_AUDIO error code, FLAC extension mismatch. Added SFX to all selects, sliders, toggles, and buttons. Added useBeforeUnloadGuard to prevent accidental refresh from losing progress.',
+    announcementDescription: 'v1.7.1 UI refactor and deep bug fixes: Audio Converter page UI fully aligned with Audio Editor. Grid layout, collapsible Results/Debug panels, central upload zone. Fixed handleReset state leak, progress timeout leak, pageTitle unrendered, slider SFX spam, applyFade boundary error, and 9 other core issues. Enhanced accessibility (aria-label, aria-expanded, keyboard collapse).',
+    announcementList1: 'UI Refactor: Audio Converter page UI fully aligned with Audio Editor. Grid layout (1fr / 360px) with responsive narrow-screen collapse; central dashed-border upload zone with 🎵 icon and Import Audio title; collapsible Results / Debug panels with ▲/▼ toggle; Clear button added to log panel; Settings uses param-card style.',
+    announcementList2: 'Deep bug fixes (14 items): fixed handleReset missing 7 states (isImporting/isConverting/convertProgress, etc.); progress timeout leak causing memory issues; pageTitle/pageDescription not rendered in header; slider SFX unlimited spam (added 50ms throttle); Volume minimum relaxed from 50% to 0%; applyFade fade-out off-by-one; formatTime/formatBytes boundary errors.',
+    announcementList3: 'Accessibility and semantics improvements: added aria-label to all buttons; added aria-expanded, aria-controls, and Enter/Space keyboard support to collapsible panels; fixed semantic HTML error where `<main>` wrapped `<header>`; added optional chaining safe access to _settings.others; added audio-editor/audio-converter cases to importToolConfig.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1404,7 +1404,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterTitle: 'Audio Converter',
     pageAudioConverterDescription: 'Import audio files and convert formats, adjust sample rate, bit depth, and channel count. Supports volume gain, speed change, pitch shift, normalization, and noise reduction.',
     pageDocsTitle: 'User Manual',
-    pageDocsDescription: 'View detailed documentation for all 7 tools: button functions, parameter explanations, and common errors with solutions.',
+    pageDocsDescription: 'View detailed documentation for all 11 tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
     docsNavTools: 'Tool Manuals',
     docsNavGuides: 'Guides & References',
@@ -1760,10 +1760,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.7.0 Новый конвертер аудиоформатов: полностью новая страница Audio Converter с поддержкой импорта MP3/WAV/OGG/FLAC/M4A/AAC/WEBM и экспорта в WAV (8/16/24/32-бит), WebM/Opus, OGG/Opus, MP3, MP4/AAC. Встроенная регулировка частоты дискретизации, настройка каналов, управление громкостью/скоростью/высотой тона, fade in/out, шумоподавление и нормализация пиков. Бесшовная интеграция с аудиоредактором. Синхронизация документации на 30 языках.',
-    announcementList1: 'Новый конвертер аудиоформатов: импортируйте основные аудиоформаты и конвертируйте их через 7-ступенчатую цепочку обработки (конверсия каналов → громкость → ресемплинг/скорость/тон → fade → шумоподавление → нормализация → кодирование). Поддерживаются частоты дискретизации 22050–192000Гц, переключение моно/стерео, громкость 50%–200%, скорость 25%–400%, сдвиг тона ±1200 центов.',
-    announcementList2: 'Интеграция с аудиоредактором: на странице конвертера добавлена кнопка «🎵 Audio Editor» для перехода к редактору волновых форм в один клик. Редактор также теперь принимает prop onSwitchTool, подготавливая почву для двустороннего перехода между инструментами.',
-    announcementList3: 'Глубокие исправления багов и улучшения UX: исправлены 9 ключевых проблем, включая утечку памяти AudioContext, состояние гонки при импорте, мерцание при перетаскивании, неограниченный рост логов, неиспользуемый код ошибки CONVERT_NO_AUDIO, несоответствие расширения FLAC. Добавлены звуковые эффекты для всех select, slider, toggle и кнопок. Добавлен useBeforeUnloadGuard для предотвращения потери прогресса при случайном обновлении страницы.',
+    announcementDescription: 'v1.7.1 Рефакторинг UI и глубокие исправления багов: UI страницы Audio Converter полностью выровнен с Audio Editor. Grid layout, сворачиваемые панели Results/Debug, центральная зона загрузки. Исправлены утечка состояния handleReset, утечка timeout прогресса, неотображаемый pageTitle, спам SFX слайдера, ошибка границы applyFade и 9 других ключевых проблем. Улучшена доступность (aria-label, aria-expanded, клавиатурное сворачивание).',
+    announcementList1: 'Рефакторинг UI: UI страницы Audio Converter полностью выровнен с Audio Editor. Grid layout (1fr / 360px) с адаптивным сворачиванием на узких экранах; центральная зона загрузки с пунктирной рамкой, 🎵 иконкой и заголовком Import Audio; сворачиваемые панели Results / Debug с переключателем ▲/▼; кнопка Clear добавлена в панель логов; Settings использует стиль param-card.',
+    announcementList2: 'Глубокие исправления багов (14 пунктов): исправлена утечка состояния handleReset (7 состояний: isImporting/isConverting/convertProgress и др.); утечка timeout прогресса, вызывающая проблемы с памятью; неотображаемые pageTitle/pageDescription в заголовке; неограниченный спам SFX слайдера (добавлен throttle 50ms); минимум Volume ослаблен с 50% до 0%; off-by-one fade-out в applyFade; ошибки границ в formatTime/formatBytes.',
+    announcementList3: 'Улучшения доступности и семантики: добавлены aria-label ко всем кнопкам; добавлены aria-expanded, aria-controls и поддержка клавиатуры Enter/Space для сворачиваемых панелей; исправлена семантическая ошибка HTML, когда `<main>` оборачивал `<header>`; добавлен безопасный доступ с опциональной цепочкой к _settings.others; добавлены кейсы audio-editor/audio-converter в importToolConfig.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1794,7 +1794,7 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterTitle: 'Конвертер аудио',
     pageAudioConverterDescription: 'Импортируйте аудиофайлы и конвертируйте форматы, настройте частоту дискретизации, битовую глубину и количество каналов. Поддерживает усиление громкости, изменение скорости, сдвиг тона, нормализацию и шумоподавление.',
     pageDocsTitle: 'Руководство пользователя',
-    pageDocsDescription: 'Просмотрите подробную документацию по всем 7 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
+    pageDocsDescription: 'Просмотрите подробную документацию по всем 11 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
     docsNavTools: 'Руководства по инструментам',
     docsNavGuides: 'Руководства и справочники',
@@ -2460,10 +2460,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAudioEditorDescription: '오디오 파일을 가져와서 파형을 시각화하고 편집하세요. 자르기, 분할, 페이드, 볼륨 조절, 속도/피치 변경, EQ, 컴프레서, 리버브 등 다양한 효과를 지원합니다.',
     pageAudioConverterTitle: '오디오 변환기',
     pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
-    announcementDescription: 'v1.7.0 오디오 포맷 변환기 신규 추가: MP3/WAV/OGG/FLAC/M4A/AAC/WEBM 가져오기를 지원하고 WAV(8/16/24/32-bit), WebM/Opus, OGG/Opus, MP3, MP4/AAC 등으로 낼 수 있는全新的 Audio Converter 페이지. 샘플링 레이트 조정, 채널 전환, 볼륨/속도/피치 조절, 페이드 인/아웃, 노이즈 감소 및 피크 정규화 내장. 오디오 편집기와의 원활한 상호 운용. 30개 언어 문서 동기 확장.',
-    announcementList1: '오디오 포맷 변환기 신규 추가: 주요 오디오 포맷을 가져와 7단계 처리 체인(채널 전환→볼륨→리샘플링/속도/피치→페이드→노이즈 감소→정규화→인코딩)으로 원클릭 변환. 22050~192000Hz 샘플링 레이트, 모노/스테레오 전환, 50%~200% 볼륨, 25%~400% 속도, ±1200cents 피치 시프트 지원.',
-    announcementList2: '오디오 편집기 상호 운용: 변환기 페이지에 「🎵 Audio Editor」 버튼을 추가하여 파형 편집기로 원클릭 이동 가능. 편집기도 onSwitchTool prop을 수신하도록 업데이트되어 양방향 도구 전환 준비 완료.',
-    announcementList3: '심층 버그 수정 및 UX 향상: AudioContext 메모리 누수, 가져오기 상태 경쟁, 드래그 깜빡임, 로그 무한 증가, 미사용 CONVERT_NO_AUDIO 오류 코드, FLAC 확장자 불일치 등 9개 핵심 문제 수정. 모든 select, slider, toggle, 버튼에 SFX 사운드 효과 추가. useBeforeUnloadGuard를 추가하여 의도하지 않은 새로고침으로 인한 진행 상황 손실 방지.''
+    announcementDescription: 'v1.7.1 UI 리팩토링 및 심층 버그 수정: Audio Converter 페이지 UI가 Audio Editor와 완전히 통일되었습니다. grid 레이아웃, 접이식 Results/Debug 패널, 중앙 대형 업로드 영역. handleReset 상태 누수, progress timeout 누수, pageTitle 미렌더링, slider SFX 연발, applyFade 경계 오류 등 9가지 핵심 문제 수정. 접근성 강화(aria-label, aria-expanded, 키보드 접이).',
+    announcementList1: 'UI 리팩토링: Audio Converter 페이지 UI가 Audio Editor와 완전히 통일되었습니다. grid 레이아웃(1fr / 360px) + 반응형 좁은 화면 접기; 중앙 점선 테두리 업로드 영역에 🎵 아이콘과 Import Audio 제목; ▲/▼로 접을 수 있는 Results / Debug 패널; 로그 패널에 Clear 버튼 추가; Settings는 param-card 스타일을 사용합니다.',
+    announcementList2: '심층 버그 수정(14개 항목): handleReset 7개 상태 누수(isImporting/isConverting/convertProgress 등) 수정; progress timeout 누수로 인한 메모리 문제; header에 pageTitle/pageDescription 미렌더링; slider SFX 무제한 연발(50ms 스로틀 추가); Volume 최소값 50%에서 0%로 완화; applyFade 페이드아웃 off-by-one; formatTime/formatBytes 경계 오류.',
+    announcementList3: '접근성 및 의미 개선: 모든 버튼에 aria-label 추가; 접이식 패널에 aria-expanded, aria-controls 및 Enter/Space 키보드 지원 추가; `<main>`이 `<header>`를 감싸는 의미론적 HTML 오류 수정; _settings.others에 옵셔널 체이닝 안전 접근 추가; importToolConfig에 audio-editor/audio-converter 케이스 추가.'
   },
   fr: {
     ...translations.en,
@@ -2654,6 +2654,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.1',
+    date: '2026-05-12',
+    title: '1.7.1 UI 全面重构与深度 bug 修复',
+    summary:
+      '音频格式转换器页面 UI 已与音频编辑器完全对齐，采用 grid 布局、可折叠 Results/Debug 面板、中央大上传区域；修复 handleReset 状态泄漏、progress timeout 未清理、pageTitle 未渲染、slider SFX 连发、applyFade 边界误差等 14 项核心问题；增强无障碍支持（aria-label、aria-expanded、键盘折叠）；importToolConfig 补齐 audio-editor/audio-converter case。',
+    details: [
+      'UI 全面重构：转换器页面 UI 与音频编辑器对齐。grid 布局（1fr / 360px）+ 响应式窄屏折叠；中央大虚线框上传区域带 🎵 图标和 Import Audio 标题；右侧 Results / Debug 面板支持 ▲/▼ 折叠；日志面板新增 Clear 按钮；Settings 使用 param-card 卡片风格。',
+      '深度 bug 修复（14 项）：修复 handleReset 遗漏 7 个状态（isImporting/isConverting/convertProgress 等）；progress timeout 未清理导致内存泄漏；pageTitle/pageDescription 未在 header 渲染；slider SFX 无节制连发（新增 50ms 节流）；Volume 最小值从 50% 放宽到 0%；applyFade 淡出 off-by-one；formatTime/formatBytes 边界错误。',
+      '无障碍与语义增强：所有按钮添加 aria-label；折叠面板添加 aria-expanded、aria-controls 和 Enter/Space 键盘支持；修复 `<main>` 包裹 `<header>` 的语义 HTML 错误；_settings.others 添加可选链安全访问；importToolConfig 新增 audio-editor/audio-converter case。',
+      'AudioConverterPage 运行时保护：转换过程中禁用 Replace/Reset/Audio Editor 按钮和拖放导入；isAudioFile 添加 undefined guard；exportViaMediaRecorder 添加 try/catch 包裹 start 调用；error panel 下载 URL 延迟 revoke 防止下载失败。',
+      '版本同步：VERSION 升级到 1.7.1，5 种基础语言公告同步更新。',
+    ],
+  },
   {
     version: '1.7.0',
     date: '2026-05-12',
@@ -6205,6 +6219,16 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
         savedSnapshot: '',
       };
       try { localStorage.setItem('oc-maker.image-converter', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'audio-editor': {
+      if (data.tool !== 'audio-editor') return { success: false, message: 'Tool type mismatch' };
+      try { localStorage.setItem('oc-maker.audio-editor', JSON.stringify(data)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'audio-converter': {
+      if (data.tool !== 'audio-converter') return { success: false, message: 'Tool type mismatch' };
+      try { localStorage.setItem('oc-maker.audio-converter', JSON.stringify(data)); } catch { return { success: false, message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     default:
