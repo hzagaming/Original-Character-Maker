@@ -85,8 +85,12 @@ function loadNodes(): RelNode[] {
     return parsed.filter(
       (n): n is RelNode =>
         n && typeof n === 'object' && typeof n.id === 'string' && typeof n.name === 'string' &&
-        typeof n.x === 'number' && typeof n.y === 'number',
-    );
+        typeof n.x === 'number' && typeof n.y === 'number' && typeof n.color === 'string',
+    ).map((n) => ({
+      ...n,
+      color: n.color || PRESET_COLORS[0],
+      notes: n.notes || '',
+    }));
   } catch {
     return [];
   }
@@ -105,8 +109,15 @@ function loadEdges(): RelEdge[] {
     return parsed.filter(
       (e): e is RelEdge =>
         e && typeof e === 'object' && typeof e.id === 'string' &&
-        typeof e.sourceId === 'string' && typeof e.targetId === 'string',
-    );
+        typeof e.sourceId === 'string' && typeof e.targetId === 'string' &&
+        typeof e.type === 'string' && typeof e.label === 'string' &&
+        typeof e.notes === 'string',
+    ).map((e) => ({
+      ...e,
+      type: (EDGE_COLORS as Record<string, string>)[e.type] ? e.type : 'custom',
+      label: e.label || '',
+      notes: e.notes || '',
+    }));
   } catch {
     return [];
   }
@@ -180,6 +191,12 @@ const copyBase = {
     relationCustom: '自定义',
     fromAssetGallery: '从资产库选择',
     unnamed: '未命名',
+    selectColor: '选择颜色',
+    helpButton: '帮助',
+    edgeHint: '点击另一个角色以创建关系',
+    edgeLabelPlaceholder: '可选标签',
+    noImagesInGallery: '资产库中没有图片',
+    importImagesFirst: '请先前往资产库导入角色图片',
   },
   ja: {
     addNode: 'キャラ追加',
@@ -223,6 +240,12 @@ const copyBase = {
     relationCustom: 'カスタム',
     fromAssetGallery: 'アセットから選択',
     unnamed: '名称未設定',
+    selectColor: '色を選択',
+    helpButton: 'ヘルプ',
+    edgeHint: '別のキャラをクリックして関係を作成',
+    edgeLabelPlaceholder: '任意ラベル',
+    noImagesInGallery: 'アセットライブラリに画像がありません',
+    importImagesFirst: '先にアセットライブラリでキャラ画像をインポートしてください',
   },
   en: {
     addNode: 'Add Character',
@@ -266,6 +289,12 @@ const copyBase = {
     relationCustom: 'Custom',
     fromAssetGallery: 'From Asset Gallery',
     unnamed: 'Unnamed',
+    selectColor: 'Select Color',
+    helpButton: 'Help',
+    edgeHint: 'Click another character to create a relation',
+    edgeLabelPlaceholder: 'Optional label',
+    noImagesInGallery: 'No images in Asset Gallery',
+    importImagesFirst: 'Please import character images to Asset Gallery first',
   },
   ru: {
     addNode: 'Добавить персонажа',
@@ -309,6 +338,12 @@ const copyBase = {
     relationCustom: 'Другое',
     fromAssetGallery: 'Из галереи активов',
     unnamed: 'Безымянный',
+    selectColor: 'Выбрать цвет',
+    helpButton: 'Справка',
+    edgeHint: 'Кликните другого персонажа для создания связи',
+    edgeLabelPlaceholder: 'Опциональная метка',
+    noImagesInGallery: 'В галерее активов нет изображений',
+    importImagesFirst: 'Сначала импортируйте изображения персонажей в галерею активов',
   },
   ko: {
     addNode: '캐릭터 추가',
@@ -352,6 +387,12 @@ const copyBase = {
     relationCustom: '사용자 정의',
     fromAssetGallery: '에셋 갤러리에서',
     unnamed: '이름 없음',
+    selectColor: '색상 선택',
+    helpButton: '도움말',
+    edgeHint: '다른 캐릭터를 클릭하여 관계를 생성',
+    edgeLabelPlaceholder: '선택적 라벨',
+    noImagesInGallery: '에셋 갤러리에 이미지가 없습니다',
+    importImagesFirst: '먼저 에셋 갤러리에서 캐릭터 이미지를 가져오세요',
   },
 };
 
@@ -365,13 +406,6 @@ function getCopy(lang: AppLanguage) {
 }
 
 function getEdgeTypeLabel(lang: AppLanguage, type: EdgeType): string {
-  const map: Record<string, Record<EdgeType, string>> = {
-    zh: copyBase.zh as unknown as Record<EdgeType, string>,
-    ja: copyBase.ja as unknown as Record<EdgeType, string>,
-    en: copyBase.en as unknown as Record<EdgeType, string>,
-    ru: copyBase.ru as unknown as Record<EdgeType, string>,
-    ko: copyBase.ko as unknown as Record<EdgeType, string>,
-  };
   const c = copyBase[lang as keyof typeof copyBase] || copyBase.en;
   const key = `relation${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof typeof c;
   return (c[key] as string) || type;
@@ -404,16 +438,30 @@ export function RelationshipWebPage({
   const [edgeSourceId, setEdgeSourceId] = useState<string | null>(null);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
-  const galleryCache = useRef<GalleryImage[]>([]);
+  const galleryCache = useRef<Map<string, GalleryImage>>(new Map());
   const canvasRef = useRef<HTMLDivElement>(null);
   const isDraggingNode = useRef(false);
   const dragNodeId = useRef<string | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const selectedNodeIdRef = useRef<string | null>(null);
+  const selectedEdgeIdRef = useRef<string | null>(null);
+  const isAddingEdgeRef = useRef(false);
+  const nodesRef = useRef<RelNode[]>(nodes);
+  const edgesRef = useRef<RelEdge[]>(edges);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const isTouchDragging = useRef(false);
 
   // Persist
   useEffect(() => { saveNodes(nodes); }, [nodes]);
   useEffect(() => { saveEdges(edges); }, [edges]);
-  useBeforeUnloadGuard(nodes.length > 0);
+  useBeforeUnloadGuard(nodes.length > 0 || edges.length > 0);
+
+  // Keep refs in sync to avoid effect re-registration
+  useEffect(() => { nodesRef.current = nodes; }, [nodes]);
+  useEffect(() => { edgesRef.current = edges; }, [edges]);
+  useEffect(() => { selectedNodeIdRef.current = selectedNodeId; }, [selectedNodeId]);
+  useEffect(() => { selectedEdgeIdRef.current = selectedEdgeId; }, [selectedEdgeId]);
+  useEffect(() => { isAddingEdgeRef.current = isAddingEdge; }, [isAddingEdge]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -429,35 +477,45 @@ export function RelationshipWebPage({
         return;
       }
       if (e.key === 'Escape') {
-        if (isAddingEdge) {
+        if (isAddingEdgeRef.current) {
           setIsAddingEdge(false);
           setEdgeSourceId(null);
           playSound('deselect');
-        } else if (selectedEdgeId) {
+        } else if (selectedEdgeIdRef.current) {
           setSelectedEdgeId(null);
           playSound('deselect');
-        } else if (selectedNodeId) {
+        } else if (selectedNodeIdRef.current) {
           setSelectedNodeId(null);
           playSound('deselect');
         }
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (selectedNodeId) {
-          handleDeleteNode(selectedNodeId);
-        } else if (selectedEdgeId) {
-          handleDeleteEdge(selectedEdgeId);
+        if (selectedNodeIdRef.current) {
+          const node = nodesRef.current.find((n) => n.id === selectedNodeIdRef.current);
+          if (node && window.confirm(copy.deleteConfirmNode.replace('{name}', node.name))) {
+            setNodes((prev) => prev.filter((n) => n.id !== selectedNodeIdRef.current));
+            setEdges((prev) => prev.filter((e) => e.sourceId !== selectedNodeIdRef.current && e.targetId !== selectedNodeIdRef.current));
+            setSelectedNodeId(null);
+            playSound('deleteSound');
+          }
+        } else if (selectedEdgeIdRef.current) {
+          if (window.confirm(copy.deleteConfirmEdge)) {
+            setEdges((prev) => prev.filter((e) => e.id !== selectedEdgeIdRef.current));
+            setSelectedEdgeId(null);
+            playSound('deleteSound');
+          }
         }
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [nodeModal, edgeModal, avatarPickerOpen, isAddingEdge, selectedNodeId, selectedEdgeId, handleDeleteNode, handleDeleteEdge]);
+  }, [nodeModal, edgeModal, avatarPickerOpen, copy.deleteConfirmNode, copy.deleteConfirmEdge]);
 
   // Load gallery images when picker opens (cached)
   useEffect(() => {
     if (avatarPickerOpen) {
       const imgs = loadGalleryImages();
-      galleryCache.current = imgs;
+      galleryCache.current = new Map(imgs.map((i) => [i.id, i]));
       setGalleryImages(imgs);
     }
   }, [avatarPickerOpen]);
@@ -478,15 +536,19 @@ export function RelationshipWebPage({
     if (!rect) return;
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    const worldX = (mouseX - pan.x) / zoom;
-    const worldY = (mouseY - pan.y) / zoom;
-    const newZoom = Math.min(Math.max(zoom * delta, 0.3), 3);
-    setPan({
-      x: mouseX - worldX * newZoom,
-      y: mouseY - worldY * newZoom,
+    setZoom((prevZoom) => {
+      const newZoom = Math.min(Math.max(prevZoom * delta, 0.3), 3);
+      setPan((prevPan) => {
+        const worldX = (mouseX - prevPan.x) / prevZoom;
+        const worldY = (mouseY - prevPan.y) / prevZoom;
+        return {
+          x: mouseX - worldX * newZoom,
+          y: mouseY - worldY * newZoom,
+        };
+      });
+      return newZoom;
     });
-    setZoom(newZoom);
-  }, [zoom, pan.x, pan.y]);
+  }, []);
 
   const handleMouseDownCanvas = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.rel-node')) return;
@@ -531,11 +593,15 @@ export function RelationshipWebPage({
     e.stopPropagation();
     if (isAddingEdge && edgeSourceId) {
       if (edgeSourceId !== node.id) {
-        const existing = edges.find((ed) =>
-          (ed.sourceId === edgeSourceId && ed.targetId === node.id) ||
-          (ed.sourceId === node.id && ed.targetId === edgeSourceId),
-        );
-        if (!existing) {
+        setEdges((prev) => {
+          const existing = prev.find((ed) =>
+            (ed.sourceId === edgeSourceId && ed.targetId === node.id) ||
+            (ed.sourceId === node.id && ed.targetId === edgeSourceId),
+          );
+          if (existing) {
+            playSound('warning');
+            return prev;
+          }
           const newEdge: RelEdge = {
             id: uid(),
             sourceId: edgeSourceId,
@@ -544,13 +610,13 @@ export function RelationshipWebPage({
             label: '',
             notes: '',
           };
-          setEdges((prev) => [...prev, newEdge]);
           setSelectedEdgeId(newEdge.id);
           setEdgeModal(newEdge);
           playSound('confirm');
-        } else {
-          playSound('warning');
-        }
+          return [...prev, newEdge];
+        });
+      } else {
+        playSound('deselect');
       }
       setIsAddingEdge(false);
       setEdgeSourceId(null);
@@ -558,6 +624,7 @@ export function RelationshipWebPage({
     }
     setSelectedNodeId(node.id);
     setSelectedEdgeId(null);
+    playSound('select');
     isDraggingNode.current = true;
     dragNodeId.current = node.id;
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -567,7 +634,7 @@ export function RelationshipWebPage({
         y: (e.clientY - rect.top - pan.y) / zoom - node.y,
       };
     }
-  }, [isAddingEdge, edgeSourceId, edges, pan.x, pan.y, zoom]);
+  }, [isAddingEdge, edgeSourceId, pan.x, pan.y, zoom]);
 
   const handleNodeDoubleClick = useCallback((e: React.MouseEvent, node: RelNode) => {
     e.stopPropagation();
@@ -576,6 +643,104 @@ export function RelationshipWebPage({
     setSelectedEdgeId(null);
     playSound('modalOpen');
   }, []);
+
+  // Touch support
+  const handleTouchStartCanvas = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    const target = touch.target as HTMLElement;
+    if (target.closest('.rel-node')) return; // Let node handler deal with it
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    isTouchDragging.current = false;
+    panStart.current = { x: touch.clientX, y: touch.clientY, px: pan.x, py: pan.y };
+  }, [pan.x, pan.y]);
+
+  const handleTouchMoveCanvas = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 1 || !touchStartPos.current) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStartPos.current.x;
+    const dy = touch.clientY - touchStartPos.current.y;
+    if (!isTouchDragging.current && Math.sqrt(dx * dx + dy * dy) > 5) {
+      isTouchDragging.current = true;
+      setIsPanning(true);
+    }
+    if (isTouchDragging.current) {
+      if (isDraggingNode.current && dragNodeId.current) {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          const cx = (touch.clientX - rect.left - pan.x) / zoom - dragOffset.current.x;
+          const cy = (touch.clientY - rect.top - pan.y) / zoom - dragOffset.current.y;
+          setNodes((prev) => prev.map((n) => (n.id === dragNodeId.current ? { ...n, x: cx, y: cy } : n)));
+        }
+      } else {
+        setPan({
+          x: panStart.current.px + (touch.clientX - panStart.current.x),
+          y: panStart.current.py + (touch.clientY - panStart.current.y),
+        });
+      }
+    }
+  }, [pan.x, pan.y, zoom]);
+
+  const handleTouchEndCanvas = useCallback((e: React.TouchEvent) => {
+    if (!touchStartPos.current) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartPos.current.x;
+    const dy = touch.clientY - touchStartPos.current.y;
+    if (!isTouchDragging.current && Math.sqrt(dx * dx + dy * dy) < 10) {
+      // Tap on empty canvas — deselect
+      setSelectedNodeId(null);
+      setSelectedEdgeId(null);
+      setIsAddingEdge(false);
+      setEdgeSourceId(null);
+    }
+    touchStartPos.current = null;
+    isTouchDragging.current = false;
+    setIsPanning(false);
+  }, []);
+
+  const handleNodeTouchStart = useCallback((e: React.TouchEvent, node: RelNode) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    isTouchDragging.current = false;
+    if (isAddingEdge && edgeSourceId) {
+      if (edgeSourceId !== node.id) {
+        setEdges((prev) => {
+          const existing = prev.find((ed) =>
+            (ed.sourceId === edgeSourceId && ed.targetId === node.id) ||
+            (ed.sourceId === node.id && ed.targetId === edgeSourceId),
+          );
+          if (existing) { playSound('warning'); return prev; }
+          const newEdge: RelEdge = {
+            id: uid(), sourceId: edgeSourceId, targetId: node.id,
+            type: 'friend', label: '', notes: '',
+          };
+          setSelectedEdgeId(newEdge.id);
+          setEdgeModal(newEdge);
+          playSound('confirm');
+          return [...prev, newEdge];
+        });
+      } else {
+        playSound('deselect');
+      }
+      setIsAddingEdge(false);
+      setEdgeSourceId(null);
+      return;
+    }
+    setSelectedNodeId(node.id);
+    setSelectedEdgeId(null);
+    playSound('select');
+    isDraggingNode.current = true;
+    dragNodeId.current = node.id;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      dragOffset.current = {
+        x: (touch.clientX - rect.left - pan.x) / zoom - node.x,
+        y: (touch.clientY - rect.top - pan.y) / zoom - node.y,
+      };
+    }
+  }, [isAddingEdge, edgeSourceId, pan.x, pan.y, zoom]);
 
   const handleEdgeClick = useCallback((e: React.MouseEvent, edge: RelEdge) => {
     e.stopPropagation();
@@ -645,11 +810,12 @@ export function RelationshipWebPage({
     playSound('buttonClick');
   }, []);
 
-  // Compute edge SVG paths
+  // Compute edge SVG paths (O(1) node lookup via Map)
   const edgePaths = useMemo(() => {
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     return edges.map((edge) => {
-      const s = nodes.find((n) => n.id === edge.sourceId);
-      const t = nodes.find((n) => n.id === edge.targetId);
+      const s = nodeMap.get(edge.sourceId);
+      const t = nodeMap.get(edge.targetId);
       if (!s || !t) return null;
       const dx = t.x - s.x;
       const dy = t.y - s.y;
@@ -684,14 +850,20 @@ export function RelationshipWebPage({
           </button>
           {onOpenDocs && (
             <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs('relationship-web'); }}>
-              {language === 'zh' ? '帮助' : language === 'ja' ? 'ヘルプ' : language === 'ru' ? 'Справка' : language === 'ko' ? '도움말' : 'Help'}
+              {copy.helpButton}
             </button>
           )}
         </div>
       </header>
 
-      <section className="tool-workbench fade-up delay-2" style={{ padding: 0, overflow: 'hidden' }}>
-        {/* Canvas */}
+      <section className="tool-workbench fade-up delay-2" style={{ padding: 0, overflow: 'hidden', display: 'flex' }}>
+        <div className="tool-header" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5, padding: '14px 20px', pointerEvents: 'none' }}>
+          <div>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+        </div>
+        {/* Canvas -->
         <div
           ref={canvasRef}
           className="rel-canvas"
@@ -704,7 +876,10 @@ export function RelationshipWebPage({
             isDraggingNode.current = false;
             dragNodeId.current = null;
           }}
-          style={{ cursor: isPanning ? 'grabbing' : isAddingEdge ? 'crosshair' : 'default' }}
+          onTouchStart={handleTouchStartCanvas}
+          onTouchMove={handleTouchMoveCanvas}
+          onTouchEnd={handleTouchEndCanvas}
+          style={{ cursor: isPanning ? 'grabbing' : isAddingEdge ? 'crosshair' : 'default', touchAction: 'none' }}
         >
           <div
             className="rel-world"
@@ -725,6 +900,7 @@ export function RelationshipWebPage({
                     stroke={EDGE_COLORS[ep.edge.type]}
                     strokeWidth={selectedEdgeId === ep.edge.id ? 3 : 2}
                     strokeOpacity={0.85}
+                    onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => handleEdgeClick(e, ep.edge)}
                     style={{ cursor: 'pointer' }}
                   />
@@ -771,7 +947,35 @@ export function RelationshipWebPage({
                     height: NODE_SIZE,
                   }}
                   onMouseDown={(e) => handleNodeMouseDown(e, node)}
+                  onTouchStart={(e) => handleNodeTouchStart(e, node)}
+                  onTouchEnd={(e) => { e.stopPropagation(); isDraggingNode.current = false; dragNodeId.current = null; touchStartPos.current = null; isTouchDragging.current = false; setIsPanning(false); }}
                   onDoubleClick={(e) => handleNodeDoubleClick(e, node)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (e.shiftKey && selectedNodeId && selectedNodeId !== node.id) {
+                        // Shift+Enter quick-add edge
+                        setEdges((prev) => {
+                          const existing = prev.find((ed) =>
+                            (ed.sourceId === selectedNodeId && ed.targetId === node.id) ||
+                            (ed.sourceId === node.id && ed.targetId === selectedNodeId),
+                          );
+                          if (existing) return prev;
+                          const newEdge: RelEdge = {
+                            id: uid(), sourceId: selectedNodeId, targetId: node.id,
+                            type: 'friend', label: '', notes: '',
+                          };
+                          setSelectedEdgeId(newEdge.id);
+                          playSound('confirm');
+                          return [...prev, newEdge];
+                        });
+                      } else {
+                        setSelectedNodeId(node.id);
+                        setSelectedEdgeId(null);
+                        playSound('select');
+                      }
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
                   data-sfx-handled
@@ -787,7 +991,7 @@ export function RelationshipWebPage({
                     {node.avatarAssetId ? (
                       <img
                         src={(() => {
-                          const img = galleryCache.current.find((g) => g.id === node.avatarAssetId)
+                          const img = galleryCache.current.get(node.avatarAssetId)
                             || galleryImages.find((g) => g.id === node.avatarAssetId);
                           return img?.dataUrl || '';
                         })()}
@@ -820,25 +1024,25 @@ export function RelationshipWebPage({
           {/* Adding edge indicator */}
           {isAddingEdge && (
             <div className="rel-edge-hint">
-              {language === 'zh' ? '点击另一个角色以创建关系' : language === 'ja' ? '別のキャラをクリックして関係を作成' : language === 'ru' ? 'Кликните другого персонажа для создания связи' : language === 'ko' ? '다른 캐릭터를 클릭하여 관계를 생성' : 'Click another character to create a relation'}
+              {copy.edgeHint}
             </div>
           )}
         </div>
 
         {/* Side panel */}
-        <aside className="rel-side-panel">
+        <aside className={`rel-side-panel ${selectedNode || selectedEdge ? 'open' : ''}`}>
           {selectedNode ? (
             <div className="rel-panel-content">
               <h4>{selectedNode.name}</h4>
               {selectedNode.notes && <p className="rel-panel-notes">{selectedNode.notes}</p>}
               <div className="rel-panel-actions">
-                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setNodeModal({ ...selectedNode }); playSound('modalOpen'); }}>
+                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setNodeModal({ ...selectedNode }); playSound('modalOpen'); }}>
                   {copy.editNode}
                 </button>
-                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleStartAddEdge(); }}>
+                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { handleStartAddEdge(); }}>
                   {copy.addEdge}
                 </button>
-                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} data-sfx-handled onClick={() => { playSound('deleteSound'); handleDeleteNode(selectedNode.id); }}>
+                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} data-sfx-handled onClick={() => { handleDeleteNode(selectedNode.id); }}>
                   {copy.deleteNode}
                 </button>
               </div>
@@ -881,10 +1085,10 @@ export function RelationshipWebPage({
                 {selectedEdge.notes && <p className="rel-panel-notes">{selectedEdge.notes}</p>}
               </div>
               <div className="rel-panel-actions">
-                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setEdgeModal({ ...selectedEdge }); playSound('modalOpen'); }}>
+                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setEdgeModal({ ...selectedEdge }); playSound('modalOpen'); }}>
                   {copy.editEdge}
                 </button>
-                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} data-sfx-handled onClick={() => { playSound('deleteSound'); handleDeleteEdge(selectedEdge.id); }}>
+                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} data-sfx-handled onClick={() => { handleDeleteEdge(selectedEdge.id); }}>
                   {copy.deleteEdge}
                 </button>
               </div>
@@ -915,6 +1119,7 @@ export function RelationshipWebPage({
                   value={nodeModal.name}
                   onChange={(e) => setNodeModal((m) => m && { ...m, name: e.target.value })}
                   aria-label={copy.nodeName}
+                  autoFocus
                 />
               </div>
               <div>
@@ -927,8 +1132,9 @@ export function RelationshipWebPage({
                       className={`rel-color-swatch ${nodeModal.color === c ? 'active' : ''}`}
                       style={{ background: c }}
                       data-sfx-handled
-                      onClick={() => setNodeModal((m) => m && { ...m, color: c })}
-                      aria-label={c}
+                      onClick={() => { playSound('select'); setNodeModal((m) => m && { ...m, color: c }); }}
+                      aria-pressed={nodeModal.color === c}
+                      aria-label={`${copy.selectColor || 'Select color'} ${c}`}
                     />
                   ))}
                 </div>
@@ -940,7 +1146,7 @@ export function RelationshipWebPage({
                     <>
                       <div className="rel-node-avatar-preview" style={{ background: nodeModal.color }}>
                         <img
-                          src={galleryCache.current.find((g) => g.id === nodeModal.avatarAssetId)?.dataUrl
+                          src={galleryCache.current.get(nodeModal.avatarAssetId)?.dataUrl
                             || galleryImages.find((g) => g.id === nodeModal.avatarAssetId)?.dataUrl
                             || ''}
                           alt=""
@@ -999,7 +1205,8 @@ export function RelationshipWebPage({
                       type="button"
                       className={`rel-edge-type-chip ${edgeModal.type === t ? 'active' : ''}`}
                       data-sfx-handled
-                      onClick={() => setEdgeModal((m) => m && { ...m, type: t })}
+                      onClick={() => { playSound('select'); setEdgeModal((m) => m && { ...m, type: t }); }}
+                      aria-pressed={edgeModal.type === t}
                     >
                       <span className="rel-edge-dot" style={{ background: EDGE_COLORS[t] }} />
                       {getEdgeTypeLabel(language, t)}
@@ -1014,8 +1221,9 @@ export function RelationshipWebPage({
                   className="tool-input"
                   value={edgeModal.label}
                   onChange={(e) => setEdgeModal((m) => m && { ...m, label: e.target.value })}
-                  placeholder={language === 'zh' ? '可选标签' : language === 'ja' ? '任意ラベル' : language === 'ru' ? 'Опциональная метка' : language === 'ko' ? '선택적 라벨' : 'Optional label'}
+                  placeholder={copy.edgeLabelPlaceholder}
                   aria-label={copy.edgeLabel}
+                  autoFocus
                 />
               </div>
               <div>
@@ -1048,8 +1256,8 @@ export function RelationshipWebPage({
             <div style={{ padding: 22, maxHeight: 'min(420px, 60vh)', overflow: 'auto' }}>
               {galleryImages.length === 0 ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  <p>{language === 'zh' ? '资产库中没有图片' : language === 'ja' ? 'アセットライブラリに画像がありません' : language === 'ru' ? 'В галерее активов нет изображений' : language === 'ko' ? '에셋 갤러리에 이미지가 없습니다' : 'No images in Asset Gallery'}</p>
-                  <p className="tiny-copy">{language === 'zh' ? '请先前往资产库导入角色图片' : language === 'ja' ? '先にアセットライブラリでキャラ画像をインポートしてください' : language === 'ru' ? 'Сначала импортируйте изображения персонажей в галерею активов' : language === 'ko' ? '먼저 에셋 갤러리에서 캐릭터 이미지를 가져오세요' : 'Please import character images to Asset Gallery first'}</p>
+                  <p>{copy.noImagesInGallery}</p>
+                  <p className="tiny-copy">{copy.importImagesFirst}</p>
                 </div>
               ) : (
                 <div className="rel-avatar-grid">
@@ -1059,6 +1267,7 @@ export function RelationshipWebPage({
                       type="button"
                       className="rel-avatar-item"
                       data-sfx-handled
+                      aria-label={img.name}
                       onClick={() => {
                         setNodeModal((m) => m && { ...m, avatarAssetId: img.id });
                         setAvatarPickerOpen(false);

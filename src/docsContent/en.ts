@@ -3650,6 +3650,65 @@ Key capabilities:
       ],
     },
     {
+      id: 'relationship-web',
+      title: 'Relationship Web',
+      overview: `The Relationship Web is an interactive visual graph editor for mapping connections between your original characters (OCs). Create character nodes with names, colors, notes, and avatars from the Asset Gallery, then link them with color-coded relationship edges.
+
+Key capabilities:
+· Visual Graph Canvas — Pan, zoom, and drag nodes freely on an infinite canvas
+· 8 Relationship Types — Friend, Enemy, Family, Lover, Mentor, Rival, Ally, and Custom, each with a unique color
+· Node Editor — Set name, pick color from swatches, add notes, and assign an avatar from the Asset Gallery
+· Edge Editor — Choose relationship type, add optional labels and notes
+· Asset Gallery Integration — Import character illustrations directly as node avatars
+· Canvas Controls — Zoom in/out, reset view, and keyboard shortcuts (Delete to remove, Escape to deselect)
+· Persistence — All nodes and edges are saved to browser localStorage
+· Keyboard Accessibility — Tab-focusable nodes with Enter/Space to select, Shift+Enter to quick-add edges`,
+      buttons: [
+        { name: 'Add Character', description: 'Create a new character node at the center of the current viewport.' },
+        { name: 'Add Relation', description: 'Start edge-creation mode. Click a source node first, then click the target node to create a relationship.' },
+        { name: 'Edit', description: 'Open the node or edge editor modal to modify name, color, avatar, type, label, and notes.' },
+        { name: 'Delete', description: 'Remove the selected node or edge. Deleting a node also removes all connected edges.' },
+        { name: 'Zoom In / Out', description: 'Adjust canvas zoom level. Mouse wheel is also supported.' },
+        { name: 'Reset View', description: 'Reset pan and zoom to the default centered view.' },
+        { name: 'Select Avatar', description: 'Open the Asset Gallery picker to assign an image as the node avatar.' },
+        { name: 'Clear Avatar', description: 'Remove the avatar image from the node, reverting to the initial-letter placeholder.' },
+      ],
+      parameters: [
+        { name: 'Node Name', description: 'The display name of the character node.', tips: 'Keep it short so the label fits under the node circle.' },
+        { name: 'Node Color', description: 'The accent color of the node, shown as the avatar background and selection ring.', tips: 'Pick colors with good contrast against the canvas background.' },
+        { name: 'Node Notes', description: 'Optional free-text notes attached to the node.', tips: 'Use for character backstory, traits, or reminders.' },
+        { name: 'Edge Type', description: 'The relationship category between two characters.', tips: 'Choose Custom if none of the preset types fit.' },
+        { name: 'Edge Label', description: 'An optional short label displayed along the edge line.', tips: 'Examples: "Childhood friend", "Nemesis since 2020".' },
+        { name: 'Edge Notes', description: 'Optional free-text notes attached to the relationship.', tips: 'Use for relationship history, events, or story context.' },
+      ],
+      errors: [
+        {
+          code: 'NO_NODES',
+          message: 'No characters in the graph',
+          severity: 'info',
+          category: 'B. Settings & Data',
+          location: 'Page: Relationship Web → Area: Canvas',
+          cause: 'The graph is empty because no nodes have been created yet.',
+          solution: 'Click "Add Character" to create your first node.',
+          steps: ['Click the Add Character button', 'Enter a name', 'Click Save'],
+          relatedCodes: [],
+          prevention: 'N/A',
+        },
+        {
+          code: 'STORAGE_FULL',
+          message: 'Browser storage full',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Relationship Web → Area: Save',
+          cause: 'The browser localStorage quota is exceeded, preventing nodes or edges from being saved.',
+          solution: 'Free up browser storage or export data to back it up.',
+          steps: ['Clear unused localStorage data', 'Export relationship data', 'Reload the page'],
+          relatedCodes: ['DATA_CORRUPTED'],
+          prevention: 'Regularly back up your relationship web data.',
+        },
+      ],
+    },
+    {
       id: 'settings-guide',
       title: 'Settings Panel Guide',
       overview: `

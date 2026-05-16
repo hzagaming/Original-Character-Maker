@@ -3686,6 +3686,65 @@ Key capabilities:
       ],
     },
     {
+      id: 'relationship-web',
+      title: '角色关系网',
+      overview: `角色关系网是一个交互式可视化图编辑器，用于绘制原创角色（OC）之间的关联。创建带有名称、颜色、备注和头像（来自资产库）的角色节点，然后用颜色编码的关系连线将它们链接起来。
+
+主要功能：
+· 可视化画布 — 在无限画布上自由平移、缩放和拖拽节点
+· 8 种关系类型 — 朋友、敌人、家人、恋人、师徒、对手、盟友、自定义，每种都有独特颜色
+· 节点编辑器 — 设置名称、从色板选色、添加备注、从资产库分配头像
+· 边编辑器 — 选择关系类型，添加可选标签和备注
+· 资产库联动 — 直接将角色插画导入为节点头像
+· 画布控制 — 放大/缩小、重置视图、键盘快捷键（Delete 删除、Escape 取消选择）
+· 数据持久化 — 所有节点和关系自动保存到浏览器 localStorage
+· 键盘无障碍 — 节点可 Tab 聚焦，Enter/Space 选中，Shift+Enter 快速添加关系`,
+      buttons: [
+        { name: '添加角色', description: '在当前视口中心创建一个新的角色节点。' },
+        { name: '添加关系', description: '进入边创建模式。先点击源节点，再点击目标节点以创建关系。' },
+        { name: '编辑', description: '打开节点或边编辑弹窗，修改名称、颜色、头像、类型、标签和备注。' },
+        { name: '删除', description: '移除选中的节点或边。删除节点会同时移除所有相连的边。' },
+        { name: '放大 / 缩小', description: '调整画布缩放级别。也支持鼠标滚轮。' },
+        { name: '重置视图', description: '将平移和缩放重置为默认居中视图。' },
+        { name: '选择头像', description: '打开资产库选择器，将图片设为节点头像。' },
+        { name: '清除头像', description: '移除节点的头像图片，恢复为首字母占位符。' },
+      ],
+      parameters: [
+        { name: '角色名称', description: '角色节点的显示名称。', tips: '保持简短，以便标签能显示在节点圆下方。' },
+        { name: '节点颜色', description: '节点的强调色，显示为头像背景和选中光环。', tips: '选择与画布背景对比度良好的颜色。' },
+        { name: '节点备注', description: '附加到节点的可选自由文本备注。', tips: '可用于角色背景故事、特征或备忘。' },
+        { name: '关系类型', description: '两个角色之间的关系类别。', tips: '如果预设类型都不符合，请选择自定义。' },
+        { name: '关系标签', description: '显示在关系连线上的可选短标签。', tips: '示例：「青梅竹马」、「自 2020 年以来的宿敌」。' },
+        { name: '关系备注', description: '附加到关系的可选自由文本备注。', tips: '可用于关系历史、事件或故事背景。' },
+      ],
+      errors: [
+        {
+          code: 'NO_NODES',
+          message: '图中还没有角色',
+          severity: 'info',
+          category: 'B. 设置与数据',
+          location: '页面：角色关系网 → 区域：画布',
+          cause: '因为尚未创建任何节点，所以图为空。',
+          solution: '点击「添加角色」创建你的第一个节点。',
+          steps: ['点击添加角色按钮', '输入名称', '点击保存'],
+          relatedCodes: [],
+          prevention: 'N/A',
+        },
+        {
+          code: 'STORAGE_FULL',
+          message: '浏览器存储已满',
+          severity: 'error',
+          category: 'F. 浏览器与性能',
+          location: '页面：角色关系网 → 区域：保存',
+          cause: '浏览器 localStorage 配额已超出，导致节点或关系无法保存。',
+          solution: '释放浏览器存储空间，或导出数据进行备份。',
+          steps: ['清除不用的 localStorage 数据', '导出关系数据', '刷新页面'],
+          relatedCodes: ['DATA_CORRUPTED'],
+          prevention: '定期备份你的角色关系网数据。',
+        },
+      ],
+    },
+    {
       id: 'settings-guide',
       overview: `
 设置面板是 OC Maker 的全局配置中心，集中管理所有用户偏好和系统参数。所有设置均保存在浏览器本地存储中，支持导入/导出以便跨设备同步。
