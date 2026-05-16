@@ -3842,7 +3842,9 @@ function App() {
     try {
       initAudio();
       attachAudioResumeHandler();
-      startMusic();
+      if (!document.hidden) {
+        startMusic();
+      }
     } catch {
       // Audio initialization is non-critical; ignore failures.
     }
@@ -3987,6 +3989,7 @@ function App() {
 
       // Skip elements that have their own explicit sound handling (avoids double-play)
       if (el.classList.contains('collapsible-toggle') || el.classList.contains('toolbar-group-header') || el.classList.contains('tool-card-header')) return;
+      if ((el as HTMLElement).closest('[data-sfx-handled]')) return;
 
       // Determine appropriate sound based on element type and context
       const isClose = el.classList.contains('modal-close') || (el as HTMLElement).getAttribute('aria-label') === 'Close';

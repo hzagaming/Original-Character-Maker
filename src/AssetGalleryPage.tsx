@@ -578,7 +578,7 @@ export function AssetGalleryPage({
     >
       <div className="feature-header">
         <div className="feature-header-meta">
-          <button className="back-link" type="button" onClick={() => { playSound('back'); onBack(); }}>
+          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
           <span className="version-pill" style={{ minHeight: 40, padding: '0 14px' }}>
@@ -586,14 +586,14 @@ export function AssetGalleryPage({
           </span>
         </div>
         <div className="tool-header-actions">
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
             {copy.importTitle}
           </button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenSettings(); }}>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenSettings(); }}>
             {openSettings}
           </button>
           {onOpenDocs && (
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs('asset-gallery'); }}>
+            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs('asset-gallery'); }}>
               {language === 'zh' ? '帮助' : language === 'ja' ? 'ヘルプ' : language === 'ru' ? 'Справка' : language === 'ko' ? '도움말' : 'Help'}
             </button>
           )}
@@ -633,6 +633,7 @@ export function AssetGalleryPage({
                       className={`choice-chip ${filter === f ? 'active' : ''}`}
                       type="button"
                       onClick={() => { playSound('select'); setFilter(f); }}
+                      data-sfx-handled
                     >
                       {f === 'all' ? copy.filterAll : f === 'image' ? copy.filterImage : f === 'audio' ? copy.filterAudio : f === 'gif' ? copy.filterGif : copy.filterVideo}
                     </button>
@@ -845,7 +846,7 @@ export function AssetGalleryPage({
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.previewTitle}</h3>
-              <button className="modal-close" type="button" onClick={closePreview} aria-label={copy.closePreview}>×</button>
+              <button className="modal-close" type="button" data-sfx-handled onClick={closePreview} aria-label={copy.closePreview}>×</button>
             </div>
             <div style={{ flex: 1, overflow: 'auto', padding: 22, display: 'grid', placeItems: 'center', minHeight: 200 }}>
               {previewAsset.type === 'image' || previewAsset.type === 'gif' ? (
