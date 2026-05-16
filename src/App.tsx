@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage, CharacterCardPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage, CharacterCardPage, CharacterChroniclePage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.9';
+const VERSION = '1.8.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -78,6 +78,7 @@ type Messages = {
   featureAssetGallery: string;
   featureRelationshipWeb: string;
   featureCharacterCard: string;
+  featureCharacterChronicle: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -109,6 +110,7 @@ type Messages = {
   actionAssetGallery: string;
   actionRelationshipWeb: string;
   actionCharacterCard: string;
+  actionCharacterChronicle: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -232,6 +234,8 @@ type Messages = {
   pageRelationshipWebDescription: string;
   pageCharacterCardTitle: string;
   pageCharacterCardDescription: string;
+  pageCharacterChronicleTitle: string;
+  pageCharacterChronicleDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -492,6 +496,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAssetGallery: '角色资产库',
     featureRelationshipWeb: '角色关系网',
     featureCharacterCard: '角色设定卡',
+    featureCharacterChronicle: '角色编年史',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -523,6 +528,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAssetGallery: '角色资产库',
     actionRelationshipWeb: '角色关系网',
     actionCharacterCard: '角色设定卡',
+    actionCharacterChronicle: '角色编年史',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -608,10 +614,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.9 新增角色设定卡导出器：将角色信息、立绘、设定和关系整合为精美 PNG 卡片，支持 3 种模板、19 种主题色、3 种背景样式，与资产库和关系网深度联动，一键导出。',
-    announcementList1: '角色设定卡：从资产库选择头像和主视觉图，填写名称、别名、简介和自定义设定字段，添加彩色标签；自动从关系网导入关联角色生成关系摘要。三种模板（简约/详细/画廊）满足不同展示需求。',
-    announcementList2: '样式与导出：19 种预设主题色，3 种背景样式（纯色/渐变/点阵）；html-to-image 以 2 倍分辨率渲染透明背景 PNG，可直接下载分享。卡片排版自适应亮色/暗色主题，支持社交媒体和印刷用途。',
-    announcementList3: '完整集成与可访问性：新增 FeatureScreen 路由、ActionIcon SVG、StartModal 入口、HomeScreen 工作流列表；5 语言完整翻译和手册文档；全页面 SFX 音效覆盖。上一版本 v1.7.8 完成了关系网全面审计修复。版本号同步为 1.7.9。',
+    announcementDescription: 'v1.8.0 新增角色编年史：为角色创建可视化时间线，记录诞生、相遇、成长、战斗、转折等关键事件。7 种事件类型颜色编码、关系网角色联动、资产库图片附件，一键导出长图 PNG。',
+    announcementList1: '角色编年史：为角色创建按日期排序的可视化时间线，每个事件包含日期、标题、描述、类型、关联角色和可选图片。7 种事件类型（诞生/相遇/离别/成长/战斗/转折/自定义）各有独特颜色编码。',
+    announcementList2: '深度联动与可视化：自动读取关系网角色列表关联到特定事件，时间线卡片显示关联角色彩色圆点；支持从资产库选择事件配图。经典垂直时间轴左右交替排列，移动端自动适配为左对齐。',
+    announcementList3: '完整集成与导出：新增 FeatureScreen 路由、ActionIcon SVG、StartModal 入口、HomeScreen 工作流列表；5 语言完整翻译和手册文档；全页面 SFX 音效覆盖。上一版本 v1.7.9 完成了设定卡导出器。版本号同步为 1.8.0。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -647,6 +653,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageRelationshipWebDescription: '可视化创建和管理多个角色之间的关系网络，支持从资产库导入头像，构建完整的角色关系图谱。',
     pageCharacterCardTitle: '角色设定卡',
     pageCharacterCardDescription: '将角色信息、立绘、设定和关系整合为精美的设定卡图片，支持多种模板和主题样式，一键导出 PNG 分享。',
+    pageCharacterChronicleTitle: '角色编年史',
+    pageCharacterChronicleDescription: '为角色创建可视化时间线，记录诞生、相遇、成长、战斗等关键事件，支持与关系网角色联动，导出长图分享。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -894,6 +902,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAssetGallery: 'キャラクターアセット',
     featureRelationshipWeb: 'キャラ関係図',
     featureCharacterCard: 'キャラ設定カード',
+    featureCharacterChronicle: 'キャラ年表',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -925,6 +934,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAssetGallery: 'キャラクターアセット',
     actionRelationshipWeb: 'キャラ関係図',
     actionCharacterCard: 'キャラ設定カード',
+    actionCharacterChronicle: 'キャラ年表',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1010,10 +1020,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.9 キャラ設定カードエクスポーターを新規追加：キャラ情報、立ち絵、設定、関係を統合した美しい PNG カードを作成。3 種類のテンプレート、19 種類のテーマカラー、3 種類の背景スタイルに対応。アセットライブラリと関係図と連携し、ワンクリックで出力。',
-    announcementList1: 'キャラ設定カード：アセットライブラリからアイコンとメインビジュアルを選択し、名前、別名、紹介文、任意の設定項目、カラータグを入力。関係図から関連キャラを自動インポートして関係サマリーを生成。3 種類のテンプレート（シンプル/詳細/ギャラリー）で異なる展示ニーズに対応。',
-    announcementList2: 'スタイルと出力：19 種類のテーマカラー、3 種類の背景スタイル（単色/グラデ/ドット）。html-to-image で 2 倍解像度・透明背景の PNG をレンダリングし、ワンクリックでダウンロード。カードレイアウトは明暗テーマに自動適合し、SNS や印刷に利用可能。',
-    announcementList3: '完全統合とアクセシビリティ：新規 FeatureScreen ルート、ActionIcon SVG、StartModal 入口、HomeScreen ワークフローリストを追加。5 言語完全翻訳とマニュアルドキュメント。全ページ SFX 効果音カバー。前バージョン v1.7.8 で関係図の全面監査修正を完了。バージョンを 1.7.9 に同期。',
+    announcementDescription: 'v1.8.0 キャラ年表を新規追加：キャラクターの誕生、出会い、成長、戦闘、転換点などの重要イベントを記録する可視化タイムラインを作成。7 種類のイベントタイプの色分け、関係図キャラ連動、アセットライブラリ画像添付、ワンクリックで長尺画像を出力。',
+    announcementList1: 'キャラ年表：日付順の可視化タイムラインを作成。各イベントは日付、タイトル、詳細、タイプ、関連キャラ、任意の画像を含む。7 種類のイベントタイプ（誕生/出会い/別れ/成長/戦闘/転換点/カスタム）それぞれに独自の色分け。',
+    announcementList2: '深度連携と可視化：関係図のキャラリストを自動読み取り、特定イベントに関連付け。タイムラインカードに関連キャラの色付きドットを表示。アセットライブラリからイベント画像を選択可能。クラシックな垂直タイムラインで左右交互に配置、モバイルでは左寄せに自動適応。',
+    announcementList3: '完全統合と出力：新規 FeatureScreen ルート、ActionIcon SVG、StartModal 入口、HomeScreen ワークフローリストを追加。5 言語完全翻訳とマニュアルドキュメント。全ページ SFX 効果音カバー。前バージョン v1.7.9 で設定カードエクスポーターを追加。バージョンを 1.8.0 に同期。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1047,6 +1057,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageRelationshipWebDescription: '複数キャラクターの関係ネットワークを視覚的に作成・管理。アセットライブラリからアイコンをインポートして、完全なキャラ関係図を構築できます。',
     pageCharacterCardTitle: 'キャラ設定カード',
     pageCharacterCardDescription: 'キャラ情報、立ち絵、設定、関係を統合した設定カード画像を作成。複数テンプレートとテーマに対応し、ワンクリックで PNG を出力して共有できます。',
+    pageCharacterChronicleTitle: 'キャラ年表',
+    pageCharacterChronicleDescription: 'キャラクターの誕生、出会い、成長、戦闘などの重要イベントを記録する可視化タイムラインを作成。関係図のキャラと連動し、長尺画像を出力して共有できます。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1294,6 +1306,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAssetGallery: 'Asset Gallery',
     featureRelationshipWeb: 'Relationship Web',
     featureCharacterCard: 'Character Card',
+    featureCharacterChronicle: 'Chronicle',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1325,6 +1338,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAssetGallery: 'Asset Gallery',
     actionRelationshipWeb: 'Relationship Web',
     actionCharacterCard: 'Character Card',
+    actionCharacterChronicle: 'Chronicle',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1413,7 +1427,7 @@ const translations: Record<BaseLanguage, Messages> = {
     announcementDescription: 'v1.7.9 New: Character Card Exporter — combine character info, artwork, profile fields and relationships into a beautiful shareable PNG card. 3 templates, 19 theme colors, 3 background styles. Deep integration with Asset Gallery and Relationship Web. One-click export.',
     announcementList1: 'Character Card Exporter: Select avatar and main visual from Asset Gallery, fill in name, alias, bio and custom profile fields, add colored tags. Auto-import related characters from Relationship Web to generate a relation summary. Three templates (Minimal/Detailed/Gallery) for different showcase needs.',
     announcementList2: 'Style & export: 19 preset theme colors, 3 background styles (solid/gradient/dots). html-to-image renders the card at 2× resolution with transparent background PNG for direct download and sharing. Card layout auto-adapts to light/dark themes, suitable for social media and print.',
-    announcementList3: 'Full integration & accessibility: New FeatureScreen route, ActionIcon SVG, StartModal entry, HomeScreen workflow list. Complete 5-language translations and manual docs. Full-page SFX coverage. Previous v1.7.8 completed the deep audit fix for Relationship Web. Version synchronized to 1.7.9.',
+    announcementList3: 'Full integration & export: New FeatureScreen route, ActionIcon SVG, StartModal entry, HomeScreen workflow list. Complete 5-language translations and manual docs. Full-page SFX coverage. Previous v1.7.9 added the Character Card Exporter. Version synchronized to 1.8.0.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1447,6 +1461,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageRelationshipWebDescription: 'Visually create and manage relationship networks between multiple characters. Import avatars from the Asset Gallery to build a complete character relationship map.',
     pageCharacterCardTitle: 'Character Card',
     pageCharacterCardDescription: 'Combine character info, artwork, profile fields and relationships into a beautiful showcase card. Supports multiple templates and themes, export PNG with one click.',
+    pageCharacterChronicleTitle: 'Character Chronicle',
+    pageCharacterChronicleDescription: 'Create a visual timeline for your character, recording key events like birth, meetings, growth, and battles. Links to Relationship Web characters and exports as a long image.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1694,6 +1710,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAssetGallery: 'Галерея активов',
     featureRelationshipWeb: 'Сеть отношений',
     featureCharacterCard: 'Карточка персонажа',
+    featureCharacterChronicle: 'Хроника',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1725,6 +1742,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAssetGallery: 'Галерея активов',
     actionRelationshipWeb: 'Сеть отношений',
     actionCharacterCard: 'Карточка персонажа',
+    actionCharacterChronicle: 'Хроника',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1813,7 +1831,7 @@ const translations: Record<BaseLanguage, Messages> = {
     announcementDescription: 'v1.7.9 Новое: Экспортёр карточек персонажей — объединяйте информацию, арты, поля профиля и связи персонажа в красивую PNG-карточку. 3 шаблона, 19 цветов темы, 3 стиля фона. Глубокая интеграция с галереей активов и сетью отношений. Экспорт одним кликом.',
     announcementList1: 'Карточка персонажа: выбирайте аватар и главное изображение из галереи активов, заполняйте имя, псевдоним, био и произвольные поля профиля, добавляйте цветные теги. Автоимпорт связанных персонажей из сети отношений для генерации сводки. Три шаблона (минимальный/подробный/галерея) для разных задач.',
     announcementList2: 'Стили и экспорт: 19 предустановленных цветов темы, 3 стиля фона (сплошной/градиент/точки). html-to-image рендерит карточку в 2× разрешении с прозрачным фоном PNG для скачивания и публикации. Вёрстка адаптируется к светлой/тёмной теме, подходит для соцсетей и печати.',
-    announcementList3: 'Полная интеграция и доступность: добавлены новый маршрут FeatureScreen, ActionIcon SVG, вход StartModal, список рабочих процессов HomeScreen. Полные переводы и справочная документация на 5 языках. Полное покрытие SFX. Предыдущая v1.7.8 завершила глубокий аудит сети отношений. Версия синхронизирована с 1.7.9.',
+    announcementList3: 'Полная интеграция и экспорт: добавлены новый маршрут FeatureScreen, ActionIcon SVG, вход StartModal, список рабочих процессов HomeScreen. Полные переводы и справочная документация на 5 языках. Полное покрытие SFX. Предыдущая v1.7.9 добавила экспортёр карточек персонажей. Версия синхронизирована с 1.8.0.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1847,6 +1865,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageRelationshipWebDescription: 'Визуально создавайте и управляйте сетями отношений между персонажами. Импортируйте аватары из галереи активов для построения полной карты отношений.',
     pageCharacterCardTitle: 'Карточка персонажа',
     pageCharacterCardDescription: 'Объедините информацию о персонаже, арт, профиль и связи в красивую карточку. Поддерживает несколько шаблонов и тем; экспортируйте PNG одним кликом.',
+    pageCharacterChronicleTitle: 'Хроника персонажа',
+    pageCharacterChronicleDescription: 'Создайте визуальную хронологию для персонажа, записывая ключевые события: рождение, встречи, рост, битвы. Связь с персонажами из Сети отношений и экспорт в длинное изображение.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2503,8 +2523,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureAssetGallery: '에셋 갤러리',
     featureRelationshipWeb: '캐릭터 관계망',
     featureCharacterCard: '캐릭터 설정 카드',
+    featureCharacterChronicle: '캐릭터 연대기',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
+    actionCharacterChronicle: '캐릭터 연대기',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2525,10 +2547,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageRelationshipWebDescription: '여러 캐릭터 간의 관계 네트워크를 시각적으로 생성하고 관리합니다. 에셋 갤러리에서 아바타를 가져와 완전한 캐릭터 관계 지도를 구축하세요.',
     pageCharacterCardTitle: '캐릭터 설정 카드',
     pageCharacterCardDescription: '캐릭터 정보, 일러스트, 설정 및 관계를 아름다운 설정 카드 이미지로 통합합니다. 다양한 템플릿과 테마를 지원하며 한 번의 클릭으로 PNG를 낳아올 수 있습니다.',
+    pageCharacterChronicleTitle: '캐릭터 연대기',
+    pageCharacterChronicleDescription: '캐릭터의 탄생, 만남, 성장, 전투 등 주요 이벤트를 기록하는 시각적 타임라인을 생성합니다. 관계망 캐릭터와 연동되어 긴 이미지로 낳아올 수 있습니다.',
     announcementDescription: 'v1.7.9 신규: 캐릭터 설정 카드 익스포터 — 캐릭터 정보, 일러스트, 설정 항목 및 관계를 아름다운 PNG 카드로 통합합니다. 3가지 템플릿, 19가지 테마 색상, 3가지 배경 스타일. 에셋 갤러리 및 관계망과 심층 연동. 한 번의 클릭으로 낳아오기.',
     announcementList1: '캐릭터 설정 카드: 에셋 갤러리에서 아바타와 메인 비주얼을 선택하고, 이름, 별명, 소개, 사용자 정의 설정 항목, 컬러 태그를 입력합니다. 관계망에서 관련 캐릭터를 자동으로 가져와 관계 요약을 생성합니다. 세 가지 템플릿(심플/상세/갤러리)로 다양한 전시 요구에 부응합니다.',
     announcementList2: '스타일 및 낳아오기: 19가지 프리셋 테마 색상, 3가지 배경 스타일(단색/그라데이션/도트). html-to-image로 2배 해상도 투명 배경 PNG를 렌더링하여 직접 다운로드하고 공유할 수 있습니다. 카드 레이아웃은 밝은/어두운 테마에 자동 적응하며 SNS 및 인쇄에 적합합니다.',
-    announcementList3: '완전 통합 및 접근성: 새로운 FeatureScreen 경로, ActionIcon SVG, StartModal 진입, HomeScreen 워크플로 리스트 추가. 5개 언어 완전 번역 및 매뉴얼 문서. 전체 페이지 SFX 효과음 커버리지. 이전 버전 v1.7.8에서 관계망 전면 감사 수정을 완료했습니다. 버전을 1.7.9로 동기화.'
+    announcementList3: '완전 통합 및 낳아오기: 새로운 FeatureScreen 경로, ActionIcon SVG, StartModal 진입, HomeScreen 워크플로 리스트 추가. 5개 언어 완전 번역 및 매뉴얼 문서. 전체 페이지 SFX 효과음 커버리지. 이전 버전 v1.7.9에서 캐릭터 설정 카드 익스포터를 추가했습니다. 버전을 1.8.0으로 동기화.'
   },
   fr: {
     ...translations.en,
@@ -2719,6 +2743,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.8.0',
+    date: '2026-05-16',
+    title: '1.8.0 新增角色编年史（Character Chronicle）',
+    summary:
+      '全新上线 OC 角色编年史功能，支持为角色创建可视化时间线，记录诞生、相遇、成长、战斗、转折等关键事件。7 种事件类型颜色编码、关系网角色联动、资产库图片附件，一键导出长图 PNG。',
+    details: [
+      '角色编年史：为任意角色创建按日期排序的可视化时间线，每个事件包含日期、标题、描述、类型、关联角色和可选图片。事件类型包括诞生（橙）、相遇（绿）、离别（红）、成长（蓝）、战斗（橙红）、转折点（紫）、自定义（灰），每种类型都有独特的颜色编码。',
+      '深度数据联动：自动读取角色关系网中的角色列表，可将任意角色关联到特定事件；事件卡片上会显示关联角色的彩色圆点。支持从资产库选择图片作为事件配图，在时间线卡片中直接展示。',
+      '可视化时间轴：采用经典垂直时间轴设计，事件卡片沿中线左右交替排列，日期自动排序。桌面端和移动端均做了精心适配——移动端改为单侧左对齐布局，确保小屏幕阅读体验。',
+      '一键导出：基于 html-to-image 以 2 倍分辨率将完整时间轴渲染为透明背景 PNG 长图，可直接用于社交媒体长文、创作展示或印刷。所有数据自动保存到 localStorage。',
+      '完整集成：新增 FeatureScreen 路由、ActionIcon SVG、StartModal 入口、HomeScreen 工作流列表；5 语言完整翻译和手册文档；全页面 SFX 音效覆盖。',
+    ],
+  },
   {
     version: '1.7.9',
     date: '2026-05-16',
@@ -4384,6 +4422,12 @@ function App() {
           pageTitle={messages.pageCharacterCardTitle}
           pageDescription={messages.pageCharacterCardDescription}
         />
+      ) : screen === 'character-chronicle' ? (
+        <CharacterChroniclePage
+          {...sharedPageProps}
+          pageTitle={messages.pageCharacterChronicleTitle}
+          pageDescription={messages.pageCharacterChronicleDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4576,6 +4620,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-card')}>
                 <ActionIcon kind="character-card" />
                 <span>{messages.featureCharacterCard}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-chronicle')}>
+                <ActionIcon kind="character-chronicle" />
+                <span>{messages.featureCharacterChronicle}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -6027,7 +6075,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6149,6 +6197,17 @@ function ActionIcon({
         <path d="M10 32h14" strokeDasharray="2 2" />
       </>
     ),
+    'character-chronicle': (
+      <>
+        <rect x="6" y="4" width="28" height="36" rx="4" />
+        <circle cx="20" cy="12" r="4" />
+        <path d="M10 22h20" />
+        <circle cx="14" cy="28" r="2" />
+        <path d="M20 28h10" />
+        <circle cx="14" cy="34" r="2" />
+        <path d="M20 34h10" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6261,6 +6320,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('character-card')}>
             <ActionIcon kind="character-card" />
             <strong>{messages.actionCharacterCard}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('character-chronicle')}>
+            <ActionIcon kind="character-chronicle" />
+            <strong>{messages.actionCharacterChronicle}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />

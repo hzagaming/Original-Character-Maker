@@ -3709,6 +3709,61 @@ Key capabilities:
       ],
     },
     {
+      id: 'character-chronicle',
+      title: '캐릭터 연대기',
+      overview: `캐릭터 연대기를 통해 캐릭터의 삶에서 중요한 사건들을 시각적인 타임라인으로 구성할 수 있습니다. 출생, 만남, 이별, 성장의 순간, 전투, 변곡점 등을 기록하고, 각 사건에 날짜와 설명, 관계망에 연결된 캐릭터, 에셋 갤러리의 선택적 이미지를 추가하세요. 타임라인은 아름다운 수직 축에 색상으로 구분된 이벤트 카드로 표시되며, 긴 PNG 이미지로 내보낼 수 있습니다.
+
+핵심 기능:
+· 이벤트 생성 — 날짜, 제목, 설명, 유형 및 선택적 이미지를 포함한 이벤트 추가
+· 관계망 연결 — 관련 캐릭터를 이벤트에 연결; 타임라인 카드에 이름과 색상이 표시됩니다
+· 이벤트 유형 색상 구분 — 7가지 기본 유형(출생, 만남, 이별, 성장, 전투, 변곡점, 사용자 정의) 각각 고유한 색상 제공
+· 시각적 타임라인 — 수직 축에 좌우 교차로 배치된 이벤트 카드, 날짜순 자동 정렬
+· 원클릭 내보내기 — html-to-image를 통해 전체 타임라인을 2배 해상도의 투명 PNG로 렌더링하여 다운로드
+· 영구 저장 — 모든 이벤트는 자동으로 브라우저 localStorage에 저장됩니다`,
+      buttons: [
+        { name: '이벤트 추가', description: '이벤트 편집기 모달을 열어 새로운 타임라인 항목을 만듭니다.' },
+        { name: '이벤트 편집', description: '기존 이벤트를 편집기 모달에서 열어 필드를 수정합니다.' },
+        { name: '이벤트 삭제', description: '확인 후 타임라인에서 이벤트를 제거합니다.' },
+        { name: '타임라인 내보내기', description: '전체 타임라인을 고해상도 PNG로 렌더링하여 다운로드합니다.' },
+        { name: '이미지 선택', description: '에셋 갤러리에서 이벤트에 첨부할 이미지를 선택합니다.' },
+        { name: '캐릭터 연결', description: '관계망의 캐릭터를 이 이벤트와 관련된 것으로 전환합니다.' },
+        { name: '이벤트 유형 칩', description: '유형 칩을 클릭하여 이벤트 카테고리와 색상을 설정합니다.' },
+      ],
+      parameters: [
+        { name: '날짜', description: '이벤트 발생 날짜로, 연대순 정렬에 사용됩니다.', tips: '최상의 결과를 위해 ISO 형식(YYYY-MM-DD)을 사용하세요. "15세"와 같은 상대 날짜도 사용 가능하지만 예상치 못한 정렬이 될 수 있습니다.' },
+        { name: '제목', description: '타임라인 카드에 표시되는 이벤트 이름입니다.', tips: '카드에 잘 맞도록 짧게(30자 이내) 유지하세요.' },
+        { name: '설명', description: '일어난 일에 대한 자세한 자유 텍스트 설명입니다.', tips: '카드 레이아웃에는 두 세 문장이 이상적입니다.' },
+        { name: '이벤트 유형', description: '이벤트 색상을 결정하는 카테고리입니다.', tips: '사전 설정 중 어느 것도 스토리에 맞지 않으면 사용자 정의를 사용하세요.' },
+        { name: '관련 캐릭터', description: '관계망에서 이 이벤트에 연결된 캐릭터입니다.', tips: '도구가 관계망 노드를 자동으로 읽습니다. 캐릭터 이름이 일치하는지 확인하세요.' },
+      ],
+      errors: [
+        {
+          code: 'NO_EVENTS',
+          message: '타임라인이 비어 있습니다',
+          severity: 'info',
+          category: 'B. Settings & Data',
+          location: 'Page: Character Chronicle → Area: Timeline',
+          cause: '아직 생성된 이벤트가 없습니다.',
+          solution: '첫 번째 타임라인 항목을 만들려면 "이벤트 추가"를 클릭하세요.',
+          steps: ['이벤트 추가 클릭', '날짜와 제목 입력', '저장 클릭'],
+          relatedCodes: [],
+          prevention: 'N/A',
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: '타임라인 내보내기 실패',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Character Chronicle → Area: Export',
+          cause: '브라우저가 렌더링을 차단했거나 교차 출처 이미지를 만났습니다.',
+          solution: '첨부된 모든 이미지가 에셋 갤러리(Data URL)에서 가져온 것인지 확인하세요. 이미지를 제거한 후 다시 내보내기를 시도하세요.',
+          steps: ['에셋 갤러리에서 이미지 출처 확인', '이벤트에서 문제 있는 이미지 제거', '타임라인 내보내기 다시 클릭'],
+          relatedCodes: [],
+          prevention: 'CORS 문제를 피하려면 에셋 갤러리로 가져온 이미지만 사용하세요.',
+        },
+      ],
+    },
+    {
       id: 'settings-guide',
       title: 'Settings Panel Guide',
       overview: `

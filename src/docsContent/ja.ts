@@ -3722,6 +3722,61 @@ Key capabilities:
       ],
     },
     {
+      id: 'character-chronicle',
+      title: 'Character Chronicle',
+      overview: `Character Chronicle を使用すると、キャラクターの人生における重要な出来事のビジュアルタイムラインを構築できます。出生、出会い、別れ、成長の瞬間、戦闘、転換点などを記録し、それぞれに日付、説明、関係図からリンクしたキャラクター、およびアセットギャラリーからのオプション画像を添付できます。タイムラインは美しい縦軸にレンダリングされ、色分けされたイベントカードが左右に交互に配置されます。2倍解像度の透明 PNG としてエクスポートすることもできます。
+
+主要機能：
+・イベント作成 —— 日付、タイトル、説明、タイプ、およびオプション画像を持つイベントを追加
+・関係図リンク —— 任意のイベントに関連キャラクターを紐付け；タイムラインカードに名前と色が表示されます
+・イベントタイプの色分け —— 7 種類の組み込みタイプ（出生、出会い、別れ、成長、戦闘、転換点、カスタム）それぞれに固有の色があります
+・ビジュアルタイムライン —— 縦軸に左右交互のイベントカードが自動的に日付順に並びます
+・ワンクリックエクスポート —— html-to-image でタイムライン全体を 2 倍解像度の透明 PNG としてレンダリングしてダウンロード
+・永続ストレージ —— すべてのイベントは自動的にブラウザの localStorage に保存されます`,
+      buttons: [
+        { name: 'Add Event', description: 'イベントエディタモーダルを開き、新しいタイムライン項目を作成します。' },
+        { name: 'Edit Event', description: '既存のイベントをエディタモーダルで開き、フィールドを変更します。' },
+        { name: 'Delete Event', description: '確認後、タイムラインからイベントを削除します。' },
+        { name: 'Export Timeline', description: 'タイムライン全体を高解像度 PNG としてレンダリングし、ダウンロードします。' },
+        { name: 'Select Image', description: 'アセットギャラリーからイベントに添付する画像を選択します。' },
+        { name: 'Link Character', description: '関係図のキャラクターをこのイベントに関連付けてトグルします。' },
+        { name: 'Event Type Chip', description: 'タイプチップをクリックして、イベントカテゴリとその色を設定します。' },
+      ],
+      parameters: [
+        { name: 'Date', description: 'イベントの日付。時系列ソートに使用されます。', tips: '最良の結果を得るには ISO 形式（YYYY-MM-DD）を使用してください。「15歳」などの相対日付も使用可能ですが、並び順が予期しない場合があります。' },
+        { name: 'Title', description: 'タイムラインカードに表示されるイベント名。', tips: 'カードに収まるよう、30 文字以内に短く保ってください。' },
+        { name: 'Description', description: '何が起こったかについての詳細なフリーテキスト説明。', tips: 'カードレイアウトには 2〜3 文が最適です。' },
+        { name: 'Event Type', description: 'イベントの色を決定するカテゴリ。', tips: 'プリセットのいずれもストーリーの節に合わない場合は、カスタムを使用してください。' },
+        { name: 'Related Characters', description: 'このイベントにリンクされた関係図のキャラクター。', tips: 'ツールは関係図のノードを自動的に読み取ります。キャラクター名が一致していることを確認してください。' },
+      ],
+      errors: [
+        {
+          code: 'NO_EVENTS',
+          message: 'タイムラインが空です',
+          severity: 'info',
+          category: 'B. Settings & Data',
+          location: 'Page: Character Chronicle → Area: Timeline',
+          cause: 'まだイベントが作成されていません。',
+          solution: '「Add Event」をクリックして、最初のタイムライン項目を作成してください。',
+          steps: ['Add Event をクリック', '日付とタイトルを入力', 'Save をクリック'],
+          relatedCodes: [],
+          prevention: 'N/A',
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: 'タイムラインのエクスポートに失敗しました',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Character Chronicle → Area: Export',
+          cause: 'ブラウザがレンダリングをブロックしたか、クロスオリジン画像に遭遇しました。',
+          solution: '添付されているすべての画像がアセットギャラリー（Data URL）からのものであることを確認してください。画像を削除してから再度エクスポートしてください。',
+          steps: ['アセットギャラリーで画像ソースを確認', 'イベントから問題のある画像を削除', 'Export Timeline を再度クリック'],
+          relatedCodes: [],
+          prevention: 'CORS 問題を避けるため、アセットギャラリーにインポートされた画像のみを使用してください。',
+        },
+      ],
+    },
+    {
       id: 'settings-guide',
       title: 'Settings Panel Guide',
       overview: `

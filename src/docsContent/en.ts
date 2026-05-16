@@ -3766,6 +3766,61 @@ Key capabilities:
       ],
     },
     {
+      id: 'character-chronicle',
+      title: 'Character Chronicle',
+      overview: `The Character Chronicle lets you build a visual timeline of key events in a character's life story. Record births, meetings, separations, growth moments, battles, and turning points — each with dates, descriptions, linked characters from the Relationship Web, and optional images from the Asset Gallery. The timeline renders as a beautiful vertical axis with color-coded event cards that can be exported as a long PNG image.
+
+Key capabilities:
+· Event Creation — Add events with date, title, description, type, and optional image
+· Relationship Web Link — Attach related characters to any event; their names and colors appear on the timeline card
+· Event Type Color Coding — 7 built-in types (Birth, Meet, Separate, Growth, Battle, Turning Point, Custom) each with a unique color
+· Visual Timeline — Vertical axis with alternating left/right event cards, date-ordered automatically
+· One-Click Export — Renders the full timeline at 2× resolution via html-to-image as a transparent PNG
+· Persistent Storage — All events are saved to browser localStorage automatically`,
+      buttons: [
+        { name: 'Add Event', description: 'Open the event editor modal to create a new timeline entry.' },
+        { name: 'Edit Event', description: 'Open an existing event in the editor modal to modify its fields.' },
+        { name: 'Delete Event', description: 'Remove an event from the timeline after confirmation.' },
+        { name: 'Export Timeline', description: 'Render the entire timeline as a high-resolution PNG and download it.' },
+        { name: 'Select Image', description: 'Choose an image from the Asset Gallery to attach to the event.' },
+        { name: 'Link Character', description: 'Toggle a character from the Relationship Web as related to this event.' },
+        { name: 'Event Type Chip', description: 'Click a type chip to set the event category and its color.' },
+      ],
+      parameters: [
+        { name: 'Date', description: 'The date of the event, used for chronological sorting.', tips: 'Use ISO format (YYYY-MM-DD) for best results. Relative dates like "Age 15" work but may sort unexpectedly.' },
+        { name: 'Title', description: 'The display name of the event on the timeline card.', tips: 'Keep it short (under 30 characters) so it fits well on the card.' },
+        { name: 'Description', description: 'A longer free-text explanation of what happened.', tips: 'Two to three sentences are ideal for the card layout.' },
+        { name: 'Event Type', description: 'The category that determines the event color.', tips: 'Use Custom if none of the presets fit your story beat.' },
+        { name: 'Related Characters', description: 'Characters from the Relationship Web linked to this event.', tips: 'The tool reads the Relationship Web nodes automatically. Make sure character names match.' },
+      ],
+      errors: [
+        {
+          code: 'NO_EVENTS',
+          message: 'Timeline is empty',
+          severity: 'info',
+          category: 'B. Settings & Data',
+          location: 'Page: Character Chronicle → Area: Timeline',
+          cause: 'No events have been created yet.',
+          solution: 'Click "Add Event" to create your first timeline entry.',
+          steps: ['Click Add Event', 'Fill in date and title', 'Click Save'],
+          relatedCodes: [],
+          prevention: 'N/A',
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: 'Timeline export failed',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Character Chronicle → Area: Export',
+          cause: 'The browser blocked the render, or a cross-origin image was encountered.',
+          solution: 'Ensure all attached images come from the Asset Gallery (data URLs). Try removing images and export again.',
+          steps: ['Check image sources in Asset Gallery', 'Remove problematic images from events', 'Click Export Timeline again'],
+          relatedCodes: [],
+          prevention: 'Only use images imported into the Asset Gallery to avoid CORS issues.',
+        },
+      ],
+    },
+    {
       id: 'settings-guide',
       title: 'Settings Panel Guide',
       overview: `
