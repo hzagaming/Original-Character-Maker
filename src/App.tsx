@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.5';
+const VERSION = '1.7.6';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -596,10 +596,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.5 UI/UX/SFX/BGM 全面自检与优化：修复自定义音频内存泄漏、BGM 后台智能暂停、音频引擎恢复策略优化、CSS 无障碍动效增强；同步版本号。',
-    announcementList1: 'AudioEditorPage 运行时修复：修复 dragCounter 未声明导致的拖拽 ReferenceError；修复 stopPlayback TDZ 崩溃；修复 tick/onended stale closure；修复 audio node 内存泄漏；修复键盘快捷键 effect 60fps 重建；修复导出 URL 未 revoke；修复 resetAll 未 revoke 导出 URL。',
-    announcementList2: 'AudioEditorPage 交互修复：修复 applyFade off-by-one；修复 history 无上限（MAX_HISTORY=50）；修复拖拽闪烁；修复 application/octet-stream 拖拽拒绝；修复 Canvas fillRect 负宽度；修复 handleWheel 除以零；修复空格键长按高频切换。',
-    announcementList3: 'AudioConverterPage 与 App 层修复：修复 isMountedRef 未在 success 路径检查；修复 rAF 后台标签页 blob URL 泄漏；修复 e.dataTransfer.types 旧浏览器兼容性；修复 Reset 按钮 double-play；修复 Convert 按钮导入期间未禁用；修复 sliderThrottleRef 未清除；修复 mouseenter 不冒泡导致 hover SFX 失效；修复 FaceMakerPage 键盘快捷键未检查 select/shiftKey。',
+    announcementDescription: 'v1.7.6 角色资产库深度优化与全局 SFX 一致性修复：修复 Asset Gallery 双击预览闪烁、Ctrl 取消选择音效错误、预览弹窗删除时双重音效叠加；统一页面结构语义标签（main/header）、增强可访问性（aria-label、aria-live）；补充 useBeforeUnloadGuard 防止意外刷新丢失资产；全局 SFX handler 完善 data-sfx-handled 机制避免更多 double-play。',
+    announcementList1: 'AssetGalleryPage 深度修复：修复双击打开预览时资产先选中后取消导致的闪烁；修复 Ctrl/Cmd 点击已选中资产取消选择时仍播放 select 音效的问题（现正确播放 deselect）；修复预览弹窗删除资产时 deleteSound 与 modalClose 双重叠加；修复批量操作按钮、单个操作按钮和资产卡片同时触发全局 buttonClick 与内部特定音效导致的噪音叠加。',
+    announcementList2: 'AssetGalleryPage 结构与可访问性增强：根容器统一为语义化 <main> 与 <header> 标签，补全 fade-up 入场动画；搜索框添加 aria-label、toast 添加 role="alert" 与 aria-live；补充 useBeforeUnloadGuard，存在资产时刷新页面会触发浏览器确认提示；侧边概览面板标题纳入多语言 copy 体系。',
+    announcementList3: '全局 SFX 与 App 层修复：全局 click SFX handler 新增 data-sfx-handled 跳过机制，彻底根治 Asset Gallery 各类按钮的 double-play；BGM 初始化增加 !document.hidden 判断，避免后台标签页自动播放背景音乐；Asset Gallery 全部有显式 playSound 的交互元素均已标记 data-sfx-handled。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -990,10 +990,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.5 UI/UX/SFX/BGM 全面自检と最適化：カスタムオーディオのメモリリーク修正、BGM のバックグラウンド自動一時停止、オーディオエンジンの復旧戦略最適化、CSS アクセシビリティ動画効果の強化；バージョン番号の同期。',
-    announcementList1: 'AudioEditorPage ランタイム修正：dragCounter 未宣言によるドラッグ ReferenceError を修正；stopPlayback の TDZ クラッシュを修正；tick/onended の stale closure を修正；audio node メモリリークを修正；キーボードショートカット effect の 60fps 再構築を修正；エクスポート URL の revoke 漏れを修正；resetAll のエクスポート URL revoke 漏れを修正。',
-    announcementList2: 'AudioEditorPage インタラクション修正：applyFade の off-by-one を修正；history 上限なしを修正（MAX_HISTORY=50）；ドラッグちらつきを修正；application/octet-stream ドラッグ拒否を修正；Canvas fillRect の負の幅を修正；handleWheel のゼロ除算を修正；スペースキー長押しによる高頻度切り替えを修正。',
-    announcementList3: 'AudioConverterPage と App 層の修正：isMountedRef が success パスで未チェックだった問題を修正；rAF によるバックグラウンドタブの blob URL リークを修正；e.dataTransfer.types の旧ブラウザ互換性を修正；Reset ボタンの double-play を修正；Convert ボタンがインポート中に無効化されていなかった問題を修正；sliderThrottleRef の未クリアを修正；mouseenter の非バブリングによる hover SFX 無効化を修正；FaceMakerPage のキーボードショートカットが select/shiftKey をチェックしていなかった問題を修正。',
+    announcementDescription: 'v1.7.6 キャラクターアセットギャラリーの深層最適化とグローバル SFX 一貫性修正：Asset Gallery のダブルクリックプレビューちらつき、Ctrl 選択解除の誤った効果音、プレビューモーダル削除時の二重 SFX 重畳を修正；ページ構造をセマンティックタグ（main/header）に統一、アクセシビリティを強化（aria-label、aria-live）；useBeforeUnloadGuard を追加して誤った更新によるアセット消失を防止；グローバル SFX ハンドラーの data-sfx-handled 機構を完善して double-play を回避。',
+    announcementList1: 'AssetGalleryPage 深層修正：ダブルクリックでプレビューを開く際のアセット選択→解除のちらつきを修正；Ctrl/Cmd クリックで選択済みアセットを解除しても select 効果音が再生される問題を修正（正しく deselect を再生）；プレビューモーダルでアセットを削除する際の deleteSound と modalClose の二重重畳を修正；一括操作ボタン、個別操作ボタン、アセットカードでグローバル buttonClick と内部特定効果音が同時に発生するノイズ重畳を修正。',
+    announcementList2: 'AssetGalleryPage 構造とアクセシビリティ強化：ルートコンテナをセマンティック <main>・<header> タグに統一し、fade-up 入場アニメーションを補完；検索ボックスに aria-label、toast に role="alert" と aria-live を追加；useBeforeUnloadGuard を補完し、アセットが存在する場合にページ更新でブラウザ確認ダイアログを表示；サイド概要パネルのタイトルを多言語 copy 体系に統合。',
+    announcementList3: 'グローバル SFX と App 層修正：グローバル click SFX ハンドラーに data-sfx-handled スキップ機構を追加し、Asset Gallery の各種ボタンの double-play を根治；BGM 初期化に !document.hidden 判定を追加し、バックグラウンドタブでの自動再生を防止；Asset Gallery の全ての明示的 playSound を持つインタラクティブ要素に data-sfx-handled を付与。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1382,10 +1382,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.7.5 Comprehensive UI/UX/SFX/BGM audit and optimization: Fixed custom audio memory leak, BGM smart pause in background tabs, audio engine resume strategy improved, CSS accessibility motion enhanced; version synchronized.',
-    announcementList1: 'AudioEditorPage runtime fixes: Fixed dragCounter undeclared ReferenceError on drag; Fixed stopPlayback TDZ crash; Fixed tick/onended stale closures; Fixed audio node memory leak (~10 nodes per play); Fixed keyboard shortcut effect rebuilding at 60fps; Fixed export URL not revoked on unmount; Fixed resetAll not revoking export URLs.',
-    announcementList2: 'AudioEditorPage interaction fixes: Fixed applyFade off-by-one; Fixed unbounded history array (MAX_HISTORY=50); Fixed drag flicker from child element dragleave; Fixed application/octet-stream drag rejection; Fixed Canvas fillRect negative width; Fixed handleWheel division by zero; Fixed spacebar long-press rapid toggle.',
-    announcementList3: 'AudioConverterPage and App layer fixes: Fixed isMountedRef missing in async success paths; Fixed rAF blob URL leak in background tabs; Fixed e.dataTransfer.types compatibility in older browsers; Fixed Reset button double-play; Fixed Convert button not disabled during import; Fixed sliderThrottleRef not cleared on reset; Fixed mouseenter non-bubbling hover SFX failure; Fixed FaceMakerPage keyboard shortcuts not checking select/shiftKey.',
+    announcementDescription: 'v1.7.6 Asset Gallery deep optimization and global SFX consistency fix: Fixed double-click preview flicker, Ctrl+deselect wrong sound, preview modal delete dual-SFX overlay; unified semantic page structure (main/header), enhanced accessibility (aria-label, aria-live); added useBeforeUnloadGuard to prevent accidental refresh asset loss; improved global SFX handler data-sfx-handled mechanism to avoid more double-play.',
+    announcementList1: 'AssetGalleryPage deep fixes: Fixed asset select→deselect flicker when double-clicking to open preview; fixed Ctrl/Cmd clicking a selected asset still playing "select" instead of "deselect"; fixed preview modal delete overlaying deleteSound + modalClose simultaneously; fixed batch action buttons, individual action buttons and asset cards triggering both global buttonClick and internal specific sounds at the same time.',
+    announcementList2: 'AssetGalleryPage structure and accessibility enhancements: Root container unified to semantic <main> and <header> tags with fade-up entrance animations; search input gained aria-label, toast gained role="alert" and aria-live; added useBeforeUnloadGuard so refreshing with assets triggers a browser confirmation prompt; side overview panel title integrated into the multilingual copy system.',
+    announcementList3: 'Global SFX and App layer fixes: Global click SFX handler added data-sfx-handled skip mechanism to thoroughly eliminate Asset Gallery button double-play; BGM initialization added !document.hidden check to prevent auto-play in background tabs; all interactive elements in Asset Gallery with explicit playSound calls are now marked with data-sfx-handled.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1774,10 +1774,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.7.5 Комплексный аудит UI/UX/SFX/BGM: Исправлена утечка памяти пользовательского аудио, умная пауза BGM в фоновых вкладках, улучшена стратегия восстановления аудио-движка, улучшена доступность CSS-анимаций; версия синхронизирована.',
-    announcementList1: 'Исправления runtime AudioEditorPage: Исправлен ReferenceError от не объявленного dragCounter; Исправлен TDZ-crash stopPlayback; Исправлены stale closure в tick/onended; Исправлена утечка памяти аудио-узлов; Исправлена перестройка effect горячих клавиш на 60fps; Исправлена утечка URL экспорта при размонтировании; Исправлен resetAll без revoke URL экспорта.',
-    announcementList2: 'Исправления взаимодействия AudioEditorPage: Исправлен off-by-one applyFade; Исправлен неограниченный history (MAX_HISTORY=50); Исправлено мерцание drag; Исправлен отказ drag application/octet-stream; Исправлена отрицательная ширина Canvas fillRect; Исправлено деление на ноль handleWheel; Исправлено быстрое переключение при долгом нажатии пробела.',
-    announcementList3: 'Исправления AudioConverterPage и App: Исправлен пропущенный isMountedRef в success-путях async; Исправлена утечка blob URL rAF в фоновых вкладках; Исправлена совместимость e.dataTransfer.types в старых браузерах; Исправлен double-play resetSound; Исправлена неотключенная кнопка Convert при импорте; Исправлен неочищенный sliderThrottleRef; Исправлена неработающая hover SFX из-за небублирующего mouseenter; Исправлены горячие клавиши FaceMakerPage без проверки select/shiftKey.',
+    announcementDescription: 'v1.7.6 Глубокая оптимизация галереи активов и исправление глобальной согласованности SFX: Исправлено мерцание при двойном клике для предпросмотра, ошибочный звук при Ctrl+отмене выделения, двойное наложение SFX при удалении в модальном окне предпросмотра; унифицирована семантическая структура страницы (main/header), улучшена доступность (aria-label, aria-live); добавлен useBeforeUnloadGuard для предотвращения потери активов при случайном обновлении; улучшен механизм data-sfx-handled глобального SFX обработчика для предотвращения повторного воспроизведения.',
+    announcementList1: 'Глубокие исправления AssetGalleryPage: Исправлено мерцание выделения→снятия выделения при двойном клике для открытия предпросмотра; исправлена проблема воспроизведения звука select вместо deselect при Ctrl/Cmd-клике по уже выделенному активу; исправлено одновременное наложение deleteSound и modalClose при удалении актива в модальном окне предпросмотра; исправлено одновременное срабатывание глобального buttonClick и внутреннего специфического звука для кнопок пакетных операций, отдельных операций и карточек активов.',
+    announcementList2: 'Улучшение структуры и доступности AssetGalleryPage: Корневой контейнер унифицирован в семантические теги <main> и <header> с анимацией появления fade-up; поле поиска получило aria-label, toast получил role="alert" и aria-live; добавлен useBeforeUnloadGuard, чтобы при обновлении страницы с активами отображалось подтверждение браузера; заголовок боковой панели обзора интегрирован в многоязычную систему copy.',
+    announcementList3: 'Исправления глобального SFX и уровня App: Глобальный обработчик click SFX получил механизм пропуска data-sfx-handled для полного устранения повторного воспроизведения кнопок Asset Gallery; инициализация BGM получила проверку !document.hidden для предотвращения автовоспроизведения в фоновых вкладках; все интерактивные элементы Asset Gallery с явными вызовами playSound помечены data-sfx-handled.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2477,10 +2477,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
     pageAssetGalleryTitle: '캐릭터 에셋 갤러리',
     pageAssetGalleryDescription: '캐릭터 제작 에셋을 한 곳에서 관리합니다. 이미지, 오디오, GIF 등의 가져오기, 미리보기, 분류 필터링 및 일괄 다운로드를 지원합니다.',
-    announcementDescription: 'v1.7.5 UI/UX/SFX/BGM 전면 자체 점검 및 최적화: 커스텀 오디오 메모리 누수 수정, BGM 백그라운드 스마트 일시정지, 오디오 엔진 복구 전략 최적화, CSS 접근성 모션 강화; 버전 번호 동기화.',
-    announcementList1: 'AudioEditorPage 런타임 수정: 선언되지 않은 dragCounter로 인한 드래그 ReferenceError 수정; stopPlayback TDZ 충돌 수정; tick/onended stale closure 수정; 오디오 노드 메모리 누수 수정; 키보드 단축키 effect 60fps 재구성 수정; 납치기 URL revoke 누락 수정; resetAll 납치기 URL revoke 누락 수정.',
-    announcementList2: 'AudioEditorPage 상호작용 수정: applyFade off-by-one 수정; history 상한 없음 수정(MAX_HISTORY=50); 드래그 깜빡임 수정; application/octet-stream 드래그 거부 수정; Canvas fillRect 음수 너비 수정; handleWheel 0으로 나누기 수정; 스페이스바 길게 누르기 고속 전환 수정.',
-    announcementList3: 'AudioConverterPage 및 App 레이어 수정: isMountedRef가 success 경로에서 미확인 수정; rAF 백그라운드 탭 blob URL 누수 수정; e.dataTransfer.types 이전 브라우저 호환성 수정; Reset 버튼 double-play 수정; Convert 버튼 가져오기 중 비활성화 누락 수정; sliderThrottleRef 미삭제 수정; mouseenter 비버블링으로 인한 hover SFX 무효화 수정; FaceMakerPage 키보드 단축키 select/shiftKey 미확인 수정.'
+    announcementDescription: 'v1.7.6 캐릭터 에셋 갤러리 심층 최적화 및 전역 SFX 일관성 수정: Asset Gallery 더블클릭 미리보기 깜빡임, Ctrl 선택 해제 잘못된 효과음, 미리보기 모달 삭제 시 이중 SFX 중첩 수정; 페이지 구조를 시맨틱 태그(main/header)로 통일, 접근성 강화(aria-label, aria-live); useBeforeUnloadGuard 추가로 잘못된 새로고침 시 에셋 손실 방지; 전역 SFX 핸들러 data-sfx-handled 메커니즘을 개선하여 더블 플레이 방지.',
+    announcementList1: 'AssetGalleryPage 심층 수정: 더블클릭으로 미리보기 열 때 에셋 선택→해제 깜빡임 수정; Ctrl/Cmd 클릭으로 선택된 에셋 해제 시에도 select 효과음이 재생되던 문제 수정(정확히 deselect 재생); 미리보기 모달에서 에셋 삭제 시 deleteSound와 modalClose 이중 중첩 수정; 일괄 작업 버튼, 개별 작업 버튼, 에셋 카드에서 전역 buttonClick과 내부 특정 효과음이 동시에 발생하는 노이즈 중첩 수정.',
+    announcementList2: 'AssetGalleryPage 구조 및 접근성 강화: 루트 컨테이너를 시맨틱 <main>·<header> 태그로 통일하고 fade-up 진입 애니메이션 보완; 검색 상자에 aria-label, toast에 role="alert" 및 aria-live 추가; useBeforeUnloadGuard 보완하여 에셋이 존재할 때 페이지 새로고침 시 브라우저 확인 대화상자 표시; 사이드 개요 패널 제목을 다국어 copy 체계에 통합.',
+    announcementList3: '전역 SFX 및 App 레이어 수정: 전역 click SFX 핸들러에 data-sfx-handled 스킵 메커니즘을 추가하여 Asset Gallery 각종 버튼의 더블 플레이를 근본적으로 해결; BGM 초기화에 !document.hidden 판단을 추가하여 백그라운드 탭 자동 재생 방지; Asset Gallery의 모든 명시적 playSound를 가진 인터랙티브 요소에 data-sfx-handled를 부여.'
   },
   fr: {
     ...translations.en,
@@ -2671,6 +2671,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.6',
+    date: '2026-05-16',
+    title: '1.7.6 角色资产库深度优化与全局 SFX 一致性修复',
+    summary:
+      '全面修复 Asset Gallery 的 UI/UX/SFX/可访问性问题：双击预览闪烁、Ctrl 取消选择音效错误、预览弹窗删除双重音效叠加；统一语义化页面结构、增强无障碍支持；补充 useBeforeUnloadGuard；完善全局 SFX handler 的 data-sfx-handled 机制。',
+    details: [
+      'AssetGalleryPage 深度修复：修复双击打开预览时资产先选中后取消导致的闪烁（已选中的唯一资产再次单击保持不变）；修复 Ctrl/Cmd 点击已选中资产取消选择时仍播放 select 音效的问题（现正确播放 deselect）；修复预览弹窗删除资产时 deleteSound 与 modalClose 双重叠加；修复批量操作按钮、单个操作按钮和资产卡片同时触发全局 buttonClick 与内部特定音效导致的噪音叠加。',
+      'AssetGalleryPage 结构与可访问性增强：根容器统一为语义化 <main> 与 <header> 标签，补全 fade-up 入场动画；搜索框添加 aria-label、toast 添加 role="alert" 与 aria-live="polite"；补充 useBeforeUnloadGuard，存在资产时刷新页面会触发浏览器确认提示；侧边概览面板标题纳入多语言 copy 体系。',
+      '全局 SFX 与 App 层修复：全局 click SFX handler 新增 data-sfx-handled 跳过机制，彻底根治 Asset Gallery 各类按钮的 double-play；BGM 初始化增加 !document.hidden 判断，避免后台标签页自动播放背景音乐；Asset Gallery 全部有显式 playSound 的交互元素（返回、导入、设置、帮助、筛选 chip、modal 关闭、资产卡片、批量操作、单个操作）均已标记 data-sfx-handled。',
+    ],
+  },
   {
     version: '1.7.5',
     date: '2026-05-16',
@@ -4269,6 +4281,7 @@ function App() {
           {...sharedPageProps}
           pageTitle={messages.pageAssetGalleryTitle}
           pageDescription={messages.pageAssetGalleryDescription}
+          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
         />
       ) : screen === 'docs' ? (
         <DocsPage

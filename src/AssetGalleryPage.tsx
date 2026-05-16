@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playSound } from './audioEngine';
-import type { AppLanguage, FeatureScreen, SettingsState } from './types';
+import type { AppLanguage, SettingsState } from './types';
 
 type AssetType = 'image' | 'audio' | 'gif' | 'video' | 'other';
 
@@ -34,9 +34,21 @@ type SharedPageProps = {
   language: AppLanguage;
   onBack: () => void;
   onOpenSettings: () => void;
-  onNavigate?: (screen: Exclude<FeatureScreen, 'home'>) => void;
+  onSwitchTool?: (toolId: string) => void;
   onOpenDocs?: (toolId?: string, section?: string, errorCode?: string) => void;
 };
+
+function useBeforeUnloadGuard(isDirty: boolean) {
+  useEffect(() => {
+    if (!isDirty) return;
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+}
 
 const ASSETS_STORAGE_KEY = 'oc-maker.asset-gallery';
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
@@ -152,6 +164,7 @@ const uiCopy: Record<
     importSuccess: string;
     deleteConfirm: string;
     deleteConfirmPlural: string;
+    assetOverview: string;
   }
 > = {
   zh: {
@@ -186,6 +199,7 @@ const uiCopy: Record<
     importSuccess: '已导入：{name}',
     deleteConfirm: '确定要删除「{name}」吗？此操作不可撤销。',
     deleteConfirmPlural: '确定要删除选中的 {count} 项资产吗？此操作不可撤销。',
+    assetOverview: '资产概览',
   },
   ja: {
     importTitle: 'アセットをインポート',
@@ -219,6 +233,7 @@ const uiCopy: Record<
     importSuccess: 'インポート完了：{name}',
     deleteConfirm: '「{name}」を削除してもよろしいですか？この操作は元に戻せません。',
     deleteConfirmPlural: '選択した {count} 件のアセットを削除してもよろしいですか？この操作は元に戻せません。',
+    assetOverview: 'アセット概要',
   },
   en: {
     importTitle: 'Import Assets',
@@ -252,6 +267,7 @@ const uiCopy: Record<
     importSuccess: 'Imported: {name}',
     deleteConfirm: 'Delete "{name}"? This cannot be undone.',
     deleteConfirmPlural: 'Delete {count} selected assets? This cannot be undone.',
+    assetOverview: 'Asset Overview',
   },
   ru: {
     importTitle: 'Импорт активов',
@@ -285,6 +301,7 @@ const uiCopy: Record<
     importSuccess: 'Импортировано: {name}',
     deleteConfirm: 'Удалить «{name}»? Это действие нельзя отменить.',
     deleteConfirmPlural: 'Удалить {count} выбранных активов? Это действие нельзя отменить.',
+    assetOverview: 'Обзор активов',
   },
   ko: {
     importTitle: '에셋 가져오기',
@@ -318,6 +335,7 @@ const uiCopy: Record<
     importSuccess: '가져오기 완료: {name}',
     deleteConfirm: '「{name}」을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
     deleteConfirmPlural: '선택한 {count}개의 에셋을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+    assetOverview: '에셋 개요',
   },
 };
 
@@ -341,7 +359,7 @@ export function AssetGalleryPage({
   language,
   onBack,
   onOpenSettings,
-  onNavigate,
+  onSwitchTool: _onSwitchTool,
   onOpenDocs,
 }: SharedPageProps) {
   const copy = getCopy(language);
@@ -493,19 +511,24 @@ export function AssetGalleryPage({
       setSelectedIds((prev) => {
         const next = new Set(prev);
         if (isCtrl) {
-          if (next.has(id)) next.delete(id);
-          else next.add(id);
+          if (next.has(id)) {
+            next.delete(id);
+            playSound('deselect');
+          } else {
+            next.add(id);
+            playSound('select');
+          }
         } else {
           if (next.has(id) && next.size === 1) {
-            next.clear();
-          } else {
-            next.clear();
-            next.add(id);
+            // Already the only selection — keep it to prevent double-click flicker
+            return prev;
           }
+          next.clear();
+          next.add(id);
+          playSound('select');
         }
         return next;
       });
-      playSound('select');
     },
     [],
   );
@@ -566,17 +589,27 @@ export function AssetGalleryPage({
     playSound('modalClose');
   }, []);
 
+  const closePreviewSilent = useCallback(() => {
+    setIsClosingPreview(true);
+    window.setTimeout(() => {
+      setPreviewAsset(null);
+      setIsClosingPreview(false);
+    }, 220);
+  }, []);
+
   const totalSize = useMemo(() => assets.reduce((sum, a) => sum + a.size, 0), [assets]);
 
+  useBeforeUnloadGuard(assets.length > 0);
+
   return (
-    <div
+    <main
       className="feature-shell tool-page-shell"
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="feature-header">
+      <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
           <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
@@ -598,12 +631,13 @@ export function AssetGalleryPage({
             </button>
           )}
         </div>
-      </div>
+      </header>
 
       <input
         ref={fileInputRef}
         type="file"
         multiple
+        aria-label={copy.importTitle}
         accept="image/*,audio/*,video/*,.gif,.png,.jpg,.jpeg,.webp,.mp3,.wav,.ogg,.flac,.m4a,.aac,.mp4,.mov"
         hidden
         onChange={(e) => {
@@ -613,7 +647,7 @@ export function AssetGalleryPage({
         }}
       />
 
-      <section className="tool-workbench fade-up delay-1">
+      <section className="tool-workbench fade-up delay-2">
         <div className="tool-header">
           <div>
             <h2>{pageTitle}</h2>
@@ -643,6 +677,7 @@ export function AssetGalleryPage({
                   type="text"
                   className="tool-input"
                   placeholder={copy.searchPlaceholder}
+                  aria-label={copy.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ minWidth: 200, maxWidth: 320 }}
@@ -654,10 +689,10 @@ export function AssetGalleryPage({
                   <span className="tiny-copy" style={{ color: 'var(--accent-solid)' }}>
                     {copy.itemsSelected.replace('{count}', String(selectedIds.size))}
                   </span>
-                  <button className="secondary-button small-button" type="button" onClick={selectAll}>{copy.selectAll}</button>
-                  <button className="secondary-button small-button" type="button" onClick={deselectAll}>{copy.deselectAll}</button>
-                  <button className="secondary-button small-button" type="button" onClick={handleDownloadSelected}>{copy.downloadSelected}</button>
-                  <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} onClick={handleDeleteSelected}>{copy.deleteSelected}</button>
+                  <button className="secondary-button small-button" type="button" data-sfx-handled onClick={selectAll}>{copy.selectAll}</button>
+                  <button className="secondary-button small-button" type="button" data-sfx-handled onClick={deselectAll}>{copy.deselectAll}</button>
+                  <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleDownloadSelected}>{copy.downloadSelected}</button>
+                  <button className="secondary-button small-button" type="button" data-sfx-handled style={{ color: '#ff6b6b' }} onClick={handleDeleteSelected}>{copy.deleteSelected}</button>
                 </div>
               )}
             </section>
@@ -688,6 +723,7 @@ export function AssetGalleryPage({
                       className={`asset-card ${isSelected ? 'active' : ''}`}
                       role="button"
                       tabIndex={0}
+                      data-sfx-handled
                       aria-label={`${item.name}, ${formatBytes(item.size)}`}
                       onClick={(e) => toggleSelect(item.id, e.ctrlKey || e.metaKey)}
                       onKeyDown={(e) => {
@@ -737,6 +773,7 @@ export function AssetGalleryPage({
                           className="asset-action-btn"
                           type="button"
                           title={copy.downloadOne}
+                          data-sfx-handled
                           onClick={(e) => { e.stopPropagation(); handleDownload(item); }}
                         >
                           ↓
@@ -745,6 +782,7 @@ export function AssetGalleryPage({
                           className="asset-action-btn"
                           type="button"
                           title={copy.deleteOne}
+                          data-sfx-handled
                           onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
                         >
                           ×
@@ -760,7 +798,7 @@ export function AssetGalleryPage({
           {/* Side info panel */}
           <div className="tool-column side">
             <section className="tool-card info-panel">
-              <h3>{language === 'zh' ? '资产概览' : language === 'ja' ? 'アセット概要' : language === 'ru' ? 'Обзор активов' : language === 'ko' ? '에셋 개요' : 'Asset Overview'}</h3>
+              <h3>{copy.assetOverview}</h3>
               <div className="metric-box" style={{ marginTop: 12 }}>
                 <strong>{assets.length}</strong>
                 <span>{copy.itemsCount.replace('{count}', String(assets.length))}</span>
@@ -813,6 +851,8 @@ export function AssetGalleryPage({
       {toast && (
         <div
           className="notice-banner"
+          role="alert"
+          aria-live="polite"
           style={{
             position: 'fixed',
             bottom: 24,
@@ -870,12 +910,12 @@ export function AssetGalleryPage({
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button className="secondary-button small-button" type="button" onClick={() => handleDownload(previewAsset)}>{copy.downloadOne}</button>
-                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} onClick={() => { handleDelete(previewAsset.id); closePreview(); }}>{copy.deleteOne}</button>
+                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} onClick={() => { handleDelete(previewAsset.id); closePreviewSilent(); }}>{copy.deleteOne}</button>
               </div>
             </div>
           </section>
         </div>
       )}
-    </div>
+    </main>
   );
 }
