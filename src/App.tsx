@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.6';
+const VERSION = '1.7.7';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -76,6 +76,7 @@ type Messages = {
   featureAudioEditor: string;
   featureAudioConverter: string;
   featureAssetGallery: string;
+  featureRelationshipWeb: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -105,6 +106,7 @@ type Messages = {
   actionAudioEditor: string;
   actionAudioConverter: string;
   actionAssetGallery: string;
+  actionRelationshipWeb: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -224,6 +226,8 @@ type Messages = {
   pageAudioConverterDescription: string;
   pageAssetGalleryTitle: string;
   pageAssetGalleryDescription: string;
+  pageRelationshipWebTitle: string;
+  pageRelationshipWebDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -482,6 +486,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioEditor: '音频剪辑',
     featureAudioConverter: '音频格式转换',
     featureAssetGallery: '角色资产库',
+    featureRelationshipWeb: '角色关系网',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -511,6 +516,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioEditor: '音频剪辑',
     actionAudioConverter: '音频格式转换',
     actionAssetGallery: '角色资产库',
+    actionRelationshipWeb: '角色关系网',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -596,10 +602,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.6 角色资产库深度优化与全局 SFX 一致性修复：修复 Asset Gallery 双击预览闪烁、Ctrl 取消选择音效错误、预览弹窗删除时双重音效叠加；统一页面结构语义标签（main/header）、增强可访问性（aria-label、aria-live）；补充 useBeforeUnloadGuard 防止意外刷新丢失资产；全局 SFX handler 完善 data-sfx-handled 机制避免更多 double-play。',
-    announcementList1: 'AssetGalleryPage 深度修复：修复双击打开预览时资产先选中后取消导致的闪烁；修复 Ctrl/Cmd 点击已选中资产取消选择时仍播放 select 音效的问题（现正确播放 deselect）；修复预览弹窗删除资产时 deleteSound 与 modalClose 双重叠加；修复批量操作按钮、单个操作按钮和资产卡片同时触发全局 buttonClick 与内部特定音效导致的噪音叠加。',
-    announcementList2: 'AssetGalleryPage 结构与可访问性增强：根容器统一为语义化 <main> 与 <header> 标签，补全 fade-up 入场动画；搜索框添加 aria-label、toast 添加 role="alert" 与 aria-live；补充 useBeforeUnloadGuard，存在资产时刷新页面会触发浏览器确认提示；侧边概览面板标题纳入多语言 copy 体系。',
-    announcementList3: '全局 SFX 与 App 层修复：全局 click SFX handler 新增 data-sfx-handled 跳过机制，彻底根治 Asset Gallery 各类按钮的 double-play；BGM 初始化增加 !document.hidden 判断，避免后台标签页自动播放背景音乐；Asset Gallery 全部有显式 playSound 的交互元素均已标记 data-sfx-handled。',
+    announcementDescription: 'v1.7.7 新增角色关系网（OC Relationship Web）：可视化创建和管理多个角色之间的关系网络，支持 8 种关系类型、资产库头像导入、画布缩放平移与拖拽编辑；全套 SFX 音效与键盘快捷键支持。',
+    announcementList1: '新增角色关系网：支持创建多个角色节点，每个节点可配置名称、颜色、备注和头像；提供 8 种关系类型（朋友/敌人/家人/恋人/师徒/对手/盟友/自定义），可视化连线展示角色关系；与资产库深度联动，可直接调用资产库中的角色立绘作为节点头像。',
+    announcementList2: '关系网交互体验：支持鼠标滚轮缩放（以光标为中心）、空白处拖拽平移画布、节点拖拽移动、点击空白处取消选择；选中节点后可通过「添加关系」按钮创建关系，点击目标节点完成关联；支持 Delete 键删除选中项、Escape 键取消选择或关闭弹窗；所有交互均集成 SFX 音效。',
+    announcementList3: '结构与可访问性：页面使用语义化 <main>/<header> 标签，补全 fade-up 入场动画；搜索框和输入框均带 aria-label，toast 通知带 role="alert" 与 aria-live；补充 useBeforeUnloadGuard，防止意外刷新丢失关系数据；版本号同步为 1.7.7。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -631,6 +637,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterDescription: '导入音频文件，批量转换格式、调整采样率、位深度、声道数，支持音量增益、速度变换、音调偏移、标准化、降噪等处理。',
     pageAssetGalleryTitle: '角色资产库',
     pageAssetGalleryDescription: '集中管理所有角色创作素材，支持图片、音频、GIF 等多种格式的导入、预览、分类筛选与批量下载。',
+    pageRelationshipWebTitle: '角色关系网',
+    pageRelationshipWebDescription: '可视化创建和管理多个角色之间的关系网络，支持从资产库导入头像，构建完整的角色关系图谱。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部 11 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -876,6 +884,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioEditor: 'オーディオ編集',
     featureAudioConverter: 'オーディオ変換',
     featureAssetGallery: 'キャラクターアセット',
+    featureRelationshipWeb: 'キャラ関係図',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -905,6 +914,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioEditor: 'オーディオ編集',
     actionAudioConverter: 'オーディオ変換',
     actionAssetGallery: 'キャラクターアセット',
+    actionRelationshipWeb: 'キャラ関係図',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -990,10 +1000,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.6 キャラクターアセットギャラリーの深層最適化とグローバル SFX 一貫性修正：Asset Gallery のダブルクリックプレビューちらつき、Ctrl 選択解除の誤った効果音、プレビューモーダル削除時の二重 SFX 重畳を修正；ページ構造をセマンティックタグ（main/header）に統一、アクセシビリティを強化（aria-label、aria-live）；useBeforeUnloadGuard を追加して誤った更新によるアセット消失を防止；グローバル SFX ハンドラーの data-sfx-handled 機構を完善して double-play を回避。',
-    announcementList1: 'AssetGalleryPage 深層修正：ダブルクリックでプレビューを開く際のアセット選択→解除のちらつきを修正；Ctrl/Cmd クリックで選択済みアセットを解除しても select 効果音が再生される問題を修正（正しく deselect を再生）；プレビューモーダルでアセットを削除する際の deleteSound と modalClose の二重重畳を修正；一括操作ボタン、個別操作ボタン、アセットカードでグローバル buttonClick と内部特定効果音が同時に発生するノイズ重畳を修正。',
-    announcementList2: 'AssetGalleryPage 構造とアクセシビリティ強化：ルートコンテナをセマンティック <main>・<header> タグに統一し、fade-up 入場アニメーションを補完；検索ボックスに aria-label、toast に role="alert" と aria-live を追加；useBeforeUnloadGuard を補完し、アセットが存在する場合にページ更新でブラウザ確認ダイアログを表示；サイド概要パネルのタイトルを多言語 copy 体系に統合。',
-    announcementList3: 'グローバル SFX と App 層修正：グローバル click SFX ハンドラーに data-sfx-handled スキップ機構を追加し、Asset Gallery の各種ボタンの double-play を根治；BGM 初期化に !document.hidden 判定を追加し、バックグラウンドタブでの自動再生を防止；Asset Gallery の全ての明示的 playSound を持つインタラクティブ要素に data-sfx-handled を付与。',
+    announcementDescription: 'v1.7.7 キャラクター関係図（OC Relationship Web）を新規追加：複数キャラクターの関係ネットワークを視覚的に作成・管理。8 種類の関係タイプ、アセットライブラリからのアイコンインポート、キャンバスのズーム/パン/ドラッグ編集に対応。全套 SFX 効果音とキーボードショートカットをサポート。',
+    announcementList1: 'キャラクター関係図の新規追加：複数のキャラクターノードを作成可能。各ノードは名前、色、メモ、アイコンを設定可能。8 種類の関係タイプ（友達/敵/家族/恋人/師弟/ライバル/同盟/カスタム）を提供し、視覚的な連線でキャラ関係を展示。アセットライブラリと深度連携し、キャラ立ち絵をノードアイコンとして直接利用可能。',
+    announcementList2: '関係図のインタラクション体験：マウスホイールによるズーム（カーソルを中心）、空白部のドラッグによるキャンバスパン、ノードのドラッグ移動、クリックによる選択解除をサポート。ノード選択後「関係追加」ボタンで関係作成、ターゲットノードをクリックして関連付け完了。Delete キーで選択項目削除、Escape キーで選択解除/モーダル閉じる。全てのインタラクションに SFX 効果音を統合。',
+    announcementList3: '構造とアクセシビリティ：ページはセマンティック <main>/<header> タグを使用し、fade-up 入場アニメーションを補完。検索ボックスと入力ボックスは aria-label 付き、toast 通知は role="alert" と aria-live 付き。useBeforeUnloadGuard を補完し、誤った更新による関係データの消失を防止。バージョン番号を 1.7.7 に同期。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1023,6 +1033,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioEditorDescription: '音声ファイルをインポートし、波形を可視化して編集。トリミング、分割、フェード、音量調整、スピード/ピッチ変更、EQ、コンプレッサー、リバーブなど豊富なエフェクトに対応。',
     pageAudioConverterTitle: 'オーディオコンバーター',
     pageAudioConverterDescription: '音声ファイルをインポートし、フォーマット変換、サンプリングレート/ビット深度/チャンネル数の調整、音量増幅、スピード変換、ピッチシフト、ノーマライズ、ノイズリダクションに対応。',
+    pageRelationshipWebTitle: 'キャラクター関係図',
+    pageRelationshipWebDescription: '複数キャラクターの関係ネットワークを視覚的に作成・管理。アセットライブラリからアイコンをインポートして、完全なキャラ関係図を構築できます。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: '11つのツールすべての詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1268,6 +1280,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioEditor: 'Audio Editor',
     featureAudioConverter: 'Audio Converter',
     featureAssetGallery: 'Asset Gallery',
+    featureRelationshipWeb: 'Relationship Web',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1297,6 +1310,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioEditor: 'Audio Editor',
     actionAudioConverter: 'Audio Converter',
     actionAssetGallery: 'Asset Gallery',
+    actionRelationshipWeb: 'Relationship Web',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1382,10 +1396,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.7.6 Asset Gallery deep optimization and global SFX consistency fix: Fixed double-click preview flicker, Ctrl+deselect wrong sound, preview modal delete dual-SFX overlay; unified semantic page structure (main/header), enhanced accessibility (aria-label, aria-live); added useBeforeUnloadGuard to prevent accidental refresh asset loss; improved global SFX handler data-sfx-handled mechanism to avoid more double-play.',
-    announcementList1: 'AssetGalleryPage deep fixes: Fixed asset select→deselect flicker when double-clicking to open preview; fixed Ctrl/Cmd clicking a selected asset still playing "select" instead of "deselect"; fixed preview modal delete overlaying deleteSound + modalClose simultaneously; fixed batch action buttons, individual action buttons and asset cards triggering both global buttonClick and internal specific sounds at the same time.',
-    announcementList2: 'AssetGalleryPage structure and accessibility enhancements: Root container unified to semantic <main> and <header> tags with fade-up entrance animations; search input gained aria-label, toast gained role="alert" and aria-live; added useBeforeUnloadGuard so refreshing with assets triggers a browser confirmation prompt; side overview panel title integrated into the multilingual copy system.',
-    announcementList3: 'Global SFX and App layer fixes: Global click SFX handler added data-sfx-handled skip mechanism to thoroughly eliminate Asset Gallery button double-play; BGM initialization added !document.hidden check to prevent auto-play in background tabs; all interactive elements in Asset Gallery with explicit playSound calls are now marked with data-sfx-handled.',
+    announcementDescription: 'v1.7.7 New: OC Relationship Web — visually create and manage relationship networks between multiple characters. Supports 8 relation types, Asset Gallery avatar import, canvas zoom/pan/drag editing. Full SFX and keyboard shortcut support.',
+    announcementList1: 'New OC Relationship Web: Create multiple character nodes, each configurable with name, color, notes, and avatar. 8 relation types (Friend/Enemy/Family/Lover/Mentor/Rival/Ally/Custom) with visual connection lines. Deep integration with Asset Gallery — directly use character artwork as node avatars.',
+    announcementList2: 'Relationship Web interactions: Mouse wheel zoom (cursor-centered), drag to pan canvas, drag nodes to move, click empty space to deselect. Select a node and use "Add Relation" to create connections, then click the target node to complete. Delete key removes selected items, Escape deselects or closes modals. All interactions have integrated SFX.',
+    announcementList3: 'Structure and accessibility: Semantic <main>/<header> tags with fade-up entrance animations. Search and input fields have aria-label, toasts have role="alert" and aria-live. Added useBeforeUnloadGuard to prevent accidental refresh data loss. Version synchronized to 1.7.7.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1415,6 +1429,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioEditorDescription: 'Import audio files, visualize waveforms, and edit with trim, split, fade, volume control, speed/pitch shift, EQ, compressor, reverb, and more effects.',
     pageAudioConverterTitle: 'Audio Converter',
     pageAudioConverterDescription: 'Import audio files and convert formats, adjust sample rate, bit depth, and channel count. Supports volume gain, speed change, pitch shift, normalization, and noise reduction.',
+    pageRelationshipWebTitle: 'OC Relationship Web',
+    pageRelationshipWebDescription: 'Visually create and manage relationship networks between multiple characters. Import avatars from the Asset Gallery to build a complete character relationship map.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all 11 tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1660,6 +1676,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioEditor: 'Аудиоредактор',
     featureAudioConverter: 'Конвертер аудио',
     featureAssetGallery: 'Галерея активов',
+    featureRelationshipWeb: 'Сеть отношений',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1689,6 +1706,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioEditor: 'Аудиоредактор',
     actionAudioConverter: 'Конвертер аудио',
     actionAssetGallery: 'Галерея активов',
+    actionRelationshipWeb: 'Сеть отношений',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1774,10 +1792,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.7.6 Глубокая оптимизация галереи активов и исправление глобальной согласованности SFX: Исправлено мерцание при двойном клике для предпросмотра, ошибочный звук при Ctrl+отмене выделения, двойное наложение SFX при удалении в модальном окне предпросмотра; унифицирована семантическая структура страницы (main/header), улучшена доступность (aria-label, aria-live); добавлен useBeforeUnloadGuard для предотвращения потери активов при случайном обновлении; улучшен механизм data-sfx-handled глобального SFX обработчика для предотвращения повторного воспроизведения.',
-    announcementList1: 'Глубокие исправления AssetGalleryPage: Исправлено мерцание выделения→снятия выделения при двойном клике для открытия предпросмотра; исправлена проблема воспроизведения звука select вместо deselect при Ctrl/Cmd-клике по уже выделенному активу; исправлено одновременное наложение deleteSound и modalClose при удалении актива в модальном окне предпросмотра; исправлено одновременное срабатывание глобального buttonClick и внутреннего специфического звука для кнопок пакетных операций, отдельных операций и карточек активов.',
-    announcementList2: 'Улучшение структуры и доступности AssetGalleryPage: Корневой контейнер унифицирован в семантические теги <main> и <header> с анимацией появления fade-up; поле поиска получило aria-label, toast получил role="alert" и aria-live; добавлен useBeforeUnloadGuard, чтобы при обновлении страницы с активами отображалось подтверждение браузера; заголовок боковой панели обзора интегрирован в многоязычную систему copy.',
-    announcementList3: 'Исправления глобального SFX и уровня App: Глобальный обработчик click SFX получил механизм пропуска data-sfx-handled для полного устранения повторного воспроизведения кнопок Asset Gallery; инициализация BGM получила проверку !document.hidden для предотвращения автовоспроизведения в фоновых вкладках; все интерактивные элементы Asset Gallery с явными вызовами playSound помечены data-sfx-handled.',
+    announcementDescription: 'v1.7.7 Новое: Сеть отношений персонажей (OC Relationship Web) — визуально создавайте и управляйте сетями отношений между персонажами. 8 типов связей, импорт аватаров из галереи активов, масштабирование/панорама/редактирование холста. Полная поддержка SFX и горячих клавиш.',
+    announcementList1: 'Новая сеть отношений персонажей: создавайте множество узлов персонажей, каждый настраиваемый с именем, цветом, заметками и аватаром. 8 типов связей (Друг/Враг/Семья/Возлюбленный/Наставник/Соперник/Союзник/Другое) с визуальными линиями связи. Глубокая интеграция с галереей активов — прямое использование артов персонажей в качестве аватаров узлов.',
+    announcementList2: 'Интерактивность сети отношений: масштабирование колёсиком мыши (относительно курсора), перетаскивание для панорамы холста, перемещение узлов, клик по пустому пространству для снятия выделения. Выберите узел и нажмите «Добавить связь» для создания связи, затем кликните целевой узел для завершения. Клавиша Delete удаляет выбранное, Escape снимает выделение или закрывает модальные окна. Все интеракции имеют интегрированный SFX.',
+    announcementList3: 'Структура и доступность: семантические теги <main>/<header> с анимацией появления fade-up. Поля поиска и ввода имеют aria-label, уведомления toast имеют role="alert" и aria-live. Добавлен useBeforeUnloadGuard для предотвращения потери данных при случайном обновлении. Версия синхронизирована с 1.7.7.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1807,6 +1825,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioEditorDescription: 'Импортируйте аудиофайлы, визуализируйте волновые формы и редактируйте: обрезка, разделение, fade, регулировка громкости, скорость/тон, эквалайзер, компрессор, реверберация и другие эффекты.',
     pageAudioConverterTitle: 'Конвертер аудио',
     pageAudioConverterDescription: 'Импортируйте аудиофайлы и конвертируйте форматы, настройте частоту дискретизации, битовую глубину и количество каналов. Поддерживает усиление громкости, изменение скорости, сдвиг тона, нормализацию и шумоподавление.',
+    pageRelationshipWebTitle: 'Сеть отношений персонажей',
+    pageRelationshipWebDescription: 'Визуально создавайте и управляйте сетями отношений между персонажами. Импортируйте аватары из галереи активов для построения полной карты отношений.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем 11 инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2461,6 +2481,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureAudioEditor: '오디오 편집기',
     featureAudioConverter: '오디오 변환기',
     featureAssetGallery: '에셋 갤러리',
+    featureRelationshipWeb: '캐릭터 관계망',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2477,10 +2498,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
     pageAssetGalleryTitle: '캐릭터 에셋 갤러리',
     pageAssetGalleryDescription: '캐릭터 제작 에셋을 한 곳에서 관리합니다. 이미지, 오디오, GIF 등의 가져오기, 미리보기, 분류 필터링 및 일괄 다운로드를 지원합니다.',
-    announcementDescription: 'v1.7.6 캐릭터 에셋 갤러리 심층 최적화 및 전역 SFX 일관성 수정: Asset Gallery 더블클릭 미리보기 깜빡임, Ctrl 선택 해제 잘못된 효과음, 미리보기 모달 삭제 시 이중 SFX 중첩 수정; 페이지 구조를 시맨틱 태그(main/header)로 통일, 접근성 강화(aria-label, aria-live); useBeforeUnloadGuard 추가로 잘못된 새로고침 시 에셋 손실 방지; 전역 SFX 핸들러 data-sfx-handled 메커니즘을 개선하여 더블 플레이 방지.',
-    announcementList1: 'AssetGalleryPage 심층 수정: 더블클릭으로 미리보기 열 때 에셋 선택→해제 깜빡임 수정; Ctrl/Cmd 클릭으로 선택된 에셋 해제 시에도 select 효과음이 재생되던 문제 수정(정확히 deselect 재생); 미리보기 모달에서 에셋 삭제 시 deleteSound와 modalClose 이중 중첩 수정; 일괄 작업 버튼, 개별 작업 버튼, 에셋 카드에서 전역 buttonClick과 내부 특정 효과음이 동시에 발생하는 노이즈 중첩 수정.',
-    announcementList2: 'AssetGalleryPage 구조 및 접근성 강화: 루트 컨테이너를 시맨틱 <main>·<header> 태그로 통일하고 fade-up 진입 애니메이션 보완; 검색 상자에 aria-label, toast에 role="alert" 및 aria-live 추가; useBeforeUnloadGuard 보완하여 에셋이 존재할 때 페이지 새로고침 시 브라우저 확인 대화상자 표시; 사이드 개요 패널 제목을 다국어 copy 체계에 통합.',
-    announcementList3: '전역 SFX 및 App 레이어 수정: 전역 click SFX 핸들러에 data-sfx-handled 스킵 메커니즘을 추가하여 Asset Gallery 각종 버튼의 더블 플레이를 근본적으로 해결; BGM 초기화에 !document.hidden 판단을 추가하여 백그라운드 탭 자동 재생 방지; Asset Gallery의 모든 명시적 playSound를 가진 인터랙티브 요소에 data-sfx-handled를 부여.'
+    pageRelationshipWebTitle: '캐릭터 관계망',
+    pageRelationshipWebDescription: '여러 캐릭터 간의 관계 네트워크를 시각적으로 생성하고 관리합니다. 에셋 갤러리에서 아바타를 가져와 완전한 캐릭터 관계 지도를 구축하세요.',
+    announcementDescription: 'v1.7.7 신규: 캐릭터 관계망(OC Relationship Web) — 여러 캐릭터 간의 관계 네트워크를 시각적으로 생성하고 관리합니다. 8가지 관계 유형, 에셋 갤러리 아바타 가져오기, 캔버스 확대/축소/이동/편집을 지원합니다. 전체 SFX 및 키보드 단축키를 지원합니다.',
+    announcementList1: '신규 캐릭터 관계망: 여러 캐릭터 노드를 생성할 수 있으며, 각 노드는 이름, 색상, 메모, 아바타를 설정할 수 있습니다. 8가지 관계 유형(친구/적/가족/연인/스승/라이벌/동맹/사용자 정의)을 제공하며 시각적 연결선으로 캐릭터 관계를 표시합니다. 에셋 갤러리와 심층 연동되어 캐릭터 일러스트를 노드 아바타로 직접 사용할 수 있습니다.',
+    announcementList2: '관계망 인터랙션 경험: 마우스 휠 확대/축소(커서 중심), 빈 공간 드래그로 캔버스 이동, 노드 드래그 이동, 빈 공간 클릭으로 선택 해제를 지원합니다. 노드 선택 후「관계 추가」버튼으로 관계를 생성하고 대상 노드를 클릭하여 연결을 완료합니다. Delete 키로 선택 항목 삭제, Escape 키로 선택 해제 또는 모달 닫기를 지원합니다. 모든 인터랙션에 SFX 효과음이 통합되어 있습니다.',
+    announcementList3: '구조 및 접근성: 페이지는 시맨틱 <main>/<header> 태그를 사용하며 fade-up 진입 애니메이션을 보완했습니다. 검색 상자와 입력 상자에는 aria-label이, toast 알림에는 role="alert" 및 aria-live가 있습니다. useBeforeUnloadGuard를 보완하여 잘못된 새로고침으로 인한 관계 데이터 손실을 방지합니다. 버전 번호를 1.7.7로 동기화했습니다.'
   },
   fr: {
     ...translations.en,
@@ -2671,6 +2694,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.7',
+    date: '2026-05-16',
+    title: '1.7.7 新增角色关系网（OC Relationship Web）',
+    summary:
+      '全新上线 OC 角色关系网功能，支持可视化创建和管理多个角色之间的关系网络。8 种关系类型、资产库头像联动、画布缩放平移拖拽编辑、全套 SFX 与键盘快捷键支持。',
+    details: [
+      '新增角色关系网：支持创建多个角色节点，每个节点可配置名称、颜色、备注和头像；提供 8 种关系类型（朋友/敌人/家人/恋人/师徒/对手/盟友/自定义），可视化连线展示角色关系；与资产库深度联动，可直接调用资产库中的角色立绘作为节点头像。',
+      '关系网交互体验：支持鼠标滚轮缩放（以光标为中心）、空白处拖拽平移画布、节点拖拽移动、点击空白处取消选择；选中节点后可通过「添加关系」按钮创建关系，点击目标节点完成关联；支持 Delete 键删除选中项、Escape 键取消选择或关闭弹窗；所有交互均集成 SFX 音效。',
+      '结构与可访问性：页面使用语义化 <main>/<header> 标签，补全 fade-up 入场动画；搜索框和输入框均带 aria-label，toast 通知带 role="alert" 与 aria-live；补充 useBeforeUnloadGuard，防止意外刷新丢失关系数据；版本号同步为 1.7.7。',
+    ],
+  },
   {
     version: '1.7.6',
     date: '2026-05-16',
@@ -4283,6 +4318,12 @@ function App() {
           pageDescription={messages.pageAssetGalleryDescription}
           onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
         />
+      ) : screen === 'relationship-web' ? (
+        <RelationshipWebPage
+          {...sharedPageProps}
+          pageTitle={messages.pageRelationshipWebTitle}
+          pageDescription={messages.pageRelationshipWebDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4467,6 +4508,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('asset-gallery')}>
                 <ActionIcon kind="asset-gallery" />
                 <span>{messages.featureAssetGallery}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('relationship-web')}>
+                <ActionIcon kind="relationship-web" />
+                <span>{messages.featureRelationshipWeb}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5918,7 +5963,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6019,6 +6064,17 @@ function ActionIcon({
         <rect x="22" y="22" width="12" height="12" rx="2" />
         <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
         <path d="M22 28l4-4 4 4" />
+      </>
+    ),
+    'relationship-web': (
+      <>
+        <circle cx="12" cy="14" r="5" />
+        <circle cx="30" cy="10" r="4" />
+        <circle cx="28" cy="30" r="4" />
+        <circle cx="10" cy="32" r="3" />
+        <path d="M16 13l10-2" strokeDasharray="2 2" />
+        <path d="M15 19l10 9" strokeDasharray="2 2" />
+        <path d="M12 29l14 0" strokeDasharray="2 2" />
       </>
     ),
     docs: (
@@ -6125,6 +6181,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('asset-gallery')}>
             <ActionIcon kind="asset-gallery" />
             <strong>{messages.actionAssetGallery}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('relationship-web')}>
+            <ActionIcon kind="relationship-web" />
+            <strong>{messages.actionRelationshipWeb}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
