@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -75,6 +75,7 @@ type Messages = {
   featureIndexTts: string;
   featureAudioEditor: string;
   featureAudioConverter: string;
+  featureAssetGallery: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -103,6 +104,7 @@ type Messages = {
   actionIndexTts: string;
   actionAudioEditor: string;
   actionAudioConverter: string;
+  actionAssetGallery: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -220,6 +222,8 @@ type Messages = {
   pageAudioEditorDescription: string;
   pageAudioConverterTitle: string;
   pageAudioConverterDescription: string;
+  pageAssetGalleryTitle: string;
+  pageAssetGalleryDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -477,6 +481,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureIndexTts: 'IndexTTS 语音合成',
     featureAudioEditor: '音频剪辑',
     featureAudioConverter: '音频格式转换',
+    featureAssetGallery: '角色资产库',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -505,6 +510,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionIndexTts: 'IndexTTS 语音合成',
     actionAudioEditor: '音频剪辑',
     actionAudioConverter: '音频格式转换',
+    actionAssetGallery: '角色资产库',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -623,6 +629,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioEditorDescription: '导入音频文件，可视化波形编辑，支持裁剪、分割、淡入淡出、音量调节、变速变调、EQ均衡器、压缩器、混响等丰富效果。',
     pageAudioConverterTitle: '音频格式转换器',
     pageAudioConverterDescription: '导入音频文件，批量转换格式、调整采样率、位深度、声道数，支持音量增益、速度变换、音调偏移、标准化、降噪等处理。',
+    pageAssetGalleryTitle: '角色资产库',
+    pageAssetGalleryDescription: '集中管理所有角色创作素材，支持图片、音频、GIF 等多种格式的导入、预览、分类筛选与批量下载。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部 11 个工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -867,6 +875,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureIndexTts: 'IndexTTS 音声合成',
     featureAudioEditor: 'オーディオ編集',
     featureAudioConverter: 'オーディオ変換',
+    featureAssetGallery: 'キャラクターアセット',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -895,6 +904,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionIndexTts: 'IndexTTS 音声合成',
     actionAudioEditor: 'オーディオ編集',
     actionAudioConverter: 'オーディオ変換',
+    actionAssetGallery: 'キャラクターアセット',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1257,6 +1267,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureIndexTts: 'IndexTTS Voice Synthesis',
     featureAudioEditor: 'Audio Editor',
     featureAudioConverter: 'Audio Converter',
+    featureAssetGallery: 'Asset Gallery',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1285,6 +1296,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionIndexTts: 'IndexTTS Voice Synthesis',
     actionAudioEditor: 'Audio Editor',
     actionAudioConverter: 'Audio Converter',
+    actionAssetGallery: 'Asset Gallery',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1647,6 +1659,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureIndexTts: 'IndexTTS Синтез речи',
     featureAudioEditor: 'Аудиоредактор',
     featureAudioConverter: 'Конвертер аудио',
+    featureAssetGallery: 'Галерея активов',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1675,6 +1688,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionIndexTts: 'IndexTTS Синтез речи',
     actionAudioEditor: 'Аудиоредактор',
     actionAudioConverter: 'Конвертер аудио',
+    actionAssetGallery: 'Галерея активов',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -2446,6 +2460,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featurePaper: 'paper2gal 자산',
     featureAudioEditor: '오디오 편집기',
     featureAudioConverter: '오디오 변환기',
+    featureAssetGallery: '에셋 갤러리',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2460,6 +2475,8 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAudioEditorDescription: '오디오 파일을 가져와서 파형을 시각화하고 편집하세요. 자르기, 분할, 페이드, 볼륨 조절, 속도/피치 변경, EQ, 컴프레서, 리버브 등 다양한 효과를 지원합니다.',
     pageAudioConverterTitle: '오디오 변환기',
     pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
+    pageAssetGalleryTitle: '캐릭터 에셋 갤러리',
+    pageAssetGalleryDescription: '캐릭터 제작 에셋을 한 곳에서 관리합니다. 이미지, 오디오, GIF 등의 가져오기, 미리보기, 분류 필터링 및 일괄 다운로드를 지원합니다.',
     announcementDescription: 'v1.7.5 UI/UX/SFX/BGM 전면 자체 점검 및 최적화: 커스텀 오디오 메모리 누수 수정, BGM 백그라운드 스마트 일시정지, 오디오 엔진 복구 전략 최적화, CSS 접근성 모션 강화; 버전 번호 동기화.',
     announcementList1: 'AudioEditorPage 런타임 수정: 선언되지 않은 dragCounter로 인한 드래그 ReferenceError 수정; stopPlayback TDZ 충돌 수정; tick/onended stale closure 수정; 오디오 노드 메모리 누수 수정; 키보드 단축키 effect 60fps 재구성 수정; 납치기 URL revoke 누락 수정; resetAll 납치기 URL revoke 누락 수정.',
     announcementList2: 'AudioEditorPage 상호작용 수정: applyFade off-by-one 수정; history 상한 없음 수정(MAX_HISTORY=50); 드래그 깜빡임 수정; application/octet-stream 드래그 거부 수정; Canvas fillRect 음수 너비 수정; handleWheel 0으로 나누기 수정; 스페이스바 길게 누르기 고속 전환 수정.',
@@ -4088,7 +4105,7 @@ function App() {
     language: settings.language,
     onBack: () => setScreen('home'),
     onOpenSettings: () => openSettings('style'),
-    onNavigate: (screen: 'image-converter' | 'docs') => {
+    onNavigate: (screen: Exclude<FeatureScreen, 'home'>) => {
       playSound('pageSwitch');
       setScreen(screen);
     },
@@ -4243,6 +4260,12 @@ function App() {
           pageTitle={messages.pageAudioConverterTitle}
           pageDescription={messages.pageAudioConverterDescription}
           onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
+        />
+      ) : screen === 'asset-gallery' ? (
+        <AssetGalleryPage
+          {...sharedPageProps}
+          pageTitle={messages.pageAssetGalleryTitle}
+          pageDescription={messages.pageAssetGalleryDescription}
         />
       ) : screen === 'docs' ? (
         <DocsPage
@@ -4424,6 +4447,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('audio-converter')}>
                 <ActionIcon kind="audio-converter" />
                 <span>{messages.featureAudioConverter}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('asset-gallery')}>
+                <ActionIcon kind="asset-gallery" />
+                <span>{messages.featureAssetGallery}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5875,7 +5902,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -5966,6 +5993,16 @@ function ActionIcon({
         <path d="M20 18h12v6H20z" />
         <path d="M8 26h24v4H8z" />
         <path d="M12 16h2M26 11h2M26 21h2" />
+      </>
+    ),
+    'asset-gallery': (
+      <>
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+        <rect x="22" y="6" width="12" height="12" rx="2" />
+        <rect x="6" y="22" width="12" height="12" rx="2" />
+        <rect x="22" y="22" width="12" height="12" rx="2" />
+        <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+        <path d="M22 28l4-4 4 4" />
       </>
     ),
     docs: (
@@ -6068,6 +6105,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('audio-converter')}>
             <ActionIcon kind="audio-converter" />
             <strong>{messages.actionAudioConverter}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('asset-gallery')}>
+            <ActionIcon kind="asset-gallery" />
+            <strong>{messages.actionAssetGallery}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />

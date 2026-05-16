@@ -25,7 +25,7 @@ type SharedPageProps = {
   language: AppLanguage;
   onBack: () => void;
   onOpenSettings: () => void;
-  onNavigate?: (screen: 'image-converter' | 'docs') => void;
+  onNavigate?: (screen: Exclude<FeatureScreen, 'home'>) => void;
   onOpenDocs?: (toolId?: string, section?: string, errorCode?: string) => void;
 };
 
@@ -10109,3 +10109,4 @@ export function IndexTtsPage({
 
 export { AudioEditorPage } from './AudioEditorPage';
 export { AudioConverterPage } from './AudioConverterPage';
+export { AssetGalleryPage } from './AssetGalleryPage';
