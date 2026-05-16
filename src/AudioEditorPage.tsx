@@ -41,6 +41,18 @@ type ExportRecord = {
 /*  Utilities                                                          */
 /* ------------------------------------------------------------------ */
 
+function useBeforeUnloadGuard(isDirty: boolean) {
+  useEffect(() => {
+    if (!isDirty) return;
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+}
+
 function timestamp(): string {
   const now = new Date();
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.${String(now.getMilliseconds()).padStart(3, '0')}`;
@@ -55,10 +67,10 @@ function formatTime(seconds: number): string {
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes <= 0 || !isFinite(bytes)) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
@@ -375,14 +387,22 @@ export function AudioEditorPage({
   const panNodeRef = useRef<StereoPannerNode | null>(null);
 
   /* ---- SFX throttle ---- */
-  const lastSliderSoundRef = useRef(0);
+  const sliderThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playSliderSound = useCallback(() => {
-    const now = Date.now();
-    if (now - lastSliderSoundRef.current > 50) {
-      lastSliderSoundRef.current = now;
-      playSliderSound();
-    }
+    if (sliderThrottleRef.current) return;
+    playSound('sliderChange');
+    sliderThrottleRef.current = window.setTimeout(() => { sliderThrottleRef.current = null; }, 50);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (sliderThrottleRef.current) window.clearTimeout(sliderThrottleRef.current);
+    };
+  }, []);
+
+  /* ---- Dirty state guard ---- */
+  const isDirty = editBuffer !== null || exports.length > 0 || logs.length > 0;
+  useBeforeUnloadGuard(isDirty);
 
   /* ---- Responsive ---- */
   const [isNarrow, setIsNarrow] = useState(false);
@@ -425,12 +445,17 @@ export function AudioEditorPage({
   /* ================================================================== */
   /* ---- Responsive layout ---- */
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     function onResize() {
-      setIsNarrow(window.innerWidth < 900);
+      if (timeoutId) window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => setIsNarrow(window.innerWidth < 900), 100);
     }
     onResize();
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
   }, []);
 
   /* ---- Redraw waveform on resize ---- */
@@ -1305,7 +1330,12 @@ export function AudioEditorPage({
             <p className="page-subtitle">{pageDescription}</p>
           </div>
         </div>
-        <button className="settings-trigger" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }} aria-label={openSettings}>⚙</button>
+        <div className="feature-header-meta">
+          <button className="secondary-button small-button" type="button" aria-label="Help" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
+          <button className="secondary-button small-button" type="button" aria-label="Tutorial" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-converter'); }}>🎛 Audio Converter</button>
+          <button className="settings-trigger" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }} aria-label={openSettings}>⚙</button>
+        </div>
       </header>
 
       <main
@@ -1326,7 +1356,7 @@ export function AudioEditorPage({
             >
               {isImporting ? (
                 <div style={{ padding: '48px 32px', borderRadius: 16, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }}>⏳</div>
+                  <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }} aria-hidden="true">⏳</div>
                   <span className={`status-badge running`} style={{ marginBottom: 12, display: 'inline-flex' }}>Decoding audio… {importProgress}%</span>
                   <div className="progress-track">
                     <div className="progress-fill" style={{ width: `${importProgress}%` }} />
@@ -1355,7 +1385,7 @@ export function AudioEditorPage({
                       transition: 'border-color 200ms ease, background 200ms ease',
                     }}
                   >
-                    <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
+                    <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden="true">🎵</div>
                     <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
                     <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
                   </label>

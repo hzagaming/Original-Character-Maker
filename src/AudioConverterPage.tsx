@@ -12,7 +12,7 @@ function downloadText(name: string, content: string, type = 'text/plain;charset=
   anchor.href = url;
   anchor.download = name;
   anchor.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 100);
+  window.setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 type SharedPageProps = {
@@ -385,7 +385,7 @@ export function AudioConverterPage({
     try {
       playSound('uploadStart');
       addLog('info', `Importing: ${file.name} (${formatBytes(file.size)})`);
-      if (sourceUrlRef.current) { URL.revokeObjectURL(sourceUrlRef.current); sourceUrlRef.current = ''; }
+      // Don't revoke source URL yet — wait until decode succeeds to preserve fallback playback
       if (resultUrlRef.current) { URL.revokeObjectURL(resultUrlRef.current); resultUrlRef.current = ''; }
       setResultUrl('');
       setResultBlob(null);
@@ -398,6 +398,8 @@ export function AudioConverterPage({
         const decoded = await ctx.decodeAudioData(arrayBuffer);
         await ctx.close().catch(() => {});
 
+        // Successful decode — safe to replace old source
+        if (sourceUrlRef.current) { URL.revokeObjectURL(sourceUrlRef.current); }
         setSourceFile(file);
         setSourceBuffer(decoded);
         const url = URL.createObjectURL(file);
@@ -525,7 +527,7 @@ export function AudioConverterPage({
     } finally {
       setIsConverting(false);
       if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
-      progressTimeoutRef.current = window.setTimeout(() => setConvertProgress(0), 800);
+      progressTimeoutRef.current = window.setTimeout(() => { setConvertProgress(0); progressTimeoutRef.current = null; }, 800);
     }
   }, [sourceBuffer, outputFormat, sampleRate, channels, volume, speed, pitch, doNormalize, fadeIn, fadeOut, noiseReduction, addLog]);
 
@@ -631,10 +633,17 @@ export function AudioConverterPage({
     /* ---- Responsive ---- */
   const [isNarrow, setIsNarrow] = useState(false);
   useEffect(() => {
-    const check = () => setIsNarrow(window.innerWidth < 900);
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const check = () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => setIsNarrow(window.innerWidth < 900), 100);
+    };
     check();
     window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    return () => {
+      window.removeEventListener('resize', check);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
   }, []);
 
   /* ---- Panel collapse ---- */

@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.1';
+const VERSION = '1.7.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -590,10 +590,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.1 UI 全面重构与深度 bug 修复：音频格式转换器页面 UI 已与音频编辑器完全对齐，采用 grid 布局、可折叠 Results/Debug 面板、中央大上传区域；修复 handleReset 状态泄漏、progress timeout 未清理、pageTitle 未渲染、slider SFX 连发、applyFade 边界误差等 14 项核心问题；增强无障碍支持（aria-label、aria-expanded、键盘折叠）。',
-    announcementList1: 'UI 全面重构：转换器页面 UI 与音频编辑器对齐。采用 grid 布局（1fr / 360px）+ 响应式窄屏折叠；中央大虚线框上传区域带 🎵 图标和 Import Audio 标题；右侧 Results / Debug 面板支持 ▲/▼ 折叠；日志面板新增 Clear 按钮；Settings 使用 param-card 卡片风格。',
-    announcementList2: '深度 bug 修复（14 项）：修复 handleReset 遗漏 7 个状态（isImporting/isConverting/convertProgress 等）；progress timeout 未清理导致内存泄漏；pageTitle/pageDescription 未在 header 渲染；slider SFX 无节制连发（新增 50ms 节流）；Volume 最小值从 50% 放宽到 0%；applyFade 淡出 off-by-one；formatTime/formatBytes 边界错误。',
-    announcementList3: '无障碍与语义增强：所有按钮添加 aria-label；折叠面板添加 aria-expanded、aria-controls 和 Enter/Space 键盘支持；修复 `<main>` 包裹 `<header>` 的语义 HTML 错误；_settings.others 添加可选链安全访问；importToolConfig 新增 audio-editor/audio-converter case。',
+    announcementDescription: 'v1.7.2 音频编辑器 SFX 致命 bug 修复与双向互操作：修复 Audio Editor 中 playSliderSound 递归调用自身导致全部 18 个 slider 完全无声的严重 bug；新增 useBeforeUnloadGuard、Help/Tutorial 按钮和「🎛 Audio Converter」跳转按钮实现双向互操作；Audio Converter 导入失败后旧音频仍可回退播放；下载 URL 延迟 revoke 防止失败；两个页面 resize 均添加 debounce。',
+    announcementList1: 'Audio Editor SFX 致命 bug 修复：playSliderSound() 在节流条件满足后递归调用自身而非 playSound("sliderChange")，导致全部 18 个 slider（音量、声像、速度、音高、EQ、压缩器、混响、降噪等）完全无声。已替换为 setTimeout ref 节流实现。',
+    announcementList2: 'Audio Editor 双向互操作与 UX 增强：新增 useBeforeUnloadGuard 防止意外刷新丢失进度；header 新增 Help、Tutorial 和「🎛 Audio Converter」按钮，与 Audio Converter 形成双向跳转；🎵 和 ⏳ 添加 aria-hidden；formatBytes 添加 NaN/负数/infinite 保护。',
+    announcementList3: 'Audio Converter 回退保护与性能优化：handleImportFile 在解码成功前不再 revoke 旧 source URL，导入失败后仍可播放之前的音频；downloadText URL revoke 延迟从 100ms 延长到 5000ms；progress timeout 回调后自动清理 ref；两个页面 resize listener 添加 100ms debounce。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -980,10 +980,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.1 UI 全面リファクタリングと深度バグ修正：オーディオフォーマット変換器ページの UI をオーディオエディタと完全に統一。grid レイアウト、折りたたみ可能な Results/Debug パネル、中央の大きなアップロードエリアを採用。handleReset 状態リーク、progress timeout 未クリーンアップ、pageTitle 未レンダリング、slider SFX 連発、applyFade 境界誤差など 14 件の核心問題を修正。アクセシビリティを強化（aria-label、aria-expanded、キーボード折りたたみ）。',
-    announcementList1: 'UI 全面リファクタリング：変換器ページの UI をオーディオエディタに統一。grid レイアウト（1fr / 360px）＋ レスポンシブ窄画面折りたたみ；中央の大きな点線枠アップロードエリアに 🎵 アイコンと Import Audio タイトル；右側 Results / Debug パネルは ▲/▼ で折りたたみ可能；ログパネルに Clear ボタンを追加；Settings は param-card スタイル。',
-    announcementList2: '深度バグ修正（14 件）：handleReset で 7 つの状態（isImporting/isConverting/convertProgress など）がリセットされていない問題を修正；progress timeout の未クリーンアップによるメモリリーク；pageTitle/pageDescription のヘッダー未レンダリング；slider SFX の無制限連発（50ms スロットル追加）；Volume 最小値を 50% から 0% に緩和；applyFade フェードアウトの off-by-one；formatTime/formatBytes の境界エラー。',
-    announcementList3: 'アクセシビリティとセマンティクス強化：すべてのボタンに aria-label を追加；折りたたみパネルに aria-expanded、aria-controls、Enter/Space キーボードサポートを追加；`<main>` が `<header>` を含むセマンティック HTML エラーを修正；_settings.others にオプショナルチェーン安全アクセスを追加；importToolConfig に audio-editor/audio-converter の case を追加。',
+    announcementDescription: 'v1.7.2 オーディオエディタ SFX 致命的バグ修正と双方向相互運用：Audio Editor の playSliderSound が自身を再帰呼び出しして 18 個の slider が完全に無音になる重大バグを修正。useBeforeUnloadGuard、Help/Tutorial ボタン、「🎛 Audio Converter」ジャンプボタンを新設し双方向相互運用を実現。Audio Converter はインポート失敗後も旧音声を再生可能。ダウンロード URL の revoke 遅延で失敗防止。両ページの resize に debounce を追加。',
+    announcementList1: 'Audio Editor SFX 致命的バグ修正：playSliderSound() がスロットル条件満足後に自身を再帰呼び出しして playSound("sliderChange") を呼ばないため、18 個の slider（音量、パン、スピード、ピッチ、EQ、コンプレッサー、リバーブ、ノイズリダクションなど）が完全に無音。setTimeout ref スロットル実装に置き換え済み。',
+    announcementList2: 'Audio Editor 双方向相互運用と UX 強化：useBeforeUnloadGuard を新設し意図しない更新による進捗喪失を防止；ヘッダーに Help、Tutorial、「🎛 Audio Converter」ボタンを追加し Audio Converter と双方向ジャンプ；🎵 と ⏳ に aria-hidden を追加；formatBytes に NaN/負数/infinite 保護を追加。',
+    announcementList3: 'Audio Converter フォールバック保護と性能最適化：handleImportFile がデコード成功前に旧 source URL を revoke しないよう修正し、インポート失敗後も旧音声を再生可能；downloadText の URL revoke を 100ms から 5000ms に延長；progress timeout コールバック後に ref を自動クリーンアップ；両ページの resize listener に 100ms debounce を追加。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1370,10 +1370,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.7.1 UI refactor and deep bug fixes: Audio Converter page UI fully aligned with Audio Editor. Grid layout, collapsible Results/Debug panels, central upload zone. Fixed handleReset state leak, progress timeout leak, pageTitle unrendered, slider SFX spam, applyFade boundary error, and 9 other core issues. Enhanced accessibility (aria-label, aria-expanded, keyboard collapse).',
-    announcementList1: 'UI Refactor: Audio Converter page UI fully aligned with Audio Editor. Grid layout (1fr / 360px) with responsive narrow-screen collapse; central dashed-border upload zone with 🎵 icon and Import Audio title; collapsible Results / Debug panels with ▲/▼ toggle; Clear button added to log panel; Settings uses param-card style.',
-    announcementList2: 'Deep bug fixes (14 items): fixed handleReset missing 7 states (isImporting/isConverting/convertProgress, etc.); progress timeout leak causing memory issues; pageTitle/pageDescription not rendered in header; slider SFX unlimited spam (added 50ms throttle); Volume minimum relaxed from 50% to 0%; applyFade fade-out off-by-one; formatTime/formatBytes boundary errors.',
-    announcementList3: 'Accessibility and semantics improvements: added aria-label to all buttons; added aria-expanded, aria-controls, and Enter/Space keyboard support to collapsible panels; fixed semantic HTML error where `<main>` wrapped `<header>`; added optional chaining safe access to _settings.others; added audio-editor/audio-converter cases to importToolConfig.',
+    announcementDescription: 'v1.7.2 Audio Editor SFX critical bug fix and bidirectional interoperability: Fixed the severe bug where Audio Editor\'s playSliderSound recursively called itself, silencing all 18 sliders entirely. Added useBeforeUnloadGuard, Help/Tutorial buttons, and a "🎛 Audio Converter" jump button for bidirectional tool switching. Audio Converter preserves previous audio playback after failed imports. Download URL revoke delayed to prevent failures. Resize debounce added to both pages.',
+    announcementList1: 'Audio Editor SFX critical bug fix: playSliderSound() recursively called itself instead of playSound("sliderChange") when throttle conditions were met, causing all 18 sliders (volume, pan, speed, pitch, EQ, compressor, reverb, noise reduction, etc.) to be completely silent. Replaced with a setTimeout ref throttle implementation matching Audio Converter.',
+    announcementList2: 'Audio Editor bidirectional interoperability and UX enhancements: added useBeforeUnloadGuard to prevent accidental refresh from losing progress; added Help, Tutorial, and "🎛 Audio Converter" buttons to the header for bidirectional jumping with Audio Converter; added aria-hidden to decorative 🎵 and ⏳ emoji; added NaN/negative/infinite guards to formatBytes.',
+    announcementList3: 'Audio Converter fallback protection and performance improvements: handleImportFile no longer revokes the old source URL before decode succeeds, so previous audio remains playable after a failed import; downloadText URL revoke delay extended from 100ms to 5000ms; progress timeout callback now cleans up ref after firing; both pages received 100ms debounce on resize listeners.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1760,10 +1760,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.7.1 Рефакторинг UI и глубокие исправления багов: UI страницы Audio Converter полностью выровнен с Audio Editor. Grid layout, сворачиваемые панели Results/Debug, центральная зона загрузки. Исправлены утечка состояния handleReset, утечка timeout прогресса, неотображаемый pageTitle, спам SFX слайдера, ошибка границы applyFade и 9 других ключевых проблем. Улучшена доступность (aria-label, aria-expanded, клавиатурное сворачивание).',
-    announcementList1: 'Рефакторинг UI: UI страницы Audio Converter полностью выровнен с Audio Editor. Grid layout (1fr / 360px) с адаптивным сворачиванием на узких экранах; центральная зона загрузки с пунктирной рамкой, 🎵 иконкой и заголовком Import Audio; сворачиваемые панели Results / Debug с переключателем ▲/▼; кнопка Clear добавлена в панель логов; Settings использует стиль param-card.',
-    announcementList2: 'Глубокие исправления багов (14 пунктов): исправлена утечка состояния handleReset (7 состояний: isImporting/isConverting/convertProgress и др.); утечка timeout прогресса, вызывающая проблемы с памятью; неотображаемые pageTitle/pageDescription в заголовке; неограниченный спам SFX слайдера (добавлен throttle 50ms); минимум Volume ослаблен с 50% до 0%; off-by-one fade-out в applyFade; ошибки границ в formatTime/formatBytes.',
-    announcementList3: 'Улучшения доступности и семантики: добавлены aria-label ко всем кнопкам; добавлены aria-expanded, aria-controls и поддержка клавиатуры Enter/Space для сворачиваемых панелей; исправлена семантическая ошибка HTML, когда `<main>` оборачивал `<header>`; добавлен безопасный доступ с опциональной цепочкой к _settings.others; добавлены кейсы audio-editor/audio-converter в importToolConfig.',
+    announcementDescription: 'v1.7.2 Критическое исправление SFX в Audio Editor и двусторонняя интеграция: Исправлен критический баг, при котором playSliderSound рекурсивно вызывал сам себя, полностью отключая звук на всех 18 слайдерах. Добавлен useBeforeUnloadGuard, кнопки Help/Tutorial и кнопка перехода «🎛 Audio Converter» для двустороннего переключения. Audio Converter сохраняет воспроизведение предыдущего аудио после неудачного импорта. Задержка revoke URL загрузки увеличена для предотвращения сбоев. Debounce на resize добавлен на обеих страницах.',
+    announcementList1: 'Критическое исправление SFX в Audio Editor: playSliderSound() рекурсивно вызывал сам себя вместо playSound("sliderChange") при выполнении условий throttle, что приводило к полной тишине на всех 18 слайдерах (громкость, панорама, скорость, тон, EQ, компрессор, реверберация, шумоподавление и др.). Заменено на реализацию throttle с setTimeout ref, как в Audio Converter.',
+    announcementList2: 'Двусторонняя интеграция Audio Editor и улучшения UX: добавлен useBeforeUnloadGuard для предотвращения потери прогресса при случайном обновлении; в заголовок добавлены кнопки Help, Tutorial и «🎛 Audio Converter» для двустороннего перехода с Audio Converter; добавлен aria-hidden к декоративным emoji 🎵 и ⏳; добавлена защита от NaN/отрицательных/bесконечных значений в formatBytes.',
+    announcementList3: 'Защита отката Audio Converter и улучшения производительности: handleImportFile больше не отзывает старый source URL до успешного декодирования, поэтому предыдущее аудио остаётся воспроизводимым после неудачного импорта; задержка revoke URL в downloadText увеличена с 100 мс до 5000 мс; callback progress timeout теперь очищает ref после срабатывания; на обеих страницах добавлен debounce 100 мс на resize listener.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2460,10 +2460,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAudioEditorDescription: '오디오 파일을 가져와서 파형을 시각화하고 편집하세요. 자르기, 분할, 페이드, 볼륨 조절, 속도/피치 변경, EQ, 컴프레서, 리버브 등 다양한 효과를 지원합니다.',
     pageAudioConverterTitle: '오디오 변환기',
     pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
-    announcementDescription: 'v1.7.1 UI 리팩토링 및 심층 버그 수정: Audio Converter 페이지 UI가 Audio Editor와 완전히 통일되었습니다. grid 레이아웃, 접이식 Results/Debug 패널, 중앙 대형 업로드 영역. handleReset 상태 누수, progress timeout 누수, pageTitle 미렌더링, slider SFX 연발, applyFade 경계 오류 등 9가지 핵심 문제 수정. 접근성 강화(aria-label, aria-expanded, 키보드 접이).',
-    announcementList1: 'UI 리팩토링: Audio Converter 페이지 UI가 Audio Editor와 완전히 통일되었습니다. grid 레이아웃(1fr / 360px) + 반응형 좁은 화면 접기; 중앙 점선 테두리 업로드 영역에 🎵 아이콘과 Import Audio 제목; ▲/▼로 접을 수 있는 Results / Debug 패널; 로그 패널에 Clear 버튼 추가; Settings는 param-card 스타일을 사용합니다.',
-    announcementList2: '심층 버그 수정(14개 항목): handleReset 7개 상태 누수(isImporting/isConverting/convertProgress 등) 수정; progress timeout 누수로 인한 메모리 문제; header에 pageTitle/pageDescription 미렌더링; slider SFX 무제한 연발(50ms 스로틀 추가); Volume 최소값 50%에서 0%로 완화; applyFade 페이드아웃 off-by-one; formatTime/formatBytes 경계 오류.',
-    announcementList3: '접근성 및 의미 개선: 모든 버튼에 aria-label 추가; 접이식 패널에 aria-expanded, aria-controls 및 Enter/Space 키보드 지원 추가; `<main>`이 `<header>`를 감싸는 의미론적 HTML 오류 수정; _settings.others에 옵셔널 체이닝 안전 접근 추가; importToolConfig에 audio-editor/audio-converter 케이스 추가.'
+    announcementDescription: 'v1.7.2 오디오 에디터 SFX 치명적 버그 수정 및 양방향 상호 운용: Audio Editor의 playSliderSound가 자기 자신을 재귀 호출하여 18개 slider가 완전히 무음이 되는 치명적 버그를 수정. useBeforeUnloadGuard, Help/Tutorial 버튼, 「🎛 Audio Converter」이동 버튼을 추가하여 양방향 상호 운용을 구현. Audio Converter는 가져오기 실패 후에도 이전 오디오 재생 유지. 다운로드 URL revoke 지연으로 실패 방지. 두 페이지 모두 resize에 debounce 추가.',
+    announcementList1: 'Audio Editor SFX 치명적 버그 수정: playSliderSound()가 스로틀 조건 충족 후 자기 자신을 재귀 호출하여 playSound("sliderChange")를 호출하지 않아, 18개 slider(볼륨, 팬, 속도, 피치, EQ, 컴프레서, 리버브, 노이즈 리덕션 등)가 완전히 무음이 됨. Audio Converter와 동일한 setTimeout ref 스로틀 구현으로 교체 완료.',
+    announcementList2: 'Audio Editor 양방향 상호 운용 및 UX 향상: useBeforeUnloadGuard를 추가하여 의도하지 않은 새로고침으로 인한 진행 상황 손실 방지; 헤더에 Help, Tutorial, 「🎛 Audio Converter」버튼을 추가하여 Audio Converter와 양방향 이동; 🎵 및 ⏳에 aria-hidden 추가; formatBytes에 NaN/음수/무한대 보호 추가.',
+    announcementList3: 'Audio Converter 폴백 보호 및 성능 최적화: handleImportFile이 디코딩 성공 전에 이전 source URL을 revoke하지 않도록 수정하여, 가져오기 실패 후에도 이전 오디오 재생 가능; downloadText의 URL revoke를 100ms에서 5000ms로 연장; progress timeout 콜백 후 ref를 자동 정리; 두 페이지의 resize listener에 100ms debounce 추가.'
   },
   fr: {
     ...translations.en,
@@ -2654,6 +2654,22 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.2',
+    date: '2026-05-12',
+    title: '1.7.2 音频编辑器 SFX 致命 bug 修复与双向互操作',
+    summary:
+      '修复 Audio Editor 中 playSliderSound 递归调用自身导致全部 18 个 slider 无声的严重 bug；修复 Audio Editor formatBytes 边界错误；新增 useBeforeUnloadGuard、Help/Tutorial 按钮和「🎛 Audio Converter」跳转按钮，实现双向互操作；Audio Converter 导入失败后旧音频仍可回退播放；下载 URL 延迟 revoke 防止失败；两个页面 resize listener 添加 100ms debounce。',
+    details: [
+      'Audio Editor SFX 致命 bug 修复：playSliderSound() 在节流条件满足后递归调用自身而非 playSound("sliderChange")，导致全部 18 个 slider（音量、声像、速度、音高、EQ、压缩器、混响、降噪等）完全无声。已替换为与 Audio Converter 一致的 setTimeout ref 节流实现。',
+      'Audio Editor 新增 useBeforeUnloadGuard：导入音频、存在导出记录或日志时，刷新/关闭页面会触发浏览器确认提示，防止进度丢失。',
+      'Audio Editor 双向互操作：header 新增 Help、Tutorial 和「🎛 Audio Converter」按钮，与 Audio Converter 的「🎵 Audio Editor」按钮形成双向跳转；两个页面均通过 onSwitchTool 实现工具间切换。',
+      'Audio Editor 无障碍与边界修复：🎵 和 ⏳ 装饰性 emoji 添加 aria-hidden="true"；formatBytes 添加 NaN/负数/infinite 保护，与 Audio Converter 对齐。',
+      'Audio Converter 导入回退保护：handleImportFile 在解码成功前不再 revoke 旧 source URL，导入失败后用户仍可播放之前的音频；downloadText URL revoke 延迟从 100ms 延长到 5000ms，避免大文件下载对话框弹出期间 URL 被提前释放。',
+      '性能优化：Audio Converter 和 Audio Editor 的 resize listener 均添加 100ms debounce，减少频繁 resize 时的重渲染开销。',
+      '版本同步：VERSION 升级到 1.7.2，5 种基础语言公告同步更新。',
+    ],
+  },
   {
     version: '1.7.1',
     date: '2026-05-12',
