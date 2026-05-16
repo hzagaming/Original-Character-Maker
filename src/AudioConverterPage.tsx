@@ -331,6 +331,8 @@ export function AudioConverterPage({
 
   /* ---- Import state ---- */
   const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const importTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ---- Drag & drop ---- */
   const [isDragOver, setIsDragOver] = useState(false);
@@ -341,6 +343,7 @@ export function AudioConverterPage({
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
+      if (importTimeoutRef.current) window.clearTimeout(importTimeoutRef.current);
       if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
       if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
@@ -386,6 +389,8 @@ export function AudioConverterPage({
   const handleImportFile = useCallback(async (file: File) => {
     if (isImporting) return;
     setIsImporting(true);
+    setImportProgress(10);
+    if (importTimeoutRef.current) window.clearTimeout(importTimeoutRef.current);
     try {
       playSound('uploadStart');
       addLog('info', `Importing: ${file.name} (${formatBytes(file.size)})`);
@@ -398,8 +403,11 @@ export function AudioConverterPage({
 
       const ctx = new AudioContext();
       try {
+        setImportProgress(30);
         const arrayBuffer = await file.arrayBuffer();
+        setImportProgress(60);
         const decoded = await ctx.decodeAudioData(arrayBuffer);
+        setImportProgress(85);
         await ctx.close().catch(() => {});
 
         if (!isMountedRef.current) return;
@@ -410,21 +418,23 @@ export function AudioConverterPage({
         const url = URL.createObjectURL(file);
         sourceUrlRef.current = url;
         setSourceUrl(url);
+        setImportProgress(100);
         addLog('success', `Loaded: ${decoded.numberOfChannels}ch, ${decoded.sampleRate}Hz, ${formatTime(decoded.duration)}`);
         playSound('uploadComplete');
+        importTimeoutRef.current = window.setTimeout(() => setIsImporting(false), 400);
       } catch (err) {
         await ctx.close().catch(() => {});
         throw err;
       }
     } catch (err) {
       if (!isMountedRef.current) return;
+      setIsImporting(false);
+      setImportProgress(0);
       const msg = String(err);
       addLog('error', `Import failed: ${msg}`);
       playSound('error');
       setError({ code: 'IMPORT_FAILED', message: 'Failed to decode audio file', hint: msg });
       setShowErrorPanel(true);
-    } finally {
-      if (isMountedRef.current) setIsImporting(false);
     }
   }, [addLog, isImporting]);
 
@@ -695,7 +705,10 @@ export function AudioConverterPage({
                   {isImporting ? (
                     <div className="preview-surface">
                       <div className="preview-empty">
-                        <span className="status-badge running">Decoding audio…</span>
+                        <span className="status-badge running">Decoding audio… {importProgress}%</span>
+                        <div className="progress-track" style={{ width: 'min(260px, 80%)' }}>
+                          <div className="progress-fill" style={{ width: `${importProgress}%` }} />
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -708,8 +721,9 @@ export function AudioConverterPage({
                       role="button"
                       aria-label="Import audio file"
                       style={{
-                        border: isDragOver ? '2px solid var(--accent)' : undefined,
-                        background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : undefined,
+                        border: isDragOver ? '2px dashed var(--accent)' : undefined,
+                        background: isDragOver ? 'rgba(var(--accent-rgb), 0.08)' : undefined,
+                        boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
                       }}
                     >
                       <h3>Import Audio</h3>

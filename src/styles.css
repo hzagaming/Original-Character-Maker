@@ -3510,6 +3510,15 @@ input[type='range']:active::-moz-range-thumb {
     transform: none !important;
     animation: none !important;
   }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Modals also rely on keyframe animations for entrance; ensure they stay usable */
@@ -5184,7 +5193,7 @@ input[type='range']:active::-moz-range-thumb {
   border: 2px dashed var(--border);
   background: rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  transition: border-color 200ms ease, background 200ms ease;
+  transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
 }
 
 .upload-dropzone:hover {
@@ -5222,6 +5231,15 @@ input[type='range']:active::-moz-range-thumb {
 
 .collapsible {
   cursor: pointer;
+  transition: background 160ms ease, transform 120ms ease;
+}
+
+.collapsible:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.collapsible:active {
+  transform: scale(0.995);
 }
 
 .empty-state {
@@ -5239,6 +5257,8 @@ input[type='range']:active::-moz-range-thumb {
 .audio-export-name {
   font-size: 12px;
   color: var(--text-primary);
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .mono {

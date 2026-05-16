@@ -1260,7 +1260,8 @@ export function AudioEditorPage({
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     dragCounter.current += 1;
-    setIsDragOver(true);
+    const types = Array.from(e.dataTransfer.types);
+    if (types.includes('Files')) setIsDragOver(true);
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -1393,8 +1394,9 @@ export function AudioEditorPage({
                         role="button"
                         aria-label="Import audio file"
                         style={{
-                          border: isDragOver ? '2px solid var(--accent)' : undefined,
-                          background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : undefined,
+                          border: isDragOver ? '2px dashed var(--accent)' : undefined,
+                          background: isDragOver ? 'rgba(var(--accent-rgb), 0.08)' : undefined,
+                          boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
                         }}
                       >
                         <h3>Import Audio</h3>
@@ -1630,7 +1632,7 @@ export function AudioEditorPage({
                             <strong className="audio-export-name">{rec.fileName}</strong>
                             <span className="tiny-copy mono">{rec.format} · {formatBytes(rec.size)}</span>
                           </div>
-                          <audio controls src={rec.url} className="tool-audio" />
+                          <audio key={rec.id} controls src={rec.url} className="tool-audio" />
                           <div className="mini-action-row">
                             <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
                             <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>

@@ -444,7 +444,12 @@ let customSfxAudio: HTMLAudioElement | null = null;
 let customMusicAudio: HTMLAudioElement | null = null;
 
 export function setCustomSfx(dataUrl: string | null) {
-  if (customSfxAudio) { customSfxAudio.pause(); customSfxAudio = null; }
+  if (customSfxAudio) {
+    customSfxAudio.pause();
+    customSfxAudio.src = '';
+    customSfxAudio.load();
+    customSfxAudio = null;
+  }
   if (dataUrl) {
     customSfxAudio = new Audio(dataUrl);
     customSfxAudio.volume = (currentSettings.sfxVolume / 100) * (currentSettings.masterVolume / 100);
@@ -453,7 +458,12 @@ export function setCustomSfx(dataUrl: string | null) {
 }
 
 export function setCustomMusic(dataUrl: string | null) {
-  if (customMusicAudio) { customMusicAudio.pause(); customMusicAudio = null; }
+  if (customMusicAudio) {
+    customMusicAudio.pause();
+    customMusicAudio.src = '';
+    customMusicAudio.load();
+    customMusicAudio = null;
+  }
   if (dataUrl) {
     customMusicAudio = new Audio(dataUrl);
     customMusicAudio.loop = true;
@@ -974,7 +984,7 @@ export function attachAudioResumeHandler() {
     }
   };
   events.forEach((evt) => {
-    document.addEventListener(evt, handler, { once: true, passive: true });
+    document.addEventListener(evt, handler, { passive: true });
   });
 }
 

@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.4';
+const VERSION = '1.7.5';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -590,7 +590,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.4 音频页面深度 bug 修复与稳定性提升：全面修复 AudioEditorPage 和 AudioConverterPage 的运行时崩溃、内存泄漏、stale closure、拖拽闪烁等 20+ 项严重问题；修复 App.tsx hover SFX 失效和 FaceMakerPage 键盘快捷键冲突；新增音频工具专用 CSS 类与无障碍支持。',
+    announcementDescription: 'v1.7.5 UI/UX/SFX/BGM 全面自检与优化：修复自定义音频内存泄漏、BGM 后台智能暂停、音频引擎恢复策略优化、CSS 无障碍动效增强；同步版本号。',
     announcementList1: 'AudioEditorPage 运行时修复：修复 dragCounter 未声明导致的拖拽 ReferenceError；修复 stopPlayback TDZ 崩溃；修复 tick/onended stale closure；修复 audio node 内存泄漏；修复键盘快捷键 effect 60fps 重建；修复导出 URL 未 revoke；修复 resetAll 未 revoke 导出 URL。',
     announcementList2: 'AudioEditorPage 交互修复：修复 applyFade off-by-one；修复 history 无上限（MAX_HISTORY=50）；修复拖拽闪烁；修复 application/octet-stream 拖拽拒绝；修复 Canvas fillRect 负宽度；修复 handleWheel 除以零；修复空格键长按高频切换。',
     announcementList3: 'AudioConverterPage 与 App 层修复：修复 isMountedRef 未在 success 路径检查；修复 rAF 后台标签页 blob URL 泄漏；修复 e.dataTransfer.types 旧浏览器兼容性；修复 Reset 按钮 double-play；修复 Convert 按钮导入期间未禁用；修复 sliderThrottleRef 未清除；修复 mouseenter 不冒泡导致 hover SFX 失效；修复 FaceMakerPage 键盘快捷键未检查 select/shiftKey。',
@@ -980,7 +980,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.4 オーディオページの深刻なバグ修正と安定性向上：AudioEditorPage と AudioConverterPage のランタイムクラッシュ、メモリリーク、stale closure、ドラッグちらつきなど 20+ の重大問題を全面修正；App.tsx の hover SFX 無効化と FaceMakerPage のキーボードショートカット競合を修正；オーディオツール専用 CSS クラスとアクセシビリティ対応を追加。',
+    announcementDescription: 'v1.7.5 UI/UX/SFX/BGM 全面自检と最適化：カスタムオーディオのメモリリーク修正、BGM のバックグラウンド自動一時停止、オーディオエンジンの復旧戦略最適化、CSS アクセシビリティ動画効果の強化；バージョン番号の同期。',
     announcementList1: 'AudioEditorPage ランタイム修正：dragCounter 未宣言によるドラッグ ReferenceError を修正；stopPlayback の TDZ クラッシュを修正；tick/onended の stale closure を修正；audio node メモリリークを修正；キーボードショートカット effect の 60fps 再構築を修正；エクスポート URL の revoke 漏れを修正；resetAll のエクスポート URL revoke 漏れを修正。',
     announcementList2: 'AudioEditorPage インタラクション修正：applyFade の off-by-one を修正；history 上限なしを修正（MAX_HISTORY=50）；ドラッグちらつきを修正；application/octet-stream ドラッグ拒否を修正；Canvas fillRect の負の幅を修正；handleWheel のゼロ除算を修正；スペースキー長押しによる高頻度切り替えを修正。',
     announcementList3: 'AudioConverterPage と App 層の修正：isMountedRef が success パスで未チェックだった問題を修正；rAF によるバックグラウンドタブの blob URL リークを修正；e.dataTransfer.types の旧ブラウザ互換性を修正；Reset ボタンの double-play を修正；Convert ボタンがインポート中に無効化されていなかった問題を修正；sliderThrottleRef の未クリアを修正；mouseenter の非バブリングによる hover SFX 無効化を修正；FaceMakerPage のキーボードショートカットが select/shiftKey をチェックしていなかった問題を修正。',
@@ -1370,7 +1370,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.7.4 Deep bug fixes and stability improvements for audio pages: Fixed 20+ critical issues in AudioEditorPage and AudioConverterPage including runtime crashes, memory leaks, stale closures, and drag flicker; Fixed App.tsx hover SFX failure and FaceMakerPage keyboard shortcut conflicts; Added audio-tool-specific CSS classes and accessibility support.',
+    announcementDescription: 'v1.7.5 Comprehensive UI/UX/SFX/BGM audit and optimization: Fixed custom audio memory leak, BGM smart pause in background tabs, audio engine resume strategy improved, CSS accessibility motion enhanced; version synchronized.',
     announcementList1: 'AudioEditorPage runtime fixes: Fixed dragCounter undeclared ReferenceError on drag; Fixed stopPlayback TDZ crash; Fixed tick/onended stale closures; Fixed audio node memory leak (~10 nodes per play); Fixed keyboard shortcut effect rebuilding at 60fps; Fixed export URL not revoked on unmount; Fixed resetAll not revoking export URLs.',
     announcementList2: 'AudioEditorPage interaction fixes: Fixed applyFade off-by-one; Fixed unbounded history array (MAX_HISTORY=50); Fixed drag flicker from child element dragleave; Fixed application/octet-stream drag rejection; Fixed Canvas fillRect negative width; Fixed handleWheel division by zero; Fixed spacebar long-press rapid toggle.',
     announcementList3: 'AudioConverterPage and App layer fixes: Fixed isMountedRef missing in async success paths; Fixed rAF blob URL leak in background tabs; Fixed e.dataTransfer.types compatibility in older browsers; Fixed Reset button double-play; Fixed Convert button not disabled during import; Fixed sliderThrottleRef not cleared on reset; Fixed mouseenter non-bubbling hover SFX failure; Fixed FaceMakerPage keyboard shortcuts not checking select/shiftKey.',
@@ -1760,7 +1760,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.7.4 Глубокое исправление багов и повышение стабильности аудио-страниц: Исправлено 20+ критических проблем в AudioEditorPage и AudioConverterPage, включая падения runtime, утечки памяти, stale closure и мерцание drag; Исправлена неработающая hover SFX в App.tsx и конфликты горячих клавиш FaceMakerPage; Добавлены специальные CSS-классы для аудио-инструментов и поддержка доступности.',
+    announcementDescription: 'v1.7.5 Комплексный аудит UI/UX/SFX/BGM: Исправлена утечка памяти пользовательского аудио, умная пауза BGM в фоновых вкладках, улучшена стратегия восстановления аудио-движка, улучшена доступность CSS-анимаций; версия синхронизирована.',
     announcementList1: 'Исправления runtime AudioEditorPage: Исправлен ReferenceError от не объявленного dragCounter; Исправлен TDZ-crash stopPlayback; Исправлены stale closure в tick/onended; Исправлена утечка памяти аудио-узлов; Исправлена перестройка effect горячих клавиш на 60fps; Исправлена утечка URL экспорта при размонтировании; Исправлен resetAll без revoke URL экспорта.',
     announcementList2: 'Исправления взаимодействия AudioEditorPage: Исправлен off-by-one applyFade; Исправлен неограниченный history (MAX_HISTORY=50); Исправлено мерцание drag; Исправлен отказ drag application/octet-stream; Исправлена отрицательная ширина Canvas fillRect; Исправлено деление на ноль handleWheel; Исправлено быстрое переключение при долгом нажатии пробела.',
     announcementList3: 'Исправления AudioConverterPage и App: Исправлен пропущенный isMountedRef в success-путях async; Исправлена утечка blob URL rAF в фоновых вкладках; Исправлена совместимость e.dataTransfer.types в старых браузерах; Исправлен double-play resetSound; Исправлена неотключенная кнопка Convert при импорте; Исправлен неочищенный sliderThrottleRef; Исправлена неработающая hover SFX из-за небублирующего mouseenter; Исправлены горячие клавиши FaceMakerPage без проверки select/shiftKey.',
@@ -2460,7 +2460,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAudioEditorDescription: '오디오 파일을 가져와서 파형을 시각화하고 편집하세요. 자르기, 분할, 페이드, 볼륨 조절, 속도/피치 변경, EQ, 컴프레서, 리버브 등 다양한 효과를 지원합니다.',
     pageAudioConverterTitle: '오디오 변환기',
     pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
-    announcementDescription: 'v1.7.4 오디오 페이지 심층 버그 수정 및 안정성 향상: AudioEditorPage와 AudioConverterPage의 런타임 충돌, 메모리 누수, stale closure, 드래그 깜빡임 등 20+ 개의 심각한 문제를 전면 수정; App.tsx hover SFX 무효화 및 FaceMakerPage 키보드 단축키 충돌 수정; 오디오 도구 전용 CSS 클래스와 접근성 지원 추가.',
+    announcementDescription: 'v1.7.5 UI/UX/SFX/BGM 전면 자체 점검 및 최적화: 커스텀 오디오 메모리 누수 수정, BGM 백그라운드 스마트 일시정지, 오디오 엔진 복구 전략 최적화, CSS 접근성 모션 강화; 버전 번호 동기화.',
     announcementList1: 'AudioEditorPage 런타임 수정: 선언되지 않은 dragCounter로 인한 드래그 ReferenceError 수정; stopPlayback TDZ 충돌 수정; tick/onended stale closure 수정; 오디오 노드 메모리 누수 수정; 키보드 단축키 effect 60fps 재구성 수정; 납치기 URL revoke 누락 수정; resetAll 납치기 URL revoke 누락 수정.',
     announcementList2: 'AudioEditorPage 상호작용 수정: applyFade off-by-one 수정; history 상한 없음 수정(MAX_HISTORY=50); 드래그 깜빡임 수정; application/octet-stream 드래그 거부 수정; Canvas fillRect 음수 너비 수정; handleWheel 0으로 나누기 수정; 스페이스바 길게 누르기 고속 전환 수정.',
     announcementList3: 'AudioConverterPage 및 App 레이어 수정: isMountedRef가 success 경로에서 미확인 수정; rAF 백그라운드 탭 blob URL 누수 수정; e.dataTransfer.types 이전 브라우저 호환성 수정; Reset 버튼 double-play 수정; Convert 버튼 가져오기 중 비활성화 누락 수정; sliderThrottleRef 미삭제 수정; mouseenter 비버블링으로 인한 hover SFX 무효화 수정; FaceMakerPage 키보드 단축키 select/shiftKey 미확인 수정.'
@@ -2654,6 +2654,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.5',
+    date: '2026-05-16',
+    title: '1.7.5 UI/UX/SFX/BGM 全面自检与优化',
+    summary:
+      '从 UI/UX/SFX/BGM 四个维度进行整体自检并修复多项隐藏问题：修复自定义音频文件内存泄漏、BGM 后台标签页智能暂停、音频引擎自动恢复策略优化、CSS 无障碍动效增强；同步 package.json 与代码版本号。',
+    details: [
+      'SFX 修复：修复 audioEngine.ts 中 setCustomSfx / setCustomMusic 替换自定义音频时未释放 data URL 内存的问题，旧 Audio 元素现在会清空 src 并调用 load() 彻底释放引用。',
+      'BGM 优化：App.tsx 新增 visibilitychange 监听，当用户切换到其他标签页或最小化窗口时自动暂停背景音乐，返回页面后自动恢复播放，减少后台资源占用。',
+      '音频引擎优化：attachAudioResumeHandler 移除 { once: true } 限制，改为持续监听用户交互；避免 AudioContext 被浏览器多次挂起后无法自动恢复的问题。',
+      'CSS 无障碍增强：prefers-reduced-motion 媒体查询从仅覆盖 .fade-up 扩展到禁用全局 transition 和 transform，确保开启「减少动画」的用户获得完全静态的界面。',
+      '版本同步：package.json 版本号从 1.1.0 同步为 1.7.5，与 App.tsx 的 VERSION 常量保持一致；首页公告更新为 v1.7.5。',
+    ],
+  },
   {
     version: '1.7.4',
     date: '2026-05-12',
@@ -3815,7 +3829,16 @@ function App() {
     } catch {
       // Audio initialization is non-critical; ignore failures.
     }
+    const handleVisibility = () => {
+      if (document.hidden) {
+        try { stopMusic(); } catch { /* ignore */ }
+      } else {
+        try { startMusic(); } catch { /* ignore */ }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
       try { stopMusic(); } catch { /* ignore */ }
     };
   }, []);
