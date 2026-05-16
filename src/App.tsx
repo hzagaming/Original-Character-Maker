@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.2';
+const VERSION = '1.7.3';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -590,10 +590,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.2 音频编辑器 SFX 致命 bug 修复与双向互操作：修复 Audio Editor 中 playSliderSound 递归调用自身导致全部 18 个 slider 完全无声的严重 bug；新增 useBeforeUnloadGuard、Help/Tutorial 按钮和「🎛 Audio Converter」跳转按钮实现双向互操作；Audio Converter 导入失败后旧音频仍可回退播放；下载 URL 延迟 revoke 防止失败；两个页面 resize 均添加 debounce。',
-    announcementList1: 'Audio Editor SFX 致命 bug 修复：playSliderSound() 在节流条件满足后递归调用自身而非 playSound("sliderChange")，导致全部 18 个 slider（音量、声像、速度、音高、EQ、压缩器、混响、降噪等）完全无声。已替换为 setTimeout ref 节流实现。',
-    announcementList2: 'Audio Editor 双向互操作与 UX 增强：新增 useBeforeUnloadGuard 防止意外刷新丢失进度；header 新增 Help、Tutorial 和「🎛 Audio Converter」按钮，与 Audio Converter 形成双向跳转；🎵 和 ⏳ 添加 aria-hidden；formatBytes 添加 NaN/负数/infinite 保护。',
-    announcementList3: 'Audio Converter 回退保护与性能优化：handleImportFile 在解码成功前不再 revoke 旧 source URL，导入失败后仍可播放之前的音频；downloadText URL revoke 延迟从 100ms 延长到 5000ms；progress timeout 回调后自动清理 ref；两个页面 resize listener 添加 100ms debounce。',
+    announcementDescription: 'v1.7.3 全局启动加载动画与音频页面 UI 重构：Splash loading 从 AudioEditorPage 迁移到 App 全局层级，自动跟随主题色和 accent 配色；AudioConverterPage 和 AudioEditorPage 页面结构与 ImageConverter/StyleTransfer/Paper2Gal 完全统一，使用标准 feature-shell、tool-header、tool-grid transfer-grid、tool-card 结构；移除所有 emoji 按钮标签和自定义 header 结构；修复 log-line CSS 类名不匹配、audio 元素 key prop 缺失、折叠面板 expand/collapse 音效切换、CSS 未定义变量 --text-primary 和 --muted 等。',
+    announcementList1: '全局 Splash Loading 迁移：将 AudioEditorPage 的局部加载遮罩提取到 App.tsx 全局层级，应用启动时统一显示主题色进度动画，使用 CSS 变量跟随 light/dark 模式和 accent 配色。',
+    announcementList2: '音频工具页面 UI 重构与视觉统一：AudioConverterPage 和 AudioEditorPage 根节点统一为 feature-shell tool-page-shell，header 统一为 feature-header + feature-header-meta，新增 tool-header 说明区，主体使用 tool-grid transfer-grid 两栏布局，卡片使用标准 tool-card/tool-card-header/card-caption 结构，参数使用 form-grid two-column，日志使用标准 log-scroll/log-line 类；移除所有 emoji 按钮标签、自定义 header-left/back-button/page-title 结构。',
+    announcementList3: '细节修复与 CSS 补全：修复 log-line CSS 类名不匹配（JSX 生成 log-info 但 CSS 定义 .log-line.info）；为 audio 元素添加 key prop 防止 src 变化时浏览器不重新加载；折叠面板根据展开/收起状态切换 expand/collapse 音效；补全 CSS 缺失的 --text-primary 和 --muted 变量定义；移除 AudioEditorPage 残留的 isNarrow resize listener；新增 resetAll() 完整重置函数。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -980,10 +980,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.2 オーディオエディタ SFX 致命的バグ修正と双方向相互運用：Audio Editor の playSliderSound が自身を再帰呼び出しして 18 個の slider が完全に無音になる重大バグを修正。useBeforeUnloadGuard、Help/Tutorial ボタン、「🎛 Audio Converter」ジャンプボタンを新設し双方向相互運用を実現。Audio Converter はインポート失敗後も旧音声を再生可能。ダウンロード URL の revoke 遅延で失敗防止。両ページの resize に debounce を追加。',
-    announcementList1: 'Audio Editor SFX 致命的バグ修正：playSliderSound() がスロットル条件満足後に自身を再帰呼び出しして playSound("sliderChange") を呼ばないため、18 個の slider（音量、パン、スピード、ピッチ、EQ、コンプレッサー、リバーブ、ノイズリダクションなど）が完全に無音。setTimeout ref スロットル実装に置き換え済み。',
-    announcementList2: 'Audio Editor 双方向相互運用と UX 強化：useBeforeUnloadGuard を新設し意図しない更新による進捗喪失を防止；ヘッダーに Help、Tutorial、「🎛 Audio Converter」ボタンを追加し Audio Converter と双方向ジャンプ；🎵 と ⏳ に aria-hidden を追加；formatBytes に NaN/負数/infinite 保護を追加。',
-    announcementList3: 'Audio Converter フォールバック保護と性能最適化：handleImportFile がデコード成功前に旧 source URL を revoke しないよう修正し、インポート失敗後も旧音声を再生可能；downloadText の URL revoke を 100ms から 5000ms に延長；progress timeout コールバック後に ref を自動クリーンアップ；両ページの resize listener に 100ms debounce を追加。',
+    announcementDescription: 'v1.7.3 グローバル起動ローディングとオーディオページ UI 再構築：Splash loading を AudioEditorPage から App グローバル層へ移行しテーマカラーに追従；AudioConverterPage と AudioEditorPage のページ構造を ImageConverter/StyleTransfer/Paper2Gal と完全統一し feature-shell、tool-header、tool-grid transfer-grid、tool-card 等の標準構造を使用；すべての絵文字ボタンラベルとカスタム header 構造を削除；log-line CSS クラス名不一致、audio 要素 key prop 欠落、折りたたみパネルの expand/collapse SFX 切り替え、CSS 未定義変数 --text-primary と --muted の修正など。',
+    announcementList1: 'グローバル Splash Loading 移行：AudioEditorPage のローカルローディングオーバーレイを App.tsx グローバル層へ移行し、アプリ起動時に統一されたテーマカラーの進捗アニメーションを表示。CSS 変数で light/dark モードと accent 配色に追従。',
+    announcementList2: 'オーディオツールページ UI 再構築と視覚統一：AudioConverterPage と AudioEditorPage のルートを feature-shell tool-page-shell に統一し、ヘッダーを feature-header + feature-header-meta に統一。tool-header 説明エリアを新設し、メインを tool-grid transfer-grid の 2 カラムレイアウトに変更。カードは標準の tool-card/tool-card-header/card-caption 構造、パラメータは form-grid two-column、ログは標準の log-scroll/log-line クラスを使用。すべての絵文字ボタンラベルとカスタム header-left/back-button/page-title 構造を削除。',
+    announcementList3: '詳細修正と CSS 補完：log-line CSS クラス名の不一致を修正（JSX が log-info を生成するが CSS は .log-line.info を定義）；audio 要素に key prop を追加して src 変更時のブラウザ再読み込みを保証；折りたたみパネルが展開/収束状態に応じて expand/collapse サウンドを切り替え；CSS に欠落していた --text-primary と --muted 変数定義を補完；AudioEditorPage に残存していた isNarrow resize listener を削除；resetAll() 完全リセット関数を新設。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1370,10 +1370,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.7.2 Audio Editor SFX critical bug fix and bidirectional interoperability: Fixed the severe bug where Audio Editor\'s playSliderSound recursively called itself, silencing all 18 sliders entirely. Added useBeforeUnloadGuard, Help/Tutorial buttons, and a "🎛 Audio Converter" jump button for bidirectional tool switching. Audio Converter preserves previous audio playback after failed imports. Download URL revoke delayed to prevent failures. Resize debounce added to both pages.',
-    announcementList1: 'Audio Editor SFX critical bug fix: playSliderSound() recursively called itself instead of playSound("sliderChange") when throttle conditions were met, causing all 18 sliders (volume, pan, speed, pitch, EQ, compressor, reverb, noise reduction, etc.) to be completely silent. Replaced with a setTimeout ref throttle implementation matching Audio Converter.',
-    announcementList2: 'Audio Editor bidirectional interoperability and UX enhancements: added useBeforeUnloadGuard to prevent accidental refresh from losing progress; added Help, Tutorial, and "🎛 Audio Converter" buttons to the header for bidirectional jumping with Audio Converter; added aria-hidden to decorative 🎵 and ⏳ emoji; added NaN/negative/infinite guards to formatBytes.',
-    announcementList3: 'Audio Converter fallback protection and performance improvements: handleImportFile no longer revokes the old source URL before decode succeeds, so previous audio remains playable after a failed import; downloadText URL revoke delay extended from 100ms to 5000ms; progress timeout callback now cleans up ref after firing; both pages received 100ms debounce on resize listeners.',
+    announcementDescription: 'v1.7.3 Global splash loading and audio page UI refactor: Migrated splash loading from AudioEditorPage to App-level with theme-aware accent colors; Unified AudioConverterPage and AudioEditorPage structure with ImageConverter/StyleTransfer/Paper2Gal using standard feature-shell, tool-header, tool-grid transfer-grid, and tool-card patterns; Removed all emoji button labels and custom header structures; Fixed log-line CSS class mismatch, missing audio key props, expand/collapse SFX switching, and undefined CSS variables --text-primary and --muted.',
+    announcementList1: 'Global Splash Loading migration: Extracted the local loading overlay from AudioEditorPage to the App.tsx global level, displaying a unified theme-colored progress animation on app launch that follows the light/dark mode and accent color via CSS variables.',
+    announcementList2: 'Audio tool page UI refactor and visual unification: Unified AudioConverterPage and AudioEditorPage root to feature-shell tool-page-shell, header to feature-header + feature-header-meta, added tool-header description area, main body uses tool-grid transfer-grid two-column layout, cards use standard tool-card/tool-card-header/card-caption structure, parameters use form-grid two-column, logs use standard log-scroll/log-line classes; removed all emoji button labels and custom header-left/back-button/page-title structures.',
+    announcementList3: 'Detail fixes and CSS completion: Fixed log-line CSS class name mismatch (JSX generates log-info but CSS defines .log-line.info); added key prop to audio elements to force browser reload on src change; collapsible panels now switch between expand and collapse sounds based on open/close state; completed missing CSS variable definitions for --text-primary and --muted; removed orphaned isNarrow resize listener from AudioEditorPage; added resetAll() full reset function.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1760,10 +1760,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.7.2 Критическое исправление SFX в Audio Editor и двусторонняя интеграция: Исправлен критический баг, при котором playSliderSound рекурсивно вызывал сам себя, полностью отключая звук на всех 18 слайдерах. Добавлен useBeforeUnloadGuard, кнопки Help/Tutorial и кнопка перехода «🎛 Audio Converter» для двустороннего переключения. Audio Converter сохраняет воспроизведение предыдущего аудио после неудачного импорта. Задержка revoke URL загрузки увеличена для предотвращения сбоев. Debounce на resize добавлен на обеих страницах.',
-    announcementList1: 'Критическое исправление SFX в Audio Editor: playSliderSound() рекурсивно вызывал сам себя вместо playSound("sliderChange") при выполнении условий throttle, что приводило к полной тишине на всех 18 слайдерах (громкость, панорама, скорость, тон, EQ, компрессор, реверберация, шумоподавление и др.). Заменено на реализацию throttle с setTimeout ref, как в Audio Converter.',
-    announcementList2: 'Двусторонняя интеграция Audio Editor и улучшения UX: добавлен useBeforeUnloadGuard для предотвращения потери прогресса при случайном обновлении; в заголовок добавлены кнопки Help, Tutorial и «🎛 Audio Converter» для двустороннего перехода с Audio Converter; добавлен aria-hidden к декоративным emoji 🎵 и ⏳; добавлена защита от NaN/отрицательных/bесконечных значений в formatBytes.',
-    announcementList3: 'Защита отката Audio Converter и улучшения производительности: handleImportFile больше не отзывает старый source URL до успешного декодирования, поэтому предыдущее аудио остаётся воспроизводимым после неудачного импорта; задержка revoke URL в downloadText увеличена с 100 мс до 5000 мс; callback progress timeout теперь очищает ref после срабатывания; на обеих страницах добавлен debounce 100 мс на resize listener.',
+    announcementDescription: 'v1.7.3 Глобальная загрузка и рефакторинг UI аудио-страниц: Splash loading перенесён из AudioEditorPage на уровень App с поддержкой тем; AudioConverterPage и AudioEditorPage полностью унифицированы с ImageConverter/StyleTransfer/Paper2Gal через стандартные структуры feature-shell, tool-header, tool-grid transfer-grid и tool-card; Удалены все эмодзи-метки кнопок и кастомные header-структуры; Исправлено несоответствие CSS-классов log-line, отсутствие key prop у audio, переключение звуков expand/collapse и неопределённые переменные --text-primary и --muted.',
+    announcementList1: 'Миграция глобального Splash Loading: Локальный оверлей загрузки из AudioEditorPage перенесён на глобальный уровень App.tsx, при запуске приложения отображается единая анимация прогресса в цвете темы, которая следует за light/dark режимом и accent-цветом через CSS-переменные.',
+    announcementList2: 'Рефакторинг UI аудио-страниц и визуальная унификация: Корневые элементы AudioConverterPage и AudioEditorPage унифицированы в feature-shell tool-page-shell, заголовки — в feature-header + feature-header-meta. Добавлена область описания tool-header, основная часть использует двухколоночный макет tool-grid transfer-grid, карточки — стандартную структуру tool-card/tool-card-header/card-caption, параметры — form-grid two-column, логи — стандартные классы log-scroll/log-line. Удалены все эмодзи-метки кнопок и кастомные структуры header-left/back-button/page-title.',
+    announcementList3: 'Мелкие исправления и дополнение CSS: Исправлено несоответствие имён CSS-классов log-line (JSX генерирует log-info, но CSS определяет .log-line.info); добавлен key prop к audio-элементам для принудительной перезагрузки браузера при смене src; сворачиваемые панели теперь переключают звуки expand/collapse в зависимости от состояния; дополнены недостающие определения CSS-переменных --text-primary и --muted; удалён устаревший isNarrow resize listener из AudioEditorPage; добавлена функция полного сброса resetAll().',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2460,10 +2460,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAudioEditorDescription: '오디오 파일을 가져와서 파형을 시각화하고 편집하세요. 자르기, 분할, 페이드, 볼륨 조절, 속도/피치 변경, EQ, 컴프레서, 리버브 등 다양한 효과를 지원합니다.',
     pageAudioConverterTitle: '오디오 변환기',
     pageAudioConverterDescription: '오디오 파일을 가져와서 포맷 변환, 샘플링 레이트/비트 깊이/채널 수 조정, 볼륨 게인, 속도 변환, 피치 시프트, 노멀라이제이션, 노이즈 리덕션을 지원합니다.',
-    announcementDescription: 'v1.7.2 오디오 에디터 SFX 치명적 버그 수정 및 양방향 상호 운용: Audio Editor의 playSliderSound가 자기 자신을 재귀 호출하여 18개 slider가 완전히 무음이 되는 치명적 버그를 수정. useBeforeUnloadGuard, Help/Tutorial 버튼, 「🎛 Audio Converter」이동 버튼을 추가하여 양방향 상호 운용을 구현. Audio Converter는 가져오기 실패 후에도 이전 오디오 재생 유지. 다운로드 URL revoke 지연으로 실패 방지. 두 페이지 모두 resize에 debounce 추가.',
-    announcementList1: 'Audio Editor SFX 치명적 버그 수정: playSliderSound()가 스로틀 조건 충족 후 자기 자신을 재귀 호출하여 playSound("sliderChange")를 호출하지 않아, 18개 slider(볼륨, 팬, 속도, 피치, EQ, 컴프레서, 리버브, 노이즈 리덕션 등)가 완전히 무음이 됨. Audio Converter와 동일한 setTimeout ref 스로틀 구현으로 교체 완료.',
-    announcementList2: 'Audio Editor 양방향 상호 운용 및 UX 향상: useBeforeUnloadGuard를 추가하여 의도하지 않은 새로고침으로 인한 진행 상황 손실 방지; 헤더에 Help, Tutorial, 「🎛 Audio Converter」버튼을 추가하여 Audio Converter와 양방향 이동; 🎵 및 ⏳에 aria-hidden 추가; formatBytes에 NaN/음수/무한대 보호 추가.',
-    announcementList3: 'Audio Converter 폴백 보호 및 성능 최적화: handleImportFile이 디코딩 성공 전에 이전 source URL을 revoke하지 않도록 수정하여, 가져오기 실패 후에도 이전 오디오 재생 가능; downloadText의 URL revoke를 100ms에서 5000ms로 연장; progress timeout 콜백 후 ref를 자동 정리; 두 페이지의 resize listener에 100ms debounce 추가.'
+    announcementDescription: 'v1.7.3 글로벌 스플래시 로딩 및 오디오 페이지 UI 리팩토링: Splash loading을 AudioEditorPage에서 App 전역 레벨로 마이그레이션하여 테마 색상 적용; AudioConverterPage와 AudioEditorPage 구조를 ImageConverter/StyleTransfer/Paper2Gal과 완전히 통일하여 feature-shell, tool-header, tool-grid transfer-grid, tool-card 등 표준 구조 사용; 모든 이모지 버튼 레이블과 커스텀 헤더 구조 제거; log-line CSS 클래스명 불일치, audio 요소 key prop 누락, 접힘 패널 expand/collapse SFX 전환, CSS 미정의 변수 --text-primary 및 --muted 수정 등.','
+    announcementList1: '글로벌 Splash Loading 마이그레이션: AudioEditorPage의 로컬 로딩 오버레이를 App.tsx 전역 레벨로 이동하여 앱 실행 시 통일된 테마색 진행 애니메이션을 표시. CSS 변수로 light/dark 모드와 accent 색상에 동기화.','
+    announcementList2: '오디오 도구 페이지 UI 리팩토링 및 시각적 통일: AudioConverterPage와 AudioEditorPage 루트를 feature-shell tool-page-shell로 통일하고, 헤더를 feature-header + feature-header-meta로 통일. tool-header 설명 영역을 신설하고, 본문은 tool-grid transfer-grid 2열 레이아웃으로 변경. 카드는 표준 tool-card/tool-card-header/card-caption 구조, 파라미터는 form-grid two-column, 로그는 표준 log-scroll/log-line 클래스를 사용. 모든 이모지 버튼 레이블과 커스텀 header-left/back-button/page-title 구조를 제거.','
+    announcementList3: '세부 수정 및 CSS 보완: log-line CSS 클래스명 불일치 수정(JSX가 log-info를 생성하지만 CSS는 .log-line.info를 정의); audio 요소에 key prop을 추가하여 src 변경 시 브라우저 재로드를 보장; 접힘 패널이 펼침/접힘 상태에 따라 expand/collapse 사운드를 전환; CSS에 누락된 --text-primary 및 --muted 변수 정의를 보완; AudioEditorPage에 잔존한 isNarrow resize listener를 제거; resetAll() 완전 초기화 함수를 신설.'
   },
   fr: {
     ...translations.en,
@@ -2654,6 +2654,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.3',
+    date: '2026-05-12',
+    title: '1.7.3 全局启动加载动画与音频页面 UI 重构',
+    summary:
+      'Splash loading 从 AudioEditorPage 迁移到 App 全局层级，自动跟随主题色和 accent 配色；AudioConverterPage 和 AudioEditorPage 页面结构与 ImageConverter/StyleTransfer/Paper2Gal 完全统一，使用标准 feature-shell、tool-header、tool-grid transfer-grid、tool-card 结构；移除所有 emoji 按钮标签和自定义 header 结构；修复 log-line CSS 类名不匹配、audio 元素 key prop 缺失、折叠面板 expand/collapse 音效切换、CSS 未定义变量 --text-primary 和 --muted 等。',
+    details: [
+      '全局 Splash Loading 迁移：将 AudioEditorPage 的局部加载遮罩提取到 App.tsx 全局层级，应用启动时统一显示主题色进度动画，使用 CSS 变量跟随 light/dark 模式和 accent 配色。',
+      '音频工具页面 UI 重构与视觉统一：AudioConverterPage 和 AudioEditorPage 根节点统一为 feature-shell tool-page-shell，header 统一为 feature-header + feature-header-meta，新增 tool-header 说明区，主体使用 tool-grid transfer-grid 两栏布局，卡片使用标准 tool-card/tool-card-header/card-caption 结构，参数使用 form-grid two-column，日志使用标准 log-scroll/log-line 类；移除所有 emoji 按钮标签、自定义 header-left/back-button/page-title 结构。',
+      '细节修复与 CSS 补全：修复 log-line CSS 类名不匹配（JSX 生成 log-info 但 CSS 定义 .log-line.info）；为 audio 元素添加 key prop 防止 src 变化时浏览器不重新加载；折叠面板根据展开/收起状态切换 expand/collapse 音效；补全 CSS 缺失的 --text-primary 和 --muted 变量定义；移除 AudioEditorPage 残留的 isNarrow resize listener；新增 resetAll() 完整重置函数。',
+      '版本同步：VERSION 升级到 1.7.3，5 种基础语言公告同步更新。',
+    ],
+  },
   {
     version: '1.7.2',
     date: '2026-05-12',
@@ -3775,6 +3788,11 @@ function App() {
   const [modalStep, setModalStep] = useState<StartModalStep>(null);
   const [importOpen, setImportOpen] = useState(false);
 
+  /* ---- Splash loading ---- */
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStep, setLoadingStep] = useState('Initializing application…');
+
   useEffect(() => {
     try {
       initAudio();
@@ -3786,6 +3804,29 @@ function App() {
     return () => {
       try { stopMusic(); } catch { /* ignore */ }
     };
+  }, []);
+
+  /* Splash loading simulation */
+  useEffect(() => {
+    const steps = [
+      { ms: 0, pct: 0, text: 'Initializing application…' },
+      { ms: 300, pct: 12, text: 'Loading UI components…' },
+      { ms: 600, pct: 28, text: 'Mounting audio engine…' },
+      { ms: 900, pct: 45, text: 'Restoring preferences…' },
+      { ms: 1200, pct: 62, text: 'Preparing workspace…' },
+      { ms: 1550, pct: 78, text: 'Calibrating display…' },
+      { ms: 1950, pct: 94, text: 'Finalizing setup…' },
+      { ms: 2300, pct: 100, text: 'Ready' },
+    ];
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    steps.forEach(({ ms, pct, text }) => {
+      timers.push(setTimeout(() => {
+        setLoadingProgress(pct);
+        setLoadingStep(text);
+      }, ms));
+    });
+    timers.push(setTimeout(() => setIsLoading(false), 2500));
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   // Global hover sound delegation (throttled)
@@ -4023,6 +4064,64 @@ function App() {
 
   return (
     <div className={appClassName} style={appStyle}>
+      {/* ---- Splash loading overlay ---- */}
+      <div
+        aria-hidden={!isLoading}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--panel-soft)',
+          backdropFilter: 'blur(12px)',
+          opacity: isLoading ? 1 : 0,
+          pointerEvents: isLoading ? 'auto' : 'none',
+          transition: 'opacity 600ms ease',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 'clamp(1.6rem, 4vw, 2.8rem)',
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            background: 'linear-gradient(90deg, var(--accent-solid), var(--text-main))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            margin: '0 0 10px',
+            textAlign: 'center',
+          }}
+        >
+          {Array.from('OriginalCharacterMaker').join(' ')}
+        </h1>
+        <p
+          style={{
+            fontSize: 12,
+            color: 'var(--text-secondary)',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            margin: '0 0 40px',
+            textAlign: 'center',
+          }}
+        >
+          Hanazar projects / mirako company / ptg co ltd
+        </p>
+
+        <div style={{ width: 'min(420px, 80vw)', marginBottom: 16 }}>
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${loadingProgress}%`, transition: 'width 200ms linear' }} />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: 'min(420px, 80vw)', marginBottom: 8 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{loadingStep}</span>
+          <span style={{ fontSize: 12, color: 'var(--accent)', fontFamily: 'monospace', fontWeight: 600 }}>{loadingProgress}%</span>
+        </div>
+      </div>
+
       <div className="app-background">
         <div className="orb orb-left" />
         <div className="orb orb-right" />

@@ -56,7 +56,9 @@ a {
   --panel-soft: rgba(21, 38, 56, 0.96);
   --panel-elevated: rgba(18, 34, 51, 0.96);
   --text-main: #eef4fb;
+  --text-primary: #eef4fb;
   --text-secondary: #9fb2c6;
+  --muted: #9fb2c6;
   --border: rgba(98, 132, 166, 0.26);
   --shadow: 0 24px 64px rgba(3, 9, 18, 0.34);
   --button-shadow: 0 14px 30px rgba(var(--accent-rgb), 0.22);
@@ -124,7 +126,9 @@ a {
   --panel-soft: rgba(248, 251, 255, 0.94);
   --panel-elevated: rgba(255, 255, 255, 0.97);
   --text-main: #203246;
+  --text-primary: #203246;
   --text-secondary: #64798f;
+  --muted: #64798f;
   --border: rgba(120, 145, 170, 0.28);
   --shadow: 0 22px 52px rgba(86, 106, 129, 0.18);
 }
@@ -140,7 +144,9 @@ a {
   --panel-soft: rgba(255, 255, 255, 0.95);
   --panel-elevated: rgba(255, 253, 254, 0.98);
   --text-main: #734f64;
+  --text-primary: #734f64;
   --text-secondary: #bc91a5;
+  --muted: #bc91a5;
   --border: rgba(237, 197, 213, 0.7);
   --shadow: 0 22px 58px rgba(228, 164, 189, 0.24);
   --button-shadow: 0 14px 32px rgba(247, 104, 156, 0.18);
@@ -2955,10 +2961,14 @@ input[type='range']:active::-moz-range-thumb {
 .log-badge.error { background: rgba(244, 90, 90, 0.2); color: #f45a5a; }
 .log-badge.debug { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
 
-.log-line.info { border-left: 2px solid rgba(79, 157, 247, 0.4); padding-left: 6px; }
-.log-line.success { border-left: 2px solid rgba(74, 222, 128, 0.4); padding-left: 6px; }
-.log-line.error { border-left: 2px solid rgba(244, 90, 90, 0.4); padding-left: 6px; }
-.log-line.debug { border-left: 2px solid rgba(156, 163, 175, 0.4); padding-left: 6px; }
+.log-line.info,
+.log-line.log-info { border-left: 2px solid rgba(79, 157, 247, 0.4); padding-left: 6px; }
+.log-line.success,
+.log-line.log-success { border-left: 2px solid rgba(74, 222, 128, 0.4); padding-left: 6px; }
+.log-line.error,
+.log-line.log-error { border-left: 2px solid rgba(244, 90, 90, 0.4); padding-left: 6px; }
+.log-line.debug,
+.log-line.log-debug { border-left: 2px solid rgba(156, 163, 175, 0.4); padding-left: 6px; }
 
 .log-text {
   color: var(--text-main);
@@ -5158,4 +5168,49 @@ input[type='range']:active::-moz-range-thumb {
   font-size: 13px;
   border-top: 1px dashed var(--border);
   margin-top: 8px;
+}
+
+
+/* Audio tool specific --------------------------------------------- */
+.audio-waveform-surface {
+  position: relative;
+  min-height: 220px;
+  border-radius: 22px;
+  border: var(--border-width) solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.audio-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.audio-export-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.audio-export-item {
+  padding: 12px;
+  border-radius: 16px;
+  border: var(--border-width) solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@media (max-width: 900px) {
+  .audio-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .audio-action-grid {
+    grid-template-columns: 1fr;
+  }
+  .audio-waveform-surface {
+    border-radius: 18px;
+  }
 }

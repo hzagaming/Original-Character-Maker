@@ -306,6 +306,7 @@ export function AudioEditorPage({
   onBack,
   onOpenSettings,
   onOpenDocs,
+  onSwitchTool,
 }: SharedPageProps) {
   /* ---- Single shared AudioContext ---- */
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -404,41 +405,8 @@ export function AudioEditorPage({
   const isDirty = editBuffer !== null || exports.length > 0 || logs.length > 0;
   useBeforeUnloadGuard(isDirty);
 
-  /* ---- Responsive ---- */
-  const [isNarrow, setIsNarrow] = useState(false);
-
-  /* ---- Splash loading ---- */
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [loadingStep, setLoadingStep] = useState('Initializing audio engine…');
-
   /* ---- Drag & drop ---- */
   const [isDragOver, setIsDragOver] = useState(false);
-
-  /* ================================================================== */
-  /*  Splash loading simulation                                          */
-  /* ================================================================== */
-  useEffect(() => {
-    const steps = [
-      { ms: 0, pct: 0, text: 'Initializing audio engine…' },
-      { ms: 350, pct: 15, text: 'Loading waveform renderer…' },
-      { ms: 700, pct: 30, text: 'Mounting effect processors…' },
-      { ms: 1050, pct: 48, text: 'Allocating memory buffers…' },
-      { ms: 1400, pct: 65, text: 'Connecting Web Audio API…' },
-      { ms: 1750, pct: 82, text: 'Calibrating canvas display…' },
-      { ms: 2200, pct: 96, text: 'Finalizing setup…' },
-      { ms: 2500, pct: 100, text: 'Ready' },
-    ];
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    steps.forEach(({ ms, pct, text }) => {
-      timers.push(setTimeout(() => {
-        setLoadingProgress(pct);
-        setLoadingStep(text);
-      }, ms));
-    });
-    timers.push(setTimeout(() => setIsLoading(false), 2700));
-    return () => timers.forEach(clearTimeout);
-  }, []);
 
   /* ================================================================== */
   /*  Lifecycle & Cleanup                                                */
@@ -904,6 +872,54 @@ export function AudioEditorPage({
     playSound('resetSound');
   }, [addLog]);
 
+  const resetAll = useCallback(() => {
+    stopPlayback();
+    setSourceBuffer(null);
+    setEditBuffer(null);
+    setFileName('');
+    setDuration(0);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setZoom(1);
+    setPanOffset(0);
+    setSelection(null);
+    setVolume(100);
+    setPan(0);
+    setSpeed(100);
+    setPitch(0);
+    setFadeIn(0);
+    setFadeOut(0);
+    setEqLow(0);
+    setEqMid(0);
+    setEqHigh(0);
+    setCompThreshold(-24);
+    setCompRatio(4);
+    setCompAttack(3);
+    setCompRelease(50);
+    setReverbSize(30);
+    setReverbDamp(50);
+    setReverbMix(20);
+    setNoiseReduction(0);
+    setIsReversed(false);
+    setDoNormalize(false);
+    setIsMuted(false);
+    setIsLoop(false);
+    setHistory([]);
+    setHistoryIdx(-1);
+    setLogs([]);
+    setExports([]);
+    setExportFormat('wav-16');
+    setIsExporting(false);
+    setExportProgress(0);
+    setIsResultOpen(true);
+    setIsLogsOpen(true);
+    setErrors([]);
+    setZoom(1);
+    setPanOffset(0);
+    addLog('info', 'Workspace reset');
+    playSound('resetSound');
+  }, [addLog, stopPlayback]);
+
   /* ================================================================== */
   /*  Export                                                             */
   /* ================================================================== */
@@ -1264,399 +1280,359 @@ export function AudioEditorPage({
   /*  Render                                                             */
   /* ================================================================== */
   return (
-    <div className="tool-page-shell">
-      {/* ---- Splash loading overlay ---- */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'rgba(10,10,14,0.96)',
-          backdropFilter: 'blur(12px)',
-          opacity: isLoading ? 1 : 0,
-          pointerEvents: isLoading ? 'auto' : 'none',
-          transition: 'opacity 600ms ease',
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 'clamp(1.6rem, 4vw, 2.8rem)',
-            fontWeight: 800,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            background: 'linear-gradient(90deg, #c084fc, #60a5fa, #34d399)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            margin: '0 0 10px',
-            textAlign: 'center',
-          }}
-        >
-          OriginalCharacterMaker
-        </h1>
-        <p
-          style={{
-            fontSize: 12,
-            color: 'var(--text-secondary)',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            margin: '0 0 40px',
-            textAlign: 'center',
-          }}
-        >
-          Hanazar projects / mirako company / ptg co ltd
-        </p>
-
-        <div style={{ width: 'min(420px, 80vw)', marginBottom: 16 }}>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${loadingProgress}%`, transition: 'width 200ms linear' }} />
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: 'min(420px, 80vw)', marginBottom: 8 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{loadingStep}</span>
-          <span style={{ fontSize: 12, color: 'var(--accent)', fontFamily: 'monospace', fontWeight: 600 }}>{loadingProgress}%</span>
-        </div>
-      </div>
-
+    <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <div className="header-left">
-          <button className="back-button" type="button" onClick={() => { playSound('back'); onBack(); }} aria-label={backHome}>←</button>
-          <div>
-            <h1 className="page-title">{pageTitle}</h1>
-            <p className="page-subtitle">{pageDescription}</p>
-          </div>
-        </div>
+        <button className="secondary-button small-button" type="button" aria-label={backHome} onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
           <button className="secondary-button small-button" type="button" aria-label="Help" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
           <button className="secondary-button small-button" type="button" aria-label="Tutorial" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-converter'); }}>🎛 Audio Converter</button>
-          <button className="settings-trigger" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }} aria-label={openSettings}>⚙</button>
+          <button className="secondary-button small-button" type="button" aria-label={openSettings} onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
 
-      <main
-        key={isLoading ? 'splash' : 'ready'}
-        className="tool-workbench fade-up delay-2"
-        style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 360px', gap: 20, opacity: isLoading ? 0 : 1 }}
-      >
-        <div className="main-column">
-          {/* ---- Import area ---- */}
-          {!editBuffer && (
-            <div
-              className="upload-zone"
-              style={{ margin: '40px auto', maxWidth: 560, textAlign: 'center' }}
-              onDragEnter={handleDragEnter}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              {isImporting ? (
-                <div style={{ padding: '48px 32px', borderRadius: 16, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div style={{ fontSize: 32, marginBottom: 16, animation: 'spin 1.2s linear infinite' }} aria-hidden="true">⏳</div>
-                  <span className={`status-badge running`} style={{ marginBottom: 12, display: 'inline-flex' }}>Decoding audio… {importProgress}%</span>
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: `${importProgress}%` }} />
-                  </div>
+      <section className="tool-workbench fade-up delay-2">
+        <div className="tool-header">
+          <div>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+          <div className="tool-header-actions">
+            <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-converter'); }}>Audio Converter</button>
+            <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { playSound('resetSound'); resetAll(); }}>Reset All</button>
+          </div>
+        </div>
+
+        <div className="tool-grid transfer-grid">
+          <div className="tool-column">
+            {/* Import area */}
+            <section className="tool-card">
+              {!editBuffer ? (
+                <div
+                  className="upload-zone"
+                  onDragEnter={handleDragEnter}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  {isImporting ? (
+                    <div className="preview-surface">
+                      <div className="preview-empty">
+                        <span className="status-badge running">Decoding audio… {importProgress}%</span>
+                        <div className="progress-track" style={{ marginTop: 12 }}>
+                          <div className="progress-fill" style={{ width: `${importProgress}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
+                        id="audio-import"
+                        hidden
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
+                      />
+                      <label
+                        htmlFor="audio-import"
+                        className="upload-dropzone"
+                        onClick={() => playSound('buttonClick')}
+                        style={{
+                          cursor: 'pointer',
+                          display: 'block',
+                          padding: '48px 32px',
+                          border: isDragOver ? '2px solid var(--accent)' : '2px dashed var(--border)',
+                          borderRadius: 16,
+                          background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : 'rgba(255,255,255,0.03)',
+                          transition: 'border-color 200ms ease, background 200ms ease',
+                        }}
+                      >
+                        <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
+                      </label>
+                    </>
+                  )}
                 </div>
               ) : (
                 <>
-                  <input
-                    type="file"
-                    accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
-                    id="audio-import"
-                    hidden
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
-                  />
-                  <label
-                    htmlFor="audio-import"
-                    className="upload-dropzone"
-                    onClick={() => playSound('buttonClick')}
-                    style={{
-                      cursor: 'pointer',
-                      display: 'block',
-                      padding: '48px 32px',
-                      border: isDragOver ? '2px solid var(--accent)' : '2px dashed var(--border)',
-                      borderRadius: 16,
-                      background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : 'rgba(255,255,255,0.03)',
-                      transition: 'border-color 200ms ease, background 200ms ease',
-                    }}
-                  >
-                    <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden="true">🎵</div>
-                    <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
-                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
-                  </label>
+                  <div className="tool-card-header">
+                    <div>
+                      <span className="card-caption">Source</span>
+                      <h3>{fileName}</h3>
+                    </div>
+                    <div className="tool-header-actions">
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
+                        {isPlaying ? 'Pause' : 'Play'}
+                      </button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
+                        Stop
+                      </button>
+                    </div>
+                  </div>
+                  <p className="tiny-copy" style={{ marginTop: 8, marginBottom: 0 }}>
+                    {formatTime(duration)} · {editBuffer.numberOfChannels}ch, {editBuffer.sampleRate}Hz
+                  </p>
                 </>
               )}
-            </div>
-          )}
+            </section>
 
-          {editBuffer && (
-            <>
-              {/* ---- Toolbar ---- */}
-              <div className="toolbar" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
-                <span className="file-label" style={{ fontSize: 13, color: 'var(--text-secondary)', marginRight: 8 }}>
-                  {fileName} · {formatTime(duration)}
-                </span>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
-                  {isPlaying ? '⏸ Pause' : '▶ Play'}
-                </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
-                  ⏹ Stop
-                </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>
-                  ↩ Undo
-                </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>
-                  ↪ Redo
-                </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>✂ Trim</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>✂ Split</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>🗑 Delete</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>📋 Duplicate</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>🔀 Reverse</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>📉 Fade</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>📈 Normalize</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>🔊 Mono</button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>🔄 Reset FX</button>
-                <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
-                <label htmlFor="audio-reimport" className="secondary-button small-button" style={{ cursor: 'pointer' }} onClick={() => playSound('buttonClick')}>📁 New File</label>
-              </div>
-
-              {/* ---- Time display ---- */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                <span>{formatTime(currentTime)}</span>
-                <span>Zoom: {zoom.toFixed(1)}x</span>
-                <span>{formatTime(duration)}</span>
-              </div>
-
-              {/* ---- Waveform canvas ---- */}
-              <div className="waveform-container fade-up delay-3" style={{ position: 'relative', height: 220, borderRadius: 12, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', marginBottom: 16, transition: 'opacity 400ms ease, transform 400ms ease' }}>
-                <canvas
-                  ref={canvasRef}
-                  style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : 'crosshair' }}
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
-                  onClick={handleCanvasClick}
-                  onWheel={handleWheel}
-                />
-              </div>
-
-              {/* ---- Selection info ---- */}
-              {selection && (
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                  Selection: {formatTime(selection.start)} – {formatTime(selection.end)} ({formatTime(selection.end - selection.start)})
-                </div>
-              )}
-
-              {/* ---- Export section ---- */}
-              <div className="export-section" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)', marginBottom: 16 }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>💾 Export</h4>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
-                  <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Format:</label>
-                  <select
-                    className="settings-select"
-                    value={exportFormat}
-                    onChange={(e) => setExportFormat(e.target.value as typeof exportFormat)}
-                    style={{ minWidth: 160 }}
-                  >
-                    {supportedFormats.map((f: { key: string; label: string }) => (
-                      <option key={f.key} value={f.key}>{f.label}</option>
-                    ))}
-                  </select>
-                  <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting}>
-                    {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
-                  </button>
-                  <span className={`status-badge ${isExporting ? 'running' : exportProgress >= 100 ? 'success' : 'idle'}`}>
-                    {isExporting ? 'Exporting…' : exportProgress >= 100 ? 'Export complete' : 'Ready'}
-                  </span>
-                </div>
-                {(isExporting || exportProgress > 0) && (
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
+            {editBuffer && (
+              <>
+                {/* Waveform */}
+                <section className="tool-card">
+                  <div className="tool-card-header">
+                    <div>
+                      <span className="card-caption">Waveform</span>
+                      <h3>Editor</h3>
+                    </div>
                   </div>
-                )}
-              </div>
-
-              {/* ---- Effects Panel ---- */}
-              <div className="effects-panel" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
-                {/* Volume & Pan */}
-                <div className="param-card fade-up delay-3" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔊 Volume & Pan</h4>
-                  <ParamRow label="Volume" value={`${volume}%`}>
-                    <input type="range" min={0} max={200} value={volume} onChange={(e) => { playSliderSound(); setVolume(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Mute" value={isMuted ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isMuted ? 'active' : ''}`} type="button" onClick={() => { playSound(isMuted ? 'toggleOff' : 'toggleOn'); setIsMuted((v) => !v); }}>{isMuted ? 'On' : 'Off'}</button>
-                  </ParamRow>
-                  <ParamRow label="Pan (L/R)" value={`${pan > 0 ? '+' : ''}${pan}`}>
-                    <input type="range" min={-100} max={100} value={pan} onChange={(e) => { playSliderSound(); setPan(Number(e.target.value)); }} />
-                  </ParamRow>
-                </div>
-
-                {/* Speed & Pitch */}
-                <div className="param-card fade-up delay-4" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>⚡ Speed & Pitch</h4>
-                  <ParamRow label="Speed" value={`${speed}%`}>
-                    <input type="range" min={25} max={400} value={speed} onChange={(e) => { playSliderSound(); setSpeed(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Pitch (cents)" value={`${pitch > 0 ? '+' : ''}${pitch}`}>
-                    <input type="range" min={-1200} max={1200} step={10} value={pitch} onChange={(e) => { playSliderSound(); setPitch(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Reverse" value={isReversed ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isReversed ? 'active' : ''}`} type="button" onClick={() => { playSound(isReversed ? 'toggleOff' : 'toggleOn'); setIsReversed((v) => !v); }}>{isReversed ? 'On' : 'Off'}</button>
-                  </ParamRow>
-                  <ParamRow label="Loop" value={isLoop ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${isLoop ? 'active' : ''}`} type="button" onClick={() => { playSound(isLoop ? 'toggleOff' : 'toggleOn'); setIsLoop((v) => !v); }}>{isLoop ? 'On' : 'Off'}</button>
-                  </ParamRow>
-                </div>
-
-                {/* Fade */}
-                <div className="param-card fade-up delay-5" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>📉 Fade</h4>
-                  <ParamRow label="Fade In" value={`${fadeIn}s`}>
-                    <input type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => { playSliderSound(); setFadeIn(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Fade Out" value={`${fadeOut}s`}>
-                    <input type="range" min={0} max={10} step={0.1} value={fadeOut} onChange={(e) => { playSliderSound(); setFadeOut(Number(e.target.value)); }} />
-                  </ParamRow>
-                </div>
-
-                {/* EQ */}
-                <div className="param-card fade-up delay-6" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🎚 EQ</h4>
-                  <ParamRow label="Low Gain" value={`${eqLow > 0 ? '+' : ''}${eqLow}dB`}>
-                    <input type="range" min={-12} max={12} value={eqLow} onChange={(e) => { playSliderSound(); setEqLow(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Mid Gain" value={`${eqMid > 0 ? '+' : ''}${eqMid}dB`}>
-                    <input type="range" min={-12} max={12} value={eqMid} onChange={(e) => { playSliderSound(); setEqMid(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="High Gain" value={`${eqHigh > 0 ? '+' : ''}${eqHigh}dB`}>
-                    <input type="range" min={-12} max={12} value={eqHigh} onChange={(e) => { playSliderSound(); setEqHigh(Number(e.target.value)); }} />
-                  </ParamRow>
-                </div>
-
-                {/* Compressor */}
-                <div className="param-card fade-up delay-3" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔧 Compressor</h4>
-                  <ParamRow label="Threshold" value={`${compThreshold}dB`}>
-                    <input type="range" min={-60} max={0} value={compThreshold} onChange={(e) => { playSliderSound(); setCompThreshold(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Ratio" value={`${compRatio}:1`}>
-                    <input type="range" min={1} max={20} value={compRatio} onChange={(e) => { playSliderSound(); setCompRatio(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Attack" value={`${compAttack}ms`}>
-                    <input type="range" min={0} max={100} value={compAttack} onChange={(e) => { playSliderSound(); setCompAttack(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Release" value={`${compRelease}ms`}>
-                    <input type="range" min={0} max={500} value={compRelease} onChange={(e) => { playSliderSound(); setCompRelease(Number(e.target.value)); }} />
-                  </ParamRow>
-                </div>
-
-                {/* Reverb */}
-                <div className="param-card fade-up delay-4" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🌊 Reverb</h4>
-                  <ParamRow label="Room Size" value={`${reverbSize}%`}>
-                    <input type="range" min={0} max={100} value={reverbSize} onChange={(e) => { playSliderSound(); setReverbSize(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Damping" value={`${reverbDamp}%`}>
-                    <input type="range" min={0} max={100} value={reverbDamp} onChange={(e) => { playSliderSound(); setReverbDamp(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Wet/Dry" value={`${reverbMix}%`}>
-                    <input type="range" min={0} max={100} value={reverbMix} onChange={(e) => { playSliderSound(); setReverbMix(Number(e.target.value)); }} />
-                  </ParamRow>
-                </div>
-
-                {/* Noise & Normalize */}
-                <div className="param-card fade-up delay-5" style={{ padding: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                  <h4 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--accent)' }}>🔇 Noise & Normalize</h4>
-                  <ParamRow label="Noise Reduction" value={`${noiseReduction}%`}>
-                    <input type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSliderSound(); setNoiseReduction(Number(e.target.value)); }} />
-                  </ParamRow>
-                  <ParamRow label="Normalize" value={doNormalize ? 'On' : 'Off'}>
-                    <button className={`toggle-button ${doNormalize ? 'active' : ''}`} type="button" onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>{doNormalize ? 'On' : 'Off'}</button>
-                  </ParamRow>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* ---- Side panel: Logs & Results ---- */}
-        <div className="side-column" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Results */}
-          <section className="tool-card fade-up delay-3" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}>
-            <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { playSound('expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
-              <div>
-                <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Results</span>
-                <h3 style={{ margin: 0, fontSize: 15 }}>Exported Files ({exports.length})</h3>
-              </div>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isResultOpen ? '▲' : '▼'}</span>
-            </div>
-            {isResultOpen && (
-              <div style={{ padding: '0 16px 16px' }}>
-                {exports.length === 0 ? (
-                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '12px 0' }}>No exports yet. Select a format and click Export.</p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {exports.map((rec) => (
-                      <div key={rec.id} style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.03)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                          <strong style={{ fontSize: 12, color: 'var(--text-primary)' }}>{rec.fileName}</strong>
-                          <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{rec.format} · {formatBytes(rec.size)}</span>
-                        </div>
-                        <audio controls src={rec.url} style={{ width: '100%', height: 28, marginBottom: 6 }} />
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
-                          <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="audio-waveform-surface">
+                    <canvas
+                      ref={canvasRef}
+                      style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : 'crosshair' }}
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseUp}
+                      onClick={handleCanvasClick}
+                      onWheel={handleWheel}
+                    />
                   </div>
-                )}
-              </div>
+                  <div className="progress-meta">
+                    <span>{formatTime(currentTime)}</span>
+                    <strong>Zoom: {zoom.toFixed(1)}x</strong>
+                    <span>{formatTime(duration)}</span>
+                  </div>
+                  {selection && (
+                    <p className="tiny-copy" style={{ marginBottom: 0 }}>
+                      Selection: {formatTime(selection.start)} – {formatTime(selection.end)} ({formatTime(selection.end - selection.start)})
+                    </p>
+                  )}
+                </section>
+
+                {/* Edit Operations */}
+                <section className="tool-card">
+                  <div className="tool-card-header">
+                    <div>
+                      <span className="card-caption">Edit</span>
+                      <h3>Operations</h3>
+                    </div>
+                  </div>
+                  <div className="audio-action-grid">
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>Undo</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>Redo</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>Trim</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>Split</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>Delete</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>Duplicate</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>Reverse</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>Fade</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>Normalize</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>Mono</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>Reset FX</button>
+                    <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
+                    <label htmlFor="audio-reimport" className="secondary-button small-button" style={{ cursor: 'pointer' }} onClick={() => playSound('buttonClick')}>New File</label>
+                  </div>
+                </section>
+
+                {/* Export */}
+                <section className="tool-card">
+                  <div className="tool-card-header">
+                    <div>
+                      <span className="card-caption">Export</span>
+                      <h3>Export Settings</h3>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
+                    <select
+                      className="settings-input tool-select"
+                      value={exportFormat}
+                      onChange={(e) => setExportFormat(e.target.value as typeof exportFormat)}
+                    >
+                      {supportedFormats.map((f: { key: string; label: string }) => (
+                        <option key={f.key} value={f.key}>{f.label}</option>
+                      ))}
+                    </select>
+                    <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting}>
+                      {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
+                    </button>
+                    <span className={`status-badge ${isExporting ? 'running' : exportProgress >= 100 ? 'success' : 'idle'}`}>
+                      {isExporting ? 'Exporting…' : exportProgress >= 100 ? 'Export complete' : 'Ready'}
+                    </span>
+                  </div>
+                  {(isExporting || exportProgress > 0) && (
+                    <div className="progress-track">
+                      <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
+                    </div>
+                  )}
+                </section>
+
+                {/* Effects */}
+                <section className="tool-card">
+                  <div className="tool-card-header">
+                    <div>
+                      <span className="card-caption">Effects</span>
+                      <h3>Parameters</h3>
+                    </div>
+                  </div>
+                  <div className="form-grid two-column">
+                    <ParamRow label="Volume" value={`${volume}%`}>
+                      <input className="tool-range" type="range" min={0} max={200} value={volume} onChange={(e) => { playSliderSound(); setVolume(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Pan (L/R)" value={`${pan > 0 ? '+' : ''}${pan}`}>
+                      <input className="tool-range" type="range" min={-100} max={100} value={pan} onChange={(e) => { playSliderSound(); setPan(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Speed" value={`${speed}%`}>
+                      <input className="tool-range" type="range" min={25} max={400} value={speed} onChange={(e) => { playSliderSound(); setSpeed(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Pitch (cents)" value={`${pitch > 0 ? '+' : ''}${pitch}`}>
+                      <input className="tool-range" type="range" min={-1200} max={1200} step={10} value={pitch} onChange={(e) => { playSliderSound(); setPitch(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Fade In" value={`${fadeIn}s`}>
+                      <input className="tool-range" type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => { playSliderSound(); setFadeIn(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Fade Out" value={`${fadeOut}s`}>
+                      <input className="tool-range" type="range" min={0} max={10} step={0.1} value={fadeOut} onChange={(e) => { playSliderSound(); setFadeOut(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Low Gain" value={`${eqLow > 0 ? '+' : ''}${eqLow}dB`}>
+                      <input className="tool-range" type="range" min={-12} max={12} value={eqLow} onChange={(e) => { playSliderSound(); setEqLow(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Mid Gain" value={`${eqMid > 0 ? '+' : ''}${eqMid}dB`}>
+                      <input className="tool-range" type="range" min={-12} max={12} value={eqMid} onChange={(e) => { playSliderSound(); setEqMid(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="High Gain" value={`${eqHigh > 0 ? '+' : ''}${eqHigh}dB`}>
+                      <input className="tool-range" type="range" min={-12} max={12} value={eqHigh} onChange={(e) => { playSliderSound(); setEqHigh(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Threshold" value={`${compThreshold}dB`}>
+                      <input className="tool-range" type="range" min={-60} max={0} value={compThreshold} onChange={(e) => { playSliderSound(); setCompThreshold(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Ratio" value={`${compRatio}:1`}>
+                      <input className="tool-range" type="range" min={1} max={20} value={compRatio} onChange={(e) => { playSliderSound(); setCompRatio(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Attack" value={`${compAttack}ms`}>
+                      <input className="tool-range" type="range" min={0} max={100} value={compAttack} onChange={(e) => { playSliderSound(); setCompAttack(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Release" value={`${compRelease}ms`}>
+                      <input className="tool-range" type="range" min={0} max={500} value={compRelease} onChange={(e) => { playSliderSound(); setCompRelease(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Room Size" value={`${reverbSize}%`}>
+                      <input className="tool-range" type="range" min={0} max={100} value={reverbSize} onChange={(e) => { playSliderSound(); setReverbSize(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Damping" value={`${reverbDamp}%`}>
+                      <input className="tool-range" type="range" min={0} max={100} value={reverbDamp} onChange={(e) => { playSliderSound(); setReverbDamp(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Wet/Dry" value={`${reverbMix}%`}>
+                      <input className="tool-range" type="range" min={0} max={100} value={reverbMix} onChange={(e) => { playSliderSound(); setReverbMix(Number(e.target.value)); }} />
+                    </ParamRow>
+                    <ParamRow label="Noise Reduction" value={`${noiseReduction}%`}>
+                      <input className="tool-range" type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSliderSound(); setNoiseReduction(Number(e.target.value)); }} />
+                    </ParamRow>
+                  </div>
+                  <div className="toggle-grid" style={{ marginTop: 12 }}>
+                    <button className={`toggle-chip ${isMuted ? 'active' : ''}`} type="button" onClick={() => { playSound(isMuted ? 'toggleOff' : 'toggleOn'); setIsMuted((v) => !v); }}>
+                      <span className="toggle-chip-dot" /> Mute
+                    </button>
+                    <button className={`toggle-chip ${isReversed ? 'active' : ''}`} type="button" onClick={() => { playSound(isReversed ? 'toggleOff' : 'toggleOn'); setIsReversed((v) => !v); }}>
+                      <span className="toggle-chip-dot" /> Reverse
+                    </button>
+                    <button className={`toggle-chip ${isLoop ? 'active' : ''}`} type="button" onClick={() => { playSound(isLoop ? 'toggleOff' : 'toggleOn'); setIsLoop((v) => !v); }}>
+                      <span className="toggle-chip-dot" /> Loop
+                    </button>
+                    <button className={`toggle-chip ${doNormalize ? 'active' : ''}`} type="button" onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>
+                      <span className="toggle-chip-dot" /> Normalize
+                    </button>
+                  </div>
+                </section>
+              </>
             )}
-          </section>
+          </div>
 
-          {/* Logs */}
-          <section className="tool-card fade-up delay-4" style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'rgba(255,255,255,0.02)', overflow: 'hidden', flex: 1, minHeight: 200 }}>
-            <div className="tool-card-header" style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { playSound('expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
-              <div>
-                <span style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Debug</span>
-                <h3 style={{ margin: 0, fontSize: 15 }}>Workflow Logs ({logs.length})</h3>
-              </div>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isLogsOpen ? '▲' : '▼'}</span>
-            </div>
-            {isLogsOpen && (
-              <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
-                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText); }}>Copy</button>
-                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url); }}>Download</button>
-                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>
+          <div className="tool-column side">
+            {/* Results */}
+            <section className="tool-card">
+              <div
+                className="tool-card-header"
+                style={{ cursor: 'pointer' }}
+                onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isResultOpen}
+              >
+                <div>
+                  <span className="card-caption">Results</span>
+                  <h3>Exported Files ({exports.length})</h3>
                 </div>
-                <div style={{ maxHeight: 320, overflowY: 'auto', fontSize: 11, fontFamily: 'monospace', lineHeight: 1.5 }}>
-                  {logs.length === 0 ? (
-                    <span style={{ color: 'var(--text-secondary)' }}>No logs yet.</span>
+                <span className="collapsible-state">{isResultOpen ? 'Hide' : 'Show'}</span>
+              </div>
+              {isResultOpen && (
+                <div>
+                  {exports.length === 0 ? (
+                    <p className="tiny-copy" style={{ margin: '12px 0', opacity: 0.6 }}>No exports yet. Select a format and click Export.</p>
                   ) : (
-                    logs.map((log, i) => (
-                      <div key={i} style={{ color: log.level === 'error' ? '#f45a5a' : log.level === 'success' ? '#4ade80' : log.level === 'debug' ? '#94a3b8' : 'var(--text-primary)' }}>
-                        [{log.time}] <strong>{log.level.toUpperCase()}</strong>: {log.text}
-                      </div>
-                    ))
+                    <div className="audio-export-list">
+                      {exports.map((rec) => (
+                        <div key={rec.id} className="audio-export-item">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <strong style={{ fontSize: 12, color: 'var(--text-primary)' }}>{rec.fileName}</strong>
+                            <span className="tiny-copy" style={{ fontFamily: 'monospace' }}>{rec.format} · {formatBytes(rec.size)}</span>
+                          </div>
+                          <audio controls src={rec.url} style={{ width: '100%', height: 28, marginBottom: 6 }} />
+                          <div className="mini-action-row">
+                            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
+                            <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-              </div>
-            )}
-          </section>
-        </div>
-      </main>
+              )}
+            </section>
 
-      {/* ---- Error panel ---- */}
+            {/* Logs */}
+            <section className="tool-card">
+              <div
+                className="tool-card-header"
+                style={{ cursor: 'pointer' }}
+                onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isLogsOpen}
+              >
+                <div>
+                  <span className="card-caption">Debug</span>
+                  <h3>Workflow Logs ({logs.length})</h3>
+                </div>
+                <span className="collapsible-state">{isLogsOpen ? 'Hide' : 'Show'}</span>
+              </div>
+              {isLogsOpen && (
+                <div className="tool-card-section">
+                  <div className="tool-header-actions" style={{ marginBottom: 8 }}>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText); }}>Copy</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url); }}>Download</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>
+                  </div>
+                  <div className="log-scroll">
+                    {logs.length === 0 ? (
+                      <p className="log-empty">No logs yet.</p>
+                    ) : (
+                      logs.map((log, i) => (
+                        <div key={i} className={`log-line log-${log.level}`}>
+                          <span className="log-time">{log.time}</span>
+                          <span className={`log-badge ${log.level}`}>{log.level}</span>
+                          <span className="log-text">{log.text}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+      </section>
+
       <DraggableErrorPanel
         error={errors[0] ? { code: errors[0].code, stage: 'audio-editor', message: errors[0].message, hint: errors[0].hint, details: {} } : null}
         labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
@@ -1671,7 +1647,7 @@ export function AudioEditorPage({
         onOpenDocs={(code) => onOpenDocs?.('audio-editor', undefined, code)}
         docAnchor={errors[0]?.code}
       />
-    </div>
+    </main>
   );
 }
 
@@ -1681,10 +1657,12 @@ export function AudioEditorPage({
 
 function ParamRow({ label, value, children }: { label: string; value: string; children: React.ReactNode }) {
   return (
-    <div className="param-row" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-      <label style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 90, flexShrink: 0 }}>{label}</label>
-      <div style={{ flex: 1 }}>{children}</div>
-      <span style={{ fontSize: 12, color: 'var(--text-primary)', minWidth: 60, textAlign: 'right', fontFamily: 'monospace' }}>{value}</span>
-    </div>
+    <label className="field">
+      <div className="field-title-row">
+        <span>{label}</span>
+        <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{value}</span>
+      </div>
+      {children}
+    </label>
   );
 }
