@@ -10111,3 +10111,4 @@ export { AudioEditorPage } from './AudioEditorPage';
 export { AudioConverterPage } from './AudioConverterPage';
 export { AssetGalleryPage } from './AssetGalleryPage';
 export { RelationshipWebPage } from './RelationshipWebPage';
+export { default as CharacterCardPage } from './CharacterCardPage';

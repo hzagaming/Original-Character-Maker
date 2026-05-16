@@ -3707,6 +3707,63 @@ Key capabilities:
           prevention: 'Regularly back up your relationship web data.',
         },
       ],
+    {
+      id: 'character-card',
+      title: 'Character Card',
+      overview: `The Character Card Exporter lets you combine character information, artwork, profile fields, tags, and relationship data into a beautiful, shareable PNG card. Choose from three templates (Minimal, Detailed, Gallery), customize theme colors and backgrounds, and export with one click.
+
+Key capabilities:
+· Three Card Templates — Minimal (compact portrait card), Detailed (full profile with hero image), Gallery (centered showcase with relation grid)
+· Asset Gallery Integration — Select avatar and main visual images directly from your Asset Gallery
+· Relationship Web Integration — Optionally import related characters and their relationship types automatically
+· Custom Profile Fields — Add any number of labeled fields (age, height, birthday, personality, etc.)
+· Tags & Colors — Assign colored tags to categorize your character
+· Theme Customization — Choose accent color from 19 presets; pick background style (solid, gradient, or dot pattern)
+· One-Click Export — Renders the card at 2× resolution via html-to-image and downloads as PNG`,
+      buttons: [
+        { name: 'Export Card', description: 'Render the current card preview as a high-resolution PNG image and download it to your device.' },
+        { name: 'Select Avatar', description: 'Open the Asset Gallery picker to choose a square avatar image for the card.' },
+        { name: 'Select Main Visual', description: 'Open the Asset Gallery picker to choose a hero/banner image for detailed and gallery templates.' },
+        { name: 'Add Tag', description: 'Create a new colored tag. A random color is assigned automatically.' },
+        { name: 'Add Field', description: 'Add a new custom profile field with a label and value.' },
+        { name: 'Remove Field / Tag', description: 'Delete a specific profile field or tag from the card.' },
+        { name: 'Template Switch', description: 'Switch between Minimal, Detailed, and Gallery card layouts.' },
+        { name: 'Background Style', description: 'Toggle between solid background, accent-gradient overlay, and dot-pattern overlay.' },
+      ],
+      parameters: [
+        { name: 'Character Name', description: 'The primary display name of the character on the card.', tips: 'Required. The export button is disabled until a name is entered.' },
+        { name: 'Alias', description: 'An optional secondary name or nickname.', tips: 'Leave empty if the character has no alias.' },
+        { name: 'Theme Color', description: 'The accent color used for borders, highlights, and gradient backgrounds.', tips: 'Pick a color that complements the character\'s artwork.' },
+        { name: 'Character Bio', description: 'A free-text description or backstory displayed on the card.', tips: 'Keep it concise for the Minimal template; Detailed and Gallery templates have more room.' },
+        { name: 'Import Relations', description: 'When enabled, the tool reads the Relationship Web data and auto-fills related characters.', tips: 'The tool looks for a node whose name exactly matches the Character Name field.' },
+        { name: 'Template', description: 'The visual layout of the exported card.', tips: 'Detailed is best for full profiles; Gallery is best for visually-focused showcases.' },
+      ],
+      errors: [
+        {
+          code: 'NO_NAME',
+          message: 'Character name is empty',
+          severity: 'warning',
+          category: 'B. Settings & Data',
+          location: 'Page: Character Card → Area: Export button',
+          cause: 'The Export button was clicked before entering a character name.',
+          solution: 'Enter at least one character in the Character Name field.',
+          steps: ['Click the Character Name input', 'Type a name', 'Click Export Card again'],
+          relatedCodes: [],
+          prevention: 'N/A',
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: 'Card export failed',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: Character Card → Area: Export',
+          cause: 'The browser blocked the image render, the preview DOM was detached, or html-to-image encountered a cross-origin image.',
+          solution: 'Ensure all selected images are from the Asset Gallery (data URLs). Try re-selecting images or reload the page.',
+          steps: ['Check that images still exist in Asset Gallery', 'Re-select the avatar/main image', 'Click Export again'],
+          relatedCodes: [],
+          prevention: 'Only use images imported into the Asset Gallery to avoid CORS issues.',
+        },
+      ],
     },
     {
       id: 'settings-guide',

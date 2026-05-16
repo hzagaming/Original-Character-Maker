@@ -17,7 +17,7 @@ import type {
   ThemeDepth,
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage } from './workflowPages';
+import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage, CharacterCardPage } from './workflowPages';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.7.8';
+const VERSION = '1.7.9';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -77,6 +77,7 @@ type Messages = {
   featureAudioConverter: string;
   featureAssetGallery: string;
   featureRelationshipWeb: string;
+  featureCharacterCard: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -107,6 +108,7 @@ type Messages = {
   actionAudioConverter: string;
   actionAssetGallery: string;
   actionRelationshipWeb: string;
+  actionCharacterCard: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -228,6 +230,8 @@ type Messages = {
   pageAssetGalleryDescription: string;
   pageRelationshipWebTitle: string;
   pageRelationshipWebDescription: string;
+  pageCharacterCardTitle: string;
+  pageCharacterCardDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -487,6 +491,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioConverter: '音频格式转换',
     featureAssetGallery: '角色资产库',
     featureRelationshipWeb: '角色关系网',
+    featureCharacterCard: '角色设定卡',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -517,6 +522,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioConverter: '音频格式转换',
     actionAssetGallery: '角色资产库',
     actionRelationshipWeb: '角色关系网',
+    actionCharacterCard: '角色设定卡',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -602,10 +608,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.7.8 对角色关系网进行全面审计修复：触摸事件支持、性能优化（O(n×m)→O(n+m)）、可访问性增强（focus-visible/键盘导航）、移动端底部抽屉适配、5 语言文档补全、数据验证强化。',
-    announcementList1: '性能与可访问性：edgePaths 与 galleryCache 改为 Map 实现，复杂度大幅降低；所有交互元素新增 focus-visible 焦点环；节点支持 Enter/Space 选中、Shift+Enter 快速加边；模态框 autoFocus；色板与 chip 添加 aria-pressed。',
-    announcementList2: '移动端与数据安全：完整触摸事件支持（单指平移画布、拖拽节点）；移动端侧边栏改为底部抽屉，选中时自动滑出；loadEdges 增加字段校验与类型回退；useBeforeUnloadGuard 同时监听节点和边变化。',
-    announcementList3: '文档与翻译补全：为 relationship-web 补充 5 语言完整手册条目；韩语补全 actionRelationshipWeb；移除所有语言中过时的硬编码计数文案；CSS 修复 flex 布局、box-shadow 动画改为 transform、头像边框使用 theme-aware 变量。版本号同步为 1.7.8。',
+    announcementDescription: 'v1.7.9 新增角色设定卡导出器：将角色信息、立绘、设定和关系整合为精美 PNG 卡片，支持 3 种模板、19 种主题色、3 种背景样式，与资产库和关系网深度联动，一键导出。',
+    announcementList1: '角色设定卡：从资产库选择头像和主视觉图，填写名称、别名、简介和自定义设定字段，添加彩色标签；自动从关系网导入关联角色生成关系摘要。三种模板（简约/详细/画廊）满足不同展示需求。',
+    announcementList2: '样式与导出：19 种预设主题色，3 种背景样式（纯色/渐变/点阵）；html-to-image 以 2 倍分辨率渲染透明背景 PNG，可直接下载分享。卡片排版自适应亮色/暗色主题，支持社交媒体和印刷用途。',
+    announcementList3: '完整集成与可访问性：新增 FeatureScreen 路由、ActionIcon SVG、StartModal 入口、HomeScreen 工作流列表；5 语言完整翻译和手册文档；全页面 SFX 音效覆盖。上一版本 v1.7.8 完成了关系网全面审计修复。版本号同步为 1.7.9。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -639,6 +645,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAssetGalleryDescription: '集中管理所有角色创作素材，支持图片、音频、GIF 等多种格式的导入、预览、分类筛选与批量下载。',
     pageRelationshipWebTitle: '角色关系网',
     pageRelationshipWebDescription: '可视化创建和管理多个角色之间的关系网络，支持从资产库导入头像，构建完整的角色关系图谱。',
+    pageCharacterCardTitle: '角色设定卡',
+    pageCharacterCardDescription: '将角色信息、立绘、设定和关系整合为精美的设定卡图片，支持多种模板和主题样式，一键导出 PNG 分享。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -885,6 +893,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioConverter: 'オーディオ変換',
     featureAssetGallery: 'キャラクターアセット',
     featureRelationshipWeb: 'キャラ関係図',
+    featureCharacterCard: 'キャラ設定カード',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -915,6 +924,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioConverter: 'オーディオ変換',
     actionAssetGallery: 'キャラクターアセット',
     actionRelationshipWeb: 'キャラ関係図',
+    actionCharacterCard: 'キャラ設定カード',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1000,10 +1010,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.7.8 キャラ関係図の全面監査・修正：タッチイベント対応、パフォーマンス最適化（O(n×m)→O(n+m)）、アクセシビリティ強化（focus-visible/キーボードナビ）、モバイル底部ドロワー対応、5 言語ドキュメント補完、データ検証強化。',
-    announcementList1: 'パフォーマンスとアクセシビリティ：edgePaths と galleryCache を Map 化し計算量を大幅削減。全インタラクティブ要素に focus-visible フォーカスリング追加。ノードは Enter/Space で選択、Shift+Enter でクイックエッジ追加。モーダル autoFocus。スウォッチと chip に aria-pressed 追加。',
-    announcementList2: 'モバイルとデータ安全：完全なタッチイベント対応（1 指パン、ノードドラッグ）。モバイルサイドパネルを底部ドロワー化、選択時に自動スライド。loadEdges にフィールド検証とタイプフォールバック追加。useBeforeUnloadGuard がノードとエッジ双方を監視。',
-    announcementList3: 'ドキュメントと翻訳補完：relationship-web に 5 言語完全マニュアルエントリーを追加。韓国語に actionRelationshipWeb を補完。全言語から古いハードコード数値文案を削除。CSS で flex レイアウト修正、box-shadow アニメを transform に変更、アバター枠線を theme-aware 変数化。バージョンを 1.7.8 に同期。',
+    announcementDescription: 'v1.7.9 キャラ設定カードエクスポーターを新規追加：キャラ情報、立ち絵、設定、関係を統合した美しい PNG カードを作成。3 種類のテンプレート、19 種類のテーマカラー、3 種類の背景スタイルに対応。アセットライブラリと関係図と連携し、ワンクリックで出力。',
+    announcementList1: 'キャラ設定カード：アセットライブラリからアイコンとメインビジュアルを選択し、名前、別名、紹介文、任意の設定項目、カラータグを入力。関係図から関連キャラを自動インポートして関係サマリーを生成。3 種類のテンプレート（シンプル/詳細/ギャラリー）で異なる展示ニーズに対応。',
+    announcementList2: 'スタイルと出力：19 種類のテーマカラー、3 種類の背景スタイル（単色/グラデ/ドット）。html-to-image で 2 倍解像度・透明背景の PNG をレンダリングし、ワンクリックでダウンロード。カードレイアウトは明暗テーマに自動適合し、SNS や印刷に利用可能。',
+    announcementList3: '完全統合とアクセシビリティ：新規 FeatureScreen ルート、ActionIcon SVG、StartModal 入口、HomeScreen ワークフローリストを追加。5 言語完全翻訳とマニュアルドキュメント。全ページ SFX 効果音カバー。前バージョン v1.7.8 で関係図の全面監査修正を完了。バージョンを 1.7.9 に同期。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1035,6 +1045,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterDescription: '音声ファイルをインポートし、フォーマット変換、サンプリングレート/ビット深度/チャンネル数の調整、音量増幅、スピード変換、ピッチシフト、ノーマライズ、ノイズリダクションに対応。',
     pageRelationshipWebTitle: 'キャラクター関係図',
     pageRelationshipWebDescription: '複数キャラクターの関係ネットワークを視覚的に作成・管理。アセットライブラリからアイコンをインポートして、完全なキャラ関係図を構築できます。',
+    pageCharacterCardTitle: 'キャラ設定カード',
+    pageCharacterCardDescription: 'キャラ情報、立ち絵、設定、関係を統合した設定カード画像を作成。複数テンプレートとテーマに対応し、ワンクリックで PNG を出力して共有できます。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1281,6 +1293,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioConverter: 'Audio Converter',
     featureAssetGallery: 'Asset Gallery',
     featureRelationshipWeb: 'Relationship Web',
+    featureCharacterCard: 'Character Card',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1311,6 +1324,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioConverter: 'Audio Converter',
     actionAssetGallery: 'Asset Gallery',
     actionRelationshipWeb: 'Relationship Web',
+    actionCharacterCard: 'Character Card',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1396,10 +1410,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.7.8 Deep audit & fix for OC Relationship Web: touch event support, performance optimization (O(n×m)→O(n+m)), accessibility enhancements (focus-visible/keyboard nav), mobile bottom-sheet adapter, 5-language docs completion, data validation hardening.',
-    announcementList1: 'Performance & accessibility: edgePaths and galleryCache switched to Map implementations for major complexity reduction. All interactive elements gain focus-visible focus rings. Nodes support Enter/Space select, Shift+Enter quick-add edge. Modal autoFocus. Swatches and chips get aria-pressed.',
-    announcementList2: 'Mobile & data safety: Full touch event support (single-finger pan, node drag). Mobile side panel converted to bottom sheet, auto-sliding on selection. loadEdges gains field validation with type fallback. useBeforeUnloadGuard now watches both nodes and edges.',
-    announcementList3: 'Docs & translation completion: Added full relationship-web manual entries in 5 languages. Korean actionRelationshipWeb completed. Removed outdated hardcoded count copy across all languages. CSS fixes: flex layout, box-shadow animation replaced with transform, avatar borders use theme-aware variables. Version synchronized to 1.7.8.',
+    announcementDescription: 'v1.7.9 New: Character Card Exporter — combine character info, artwork, profile fields and relationships into a beautiful shareable PNG card. 3 templates, 19 theme colors, 3 background styles. Deep integration with Asset Gallery and Relationship Web. One-click export.',
+    announcementList1: 'Character Card Exporter: Select avatar and main visual from Asset Gallery, fill in name, alias, bio and custom profile fields, add colored tags. Auto-import related characters from Relationship Web to generate a relation summary. Three templates (Minimal/Detailed/Gallery) for different showcase needs.',
+    announcementList2: 'Style & export: 19 preset theme colors, 3 background styles (solid/gradient/dots). html-to-image renders the card at 2× resolution with transparent background PNG for direct download and sharing. Card layout auto-adapts to light/dark themes, suitable for social media and print.',
+    announcementList3: 'Full integration & accessibility: New FeatureScreen route, ActionIcon SVG, StartModal entry, HomeScreen workflow list. Complete 5-language translations and manual docs. Full-page SFX coverage. Previous v1.7.8 completed the deep audit fix for Relationship Web. Version synchronized to 1.7.9.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1431,6 +1445,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterDescription: 'Import audio files and convert formats, adjust sample rate, bit depth, and channel count. Supports volume gain, speed change, pitch shift, normalization, and noise reduction.',
     pageRelationshipWebTitle: 'OC Relationship Web',
     pageRelationshipWebDescription: 'Visually create and manage relationship networks between multiple characters. Import avatars from the Asset Gallery to build a complete character relationship map.',
+    pageCharacterCardTitle: 'Character Card',
+    pageCharacterCardDescription: 'Combine character info, artwork, profile fields and relationships into a beautiful showcase card. Supports multiple templates and themes, export PNG with one click.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1677,6 +1693,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureAudioConverter: 'Конвертер аудио',
     featureAssetGallery: 'Галерея активов',
     featureRelationshipWeb: 'Сеть отношений',
+    featureCharacterCard: 'Карточка персонажа',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1707,6 +1724,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionAudioConverter: 'Конвертер аудио',
     actionAssetGallery: 'Галерея активов',
     actionRelationshipWeb: 'Сеть отношений',
+    actionCharacterCard: 'Карточка персонажа',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1792,10 +1810,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.7.8 Глубокий аудит и исправление сети отношений: поддержка touch-событий, оптимизация производительности (O(n×m)→O(n+m)), улучшение доступности (focus-visible/клавиатурная навигация), адаптация мобильного bottom-sheet, документация на 5 языках, усиление валидации данных.',
-    announcementList1: 'Производительность и доступность: edgePaths и galleryCache переведены на Map, значительно снижена вычислительная сложность. Все интерактивные элементы получили focus-visible кольца фокуса. Узлы поддерживают выбор Enter/Space, быстрое добавление связи Shift+Enter. Модальные окна с автофокусом. Суотчи и чипы получили aria-pressed.',
-    announcementList2: 'Мобильные устройства и безопасность данных: полная поддержка touch-событий (панорама одним пальцем, перетаскивание узлов). Боковая панель на мобильных преобразована в bottom sheet с автоматическим выдвижением при выборе. loadEdges усилен валидацией полей и fallback типа. useBeforeUnloadGuard теперь следит и за узлами, и за связями.',
-    announcementList3: 'Документация и переводы: добавлены полные записи справочника relationship-web на 5 языках. Дополнен корейский actionRelationshipWeb. Удалены устаревшие жёстко закодированные числовые фразы во всех языках. CSS-исправления: flex-раскладка, анимация box-shadow заменена на transform, границы аватаров используют theme-aware переменные. Версия синхронизирована с 1.7.8.',
+    announcementDescription: 'v1.7.9 Новое: Экспортёр карточек персонажей — объединяйте информацию, арты, поля профиля и связи персонажа в красивую PNG-карточку. 3 шаблона, 19 цветов темы, 3 стиля фона. Глубокая интеграция с галереей активов и сетью отношений. Экспорт одним кликом.',
+    announcementList1: 'Карточка персонажа: выбирайте аватар и главное изображение из галереи активов, заполняйте имя, псевдоним, био и произвольные поля профиля, добавляйте цветные теги. Автоимпорт связанных персонажей из сети отношений для генерации сводки. Три шаблона (минимальный/подробный/галерея) для разных задач.',
+    announcementList2: 'Стили и экспорт: 19 предустановленных цветов темы, 3 стиля фона (сплошной/градиент/точки). html-to-image рендерит карточку в 2× разрешении с прозрачным фоном PNG для скачивания и публикации. Вёрстка адаптируется к светлой/тёмной теме, подходит для соцсетей и печати.',
+    announcementList3: 'Полная интеграция и доступность: добавлены новый маршрут FeatureScreen, ActionIcon SVG, вход StartModal, список рабочих процессов HomeScreen. Полные переводы и справочная документация на 5 языках. Полное покрытие SFX. Предыдущая v1.7.8 завершила глубокий аудит сети отношений. Версия синхронизирована с 1.7.9.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1827,6 +1845,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageAudioConverterDescription: 'Импортируйте аудиофайлы и конвертируйте форматы, настройте частоту дискретизации, битовую глубину и количество каналов. Поддерживает усиление громкости, изменение скорости, сдвиг тона, нормализацию и шумоподавление.',
     pageRelationshipWebTitle: 'Сеть отношений персонажей',
     pageRelationshipWebDescription: 'Визуально создавайте и управляйте сетями отношений между персонажами. Импортируйте аватары из галереи активов для построения полной карты отношений.',
+    pageCharacterCardTitle: 'Карточка персонажа',
+    pageCharacterCardDescription: 'Объедините информацию о персонаже, арт, профиль и связи в красивую карточку. Поддерживает несколько шаблонов и тем; экспортируйте PNG одним кликом.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2482,7 +2502,9 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureAudioConverter: '오디오 변환기',
     featureAssetGallery: '에셋 갤러리',
     featureRelationshipWeb: '캐릭터 관계망',
+    featureCharacterCard: '캐릭터 설정 카드',
     actionRelationshipWeb: '캐릭터 관계망',
+    actionCharacterCard: '캐릭터 설정 카드',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2501,10 +2523,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageAssetGalleryDescription: '캐릭터 제작 에셋을 한 곳에서 관리합니다. 이미지, 오디오, GIF 등의 가져오기, 미리보기, 분류 필터링 및 일괄 다운로드를 지원합니다.',
     pageRelationshipWebTitle: '캐릭터 관계망',
     pageRelationshipWebDescription: '여러 캐릭터 간의 관계 네트워크를 시각적으로 생성하고 관리합니다. 에셋 갤러리에서 아바타를 가져와 완전한 캐릭터 관계 지도를 구축하세요.',
-    announcementDescription: 'v1.7.8 캐릭터 관계망 전면 감사 및 수정: 터치 이벤트 지원, 성능 최적화(O(n×m)→O(n+m)), 접근성 강화(focus-visible/키보드 네비), 모바일 하단 서랍 적용, 5개 언어 문서 보완, 데이터 검증 강화.',
-    announcementList1: '성능 및 접근성: edgePaths와 galleryCache를 Map으로 전환하여 계산량을 대폭 감소. 모든 인터랙티브 요소에 focus-visible 포커스 링 추가. 노드는 Enter/Space로 선택, Shift+Enter로 빠른 관계 추가 지원. 모달 autoFocus. 스와치와 chip에 aria-pressed 추가.',
-    announcementList2: '모바일 및 데이터 안전: 완전한 터치 이벤트 지원(한 손가띴 팬, 노드 드래그). 모바일 사이드 패널을 하단 서랍으로 전환, 선택 시 자동 슬라이드. loadEdges에 필드 검증 및 타입 폴잭 추가. useBeforeUnloadGuard가 노드와 엣지를 동시에 감시.',
-    announcementList3: '문서 및 번역 보완: relationship-web에 5개 언어 완전 매뉴얼 항목 추가. 한국어 actionRelationshipWeb 보완. 모든 언어에서 오래된 하드코딩 수량 문구 제거. CSS 수정: flex 레이아웃, box-shadow 애니메이션을 transform으로 교체, 아바타 테두리를 theme-aware 변수 사용. 버전을 1.7.8로 동기화.'
+    pageCharacterCardTitle: '캐릭터 설정 카드',
+    pageCharacterCardDescription: '캐릭터 정보, 일러스트, 설정 및 관계를 아름다운 설정 카드 이미지로 통합합니다. 다양한 템플릿과 테마를 지원하며 한 번의 클릭으로 PNG를 낳아올 수 있습니다.',
+    announcementDescription: 'v1.7.9 신규: 캐릭터 설정 카드 익스포터 — 캐릭터 정보, 일러스트, 설정 항목 및 관계를 아름다운 PNG 카드로 통합합니다. 3가지 템플릿, 19가지 테마 색상, 3가지 배경 스타일. 에셋 갤러리 및 관계망과 심층 연동. 한 번의 클릭으로 낳아오기.',
+    announcementList1: '캐릭터 설정 카드: 에셋 갤러리에서 아바타와 메인 비주얼을 선택하고, 이름, 별명, 소개, 사용자 정의 설정 항목, 컬러 태그를 입력합니다. 관계망에서 관련 캐릭터를 자동으로 가져와 관계 요약을 생성합니다. 세 가지 템플릿(심플/상세/갤러리)로 다양한 전시 요구에 부응합니다.',
+    announcementList2: '스타일 및 낳아오기: 19가지 프리셋 테마 색상, 3가지 배경 스타일(단색/그라데이션/도트). html-to-image로 2배 해상도 투명 배경 PNG를 렌더링하여 직접 다운로드하고 공유할 수 있습니다. 카드 레이아웃은 밝은/어두운 테마에 자동 적응하며 SNS 및 인쇄에 적합합니다.',
+    announcementList3: '완전 통합 및 접근성: 새로운 FeatureScreen 경로, ActionIcon SVG, StartModal 진입, HomeScreen 워크플로 리스트 추가. 5개 언어 완전 번역 및 매뉴얼 문서. 전체 페이지 SFX 효과음 커버리지. 이전 버전 v1.7.8에서 관계망 전면 감사 수정을 완료했습니다. 버전을 1.7.9로 동기화.'
   },
   fr: {
     ...translations.en,
@@ -2695,6 +2719,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.7.9',
+    date: '2026-05-16',
+    title: '1.7.9 新增角色设定卡导出器（Character Card Exporter）',
+    summary:
+      '全新上线 OC 角色设定卡功能，支持将角色信息、立绘、设定字段和关系网数据整合为精美的可分享 PNG 卡片。提供 3 种模板、19 种主题色、3 种背景样式，与资产库和关系网深度联动，一键导出。',
+    details: [
+      '角色设定卡：支持从资产库选择头像和主视觉图，填写角色名称、别名、简介和任意数量的自定义设定字段（年龄、身高、性格等），添加彩色标签；自动从角色关系网导入关联角色，生成关系摘要。',
+      '三种精美模板：简约卡（Minimal）——紧凑纵向名片风格，适合快速分享；详细卡（Detailed）——顶部大图+头像+信息网格+关系列表，适合完整角色档案；画廊卡（Gallery）——居中头像+主视觉+字段网格，适合视觉展示。',
+      '样式自定义：19 种预设主题色，3 种背景样式（纯色/渐变/点阵）；卡片圆角、阴影、排版均经过精心设计，支持亮色和暗色主题自适应。',
+      '一键导出：基于 html-to-image 以 2 倍分辨率渲染卡片为透明背景 PNG，可直接下载并在社交媒体、创作平台或印刷品中使用。所有数据保存在 localStorage。',
+      '完整集成：新增 FeatureScreen 路由、ActionIcon SVG、StartModal 入口、HomeScreen 工作流列表；5 语言完整翻译和手册文档；全页面 SFX 音效覆盖。',
+    ],
+  },
   {
     version: '1.7.8',
     date: '2026-05-16',
@@ -4340,6 +4378,12 @@ function App() {
           pageTitle={messages.pageRelationshipWebTitle}
           pageDescription={messages.pageRelationshipWebDescription}
         />
+      ) : screen === 'character-card' ? (
+        <CharacterCardPage
+          {...sharedPageProps}
+          pageTitle={messages.pageCharacterCardTitle}
+          pageDescription={messages.pageCharacterCardDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4528,6 +4572,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('relationship-web')}>
                 <ActionIcon kind="relationship-web" />
                 <span>{messages.featureRelationshipWeb}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-card')}>
+                <ActionIcon kind="character-card" />
+                <span>{messages.featureCharacterCard}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5979,7 +6027,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6093,6 +6141,14 @@ function ActionIcon({
         <path d="M12 29l14 0" strokeDasharray="2 2" />
       </>
     ),
+    'character-card': (
+      <>
+        <rect x="6" y="4" width="28" height="36" rx="4" />
+        <circle cx="20" cy="14" r="6" />
+        <path d="M10 28h20" strokeDasharray="2 2" />
+        <path d="M10 32h14" strokeDasharray="2 2" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6201,6 +6257,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('relationship-web')}>
             <ActionIcon kind="relationship-web" />
             <strong>{messages.actionRelationshipWeb}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('character-card')}>
+            <ActionIcon kind="character-card" />
+            <strong>{messages.actionCharacterCard}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
