@@ -45,6 +45,7 @@ a {
 .app-shell {
   --accent-rgb: 79, 157, 247;
   --accent-solid: #4f9df7;
+  --accent: var(--accent-solid);
   --accent-soft: rgba(var(--accent-rgb), 0.14);
   --accent-soft-strong: rgba(var(--accent-rgb), 0.26);
   --ui-contrast: 100%;
@@ -2352,7 +2353,7 @@ input[type='range']:active::-moz-range-thumb {
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
@@ -4947,7 +4948,7 @@ input[type='range']:active::-moz-range-thumb {
 }
 
 .docs-search-input::placeholder {
-  color: var(--text-muted);
+  color: var(--muted);
 }
 
 .docs-search-input:focus {
@@ -4976,7 +4977,7 @@ input[type='range']:active::-moz-range-thumb {
 .docs-search-empty {
   padding: 40px 20px;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 14px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.02);
@@ -5122,7 +5123,7 @@ input[type='range']:active::-moz-range-thumb {
 
 .docs-index-location {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--muted);
   font-style: italic;
   white-space: nowrap;
   overflow: hidden;
@@ -5172,13 +5173,112 @@ input[type='range']:active::-moz-range-thumb {
 
 
 /* Audio tool specific --------------------------------------------- */
+.upload-zone {
+  display: block;
+}
+
+.upload-dropzone {
+  display: block;
+  padding: 48px 32px;
+  border-radius: 16px;
+  border: 2px dashed var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.04);
+}
+
+.upload-dropzone:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upload-dropzone h3 {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+
+.upload-dropzone p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+@media (max-width: 720px) {
+  .upload-dropzone {
+    padding: 32px 20px;
+  }
+}
+
+.tool-audio {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.collapsible {
+  cursor: pointer;
+}
+
+.empty-state {
+  margin: 12px 0;
+  color: var(--muted);
+}
+
+.audio-export-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.audio-export-name {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.mono {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.param-value {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.export-control-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.tool-card-section > .tool-header-actions {
+  margin-bottom: 8px;
+}
+
 .audio-waveform-surface {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 220px;
+  height: 220px;
   border-radius: 22px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.02);
   overflow: hidden;
+}
+
+.audio-waveform-surface canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
 }
 
 .audio-action-grid {

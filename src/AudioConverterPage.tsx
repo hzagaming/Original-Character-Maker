@@ -160,9 +160,10 @@ function applyVolume(buffer: AudioBuffer, volumePercent: number): AudioBuffer {
 }
 
 async function resampleBuffer(buffer: AudioBuffer, targetSampleRate: number, speedPercent: number, pitchCents: number): Promise<AudioBuffer> {
+  if (buffer.length === 0) return buffer;
   const speed = speedPercent / 100;
   const duration = buffer.duration / speed;
-  const targetLength = Math.ceil(duration * targetSampleRate);
+  const targetLength = Math.max(1, Math.ceil(duration * targetSampleRate));
   const offline = new OfflineAudioContext(buffer.numberOfChannels, targetLength, targetSampleRate);
   const source = offline.createBufferSource();
   source.buffer = buffer;
@@ -261,7 +262,8 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type: mimeType });
       ctx.close().catch(() => {});
-      resolve(blob);
+      if (blob.size === 0) reject(new Error('Empty recording'));
+      else resolve(blob);
     };
     recorder.onerror = () => {
       ctx.close().catch(() => {});
@@ -270,7 +272,7 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
     try {
       recorder.start();
       source.start(0);
-      source.onended = () => recorder.stop();
+      source.onended = () => { try { recorder.stop(); } catch {} };
     } catch (err) {
       ctx.close().catch(() => {});
       reject(err);
@@ -334,9 +336,11 @@ export function AudioConverterPage({
   const [isDragOver, setIsDragOver] = useState(false);
   const dragCounter = useRef(0);
 
-  /* ---- Cleanup ---- */
+  /* ---- Mount guard ---- */
+  const isMountedRef = useRef(true);
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
       if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
@@ -398,6 +402,7 @@ export function AudioConverterPage({
         const decoded = await ctx.decodeAudioData(arrayBuffer);
         await ctx.close().catch(() => {});
 
+        if (!isMountedRef.current) return;
         // Successful decode — safe to replace old source
         if (sourceUrlRef.current) { URL.revokeObjectURL(sourceUrlRef.current); }
         setSourceFile(file);
@@ -412,13 +417,14 @@ export function AudioConverterPage({
         throw err;
       }
     } catch (err) {
+      if (!isMountedRef.current) return;
       const msg = String(err);
       addLog('error', `Import failed: ${msg}`);
       playSound('error');
       setError({ code: 'IMPORT_FAILED', message: 'Failed to decode audio file', hint: msg });
       setShowErrorPanel(true);
     } finally {
-      setIsImporting(false);
+      if (isMountedRef.current) setIsImporting(false);
     }
   }, [addLog, isImporting]);
 
@@ -509,6 +515,7 @@ export function AudioConverterPage({
         ext = outputFormat;
       }
 
+      if (!isMountedRef.current) return;
       setConvertProgress(100);
       if (resultUrlRef.current) { URL.revokeObjectURL(resultUrlRef.current); }
       const url = URL.createObjectURL(blob);
@@ -525,9 +532,14 @@ export function AudioConverterPage({
       setError({ code: 'CONVERT_FAILED', message: 'Conversion failed', hint: msg });
       setShowErrorPanel(true);
     } finally {
-      setIsConverting(false);
-      if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
-      progressTimeoutRef.current = window.setTimeout(() => { setConvertProgress(0); progressTimeoutRef.current = null; }, 800);
+      if (isMountedRef.current) {
+        setIsConverting(false);
+        if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
+        progressTimeoutRef.current = window.setTimeout(() => {
+          if (isMountedRef.current) setConvertProgress(0);
+          progressTimeoutRef.current = null;
+        }, 800);
+      }
     }
   }, [sourceBuffer, outputFormat, sampleRate, channels, volume, speed, pitch, doNormalize, fadeIn, fadeOut, noiseReduction, addLog]);
 
@@ -581,6 +593,7 @@ export function AudioConverterPage({
     setIsDragOver(false);
     dragCounter.current = 0;
     if (progressTimeoutRef.current) { window.clearTimeout(progressTimeoutRef.current); progressTimeoutRef.current = null; }
+    if (sliderThrottleRef.current) { window.clearTimeout(sliderThrottleRef.current); sliderThrottleRef.current = null; }
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
@@ -588,7 +601,8 @@ export function AudioConverterPage({
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     dragCounter.current += 1;
-    if (e.dataTransfer.types.includes('Files')) setIsDragOver(true);
+    const types = Array.from(e.dataTransfer.types);
+    if (types.includes('Files')) setIsDragOver(true);
   }, []);
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -604,7 +618,7 @@ export function AudioConverterPage({
   }, []);
   const isAudioFile = (file: File | undefined) => {
     if (!file) return false;
-    if (file.type.startsWith('audio/')) return true;
+    if (file.type.startsWith('audio/') || file.type === 'application/octet-stream') return true;
     const ext = file.name.split('.').pop()?.toLowerCase();
     return ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'webm'].includes(ext || '');
   };
@@ -618,13 +632,12 @@ export function AudioConverterPage({
     }
     const file = e.dataTransfer.files?.[0];
     if (file && isAudioFile(file)) {
-      if (!isImporting) playSound('uploadStart');
       handleImportFile(file);
     } else if (file) {
       addLog('info', 'Dropped file is not an audio file');
       playSound('error');
     }
-  }, [handleImportFile, addLog, isImporting, isConverting]);
+  }, [handleImportFile, addLog, isConverting]);
 
   /* ---- Dirty state guard ---- */
   const isDirty = sourceFile !== null || resultUrl !== '' || logs.length > 0;
@@ -641,12 +654,6 @@ export function AudioConverterPage({
     if (sliderThrottleRef.current) return;
     playSound('sliderChange');
     sliderThrottleRef.current = window.setTimeout(() => { sliderThrottleRef.current = null; }, 50);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (sliderThrottleRef.current) window.clearTimeout(sliderThrottleRef.current);
-    };
   }, []);
 
   /* ---- Render ---- */
@@ -669,7 +676,7 @@ export function AudioConverterPage({
           </div>
           <div className="tool-header-actions">
             <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
-            <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('resetSound'); handleReset(); }}>Reset</button>
+            <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); handleReset(); }}>Reset</button>
           </div>
         </div>
 
@@ -696,18 +703,17 @@ export function AudioConverterPage({
                       htmlFor="audio-converter-import"
                       className="upload-dropzone"
                       onClick={() => playSound('buttonClick')}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label="Import audio file"
                       style={{
-                        cursor: 'pointer',
-                        display: 'block',
-                        padding: '48px 32px',
-                        border: isDragOver ? '2px solid var(--accent)' : '2px dashed var(--border)',
-                        borderRadius: 16,
-                        background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : 'rgba(255,255,255,0.03)',
-                        transition: 'border-color 200ms ease, background 200ms ease',
+                        border: isDragOver ? '2px solid var(--accent)' : undefined,
+                        background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : undefined,
                       }}
                     >
-                      <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
-                      <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A, AAC, WEBM here</p>
+                      <h3>Import Audio</h3>
+                      <p>Click or drag MP3, WAV, OGG, FLAC, M4A, AAC, WEBM here</p>
                     </label>
                   )}
                 </div>
@@ -722,8 +728,8 @@ export function AudioConverterPage({
                       {isImporting ? 'Importing…' : 'Replace'}
                     </button>
                   </div>
-                  <audio key={sourceUrl} controls src={sourceUrl} style={{ width: '100%', borderRadius: 8 }} />
-                  <p className="tiny-copy" style={{ marginTop: 8, marginBottom: 0 }}>
+                  <audio key={sourceUrl} controls src={sourceUrl} className="tool-audio" aria-label="Source audio" />
+                  <p className="tiny-copy">
                     {formatBytes(sourceFile.size)} · {sourceBuffer ? `${sourceBuffer.numberOfChannels}ch, ${sourceBuffer.sampleRate}Hz, ${formatTime(sourceBuffer.duration)}` : ''}
                   </p>
                 </>
@@ -800,7 +806,7 @@ export function AudioConverterPage({
                 </label>
               </div>
 
-              <div className="toggle-grid" style={{ marginTop: 12 }}>
+              <div className="toggle-grid">
                 <button className={`toggle-chip ${doNormalize ? 'active' : ''}`} type="button" aria-pressed={doNormalize} onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>
                   <span className="toggle-chip-dot" />
                   Normalize Peak
@@ -808,7 +814,7 @@ export function AudioConverterPage({
               </div>
 
               <div className="tool-actions-row">
-                <button className="primary-button" type="button" onClick={handleConvert} disabled={!sourceBuffer || isConverting}>
+                <button className="primary-button" type="button" onClick={handleConvert} disabled={!sourceBuffer || isConverting || isImporting}>
                   {isConverting ? `Converting ${convertProgress}%…` : 'Convert'}
                 </button>
                 <button className="secondary-button" type="button" onClick={handleDownload} disabled={!resultUrl}>
@@ -817,7 +823,7 @@ export function AudioConverterPage({
               </div>
 
               {(isConverting || convertProgress > 0) && (
-                <div className="progress-track" style={{ marginTop: 12 }}>
+                <div className="progress-track">
                   <div className="progress-fill" style={{ width: `${convertProgress}%` }} />
                 </div>
               )}
@@ -828,8 +834,7 @@ export function AudioConverterPage({
             {/* Results panel */}
             <section className="tool-card">
               <div
-                className="tool-card-header"
-                style={{ cursor: 'pointer' }}
+                className="tool-card-header collapsible"
                 onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }}
                 role="button"
@@ -846,8 +851,8 @@ export function AudioConverterPage({
                 <div>
                   {resultUrl ? (
                     <>
-                      <audio key={resultUrl} controls src={resultUrl} style={{ width: '100%', borderRadius: 8 }} />
-                      <div className="progress-meta" style={{ marginTop: 8 }}>
+                      <audio key={resultUrl} controls src={resultUrl} className="tool-audio" aria-label="Converted audio" />
+                      <div className="progress-meta">
                         <span>Format</span>
                         <strong>{resultFormat}</strong>
                         <span>Size</span>
@@ -855,7 +860,7 @@ export function AudioConverterPage({
                       </div>
                     </>
                   ) : (
-                    <p className="tiny-copy" style={{ margin: '12px 0', opacity: 0.6 }}>Select a format and click Convert.</p>
+                    <p className="tiny-copy empty-state">Select a format and click Convert.</p>
                   )}
                 </div>
               )}
@@ -864,8 +869,7 @@ export function AudioConverterPage({
             {/* Logs panel */}
             <section className="tool-card">
               <div
-                className="tool-card-header"
-                style={{ cursor: 'pointer' }}
+                className="tool-card-header collapsible"
                 onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }}
                 role="button"
@@ -880,17 +884,17 @@ export function AudioConverterPage({
               </div>
               {isLogsOpen && (
                 <div className="tool-card-section">
-                  <div className="tool-header-actions" style={{ marginBottom: 8 }}>
+                  <div className="tool-header-actions">
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { playSound('deleteSound'); setLogs([]); }}>Clear</button>
                   </div>
-                  <div className="log-scroll">
+                  <div className="log-scroll" aria-live="polite" aria-atomic="false">
                     {logs.length === 0 ? (
                       <p className="log-empty">No logs yet.</p>
                     ) : (
                       logs.map((l, i) => (
-                        <div key={i} className={`log-line log-${l.level}`}>
+                        <div key={`${l.time}-${i}`} className={`log-line log-${l.level}`}>
                           <span className="log-time">{l.time}</span>
                           <span className={`log-badge ${l.level}`}>{l.level}</span>
                           <span className="log-text">{l.text}</span>
@@ -910,7 +914,7 @@ export function AudioConverterPage({
           error={{ code: error.code, stage: 'audio-converter', message: error.message, hint: error.hint, details: {} }}
           labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
           onClose={() => { playSound('back'); setShowErrorPanel(false); }}
-          onCopy={() => { playSound('copySound'); navigator.clipboard.writeText(`${error.code}: ${error.message}`); }}
+          onCopy={() => { playSound('copySound'); navigator.clipboard.writeText(`${error.code}: ${error.message}`).catch(() => {}); }}
           onDownload={() => { playSound('downloadSound'); const blob = new Blob([JSON.stringify(error, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-converter-error.json'; a.click(); window.setTimeout(() => URL.revokeObjectURL(url), 100); }}
           onRetry={() => { playSound('confirm'); setShowErrorPanel(false); handleConvert(); }}
           onOpenDocs={(code) => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'errors', code); }}

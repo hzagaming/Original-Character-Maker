@@ -130,8 +130,8 @@ function applyFade(buffer: AudioBuffer, fadeIn: number, fadeOut: number): AudioB
     const dst = result.getChannelData(ch);
     for (let i = 0; i < src.length; i++) {
       let gain = 1;
-      if (inSamples > 0 && i < inSamples) gain = i / inSamples;
-      if (outSamples > 0 && i > src.length - outSamples) gain = Math.max(0, (src.length - i) / outSamples);
+      if (inSamples > 0 && i < inSamples) gain = i / (inSamples - 1 || 1);
+      if (outSamples > 0 && i >= src.length - outSamples) gain = Math.max(0, (src.length - 1 - i) / (outSamples - 1 || 1));
       dst[i] = src[i] * gain;
     }
   }
@@ -281,7 +281,8 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type: mimeType });
       ctx.close().catch(() => {});
-      resolve(blob);
+      if (blob.size === 0) reject(new Error('Empty recording'));
+      else resolve(blob);
     };
     recorder.onerror = () => {
       ctx.close().catch(() => {});
@@ -290,7 +291,7 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
 
     recorder.start();
     source.start(0);
-    source.onended = () => recorder.stop();
+    source.onended = () => { try { recorder.stop(); } catch {} };
   });
 }
 
@@ -332,6 +333,7 @@ export function AudioEditorPage({
   const [panOffset, setPanOffset] = useState(0);
   const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
   const dragModeRef = useRef<'select' | 'pan' | 'seek'>('select');
   const dragStartXRef = useRef(0);
   const dragStartOffsetRef = useRef(0);
@@ -373,7 +375,7 @@ export function AudioEditorPage({
   /* ---- Export / Results ---- */
   const [exports, setExports] = useState<ExportRecord[]>([]);
   const [isResultOpen, setIsResultOpen] = useState(true);
-  const [exportFormat, setExportFormat] = useState<'wav-16' | 'wav-8' | 'wav-32' | 'webm' | 'ogg' | 'mp3'>('wav-16');
+  const [exportFormat, setExportFormat] = useState<'wav-16' | 'wav-8' | 'wav-32' | 'webm' | 'ogg' | 'mp3' | 'mp4'>('wav-16');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
@@ -386,9 +388,29 @@ export function AudioEditorPage({
   /* ---- Refs for real-time nodes ---- */
   const gainNodeRef = useRef<GainNode | null>(null);
   const panNodeRef = useRef<StereoPannerNode | null>(null);
+  const nodeChainRef = useRef<AudioNode[]>([]);
+
+  /* ---- Mutable refs to avoid stale closures ---- */
+  const speedRef = useRef(speed);
+  const isLoopRef = useRef(isLoop);
+  const editBufferRef = useRef(editBuffer);
+  const exportsRef = useRef<ExportRecord[]>([]);
+  const reversedBufferRef = useRef<AudioBuffer | null>(null);
+  const importTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exportTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /* ---- Sync mutable refs ---- */
+  useEffect(() => { speedRef.current = speed; }, [speed]);
+  useEffect(() => { isLoopRef.current = isLoop; }, [isLoop]);
+  useEffect(() => { editBufferRef.current = editBuffer; }, [editBuffer]);
+  useEffect(() => { exportsRef.current = exports; }, [exports]);
+  useEffect(() => {
+    reversedBufferRef.current = isReversed && editBuffer ? applyReverse(editBuffer) : null;
+  }, [editBuffer, isReversed]);
 
   /* ---- SFX throttle ---- */
   const sliderThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const playSliderSound = useCallback(() => {
     if (sliderThrottleRef.current) return;
     playSound('sliderChange');
@@ -411,21 +433,6 @@ export function AudioEditorPage({
   /* ================================================================== */
   /*  Lifecycle & Cleanup                                                */
   /* ================================================================== */
-  /* ---- Responsive layout ---- */
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    function onResize() {
-      if (timeoutId) window.clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => setIsNarrow(window.innerWidth < 900), 100);
-    }
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => {
-      window.removeEventListener('resize', onResize);
-      if (timeoutId) window.clearTimeout(timeoutId);
-    };
-  }, []);
-
   /* ---- Redraw waveform on resize ---- */
   useEffect(() => {
     function onResize() {
@@ -452,13 +459,13 @@ export function AudioEditorPage({
         audioCtxRef.current.close().catch(() => {});
       }
       // Stop playback
-      if (sourceRef.current) {
-        try { sourceRef.current.stop(); } catch { /* ignore */ }
-        sourceRef.current.disconnect();
-      }
+      stopPlayback();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (importTimeoutRef.current) window.clearTimeout(importTimeoutRef.current);
+      if (exportTimeoutRef.current) window.clearTimeout(exportTimeoutRef.current);
+      if (sliderThrottleRef.current) window.clearTimeout(sliderThrottleRef.current);
       // Revoke all export URLs
-      exports.forEach((rec) => URL.revokeObjectURL(rec.url));
+      exportsRef.current.forEach((rec) => URL.revokeObjectURL(rec.url));
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -479,10 +486,34 @@ export function AudioEditorPage({
   const logsText = logs.map((l) => `[${l.time}] ${l.level.toUpperCase()}: ${l.text}`).join('\n');
 
   /* ================================================================== */
+  /*  Playback                                                           */
+  /* ================================================================== */
+  const stopPlayback = useCallback(() => {
+    if (sourceRef.current) {
+      try { sourceRef.current.stop(); } catch { /* already stopped */ }
+      try { sourceRef.current.disconnect(); } catch { /* ignore */ }
+      sourceRef.current = null;
+    }
+    nodeChainRef.current.forEach((n) => { try { n.disconnect(); } catch {} });
+    nodeChainRef.current = [];
+    gainNodeRef.current = null;
+    panNodeRef.current = null;
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
+    }
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
+    setIsPlaying(false);
+  }, []);
+
+  /* ================================================================== */
   /*  Audio import                                                       */
   /* ================================================================== */
   const handleImport = useCallback(
     async (file: File) => {
+      stopPlayback();
+      if (importTimeoutRef.current) window.clearTimeout(importTimeoutRef.current);
       try {
         setIsImporting(true);
         setImportProgress(10);
@@ -517,7 +548,7 @@ export function AudioEditorPage({
           const w = canvas.clientWidth || 800;
           setPeaks(generateWaveformData(decoded, w));
         }
-        setTimeout(() => setIsImporting(false), 400);
+        importTimeoutRef.current = window.setTimeout(() => setIsImporting(false), 400);
       } catch (err) {
         setIsImporting(false);
         setImportProgress(0);
@@ -527,22 +558,8 @@ export function AudioEditorPage({
         playSound('error');
       }
     },
-    [addLog]
+    [addLog, stopPlayback]
   );
-
-  /* ================================================================== */
-  /*  Playback                                                           */
-  /* ================================================================== */
-  const stopPlayback = useCallback(() => {
-    if (sourceRef.current) {
-      try { sourceRef.current.stop(); } catch { /* already stopped */ }
-      try { sourceRef.current.disconnect(); } catch { /* ignore */ }
-      sourceRef.current = null;
-    }
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = 0;
-    setIsPlaying(false);
-  }, []);
 
   const startPlayback = useCallback(
     (offset: number) => {
@@ -557,7 +574,7 @@ export function AudioEditorPage({
       }
 
       const source = ctx.createBufferSource();
-      source.buffer = isReversed ? applyReverse(editBuffer) : editBuffer;
+      source.buffer = reversedBufferRef.current || editBuffer;
       source.playbackRate.value = speed / 100;
       source.detune.value = pitch;
       source.loop = isLoop;
@@ -627,6 +644,8 @@ export function AudioEditorPage({
       compNode.connect(convolver).connect(wetGain).connect(gain);
       gain.connect(panner).connect(ctx.destination);
 
+      nodeChainRef.current = [source, eqLowNode, eqMidNode, eqHighNode, compNode, dryGain, convolver, wetGain, gain, panner];
+
       source.start(0, offset);
       sourceRef.current = source;
       playStartTimeRef.current = ctx.currentTime;
@@ -636,20 +655,21 @@ export function AudioEditorPage({
       const tick = () => {
         if (!audioCtxRef.current || !sourceRef.current) return;
         const elapsed = audioCtxRef.current.currentTime - playStartTimeRef.current;
-        const t = playOffsetRef.current + elapsed * (speed / 100);
-        if (t >= editBuffer.duration && !isLoop) {
+        const t = playOffsetRef.current + elapsed * (speedRef.current / 100);
+        const buffer = editBufferRef.current;
+        if (buffer && t >= buffer.duration && !isLoopRef.current) {
           stopPlayback();
-          setCurrentTime(editBuffer.duration);
+          setCurrentTime(buffer.duration);
           return;
         }
-        setCurrentTime(Math.min(t, editBuffer.duration));
+        setCurrentTime(Math.min(t, buffer ? buffer.duration : 0));
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
 
       source.onended = () => {
-        if (!isLoop) {
-          stopPlayback();
+        stopPlayback();
+        if (!isLoopRef.current) {
           addLog('debug', 'Playback finished');
         }
       };
@@ -682,10 +702,12 @@ export function AudioEditorPage({
   /* ================================================================== */
   /*  Effects processing                                                 */
   /* ================================================================== */
+  const MAX_HISTORY = 50;
   const pushHistory = useCallback(
     (buffer: AudioBuffer) => {
       const newHistory = history.slice(0, historyIdx + 1);
       newHistory.push(buffer);
+      if (newHistory.length > MAX_HISTORY) newHistory.shift();
       setHistory(newHistory);
       setHistoryIdx(newHistory.length - 1);
       setEditBuffer(buffer);
@@ -702,6 +724,7 @@ export function AudioEditorPage({
   const applyEdit = useCallback(
     (name: string) => {
       if (!editBuffer) return;
+      stopPlayback();
       let result = editBuffer;
 
       switch (name) {
@@ -809,13 +832,16 @@ export function AudioEditorPage({
           return;
       }
 
-      pushHistory(result);
+      if (result !== editBuffer) {
+        pushHistory(result);
+      }
     },
-    [editBuffer, selection, fadeIn, fadeOut, pushHistory, addLog]
+    [editBuffer, selection, fadeIn, fadeOut, pushHistory, addLog, stopPlayback]
   );
 
   const undo = useCallback(() => {
     if (historyIdx > 0) {
+      stopPlayback();
       const idx = historyIdx - 1;
       setHistoryIdx(idx);
       setEditBuffer(history[idx]);
@@ -828,10 +854,11 @@ export function AudioEditorPage({
       addLog('info', `Undo: restored step ${idx}`);
       playSound('undo');
     }
-  }, [history, historyIdx, addLog]);
+  }, [history, historyIdx, addLog, stopPlayback]);
 
   const redo = useCallback(() => {
     if (historyIdx < history.length - 1) {
+      stopPlayback();
       const idx = historyIdx + 1;
       setHistoryIdx(idx);
       setEditBuffer(history[idx]);
@@ -844,7 +871,7 @@ export function AudioEditorPage({
       addLog('info', `Redo: restored step ${idx}`);
       playSound('redo');
     }
-  }, [history, historyIdx, addLog]);
+  }, [history, historyIdx, addLog, stopPlayback]);
 
   const resetEffects = useCallback(() => {
     setVolume(100);
@@ -907,15 +934,15 @@ export function AudioEditorPage({
     setHistory([]);
     setHistoryIdx(-1);
     setLogs([]);
-    setExports([]);
+    setExports((prev) => { prev.forEach((rec) => URL.revokeObjectURL(rec.url)); return []; });
     setExportFormat('wav-16');
     setIsExporting(false);
     setExportProgress(0);
     setIsResultOpen(true);
     setIsLogsOpen(true);
     setErrors([]);
-    setZoom(1);
-    setPanOffset(0);
+    gainNodeRef.current = null;
+    panNodeRef.current = null;
     addLog('info', 'Workspace reset');
     playSound('resetSound');
   }, [addLog, stopPlayback]);
@@ -1035,7 +1062,8 @@ export function AudioEditorPage({
         playSound('workflowFail');
       } finally {
         setIsExporting(false);
-        setTimeout(() => setExportProgress(0), 600);
+        if (exportTimeoutRef.current) window.clearTimeout(exportTimeoutRef.current);
+        exportTimeoutRef.current = window.setTimeout(() => setExportProgress(0), 600);
       }
     },
     [editBuffer, exportFormat, fileName, fadeIn, fadeOut, isReversed, doNormalize, noiseReduction, addLog]
@@ -1091,7 +1119,7 @@ export function AudioEditorPage({
     const endIdx = Math.min(startIdx + totalVisible, peaks.length);
     const samplesPerPixel = Math.max(1, (endIdx - startIdx) / w);
 
-    ctx.strokeStyle = 'var(--accent)';
+    ctx.strokeStyle = '#4f9df7';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     for (let x = 0; x < w; x++) {
@@ -1110,8 +1138,8 @@ export function AudioEditorPage({
       const selEndX = ((selection.end / duration) * peaks.length - startIdx) / samplesPerPixel;
       if (selEndX > 0 && selStartX < w) {
         ctx.fillStyle = 'rgba(124,92,255,0.25)';
-        ctx.fillRect(Math.max(0, selStartX), 0, Math.min(w, selEndX) - Math.max(0, selStartX), h);
-        ctx.strokeStyle = 'var(--accent)';
+        ctx.fillRect(Math.max(0, selStartX), 0, Math.max(0, Math.min(w, selEndX) - Math.max(0, selStartX)), h);
+        ctx.strokeStyle = '#4f9df7';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(Math.max(0, selStartX), 0);
@@ -1218,7 +1246,9 @@ export function AudioEditorPage({
       } else {
         const canvas = canvasRef.current;
         if (!canvas || duration <= 0) return;
-        const ratio = e.deltaX / canvas.getBoundingClientRect().width;
+        const rectWidth = canvas.getBoundingClientRect().width;
+        if (!rectWidth) return;
+        const ratio = e.deltaX / rectWidth;
         const newOffset = panOffset + ratio * duration;
         setPanOffset(Math.max(0, Math.min(duration - duration / zoom, newOffset)));
       }
@@ -1229,6 +1259,7 @@ export function AudioEditorPage({
   /* ---- Drag & drop handlers ---- */
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    dragCounter.current += 1;
     setIsDragOver(true);
   }, []);
 
@@ -1238,26 +1269,46 @@ export function AudioEditorPage({
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragOver(false);
+    dragCounter.current -= 1;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const isAudioFile = useCallback((file: File | undefined) => {
+    if (!file) return false;
+    if (file.type.startsWith('audio/') || file.type === 'application/octet-stream') return true;
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    return ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'webm'].includes(ext || '');
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    dragCounter.current = 0;
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('audio/')) {
+    if (file && isAudioFile(file)) {
       handleImport(file);
     } else if (file) {
       addLog('info', 'Dropped file is not an audio file');
       playSound('error');
     }
-  }, [handleImport, addLog]);
+  }, [handleImport, addLog, isAudioFile]);
 
   /* ================================================================== */
   /*  Keyboard shortcuts                                                 */
   /* ================================================================== */
+  const togglePlayRef = useRef(togglePlay);
+  const undoRef = useRef(undo);
+  const redoRef = useRef(redo);
+  useEffect(() => { togglePlayRef.current = togglePlay; }, [togglePlay]);
+  useEffect(() => { undoRef.current = undo; }, [undo]);
+  useEffect(() => { redoRef.current = redo; }, [redo]);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.repeat) return;
       // Ignore if user is typing in an input/textarea/select
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target as HTMLElement)?.isContentEditable) {
@@ -1265,16 +1316,16 @@ export function AudioEditorPage({
       }
       if (e.key === ' ') {
         e.preventDefault();
-        togglePlay();
+        togglePlayRef.current();
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         e.preventDefault();
-        if (e.shiftKey) redo(); else undo();
+        if (e.shiftKey) redoRef.current(); else undoRef.current();
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [togglePlay, undo, redo]);
+  }, []);
 
   /* ================================================================== */
   /*  Render                                                             */
@@ -1318,7 +1369,7 @@ export function AudioEditorPage({
                     <div className="preview-surface">
                       <div className="preview-empty">
                         <span className="status-badge running">Decoding audio… {importProgress}%</span>
-                        <div className="progress-track" style={{ marginTop: 12 }}>
+                        <div className="progress-track">
                           <div className="progress-fill" style={{ width: `${importProgress}%` }} />
                         </div>
                       </div>
@@ -1326,6 +1377,7 @@ export function AudioEditorPage({
                   ) : (
                     <>
                       <input
+                        ref={fileInputRef}
                         type="file"
                         accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
                         id="audio-import"
@@ -1336,18 +1388,17 @@ export function AudioEditorPage({
                         htmlFor="audio-import"
                         className="upload-dropzone"
                         onClick={() => playSound('buttonClick')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Import audio file"
                         style={{
-                          cursor: 'pointer',
-                          display: 'block',
-                          padding: '48px 32px',
-                          border: isDragOver ? '2px solid var(--accent)' : '2px dashed var(--border)',
-                          borderRadius: 16,
-                          background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : 'rgba(255,255,255,0.03)',
-                          transition: 'border-color 200ms ease, background 200ms ease',
+                          border: isDragOver ? '2px solid var(--accent)' : undefined,
+                          background: isDragOver ? 'rgba(var(--accent-rgb), 0.06)' : undefined,
                         }}
                       >
-                        <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>Import Audio</h3>
-                        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
+                        <h3>Import Audio</h3>
+                        <p>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
                       </label>
                     </>
                   )}
@@ -1368,7 +1419,7 @@ export function AudioEditorPage({
                       </button>
                     </div>
                   </div>
-                  <p className="tiny-copy" style={{ marginTop: 8, marginBottom: 0 }}>
+                  <p className="tiny-copy">
                     {formatTime(duration)} · {editBuffer.numberOfChannels}ch, {editBuffer.sampleRate}Hz
                   </p>
                 </>
@@ -1388,13 +1439,17 @@ export function AudioEditorPage({
                   <div className="audio-waveform-surface">
                     <canvas
                       ref={canvasRef}
-                      style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : 'crosshair' }}
+                      role="img"
+                      aria-label="Audio waveform editor. Click to set playhead, drag to select a region, shift-drag to pan, scroll or ctrl-scroll to zoom."
+                      tabIndex={0}
+                      style={{ cursor: isDragging ? 'grabbing' : 'crosshair' }}
                       onMouseDown={handleMouseDown}
                       onMouseMove={handleMouseMove}
                       onMouseUp={handleMouseUp}
                       onMouseLeave={handleMouseUp}
                       onClick={handleCanvasClick}
                       onWheel={handleWheel}
+                      onKeyDown={(e) => { if (e.key === ' ') e.preventDefault(); }}
                     />
                   </div>
                   <div className="progress-meta">
@@ -1403,7 +1458,7 @@ export function AudioEditorPage({
                     <span>{formatTime(duration)}</span>
                   </div>
                   {selection && (
-                    <p className="tiny-copy" style={{ marginBottom: 0 }}>
+                    <p className="tiny-copy">
                       Selection: {formatTime(selection.start)} – {formatTime(selection.end)} ({formatTime(selection.end - selection.start)})
                     </p>
                   )}
@@ -1430,7 +1485,7 @@ export function AudioEditorPage({
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>Mono</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>Reset FX</button>
                     <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
-                    <label htmlFor="audio-reimport" className="secondary-button small-button" style={{ cursor: 'pointer' }} onClick={() => playSound('buttonClick')}>New File</label>
+                    <label htmlFor="audio-reimport" className="secondary-button small-button" onClick={() => playSound('buttonClick')}>New File</label>
                   </div>
                 </section>
 
@@ -1442,7 +1497,7 @@ export function AudioEditorPage({
                       <h3>Export Settings</h3>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
+                  <div className="export-control-row">
                     <select
                       className="settings-input tool-select"
                       value={exportFormat}
@@ -1527,7 +1582,7 @@ export function AudioEditorPage({
                       <input className="tool-range" type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSliderSound(); setNoiseReduction(Number(e.target.value)); }} />
                     </ParamRow>
                   </div>
-                  <div className="toggle-grid" style={{ marginTop: 12 }}>
+                  <div className="toggle-grid">
                     <button className={`toggle-chip ${isMuted ? 'active' : ''}`} type="button" onClick={() => { playSound(isMuted ? 'toggleOff' : 'toggleOn'); setIsMuted((v) => !v); }}>
                       <span className="toggle-chip-dot" /> Mute
                     </button>
@@ -1550,8 +1605,7 @@ export function AudioEditorPage({
             {/* Results */}
             <section className="tool-card">
               <div
-                className="tool-card-header"
-                style={{ cursor: 'pointer' }}
+                className="tool-card-header collapsible"
                 onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }}
                 role="button"
@@ -1567,16 +1621,16 @@ export function AudioEditorPage({
               {isResultOpen && (
                 <div>
                   {exports.length === 0 ? (
-                    <p className="tiny-copy" style={{ margin: '12px 0', opacity: 0.6 }}>No exports yet. Select a format and click Export.</p>
+                    <p className="tiny-copy empty-state">No exports yet. Select a format and click Export.</p>
                   ) : (
                     <div className="audio-export-list">
                       {exports.map((rec) => (
                         <div key={rec.id} className="audio-export-item">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                            <strong style={{ fontSize: 12, color: 'var(--text-primary)' }}>{rec.fileName}</strong>
-                            <span className="tiny-copy" style={{ fontFamily: 'monospace' }}>{rec.format} · {formatBytes(rec.size)}</span>
+                          <div className="audio-export-item-header">
+                            <strong className="audio-export-name">{rec.fileName}</strong>
+                            <span className="tiny-copy mono">{rec.format} · {formatBytes(rec.size)}</span>
                           </div>
-                          <audio controls src={rec.url} style={{ width: '100%', height: 28, marginBottom: 6 }} />
+                          <audio controls src={rec.url} className="tool-audio" />
                           <div className="mini-action-row">
                             <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
                             <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
@@ -1592,8 +1646,7 @@ export function AudioEditorPage({
             {/* Logs */}
             <section className="tool-card">
               <div
-                className="tool-card-header"
-                style={{ cursor: 'pointer' }}
+                className="tool-card-header collapsible"
                 onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }}
                 role="button"
@@ -1608,8 +1661,8 @@ export function AudioEditorPage({
               </div>
               {isLogsOpen && (
                 <div className="tool-card-section">
-                  <div className="tool-header-actions" style={{ marginBottom: 8 }}>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText); }}>Copy</button>
+                  <div className="tool-header-actions">
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText).catch(() => {}); }}>Copy</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url); }}>Download</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>
                   </div>
@@ -1637,7 +1690,7 @@ export function AudioEditorPage({
         error={errors[0] ? { code: errors[0].code, stage: 'audio-editor', message: errors[0].message, hint: errors[0].hint, details: {} } : null}
         labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
         onClose={() => setErrors([])}
-        onCopy={() => { if (errors[0]) navigator.clipboard.writeText(`${errors[0].code}: ${errors[0].message}`); }}
+        onCopy={() => { if (errors[0]) navigator.clipboard.writeText(`${errors[0].code}: ${errors[0].message}`).catch(() => {}); }}
         onDownload={() => {
           const blob = new Blob([JSON.stringify(errors, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
@@ -1660,7 +1713,7 @@ function ParamRow({ label, value, children }: { label: string; value: string; ch
     <label className="field">
       <div className="field-title-row">
         <span>{label}</span>
-        <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{value}</span>
+        <span className="param-value">{value}</span>
       </div>
       {children}
     </label>
