@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.2';
+const VERSION = '1.8.3';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -620,10 +620,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.8.1 新增世界设定集：构建结构化的世界观百科，支持 7 种分类条目（地点/组织/种族/事件/物品/概念/自定义）、标签、关联角色、搜索筛选、列表/卡片双视图，一键导出 JSON。',
-    announcementList1: '世界设定集：为原创世界观创建结构化百科条目，7 种预设分类各有独立颜色编码。每个条目包含标题、分类、详细内容、标签和关联角色。支持将关系网中的角色关联到任意条目。',
-    announcementList2: '双视图与搜索筛选：卡片网格视图适合视觉浏览，列表视图适合密集扫描。支持按关键词全文搜索（标题+内容+标签），分类筛选芯片显示实时计数。所有交互均集成 SFX 音效。',
-    announcementList3: '完整集成与 JSON 导出：新增 FeatureScreen 路由、ActionIcon SVG、StartModal 入口、HomeScreen 工作流列表；5 语言完整翻译和手册文档；全页面 SFX 音效覆盖。上一版本 v1.8.0 完成了角色编年史。版本号同步为 1.8.1。',
+    announcementDescription: 'v1.8.3 音频页面 UI 统一与稳定性修复：AudioEditorPage 和 AudioConverterPage 完成 UI/UX 全面重构，与 ImageConverter/StyleTransfer 保持统一；修复 SFX 双播、内存泄漏、组件卸载后 setState 等 10+ 项问题。',
+    announcementList1: 'UI 统一：AudioEditorPage 和 AudioConverterPage 页面结构与 ImageConverter/StyleTransfer 完全对齐；feature-header-meta 移除工具切换按钮；左侧主列统一为 Source + Settings/Effects 卡片；右侧栏统一为 Results + Logs 卡片。',
+    announcementList2: 'AudioEditorPage 重构：编辑操作区按钮分组排列（Playback / History / Selection / Global FX / Misc）；Play/Stop 从 Source header 移至 Edit Operations；Export Settings 移至右侧栏并与 Results 合并；波形 canvas 宽度修复为 100%。',
+    announcementList3: '稳定性修复：两页面均添加 isMountedRef 守卫，防止组件卸载后异步操作继续 setState；AudioEditorPage 导出/导入 timeout 回调添加卸载检查；AudioConverterPage 转换 catch 块添加卸载检查。修复 Reset 按钮 triple-play 和 Reset All 按钮 double-play resetSound。上一版本 v1.8.1 完成了世界设定集。版本号同步为 1.8.3。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1030,10 +1030,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.8.1 世界観百科を新規追加：構造化された世界観百科を構築。7 種類の分類項目（場所/組織/種族/イベント/アイテム/概念/カスタム）、タグ、関連キャラ、検索フィルタ、リスト/カード両ビュー、ワンクリックで JSON を出力。',
-    announcementList1: '世界観百科：オリジナル世界観の構造化百科項目を作成。7 種類のプリセット分類にそれぞれ独立した色分け。各項目はタイトル、分類、詳細内容、タグ、関連キャラを含む。関係図のキャラを任意の項目に関連付け可能。',
-    announcementList2: '両ビューと検索フィルタ：カードグリッドビューは視覚的ブラウジングに、リストビューは密集スキャンに適している。キーワード全文検索（タイトル+内容+タグ）に対応。分類フィルタチップにリアルタイムカウントを表示。全インタラクションに SFX 効果音を統合。',
-    announcementList3: '完全統合と JSON 出力：新規 FeatureScreen ルート、ActionIcon SVG、StartModal 入口、HomeScreen ワークフローリストを追加。5 言語完全翻訳とマニュアルドキュメント。全ページ SFX 効果音カバー。前バージョン v1.8.0 でキャラ年表を追加。バージョンを 1.8.1 に同期。',
+    announcementDescription: 'v1.8.3 オーディオページ UI 統一と安定性修正：AudioEditorPage と AudioConverterPage の UI/UX を全面再構築し、ImageConverter/StyleTransfer と統一。SFX 重複再生、メモリリーク、コンポーネントアンマウント後の setState など 10 件以上の問題を修正。',
+    announcementList1: 'UI 統一：AudioEditorPage と AudioConverterPage のページ構造を ImageConverter/StyleTransfer と完全に統一。feature-header-meta からツール切り替えボタンを削除。左列を Source + Settings/Effects カードに統一。右列を Results + Logs カードに統一。',
+    announcementList2: 'AudioEditorPage 再構築：編集操作ボタンをグループ化（Playback / History / Selection / Global FX / Misc）。Play/Stop を Source header から Edit Operations に移動。Export Settings を右列に移動し Results と統合。波形 canvas 幅を 100% に修正。',
+    announcementList3: '安定性修正：両ページに isMountedRef ガードを追加し、コンポーネントアンマウント後の非同期 setState を防止。AudioEditorPage のエクスポート/インポート timeout コールバックにアンマウントチェックを追加。AudioConverterPage の変換 catch ブロックにアンマウントチェックを追加。Reset ボタンの triple-play と Reset All ボタンの double-play resetSound を修正。前バージョン v1.8.1 で世界観百科を追加。バージョンを 1.8.3 に同期。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1438,10 +1438,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.8.1 New: World Encyclopedia — build a structured world setting encyclopedia with 7 entry categories (Location/Organization/Race/Event/Item/Concept/Custom), tags, linked characters, search/filter, list/card dual views, and one-click JSON export.',
-    announcementList1: 'World Encyclopedia: Create structured encyclopedia entries for your original world. 7 preset categories each with independent color coding. Each entry includes title, category, detailed content, tags, and related characters. Link characters from the Relationship Web to any entry.',
-    announcementList2: 'Dual views and search/filter: Card grid view for visual browsing, list view for dense scanning. Full-text search by keyword (title + content + tags). Category filter chips show live counters. All interactions have integrated SFX.',
-    announcementList3: 'Full integration and JSON export: New FeatureScreen route, ActionIcon SVG, StartModal entry, HomeScreen workflow list. Complete 5-language translations and manual docs. Full-page SFX coverage. Previous v1.8.0 added the Character Chronicle. Version synchronized to 1.8.1.',
+    announcementDescription: 'v1.8.3 Audio page UI unification and stability fixes: AudioEditorPage and AudioConverterPage fully refactored for UI/UX consistency with ImageConverter/StyleTransfer; fixed 10+ issues including SFX double-plays, memory leaks, and post-unmount setState calls.',
+    announcementList1: 'UI unification: AudioEditorPage and AudioConverterPage now align with ImageConverter/StyleTransfer structure. Tool-switch buttons removed from feature-header-meta. Left column unified as Source + Settings/Effects cards. Right column unified as Results + Logs cards.',
+    announcementList2: 'AudioEditorPage refactor: Edit operation buttons grouped into rows (Playback / History / Selection / Global FX / Misc). Play/Stop moved from Source header to Edit Operations. Export Settings moved to right column and merged with Results. Waveform canvas width fixed to 100%.',
+    announcementList3: 'Stability fixes: Added isMountedRef guards to both pages to prevent async setState after unmount. Added unmount checks to AudioEditorPage export/import timeout callbacks and AudioConverterPage convert catch block. Fixed Reset button triple-play and Reset All button double-play resetSound. Previous v1.8.1 added the World Encyclopedia. Version synchronized to 1.8.3.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1846,10 +1846,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.8.1 Новое: Энциклопедия мира — стройте структурированную энциклопедию мира с 7 категориями (Место/Организация/Раса/Событие/Предмет/Концепт/Другое), тегами, связанными персонажами, поиском/фильтром, двумя видами отображения и экспортом JSON одним кликом.',
-    announcementList1: 'Энциклопедия мира: создавайте структурированные записи энциклопедии для вашего оригинального мира. 7 предустановленных категорий с независимой цветовой кодировкой. Каждая запись включает название, категорию, подробное содержание, теги и связанных персонажей. Связывайте персонажей из Сети отношений с любой записью.',
-    announcementList2: 'Два вида и поиск/фильтр: сетка карточек для визуального просмотра, список для плотного сканирования. Полнотекстовый поиск по ключевым словам (название + содержание + теги). Чипы фильтра категорий показывают счётчики в реальном времени. Все интеракции имеют интегрированный SFX.',
-    announcementList3: 'Полная интеграция и экспорт JSON: добавлены новый маршрут FeatureScreen, ActionIcon SVG, вход StartModal, список рабочих процессов HomeScreen. Полные переводы и справочная документация на 5 языках. Полное покрытие SFX. Предыдущая v1.8.0 добавила хронику персонажа. Версия синхронизирована с 1.8.1.',
+    announcementDescription: 'v1.8.3 Унификация UI аудио-страниц и исправления стабильности: AudioEditorPage и AudioConverterPage полностью рефакторены для единообразия UI/UX с ImageConverter/StyleTransfer; исправлено 10+ проблем, включая двойной SFX, утечки памяти и setState после размонтирования.',
+    announcementList1: 'Унификация UI: AudioEditorPage и AudioConverterPage теперь соответствуют структуре ImageConverter/StyleTransfer. Кнопки переключения инструментов удалены из feature-header-meta. Левая колонка объединена в карточки Source + Settings/Effects. Правая колонка объединена в карточки Results + Logs.',
+    announcementList2: 'Рефакторинг AudioEditorPage: Кнопки редактирования сгруппированы в ряды (Playback / History / Selection / Global FX / Misc). Play/Stop перенесены из Source header в Edit Operations. Export Settings перенесены в правую колонку и объединены с Results. Ширина canvas волны исправлена на 100%.',
+    announcementList3: 'Исправления стабильности: Добавлены isMountedRef-гарды на обеих страницах для предотвращения async setState после размонтирования. Добавлены проверки размонтирования в колбэки таймаутов экспорта/импорта AudioEditorPage и блок catch конвертации AudioConverterPage. Исправлен triple-play кнопки Reset и double-play resetSound кнопки Reset All. Предыдущая v1.8.1 добавила Энциклопедию мира. Версия синхронизирована с 1.8.3.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2573,10 +2573,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageCharacterChronicleDescription: '캐릭터의 탄생, 만남, 성장, 전투 등 주요 이벤트를 기록하는 시각적 타임라인을 생성합니다. 관계망 캐릭터와 연동되어 긴 이미지로 내보낼 수 있습니다.',
     pageWorldEncyclopediaTitle: '세계관 백과',
     pageWorldEncyclopediaDescription: '구조화된 세계관 백과를 구축합니다. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성하고 태그, 관련 캐릭터, 검색 필터 및 JSON 내보내기를 지원합니다.',
-    announcementDescription: 'v1.8.1 신규: 세계관 백과 — 구조화된 세계관 백과를 구축합니다. 7가지 분류 항목(장소/조직/종족/이벤트/아이템/개념/사용자 정의), 태그, 관련 캐릭터, 검색 필터, 목록/카드 이중 뷰, 한 번의 클릭으로 JSON 내보내기를 지원합니다.',
-    announcementList1: '세계관 백과: 오리지널 세계관을 위한 구조화된 백과 항목을 생성합니다. 7가지 프리셋 분류에 각각 독립적인 색상 코딩이 적용됩니다. 각 항목은 제목, 분류, 상세 내용, 태그, 관련 캐릭터를 포함합니다. 관계망의 캐릭터를 임의의 항목에 연동할 수 있습니다.',
-    announcementList2: '이중 뷰 및 검색 필터: 카드 그리드 뷰는 시각적 브라우징에, 목록 뷰는 밀집 스캔에 적합합니다. 키워드 전문 검색(제목+내용+태그)을 지원합니다. 분류 필터 칩에 실시간 카운터를 표시합니다. 모든 인터랙션에 SFX 효과음이 통합되어 있습니다.',
-    announcementList3: '완전 통합 및 JSON 내보내기: 새로운 FeatureScreen 경로, ActionIcon SVG, StartModal 진입, HomeScreen 워크플로 리스트 추가. 5개 언어 완전 번역 및 매뉴얼 문서. 전체 페이지 SFX 효과음 커버리지. 이전 버전 v1.8.0에서 캐릭터 연대기를 추가했습니다. 버전을 1.8.1으로 동기화.'
+    announcementDescription: 'v1.8.3 오디오 페이지 UI 통합 및 안정성 수정: AudioEditorPage와 AudioConverterPage의 UI/UX를 ImageConverter/StyleTransfer와 통일되도록 전면 재구축; SFX 중복 재생, 메모리 누수, 컴포넌트 언마운트 후 setState 등 10건 이상의 문제 수정.',
+    announcementList1: 'UI 통합: AudioEditorPage와 AudioConverterPage 페이지 구조를 ImageConverter/StyleTransfer와 완전히 통일. feature-header-meta에서 도구 전환 버튼 제거. 좌측 열을 Source + Settings/Effects 카드로 통일. 우측 열을 Results + Logs 카드로 통일.',
+    announcementList2: 'AudioEditorPage 재구축: 편집 작업 버튼을 그룹화(Playback / History / Selection / Global FX / Misc). Play/Stop를 Source header에서 Edit Operations로 이동. Export Settings를 우측 열로 이동하여 Results와 통합. 파형 canvas 너비를 100%로 수정.',
+    announcementList3: '안정성 수정: 두 페이지 모두에 isMountedRef 가드를 추가하여 컴포넌트 언마운트 후 비동기 setState 방지. AudioEditorPage 내보내기/가져오기 타임아웃 콜백에 언마운트 체크 추가. AudioConverterPage 변환 catch 블록에 언마운트 체크 추가. Reset 버튼 triple-play 및 Reset All 버튼 double-play resetSound 수정. 이전 버전 v1.8.1에서 세계관 백과를 추가. 버전을 1.8.3으로 동기화.'
   },
   fr: {
     ...translations.en,
@@ -2767,6 +2767,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.8.3',
+    date: '2026-05-17',
+    title: '1.8.3 音频页面 UI 统一与稳定性修复',
+    summary:
+      'AudioEditorPage 和 AudioConverterPage 完成 UI/UX 全面重构，与 ImageConverter/StyleTransfer 保持统一；修复 SFX 双播、内存泄漏、组件卸载后 setState 等 10+ 项问题。',
+    details: [
+      'UI 统一：AudioEditorPage 和 AudioConverterPage 页面结构与 ImageConverter/StyleTransfer 完全对齐；feature-header-meta 移除工具切换按钮；左侧主列统一为 Source + Settings/Effects 卡片；右侧栏统一为 Results + Logs 卡片。',
+      'AudioEditorPage 重构：编辑操作区按钮分组排列（Playback / History / Selection / Global FX / Misc）；Play/Stop 从 Source header 移至 Edit Operations；Export Settings 移至右侧栏并与 Results 合并；波形 canvas 宽度修复为 100%。',
+      'AudioConverterPage 重构：6 个参数滑块统一使用 range-field 模式；tool-actions-row 集中 Convert/Download/Reset/Audio Editor 按钮；Results 卡片使用 result-meta 横排布局并添加内联 Download。',
+      '稳定性修复：两页面均添加 isMountedRef 守卫，防止组件卸载后异步操作继续 setState；AudioEditorPage 导出/导入 timeout 回调添加卸载检查；AudioConverterPage 转换 catch 块添加卸载检查。',
+      'SFX 修复：修复 Reset 按钮 triple-play（buttonClick ×2 + resetSound）；修复 Reset All 按钮 double-play resetSound；移除 Audio Editor 页面上已废弃的 onSwitchTool prop。',
+    ],
+  },
   {
     version: '1.8.1',
     date: '2026-05-16',
@@ -4433,7 +4447,6 @@ function App() {
           {...sharedPageProps}
           pageTitle={messages.pageAudioEditorTitle}
           pageDescription={messages.pageAudioEditorDescription}
-          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
         />
       ) : screen === 'audio-converter' ? (
         <AudioConverterPage

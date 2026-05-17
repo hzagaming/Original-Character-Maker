@@ -399,6 +399,7 @@ export function AudioEditorPage({
   const reversedBufferRef = useRef<AudioBuffer | null>(null);
   const importTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exportTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
 
   /* ---- Sync mutable refs ---- */
   useEffect(() => { speedRef.current = speed; }, [speed]);
@@ -549,8 +550,9 @@ export function AudioEditorPage({
           const w = canvas.clientWidth || 800;
           setPeaks(generateWaveformData(decoded, w));
         }
-        importTimeoutRef.current = window.setTimeout(() => setIsImporting(false), 400);
+        importTimeoutRef.current = window.setTimeout(() => { if (isMountedRef.current) setIsImporting(false); }, 400);
       } catch (err) {
+        if (!isMountedRef.current) return;
         setIsImporting(false);
         setImportProgress(0);
         const msg = String(err);
@@ -1057,14 +1059,17 @@ export function AudioEditorPage({
         a.download = record.fileName;
         a.click();
       } catch (err) {
+        if (!isMountedRef.current) return;
         const msg = String(err);
         setErrors([{ code: 'EXPORT_FAILED', message: 'Export failed', hint: msg }]);
         addLog('error', `Export failed: ${msg}`);
         playSound('workflowFail');
       } finally {
-        setIsExporting(false);
-        if (exportTimeoutRef.current) window.clearTimeout(exportTimeoutRef.current);
-        exportTimeoutRef.current = window.setTimeout(() => setExportProgress(0), 600);
+        if (isMountedRef.current) {
+          setIsExporting(false);
+          if (exportTimeoutRef.current) window.clearTimeout(exportTimeoutRef.current);
+          exportTimeoutRef.current = window.setTimeout(() => { if (isMountedRef.current) setExportProgress(0); }, 600);
+        }
       }
     },
     [editBuffer, exportFormat, fileName, fadeIn, fadeOut, isReversed, doNormalize, noiseReduction, addLog]
@@ -1351,7 +1356,7 @@ export function AudioEditorPage({
             <p>{pageDescription}</p>
           </div>
           <div className="tool-header-actions">
-            <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { playSound('resetSound'); resetAll(); }}>Reset All</button>
+            <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { resetAll(); }}>Reset All</button>
           </div>
         </div>
 

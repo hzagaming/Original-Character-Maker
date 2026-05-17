@@ -421,7 +421,7 @@ export function AudioConverterPage({
         setImportProgress(100);
         addLog('success', `Loaded: ${decoded.numberOfChannels}ch, ${decoded.sampleRate}Hz, ${formatTime(decoded.duration)}`);
         playSound('uploadComplete');
-        importTimeoutRef.current = window.setTimeout(() => setIsImporting(false), 400);
+        importTimeoutRef.current = window.setTimeout(() => { if (isMountedRef.current) setIsImporting(false); }, 400);
       } catch (err) {
         await ctx.close().catch(() => {});
         throw err;
@@ -536,6 +536,7 @@ export function AudioConverterPage({
       addLog('success', `Conversion complete: ${ext.toUpperCase()}, ${formatBytes(blob.size)}`);
       playSound('success');
     } catch (err) {
+      if (!isMountedRef.current) return;
       const msg = String(err);
       addLog('error', `Conversion failed: ${msg}`);
       playSound('error');
@@ -851,8 +852,8 @@ export function AudioConverterPage({
                 <button className="secondary-button" type="button" onClick={handleDownload} disabled={!resultUrl}>
                   Download
                 </button>
-                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); handleReset(); }}>Reset</button>
-                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
+                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { handleReset(); }}>Reset</button>
+                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
               </div>
 
               {(isConverting || convertProgress > 0) && (
