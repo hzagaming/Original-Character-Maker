@@ -300,10 +300,12 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
 /* ------------------------------------------------------------------ */
 
 export function AudioEditorPage({
+  appSubtitle,
   pageTitle,
   pageDescription,
   backHome,
   openSettings,
+  settings: _settings,
   onBack,
   onOpenSettings,
   onOpenDocs,
@@ -1345,6 +1347,7 @@ export function AudioEditorPage({
       <section className="tool-workbench fade-up delay-2">
         <div className="tool-header">
           <div>
+            <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
           </div>
@@ -1358,74 +1361,74 @@ export function AudioEditorPage({
           <div className="tool-column">
             {/* Import area */}
             <section className="tool-card">
-              {!editBuffer ? (
-                <div
-                  className="upload-zone"
-                  onDragEnter={handleDragEnter}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  {isImporting ? (
-                    <div className="preview-surface">
+              <div className="tool-card-header">
+                <div>
+                  <span className="card-caption">Source</span>
+                  <h3>{editBuffer ? fileName : 'Import Audio'}</h3>
+                </div>
+                {editBuffer && (
+                  <div className="tool-header-actions">
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
+                      {isPlaying ? 'Pause' : 'Play'}
+                    </button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
+                      Stop
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="preview-surface" style={{ minHeight: editBuffer ? undefined : 220 }}>
+                {!editBuffer ? (
+                  <div
+                    className="upload-zone"
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    {isImporting ? (
                       <div className="preview-empty">
                         <span className="status-badge running">Decoding audio… {importProgress}%</span>
                         <div className="progress-track">
                           <div className="progress-fill" style={{ width: `${importProgress}%` }} />
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
-                        id="audio-import"
-                        hidden
-                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
-                      />
-                      <label
-                        htmlFor="audio-import"
-                        className="upload-dropzone"
-                        onClick={() => playSound('buttonClick')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
-                        tabIndex={0}
-                        role="button"
-                        aria-label="Import audio file"
-                        style={{
-                          border: isDragOver ? '2px dashed var(--accent)' : undefined,
-                          background: isDragOver ? 'rgba(var(--accent-rgb), 0.08)' : undefined,
-                          boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
-                        }}
-                      >
-                        <h3>Import Audio</h3>
-                        <p>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
-                      </label>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <div className="tool-card-header">
-                    <div>
-                      <span className="card-caption">Source</span>
-                      <h3>{fileName}</h3>
-                    </div>
-                    <div className="tool-header-actions">
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
-                        {isPlaying ? 'Pause' : 'Play'}
-                      </button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
-                        Stop
-                      </button>
-                    </div>
+                    ) : (
+                      <>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm"
+                          id="audio-import"
+                          hidden
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }}
+                        />
+                        <label
+                          htmlFor="audio-import"
+                          className="upload-dropzone"
+                          onClick={() => playSound('buttonClick')}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
+                          tabIndex={0}
+                          role="button"
+                          aria-label="Import audio file"
+                          style={{
+                            border: isDragOver ? '2px dashed var(--accent)' : undefined,
+                            background: isDragOver ? 'rgba(var(--accent-rgb), 0.08)' : undefined,
+                            boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
+                          }}
+                        >
+                          <h3>Import Audio</h3>
+                          <p>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
+                        </label>
+                      </>
+                    )}
                   </div>
+                ) : (
                   <p className="tiny-copy">
                     {formatTime(duration)} · {editBuffer.numberOfChannels}ch, {editBuffer.sampleRate}Hz
                   </p>
-                </>
-              )}
+                )}
+              </div>
             </section>
 
             {editBuffer && (
@@ -1438,7 +1441,7 @@ export function AudioEditorPage({
                       <h3>Editor</h3>
                     </div>
                   </div>
-                  <div className="audio-waveform-surface">
+                  <div className="preview-surface" style={{ minHeight: 220, height: 220 }}>
                     <canvas
                       ref={canvasRef}
                       role="img"
@@ -1474,7 +1477,7 @@ export function AudioEditorPage({
                       <h3>Operations</h3>
                     </div>
                   </div>
-                  <div className="audio-action-grid">
+                  <div className="tool-actions-row">
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>Undo</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>Redo</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>Trim</button>
@@ -1499,7 +1502,7 @@ export function AudioEditorPage({
                       <h3>Export Settings</h3>
                     </div>
                   </div>
-                  <div className="export-control-row">
+                  <div className="tool-actions-row">
                     <select
                       className="settings-input tool-select"
                       value={exportFormat}
@@ -1625,14 +1628,14 @@ export function AudioEditorPage({
                   {exports.length === 0 ? (
                     <p className="tiny-copy empty-state">No exports yet. Select a format and click Export.</p>
                   ) : (
-                    <div className="audio-export-list">
+                    <div className="result-grid">
                       {exports.map((rec) => (
-                        <div key={rec.id} className="audio-export-item">
-                          <div className="audio-export-item-header">
-                            <strong className="audio-export-name">{rec.fileName}</strong>
+                        <div key={rec.id} className="log-entry">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                            <strong>{rec.fileName}</strong>
                             <span className="tiny-copy mono">{rec.format} · {formatBytes(rec.size)}</span>
                           </div>
-                          <audio key={rec.id} controls src={rec.url} className="tool-audio" />
+                          <audio key={rec.id} controls src={rec.url} className="tool-audio" style={{ width: '100%' }} />
                           <div className="mini-action-row">
                             <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
                             <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
@@ -1662,15 +1665,15 @@ export function AudioEditorPage({
                 <span className="collapsible-state">{isLogsOpen ? 'Hide' : 'Show'}</span>
               </div>
               {isLogsOpen && (
-                <div className="tool-card-section">
-                  <div className="tool-header-actions">
+                <>
+                  <div className="tool-header-actions" style={{ marginBottom: 8 }}>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText).catch(() => {}); }}>Copy</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url); }}>Download</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>
                   </div>
                   <div className="log-scroll">
                     {logs.length === 0 ? (
-                      <p className="log-empty">No logs yet.</p>
+                      <p className="tiny-copy empty-state">No logs yet.</p>
                     ) : (
                       logs.map((log, i) => (
                         <div key={i} className={`log-line log-${log.level}`}>
@@ -1681,27 +1684,29 @@ export function AudioEditorPage({
                       ))
                     )}
                   </div>
-                </div>
+                </>
               )}
             </section>
           </div>
         </div>
       </section>
 
-      <DraggableErrorPanel
-        error={errors[0] ? { code: errors[0].code, stage: 'audio-editor', message: errors[0].message, hint: errors[0].hint, details: {} } : null}
-        labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
-        onClose={() => setErrors([])}
-        onCopy={() => { if (errors[0]) navigator.clipboard.writeText(`${errors[0].code}: ${errors[0].message}`).catch(() => {}); }}
-        onDownload={() => {
-          const blob = new Blob([JSON.stringify(errors, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-errors.json'; a.click(); URL.revokeObjectURL(url);
-        }}
-        onRetry={() => setErrors([])}
-        onOpenDocs={(code) => onOpenDocs?.('audio-editor', undefined, code)}
-        docAnchor={errors[0]?.code}
-      />
+      {_settings.others.showErrorPanel && errors.length > 0 && (
+        <DraggableErrorPanel
+          error={errors[0] ? { code: errors[0].code, stage: 'audio-editor', message: errors[0].message, hint: errors[0].hint, details: {} } : null}
+          labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
+          onClose={() => setErrors([])}
+          onCopy={() => { if (errors[0]) navigator.clipboard.writeText(`${errors[0].code}: ${errors[0].message}`).catch(() => {}); }}
+          onDownload={() => {
+            const blob = new Blob([JSON.stringify(errors, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-errors.json'; a.click(); URL.revokeObjectURL(url);
+          }}
+          onRetry={() => setErrors([])}
+          onOpenDocs={(code) => onOpenDocs?.('audio-editor', undefined, code)}
+          docAnchor={errors[0]?.code}
+        />
+      )}
     </main>
   );
 }
@@ -1712,10 +1717,10 @@ export function AudioEditorPage({
 
 function ParamRow({ label, value, children }: { label: string; value: string; children: React.ReactNode }) {
   return (
-    <label className="field">
-      <div className="field-title-row">
+    <label className="field range-field">
+      <div className="range-field-top">
         <span>{label}</span>
-        <span className="param-value">{value}</span>
+        <strong>{value}</strong>
       </div>
       {children}
     </label>

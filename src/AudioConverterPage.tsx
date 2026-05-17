@@ -681,6 +681,7 @@ export function AudioConverterPage({
       <section className="tool-workbench fade-up delay-2">
         <div className="tool-header">
           <div>
+            <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
           </div>
@@ -694,60 +695,62 @@ export function AudioConverterPage({
           <div className="tool-column">
             {/* Source / Upload */}
             <section className="tool-card">
-              {!sourceFile ? (
-                <div
-                  className="upload-zone"
-                  onDragEnter={handleDragEnter}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  {isImporting ? (
-                    <div className="preview-surface">
+              <div className="tool-card-header">
+                <div>
+                  <span className="card-caption">Source</span>
+                  <h3>{sourceFile ? sourceFile.name : 'Import Audio'}</h3>
+                </div>
+                {sourceFile && (
+                  <button className="secondary-button small-button" type="button" disabled={isImporting || isConverting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
+                    {isImporting ? 'Importing…' : 'Replace'}
+                  </button>
+                )}
+              </div>
+              <div className="preview-surface" style={{ minHeight: sourceFile ? undefined : 220 }}>
+                {!sourceFile ? (
+                  <div
+                    className="upload-zone"
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    {isImporting ? (
                       <div className="preview-empty">
                         <span className="status-badge running">Decoding audio… {importProgress}%</span>
                         <div className="progress-track" style={{ width: 'min(260px, 80%)' }}>
                           <div className="progress-fill" style={{ width: `${importProgress}%` }} />
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <label
-                      htmlFor="audio-converter-import"
-                      className="upload-dropzone"
-                      onClick={() => playSound('buttonClick')}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
-                      tabIndex={0}
-                      role="button"
-                      aria-label="Import audio file"
-                      style={{
-                        border: isDragOver ? '2px dashed var(--accent)' : undefined,
-                        background: isDragOver ? 'rgba(var(--accent-rgb), 0.08)' : undefined,
-                        boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
-                      }}
-                    >
-                      <h3>Import Audio</h3>
-                      <p>Click or drag MP3, WAV, OGG, FLAC, M4A, AAC, WEBM here</p>
-                    </label>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <div className="tool-card-header">
-                    <div>
-                      <span className="card-caption">Source</span>
-                      <h3>{sourceFile.name}</h3>
-                    </div>
-                    <button className="secondary-button small-button" type="button" disabled={isImporting || isConverting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
-                      {isImporting ? 'Importing…' : 'Replace'}
-                    </button>
+                    ) : (
+                      <label
+                        htmlFor="audio-converter-import"
+                        className="upload-dropzone"
+                        onClick={() => playSound('buttonClick')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Import audio file"
+                        style={{
+                          border: isDragOver ? '2px dashed var(--accent)' : undefined,
+                          background: isDragOver ? 'rgba(var(--accent-rgb), 0.08)' : undefined,
+                          boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
+                        }}
+                      >
+                        <h3>Import Audio</h3>
+                        <p>Click or drag MP3, WAV, OGG, FLAC, M4A, AAC, WEBM here</p>
+                      </label>
+                    )}
                   </div>
-                  <audio key={sourceUrl} controls src={sourceUrl} className="tool-audio" aria-label="Source audio" />
-                  <p className="tiny-copy">
-                    {formatBytes(sourceFile.size)} · {sourceBuffer ? `${sourceBuffer.numberOfChannels}ch, ${sourceBuffer.sampleRate}Hz, ${formatTime(sourceBuffer.duration)}` : ''}
-                  </p>
-                </>
-              )}
+                ) : (
+                  <>
+                    <audio key={sourceUrl} controls src={sourceUrl} className="tool-audio" aria-label="Source audio" />
+                    <p className="tiny-copy">
+                      {formatBytes(sourceFile.size)} · {sourceBuffer ? `${sourceBuffer.numberOfChannels}ch, ${sourceBuffer.sampleRate}Hz, ${formatTime(sourceBuffer.duration)}` : ''}
+                    </p>
+                  </>
+                )}
+              </div>
               <input
                 id="audio-converter-import"
                 ref={fileInputRef}
@@ -897,15 +900,15 @@ export function AudioConverterPage({
                 <span className="collapsible-state">{isLogsOpen ? 'Hide' : 'Show'}</span>
               </div>
               {isLogsOpen && (
-                <div className="tool-card-section">
-                  <div className="tool-header-actions">
+                <>
+                  <div className="tool-header-actions" style={{ marginBottom: 8 }}>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { playSound('deleteSound'); setLogs([]); }}>Clear</button>
                   </div>
                   <div className="log-scroll" aria-live="polite" aria-atomic="false">
                     {logs.length === 0 ? (
-                      <p className="log-empty">No logs yet.</p>
+                      <p className="tiny-copy empty-state">No logs yet.</p>
                     ) : (
                       logs.map((l, i) => (
                         <div key={`${l.time}-${i}`} className={`log-line log-${l.level}`}>
@@ -916,7 +919,7 @@ export function AudioConverterPage({
                       ))
                     )}
                   </div>
-                </div>
+                </>
               )}
             </section>
           </div>
