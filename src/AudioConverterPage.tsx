@@ -674,7 +674,6 @@ export function AudioConverterPage({
         <div className="feature-header-meta">
           <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
           <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
           <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
@@ -685,9 +684,6 @@ export function AudioConverterPage({
             <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
-          </div>
-          <div className="tool-header-actions">
-            <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); handleReset(); }}>Reset</button>
           </div>
         </div>
 
@@ -797,28 +793,46 @@ export function AudioConverterPage({
                     <option value="stereo">Stereo</option>
                   </select>
                 </label>
-                <label className="field">
-                  <span>Volume ({volume}%)</span>
+                <label className="field range-field">
+                  <div className="range-field-top">
+                    <span>Volume</span>
+                    <strong>{volume}%</strong>
+                  </div>
                   <input className="tool-range" type="range" min="0" max="200" step="1" value={volume} onChange={(e) => { playSliderThrottled(); setVolume(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Speed ({speed}%)</span>
+                <label className="field range-field">
+                  <div className="range-field-top">
+                    <span>Speed</span>
+                    <strong>{speed}%</strong>
+                  </div>
                   <input className="tool-range" type="range" min="25" max="400" step="1" value={speed} onChange={(e) => { playSliderThrottled(); setSpeed(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Pitch ({pitch > 0 ? '+' : ''}{pitch} cents)</span>
+                <label className="field range-field">
+                  <div className="range-field-top">
+                    <span>Pitch</span>
+                    <strong>{pitch > 0 ? '+' : ''}{pitch} cents</strong>
+                  </div>
                   <input className="tool-range" type="range" min="-1200" max="1200" step="10" value={pitch} onChange={(e) => { playSliderThrottled(); setPitch(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Fade In ({fadeIn}s)</span>
+                <label className="field range-field">
+                  <div className="range-field-top">
+                    <span>Fade In</span>
+                    <strong>{fadeIn}s</strong>
+                  </div>
                   <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeIn} onChange={(e) => { playSliderThrottled(); setFadeIn(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Fade Out ({fadeOut}s)</span>
+                <label className="field range-field">
+                  <div className="range-field-top">
+                    <span>Fade Out</span>
+                    <strong>{fadeOut}s</strong>
+                  </div>
                   <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeOut} onChange={(e) => { playSliderThrottled(); setFadeOut(Number(e.target.value)); }} />
                 </label>
-                <label className="field">
-                  <span>Noise Reduction ({noiseReduction}%)</span>
+                <label className="field range-field">
+                  <div className="range-field-top">
+                    <span>Noise Reduction</span>
+                    <strong>{noiseReduction}%</strong>
+                  </div>
                   <input className="tool-range" type="range" min="0" max="100" step="1" value={noiseReduction} onChange={(e) => { playSliderThrottled(); setNoiseReduction(Number(e.target.value)); }} />
                 </label>
               </div>
@@ -837,6 +851,8 @@ export function AudioConverterPage({
                 <button className="secondary-button" type="button" onClick={handleDownload} disabled={!resultUrl}>
                   Download
                 </button>
+                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); handleReset(); }}>Reset</button>
+                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
               </div>
 
               {(isConverting || convertProgress > 0) && (
@@ -869,15 +885,13 @@ export function AudioConverterPage({
                   {resultUrl ? (
                     <>
                       <audio key={resultUrl} controls src={resultUrl} className="tool-audio" aria-label="Converted audio" />
-                      <div className="progress-meta">
-                        <span>Format</span>
-                        <strong>{resultFormat}</strong>
-                        <span>Size</span>
-                        <strong>{formatBytes(resultBlob?.size || 0)}</strong>
+                      <div className="result-meta">
+                        <span className="tiny-copy">{resultFormat} · {formatBytes(resultBlob?.size || 0)}</span>
+                        <button className="secondary-button small-button" type="button" onClick={handleDownload}>Download</button>
                       </div>
                     </>
                   ) : (
-                    <p className="tiny-copy empty-state">Select a format and click Convert.</p>
+                    <p className="tiny-copy empty-state">No export results yet.</p>
                   )}
                 </div>
               )}
