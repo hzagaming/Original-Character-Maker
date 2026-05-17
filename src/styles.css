@@ -1054,6 +1054,8 @@ a {
 }
 
 .preview-surface canvas {
+  display: block;
+  width: 100%;
   background: rgba(255, 255, 255, 0.02);
 }
 

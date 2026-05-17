@@ -309,7 +309,6 @@ export function AudioEditorPage({
   onBack,
   onOpenSettings,
   onOpenDocs,
-  onSwitchTool,
 }: SharedPageProps) {
   /* ---- Single shared AudioContext ---- */
   const audioCtxRef = useRef<AudioContext | null>(null);
