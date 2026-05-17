@@ -16,7 +16,6 @@ type SharedPageProps = {
   onOpenSettings: () => void;
   onNavigate?: (screen: 'image-converter' | 'docs') => void;
   onOpenDocs?: (toolId?: string, section?: string, errorCode?: string) => void;
-  onSwitchTool?: (toolId: string) => void;
 };
 
 /* ------------------------------------------------------------------ */
@@ -455,7 +454,9 @@ export function AudioEditorPage({
   }, [zoom, duration]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       // Cleanup audio context
       if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
         audioCtxRef.current.close().catch(() => {});
@@ -566,10 +567,16 @@ export function AudioEditorPage({
 
   const startPlayback = useCallback(
     (offset: number) => {
-      const ctx = audioCtxRef.current;
-      if (!ctx || !editBuffer) return;
+      if (!editBuffer) return;
       offset = Math.max(0, Math.min(offset, editBuffer.duration));
       stopPlayback();
+
+      // Create or re-create context if needed
+      let ctx = audioCtxRef.current;
+      if (!ctx || ctx.state === 'closed') {
+        ctx = new AudioContext();
+        audioCtxRef.current = ctx;
+      }
 
       // Resume context if suspended (browser autoplay policy)
       if (ctx.state === 'suspended') {
@@ -1057,7 +1064,9 @@ export function AudioEditorPage({
         const a = document.createElement('a');
         a.href = url;
         a.download = record.fileName;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
       } catch (err) {
         if (!isMountedRef.current) return;
         const msg = String(err);
@@ -1089,7 +1098,7 @@ export function AudioEditorPage({
   /* ================================================================== */
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || peaks.length === 0) return;
+    if (!canvas || peaks.length === 0 || duration <= 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -1228,6 +1237,7 @@ export function AudioEditorPage({
   );
 
   const handleMouseUp = useCallback(() => {
+    if (dragModeRef.current === 'pan') didDragRef.current = true;
     setIsDragging(false);
     dragModeRef.current = 'select';
   }, []);
@@ -1340,11 +1350,11 @@ export function AudioEditorPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button" type="button" onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
+        <button className="secondary-button small-button back-link" type="button" onClick={() => { onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
 
@@ -1356,7 +1366,7 @@ export function AudioEditorPage({
             <p>{pageDescription}</p>
           </div>
           <div className="tool-header-actions">
-            <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { resetAll(); }}>Reset All</button>
+            <button className="secondary-button small-button" type="button" disabled={isImporting || isExporting} data-sfx-handled onClick={() => { resetAll(); }}>Reset All</button>
           </div>
         </div>
 
@@ -1370,7 +1380,7 @@ export function AudioEditorPage({
                   <h3>{editBuffer ? fileName : 'Import Audio'}</h3>
                 </div>
                 {editBuffer && (
-                  <button className="secondary-button small-button" type="button" disabled={isImporting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
+                  <button className="secondary-button small-button" type="button" disabled={isImporting} data-sfx-handled onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
                     Replace
                   </button>
                 )}
@@ -1404,8 +1414,8 @@ export function AudioEditorPage({
                         <label
                           htmlFor="audio-import"
                           className="upload-dropzone"
-                          onClick={() => playSound('buttonClick')}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
+                          data-sfx-handled
+                          onKeyDown={(e) => { if (e.repeat) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
                           tabIndex={0}
                           role="button"
                           aria-label="Import audio file"
@@ -1477,37 +1487,37 @@ export function AudioEditorPage({
                   </div>
                   <div className="tool-card-section">
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); togglePlay(); }}>
                         {isPlaying ? 'Pause' : 'Play'}
                       </button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
                         Stop
                       </button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>Undo</button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>Redo</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>Undo</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>Redo</button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>Trim</button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>Split</button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>Delete</button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>Duplicate</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>Trim</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>Split</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>Delete</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>Duplicate</button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>Reverse</button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>Fade</button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>Normalize</button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>Mono</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>Reverse</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>Fade</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>Normalize</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>Mono</button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>Reset FX</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { resetEffects(); }}>Reset FX</button>
                       <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
-                      <label htmlFor="audio-reimport" className="secondary-button small-button" onClick={() => playSound('buttonClick')}>New File</label>
+                      <label htmlFor="audio-reimport" className="secondary-button small-button" data-sfx-handled onClick={() => playSound('buttonClick')}>New File</label>
                     </div>
                   </div>
                 </section>
@@ -1522,68 +1532,68 @@ export function AudioEditorPage({
                   </div>
                   <div className="form-grid two-column">
                     <ParamRow label="Volume" value={`${volume}%`}>
-                      <input className="tool-range" type="range" min={0} max={200} value={volume} onChange={(e) => { playSliderSound(); setVolume(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={200} data-sfx-handled value={volume} onChange={(e) => { playSliderSound(); setVolume(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Pan (L/R)" value={`${pan > 0 ? '+' : ''}${pan}`}>
-                      <input className="tool-range" type="range" min={-100} max={100} value={pan} onChange={(e) => { playSliderSound(); setPan(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={-100} max={100} data-sfx-handled value={pan} onChange={(e) => { playSliderSound(); setPan(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Speed" value={`${speed}%`}>
-                      <input className="tool-range" type="range" min={25} max={400} value={speed} onChange={(e) => { playSliderSound(); setSpeed(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={25} max={400} data-sfx-handled value={speed} onChange={(e) => { playSliderSound(); setSpeed(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Pitch (cents)" value={`${pitch > 0 ? '+' : ''}${pitch}`}>
-                      <input className="tool-range" type="range" min={-1200} max={1200} step={10} value={pitch} onChange={(e) => { playSliderSound(); setPitch(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={-1200} max={1200} step={10} data-sfx-handled value={pitch} onChange={(e) => { playSliderSound(); setPitch(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Fade In" value={`${fadeIn}s`}>
-                      <input className="tool-range" type="range" min={0} max={10} step={0.1} value={fadeIn} onChange={(e) => { playSliderSound(); setFadeIn(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={10} step={0.1} data-sfx-handled value={fadeIn} onChange={(e) => { playSliderSound(); setFadeIn(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Fade Out" value={`${fadeOut}s`}>
-                      <input className="tool-range" type="range" min={0} max={10} step={0.1} value={fadeOut} onChange={(e) => { playSliderSound(); setFadeOut(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={10} step={0.1} data-sfx-handled value={fadeOut} onChange={(e) => { playSliderSound(); setFadeOut(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Low Gain" value={`${eqLow > 0 ? '+' : ''}${eqLow}dB`}>
-                      <input className="tool-range" type="range" min={-12} max={12} value={eqLow} onChange={(e) => { playSliderSound(); setEqLow(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={-12} max={12} data-sfx-handled value={eqLow} onChange={(e) => { playSliderSound(); setEqLow(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Mid Gain" value={`${eqMid > 0 ? '+' : ''}${eqMid}dB`}>
-                      <input className="tool-range" type="range" min={-12} max={12} value={eqMid} onChange={(e) => { playSliderSound(); setEqMid(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={-12} max={12} data-sfx-handled value={eqMid} onChange={(e) => { playSliderSound(); setEqMid(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="High Gain" value={`${eqHigh > 0 ? '+' : ''}${eqHigh}dB`}>
-                      <input className="tool-range" type="range" min={-12} max={12} value={eqHigh} onChange={(e) => { playSliderSound(); setEqHigh(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={-12} max={12} data-sfx-handled value={eqHigh} onChange={(e) => { playSliderSound(); setEqHigh(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Threshold" value={`${compThreshold}dB`}>
-                      <input className="tool-range" type="range" min={-60} max={0} value={compThreshold} onChange={(e) => { playSliderSound(); setCompThreshold(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={-60} max={0} data-sfx-handled value={compThreshold} onChange={(e) => { playSliderSound(); setCompThreshold(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Ratio" value={`${compRatio}:1`}>
-                      <input className="tool-range" type="range" min={1} max={20} value={compRatio} onChange={(e) => { playSliderSound(); setCompRatio(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={1} max={20} data-sfx-handled value={compRatio} onChange={(e) => { playSliderSound(); setCompRatio(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Attack" value={`${compAttack}ms`}>
-                      <input className="tool-range" type="range" min={0} max={100} value={compAttack} onChange={(e) => { playSliderSound(); setCompAttack(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={100} data-sfx-handled value={compAttack} onChange={(e) => { playSliderSound(); setCompAttack(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Release" value={`${compRelease}ms`}>
-                      <input className="tool-range" type="range" min={0} max={500} value={compRelease} onChange={(e) => { playSliderSound(); setCompRelease(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={500} data-sfx-handled value={compRelease} onChange={(e) => { playSliderSound(); setCompRelease(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Room Size" value={`${reverbSize}%`}>
-                      <input className="tool-range" type="range" min={0} max={100} value={reverbSize} onChange={(e) => { playSliderSound(); setReverbSize(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={100} data-sfx-handled value={reverbSize} onChange={(e) => { playSliderSound(); setReverbSize(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Damping" value={`${reverbDamp}%`}>
-                      <input className="tool-range" type="range" min={0} max={100} value={reverbDamp} onChange={(e) => { playSliderSound(); setReverbDamp(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={100} data-sfx-handled value={reverbDamp} onChange={(e) => { playSliderSound(); setReverbDamp(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Wet/Dry" value={`${reverbMix}%`}>
-                      <input className="tool-range" type="range" min={0} max={100} value={reverbMix} onChange={(e) => { playSliderSound(); setReverbMix(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={100} data-sfx-handled value={reverbMix} onChange={(e) => { playSliderSound(); setReverbMix(Number(e.target.value)); }} />
                     </ParamRow>
                     <ParamRow label="Noise Reduction" value={`${noiseReduction}%`}>
-                      <input className="tool-range" type="range" min={0} max={100} value={noiseReduction} onChange={(e) => { playSliderSound(); setNoiseReduction(Number(e.target.value)); }} />
+                      <input className="tool-range" type="range" min={0} max={100} data-sfx-handled value={noiseReduction} onChange={(e) => { playSliderSound(); setNoiseReduction(Number(e.target.value)); }} />
                     </ParamRow>
                   </div>
                   <div className="toggle-grid">
-                    <button className={`toggle-chip ${isMuted ? 'active' : ''}`} type="button" onClick={() => { playSound(isMuted ? 'toggleOff' : 'toggleOn'); setIsMuted((v) => !v); }}>
+                    <button className={`toggle-chip ${isMuted ? 'active' : ''}`} type="button" aria-pressed={isMuted} data-sfx-handled onClick={() => { playSound(isMuted ? 'toggleOff' : 'toggleOn'); setIsMuted((v) => !v); }}>
                       <span className="toggle-chip-dot" /> Mute
                     </button>
-                    <button className={`toggle-chip ${isReversed ? 'active' : ''}`} type="button" onClick={() => { playSound(isReversed ? 'toggleOff' : 'toggleOn'); setIsReversed((v) => !v); }}>
+                    <button className={`toggle-chip ${isReversed ? 'active' : ''}`} type="button" aria-pressed={isReversed} data-sfx-handled onClick={() => { playSound(isReversed ? 'toggleOff' : 'toggleOn'); setIsReversed((v) => !v); }}>
                       <span className="toggle-chip-dot" /> Reverse
                     </button>
-                    <button className={`toggle-chip ${isLoop ? 'active' : ''}`} type="button" onClick={() => { playSound(isLoop ? 'toggleOff' : 'toggleOn'); setIsLoop((v) => !v); }}>
+                    <button className={`toggle-chip ${isLoop ? 'active' : ''}`} type="button" aria-pressed={isLoop} data-sfx-handled onClick={() => { playSound(isLoop ? 'toggleOff' : 'toggleOn'); setIsLoop((v) => !v); }}>
                       <span className="toggle-chip-dot" /> Loop
                     </button>
-                    <button className={`toggle-chip ${doNormalize ? 'active' : ''}`} type="button" onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>
+                    <button className={`toggle-chip ${doNormalize ? 'active' : ''}`} type="button" aria-pressed={doNormalize} data-sfx-handled onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>
                       <span className="toggle-chip-dot" /> Normalize
                     </button>
                   </div>
@@ -1604,6 +1614,7 @@ export function AudioEditorPage({
               <div className="tool-actions-row">
                 <select
                   className="settings-input tool-select"
+                  aria-label="Export format"
                   value={exportFormat}
                   onChange={(e) => setExportFormat(e.target.value as typeof exportFormat)}
                 >
@@ -1611,7 +1622,7 @@ export function AudioEditorPage({
                     <option key={f.key} value={f.key}>{f.label}</option>
                   ))}
                 </select>
-                <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting}>
+                <button className="primary-button small-button" type="button" data-sfx-handled onClick={() => { handleExport(); }} disabled={isExporting}>
                   {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
                 </button>
                 <span className={`status-badge ${isExporting ? 'running' : exportProgress >= 100 ? 'success' : 'idle'}`}>
@@ -1634,10 +1645,10 @@ export function AudioEditorPage({
                         <strong>{rec.fileName}</strong>
                         <span className="tiny-copy mono">{rec.format} · {formatBytes(rec.size)}</span>
                       </div>
-                      <audio key={rec.id} controls src={rec.url} className="tool-audio" />
+                      <audio key={rec.id} controls src={rec.url} className="tool-audio" aria-label={`Exported audio: ${rec.fileName}`} />
                       <div className="mini-action-row">
-                        <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
-                        <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
+                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}>Download</button>
+                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => removeExport(rec.id)}>Remove</button>
                       </div>
                     </div>
                   ))}
@@ -1664,9 +1675,9 @@ export function AudioEditorPage({
               {isLogsOpen && (
                 <>
                   <div className="tool-header-actions">
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText).catch(() => {}); }}>Copy</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url); }}>Download</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>
+                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText).catch(() => {}); }}>Copy</button>
+                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }}>Download</button>
+                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>
                   </div>
                   <div className="log-scroll">
                     {logs.length === 0 ? (
@@ -1697,7 +1708,7 @@ export function AudioEditorPage({
           onDownload={() => {
             const blob = new Blob([JSON.stringify(errors, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-errors.json'; a.click(); URL.revokeObjectURL(url);
+            const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-errors.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
           }}
           onRetry={() => setErrors([])}
           onOpenDocs={(code) => onOpenDocs?.('audio-editor', undefined, code)}

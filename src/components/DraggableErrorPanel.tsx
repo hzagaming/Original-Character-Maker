@@ -109,6 +109,7 @@ export function DraggableErrorPanel({
     return (
       <button
         type="button"
+        data-sfx-handled
         onClick={() => setCollapsed(false)}
         style={{
           position: 'fixed',
@@ -167,12 +168,14 @@ export function DraggableErrorPanel({
           <button
             className="secondary-button small-button"
             type="button"
+            data-sfx-handled
+            aria-label="Collapse error panel"
             onClick={() => setCollapsed(true)}
             title="Collapse"
           >
             −
           </button>
-          <button className="secondary-button small-button" type="button" onClick={onClose}>
+          <button className="secondary-button small-button" type="button" data-sfx-handled aria-label="Close error panel" onClick={onClose}>
             ✕
           </button>
         </div>
@@ -197,19 +200,20 @@ export function DraggableErrorPanel({
           </pre>
         </div>
         <div className="mini-action-row" style={{ marginTop: 4, flexShrink: 0 }}>
-          <button className="secondary-button small-button" type="button" onClick={onCopy}>{labels.copyText}</button>
-          <button className="secondary-button small-button" type="button" onClick={onDownload}>{labels.downloadJson}</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={onCopy}>{labels.copyText}</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={onDownload}>{labels.downloadJson}</button>
           {onOpenDocs && labels.openDocs && (
             <button
               className="secondary-button small-button"
               type="button"
+              data-sfx-handled
               onClick={() => onOpenDocs(docAnchor)}
               style={{ color: 'var(--accent-solid)' }}
             >
               {labels.openDocs}
             </button>
           )}
-          <button className="primary-button small-button" type="button" onClick={onRetry}>{labels.retry}</button>
+          <button className="primary-button small-button" type="button" data-sfx-handled onClick={onRetry}>{labels.retry}</button>
         </div>
       </div>
       {/* Resize handle */}

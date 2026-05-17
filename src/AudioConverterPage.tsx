@@ -11,7 +11,9 @@ function downloadText(name: string, content: string, type = 'text/plain;charset=
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = name;
+  document.body.appendChild(anchor);
   anchor.click();
+  document.body.removeChild(anchor);
   window.setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
@@ -97,9 +99,12 @@ function normalizeBuffer(buffer: AudioBuffer): AudioBuffer {
   let peak = 0;
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
     const data = buffer.getChannelData(ch);
-    for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]));
+    for (let i = 0; i < data.length; i++) {
+      const v = Math.abs(data[i]);
+      if (!isNaN(v) && isFinite(v)) peak = Math.max(peak, v);
+    }
   }
-  if (peak === 0 || peak >= 0.999) return buffer;
+  if (!isFinite(peak) || peak === 0 || peak >= 0.999) return buffer;
   const gain = 0.999 / peak;
   const result = new AudioBuffer({ numberOfChannels: buffer.numberOfChannels, length: buffer.length, sampleRate: buffer.sampleRate });
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
@@ -247,10 +252,11 @@ function getSupportedMimeTypes(): string[] {
   return types.filter((t) => MediaRecorder.isTypeSupported(t));
 }
 
-async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Promise<Blob> {
+async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string, cleanupRef?: { current: AudioContext | null }): Promise<Blob> {
   const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) throw new Error('Web Audio API not supported');
   const ctx = new AC();
+  if (cleanupRef) cleanupRef.current = ctx;
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   const dest = ctx.createMediaStreamDestination();
@@ -262,11 +268,13 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type: mimeType });
       ctx.close().catch(() => {});
+      if (cleanupRef) cleanupRef.current = null;
       if (blob.size === 0) reject(new Error('Empty recording'));
       else resolve(blob);
     };
     recorder.onerror = () => {
       ctx.close().catch(() => {});
+      if (cleanupRef) cleanupRef.current = null;
       reject(new Error('MediaRecorder error'));
     };
     try {
@@ -275,6 +283,7 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string): Pr
       source.onended = () => { try { recorder.stop(); } catch {} };
     } catch (err) {
       ctx.close().catch(() => {});
+      if (cleanupRef) cleanupRef.current = null;
       reject(err);
     }
   });
@@ -333,6 +342,9 @@ export function AudioConverterPage({
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const importTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const importCtxRef = useRef<AudioContext | null>(null);
+  const exportCtxRef = useRef<AudioContext | null>(null);
+  const isImportingRef = useRef(false);
 
   /* ---- Drag & drop ---- */
   const [isDragOver, setIsDragOver] = useState(false);
@@ -341,6 +353,7 @@ export function AudioConverterPage({
   /* ---- Mount guard ---- */
   const isMountedRef = useRef(true);
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       if (importTimeoutRef.current) window.clearTimeout(importTimeoutRef.current);
@@ -348,6 +361,8 @@ export function AudioConverterPage({
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
       if (progressTimeoutRef.current) window.clearTimeout(progressTimeoutRef.current);
       if (sliderThrottleRef.current) window.clearTimeout(sliderThrottleRef.current);
+      if (importCtxRef.current) { importCtxRef.current.close().catch(() => {}); importCtxRef.current = null; }
+      if (exportCtxRef.current) { exportCtxRef.current.close().catch(() => {}); exportCtxRef.current = null; }
     };
   }, []);
 
@@ -387,7 +402,8 @@ export function AudioConverterPage({
 
   /* ---- Import ---- */
   const handleImportFile = useCallback(async (file: File) => {
-    if (isImporting) return;
+    if (isImportingRef.current) return;
+    isImportingRef.current = true;
     setIsImporting(true);
     setImportProgress(10);
     if (importTimeoutRef.current) window.clearTimeout(importTimeoutRef.current);
@@ -402,6 +418,7 @@ export function AudioConverterPage({
       setShowErrorPanel(false);
 
       const ctx = new AudioContext();
+      importCtxRef.current = ctx;
       try {
         setImportProgress(30);
         const arrayBuffer = await file.arrayBuffer();
@@ -409,6 +426,7 @@ export function AudioConverterPage({
         const decoded = await ctx.decodeAudioData(arrayBuffer);
         setImportProgress(85);
         await ctx.close().catch(() => {});
+        importCtxRef.current = null;
 
         if (!isMountedRef.current) return;
         // Successful decode — safe to replace old source
@@ -424,6 +442,7 @@ export function AudioConverterPage({
         importTimeoutRef.current = window.setTimeout(() => { if (isMountedRef.current) setIsImporting(false); }, 400);
       } catch (err) {
         await ctx.close().catch(() => {});
+        importCtxRef.current = null;
         throw err;
       }
     } catch (err) {
@@ -435,8 +454,10 @@ export function AudioConverterPage({
       playSound('error');
       setError({ code: 'IMPORT_FAILED', message: 'Failed to decode audio file', hint: msg });
       setShowErrorPanel(true);
+    } finally {
+      isImportingRef.current = false;
     }
-  }, [addLog, isImporting]);
+  }, [addLog]);
 
   /* ---- Convert ---- */
   const handleConvert = useCallback(async () => {
@@ -521,7 +542,7 @@ export function AudioConverterPage({
           mp4: 'audio/mp4',
         };
         const mime = mimeMap[outputFormat] || 'audio/webm';
-        blob = await exportViaMediaRecorder(buffer, mime);
+        blob = await exportViaMediaRecorder(buffer, mime, exportCtxRef);
         ext = outputFormat;
       }
 
@@ -568,7 +589,9 @@ export function AudioConverterPage({
     const a = document.createElement('a');
     a.href = resultUrl;
     a.download = name;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     addLog('info', `Downloaded: ${name}`);
   }, [resultBlob, sourceFile, resultUrl, outputFormat, addLog]);
 
@@ -671,11 +694,11 @@ export function AudioConverterPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button" type="button" onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
+        <button className="secondary-button small-button back-link" type="button" onClick={() => { onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
 
@@ -698,7 +721,7 @@ export function AudioConverterPage({
                   <h3>{sourceFile ? sourceFile.name : 'Import Audio'}</h3>
                 </div>
                 {sourceFile && (
-                  <button className="secondary-button small-button" type="button" disabled={isImporting || isConverting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
+                  <button className="secondary-button small-button" type="button" disabled={isImporting || isConverting} data-sfx-handled onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
                     {isImporting ? 'Importing…' : 'Replace'}
                   </button>
                 )}
@@ -715,7 +738,7 @@ export function AudioConverterPage({
                     {isImporting ? (
                       <div className="preview-empty">
                         <span className="status-badge running">Decoding audio… {importProgress}%</span>
-                        <div className="progress-track centered">
+                        <div className="progress-track centered" role="progressbar" aria-valuenow={importProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Import progress">
                           <div className="progress-fill" style={{ width: `${importProgress}%` }} />
                         </div>
                       </div>
@@ -723,8 +746,8 @@ export function AudioConverterPage({
                       <label
                         htmlFor="audio-converter-import"
                         className="upload-dropzone"
-                        onClick={() => playSound('buttonClick')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
+                        data-sfx-handled
+                        onKeyDown={(e) => { if (e.repeat) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
                         tabIndex={0}
                         role="button"
                         aria-label="Import audio file"
@@ -769,7 +792,7 @@ export function AudioConverterPage({
               <div className="form-grid two-column">
                 <label className="field">
                   <span>Output Format</span>
-                  <select className="settings-input tool-select" value={outputFormat} onChange={(e) => { playSound('buttonClick'); setOutputFormat(e.target.value as typeof outputFormat); }}>
+                  <select className="settings-input tool-select" data-sfx-handled value={outputFormat} onChange={(e) => { playSound('buttonClick'); setOutputFormat(e.target.value as typeof outputFormat); }}>
                     {supportedFormats.map((f) => (
                       <option key={f.key} value={f.key}>{f.label}</option>
                     ))}
@@ -777,7 +800,7 @@ export function AudioConverterPage({
                 </label>
                 <label className="field">
                   <span>Sample Rate</span>
-                  <select className="settings-input tool-select" value={sampleRate} onChange={(e) => { playSound('buttonClick'); setSampleRate(e.target.value as typeof sampleRate); }}>
+                  <select className="settings-input tool-select" data-sfx-handled value={sampleRate} onChange={(e) => { playSound('buttonClick'); setSampleRate(e.target.value as typeof sampleRate); }}>
                     <option value="original">Original</option>
                     <option value="22050">22050 Hz</option>
                     <option value="44100">44100 Hz</option>
@@ -788,7 +811,7 @@ export function AudioConverterPage({
                 </label>
                 <label className="field">
                   <span>Channels</span>
-                  <select className="settings-input tool-select" value={channels} onChange={(e) => { playSound('buttonClick'); setChannels(e.target.value as typeof channels); }}>
+                  <select className="settings-input tool-select" data-sfx-handled value={channels} onChange={(e) => { playSound('buttonClick'); setChannels(e.target.value as typeof channels); }}>
                     <option value="original">Original</option>
                     <option value="mono">Mono</option>
                     <option value="stereo">Stereo</option>
@@ -799,65 +822,65 @@ export function AudioConverterPage({
                     <span>Volume</span>
                     <strong>{volume}%</strong>
                   </div>
-                  <input className="tool-range" type="range" min="0" max="200" step="1" value={volume} onChange={(e) => { playSliderThrottled(); setVolume(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="200" step="1" data-sfx-handled value={volume} onChange={(e) => { playSliderThrottled(); setVolume(Number(e.target.value)); }} />
                 </label>
                 <label className="field range-field">
                   <div className="range-field-top">
                     <span>Speed</span>
                     <strong>{speed}%</strong>
                   </div>
-                  <input className="tool-range" type="range" min="25" max="400" step="1" value={speed} onChange={(e) => { playSliderThrottled(); setSpeed(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="25" max="400" step="1" data-sfx-handled value={speed} onChange={(e) => { playSliderThrottled(); setSpeed(Number(e.target.value)); }} />
                 </label>
                 <label className="field range-field">
                   <div className="range-field-top">
                     <span>Pitch</span>
                     <strong>{pitch > 0 ? '+' : ''}{pitch} cents</strong>
                   </div>
-                  <input className="tool-range" type="range" min="-1200" max="1200" step="10" value={pitch} onChange={(e) => { playSliderThrottled(); setPitch(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="-1200" max="1200" step="10" data-sfx-handled value={pitch} onChange={(e) => { playSliderThrottled(); setPitch(Number(e.target.value)); }} />
                 </label>
                 <label className="field range-field">
                   <div className="range-field-top">
                     <span>Fade In</span>
                     <strong>{fadeIn}s</strong>
                   </div>
-                  <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeIn} onChange={(e) => { playSliderThrottled(); setFadeIn(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="10" step="0.1" data-sfx-handled value={fadeIn} onChange={(e) => { playSliderThrottled(); setFadeIn(Number(e.target.value)); }} />
                 </label>
                 <label className="field range-field">
                   <div className="range-field-top">
                     <span>Fade Out</span>
                     <strong>{fadeOut}s</strong>
                   </div>
-                  <input className="tool-range" type="range" min="0" max="10" step="0.1" value={fadeOut} onChange={(e) => { playSliderThrottled(); setFadeOut(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="10" step="0.1" data-sfx-handled value={fadeOut} onChange={(e) => { playSliderThrottled(); setFadeOut(Number(e.target.value)); }} />
                 </label>
                 <label className="field range-field">
                   <div className="range-field-top">
                     <span>Noise Reduction</span>
                     <strong>{noiseReduction}%</strong>
                   </div>
-                  <input className="tool-range" type="range" min="0" max="100" step="1" value={noiseReduction} onChange={(e) => { playSliderThrottled(); setNoiseReduction(Number(e.target.value)); }} />
+                  <input className="tool-range" type="range" min="0" max="100" step="1" data-sfx-handled value={noiseReduction} onChange={(e) => { playSliderThrottled(); setNoiseReduction(Number(e.target.value)); }} />
                 </label>
               </div>
 
               <div className="toggle-grid">
-                <button className={`toggle-chip ${doNormalize ? 'active' : ''}`} type="button" aria-pressed={doNormalize} onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>
+                <button className={`toggle-chip ${doNormalize ? 'active' : ''}`} type="button" aria-pressed={doNormalize} data-sfx-handled onClick={() => { playSound(doNormalize ? 'toggleOff' : 'toggleOn'); setDoNormalize((v) => !v); }}>
                   <span className="toggle-chip-dot" />
                   Normalize Peak
                 </button>
               </div>
 
               <div className="tool-actions-row">
-                <button className="primary-button" type="button" onClick={handleConvert} disabled={!sourceBuffer || isConverting || isImporting}>
+                <button className="primary-button" type="button" data-sfx-handled onClick={handleConvert} disabled={!sourceBuffer || isConverting || isImporting}>
                   {isConverting ? `Converting ${convertProgress}%…` : 'Convert'}
                 </button>
-                <button className="secondary-button" type="button" onClick={handleDownload} disabled={!resultUrl}>
+                <button className="secondary-button" type="button" data-sfx-handled onClick={handleDownload} disabled={!resultUrl}>
                   Download
                 </button>
-                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { handleReset(); }}>Reset</button>
-                <button className="secondary-button" type="button" disabled={isConverting} onClick={() => { onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
+                <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { handleReset(); }}>Reset</button>
+                <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
               </div>
 
               {(isConverting || convertProgress > 0) && (
-                <div className="progress-track">
+                <div className="progress-track" role="progressbar" aria-valuenow={convertProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Conversion progress">
                   <div className="progress-fill" style={{ width: `${convertProgress}%` }} />
                 </div>
               )}
@@ -888,7 +911,7 @@ export function AudioConverterPage({
                       <audio key={resultUrl} controls src={resultUrl} className="tool-audio" aria-label="Converted audio" />
                       <div className="result-meta">
                         <span className="tiny-copy">{resultFormat} · {formatBytes(resultBlob?.size || 0)}</span>
-                        <button className="secondary-button small-button" type="button" onClick={handleDownload}>Download</button>
+                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleDownload}>Download</button>
                       </div>
                     </>
                   ) : (
@@ -917,9 +940,9 @@ export function AudioConverterPage({
               {isLogsOpen && (
                 <>
                   <div className="tool-header-actions">
-                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
-                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
-                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { playSound('deleteSound'); setLogs([]); }}>Clear</button>
+                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} data-sfx-handled onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
+                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} data-sfx-handled onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
+                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} data-sfx-handled onClick={() => { playSound('deleteSound'); setLogs([]); }}>Clear</button>
                   </div>
                   <div className="log-scroll" aria-live="polite" aria-atomic="false">
                     {logs.length === 0 ? (
@@ -947,7 +970,7 @@ export function AudioConverterPage({
           labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
           onClose={() => { playSound('back'); setShowErrorPanel(false); }}
           onCopy={() => { playSound('copySound'); navigator.clipboard.writeText(`${error.code}: ${error.message}`).catch(() => {}); }}
-          onDownload={() => { playSound('downloadSound'); const blob = new Blob([JSON.stringify(error, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-converter-error.json'; a.click(); window.setTimeout(() => URL.revokeObjectURL(url), 100); }}
+          onDownload={() => { playSound('downloadSound'); const blob = new Blob([JSON.stringify(error, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-converter-error.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.setTimeout(() => URL.revokeObjectURL(url), 100); }}
           onRetry={() => { playSound('confirm'); setShowErrorPanel(false); handleConvert(); }}
           onOpenDocs={(code) => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'errors', code); }}
           docAnchor={error.code}

@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.3';
+const VERSION = '1.8.4';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -620,10 +620,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.8.3 音频页面 UI 统一与稳定性修复：AudioEditorPage 和 AudioConverterPage 完成 UI/UX 全面重构，与 ImageConverter/StyleTransfer 保持统一；修复 SFX 双播、内存泄漏、组件卸载后 setState 等 10+ 项问题。',
-    announcementList1: 'UI 统一：AudioEditorPage 和 AudioConverterPage 页面结构与 ImageConverter/StyleTransfer 完全对齐；feature-header-meta 移除工具切换按钮；左侧主列统一为 Source + Settings/Effects 卡片；右侧栏统一为 Results + Logs 卡片。',
-    announcementList2: 'AudioEditorPage 重构：编辑操作区按钮分组排列（Playback / History / Selection / Global FX / Misc）；Play/Stop 从 Source header 移至 Edit Operations；Export Settings 移至右侧栏并与 Results 合并；波形 canvas 宽度修复为 100%。',
-    announcementList3: '稳定性修复：两页面均添加 isMountedRef 守卫，防止组件卸载后异步操作继续 setState；AudioEditorPage 导出/导入 timeout 回调添加卸载检查；AudioConverterPage 转换 catch 块添加卸载检查。修复 Reset 按钮 triple-play 和 Reset All 按钮 double-play resetSound。上一版本 v1.8.1 完成了世界设定集。版本号同步为 1.8.3。',
+    announcementDescription: 'v1.8.4 音频页面深度审计与核心稳定性修复：对 AudioEditorPage 和 AudioConverterPage 进行最严格的深度审计，修复 2 项 Critical 运行时缺陷、6 项 High 优先级问题、10+ 项 UI/UX/SFX/a11y 改进；全局音效系统同步升级。',
+    announcementList1: 'Critical 修复：React 18 Strict Mode 下 isMountedRef 永久失效（开发环境功能静默不可用）；并发导入 Race Condition 导致 AudioContext 泄漏和状态覆盖。',
+    announcementList2: '内存与 SFX：AudioContext 导入/导出流程添加上下文追踪 ref，组件卸载时自动关闭；所有下载锚点补全 append/click/remove 流程；为全部 70+ 交互元素添加 data-sfx-handled，彻底消除 double-play。',
+    announcementList3: '无障碍与数据安全：导入/转换进度条添加 role="progressbar" + ARIA 属性；toggle chip 添加 aria-pressed；normalizeBuffer 添加 NaN/Infinity 样本过滤；波形绘制添加 duration <= 0 边界保护；全局音效系统升级 label 选择器和 back-link 统一。版本同步为 1.8.4。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1030,10 +1030,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.8.3 オーディオページ UI 統一と安定性修正：AudioEditorPage と AudioConverterPage の UI/UX を全面再構築し、ImageConverter/StyleTransfer と統一。SFX 重複再生、メモリリーク、コンポーネントアンマウント後の setState など 10 件以上の問題を修正。',
-    announcementList1: 'UI 統一：AudioEditorPage と AudioConverterPage のページ構造を ImageConverter/StyleTransfer と完全に統一。feature-header-meta からツール切り替えボタンを削除。左列を Source + Settings/Effects カードに統一。右列を Results + Logs カードに統一。',
-    announcementList2: 'AudioEditorPage 再構築：編集操作ボタンをグループ化（Playback / History / Selection / Global FX / Misc）。Play/Stop を Source header から Edit Operations に移動。Export Settings を右列に移動し Results と統合。波形 canvas 幅を 100% に修正。',
-    announcementList3: '安定性修正：両ページに isMountedRef ガードを追加し、コンポーネントアンマウント後の非同期 setState を防止。AudioEditorPage のエクスポート/インポート timeout コールバックにアンマウントチェックを追加。AudioConverterPage の変換 catch ブロックにアンマウントチェックを追加。Reset ボタンの triple-play と Reset All ボタンの double-play resetSound を修正。前バージョン v1.8.1 で世界観百科を追加。バージョンを 1.8.3 に同期。',
+    announcementDescription: 'v1.8.4 オーディオページ深度監査とコア安定性修正：AudioEditorPage と AudioConverterPage に最も厳格な深度監査を実施し、Critical ランタイム欠陥 2 件、High 優先度問題 6 件、UI/UX/SFX/a11y 改善 10+ 件を修正。グローバル SFX システムも同期アップグレード。',
+    announcementList1: 'Critical 修正：React 18 Strict Mode で isMountedRef が永久に無効化される問題（開発環境で機能が暗黙的に利用不可）；並行インポート Race Condition による AudioContext リークと状態の上書き。',
+    announcementList2: 'メモリと SFX：AudioContext インポート/エクスポートフローにコンテキスト追跡 ref を追加、コンポーネントアンマウント時に自動クローズ；すべてのダウンロードアンカーに append/click/remove フローを補完；70+ のインタラクティブ要素に data-sfx-handled を追加し double-play を完全に排除。',
+    announcementList3: 'アクセシビリティとデータ安全性：インポート/変換プログレスバーに role="progressbar" + ARIA 属性を追加；toggle chip に aria-pressed を追加；normalizeBuffer に NaN/Infinity サンプルフィルタを追加；波形描画に duration <= 0 境界保護を追加；グローバル SFX システムを label セレクターと back-link 統一でアップグレード。バージョンを 1.8.4 に同期。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1438,10 +1438,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.8.3 Audio page UI unification and stability fixes: AudioEditorPage and AudioConverterPage fully refactored for UI/UX consistency with ImageConverter/StyleTransfer; fixed 10+ issues including SFX double-plays, memory leaks, and post-unmount setState calls.',
-    announcementList1: 'UI unification: AudioEditorPage and AudioConverterPage now align with ImageConverter/StyleTransfer structure. Tool-switch buttons removed from feature-header-meta. Left column unified as Source + Settings/Effects cards. Right column unified as Results + Logs cards.',
-    announcementList2: 'AudioEditorPage refactor: Edit operation buttons grouped into rows (Playback / History / Selection / Global FX / Misc). Play/Stop moved from Source header to Edit Operations. Export Settings moved to right column and merged with Results. Waveform canvas width fixed to 100%.',
-    announcementList3: 'Stability fixes: Added isMountedRef guards to both pages to prevent async setState after unmount. Added unmount checks to AudioEditorPage export/import timeout callbacks and AudioConverterPage convert catch block. Fixed Reset button triple-play and Reset All button double-play resetSound. Previous v1.8.1 added the World Encyclopedia. Version synchronized to 1.8.3.',
+    announcementDescription: 'v1.8.4 Audio page deep audit and core stability fixes: Conducted the strictest deep audit on AudioEditorPage and AudioConverterPage, fixing 2 Critical runtime defects, 6 High-priority issues, and 10+ UI/UX/SFX/a11y improvements; global SFX system upgraded in tandem.',
+    announcementList1: 'Critical fixes: isMountedRef permanently broken under React 18 Strict Mode (silently breaks dev environment); concurrent import Race Condition causing AudioContext leaks and state overwrites.',
+    announcementList2: 'Memory and SFX: Added context-tracking refs to AudioContext import/export flows for automatic close on unmount; completed append/click/remove flow for all download anchors; added data-sfx-handled to all 70+ interactive elements, completely eliminating double-play.',
+    announcementList3: 'Accessibility and data safety: Added role="progressbar" + ARIA attributes to import/convert progress bars; added aria-pressed to toggle chips; added NaN/Infinity sample filtering to normalizeBuffer; added duration <= 0 boundary guard to waveform drawing; upgraded global SFX system with label selector and unified back-link sound. Version synchronized to 1.8.4.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1846,10 +1846,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.8.3 Унификация UI аудио-страниц и исправления стабильности: AudioEditorPage и AudioConverterPage полностью рефакторены для единообразия UI/UX с ImageConverter/StyleTransfer; исправлено 10+ проблем, включая двойной SFX, утечки памяти и setState после размонтирования.',
-    announcementList1: 'Унификация UI: AudioEditorPage и AudioConverterPage теперь соответствуют структуре ImageConverter/StyleTransfer. Кнопки переключения инструментов удалены из feature-header-meta. Левая колонка объединена в карточки Source + Settings/Effects. Правая колонка объединена в карточки Results + Logs.',
-    announcementList2: 'Рефакторинг AudioEditorPage: Кнопки редактирования сгруппированы в ряды (Playback / History / Selection / Global FX / Misc). Play/Stop перенесены из Source header в Edit Operations. Export Settings перенесены в правую колонку и объединены с Results. Ширина canvas волны исправлена на 100%.',
-    announcementList3: 'Исправления стабильности: Добавлены isMountedRef-гарды на обеих страницах для предотвращения async setState после размонтирования. Добавлены проверки размонтирования в колбэки таймаутов экспорта/импорта AudioEditorPage и блок catch конвертации AudioConverterPage. Исправлен triple-play кнопки Reset и double-play resetSound кнопки Reset All. Предыдущая v1.8.1 добавила Энциклопедию мира. Версия синхронизирована с 1.8.3.',
+    announcementDescription: 'v1.8.4 Глубокий аудит аудио-страниц и исправления ядра стабильности: Проведен самый строгий глубокий аудит AudioEditorPage и AudioConverterPage, исправлено 2 критических дефекта времени выполнения, 6 проблем высокого приоритета и 10+ улучшений UI/UX/SFX/a11y; глобальная система SFX синхронно обновлена.',
+    announcementList1: 'Критические исправления: isMountedRef навсегда ломается в React 18 Strict Mode (в dev-окружении функции молча не работают); Race Condition при параллельном импорте, вызывающий утечки AudioContext и перезапись состояния.',
+    announcementList2: 'Память и SFX: Добавлены ref-отслеживания контекста в потоки импорта/экспорта AudioContext для автоматического закрытия при размонтировании; дополнены append/click/remove для всех якорей загрузки; добавлен data-sfx-handled ко всем 70+ интерактивным элементам, полностью устранен double-play.',
+    announcementList3: 'Доступность и безопасность данных: Добавлен role="progressbar" + ARIA-атрибуты к индикаторам прогресса импорта/конвертации; добавлен aria-pressed для toggle chip; добавлена фильтрация NaN/Infinity в normalizeBuffer; добавлена защита duration <= 0 для отрисовки волны; обновлена глобальная система SFX с селектором label и единым звуком back-link. Версия синхронизирована с 1.8.4.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2573,10 +2573,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageCharacterChronicleDescription: '캐릭터의 탄생, 만남, 성장, 전투 등 주요 이벤트를 기록하는 시각적 타임라인을 생성합니다. 관계망 캐릭터와 연동되어 긴 이미지로 내보낼 수 있습니다.',
     pageWorldEncyclopediaTitle: '세계관 백과',
     pageWorldEncyclopediaDescription: '구조화된 세계관 백과를 구축합니다. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성하고 태그, 관련 캐릭터, 검색 필터 및 JSON 내보내기를 지원합니다.',
-    announcementDescription: 'v1.8.3 오디오 페이지 UI 통합 및 안정성 수정: AudioEditorPage와 AudioConverterPage의 UI/UX를 ImageConverter/StyleTransfer와 통일되도록 전면 재구축; SFX 중복 재생, 메모리 누수, 컴포넌트 언마운트 후 setState 등 10건 이상의 문제 수정.',
-    announcementList1: 'UI 통합: AudioEditorPage와 AudioConverterPage 페이지 구조를 ImageConverter/StyleTransfer와 완전히 통일. feature-header-meta에서 도구 전환 버튼 제거. 좌측 열을 Source + Settings/Effects 카드로 통일. 우측 열을 Results + Logs 카드로 통일.',
-    announcementList2: 'AudioEditorPage 재구축: 편집 작업 버튼을 그룹화(Playback / History / Selection / Global FX / Misc). Play/Stop를 Source header에서 Edit Operations로 이동. Export Settings를 우측 열로 이동하여 Results와 통합. 파형 canvas 너비를 100%로 수정.',
-    announcementList3: '안정성 수정: 두 페이지 모두에 isMountedRef 가드를 추가하여 컴포넌트 언마운트 후 비동기 setState 방지. AudioEditorPage 내보내기/가져오기 타임아웃 콜백에 언마운트 체크 추가. AudioConverterPage 변환 catch 블록에 언마운트 체크 추가. Reset 버튼 triple-play 및 Reset All 버튼 double-play resetSound 수정. 이전 버전 v1.8.1에서 세계관 백과를 추가. 버전을 1.8.3으로 동기화.'
+    announcementDescription: 'v1.8.4 오디오 페이지 심층 감사 및 핵심 안정성 수정: AudioEditorPage와 AudioConverterPage에 가장 엄격한 심층 감사를 실시하여 Critical 런타임 결함 2건, High 우선순위 문제 6건, UI/UX/SFX/a11y 개선 10+건을 수정했습니다. 글로벌 SFX 시스템도 동기화되어 업그레이드되었습니다.',
+    announcementList1: 'Critical 수정: React 18 Strict Mode에서 isMountedRef가 영구적으로 무효화되는 문제(개발 환경에서 기능이 조용히 작동 불가); 동시 가져오기 Race Condition으로 인한 AudioContext 누수 및 상태 덮어쓰기.',
+    announcementList2: '메모리 및 SFX: AudioContext 가져오기/납치내기 흐름에 컨텍스트 추적 ref를 추가하여 컴포넌트 언마운트 시 자동으로 닫기; 모든 다운로드 앵커에 append/click/remove 흐름을 보완; 70개 이상의 인터랙티브 요소에 data-sfx-handled를 추가하여 double-play를 완전히 제거.',
+    announcementList3: '접근성 및 데이터 안전: 가져오기/변환 진행 바에 role="progressbar" + ARIA 속성 추가; 토글 칩에 aria-pressed 추가; normalizeBuffer에 NaN/Infinity 샘플 필터링 추가; 파형 렌더링에 duration <= 0 경계 보호 추가; 글로벌 SFX 시스템을 label 선택기와 통합된 back-link 사운드로 업그레이드. 버전을 1.8.4로 동기화.'
   },
   fr: {
     ...translations.en,
@@ -2767,6 +2767,21 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.8.4',
+    date: '2026-05-17',
+    title: '1.8.4 音频页面深度审计与核心稳定性修复',
+    summary:
+      '对 AudioEditorPage 和 AudioConverterPage 进行最严格的深度审计，修复 2 项 Critical 运行时缺陷、6 项 High 优先级问题、10+ 项 UI/UX/SFX/a11y 改进；全局音效系统同步升级。',
+    details: [
+      'Critical 修复：React 18 Strict Mode 下 isMountedRef 永久失效（开发环境功能静默不可用）；并发导入 Race Condition 导致 AudioContext 泄漏和状态覆盖。',
+      '内存安全：AudioContext 导入/导出流程添加上下文追踪 ref，组件卸载时自动关闭；所有下载锚点补全 append/click/remove 流程，消除 detached DOM 泄漏。',
+      'SFX 全面修复：为全部 70+ 交互元素添加 data-sfx-handled，彻底消除 double-play；全局 handler 升级 label[for] 选择器、chip-row toggle 判断更精确、back-link 统一返回音效；hover 覆盖 tool-card-header 和 toolbar-group-header。',
+      '无障碍增强：导入/转换进度条添加 role="progressbar" + aria-valuenow/valuemin/valuemax；toggle chip 添加 aria-pressed；export audio 添加 aria-label；上传区 label 添加 e.repeat 防护。',
+      '数据安全：normalizeBuffer 添加 NaN/Infinity 样本过滤，防止损坏音频静默输出全零；波形绘制添加 duration <= 0 边界保护，消除除零风险。',
+      'DraggableErrorPanel 修复：全部按钮添加 data-sfx-handled 消除 double-play；Collapse/Close 按钮添加 aria-label；onDownload 回调补全 DOM 操作。',
+    ],
+  },
   {
     version: '1.8.3',
     date: '2026-05-17',
@@ -4042,7 +4057,9 @@ function App() {
     }
     const handleVisibility = () => {
       if (document.hidden) {
-        try { stopMusic(); } catch { /* ignore */ }
+        if (settings.audio.musicEnabled) {
+          try { stopMusic(); } catch { /* ignore */ }
+        }
       } else {
         try { startMusic(); } catch { /* ignore */ }
       }
@@ -4086,7 +4103,7 @@ function App() {
       if (!target) return;
       const now = Date.now();
       if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
-      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle')) {
+      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header')) {
         lastHoverTime = now;
         playSound('buttonHover');
       } else if (target.closest('.home-card, .feature-intro-card, .tool-card, .asset-card, .template-card, .announcement-entry')) {
@@ -4176,7 +4193,7 @@ function App() {
         return;
       }
 
-      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], input[type="color"], input[type="url"], input[type="password"], select, textarea, .announcement-entry');
+      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], input[type="color"], input[type="url"], input[type="password"], select, textarea, label[for], .announcement-entry');
       if (!el) return;
 
       // Skip elements that have their own explicit sound handling (avoids double-play)
@@ -4184,7 +4201,7 @@ function App() {
       if ((el as HTMLElement).closest('[data-sfx-handled]')) return;
 
       // Determine appropriate sound based on element type and context
-      const isClose = el.classList.contains('modal-close') || (el as HTMLElement).getAttribute('aria-label') === 'Close';
+      const isClose = el.classList.contains('modal-close');
       const isBack = el.classList.contains('back-link');
       const isConfirm = el.classList.contains('primary-button');
       const isSlider = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'range';
@@ -4199,8 +4216,7 @@ function App() {
       const isChip = el.classList.contains('choice-chip') || el.classList.contains('palette-chip');
       const chipWasActive = el.classList.contains('active');
       const chipRow = el.closest('.chip-row');
-      const chipRowButtons = chipRow ? chipRow.querySelectorAll('button').length : 0;
-      const isToggleChip = isChip && chipRowButtons === 2;
+      const isToggleChip = isChip && chipRow?.classList.contains('toggle-row');
 
       if (isClose) {
         playSound('modalClose');
