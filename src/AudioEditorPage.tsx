@@ -376,7 +376,7 @@ export function AudioEditorPage({
 
   /* ---- Export / Results ---- */
   const [exports, setExports] = useState<ExportRecord[]>([]);
-  const [isResultOpen, setIsResultOpen] = useState(true);
+
   const [exportFormat, setExportFormat] = useState<'wav-16' | 'wav-8' | 'wav-32' | 'webm' | 'ogg' | 'mp3' | 'mp4'>('wav-16');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
@@ -940,7 +940,7 @@ export function AudioEditorPage({
     setExportFormat('wav-16');
     setIsExporting(false);
     setExportProgress(0);
-    setIsResultOpen(true);
+
     setIsLogsOpen(true);
     setErrors([]);
     gainNodeRef.current = null;
@@ -1340,7 +1340,6 @@ export function AudioEditorPage({
         <div className="feature-header-meta">
           <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
           <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-converter'); }}>Audio Converter</button>
           <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
@@ -1367,14 +1366,9 @@ export function AudioEditorPage({
                   <h3>{editBuffer ? fileName : 'Import Audio'}</h3>
                 </div>
                 {editBuffer && (
-                  <div className="tool-header-actions">
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
-                      {isPlaying ? 'Pause' : 'Play'}
-                    </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
-                      Stop
-                    </button>
-                  </div>
+                  <button className="secondary-button small-button" type="button" disabled={isImporting} onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
+                    Replace
+                  </button>
                 )}
               </div>
               <div className={`preview-surface ${!editBuffer ? 'compact' : ''}`}>
@@ -1477,53 +1471,41 @@ export function AudioEditorPage({
                       <h3>Operations</h3>
                     </div>
                   </div>
-                  <div className="tool-actions-row">
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>Undo</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>Redo</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>Trim</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>Split</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>Delete</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>Duplicate</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>Reverse</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>Fade</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>Normalize</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>Mono</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>Reset FX</button>
-                    <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
-                    <label htmlFor="audio-reimport" className="secondary-button small-button" onClick={() => playSound('buttonClick')}>New File</label>
-                  </div>
-                </section>
-
-                {/* Export */}
-                <section className="tool-card">
-                  <div className="tool-card-header">
-                    <div>
-                      <span className="card-caption">Export</span>
-                      <h3>Export Settings</h3>
+                  <div className="tool-card-section">
+                    <div className="tool-actions-row">
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); togglePlay(); }}>
+                        {isPlaying ? 'Pause' : 'Play'}
+                      </button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
+                        Stop
+                      </button>
+                    </div>
+                    <div className="tool-card-divider" />
+                    <div className="tool-actions-row">
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>Undo</button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>Redo</button>
+                    </div>
+                    <div className="tool-card-divider" />
+                    <div className="tool-actions-row">
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>Trim</button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>Split</button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>Delete</button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>Duplicate</button>
+                    </div>
+                    <div className="tool-card-divider" />
+                    <div className="tool-actions-row">
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>Reverse</button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>Fade</button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>Normalize</button>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>Mono</button>
+                    </div>
+                    <div className="tool-card-divider" />
+                    <div className="tool-actions-row">
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('resetSound'); resetEffects(); }}>Reset FX</button>
+                      <input type="file" accept="audio/*" hidden id="audio-reimport" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ''; }} />
+                      <label htmlFor="audio-reimport" className="secondary-button small-button" onClick={() => playSound('buttonClick')}>New File</label>
                     </div>
                   </div>
-                  <div className="tool-actions-row">
-                    <select
-                      className="settings-input tool-select"
-                      value={exportFormat}
-                      onChange={(e) => setExportFormat(e.target.value as typeof exportFormat)}
-                    >
-                      {supportedFormats.map((f: { key: string; label: string }) => (
-                        <option key={f.key} value={f.key}>{f.label}</option>
-                      ))}
-                    </select>
-                    <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting}>
-                      {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
-                    </button>
-                    <span className={`status-badge ${isExporting ? 'running' : exportProgress >= 100 ? 'success' : 'idle'}`}>
-                      {isExporting ? 'Exporting…' : exportProgress >= 100 ? 'Export complete' : 'Ready'}
-                    </span>
-                  </div>
-                  {(isExporting || exportProgress > 0) && (
-                    <div className="progress-track">
-                      <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
-                    </div>
-                  )}
                 </section>
 
                 {/* Effects */}
@@ -1607,43 +1589,54 @@ export function AudioEditorPage({
           </div>
 
           <div className="tool-column side">
-            {/* Results */}
+            {/* Export Settings & Records */}
             <section className="tool-card">
-              <div
-                className="tool-card-header collapsible"
-                onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }}
-                role="button"
-                tabIndex={0}
-                aria-expanded={isResultOpen}
-              >
+              <div className="tool-card-header">
                 <div>
-                  <span className="card-caption">Results</span>
-                  <h3>Exported Files ({exports.length})</h3>
+                  <span className="card-caption">Export</span>
+                  <h3>Export Settings</h3>
                 </div>
-                <span className="collapsible-state">{isResultOpen ? 'Hide' : 'Show'}</span>
               </div>
-              {isResultOpen && (
-                <div>
-                  {exports.length === 0 ? (
-                    <p className="tiny-copy empty-state">No exports yet. Select a format and click Export.</p>
-                  ) : (
-                    <div className="result-grid">
-                      {exports.map((rec) => (
-                        <div key={rec.id} className="log-entry">
-                          <div className="result-meta">
-                            <strong>{rec.fileName}</strong>
-                            <span className="tiny-copy mono">{rec.format} · {formatBytes(rec.size)}</span>
-                          </div>
-                          <audio key={rec.id} controls src={rec.url} className="tool-audio" />
-                          <div className="mini-action-row">
-                            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
-                            <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
-                          </div>
-                        </div>
-                      ))}
+              <div className="tool-actions-row">
+                <select
+                  className="settings-input tool-select"
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value as typeof exportFormat)}
+                >
+                  {supportedFormats.map((f: { key: string; label: string }) => (
+                    <option key={f.key} value={f.key}>{f.label}</option>
+                  ))}
+                </select>
+                <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting}>
+                  {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
+                </button>
+                <span className={`status-badge ${isExporting ? 'running' : exportProgress >= 100 ? 'success' : 'idle'}`}>
+                  {isExporting ? 'Exporting…' : exportProgress >= 100 ? 'Export complete' : 'Ready'}
+                </span>
+              </div>
+              {(isExporting || exportProgress > 0) && (
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
+                </div>
+              )}
+              <div className="tool-card-divider" />
+              {exports.length === 0 ? (
+                <p className="tiny-copy empty-state">No exports yet.</p>
+              ) : (
+                <div className="result-grid">
+                  {exports.map((rec) => (
+                    <div key={rec.id} className="log-entry">
+                      <div className="result-meta">
+                        <strong>{rec.fileName}</strong>
+                        <span className="tiny-copy mono">{rec.format} · {formatBytes(rec.size)}</span>
+                      </div>
+                      <audio key={rec.id} controls src={rec.url} className="tool-audio" />
+                      <div className="mini-action-row">
+                        <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
+                        <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
             </section>

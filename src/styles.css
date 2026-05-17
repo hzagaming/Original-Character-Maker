@@ -965,6 +965,10 @@ a {
   gap: 10px;
 }
 
+.tool-card-section > .tool-actions-row:first-of-type {
+  margin-top: 0;
+}
+
 .tool-card h3 {
   margin: 0;
   font-size: 1.4rem;
