@@ -10113,3 +10113,4 @@ export { AssetGalleryPage } from './AssetGalleryPage';
 export { RelationshipWebPage } from './RelationshipWebPage';
 export { default as CharacterCardPage } from './CharacterCardPage';
 export { default as CharacterChroniclePage } from './CharacterChroniclePage';
+export { default as WorldEncyclopediaPage } from './WorldEncyclopediaPage';

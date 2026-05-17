@@ -3821,6 +3821,63 @@ Key capabilities:
       ],
     },
     {
+      id: 'world-encyclopedia',
+      title: 'World Encyclopedia',
+      overview: `The World Encyclopedia is a structured knowledge management tool for building your original world setting. Create entries for locations, organizations, races, events, items, concepts, and custom categories. Each entry supports tags, linked characters from the Relationship Web, and free-text content. Browse in list or card-grid view with search and category filtering. Export the entire encyclopedia as JSON for backup or sharing.
+
+Key capabilities:
+· Seven Entry Categories — Location (green), Organization (blue), Race (amber), Event (red), Item (purple), Concept (cyan), Custom (gray)
+· Tag System — Assign any number of free-text tags to categorize and filter entries
+· Relationship Web Link — Attach related characters to any entry; their colors appear as dots on the entry card
+· Dual View Modes — Card grid for visual browsing, compact list for dense scanning
+· Search & Filter — Full-text search across titles, content, and tags; category chips with live counters
+· JSON Export — Copy the entire encyclopedia to clipboard as formatted JSON
+· Persistent Storage — All entries saved to browser localStorage automatically`,
+      buttons: [
+        { name: 'Add Entry', description: 'Open the entry editor modal to create a new encyclopedia entry.' },
+        { name: 'Edit Entry', description: 'Open an existing entry in the editor modal to modify its fields.' },
+        { name: 'Delete Entry', description: 'Remove an entry from the encyclopedia after confirmation.' },
+        { name: 'Export JSON', description: 'Copy the entire encyclopedia dataset to the clipboard as formatted JSON.' },
+        { name: 'Search', description: 'Filter entries by typing keywords that match titles, content, or tags.' },
+        { name: 'Category Filter', description: 'Click a category chip to show only entries of that type. Click again to clear.' },
+        { name: 'View Toggle', description: 'Switch between card grid view and compact list view.' },
+        { name: 'Link Character', description: 'Toggle a character from the Relationship Web as related to this entry.' },
+      ],
+      parameters: [
+        { name: 'Title', description: 'The display name of the encyclopedia entry.', tips: 'Keep it concise and unique for easy searching.' },
+        { name: 'Category', description: 'The classification that determines the entry color and icon.', tips: 'Use Custom if none of the six presets fit your entry type.' },
+        { name: 'Content', description: 'The main body text describing the entry in detail.', tips: 'Supports free-form text. Write lore, history, physical descriptions, or rules here.' },
+        { name: 'Tags', description: 'Free-text labels for additional categorization beyond the preset categories.', tips: 'Examples: "magic", "faction-A", "main-city", "legendary".' },
+        { name: 'Related Characters', description: 'Characters from the Relationship Web linked to this entry.', tips: 'Useful for marking which characters belong to an organization, live in a location, or participated in an event.' },
+      ],
+      errors: [
+        {
+          code: 'NO_ENTRIES',
+          message: 'Encyclopedia is empty',
+          severity: 'info',
+          category: 'B. Settings & Data',
+          location: 'Page: World Encyclopedia → Area: Content area',
+          cause: 'No entries have been created yet.',
+          solution: 'Click "Add Entry" to create your first encyclopedia entry.',
+          steps: ['Click Add Entry', 'Fill in title and category', 'Click Save'],
+          relatedCodes: [],
+          prevention: 'N/A',
+        },
+        {
+          code: 'EXPORT_FAILED',
+          message: 'JSON export failed',
+          severity: 'error',
+          category: 'F. Browser & Performance',
+          location: 'Page: World Encyclopedia → Area: Export button',
+          cause: 'The browser blocked clipboard access or the data was too large.',
+          solution: 'Ensure the page has clipboard permission. If data is very large, try deleting some entries before export.',
+          steps: ['Check browser permissions', 'Reduce entry count if needed', 'Click Export JSON again'],
+          relatedCodes: [],
+          prevention: 'Regularly export smaller batches to avoid oversized JSON.',
+        },
+      ],
+    },
+    {
       id: 'settings-guide',
       title: 'Settings Panel Guide',
       overview: `
