@@ -1336,11 +1336,12 @@ export function AudioEditorPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button" type="button" aria-label={backHome} onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
+        <button className="secondary-button small-button" type="button" onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" aria-label="Help" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
-          <button className="secondary-button small-button" type="button" aria-label="Tutorial" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" aria-label={openSettings} onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
+          <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-converter'); }}>Audio Converter</button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
 
@@ -1352,7 +1353,6 @@ export function AudioEditorPage({
             <p>{pageDescription}</p>
           </div>
           <div className="tool-header-actions">
-            <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-converter'); }}>Audio Converter</button>
             <button className="secondary-button small-button" type="button" disabled={isExporting} onClick={() => { playSound('resetSound'); resetAll(); }}>Reset All</button>
           </div>
         </div>
@@ -1377,7 +1377,7 @@ export function AudioEditorPage({
                   </div>
                 )}
               </div>
-              <div className="preview-surface" style={{ minHeight: editBuffer ? undefined : 220 }}>
+              <div className={`preview-surface ${!editBuffer ? 'compact' : ''}`}>
                 {!editBuffer ? (
                   <div
                     className="upload-zone"
@@ -1389,7 +1389,7 @@ export function AudioEditorPage({
                     {isImporting ? (
                       <div className="preview-empty">
                         <span className="status-badge running">Decoding audio… {importProgress}%</span>
-                        <div className="progress-track">
+                        <div className="progress-track centered">
                           <div className="progress-fill" style={{ width: `${importProgress}%` }} />
                         </div>
                       </div>
@@ -1441,7 +1441,7 @@ export function AudioEditorPage({
                       <h3>Editor</h3>
                     </div>
                   </div>
-                  <div className="preview-surface" style={{ minHeight: 220, height: 220 }}>
+                  <div className="preview-surface compact">
                     <canvas
                       ref={canvasRef}
                       role="img"
@@ -1631,11 +1631,11 @@ export function AudioEditorPage({
                     <div className="result-grid">
                       {exports.map((rec) => (
                         <div key={rec.id} className="log-entry">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                          <div className="result-meta">
                             <strong>{rec.fileName}</strong>
                             <span className="tiny-copy mono">{rec.format} · {formatBytes(rec.size)}</span>
                           </div>
-                          <audio key={rec.id} controls src={rec.url} className="tool-audio" style={{ width: '100%' }} />
+                          <audio key={rec.id} controls src={rec.url} className="tool-audio" />
                           <div className="mini-action-row">
                             <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; a.click(); }}>Download</button>
                             <button className="secondary-button small-button" type="button" onClick={() => removeExport(rec.id)}>Remove</button>
@@ -1666,7 +1666,7 @@ export function AudioEditorPage({
               </div>
               {isLogsOpen && (
                 <>
-                  <div className="tool-header-actions" style={{ marginBottom: 8 }}>
+                  <div className="tool-header-actions">
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); navigator.clipboard.writeText(logsText).catch(() => {}); }}>Copy</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-logs.txt'; a.click(); URL.revokeObjectURL(url); }}>Download</button>
                     <button className="secondary-button small-button" type="button" onClick={() => { playSound('deleteSound'); clearLogs(); }}>Clear</button>

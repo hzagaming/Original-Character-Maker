@@ -670,11 +670,12 @@ export function AudioConverterPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button" type="button" aria-label={backHome} onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
+        <button className="secondary-button small-button" type="button" onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" aria-label="Help" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
-          <button className="secondary-button small-button" type="button" aria-label="Tutorial" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
-          <button className="secondary-button small-button" type="button" aria-label={openSettings} onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
+          <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>
 
@@ -686,7 +687,6 @@ export function AudioConverterPage({
             <p>{pageDescription}</p>
           </div>
           <div className="tool-header-actions">
-            <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
             <button className="secondary-button small-button" type="button" disabled={isConverting} onClick={() => { playSound('buttonClick'); handleReset(); }}>Reset</button>
           </div>
         </div>
@@ -706,7 +706,7 @@ export function AudioConverterPage({
                   </button>
                 )}
               </div>
-              <div className="preview-surface" style={{ minHeight: sourceFile ? undefined : 220 }}>
+              <div className={`preview-surface ${!sourceFile ? 'compact' : ''}`}>
                 {!sourceFile ? (
                   <div
                     className="upload-zone"
@@ -718,7 +718,7 @@ export function AudioConverterPage({
                     {isImporting ? (
                       <div className="preview-empty">
                         <span className="status-badge running">Decoding audio… {importProgress}%</span>
-                        <div className="progress-track" style={{ width: 'min(260px, 80%)' }}>
+                        <div className="progress-track centered">
                           <div className="progress-fill" style={{ width: `${importProgress}%` }} />
                         </div>
                       </div>
@@ -901,7 +901,7 @@ export function AudioConverterPage({
               </div>
               {isLogsOpen && (
                 <>
-                  <div className="tool-header-actions" style={{ marginBottom: 8 }}>
+                  <div className="tool-header-actions">
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { playSound('deleteSound'); setLogs([]); }}>Clear</button>

@@ -1036,6 +1036,15 @@ a {
   min-height: inherit;
 }
 
+.preview-surface.compact {
+  min-height: 220px;
+}
+
+.preview-surface.compact canvas {
+  min-height: 220px;
+  height: 220px;
+}
+
 .preview-surface audio {
   background: rgba(255, 255, 255, 0.02);
 }
@@ -1306,6 +1315,14 @@ input[type='range']:active::-moz-range-thumb {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.result-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .tool-actions-row {
@@ -5292,7 +5309,8 @@ input[type='range']:active::-moz-range-thumb {
   margin-bottom: 12px;
 }
 
-.tool-card-section > .tool-header-actions {
+.tool-card-section > .tool-header-actions,
+.tool-card > .tool-header-actions {
   margin-bottom: 8px;
 }
 
