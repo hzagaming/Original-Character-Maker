@@ -6709,6 +6709,10 @@ input[type='range']:active::-moz-range-thumb {
 .ch-event-item:hover .ch-event-delete { opacity: 1; }
 .ch-event-delete:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
 
+@media (hover: none) {
+  .ch-event-delete { opacity: 1; }
+}
+
 .ch-preview {
   flex: 1;
   display: flex;

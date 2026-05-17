@@ -190,6 +190,7 @@ const copyBase = {
     cancel: '取消', save: '保存', delete: '删除', duplicate: '复制',
     helpButton: '帮助', cardHint: '选择模板并填写信息，右侧实时预览并导出 PNG 图片',
     exportSuccess: '卡片导出成功',
+    exportError: '导出失败，请尝试缩小图片或降低质量',
   },
   ja: {
     cardName: 'キャラ名', cardAlias: '別名', themeColor: 'テーマカラー', avatar: 'アイコン',
@@ -204,6 +205,7 @@ const copyBase = {
     cancel: 'キャンセル', save: '保存', delete: '削除', duplicate: '複製',
     helpButton: 'ヘルプ', cardHint: 'テンプレートを選んで情報を入力し、プレビュー確認後 PNG を出力',
     exportSuccess: 'カードを出力しました',
+    exportError: '出力に失敗しました。画像を小さくするか品質を下げてお試しください',
   },
   en: {
     cardName: 'Character Name', cardAlias: 'Alias', themeColor: 'Theme Color', avatar: 'Avatar',
@@ -218,6 +220,7 @@ const copyBase = {
     cancel: 'Cancel', save: 'Save', delete: 'Delete', duplicate: 'Duplicate',
     helpButton: 'Help', cardHint: 'Choose a template, fill in the info, preview live, then export PNG',
     exportSuccess: 'Card exported successfully',
+    exportError: 'Export failed. Try a smaller image or lower quality.',
   },
   ru: {
     cardName: 'Имя персонажа', cardAlias: 'Псевдоним', themeColor: 'Цвет темы', avatar: 'Аватар',
@@ -232,6 +235,7 @@ const copyBase = {
     cancel: 'Отмена', save: 'Сохранить', delete: 'Удалить', duplicate: 'Дублировать',
     helpButton: 'Справка', cardHint: 'Выберите шаблон, заполните данные, посмотрите превью и экспортируйте PNG',
     exportSuccess: 'Карточка экспортирована',
+    exportError: 'Ошибка экспорта. Попробуйте уменьшить изображение или понизить качество.',
   },
   ko: {
     cardName: '캐릭터 이름', cardAlias: '별명', themeColor: '테마 색상', avatar: '아바타',
@@ -241,11 +245,12 @@ const copyBase = {
     importRelations: '관계망에서 관련 캐릭터 가져오기', template: '템플릿',
     templateMinimal: '심플', templateDetailed: '상세', templateGallery: '갤러리',
     bgStyle: '배경', bgSolid: '단색', bgGradient: '그라데이션', bgDots: '도트',
-    previewTitle: '실시간 미리보기', exportCard: '카드 낳아오기', exporting: '낳아오는 중…',
+    previewTitle: '실시간 미리보기', exportCard: '카드 내보내기', exporting: '내보내는 중…',
     emptyNameHint: '캐릭터 이름을 입력하세요', noImage: '이미지 없음', dragHint: '위치 조정',
     cancel: '취소', save: '저장', delete: '삭제', duplicate: '복제',
-    helpButton: '도움말', cardHint: '템플릿을 선택하고 정보를 입력한 뒤 PNG로 낳아오세요',
-    exportSuccess: '카드를 낳아왔습니다',
+    helpButton: '도움말', cardHint: '템플릿을 선택하고 정보를 입력한 뒤 PNG로 내보내세요',
+    exportSuccess: '카드를 내보내왔습니다',
+    exportError: '내보내기 실패. 이미지 크기를 줄이거나 품질을 낮춰 보세요.',
   },
 };
 
@@ -288,6 +293,24 @@ export default function CharacterCardPage({
     setGalleryImages(imgs);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+      if (pickerMode) {
+        setPickerMode(null);
+        playSound('modalClose');
+      }
+    }
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [pickerMode]);
+
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -297,14 +320,22 @@ export default function CharacterCardPage({
   const handleExport = useCallback(async () => {
     if (!cardRef.current || !card.name.trim()) return;
     setIsExporting(true);
-    playSound('buttonClick');
     try {
       await new Promise((r) => setTimeout(r, 300));
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor: 'transparent',
-      });
+      let dataUrl: string;
+      try {
+        dataUrl = await toPng(cardRef.current, {
+          pixelRatio: 2,
+          cacheBust: true,
+          backgroundColor: 'transparent',
+        });
+      } catch {
+        dataUrl = await toPng(cardRef.current, {
+          pixelRatio: 1,
+          cacheBust: true,
+          backgroundColor: 'transparent',
+        });
+      }
       const link = document.createElement('a');
       link.download = `${card.name || 'character'}-card.png`;
       link.href = dataUrl;
@@ -313,10 +344,11 @@ export default function CharacterCardPage({
       playSound('confirm');
     } catch {
       playSound('warning');
+      showToast(copy.exportError || 'Export failed');
     } finally {
       setIsExporting(false);
     }
-  }, [card.name, copy.exportSuccess, showToast]);
+  }, [card.name, copy.exportSuccess, copy.exportError, showToast]);
 
   const addField = useCallback(() => {
     setCard((c) => ({
@@ -477,7 +509,7 @@ export default function CharacterCardPage({
                 <div className="cc-thumb empty">{copy.noImage}</div>
               )}
               <div className="cc-image-actions">
-                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setPickerMode('avatar'); playSound('buttonClick'); }}>
+                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setPickerMode('avatar'); playSound('modalOpen'); }}>
                   {copy.selectImage}
                 </button>
                 {card.avatarAssetId && (
@@ -498,7 +530,7 @@ export default function CharacterCardPage({
                 <div className="cc-thumb empty">{copy.noImage}</div>
               )}
               <div className="cc-image-actions">
-                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setPickerMode('main'); playSound('buttonClick'); }}>
+                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setPickerMode('main'); playSound('modalOpen'); }}>
                   {copy.selectImage}
                 </button>
                 {card.mainImageAssetId && (

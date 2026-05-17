@@ -35,7 +35,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.1';
+const VERSION = '1.8.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -469,7 +469,7 @@ const translations: Record<BaseLanguage, Messages> = {
       '把捏脸、转画风、角色 Prompt / LLM / TTS 封装、paper2gal 素材生成与图片格式转换统一到同一个入口页里，方便集中管理角色创作流程。',
   workflowTitle: '开始新的工作流',
   workflowDescription: '从这里直接进入捏脸、转画风、角色 Prompt + LLM / TTS 或 paper2gal 工作台。',
-  workflowHint: '点击开始会打开七个主入口弹窗，也可以直接点击上面的图标卡片进入。',
+  workflowHint: '点击开始会打开主入口弹窗，也可以直接点击上面的图标卡片进入。',
   workflowFormats: '支持 PNG / JPG / WEBP，推荐上传单人立绘或清晰半身图。',
     startButton: '开始',
     settingsButton: '设置',
@@ -2568,15 +2568,15 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageRelationshipWebTitle: '캐릭터 관계망',
     pageRelationshipWebDescription: '여러 캐릭터 간의 관계 네트워크를 시각적으로 생성하고 관리합니다. 에셋 갤러리에서 아바타를 가져와 완전한 캐릭터 관계 지도를 구축하세요.',
     pageCharacterCardTitle: '캐릭터 설정 카드',
-    pageCharacterCardDescription: '캐릭터 정보, 일러스트, 설정 및 관계를 아름다운 설정 카드 이미지로 통합합니다. 다양한 템플릿과 테마를 지원하며 한 번의 클릭으로 PNG를 낳아올 수 있습니다.',
+    pageCharacterCardDescription: '캐릭터 정보, 일러스트, 설정 및 관계를 아름다운 설정 카드 이미지로 통합합니다. 다양한 템플릿과 테마를 지원하며 한 번의 클릭으로 PNG를 내보낼 수 있습니다.',
     pageCharacterChronicleTitle: '캐릭터 연대기',
-    pageCharacterChronicleDescription: '캐릭터의 탄생, 만남, 성장, 전투 등 주요 이벤트를 기록하는 시각적 타임라인을 생성합니다. 관계망 캐릭터와 연동되어 긴 이미지로 낳아올 수 있습니다.',
+    pageCharacterChronicleDescription: '캐릭터의 탄생, 만남, 성장, 전투 등 주요 이벤트를 기록하는 시각적 타임라인을 생성합니다. 관계망 캐릭터와 연동되어 긴 이미지로 내보낼 수 있습니다.',
     pageWorldEncyclopediaTitle: '세계관 백과',
-    pageWorldEncyclopediaDescription: '구조화된 세계관 백과를 구축합니다. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성하고 태그, 관련 캐릭터, 검색 필터 및 JSON 낳아오기를 지원합니다.',
-    announcementDescription: 'v1.8.1 신규: 세계관 백과 — 구조화된 세계관 백과를 구축합니다. 7가지 분류 항목(장소/조직/종족/이벤트/아이템/개념/사용자 정의), 태그, 관련 캐릭터, 검색 필터, 목록/카드 이중 뷰, 한 번의 클릭으로 JSON 낳아오기를 지원합니다.',
+    pageWorldEncyclopediaDescription: '구조화된 세계관 백과를 구축합니다. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성하고 태그, 관련 캐릭터, 검색 필터 및 JSON 내보내기를 지원합니다.',
+    announcementDescription: 'v1.8.1 신규: 세계관 백과 — 구조화된 세계관 백과를 구축합니다. 7가지 분류 항목(장소/조직/종족/이벤트/아이템/개념/사용자 정의), 태그, 관련 캐릭터, 검색 필터, 목록/카드 이중 뷰, 한 번의 클릭으로 JSON 내보내기를 지원합니다.',
     announcementList1: '세계관 백과: 오리지널 세계관을 위한 구조화된 백과 항목을 생성합니다. 7가지 프리셋 분류에 각각 독립적인 색상 코딩이 적용됩니다. 각 항목은 제목, 분류, 상세 내용, 태그, 관련 캐릭터를 포함합니다. 관계망의 캐릭터를 임의의 항목에 연동할 수 있습니다.',
     announcementList2: '이중 뷰 및 검색 필터: 카드 그리드 뷰는 시각적 브라우징에, 목록 뷰는 밀집 스캔에 적합합니다. 키워드 전문 검색(제목+내용+태그)을 지원합니다. 분류 필터 칩에 실시간 카운터를 표시합니다. 모든 인터랙션에 SFX 효과음이 통합되어 있습니다.',
-    announcementList3: '완전 통합 및 JSON 낳아오기: 새로운 FeatureScreen 경로, ActionIcon SVG, StartModal 진입, HomeScreen 워크플로 리스트 추가. 5개 언어 완전 번역 및 매뉴얼 문서. 전체 페이지 SFX 효과음 커버리지. 이전 버전 v1.8.0에서 캐릭터 연대기를 추가했습니다. 버전을 1.8.1으로 동기화.'
+    announcementList3: '완전 통합 및 JSON 내보내기: 새로운 FeatureScreen 경로, ActionIcon SVG, StartModal 진입, HomeScreen 워크플로 리스트 추가. 5개 언어 완전 번역 및 매뉴얼 문서. 전체 페이지 SFX 효과음 커버리지. 이전 버전 v1.8.0에서 캐릭터 연대기를 추가했습니다. 버전을 1.8.1으로 동기화.'
   },
   fr: {
     ...translations.en,
@@ -6240,21 +6240,21 @@ function ActionIcon({
     ),
     'character-card': (
       <>
-        <rect x="6" y="4" width="28" height="36" rx="4" />
+        <rect x="6" y="4" width="28" height="34" rx="4" />
         <circle cx="20" cy="14" r="6" />
-        <path d="M10 28h20" strokeDasharray="2 2" />
-        <path d="M10 32h14" strokeDasharray="2 2" />
+        <path d="M10 26h20" strokeDasharray="2 2" />
+        <path d="M10 30h14" strokeDasharray="2 2" />
       </>
     ),
     'character-chronicle': (
       <>
-        <rect x="6" y="4" width="28" height="36" rx="4" />
+        <rect x="6" y="4" width="28" height="34" rx="4" />
         <circle cx="20" cy="12" r="4" />
         <path d="M10 22h20" />
-        <circle cx="14" cy="28" r="2" />
-        <path d="M20 28h10" />
-        <circle cx="14" cy="34" r="2" />
-        <path d="M20 34h10" />
+        <circle cx="14" cy="26" r="2" />
+        <path d="M20 26h10" />
+        <circle cx="14" cy="32" r="2" />
+        <path d="M20 32h10" />
       </>
     ),
     'world-encyclopedia': (

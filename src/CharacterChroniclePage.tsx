@@ -145,9 +145,11 @@ const copyBase = {
     helpButton: '帮助',
     timelineHint: '按日期排序的可视化角色时间线，支持事件类型颜色编码和关联角色展示',
     exportSuccess: '时间轴导出成功',
+    exportError: '导出失败，请尝试缩小图片或降低质量',
     previewTitle: '时间轴预览',
     unnamed: '未命名',
     noImage: '无图片',
+    noRelCharacters: '关系网中没有角色',
     eventTypes: EVENT_TYPE_LABELS.zh,
   },
   ja: {
@@ -176,6 +178,7 @@ const copyBase = {
     previewTitle: 'タイムラインプレビュー',
     unnamed: '名称未設定',
     noImage: '画像なし',
+    noRelCharacters: '関係図にキャラがいません',
     eventTypes: EVENT_TYPE_LABELS.ja,
   },
   en: {
@@ -201,9 +204,11 @@ const copyBase = {
     helpButton: 'Help',
     timelineHint: 'A date-sorted visual character timeline with event type color-coding and related character display',
     exportSuccess: 'Timeline exported successfully',
+    exportError: 'Export failed. Try a smaller image or lower quality.',
     previewTitle: 'Timeline Preview',
     unnamed: 'Unnamed',
     noImage: 'No image',
+    noRelCharacters: 'No characters in Relationship Web',
     eventTypes: EVENT_TYPE_LABELS.en,
   },
   ru: {
@@ -229,9 +234,11 @@ const copyBase = {
     helpButton: 'Справка',
     timelineHint: 'Визуальная хронология персонажа, отсортированная по дате, с цветовой кодировкой типов событий и отображением связанных персонажей',
     exportSuccess: 'Хронология экспортирована',
+    exportError: 'Ошибка экспорта. Попробуйте уменьшить изображение или понизить качество.',
     previewTitle: 'Предпросмотр',
     unnamed: 'Безымянный',
     noImage: 'Нет изображения',
+    noRelCharacters: 'В Сети отношений нет персонажей',
     eventTypes: EVENT_TYPE_LABELS.ru,
   },
   ko: {
@@ -256,10 +263,12 @@ const copyBase = {
     exporting: '낳아오는 중…',
     helpButton: '도움말',
     timelineHint: '날짜순으로 정렬된 시각적 캐릭터 타임라인. 이벤트 유형 색상 코딩 및 관련 캐릭터 표시 지원',
-    exportSuccess: '타임라인을 낳아왔습니다',
+    exportSuccess: '타임라인을 내보내왔습니다',
+    exportError: '낳아오기 실패. 이미지 크기를 줄이거나 품질을 낮춰 보세요.',
     previewTitle: '타임라인 미리보기',
     unnamed: '이름 없음',
     noImage: '이미지 없음',
+    noRelCharacters: '관계망에 캐릭터가 없습니다',
     eventTypes: EVENT_TYPE_LABELS.ko,
   },
 };
@@ -319,6 +328,27 @@ export default function CharacterChroniclePage({
     setRelNodes(loadRelationshipNodes());
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+      if (imagePickerOpen) {
+        setImagePickerOpen(false);
+        playSound('modalClose');
+      } else if (modalEvent) {
+        setModalEvent(null);
+        playSound('modalClose');
+      }
+    }
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [imagePickerOpen, modalEvent]);
+
   const sortedEvents = useMemo(() => {
     return [...events].sort((a, b) => a.date.localeCompare(b.date));
   }, [events]);
@@ -331,12 +361,10 @@ export default function CharacterChroniclePage({
 
   const handleAddEvent = useCallback(() => {
     setModalEvent(defaultEvent());
-    playSound('modalOpen');
   }, []);
 
   const handleEditEvent = useCallback((evt: ChronicleEvent) => {
     setModalEvent({ ...evt });
-    playSound('modalOpen');
   }, []);
 
   const handleDeleteEvent = useCallback((id: string) => {
@@ -360,26 +388,36 @@ export default function CharacterChroniclePage({
   const handleExport = useCallback(async () => {
     if (!timelineRef.current || sortedEvents.length === 0) return;
     setIsExporting(true);
-    playSound('buttonClick');
     try {
       await new Promise((r) => setTimeout(r, 300));
-      const dataUrl = await toPng(timelineRef.current, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor: 'transparent',
-      });
+      let dataUrl: string;
+      try {
+        dataUrl = await toPng(timelineRef.current, {
+          pixelRatio: 2,
+          cacheBust: true,
+          backgroundColor: 'transparent',
+        });
+      } catch {
+        dataUrl = await toPng(timelineRef.current, {
+          pixelRatio: 1,
+          cacheBust: true,
+          backgroundColor: 'transparent',
+        });
+      }
       const link = document.createElement('a');
-      link.download = `character-timeline.png`;
+      const firstDate = sortedEvents[0]?.date || 'timeline';
+      link.download = `${copy.exportTimeline || 'timeline'}-${firstDate}.png`;
       link.href = dataUrl;
       link.click();
       showToast(copy.exportSuccess);
       playSound('confirm');
     } catch {
       playSound('warning');
+      showToast(copy.exportError || 'Export failed');
     } finally {
       setIsExporting(false);
     }
-  }, [sortedEvents.length, copy.exportSuccess, showToast]);
+  }, [sortedEvents, copy.exportSuccess, copy.exportTimeline, copy.exportError, showToast]);
 
   const toggleRelCharacter = useCallback((charId: string) => {
     setModalEvent((m) => {
@@ -403,7 +441,7 @@ export default function CharacterChroniclePage({
           </span>
         </div>
         <div className="tool-header-actions">
-          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleAddEvent(); }}>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('modalOpen'); handleAddEvent(); }}>
             {copy.addEvent}
           </button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={isExporting || sortedEvents.length === 0}>
@@ -427,7 +465,7 @@ export default function CharacterChroniclePage({
             <div className="ch-empty">
               <p>{copy.noEvents}</p>
               <p className="tiny-copy">{copy.emptyHint}</p>
-              <button className="primary-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleAddEvent(); }} style={{ marginTop: 14 }}>
+              <button className="primary-button" type="button" data-sfx-handled onClick={() => { playSound('modalOpen'); handleAddEvent(); }} style={{ marginTop: 14 }}>
                 {copy.addEvent}
               </button>
             </div>
@@ -437,8 +475,17 @@ export default function CharacterChroniclePage({
                 <div
                   key={evt.id}
                   className="ch-event-item"
-                  data-sfx-handled
-                  onClick={() => { handleEditEvent(evt); playSound('select'); }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${copy.editEvent}: ${evt.title || copy.unnamed}`}
+                  onClick={() => { handleEditEvent(evt); playSound('modalOpen'); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleEditEvent(evt);
+                      playSound('modalOpen');
+                    }
+                  }}
                   style={{ borderLeftColor: evt.color }}
                 >
                   <div className="ch-event-bar" style={{ background: evt.color }} />
@@ -568,7 +615,7 @@ export default function CharacterChroniclePage({
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{copy.relatedCharacters}</label>
                 {relNodes.length === 0 ? (
-                  <p className="tiny-copy" style={{ color: 'var(--text-secondary)' }}>No characters in Relationship Web</p>
+                  <p className="tiny-copy" style={{ color: 'var(--text-secondary)' }}>{copy.noRelCharacters}</p>
                 ) : (
                   <div className="ch-rel-row">
                     {relNodes.map((node) => (
@@ -596,11 +643,11 @@ export default function CharacterChroniclePage({
                     <div className="cc-thumb empty">{copy.noImage}</div>
                   )}
                   <div className="cc-image-actions">
-                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setImagePickerOpen(true); playSound('buttonClick'); }}>
+                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setImagePickerOpen(true); playSound('modalOpen'); }}>
                       {copy.selectImage}
                     </button>
                     {modalEvent.imageAssetId && (
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => setModalEvent((m) => m && { ...m, imageAssetId: null })}>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setModalEvent((m) => m && { ...m, imageAssetId: null }); playSound('deleteSound'); }}>
                         {copy.clearImage}
                       </button>
                     )}

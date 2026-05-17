@@ -284,6 +284,24 @@ export default function WorldEncyclopediaPage({
     setRelNodes(loadRelationshipNodes());
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+      if (modalEntry) {
+        setModalEntry(null);
+        playSound('modalClose');
+      }
+    }
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [modalEntry]);
+
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -317,12 +335,10 @@ export default function WorldEncyclopediaPage({
 
   const handleAdd = useCallback(() => {
     setModalEntry(defaultEntry());
-    playSound('modalOpen');
   }, []);
 
   const handleEdit = useCallback((entry: EncyclopediaEntry) => {
     setModalEntry({ ...entry });
-    playSound('modalOpen');
   }, []);
 
   const handleDelete = useCallback((id: string) => {
@@ -385,7 +401,7 @@ export default function WorldEncyclopediaPage({
           </span>
         </div>
         <div className="tool-header-actions">
-          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleAdd(); }}>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('modalOpen'); handleAdd(); }}>
             {copy.addEntry}
           </button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={entries.length === 0}>
@@ -462,7 +478,7 @@ export default function WorldEncyclopediaPage({
               <p>{entries.length === 0 ? copy.noEntries : 'No matching entries'}</p>
               {entries.length === 0 && <p className="tiny-copy">{copy.emptyHint}</p>}
               {entries.length === 0 && (
-                <button className="primary-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleAdd(); }} style={{ marginTop: 14 }}>
+                <button className="primary-button" type="button" data-sfx-handled onClick={() => { playSound('modalOpen'); handleAdd(); }} style={{ marginTop: 14 }}>
                   {copy.addEntry}
                 </button>
               )}
@@ -618,8 +634,17 @@ function EntryCard({
   return (
     <div
       className="we-card"
-      data-sfx-handled
-      onClick={() => { onEdit(entry); playSound('select'); }}
+      tabIndex={0}
+      role="button"
+      aria-label={`${copy.editEntry}: ${entry.title || copy.unnamed}`}
+      onClick={() => { onEdit(entry); playSound('modalOpen'); }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onEdit(entry);
+          playSound('modalOpen');
+        }
+      }}
     >
       <div className="we-card-bar" style={{ background: color }} />
       <div className="we-card-body">
@@ -676,8 +701,17 @@ function EntryListItem({
   return (
     <div
       className="we-list-item"
-      data-sfx-handled
-      onClick={() => { onEdit(entry); playSound('select'); }}
+      tabIndex={0}
+      role="button"
+      aria-label={`${copy.editEntry}: ${entry.title || copy.unnamed}`}
+      onClick={() => { onEdit(entry); playSound('modalOpen'); }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onEdit(entry);
+          playSound('modalOpen');
+        }
+      }}
     >
       <div className="we-list-bar" style={{ background: color }} />
       <div className="we-list-body">
