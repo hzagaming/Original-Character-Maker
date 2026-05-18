@@ -733,7 +733,7 @@ export default function ColorPaletteDesignerPage({
         </div>
 
         {/* Main layout: color editor + preview */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 20 }}>
           {/* Color editor */}
           <div className="tool-card" style={{ padding: 18 }}>
             <div className="tool-card-header" style={{ marginBottom: 14 }}>
@@ -782,7 +782,7 @@ export default function ColorPaletteDesignerPage({
           {history.length === 0 ? (
             <p className="muted-copy" style={{ padding: '20px 0' }}>{labels.emptyHistory}</p>
           ) : (
-            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12, marginTop: 12 }}>
+            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: 12, marginTop: 12 }}>
               {history.map((set) => (
                 <PaletteHistoryCard key={set.id} set={set} labels={labels} onLoad={() => loadSet(set)} />
               ))}
@@ -802,7 +802,7 @@ export default function ColorPaletteDesignerPage({
           {favorites.length === 0 ? (
             <p className="muted-copy" style={{ padding: '20px 0' }}>{labels.emptyFavorites}</p>
           ) : (
-            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12, marginTop: 12 }}>
+            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: 12, marginTop: 12 }}>
               {favorites.map((set) => (
                 <PaletteHistoryCard
                   key={set.id}
@@ -986,8 +986,8 @@ function ContrastRow({
             borderRadius: 4,
             fontSize: 11,
             fontWeight: 600,
-            background: pass ? 'rgba(134, 239, 172, 0.18)' : 'rgba(239, 71, 111, 0.18)',
-            color: pass ? 'var(--success, #86efac)' : 'var(--danger, #ef476f)',
+            background: pass ? 'rgba(var(--success-rgb), 0.18)' : 'rgba(var(--danger-rgb), 0.18)',
+            color: pass ? 'var(--success)' : 'var(--danger)',
           }}
         >
           {pass ? `WCAG AA ${passLabel}` : failLabel}

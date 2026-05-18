@@ -636,6 +636,7 @@ function EntryCard({
       className="we-card"
       tabIndex={0}
       role="button"
+      data-sfx-handled
       aria-label={`${copy.editEntry}: ${entry.title || copy.unnamed}`}
       onClick={() => { onEdit(entry); playSound('modalOpen'); }}
       onKeyDown={(e) => {
@@ -703,6 +704,7 @@ function EntryListItem({
       className="we-list-item"
       tabIndex={0}
       role="button"
+      data-sfx-handled
       aria-label={`${copy.editEntry}: ${entry.title || copy.unnamed}`}
       onClick={() => { onEdit(entry); playSound('modalOpen'); }}
       onKeyDown={(e) => {

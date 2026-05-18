@@ -947,6 +947,8 @@ export function startMusic() {
     if (typeof document !== 'undefined' && document.hidden) return;
     ensureContext();
     if (musicScheduleTimer) return;
+    // Don't schedule if the context isn't running yet (browser autoplay policy)
+    if (!ctx || ctx.state !== 'running') return;
     if (currentSettings.useCustomMusic && customMusicAudio) {
       if (customMusicAudio.paused) {
         customMusicAudio.currentTime = 0;
@@ -1015,7 +1017,9 @@ export function attachAudioResumeHandler() {
   const events = ['click', 'keydown', 'touchstart', 'pointerdown'];
   resumeHandler = () => {
     if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted')) {
-      ctx.resume().catch(() => {});
+      ctx.resume().catch(() => {}).then(() => {
+        if (currentSettings.musicEnabled) startMusic();
+      });
     }
   };
   events.forEach((evt) => {

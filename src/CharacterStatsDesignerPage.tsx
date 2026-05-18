@@ -730,7 +730,7 @@ export default function CharacterStatsDesignerPage({
         </div>
 
         {/* Main layout: stats list + radar chart */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 20 }}>
           {/* Stat sliders */}
           <div className="tool-card" style={{ padding: 18 }}>
             <div className="tool-card-header" style={{ marginBottom: 14 }}>
@@ -782,7 +782,7 @@ export default function CharacterStatsDesignerPage({
           {history.length === 0 ? (
             <p className="muted-copy" style={{ padding: '20px 0' }}>{labels.emptyHistory}</p>
           ) : (
-            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12, marginTop: 12 }}>
+            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: 12, marginTop: 12 }}>
               {history.map((set) => (
                 <StatHistoryCard key={set.id} set={set} language={language} labels={labels} onLoad={() => loadSet(set)} />
               ))}
@@ -802,7 +802,7 @@ export default function CharacterStatsDesignerPage({
           {favorites.length === 0 ? (
             <p className="muted-copy" style={{ padding: '20px 0' }}>{labels.emptyFavorites}</p>
           ) : (
-            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12, marginTop: 12 }}>
+            <div className="tool-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: 12, marginTop: 12 }}>
               {favorites.map((set) => (
                 <StatHistoryCard
                   key={set.id}
@@ -863,6 +863,7 @@ function StatRow({
           disabled={attr.locked}
           data-sfx-handled
           title={labels.regenerate}
+          aria-label={labels.regenerate}
         >
           ⟳
         </button>
@@ -873,6 +874,7 @@ function StatRow({
           aria-pressed={attr.locked}
           data-sfx-handled
           title={attr.locked ? labels.unlock : labels.lock}
+          aria-label={attr.locked ? labels.unlock : labels.lock}
         >
           {attr.locked ? '🔒' : '🔓'}
         </button>

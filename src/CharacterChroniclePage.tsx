@@ -477,6 +477,7 @@ export default function CharacterChroniclePage({
                   className="ch-event-item"
                   tabIndex={0}
                   role="button"
+                  data-sfx-handled
                   aria-label={`${copy.editEvent}: ${evt.title || copy.unnamed}`}
                   onClick={() => { handleEditEvent(evt); playSound('modalOpen'); }}
                   onKeyDown={(e) => {

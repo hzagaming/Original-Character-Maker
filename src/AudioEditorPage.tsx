@@ -457,12 +457,12 @@ export function AudioEditorPage({
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      // Cleanup audio context
+      // Stop playback first, then close context
+      stopPlayback();
       if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
         audioCtxRef.current.close().catch(() => {});
+        audioCtxRef.current = null;
       }
-      // Stop playback
-      stopPlayback();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (importTimeoutRef.current) window.clearTimeout(importTimeoutRef.current);
       if (exportTimeoutRef.current) window.clearTimeout(exportTimeoutRef.current);
@@ -501,10 +501,8 @@ export function AudioEditorPage({
     nodeChainRef.current = [];
     gainNodeRef.current = null;
     panNodeRef.current = null;
-    if (audioCtxRef.current) {
-      audioCtxRef.current.close().catch(() => {});
-      audioCtxRef.current = null;
-    }
+    // NOTE: Do NOT close the AudioContext here — reuse it on next play.
+    // The unmount effect will close it when the component unmounts.
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = 0;
     setIsPlaying(false);

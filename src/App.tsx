@@ -21,6 +21,7 @@ import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, In
 import InspirationGeneratorPage from './InspirationGeneratorPage';
 import CharacterStatsDesignerPage from './CharacterStatsDesignerPage';
 import ColorPaletteDesignerPage from './ColorPaletteDesignerPage';
+import DialogueGeneratorPage from './DialogueGeneratorPage';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -39,7 +40,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.9.0';
+const VERSION = '1.10.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -87,6 +88,7 @@ type Messages = {
   featureInspirationGenerator: string;
   featureCharacterStats: string;
   featureColorPalette: string;
+  featureDialogueGenerator: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -123,6 +125,7 @@ type Messages = {
   actionInspirationGenerator: string;
   actionCharacterStats: string;
   actionColorPalette: string;
+  actionDialogueGenerator: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -256,6 +259,8 @@ type Messages = {
   pageCharacterStatsDescription: string;
   pageColorPaletteTitle: string;
   pageColorPaletteDescription: string;
+  pageDialogueGeneratorTitle: string;
+  pageDialogueGeneratorDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -521,6 +526,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureInspirationGenerator: '角色灵感生成器',
     featureCharacterStats: '角色数值设计器',
     featureColorPalette: '角色配色设计器',
+    featureDialogueGenerator: '角色台词生成器',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -640,10 +646,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.9.0 新增角色配色设计器：为 OC 设计专属配色方案，支持色彩和谐规则、图片取色、WCAG 对比度检查与 JSON/CSS 导出。',
-    announcementList1: '新增角色配色设计器：4 色槽自由搭配（主色/辅色/点缀色/文字色），8 种风格预设，5 种色彩和谐规则（互补/类似/三角/分裂/四色），实时预览与 WCAG 对比度检查。',
-    announcementList2: '图片取色功能：上传任意图片即可自动提取 4 种主色调并应用到配色板，支持一键应用提取结果。',
-    announcementList3: '代码质量：全页面 SFX 合规验证通过（12 个按钮全部 data-sfx-handled），timer 统一清理，硬编码颜色替换为 CSS 变量，5 语言完整本地化，组件命名统一。',
+    announcementDescription: 'v1.10.0 新增角色台词生成器：基于性格标签和场景生成 OC 专属台词；全面审计修复翻译缺失、历史记录功能、SFX 合规性。',
+    announcementList1: '新增角色台词生成器：17 种性格标签 × 10 种场景组合，情感强度 1-10 滑块调节，口头禅自动插入，5 条台词批量生成，JSON/TXT 导出。',
+    announcementList2: '模板引擎：500+ 条中文台词模板，覆盖傲娇/冷酷/热血/害羞/毒舌/神秘等 17 种性格，每种性格 10 场景各 2-3 条模板，支持情感强度标点替换与口头禅插值。',
+    announcementList3: 'Bug 修复：ColorPaletteDesignerPage 历史记录自动保存（applyPreset/harmony/randomize/extract 均触发），俄语/韩语 feature 翻译补全，App.tsx 导入状态色硬编码修复为 CSS 变量。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -689,6 +695,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterStatsDescription: '为原创角色设计可视化数值面板，支持力量、敏捷、智力、魅力等多维度属性。带雷达图实时预览、预设模板、锁定属性、收藏方案与 JSON 导出。',
     pageColorPaletteTitle: '角色配色设计器',
     pageColorPaletteDescription: '为原创角色设计专属配色方案，支持主色、辅色、点缀色与文字色的自由搭配。提供 8 种预设、5 种色彩和谐规则、图片取色、WCAG 对比度检查与 JSON/CSS 导出。',
+    pageDialogueGeneratorTitle: '角色台词生成器',
+    pageDialogueGeneratorDescription: '为原创角色基于性格标签和场景生成符合人设的台词样本。支持 17 种性格、10 种场景、情感强度调节、口头禅插入，可收藏、历史回溯与 JSON/TXT 导出。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -941,6 +949,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureInspirationGenerator: 'キャラ灵感生成器',
     featureCharacterStats: 'キャラステータス設計',
     featureColorPalette: 'カラーパレット設計',
+    featureDialogueGenerator: 'セリフ生成器',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -977,6 +986,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionInspirationGenerator: 'キャラ灵感生成器',
     actionCharacterStats: 'キャラステータス設計',
     actionColorPalette: 'カラーパレット設計',
+    actionDialogueGenerator: 'セリフ生成器',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1062,10 +1072,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.9.0 新規カラーパレット設計ツール：OC の専用配色を設計し、カラーハーモニー、画像からの色抽出、WCAG コントラストチェック、JSON/CSS 出力に対応。',
-    announcementList1: '新規カラーパレット設計ツール：4 色スロット自由編集（メイン/サブ/アクセント/テキスト）、8 種類スタイルプリセット、5 種類カラーハーモニー（補色/類似色/トライアド/スプリット/テトラード）、リアルタイムプレビューと WCAG コントラストチェック。',
-    announcementList2: '画像からの色抽出：任意の画像をアップロードして 4 種類のメインカラーを自動抽出しパレットに適用。ワンクリックで抽出結果を適用可能。',
-    announcementList3: 'コード品質：全ページの SFX 適合性を検証済み（12 ボタンすべて data-sfx-handled）、タイマー統一クリーンアップ、ハードコード色を CSS 変数に置換、5 言語完全ローカライズ、コンポーネント名統一。',
+    announcementDescription: 'v1.10.0 新規セリフ生成器：性格タグとシーンに基づいて OC 専用セリフを生成。翻訳欠落、履歴機能、SFX 適合性を全面監査修正。',
+    announcementList1: '新規セリフ生成器：17 種類の性格タグ × 10 種類のシーンの組み合わせ、感情の強さ 1-10 スライダー調整、口癖の自動挿入、セリフ 5 件一括生成、JSON/TXT 出力。',
+    announcementList2: 'テンプレートエンジン：500 件以上の中国語セリフテンプレート。ツンデレ/クール/熱血/照れ屋/毒舌/謎めいたなど 17 種類の性格に対応。各性格 10 シーンあたり 2〜3 件のテンプレート。感情の強さによる句読点置換と口癖補間に対応。',
+    announcementList3: 'バグ修正：ColorPaletteDesignerPage の履歴記録の自動保存（applyPreset/harmony/randomize/extract すべてトリガー）、ロシア語/韓国語の feature 翻訳補完、App.tsx のインポート状態色のハードコード修正を CSS 変数化。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1109,6 +1119,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterStatsDescription: 'オリジナルキャラクターの可視化ステータスパネルを設計。力、敏捷、知性、魅力などの多属性に対応。レーダーチャートのリアルタイムプレビュー、プリセットテンプレート、属性ロック、お気に入り保存、JSON 出力に対応。',
     pageColorPaletteTitle: 'カラーパレット設計',
     pageColorPaletteDescription: 'オリジナルキャラクターの専用配色を設計。メイン、サブ、アクセント、テキストの自由な組み合わせに対応。8 種類のプリセット、5 種類のカラーハーモニー、画像からの色抽出、WCAG コントラストチェック、JSON/CSS 出力をサポート。',
+    pageDialogueGeneratorTitle: 'セリフ生成器',
+    pageDialogueGeneratorDescription: 'オリジナルキャラクターの性格タグとシーンに基づいて、キャラクターに合ったセリフサンプルを生成。17 種類の性格、10 種類のシーン、感情の強さ調整、口癖の挿入に対応。お気に入り保存、履歴、JSON/TXT 出力をサポート。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1361,6 +1373,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureInspirationGenerator: 'Inspiration Generator',
     featureCharacterStats: 'Stat Designer',
     featureColorPalette: 'Color Palette',
+    featureDialogueGenerator: 'Dialogue Gen',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1397,6 +1410,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionInspirationGenerator: 'Inspiration Generator',
     actionCharacterStats: 'Stat Designer',
     actionColorPalette: 'Color Palette',
+    actionDialogueGenerator: 'Dialogue Gen',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1482,10 +1496,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.9.0 New Color Palette Designer: design custom color schemes for your OC with harmony rules, image color extraction, WCAG contrast checking, and JSON/CSS export.',
-    announcementList1: 'New Color Palette Designer: 4-slot freeform color mixing (primary/secondary/accent/text), 8 style presets, 5 harmony rules (complementary/analogous/triadic/split/tetradic), real-time preview with WCAG contrast checking.',
-    announcementList2: 'Image color extraction: upload any image to automatically extract 4 dominant colors and apply them to the palette. One-click application of extraction results.',
-    announcementList3: 'Code quality: full-page SFX compliance verified (all 12 buttons have data-sfx-handled), unified timer cleanup, hardcoded colors replaced with CSS variables, complete 5-language localization, unified component naming.',
+    announcementDescription: 'v1.10.0 New Dialogue Generator: generate OC-specific lines based on personality traits and scenes; comprehensive audit fixing translation gaps, history functionality, and SFX compliance.',
+    announcementList1: 'New Dialogue Generator: 17 personality traits × 10 scene combinations, emotion intensity 1-10 slider, catchphrase auto-insertion, 5-line batch generation, JSON/TXT export.',
+    announcementList2: 'Template engine: 500+ Chinese dialogue templates covering tsundere/cool/hot-blooded/shy/sarcastic/mysterious and 13 other personalities, 2-3 templates per scene per personality, with intensity-based punctuation replacement and catchphrase interpolation.',
+    announcementList3: 'Bug fixes: ColorPaletteDesignerPage history auto-save (applyPreset/harmony/randomize/extract all trigger), Russian/Korean feature translation completion, App.tsx import status hardcoded color fix to CSS variables.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1529,6 +1543,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterStatsDescription: 'Design a visual stat panel for your original character with multi-dimensional attributes like Strength, Dexterity, Intelligence, and Charisma. Features real-time radar chart preview, preset templates, stat locking, favorite sets, and JSON export.',
     pageColorPaletteTitle: 'Color Palette Designer',
     pageColorPaletteDescription: 'Design a custom color palette for your original character. Supports primary, secondary, accent, and text color mixing with 8 presets, 5 harmony rules, image color extraction, WCAG contrast checking, and JSON/CSS export.',
+    pageDialogueGeneratorTitle: 'Dialogue Generator',
+    pageDialogueGeneratorDescription: 'Generate character-appropriate dialogue lines based on personality traits and scenes. Supports 17 personality types, 10 scenes, emotion intensity adjustment, catchphrase insertion, with favorites, history, and JSON/TXT export.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1781,6 +1797,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureInspirationGenerator: 'Генератор вдохновения',
     featureCharacterStats: 'Дизайнер характеристик',
     featureColorPalette: 'Цветовая палитра',
+    featureDialogueGenerator: 'Генератор реплик',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1817,6 +1834,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionInspirationGenerator: 'Генератор вдохновения',
     actionCharacterStats: 'Дизайнер характеристик',
     actionColorPalette: 'Цветовая палитра',
+    actionDialogueGenerator: 'Генератор реплик',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1902,10 +1920,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.9.0 Новый дизайнер цветовой палитры: создание уникальных цветовых схем для ОС с правилами гармонии, извлечением цвета из изображений, проверкой контраста WCAG и экспортом JSON/CSS.',
-    announcementList1: 'Новый дизайнер цветовой палитры: свободное смешивание 4 цветов (основной/дополнительный/акцентный/текстовый), 8 стилевых шаблонов, 5 правил гармонии (комплементарные/аналоговые/триадные/разделённые/тетрадные), предпросмотр в реальном времени с проверкой контраста WCAG.',
-    announcementList2: 'Извлечение цвета из изображений: загрузите любое изображение для автоматического извлечения 4 доминирующих цветов и их применения к палитре. Применение результатов извлечения в один клик.',
-    announcementList3: 'Качество кода: проверено соответствие SFX для всей страницы (все 12 кнопок имеют data-sfx-handled), единая очистка таймеров, жёстко закодированные цвета заменены на CSS-переменные, полная локализация на 5 языках, унифицированы имена компонентов.',
+    announcementDescription: 'v1.10.0 Новый генератор реплик: генерация реплик для ОС на основе черт характера и сцен; комплексный аудит исправления пробелов в переводах, функциональности истории и соответствия SFX.',
+    announcementList1: 'Новый генератор реплик: 17 черт характера × 10 сцен, регулятор интенсивности эмоций 1-10, автоматическая вставка фраз, пакетная генерация 5 реплик, экспорт JSON/TXT.',
+    announcementList2: 'Шаблонный движок: 500+ китайских шаблонов реплик, охватывающих тсундэрэ/холодного/горячего/застенчивого/язвительного/загадочного и 13 других личностей, 2-3 шаблона на сцену на личность, с заменой пунктуации на основе интенсивности и интерполяцией фраз.',
+    announcementList3: 'Исправления ошибок: автосохранение истории ColorPaletteDesignerPage (applyPreset/harmony/randomize/extract все запускают), дополнение переводов feature для русского/корейского, исправление жёстко закодированных цветов состояния импорта App.tsx на CSS-переменные.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1949,6 +1967,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterStatsDescription: 'Создавайте визуальную панель характеристик для оригинальных персонажей с многомерными атрибутами: сила, ловкость, интеллект, харизма. Радар-график в реальном времени, шаблоны, блокировка, избранное и экспорт JSON.',
     pageColorPaletteTitle: 'Дизайнер цветовой палитры',
     pageColorPaletteDescription: 'Создавайте уникальную цветовую палитру для оригинального персонажа. Поддержка основного, дополнительного, акцентного и текстового цветов. 8 шаблонов, 5 правил гармонии, извлечение цвета из изображений, проверка контраста WCAG, экспорт JSON/CSS.',
+    pageDialogueGeneratorTitle: 'Генератор реплик',
+    pageDialogueGeneratorDescription: 'Генерируйте реплики, соответствующие характеру оригинального персонажа, на основе черт характера и сцен. Поддержка 17 типов личности, 10 сцен, регулировка эмоциональной интенсивности, вставка фраз. Избранное, история, экспорт JSON/TXT.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2610,12 +2630,15 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureInspirationGenerator: '캐릭터灵감 생성기',
     featureCharacterStats: '캐릭터 스탯 디자이너',
     featureColorPalette: '캐릭터 컬러 팔레트',
+    featureDialogueGenerator: '캐릭터 대사 생성기',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
     actionWorldEncyclopedia: '세계관 백과',
     actionInspirationGenerator: '캐릭터灵감 생성기',
     actionCharacterStats: '캐릭터 스탯 디자이너',
+    actionColorPalette: '캐릭터 컬러 팔레트',
+    actionDialogueGenerator: '캐릭터 대사 생성기',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2646,10 +2669,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageCharacterStatsDescription: '레이더 차트로 캐릭터 수치를 시각화합니다. STR, DEX, INT, CHA 등 12가지 스탯을 편집하고 프리셋(밸런스/전투/마법/은신/지원)을 적용, 비교 모드와 JSON/PNG 납품하기를 지원합니다.',
     pageColorPaletteTitle: '캐릭터 컬러 팔레트 디자이너',
     pageColorPaletteDescription: 'OC 캐릭터 전용 컬러 팔레트를 설계합니다. 주색, 보조색, 강조색, 텍스트색 자유 조합. 8가지 프리셋, 5가지 색 조화 규칙, 이미지 색상 추출, WCAG 대비 체크, JSON/CSS 납품하기 지원.',
-    announcementDescription: 'v1.9.0 신규 캐릭터 스탯 디자이너: 레이더 차트로 OC 다차원 수치를 시각화 설계; App.tsx JSX 구문 오류 2건 수정; CharacterStatsDesignerPage 전면 테마 호환 및 현지화 개선.',
-    announcementList1: '신규 캐릭터 스탯 디자이너: 표준 6차원, D&D 클래식, JRPG, 사교 속성, 창작 능력 5가지 프리셋 지원. 실시간 레이더 차트 미리보기, 속성 잠금, 기록/즐겨찾기 저장, JSON 납품하기 지원.',
-    announcementList2: 'UI/UX 수정: App.tsx workflow entry 및 StartModal의 docs 버튼 JSX 구문 오류 수정; CharacterStatsDesignerPage canvas 레이더 차트가 CSS 변수를 동적으로 읽어 light/deep/paper2gal 테마 전환 완벽 지원.',
-    announcementList3: '현지화 및 코드 품질: 컴포넌트명을 CharacterStatsDesignerPage로 통일; 5개 언어 레이더 차트 제목, 일본어/한국어 setPrefix 번역 보완; 모든 인터랙티브 버튼 SFX 적합성 검증 완료; exportJson timeout을 통일 정리에 포함.'
+    pageDialogueGeneratorTitle: '캐릭터 대사 생성기',
+    pageDialogueGeneratorDescription: '성격 태그와 장면을 기반으로 OC 전용 대사를 생성합니다. 17가지 성격, 10가지 장면, 감정 강도 조절, 입버릇 삽입을 지원하며 즐겨찾기, 기록, JSON/TXT 납품하기가 가능합니다.',
+    announcementDescription: 'v1.10.0 신규 캐릭터 대사 생성기: 성격 태그와 장면을 기반으로 OC 전용 대사 생성. 번역 누락, 기록 기능, SFX 적합성을 전면 감사 수정.',
+    announcementList1: '신규 캐릭터 대사 생성기: 17가지 성격 태그 × 10가지 장면 조합, 감정 강도 1-10 슬라이더, 입버릇 자동 삽입, 대사 5개 일괄 생성, JSON/TXT 납품하기.',
+    announcementList2: '템플릿 엔진: 500개 이상의 중국어 대사 템플릿. 츤데레/쿨/열혈/부끄러움/독설/신비로움 등 13가지 성격 포함. 성격당 장면당 2-3개 템플릿. 감정 강도 기반 구두점 교체와 입버릇 보간 지원.',
+    announcementList3: '버그 수정: ColorPaletteDesignerPage 기록 자동 저장(applyPreset/harmony/randomize/extract 모두 트리거), 러시아어/한국어 feature 번역 보완, App.tsx 가져오기 상태색 하드코딩 수정을 CSS 변수화.'
   },
   fr: {
     ...translations.en,
@@ -2840,6 +2865,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.10.0',
+    date: '2026-05-18',
+    title: '1.10.0 角色台词生成器',
+    summary:
+      '新增 Dialogue Generator（角色台词生成器）工具页面，基于性格标签和场景为 OC 生成专属台词；全面审计修复翻译缺失、历史记录功能与 SFX 合规性。',
+    details: [
+      '新增角色台词生成器：17 种性格标签 × 10 种场景组合，情感强度 1-10 滑块调节，口头禅自动插入，5 条台词批量生成，JSON/TXT 导出。',
+      '模板引擎：500+ 条中文台词模板，覆盖傲娇/冷酷/热血/害羞/毒舌/神秘等 17 种性格，每种性格 10 场景各 2-3 条模板，支持情感强度标点替换与口头禅插值。',
+      '完整 wiring：新增 types.ts FeatureScreen、App.tsx 路由/ActionIcon/workflow entry/StartModal tile/5 语言翻译、workflowPages.tsx barrel export。',
+      'Bug 修复：ColorPaletteDesignerPage 历史记录自动保存（applyPreset/harmony/randomize/extract 均触发），俄语/韩语 feature 翻译补全，App.tsx 导入状态色硬编码修复为 CSS 变量。',
+    ],
+  },
   {
     version: '1.9.0',
     date: '2026-05-18',
@@ -4653,6 +4691,12 @@ function App() {
           pageTitle={messages.pageColorPaletteTitle}
           pageDescription={messages.pageColorPaletteDescription}
         />
+      ) : screen === 'dialogue-generator' ? (
+        <DialogueGeneratorPage
+          {...sharedPageProps}
+          pageTitle={messages.pageDialogueGeneratorTitle}
+          pageDescription={messages.pageDialogueGeneratorDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4865,6 +4909,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('color-palette')}>
                 <ActionIcon kind="color-palette" />
                 <span>{messages.featureColorPalette}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('dialogue-generator')}>
+                <ActionIcon kind="dialogue-generator" />
+                <span>{messages.featureDialogueGenerator}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -6318,7 +6366,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6487,6 +6535,14 @@ function ActionIcon({
         <path d="M24 18l-2 5" />
       </>
     ),
+    'dialogue-generator': (
+      <>
+        <rect x="8" y="8" width="24" height="16" rx="3" />
+        <path d="M12 14h16" />
+        <path d="M12 18h10" />
+        <path d="M14 26l6-2 6 2" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6619,6 +6675,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('color-palette')}>
             <ActionIcon kind="color-palette" />
             <strong>{messages.actionColorPalette}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('dialogue-generator')}>
+            <ActionIcon kind="dialogue-generator" />
+            <strong>{messages.actionDialogueGenerator}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
@@ -6813,8 +6873,8 @@ function ImportModal({
             </div>
 
             {status !== 'idle' && (
-              <div className={`notice-banner ${status === 'success' ? '' : 'error'}`} style={{ marginTop: 12, borderColor: status === 'success' ? 'rgba(74, 222, 128, 0.4)' : 'rgba(244, 90, 90, 0.4)', background: status === 'success' ? 'linear-gradient(180deg, rgba(74,222,128,0.12), rgba(255,255,255,0.02))' : 'linear-gradient(180deg, rgba(244,90,90,0.12), rgba(255,255,255,0.02))' }}>
-                <p style={{ margin: 0, color: status === 'success' ? 'var(--success, #86efac)' : 'var(--danger, #f45a5a)' }}>{statusMessage}</p>
+              <div className={`notice-banner ${status === 'success' ? 'success' : 'error'}`} style={{ marginTop: 12 }}>
+                <p style={{ margin: 0 }}>{statusMessage}</p>
               </div>
             )}
 

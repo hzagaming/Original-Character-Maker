@@ -64,6 +64,9 @@ a {
   --shadow: 0 24px 64px rgba(3, 9, 18, 0.34);
   --button-shadow: 0 14px 30px rgba(var(--accent-rgb), 0.22);
   --danger: #ef476f;
+  --danger-rgb: 239, 71, 111;
+  --success: #86efac;
+  --success-rgb: 134, 239, 172;
   --overlay-backdrop: rgba(0, 0, 0, 0.6);
   position: relative;
   min-height: 100vh;
@@ -763,6 +766,16 @@ a {
   background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.12), rgba(255, 255, 255, 0.02));
   color: var(--text-main);
 }
+.notice-banner.success {
+  border-color: rgba(var(--success-rgb), 0.4);
+  background: linear-gradient(180deg, rgba(var(--success-rgb), 0.12), rgba(255, 255, 255, 0.02));
+  color: var(--success);
+}
+.notice-banner.error {
+  border-color: rgba(var(--danger-rgb), 0.4);
+  background: linear-gradient(180deg, rgba(var(--danger-rgb), 0.12), rgba(255, 255, 255, 0.02));
+  color: var(--danger);
+}
 
 .home-footer p {
   margin: 0;
@@ -1128,6 +1141,12 @@ input[type='range']:hover::-webkit-slider-thumb {
 input[type='range']:active::-webkit-slider-thumb {
   transform: scale(1.25);
 }
+input[type='range']:focus::-webkit-slider-runnable-track {
+  background: rgba(var(--accent-rgb), 0.15);
+}
+input[type='range']:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
+}
 
 input[type='range']::-moz-range-track {
   height: 6px;
@@ -1152,6 +1171,12 @@ input[type='range']:hover::-moz-range-thumb {
 
 input[type='range']:active::-moz-range-thumb {
   transform: scale(1.25);
+}
+input[type='range']:focus::-moz-range-track {
+  background: rgba(var(--accent-rgb), 0.15);
+}
+input[type='range']:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
 }
 
 .settings-textarea {
@@ -2958,7 +2983,8 @@ input[type='range']:active::-moz-range-thumb {
 }
 
 .settings-input::placeholder {
-  color: rgba(159, 178, 198, 0.76);
+  color: var(--text-secondary);
+  opacity: 0.76;
 }
 
 .log-scroll {
@@ -7458,4 +7484,5 @@ input[type='range']:active::-moz-range-thumb {
   .we-toolbar { padding: 12px 14px; }
   .we-filter-row { gap: 6px; }
   .we-filter-chip { padding: 4px 10px; font-size: 0.78rem; }
+  .tool-grid { grid-template-columns: 1fr !important; }
 }
