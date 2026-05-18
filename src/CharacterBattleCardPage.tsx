@@ -78,9 +78,10 @@ function getLinkedStats(): Record<string, number> {
     const raw = localStorage.getItem('oc-maker.character-stats');
     if (!raw) return {};
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed?.attributes)) {
+    const arr = Array.isArray(parsed) ? parsed : parsed?.attributes;
+    if (Array.isArray(arr)) {
       const map: Record<string, number> = {};
-      for (const attr of parsed.attributes) {
+      for (const attr of arr) {
         if (attr?.id && typeof attr.value === 'number') {
           map[attr.id] = attr.value;
         }
@@ -135,6 +136,7 @@ export default function CharacterBattleCardPage({
   language: AppLanguage;
   settings: SettingsState;
   onNavigate: (screen: FeatureScreen) => void;
+  onBack: () => void;
   pageTitle: string;
   pageDescription: string;
 }) {
@@ -146,6 +148,7 @@ export default function CharacterBattleCardPage({
       zh: {
         backHome: '返回首页', readData: '读取关联数据', noLinkedData: '暂无关联数据，请先创建角色属性或技能树。',
         characterName: '角色名称', title: '称号', level: '等级', className: '职业',
+        typeActive: '主动', typePassive: '被动', typeUltimate: '终极', typeTrait: '特质', typeSpecial: '特殊',
         exportPng: '导出 PNG', exportJson: '导出 JSON', copyJson: '复制 JSON', copied: '已复制',
         battleStats: '战斗属性', skills: '技能', unlockedSkills: '已解锁技能', noSkills: '暂无解锁技能',
         warrior: '战士', mage: '法师', assassin: '刺客', support: '辅助', custom: '自定义', unknown: '未知',
@@ -156,6 +159,7 @@ export default function CharacterBattleCardPage({
       ja: {
         backHome: 'ホームへ戻る', readData: '連携データ読込', noLinkedData: '連携データがありません。先にキャラステータスまたはスキルツリーを作成してください。',
         characterName: 'キャラ名', title: '称号', level: 'レベル', className: '職業',
+        typeActive: 'アクティブ', typePassive: 'パッシブ', typeUltimate: 'アルティメット', typeTrait: '特性', typeSpecial: '特殊',
         exportPng: 'PNG 出力', exportJson: 'JSON 出力', copyJson: 'JSON コピー', copied: 'コピー済',
         battleStats: '戦闘ステータス', skills: 'スキル', unlockedSkills: '解放済スキル', noSkills: '解放済スキルなし',
         warrior: '戦士', mage: '魔導士', assassin: '暗殺者', support: 'サポート', custom: 'カスタム', unknown: '不明',
@@ -166,6 +170,7 @@ export default function CharacterBattleCardPage({
       en: {
         backHome: 'Back home', readData: 'Read linked data', noLinkedData: 'No linked data yet. Create character stats or a skill tree first.',
         characterName: 'Name', title: 'Title', level: 'Level', className: 'Class',
+        typeActive: 'Active', typePassive: 'Passive', typeUltimate: 'Ultimate', typeTrait: 'Trait', typeSpecial: 'Special',
         exportPng: 'Export PNG', exportJson: 'Export JSON', copyJson: 'Copy JSON', copied: 'Copied',
         battleStats: 'Battle Stats', skills: 'Skills', unlockedSkills: 'Unlocked Skills', noSkills: 'No unlocked skills',
         warrior: 'Warrior', mage: 'Mage', assassin: 'Assassin', support: 'Support', custom: 'Custom', unknown: 'Unknown',
@@ -176,6 +181,7 @@ export default function CharacterBattleCardPage({
       ru: {
         backHome: 'На главную', readData: 'Считать данные', noLinkedData: 'Нет связанных данных. Сначала создайте характеристики или дерево навыков.',
         characterName: 'Имя', title: 'Титул', level: 'Уровень', className: 'Класс',
+        typeActive: 'Активный', typePassive: 'Пассивный', typeUltimate: 'Ультимат', typeTrait: 'Черта', typeSpecial: 'Особый',
         exportPng: 'Экспорт PNG', exportJson: 'Экспорт JSON', copyJson: 'Копировать JSON', copied: 'Скопировано',
         battleStats: 'Боевые хар-ки', skills: 'Навыки', unlockedSkills: 'Разблокировано', noSkills: 'Нет разблокированных',
         warrior: 'Воин', mage: 'Маг', assassin: 'Ассасин', support: 'Поддержка', custom: 'Свой', unknown: 'Неизвестно',
@@ -186,6 +192,7 @@ export default function CharacterBattleCardPage({
       ko: {
         backHome: '홈으로', readData: '연동 데이터 읽기', noLinkedData: '연동 데이터가 없습니다. 먼저 캐릭터 스탯이나 스킬 트리를 생성하세요.',
         characterName: '이름', title: '칭호', level: '레벨', className: '직업',
+        typeActive: '액티브', typePassive: '패시브', typeUltimate: '궁극', typeTrait: '특성', typeSpecial: '특수',
         exportPng: 'PNG 납품하기', exportJson: 'JSON 납품하기', copyJson: 'JSON 복사', copied: '복사됨',
         battleStats: '전투 스탯', skills: '스킬', unlockedSkills: '해금된 스킬', noSkills: '해금된 스킬 없음',
         warrior: '전사', mage: '마법사', assassin: '암살자', support: '서포터', custom: '커스텀', unknown: '알 수 없음',
@@ -204,6 +211,7 @@ export default function CharacterBattleCardPage({
   const [linkedStats, setLinkedStats] = useState<Record<string, number>>({});
   const [linkedSkills, setLinkedSkills] = useState<BattleSkill[]>([]);
   const [notice, setNotice] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const noticeTimeoutRef = useRef<number>(0);
   const isMountedRef = useRef<boolean>(true);
 
@@ -249,9 +257,13 @@ export default function CharacterBattleCardPage({
           else if (name.includes('刺客') || name.includes('Assassin') || name.includes('暗殺者') || name.includes('Ассасин') || name.includes('암살자')) setClassName(labels.assassin);
           else if (name.includes('辅助') || name.includes('Support') || name.includes('サポート') || name.includes('Поддержка') || name.includes('서포터')) setClassName(labels.support);
           else setClassName(labels.custom);
+        } else {
+          setClassName(labels.custom);
         }
+      } else {
+        setClassName(labels.custom);
       }
-    } catch { /* ignore */ }
+    } catch { setClassName(labels.custom); }
 
     playSound('ui-click');
   }, [labels.warrior, labels.mage, labels.assassin, labels.support, labels.custom]);
@@ -292,13 +304,14 @@ export default function CharacterBattleCardPage({
   }, [language, level]);
 
   const exportPng = useCallback(async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || isExporting) return;
+    setIsExporting(true);
     try {
       const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, backgroundColor: 'transparent' });
       if (!isMountedRef.current) return;
       const a = document.createElement('a');
       a.href = dataUrl;
-      a.download = `battle-card-${characterName || 'oc'}.png`;
+      a.download = `battle-card-${(characterName || 'oc').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fa5\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/g, '_')}.png`;
       document.body.appendChild(a);
       a.click();
       requestAnimationFrame(() => { a.remove(); });
@@ -306,8 +319,10 @@ export default function CharacterBattleCardPage({
       playSound('ui-click');
     } catch {
       if (isMountedRef.current) showNotice(labels.noticeExportError, 'error');
+    } finally {
+      if (isMountedRef.current) setIsExporting(false);
     }
-  }, [characterName, labels.noticeExportSuccess, labels.noticeExportError, showNotice]);
+  }, [characterName, labels.noticeExportSuccess, labels.noticeExportError, showNotice, isExporting]);
 
   const exportJson = useCallback(() => {
     const data: BattleCardSet = {
@@ -323,7 +338,7 @@ export default function CharacterBattleCardPage({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `battle-card-${characterName || 'oc'}.json`;
+    a.download = `battle-card-${(characterName || 'oc').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fa5\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/g, '_')}.json`;
     document.body.appendChild(a);
     a.click();
     requestAnimationFrame(() => { a.remove(); URL.revokeObjectURL(url); });
@@ -348,7 +363,7 @@ export default function CharacterBattleCardPage({
     <div className="page-container" data-theme={themeKey}>
       <div className="page-header">
         <div className="page-header-left">
-          <button className="back-button" type="button" onClick={() => { playSound('ui-click'); onNavigate('home'); }} data-sfx-handled>
+          <button className="back-button" type="button" onClick={() => { playSound('ui-click'); onBack(); }} data-sfx-handled>
             ← {labels.backHome}
           </button>
           <h1 className="page-title">{pageTitle}</h1>
@@ -367,8 +382,8 @@ export default function CharacterBattleCardPage({
         <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); readLinkedData(); }} data-sfx-handled>
           {labels.readData}
         </button>
-        <button className="primary-button" type="button" onClick={() => { playSound('ui-click'); exportPng(); }} data-sfx-handled disabled={!hasData}>
-          {labels.exportPng}
+        <button className="primary-button" type="button" onClick={() => { playSound('ui-click'); exportPng(); }} data-sfx-handled disabled={!hasData || isExporting}>
+          {isExporting ? 'Exporting…' : labels.exportPng}
         </button>
         <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); exportJson(); }} data-sfx-handled>
           {labels.exportJson}
@@ -387,6 +402,7 @@ export default function CharacterBattleCardPage({
       {/* Battle Card */}
       <div
         ref={cardRef}
+        className="battle-card-panel"
         style={{
           background: 'linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%)',
           borderRadius: '20px',
@@ -394,13 +410,13 @@ export default function CharacterBattleCardPage({
           padding: '28px',
           maxWidth: '720px',
           margin: '0 auto',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
         }}
       >
         {/* Header row */}
         <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap' }}>
           {/* Avatar placeholder */}
-          <div style={{
+          <div role="img" aria-label={labels.characterName || 'Character avatar'} style={{
             width: '96px', height: '96px', borderRadius: '50%',
             background: 'var(--bg)', border: '3px solid var(--accent)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -424,7 +440,7 @@ export default function CharacterBattleCardPage({
                 placeholder={labels.title}
                 style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem', width: '140px' }}
               />
-              <button className="choice-chip" type="button" onClick={() => { playSound('ui-click'); generateTitle(); }} data-sfx-handled>
+              <button className="secondary-button small-button" type="button" onClick={() => { playSound('ui-click'); generateTitle(); }} data-sfx-handled>
                 {labels.generateTitle}
               </button>
             </div>
@@ -470,7 +486,7 @@ export default function CharacterBattleCardPage({
               {labels.noSkills}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '380px', overflowY: 'auto', paddingRight: '4px' }}>
               {linkedSkills.map((skill) => (
                 <div key={skill.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', background: 'var(--bg)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                   <span style={{
@@ -478,7 +494,7 @@ export default function CharacterBattleCardPage({
                     background: skill.type === 'active' ? 'rgba(248,113,113,0.15)' : skill.type === 'passive' ? 'rgba(96,165,250,0.15)' : skill.type === 'ultimate' ? 'rgba(167,139,250,0.15)' : skill.type === 'trait' ? 'rgba(52,211,153,0.15)' : 'rgba(251,191,36,0.15)',
                     color: skill.type === 'active' ? '#f87171' : skill.type === 'passive' ? '#60a5fa' : skill.type === 'ultimate' ? '#a78bfa' : skill.type === 'trait' ? '#34d399' : '#fbbf24',
                   }}>
-                    {skill.type}
+                    {labels[`type${skill.type.charAt(0).toUpperCase() + skill.type.slice(1)}` as keyof typeof labels] ?? skill.type}
                   </span>
                   <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem', flex: 1 }}>{skill.name}</span>
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Lv.{skill.level}/{skill.maxLevel}</span>

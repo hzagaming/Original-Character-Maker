@@ -189,9 +189,10 @@ function getLinkedStats(): Record<string, number> {
     const raw = localStorage.getItem('oc-maker.character-stats');
     if (!raw) return {};
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed?.attributes)) {
+    const arr = Array.isArray(parsed) ? parsed : parsed?.attributes;
+    if (Array.isArray(arr)) {
       const map: Record<string, number> = {};
-      for (const attr of parsed.attributes) {
+      for (const attr of arr) {
         if (attr?.id && typeof attr.value === 'number') {
           map[attr.id] = attr.value;
         }
@@ -223,6 +224,7 @@ export default function CharacterSkillTreePage({
   language: AppLanguage;
   settings: SettingsState;
   onNavigate: (screen: FeatureScreen) => void;
+  onBack: () => void;
   pageTitle: string;
   pageDescription: string;
 }) {
@@ -238,7 +240,7 @@ export default function CharacterSkillTreePage({
         skillName: '技能名称', skillDesc: '技能描述', skillType: '类型', skillTier: '层级',
         skillLevel: '等级', maxLevel: '最大等级', parentSkills: '前置技能', requiredStats: '需求属性',
         addNode: '添加节点', nodeSelected: '选中节点', noSelection: '点击节点查看详情',
-        treeEmpty: '技能树为空，选择预设或添加节点开始。', applyPreset: '应用预设', resetTree: '重置',
+        treeEmpty: '技能树为空，选择预设或添加节点开始。', applyPreset: '应用预设', resetTree: '重置', noHistory: '暂无历史记录', noFavorites: '暂无收藏',
         importedSuccess: '导入成功', importedError: '导入失败：格式错误',
         setPrefix: '方案', favorited: '已收藏', unnamed: '未命名',
         copyJson: '复制 JSON', copied: '已复制',
@@ -253,7 +255,7 @@ export default function CharacterSkillTreePage({
         skillName: 'スキル名', skillDesc: '説明', skillType: 'タイプ', skillTier: 'ティア',
         skillLevel: 'レベル', maxLevel: '最大レベル', parentSkills: '前提スキル', requiredStats: '必要ステータス',
         addNode: 'ノード追加', nodeSelected: '選択中', noSelection: 'ノードをクリックして詳細を表示',
-        treeEmpty: 'スキルツリーが空です。プリセットを選ぶかノードを追加してください。', applyPreset: 'プリセット適用', resetTree: 'リセット',
+        treeEmpty: 'スキルツリーが空です。プリセットを選ぶかノードを追加してください。', applyPreset: 'プリセット適用', resetTree: 'リセット', noHistory: '履歴はありません', noFavorites: 'お気に入りはありません',
         importedSuccess: 'インポート成功', importedError: 'インポート失敗：形式エラー',
         setPrefix: 'セット', favorited: 'お気に入り済', unnamed: '名称未設定',
         copyJson: 'JSON コピー', copied: 'コピー済',
@@ -268,7 +270,7 @@ export default function CharacterSkillTreePage({
         skillName: 'Skill Name', skillDesc: 'Description', skillType: 'Type', skillTier: 'Tier',
         skillLevel: 'Level', maxLevel: 'Max Level', parentSkills: 'Prerequisites', requiredStats: 'Stat Requirements',
         addNode: 'Add Node', nodeSelected: 'Selected', noSelection: 'Click a node to view details',
-        treeEmpty: 'The skill tree is empty. Choose a preset or add a node to begin.', applyPreset: 'Apply Preset', resetTree: 'Reset',
+        treeEmpty: 'The skill tree is empty. Choose a preset or add a node to begin.', applyPreset: 'Apply Preset', resetTree: 'Reset', noHistory: 'No history yet', noFavorites: 'No favorites yet',
         importedSuccess: 'Import successful', importedError: 'Import failed: invalid format',
         setPrefix: 'Set', favorited: 'Favorited', unnamed: 'Unnamed',
         copyJson: 'Copy JSON', copied: 'Copied',
@@ -283,7 +285,7 @@ export default function CharacterSkillTreePage({
         skillName: 'Название', skillDesc: 'Описание', skillType: 'Тип', skillTier: 'Уровень',
         skillLevel: 'Уровень навыка', maxLevel: 'Макс. уровень', parentSkills: 'Требования', requiredStats: 'Нужные хар-ки',
         addNode: 'Добавить узел', nodeSelected: 'Выбрано', noSelection: 'Нажмите на узел для просмотра',
-        treeEmpty: 'Дерево пусто. Выберите шаблон или добавьте узел.', applyPreset: 'Применить шаблон', resetTree: 'Сброс',
+        treeEmpty: 'Дерево пусто. Выберите шаблон или добавьте узел.', applyPreset: 'Применить шаблон', resetTree: 'Сброс', noHistory: 'История пуста', noFavorites: 'Избранного нет',
         importedSuccess: 'Импорт успешен', importedError: 'Ошибка импорта: неверный формат',
         setPrefix: 'Набор', favorited: 'В избранном', unnamed: 'Без названия',
         copyJson: 'Копировать JSON', copied: 'Скопировано',
@@ -298,7 +300,7 @@ export default function CharacterSkillTreePage({
         skillName: '스킬명', skillDesc: '설명', skillType: '타입', skillTier: '티어',
         skillLevel: '레벨', maxLevel: '최대 레벨', parentSkills: '선행 스킬', requiredStats: '필요 스탯',
         addNode: '노드 추가', nodeSelected: '선택됨', noSelection: '노드를 클릭하면 상세 정보가 표시됩니다',
-        treeEmpty: '스킬 트리가 비어 있습니다. 프리셋을 선택하거나 노드를 추가하세요.', applyPreset: '프리셋 적용', resetTree: '리셋',
+        treeEmpty: '스킬 트리가 비어 있습니다. 프리셋을 선택하거나 노드를 추가하세요.', applyPreset: '프리셋 적용', resetTree: '리셋', noHistory: '기록 없음', noFavorites: '즐겨찾기 없음',
         importedSuccess: '가져오기 성공', importedError: '가져오기 실패: 형식 오류',
         setPrefix: '세트', favorited: '즐겨찾기됨', unnamed: '이름 없음',
         copyJson: 'JSON 복사', copied: '복사됨',
@@ -323,9 +325,11 @@ export default function CharacterSkillTreePage({
   const [characterName, setCharacterName] = useState('');
   const treeRef = useRef<HTMLDivElement>(null);
   const noticeTimeoutRef = useRef<number>(0);
+  const isMountedRef = useRef<boolean>(true);
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
     };
   }, []);
@@ -518,7 +522,7 @@ export default function CharacterSkillTreePage({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `skill-tree-${characterName || 'oc'}.json`;
+    a.download = `skill-tree-${(characterName || 'oc').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fa5\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/g, '_')}.json`;
     document.body.appendChild(a);
     a.click();
     requestAnimationFrame(() => { a.remove(); URL.revokeObjectURL(url); });
@@ -539,6 +543,7 @@ export default function CharacterSkillTreePage({
   const importJson = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
+      if (!isMountedRef.current) return;
       try {
         const parsed = JSON.parse(String(reader.result));
         if (!parsed || !Array.isArray(parsed.nodes)) {
@@ -547,7 +552,7 @@ export default function CharacterSkillTreePage({
         }
         loadSet(parsed as SkillTreeSet);
       } catch {
-        showNotice(labels.importedError, 'error');
+        if (isMountedRef.current) showNotice(labels.importedError, 'error');
       }
     };
     reader.readAsText(file);
@@ -573,7 +578,7 @@ export default function CharacterSkillTreePage({
     <div className="page-container" data-theme={themeKey}>
       <div className="page-header">
         <div className="page-header-left">
-          <button className="back-button" type="button" onClick={() => { playSound('ui-click'); onNavigate('home'); }} data-sfx-handled>
+          <button className="back-button" type="button" onClick={() => { playSound('ui-click'); onBack(); }} data-sfx-handled>
             ← {labels.backHome}
           </button>
           <h1 className="page-title">{pageTitle}</h1>
@@ -667,7 +672,7 @@ export default function CharacterSkillTreePage({
       </div>
 
       {/* Main layout: tree + detail panel */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px' }}>
+      <div className="skill-tree-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px' }}>
         {/* Tree area */}
         <div
           ref={treeRef}
@@ -760,7 +765,7 @@ export default function CharacterSkillTreePage({
         </div>
 
         {/* Detail panel */}
-        <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '700px', overflowY: 'auto' }}>
+        <div className="skill-tree-detail" style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '700px', overflowY: 'auto' }}>
           {selectedNode ? (
             <>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -943,7 +948,12 @@ export default function CharacterSkillTreePage({
       {/* History list */}
       {showHistory && (
         <div className="set-list" style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>
-          {history.map((set) => (
+          {history.length === 0 ? (
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', padding: '16px', textAlign: 'center', background: 'var(--bg)', borderRadius: '12px', gridColumn: '1 / -1' }}>
+              {labels.noHistory}
+            </div>
+          ) : (
+            history.map((set) => (
             <div key={set.id} className="set-card" style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', padding: '12px' }}>
               <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '4px' }}>{set.name}</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
@@ -965,7 +975,12 @@ export default function CharacterSkillTreePage({
       {/* Favorites list */}
       {showFavorites && (
         <div className="set-list" style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>
-          {favorites.map((set) => (
+          {favorites.length === 0 ? (
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', padding: '16px', textAlign: 'center', background: 'var(--bg)', borderRadius: '12px', gridColumn: '1 / -1' }}>
+              {labels.noFavorites}
+            </div>
+          ) : (
+            favorites.map((set) => (
             <div key={set.id} className="set-card" style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', padding: '12px' }}>
               <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '4px' }}>{set.name}</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>

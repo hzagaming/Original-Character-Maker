@@ -7486,3 +7486,78 @@ input[type='range']:focus::-moz-range-thumb {
   .we-filter-chip { padding: 4px 10px; font-size: 0.78rem; }
   .tool-grid { grid-template-columns: 1fr !important; }
 }
+
+/* ─── Skill Tree & Battle Card responsive + UX ─── */
+
+.skill-tree-layout input:focus,
+.skill-tree-detail input:focus,
+.skill-tree-detail select:focus,
+.skill-tree-detail textarea:focus,
+.battle-card-panel input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.25);
+  border-color: var(--accent) !important;
+}
+
+.skill-tree-layout button[disabled],
+.battle-card-panel button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+
+@media (max-width: 900px) {
+  .skill-tree-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .skill-tree-detail {
+    max-height: none !important;
+  }
+  .battle-card-panel {
+    max-width: 100% !important;
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .skill-tree-stats-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .skill-tree-stats-bar > div:last-child {
+    margin-left: 0 !important;
+  }
+  .battle-card-panel {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+}
+
+
+/* ─── danger-button (used in skill-tree favorites list) ─── */
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 120ms ease;
+  min-height: 36px;
+}
+
+.danger-button:hover {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: rgba(248, 113, 113, 0.6);
+}
+
+.danger-button:active {
+  transform: scale(0.97);
+}

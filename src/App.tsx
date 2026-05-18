@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.1';
+const VERSION = '1.12.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -663,10 +663,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.1 全面深度审计与稳定性修复：修复 applyPreset 技能树父子关系断裂、5 语言对象字面量语法错误、showNotice 超时竞争条件、技能类型颜色映射不完整等 10+ 处问题。',
-    announcementList1: 'CharacterSkillTreePage：修复 applyPreset 重新生成节点 ID 时未同步更新 parentIds 的关键 bug（导致预设技能树父子关系完全断裂）；移除冗余的 timeoutRefs/addTimeout 死代码；showNotice 改为排他式单一 timeout 管理。',
-    announcementList2: 'CharacterBattleCardPage：修复 generateTitle NaN 防御（pool[NaN] 导致 setTitle undefined）；补充 trait/special 技能类型 badge 颜色映射；getLinkedSkills 增加 maxLevel/level NaN 与零值校验；导出 PNG 按钮在无关联数据时自动禁用；exportPng 增加 isMounted 卸载保护。',
-    announcementList3: '全局修复：App.tsx 修复 workflow entry 多余引号导致的 JSX 语法错误；修复 5 语言 announcementList3 后缺失逗号的对象语法错误；修复韩语公告列表未同步到 v1.12.0；全部新页面 SFX 审计通过（0 违规）。',
+    announcementDescription: 'v1.12.2 第二轮深度审计与全面修复：修复 getLinkedStats 数据结构解析错误、exportPng 无 loading 状态、技能类型 badge 非本地化、返回按钮 API 不一致、响应式布局缺失、History/Favorites 空状态缺失等 15+ 处问题。',
+    announcementList1: 'CharacterSkillTreePage：修复 getLinkedStats 解析错误（支持数组直接解析）；importJson 增加 isMountedRef unmount 保护；导出 JSON 文件名过滤非法字符；History/Favorites 添加 5 语言空状态；返回按钮统一为 onBack()；props 类型补全 onBack。',
+    announcementList2: 'CharacterBattleCardPage：修复 getLinkedStats 解析错误；添加 exportPng loading 状态；技能类型 badge 添加 5 语言本地化；className 推断修复 stale data；头像添加 aria-label；技能列表添加 maxHeight+overflowY；返回按钮改为 onBack()；props 类型补全 onBack。',
+    announcementList3: 'UI/UX 与 CSS：添加响应式类和 900px/720px 媒体查询；输入框添加 focus 样式；添加 disabled 按钮样式和 .danger-button 定义；卡片阴影优化。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1097,10 +1097,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.1 全面監査と安定性修正：applyPreset のスキルツリー親子関係切断、5 言語構文エラー、showNotice タイムアウト競合、スキルタイプ色マッピング不完全など 10 件以上の修正。',
-    announcementList1: 'CharacterSkillTreePage：applyPreset でノード ID を再生成した際に parentIds が同期されない重大バグを修正（プリセットスキルツリーの親子関係が完全に切断される）；不要な timeoutRefs/addTimeout デッドコードを削除；showNotice を排他的単一タイムアウト管理に変更。',
-    announcementList2: 'CharacterBattleCardPage：generateTitle の NaN 防御を追加（pool[NaN] で setTitle undefined になる問題）；trait/special スキルタイプのバッジ色マッピングを補完；getLinkedSkills に maxLevel/level の NaN・ゼロ値検証を追加；PNG 出力ボタンを未連携データ時に自動無効化；exportPng に isMounted アンマウント保護を追加。',
-    announcementList3: 'グローバル修正：App.tsx の workflow entry 余分な引用符による JSX 構文エラーを修正；5 言語の announcementList3 後の欠損カンマを修正；韓国語公告リストを v1.12.0 に同期；全新規ページ SFX 監査合格（0 違反）。',
+    announcementDescription: 'v1.12.2 第2轮全面監査と修正：getLinkedStats のデータ構造解析エラー、exportPng の loading 状態なし、スキルタイプ badge の非ローカライズ、戻るボタンの API 不一致、レスポンシブレイアウト欠如、History/Favorites の空状態欠如など 15 件以上の修正。',
+    announcementList1: 'CharacterSkillTreePage：getLinkedStats の解析エラーを修正（配列直接解析をサポート）；importJson に isMountedRef アンマウント保護を追加；JSON 出力ファイル名に不正文字フィルタを追加；History/Favorites に 5 言語空状態を追加；戻るボタンを onBack() に統一；props 型定義に onBack を追加。',
+    announcementList2: 'CharacterBattleCardPage：getLinkedStats の解析エラーを修正；exportPng に loading 状態を追加；スキルタイプ badge に 5 言語ローカライズを追加；className 推論の stale data を修正；アバターに aria-label を追加；スキルリストに maxHeight+overflowY を追加；戻るボタンを onBack() に変更；props 型定義に onBack を追加。',
+    announcementList3: 'UI/UX と CSS：レスポンシブクラスと 900px/720px メディアクエリを追加；入力欄に focus スタイルを追加；disabled ボタンスタイルと .danger-button 定義を追加；カードシャドウを最適化。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1529,10 +1529,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.1 Deep audit and stability fixes: fixed applyPreset skill-tree parent linkage breakage, 5-language object literal syntax errors, showNotice timeout race conditions, incomplete skill type color mapping, and 10+ issues.',
-    announcementList1: 'CharacterSkillTreePage: fixed critical applyPreset bug where parentIds were not synchronized after node ID regeneration (causing complete parent-child linkage breakage in preset skill trees); removed redundant timeoutRefs/addTimeout dead code; converted showNotice to exclusive single-timeout management.',
-    announcementList2: 'CharacterBattleCardPage: added NaN defense in generateTitle (pool[NaN] caused setTitle undefined); supplemented trait/special skill type badge color mapping; added maxLevel/level NaN and zero-value validation in getLinkedSkills; disabled PNG export button when no linked data present; added isMounted unmount protection to exportPng.',
-    announcementList3: 'Global fixes: fixed App.tsx workflow entry extra-quote JSX syntax error; fixed missing comma after announcementList3 in all 5 languages; fixed Korean announcement list out of sync with v1.12.0; all new pages passed SFX audit (0 violations).',
+    announcementDescription: 'v1.12.2 Second-round deep audit and comprehensive fixes: fixed getLinkedStats data structure parsing error, exportPng missing loading state, skill type badge non-localization, back button API inconsistency, missing responsive layout, missing History/Favorites empty states, and 15+ issues.',
+    announcementList1: 'CharacterSkillTreePage: fixed getLinkedStats parsing error (now supports direct array parsing); added isMountedRef unmount protection to importJson; added illegal character filtering to export JSON filenames; added 5-language empty states to History/Favorites; unified back button to onBack(); added onBack to props type definition.',
+    announcementList2: 'CharacterBattleCardPage: fixed getLinkedStats parsing error; added exportPng loading state (isExporting + finally cleanup); added 5-language localization to skill type badges; fixed className inference stale data; added aria-label to avatar placeholder; added maxHeight+overflowY to skill list; changed back button to onBack(); added onBack to props type definition.',
+    announcementList3: 'UI/UX & CSS: added responsive classes and 900px/720px media queries; added focus styles to inputs; added disabled button styles and .danger-button definition; optimized card shadow.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1961,10 +1961,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.1 Глубокий аудит и исправления стабильности: исправлен разрыв parentIds в applyPreset, синтаксические ошибки объектных литералов 5 языков, гонки таймаутов showNotice, неполное цветовое отображение типов навыков и 10+ проблем.',
-    announcementList1: 'CharacterSkillTreePage: исправлен критический баг applyPreset, при котором parentIds не синхронизировались после регенерации ID узлов (приводивший к полному разрыву родительско-дочерних связей в пресетных деревьях); удалён избыточный мёртвый код timeoutRefs/addTimeout; showNotice переведён на управление единственным эксклюзивным таймаутом.',
-    announcementList2: 'CharacterBattleCardPage: добавлена NaN-защита в generateTitle (pool[NaN] приводил к setTitle undefined); дополнено цветовое отображение бейджей типов навыков trait/special; добавлена валидация maxLevel/level на NaN и нулевые значения в getLinkedSkills; кнопка PNG-экспорта автоматически отключается при отсутствии связанных данных; добавлена защита от размонтирования isMounted в exportPng.',
-    announcementList3: 'Глобальные исправления: исправлена JSX-синтаксическая ошибка лишней кавычки в workflow entry App.tsx; исправлена пропущенная запятая после announcementList3 во всех 5 языках; исправлена рассинхронизация корейского списка объявлений с v1.12.0; все новые страницы прошли SFX-аудит (0 нарушений).',
+    announcementDescription: 'v1.12.2 Второй раунд глубокого аудита и комплексных исправлений: исправлена ошибка парсинга getLinkedStats, отсутствие состояния загрузки exportPng, не локализованные бейджи типов навыков, несоответствие API кнопки назад, отсутствие адаптивной вёрстки, отсутствие пустых состояний History/Favorites и 15+ проблем.',
+    announcementList1: 'CharacterSkillTreePage: исправлена ошибка парсинга getLinkedStats (теперь поддерживает прямой парсинг массивов); добавлена защита от размонтирования isMountedRef в importJson; добавлена фильтрация недопустимых символов в имена файлов JSON; добавлены пустые состояния на 5 языках для History/Favorites; унифицирована кнопка назад на onBack(); добавлен onBack в определение типа props.',
+    announcementList2: 'CharacterBattleCardPage: исправлена ошибка парсинга getLinkedStats; добавлено состояние загрузки exportPng; добавлена 5-язычная локализация бейджей типов навыков; исправлены устаревшие данные в логике определения className; добавлен aria-label к аватару; добавлены maxHeight+overflowY к списку навыков; кнопка назад изменена на onBack(); добавлен onBack в определение типа props.',
+    announcementList3: 'UI/UX и CSS: добавлены адаптивные классы и медиа-запросы 900px/720px; добавлены стили фокуса для полей ввода; добавлены стили отключённых кнопок и определение .danger-button; оптимизирована тень карточки.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2724,10 +2724,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.1 전면 감사 및 안정성 수정: applyPreset 스킬 트리 부모-자식 관계 단절, 5언어 객체 리터럴 구문 오류, showNotice 타임아웃 경쟁 조건, 스킬 타입 색상 매핑 불완전 등 10건 이상 수정.',
-    announcementList1: 'CharacterSkillTreePage: applyPreset에서 노드 ID 재생성 시 parentIds 동기화되지 않는 치명적 버그 수정(프리셋 스킬 트리 부모-자식 관계 완전 단절)；불필요한 timeoutRefs/addTimeout 데드코드 제거；showNotice를 배타적 단일 타임아웃 관리로 변경.',
-    announcementList2: 'CharacterBattleCardPage: generateTitle NaN 방어 추가(pool[NaN]로 setTitle undefined 문제)；trait/special 스킬 타입 배지 색상 매핑 보완；getLinkedSkills에 maxLevel/level NaN 및 영값 검증 추가；PNG 납품 버튼 미연동 데이터 시 자동 비활성화；exportPng에 isMounted 언마운트 보호 추가.',
-    announcementList3: '글로벌 수정: App.tsx workflow entry 여분의 따옴표 JSX 구문 오류 수정；5언어 announcementList3 뒤 누락된 쉼표 수정；한국어 공지 목록 v1.12.0과 동기화；신규 페이지 전체 SFX 감사 통과(0 위반).'
+    announcementDescription: 'v1.12.2 2차 전면 감사 및 종합 수정: getLinkedStats 데이터 구조 파싱 오류, exportPng 로딩 상태 없음, 스킬 타입 배지 비현지화, 뒤로 가기 버튼 API 불일치, 반응형 레이아웃 누락, History/Favorites 빈 상태 누락 등 15건 이상 수정.',
+    announcementList1: 'CharacterSkillTreePage: getLinkedStats 파싱 오류 수정(배열 직접 파싱 지원)；importJson에 isMountedRef 언마운트 보호 추가；JSON 납품 파일명에 불법 문자 필터 추가；History/Favorites에 5언어 빈 상태 추가；뒤로 가기 버튼을 onBack()으로 통일；props 타입 정의에 onBack 추가.',
+    announcementList2: 'CharacterBattleCardPage: getLinkedStats 파싱 오류 수정；exportPng 로딩 상태 추가；스킬 타입 배지에 5언어 현지화 추가；className 추론 stale data 수정；아바타에 aria-label 추가；스킬 목록에 maxHeight+overflowY 추가；뒤로 가기 버튼을 onBack()으로 변경；props 타입 정의에 onBack 추가.',
+    announcementList3: 'UI/UX 및 CSS: 반응형 클래스와 900px/720px 미디어 쿼리 추가；입력창에 focus 스타일 추가；disabled 버튼 스타일과 .danger-button 정의 추가；카드 그림자 최적화.'
   },
   fr: {
     ...translations.en,
@@ -2918,6 +2918,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.2',
+    date: '2026-05-18',
+    title: '1.12.2 第二轮深度审计与全面修复',
+    summary:
+      '对 v1.12.1 进行第二轮全面深度审计，修复 15+ 处 bug 和 UI/UX 问题：getLinkedStats 数据结构解析错误、exportPng 无 loading 状态、技能类型 badge 非本地化、返回按钮 API 不一致、响应式布局缺失、History/Favorites 空状态缺失等。',
+    details: [
+      'CharacterSkillTreePage：修复 getLinkedStats 解析错误（parsed?.attributes → 支持数组直接解析）；添加 isMountedRef unmount 保护到 importJson；导出 JSON 文件名增加非法字符过滤；History/Favorites 列表添加 5 语言空状态提示；返回按钮统一为 onBack()；props 类型定义补全 onBack。',
+      'CharacterBattleCardPage：修复 getLinkedStats 解析错误；添加 exportPng loading 状态（isExporting + finally 清理）；技能类型 badge 添加 5 语言本地化（typeActive/Passive/Ultimate/Trait/Special）；className 推断修复 stale data（空历史时重置为 custom）；头像占位符添加 aria-label；技能列表添加 maxHeight+overflowY；生成称号按钮改为 small-button；返回按钮改为 onBack()；props 类型定义补全 onBack。',
+      'UI/UX 与 CSS：添加 skill-tree-layout/detail 和 battle-card-panel 响应式类；添加 900px/720px 媒体查询；为输入框添加 focus 样式；添加 disabled 按钮样式；添加 .danger-button 定义；卡片阴影优化。',
+    ],
+  },
   {
     version: '1.12.1',
     date: '2026-05-18',
