@@ -692,7 +692,7 @@ export function AssetGalleryPage({
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={selectAll}>{copy.selectAll}</button>
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={deselectAll}>{copy.deselectAll}</button>
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleDownloadSelected}>{copy.downloadSelected}</button>
-                  <button className="secondary-button small-button" type="button" data-sfx-handled style={{ color: '#ff6b6b' }} onClick={handleDeleteSelected}>{copy.deleteSelected}</button>
+                  <button className="secondary-button small-button" type="button" data-sfx-handled style={{ color: 'var(--danger, #ef476f)' }} onClick={handleDeleteSelected}>{copy.deleteSelected}</button>
                 </div>
               )}
             </section>
@@ -819,7 +819,7 @@ export function AssetGalleryPage({
       {isDragOver && (
         <div
           className="modal-backdrop"
-          style={{ background: 'rgba(3,9,18,0.75)', zIndex: 90 }}
+          style={{ background: 'var(--overlay-backdrop, rgba(0,0,0,0.6))', zIndex: 90 }}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -910,7 +910,7 @@ export function AssetGalleryPage({
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button className="secondary-button small-button" type="button" onClick={() => handleDownload(previewAsset)}>{copy.downloadOne}</button>
-                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} onClick={() => { handleDelete(previewAsset.id); closePreviewSilent(); }}>{copy.deleteOne}</button>
+                <button className="secondary-button small-button" type="button" style={{ color: 'var(--danger, #ef476f)' }} onClick={() => { handleDelete(previewAsset.id); closePreviewSilent(); }}>{copy.deleteOne}</button>
               </div>
             </div>
           </section>

@@ -103,28 +103,47 @@ let musicGain: GainNode | null = null;
 let musicLimiter: DynamicsCompressorNode | null = null;
 // music state declared below in music engine section
 let currentSettings: AudioSettings = { ...defaultAudioSettings };
+let ctxCreationFailed = false;
 
 function ensureContext(): AudioContext {
-  if (!ctx) {
-    ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    masterGain = ctx.createGain();
-    masterGain.connect(ctx.destination);
-    sfxGain = ctx.createGain();
-    sfxGain.connect(masterGain);
-    musicGain = ctx.createGain();
-    // Music limiter: prevents multi-voice clipping
-    musicLimiter = ctx.createDynamicsCompressor();
-    musicLimiter.threshold.value = -14;
-    musicLimiter.knee.value = 8;
-    musicLimiter.ratio.value = 8;
-    musicLimiter.attack.value = 0.002;
-    musicLimiter.release.value = 0.1;
-    musicGain.connect(musicLimiter);
-    musicLimiter.connect(masterGain);
-    applyVolumes();
+  if (!ctx && !ctxCreationFailed) {
+    try {
+      const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AC) {
+        ctxCreationFailed = true;
+        throw new Error('AudioContext not supported');
+      }
+      ctx = new AC();
+      masterGain = ctx.createGain();
+      masterGain.connect(ctx.destination);
+      sfxGain = ctx.createGain();
+      sfxGain.connect(masterGain);
+      musicGain = ctx.createGain();
+      // Music limiter: prevents multi-voice clipping
+      musicLimiter = ctx.createDynamicsCompressor();
+      musicLimiter.threshold.value = -14;
+      musicLimiter.knee.value = 8;
+      musicLimiter.ratio.value = 8;
+      musicLimiter.attack.value = 0.002;
+      musicLimiter.release.value = 0.1;
+      musicGain.connect(musicLimiter);
+      musicLimiter.connect(masterGain);
+      applyVolumes();
+      // Expose for DevModePanel debugging
+      try {
+        (window as unknown as { __audioCtx?: AudioContext }).__audioCtx = ctx;
+      } catch { /* ignore */ }
+    } catch {
+      ctxCreationFailed = true;
+      ctx = null;
+      throw new Error('AudioContext creation failed');
+    }
   }
-  if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+  if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted')) {
     ctx.resume().catch(() => {});
+  }
+  if (!ctx) {
+    throw new Error('AudioContext not available');
   }
   return ctx;
 }
@@ -134,11 +153,12 @@ function now() {
 }
 
 function applyVolumes() {
-  if (!masterGain || !sfxGain || !musicGain) return;
+  if (!masterGain || !sfxGain || !musicGain || !ctx) return;
   const m = currentSettings.masterVolume / 100;
-  masterGain.gain.setValueAtTime(m, ctx!.currentTime);
-  sfxGain.gain.setValueAtTime(currentSettings.sfxEnabled ? (currentSettings.sfxVolume / 100) * m : 0, ctx!.currentTime);
-  musicGain.gain.setValueAtTime(currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * m : 0, ctx!.currentTime);
+  const t = ctx.currentTime;
+  masterGain.gain.setValueAtTime(m, t);
+  sfxGain.gain.setValueAtTime(currentSettings.sfxEnabled ? (currentSettings.sfxVolume / 100) * m : 0, t);
+  musicGain.gain.setValueAtTime(currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * m : 0, t);
   if (customSfxAudio) customSfxAudio.volume = (currentSettings.sfxVolume / 100) * m;
   if (customMusicAudio) customMusicAudio.volume = (currentSettings.musicVolume / 100) * m;
 }
@@ -956,7 +976,8 @@ export function startMusic() {
 
     musicScheduleTimer = setInterval(() => {
       try {
-        const nowTime = ctx?.currentTime ?? 0;
+        if (!ctx || ctx.state === 'closed' || ctx.state === 'suspended' || ctx.state === 'interrupted') return;
+        const nowTime = ctx.currentTime;
         while (nextNoteTime < nowTime + LOOKAHEAD_S) {
           scheduleTick(nextNoteTime, preset, pitchRatio, volume);
           nextNoteTime += beatDuration;

@@ -1000,7 +1000,7 @@ export function RelationshipWebPage({
                         style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
                       />
                     ) : (
-                      <span style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>
+                      <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-main, #fff)' }}>
                         {(node.name || '?').charAt(0).toUpperCase()}
                       </span>
                     )}
@@ -1042,7 +1042,7 @@ export function RelationshipWebPage({
                 <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { handleStartAddEdge(); }}>
                   {copy.addEdge}
                 </button>
-                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} data-sfx-handled onClick={() => { handleDeleteNode(selectedNode.id); }}>
+                <button className="secondary-button small-button" type="button" style={{ color: 'var(--danger, #ef476f)' }} data-sfx-handled onClick={() => { handleDeleteNode(selectedNode.id); }}>
                   {copy.deleteNode}
                 </button>
               </div>
@@ -1088,7 +1088,7 @@ export function RelationshipWebPage({
                 <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { setEdgeModal({ ...selectedEdge }); playSound('modalOpen'); }}>
                   {copy.editEdge}
                 </button>
-                <button className="secondary-button small-button" type="button" style={{ color: '#ff6b6b' }} data-sfx-handled onClick={() => { handleDeleteEdge(selectedEdge.id); }}>
+                <button className="secondary-button small-button" type="button" style={{ color: 'var(--danger, #ef476f)' }} data-sfx-handled onClick={() => { handleDeleteEdge(selectedEdge.id); }}>
                   {copy.deleteEdge}
                 </button>
               </div>

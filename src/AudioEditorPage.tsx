@@ -1397,7 +1397,7 @@ export function AudioEditorPage({
                     {isImporting ? (
                       <div className="preview-empty">
                         <span className="status-badge running">Decoding audio… {importProgress}%</span>
-                        <div className="progress-track centered">
+                        <div className="progress-track centered" role="progressbar" aria-valuenow={importProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Import progress">
                           <div className="progress-fill" style={{ width: `${importProgress}%` }} />
                         </div>
                       </div>
@@ -1630,7 +1630,7 @@ export function AudioEditorPage({
                 </span>
               </div>
               {(isExporting || exportProgress > 0) && (
-                <div className="progress-track">
+                <div className="progress-track" role="progressbar" aria-valuenow={exportProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Export progress">
                   <div className="progress-fill" style={{ width: `${exportProgress}%` }} />
                 </div>
               )}

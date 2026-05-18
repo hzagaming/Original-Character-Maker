@@ -3820,7 +3820,7 @@ function ConfirmReturnModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
         <p className="section-label">{copy.confirmReturnTitle}</p>
@@ -3888,7 +3888,7 @@ function ConfirmActionModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
         <p className="section-label">{title}</p>
@@ -3949,7 +3949,7 @@ function TagPickerModal({
         <div style={{ overflow: 'auto', flex: 1, gap: 16, display: 'flex', flexDirection: 'column' }}>
           {filtered.map((cat) => (
             <div key={cat.name}>
-              <h4 style={{ margin: '8px 0', fontSize: 14, color: '#8aa4c0' }}>{cat.name}</h4>
+              <h4 style={{ margin: '8px 0', fontSize: 14, color: 'var(--text-secondary, #8aa4c0)' }}>{cat.name}</h4>
               <div className="toggle-grid" style={{ gap: 6 }}>
                 {cat.tags.map((tag) => (
                   <button
@@ -4009,7 +4009,7 @@ function CollapsibleCodePanel({
 
   return (
     <article className={`result-panel collapsible-panel ${tone === 'error' ? 'error' : ''} ${isOpen ? 'open' : 'collapsed'}`}>
-      <button className="collapsible-toggle" type="button" onClick={() => { playSound(isOpen ? 'collapse' : 'expand'); setIsOpen((current) => !current); }} aria-expanded={isOpen}>
+      <button className="collapsible-toggle" type="button" onClick={() => { playSound(isOpen ? 'collapse' : 'expand'); setIsOpen((current) => !current); }} aria-expanded={isOpen} data-sfx-handled>
         <div className="collapsible-copy">
           <strong>{title}</strong>
           <p>{description}</p>
@@ -4077,7 +4077,7 @@ function ExportOptionsModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
         <p className="section-label">{promptCopy.exportOptionsTitle}</p>
@@ -4330,7 +4330,7 @@ function EditorExperimentalModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
         <h2>{title}</h2>
@@ -4743,10 +4743,10 @@ export function StyleTransferPage({
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button data-sfx-handled>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
           </div>
         </div>
 
@@ -4830,10 +4830,10 @@ export function StyleTransferPage({
                   </label>
 
                   {/* Effective Prompt Preview */}
-                  <div className="tool-card" style={{ marginTop: 12, background: 'rgba(79,157,247,0.06)' }}>
+                  <div className="tool-card" style={{ marginTop: 12, background: 'var(--accent-soft, rgba(79,157,247,0.06))' }}>
                     <span className="card-caption">{transfer.effectivePromptPreview}</span>
-                    <p className="tiny-copy" style={{ color: '#8aa4c0', marginTop: 4 }}>{effectivePrompt}</p>
-                    <p className="tiny-copy" style={{ color: '#f45a5a', marginTop: 4 }}>{effectiveNegativePrompt}</p>
+                    <p className="tiny-copy" style={{ color: 'var(--text-secondary, #8aa4c0)', marginTop: 4 }}>{effectivePrompt}</p>
+                    <p className="tiny-copy" style={{ color: 'var(--danger, #ef476f)', marginTop: 4 }}>{effectiveNegativePrompt}</p>
                   </div>
 
                   <div className="slider-grid">
@@ -4855,7 +4855,7 @@ export function StyleTransferPage({
 
                   {/* Advanced Parameters */}
                   <div className="tool-card-section" style={{ marginTop: 12 }}>
-                    <button className="collapsible-toggle" type="button" onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} style={{ padding: '8px 0', width: '100%', textAlign: 'left' }}>
+                    <button className="collapsible-toggle" type="button" onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} style={{ padding: '8px 0', width: '100%', textAlign: 'left' }} data-sfx-handled>
                       <strong>{transfer.advancedParams}</strong><span className="collapsible-state">{isAdvancedOpen ? copy.hideDetails : copy.showDetails}</span>
                       <p className="muted-copy" style={{ margin: 0 }}>{transfer.advancedParamsHint}</p>
                     </button>
@@ -5005,7 +5005,7 @@ export function StyleTransferPage({
                       <div className="tool-card" style={{ padding: 12 }}>
                         <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
                           <strong>{transfer.outputTitle}</strong>
-                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
+                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button data-sfx-handled>
                         </div>
                         <img
                           className="paper-output-image"
@@ -5041,18 +5041,18 @@ export function StyleTransferPage({
                     );
                   })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
                     {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
                     {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button data-sfx-handled>
                   </>} />
                 </div>
               )}
@@ -5787,7 +5787,7 @@ export function PromptSuitePage({
             <div className="editor-toolbar-sections">
               {toolbarSections.map((section) => (
                 <div key={section.key} className={`toolbar-group ${toolbarOpen[section.key] ? 'expanded' : 'collapsed'}`}>
-                  <button className="toolbar-group-header" type="button" onClick={() => { playSound(toolbarOpen[section.key] ? 'collapse' : 'expand'); setToolbarOpen((current) => ({ ...current, [section.key]: !current[section.key] })); }}>
+                  <button className="toolbar-group-header" type="button" onClick={() => { playSound(toolbarOpen[section.key] ? 'collapse' : 'expand'); setToolbarOpen((current) => ({ ...current, [section.key]: !current[section.key] })); }} data-sfx-handled>
                     <span className="toolbar-group-title">{section.label}</span>
                     <span className="toolbar-group-state">{toolbarOpen[section.key] ? copy.hideDetails : copy.showDetails}</span>
                   </button>
@@ -5963,7 +5963,7 @@ export function PromptSuitePage({
                   <button className="secondary-button small-button" type="button" onClick={() => setIsExportOpen(true)}>
                     {copy.exportPack}
                   </button>
-                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }}>
+                  <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }} data-sfx-handled>
                     {copy.copyJson}
                   </button>
                   <button className="secondary-button small-button" type="button" onClick={exportJsonPack}>
@@ -6806,7 +6806,7 @@ export function Paper2GalPage({
         <div className="tool-grid transfer-grid">
           <div className="tool-column">
             <section className="tool-card collapsible-panel">
-              <button className="collapsible-toggle" type="button" onClick={() => { playSound(isSourcePanelOpen ? 'collapse' : 'expand'); setIsSourcePanelOpen((current) => !current); }} aria-expanded={isSourcePanelOpen}>
+              <button className="collapsible-toggle" type="button" onClick={() => { playSound(isSourcePanelOpen ? 'collapse' : 'expand'); setIsSourcePanelOpen((current) => !current); }} aria-expanded={isSourcePanelOpen} data-sfx-handled>
                 <div className="collapsible-copy">
                   <span className="card-caption">{paper.sourceTitle}</span>
                   <strong>{paper.sourceTitle}</strong>
@@ -6845,7 +6845,7 @@ export function Paper2GalPage({
             </section>
 
             <section className="tool-card collapsible-panel">
-              <button className="collapsible-toggle" type="button" onClick={() => { playSound(isSettingsPanelOpen ? 'collapse' : 'expand'); setIsSettingsPanelOpen((current) => !current); }} aria-expanded={isSettingsPanelOpen}>
+              <button className="collapsible-toggle" type="button" onClick={() => { playSound(isSettingsPanelOpen ? 'collapse' : 'expand'); setIsSettingsPanelOpen((current) => !current); }} aria-expanded={isSettingsPanelOpen} data-sfx-handled>
                 <div className="collapsible-copy">
                   <span className="card-caption">{paper.settingsTitle}</span>
                   <strong>{paper.settingsTitle}</strong>
@@ -6892,7 +6892,7 @@ export function Paper2GalPage({
             </section>
 
             <section className="tool-card">
-              <button className="collapsible-toggle" type="button" onClick={() => { playSound(isPromptPanelOpen ? 'collapse' : 'expand'); setIsPromptPanelOpen((current) => !current); }} aria-expanded={isPromptPanelOpen}>
+              <button className="collapsible-toggle" type="button" onClick={() => { playSound(isPromptPanelOpen ? 'collapse' : 'expand'); setIsPromptPanelOpen((current) => !current); }} aria-expanded={isPromptPanelOpen} data-sfx-handled>
                 <div className="collapsible-copy">
                   <span className="card-caption">{paper.promptOverridesTitle}</span>
                   <strong>{paper.promptOverridesTitle}</strong>
@@ -7123,10 +7123,10 @@ export function Paper2GalPage({
                   copy={copy}
                   actions={
                     <>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }} data-sfx-handled>
                         {copy.copyResult}
                       </button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('paper2gal-result.json', resultJson, 'application/json'); }}>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('paper2gal-result.json', resultJson, 'application/json'); }} data-sfx-handled>
                         {copy.downloadResult}
                       </button>
                     </>
@@ -7143,10 +7143,10 @@ export function Paper2GalPage({
                   autoOpenSignal={readableErrorMessage}
                   actions={
                     <>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }} data-sfx-handled>
                         {copy.copyResult}
                       </button>
-                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('paper2gal-error.json', errorJson, 'application/json'); }}>
+                      <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('paper2gal-error.json', errorJson, 'application/json'); }} data-sfx-handled>
                         {copy.downloadResult}
                       </button>
                       {readableErrorMessage && (
@@ -7567,14 +7567,14 @@ export function LlmHubPage({
               {testHistory.length === 0 && <p className="muted-copy">No messages yet. Type below and send.</p>}
               {testHistory.map((msg, i) => (
                 <div key={i} style={{ marginBottom: 8, textAlign: msg.role === 'user' ? 'right' : 'left' }}>
-                  <span className="tiny-copy" style={{ color: msg.role === 'user' ? '#4f9df7' : '#8aa4c0', fontWeight: 700 }}>{msg.role === 'user' ? copy.llm.userLabel : copy.llm.assistantLabel}</span>
+                  <span className="tiny-copy" style={{ color: msg.role === 'user' ? 'var(--accent-solid, #4f9df7)' : 'var(--text-secondary, #8aa4c0)', fontWeight: 700 }}>{msg.role === 'user' ? copy.llm.userLabel : copy.llm.assistantLabel}</span>
                   <p style={{ margin: '4px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</p>
                 </div>
               ))}
               {testLoading && <p className="muted-copy">Thinking…</p>}
               {testError && !showErrorPanel && (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
-                  <p style={{ color: '#f45a5a', margin: 0, flex: 1 }}>{testError.message}</p>
+                  <p style={{ color: 'var(--danger, #ef476f)', margin: 0, flex: 1 }}>{testError.message}</p>
                   <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{copy.transfer.openDetailPanel}</button>
                 </div>
               )}
@@ -7648,10 +7648,10 @@ export function LlmHubPage({
             copy={copy}
             actions={
               <>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }}>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }} data-sfx-handled>
                   {copy.copyJson}
                 </button>
-                <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-llm-config.json', exportJson, 'application/json'); }}>
+                <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-llm-config.json', exportJson, 'application/json'); }} data-sfx-handled>
                   {copy.downloadJson}
                 </button>
               </>
@@ -7929,7 +7929,7 @@ export function TtsExportPage({
               {copy.importConfig}
             </button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-tts-config.json', exportJson, 'application/json'); addLog('info', 'Exported JSON config'); }}>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-tts-config.json', exportJson, 'application/json'); addLog('info', 'Exported JSON config'); }} data-sfx-handled>
               {copy.downloadJson}
             </button>
           </div>
@@ -8099,10 +8099,10 @@ export function TtsExportPage({
                 copy={copy}
                 actions={
                   <>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); addLog('info', 'Copied JSON to clipboard'); }}>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); addLog('info', 'Copied JSON to clipboard'); }} data-sfx-handled>
                       {copy.copyJson}
                     </button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-tts-config.json', exportJson, 'application/json'); addLog('info', 'Downloaded JSON config'); }}>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('oc-tts-config.json', exportJson, 'application/json'); addLog('info', 'Downloaded JSON config'); }} data-sfx-handled>
                       {copy.downloadJson}
                     </button>
                   </>
@@ -8119,8 +8119,8 @@ export function TtsExportPage({
                   <h3>{copy.imageConverter.logsTitle}</h3>
                 </div>
                 <div className="tool-header-actions">
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button>
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('tts-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button data-sfx-handled>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('tts-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button data-sfx-handled>
                 </div>
               </div>
               <div className="log-scroll" style={{ flex: 1, minHeight: 200 }}>
@@ -8455,8 +8455,8 @@ export function ImageConverterPage({
             <button className="secondary-button small-button" type="button" onClick={() => setSavedSnapshot(currentSnapshot)}>{copy.saveConfig}</button>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }}>{copy.copyJson}</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('image-converter-config.json', exportJson, 'application/json'); }}>{copy.downloadJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }}>{copy.copyJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('image-converter-config.json', exportJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
           </div>
         </div>
 
@@ -8547,8 +8547,8 @@ export function ImageConverterPage({
                   <h3>{copy.imageConverter.logsTitle}</h3>
                 </div>
                 <div className="tool-header-actions">
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button>
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button data-sfx-handled>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button data-sfx-handled>
                 </div>
               </div>
               <div className="log-scroll" style={{ flex: 1, minHeight: 120 }}>
@@ -9063,10 +9063,10 @@ export function CharacterGifPage({
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button data-sfx-handled>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
           </div>
         </div>
 
@@ -9150,10 +9150,10 @@ export function CharacterGifPage({
                   </label>
 
                   {/* Effective Prompt Preview */}
-                  <div className="tool-card" style={{ marginTop: 12, background: 'rgba(79,157,247,0.06)' }}>
+                  <div className="tool-card" style={{ marginTop: 12, background: 'var(--accent-soft, rgba(79,157,247,0.06))' }}>
                     <span className="card-caption">{transfer.effectivePromptPreview}</span>
-                    <p className="tiny-copy" style={{ color: '#8aa4c0', marginTop: 4 }}>{effectivePrompt}</p>
-                    <p className="tiny-copy" style={{ color: '#f45a5a', marginTop: 4 }}>{effectiveNegativePrompt}</p>
+                    <p className="tiny-copy" style={{ color: 'var(--text-secondary, #8aa4c0)', marginTop: 4 }}>{effectivePrompt}</p>
+                    <p className="tiny-copy" style={{ color: 'var(--danger, #ef476f)', marginTop: 4 }}>{effectiveNegativePrompt}</p>
                   </div>
 
                   <div className="slider-grid">
@@ -9207,7 +9207,7 @@ export function CharacterGifPage({
 
                   {/* Advanced Parameters */}
                   <div className="tool-card-section" style={{ marginTop: 12 }}>
-                    <button className="collapsible-toggle" type="button" onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} style={{ padding: '8px 0', width: '100%', textAlign: 'left' }}>
+                    <button className="collapsible-toggle" type="button" onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} style={{ padding: '8px 0', width: '100%', textAlign: 'left' }} data-sfx-handled>
                       <strong>{transfer.advancedParams}</strong><span className="collapsible-state">{isAdvancedOpen ? copy.hideDetails : copy.showDetails}</span>
                       <p className="muted-copy" style={{ margin: 0 }}>{transfer.advancedParamsHint}</p>
                     </button>
@@ -9357,7 +9357,7 @@ export function CharacterGifPage({
                       <div className="tool-card" style={{ padding: 12 }}>
                         <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
                           <strong>{transfer.outputTitle}</strong>
-                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
+                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button data-sfx-handled>
                         </div>
                         <img
                           className="paper-output-image"
@@ -9393,18 +9393,18 @@ export function CharacterGifPage({
                     );
                   })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
                     {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
                     {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button data-sfx-handled>
                   </>} />
                 </div>
               )}
@@ -9815,10 +9815,10 @@ export function IndexTtsPage({
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button data-sfx-handled>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
           </div>
         </div>
 
@@ -10023,7 +10023,7 @@ export function IndexTtsPage({
                       <div className="tool-card" style={{ padding: 12 }}>
                         <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
                           <strong>{transfer.outputTitle}</strong>
-                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
+                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button data-sfx-handled>
                         </div>
                         <audio
                           controls
@@ -10058,18 +10058,18 @@ export function IndexTtsPage({
                     );
                   })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
                     {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
                     {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button data-sfx-handled>
                   </>} />
                 </div>
               )}
@@ -10114,3 +10114,4 @@ export { RelationshipWebPage } from './RelationshipWebPage';
 export { default as CharacterCardPage } from './CharacterCardPage';
 export { default as CharacterChroniclePage } from './CharacterChroniclePage';
 export { default as WorldEncyclopediaPage } from './WorldEncyclopediaPage';
+export { default as InspirationGeneratorPage } from './InspirationGeneratorPage';

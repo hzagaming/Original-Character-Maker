@@ -18,6 +18,7 @@ import type {
 } from './types';
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage, CharacterCardPage, CharacterChroniclePage, WorldEncyclopediaPage } from './workflowPages';
+import InspirationGeneratorPage from './InspirationGeneratorPage';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -36,7 +37,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.5';
+const VERSION = '1.8.6';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -81,6 +82,7 @@ type Messages = {
   featureCharacterCard: string;
   featureCharacterChronicle: string;
   featureWorldEncyclopedia: string;
+  featureInspirationGenerator: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -114,6 +116,7 @@ type Messages = {
   actionCharacterCard: string;
   actionCharacterChronicle: string;
   actionWorldEncyclopedia: string;
+  actionInspirationGenerator: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -241,6 +244,8 @@ type Messages = {
   pageCharacterChronicleDescription: string;
   pageWorldEncyclopediaTitle: string;
   pageWorldEncyclopediaDescription: string;
+  pageInspirationGeneratorTitle: string;
+  pageInspirationGeneratorDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -503,6 +508,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterCard: '角色设定卡',
     featureCharacterChronicle: '角色编年史',
     featureWorldEncyclopedia: '世界设定集',
+    featureInspirationGenerator: '角色灵感生成器',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -536,6 +542,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterCard: '角色设定卡',
     actionCharacterChronicle: '角色编年史',
     actionWorldEncyclopedia: '世界设定集',
+    actionInspirationGenerator: '角色灵感生成器',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -621,7 +628,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.8.4 音频页面深度审计与核心稳定性修复：对 AudioEditorPage 和 AudioConverterPage 进行最严格的深度审计，修复 2 项 Critical 运行时缺陷、6 项 High 优先级问题、10+ 项 UI/UX/SFX/a11y 改进；全局音效系统同步升级。',
+    announcementDescription: 'v1.8.6 UI/UX/SFX/BGM 全面自检与改进：新增角色灵感生成器；修复大量 SFX double-play、硬编码颜色、音频引擎缺陷；增强无障碍支持。',
     announcementList1: 'Critical 修复：React 18 Strict Mode 下 isMountedRef 永久失效（开发环境功能静默不可用）；并发导入 Race Condition 导致 AudioContext 泄漏和状态覆盖。',
     announcementList2: '内存与 SFX：AudioContext 导入/导出流程添加上下文追踪 ref，组件卸载时自动关闭；所有下载锚点补全 append/click/remove 流程；为全部 70+ 交互元素添加 data-sfx-handled，彻底消除 double-play。',
     announcementList3: '无障碍与数据安全：导入/转换进度条添加 role="progressbar" + ARIA 属性；toggle chip 添加 aria-pressed；normalizeBuffer 添加 NaN/Infinity 样本过滤；波形绘制添加 duration <= 0 边界保护；全局音效系统升级 label 选择器和 back-link 统一。版本同步为 1.8.4。',
@@ -664,6 +671,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterChronicleDescription: '为角色创建可视化时间线，记录诞生、相遇、成长、战斗等关键事件，支持与关系网角色联动，导出长图分享。',
     pageWorldEncyclopediaTitle: '世界设定集',
     pageWorldEncyclopediaDescription: '构建结构化的世界观百科，创建地点、组织、种族、事件、物品、概念等条目，支持标签、关联角色、搜索筛选和 JSON 导出。',
+    pageInspirationGeneratorTitle: '角色灵感生成器',
+    pageInspirationGeneratorDescription: '一键生成随机的角色灵感组合：性格、外貌、服装、背景、口头禅、缺陷、秘密与爱好。支持锁定条目、收藏组合、历史回溯和 JSON 导出。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -913,6 +922,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterCard: 'キャラ設定カード',
     featureCharacterChronicle: 'キャラ年表',
     featureWorldEncyclopedia: '世界観百科',
+    featureInspirationGenerator: 'キャラ灵感生成器',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -946,6 +956,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterCard: 'キャラ設定カード',
     actionCharacterChronicle: 'キャラ年表',
     actionWorldEncyclopedia: '世界観百科',
+    actionInspirationGenerator: 'キャラ灵感生成器',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1031,7 +1042,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.8.4 オーディオページ深度監査とコア安定性修正：AudioEditorPage と AudioConverterPage に最も厳格な深度監査を実施し、Critical ランタイム欠陥 2 件、High 優先度問題 6 件、UI/UX/SFX/a11y 改善 10+ 件を修正。グローバル SFX システムも同期アップグレード。',
+    announcementDescription: 'v1.8.6 UI/UX/SFX/BGM 全面自检と改善：キャラ灵感生成器を追加；SFX double-play、ハードコード色、オーディオエンジン欠陥を修正；アクセシビリティを強化。',
     announcementList1: 'Critical 修正：React 18 Strict Mode で isMountedRef が永久に無効化される問題（開発環境で機能が暗黙的に利用不可）；並行インポート Race Condition による AudioContext リークと状態の上書き。',
     announcementList2: 'メモリと SFX：AudioContext インポート/エクスポートフローにコンテキスト追跡 ref を追加、コンポーネントアンマウント時に自動クローズ；すべてのダウンロードアンカーに append/click/remove フローを補完；70+ のインタラクティブ要素に data-sfx-handled を追加し double-play を完全に排除。',
     announcementList3: 'アクセシビリティとデータ安全性：インポート/変換プログレスバーに role="progressbar" + ARIA 属性を追加；toggle chip に aria-pressed を追加；normalizeBuffer に NaN/Infinity サンプルフィルタを追加；波形描画に duration <= 0 境界保護を追加；グローバル SFX システムを label セレクターと back-link 統一でアップグレード。バージョンを 1.8.4 に同期。',
@@ -1072,6 +1083,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterChronicleDescription: 'キャラクターの誕生、出会い、成長、戦闘などの重要イベントを記録する可視化タイムラインを作成。関係図のキャラと連動し、長尺画像を出力して共有できます。',
     pageWorldEncyclopediaTitle: '世界観百科',
     pageWorldEncyclopediaDescription: '構造化された世界観百科を構築。場所、組織、種族、イベント、アイテム、概念などの項目を作成。タグ、関連キャラ、検索フィルタ、JSON 出力に対応。',
+    pageInspirationGeneratorTitle: 'キャラ灵感生成器',
+    pageInspirationGeneratorDescription: 'ランダムなキャラ灵感コンボを一括生成：性格、外見、服装、背景、口癖、欠点、秘密、趣味。ロック、お気に入り、履歴、JSON 出力に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1321,6 +1334,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterCard: 'Character Card',
     featureCharacterChronicle: 'Chronicle',
     featureWorldEncyclopedia: 'Encyclopedia',
+    featureInspirationGenerator: 'Inspiration Generator',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1354,6 +1368,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterCard: 'Character Card',
     actionCharacterChronicle: 'Chronicle',
     actionWorldEncyclopedia: 'Encyclopedia',
+    actionInspirationGenerator: 'Inspiration Generator',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1439,7 +1454,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.8.4 Audio page deep audit and core stability fixes: Conducted the strictest deep audit on AudioEditorPage and AudioConverterPage, fixing 2 Critical runtime defects, 6 High-priority issues, and 10+ UI/UX/SFX/a11y improvements; global SFX system upgraded in tandem.',
+    announcementDescription: 'v1.8.6 Comprehensive UI/UX/SFX/BGM self-audit and improvements: Added Inspiration Generator; fixed SFX double-play, hardcoded colors, audio engine defects; enhanced accessibility.',
     announcementList1: 'Critical fixes: isMountedRef permanently broken under React 18 Strict Mode (silently breaks dev environment); concurrent import Race Condition causing AudioContext leaks and state overwrites.',
     announcementList2: 'Memory and SFX: Added context-tracking refs to AudioContext import/export flows for automatic close on unmount; completed append/click/remove flow for all download anchors; added data-sfx-handled to all 70+ interactive elements, completely eliminating double-play.',
     announcementList3: 'Accessibility and data safety: Added role="progressbar" + ARIA attributes to import/convert progress bars; added aria-pressed to toggle chips; added NaN/Infinity sample filtering to normalizeBuffer; added duration <= 0 boundary guard to waveform drawing; upgraded global SFX system with label selector and unified back-link sound. Version synchronized to 1.8.4.',
@@ -1480,6 +1495,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterChronicleDescription: 'Create a visual timeline for your character, recording key events like birth, meetings, growth, and battles. Links to Relationship Web characters and exports as a long image.',
     pageWorldEncyclopediaTitle: 'World Encyclopedia',
     pageWorldEncyclopediaDescription: 'Build a structured world encyclopedia with entries for locations, organizations, races, events, items, and concepts. Supports tags, linked characters, search/filter, and JSON export.',
+    pageInspirationGeneratorTitle: 'Inspiration Generator',
+    pageInspirationGeneratorDescription: 'Generate random character inspiration combos in one click: personality, appearance, outfit, background, catchphrase, flaw, secret, and hobby. Supports locking items, saving favorites, history, and JSON export.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1729,6 +1746,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterCard: 'Карточка персонажа',
     featureCharacterChronicle: 'Хроника',
     featureWorldEncyclopedia: 'Энциклопедия',
+    featureInspirationGenerator: 'Генератор вдохновения',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1762,6 +1780,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterCard: 'Карточка персонажа',
     actionCharacterChronicle: 'Хроника',
     actionWorldEncyclopedia: 'Энциклопедия',
+    actionInspirationGenerator: 'Генератор вдохновения',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1847,7 +1866,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.8.4 Глубокий аудит аудио-страниц и исправления ядра стабильности: Проведен самый строгий глубокий аудит AudioEditorPage и AudioConverterPage, исправлено 2 критических дефекта времени выполнения, 6 проблем высокого приоритета и 10+ улучшений UI/UX/SFX/a11y; глобальная система SFX синхронно обновлена.',
+    announcementDescription: 'v1.8.6 Комплексный аудит UI/UX/SFX/BGM: Добавлен генератор вдохновения; исправлены SFX double-play, захардкоженные цвета, дефекты аудио-движка; улучшена доступность.',
     announcementList1: 'Критические исправления: isMountedRef навсегда ломается в React 18 Strict Mode (в dev-окружении функции молча не работают); Race Condition при параллельном импорте, вызывающий утечки AudioContext и перезапись состояния.',
     announcementList2: 'Память и SFX: Добавлены ref-отслеживания контекста в потоки импорта/экспорта AudioContext для автоматического закрытия при размонтировании; дополнены append/click/remove для всех якорей загрузки; добавлен data-sfx-handled ко всем 70+ интерактивным элементам, полностью устранен double-play.',
     announcementList3: 'Доступность и безопасность данных: Добавлен role="progressbar" + ARIA-атрибуты к индикаторам прогресса импорта/конвертации; добавлен aria-pressed для toggle chip; добавлена фильтрация NaN/Infinity в normalizeBuffer; добавлена защита duration <= 0 для отрисовки волны; обновлена глобальная система SFX с селектором label и единым звуком back-link. Версия синхронизирована с 1.8.4.',
@@ -1888,6 +1907,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterChronicleDescription: 'Создайте визуальную хронологию для персонажа, записывая ключевые события: рождение, встречи, рост, битвы. Связь с персонажами из Сети отношений и экспорт в длинное изображение.',
     pageWorldEncyclopediaTitle: 'Энциклопедия мира',
     pageWorldEncyclopediaDescription: 'Постройте структурированную энциклопедию мира: места, организации, расы, события, предметы и концепты. Поддерживает теги, связанных персонажей, поиск/фильтр и экспорт JSON.',
+    pageInspirationGeneratorTitle: 'Генератор вдохновения',
+    pageInspirationGeneratorDescription: 'Генерация случайных образов персонажей одним кликом: характер, внешность, одежда, прошлое, фраза, недостаток, тайна и хобби. Поддерживает блокировку, избранное, историю и экспорт JSON.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2546,10 +2567,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureCharacterCard: '캐릭터 설정 카드',
     featureCharacterChronicle: '캐릭터 연대기',
     featureWorldEncyclopedia: '세계관 백과',
+    featureInspirationGenerator: '캐릭터灵감 생성기',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
     actionWorldEncyclopedia: '세계관 백과',
+    actionInspirationGenerator: '캐릭터灵감 생성기',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2574,7 +2597,9 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageCharacterChronicleDescription: '캐릭터의 탄생, 만남, 성장, 전투 등 주요 이벤트를 기록하는 시각적 타임라인을 생성합니다. 관계망 캐릭터와 연동되어 긴 이미지로 내보낼 수 있습니다.',
     pageWorldEncyclopediaTitle: '세계관 백과',
     pageWorldEncyclopediaDescription: '구조화된 세계관 백과를 구축합니다. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성하고 태그, 관련 캐릭터, 검색 필터 및 JSON 내보내기를 지원합니다.',
-    announcementDescription: 'v1.8.4 오디오 페이지 심층 감사 및 핵심 안정성 수정: AudioEditorPage와 AudioConverterPage에 가장 엄격한 심층 감사를 실시하여 Critical 런타임 결함 2건, High 우선순위 문제 6건, UI/UX/SFX/a11y 개선 10+건을 수정했습니다. 글로벌 SFX 시스템도 동기화되어 업그레이드되었습니다.',
+    pageInspirationGeneratorTitle: '캐릭터灵감 생성기',
+    pageInspirationGeneratorDescription: '랜덤한 캐릭터灵감 콤보를 한 번에 생성: 성격, 외모, 의상, 배경, 입버릇, 결점, 비밀, 취미. 잠금, 즐겨찾기, 기록, JSON 납품하기 지원.',
+    announcementDescription: 'v1.8.6 UI/UX/SFX/BGM 전면 자체 점검 및 개선: 캐릭터灵감 생성기 추가; SFX double-play, 하드코딩 색상, 오디오 엔진 결함 수정; 접근성 강화.',
     announcementList1: 'Critical 수정: React 18 Strict Mode에서 isMountedRef가 영구적으로 무효화되는 문제(개발 환경에서 기능이 조용히 작동 불가); 동시 가져오기 Race Condition으로 인한 AudioContext 누수 및 상태 덮어쓰기.',
     announcementList2: '메모리 및 SFX: AudioContext 가져오기/납치내기 흐름에 컨텍스트 추적 ref를 추가하여 컴포넌트 언마운트 시 자동으로 닫기; 모든 다운로드 앵커에 append/click/remove 흐름을 보완; 70개 이상의 인터랙티브 요소에 data-sfx-handled를 추가하여 double-play를 완전히 제거.',
     announcementList3: '접근성 및 데이터 안전: 가져오기/변환 진행 바에 role="progressbar" + ARIA 속성 추가; 토글 칩에 aria-pressed 추가; normalizeBuffer에 NaN/Infinity 샘플 필터링 추가; 파형 렌더링에 duration <= 0 경계 보호 추가; 글로벌 SFX 시스템을 label 선택기와 통합된 back-link 사운드로 업그레이드. 버전을 1.8.4로 동기화.'
@@ -2768,6 +2793,21 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.8.6',
+    date: '2026-05-18',
+    title: '1.8.6 UI/UX/SFX/BGM 全面自检与改进',
+    summary:
+      '从 UI/UX/SFX/BGM 四个维度进行整体自检并修复多项隐藏问题：新增角色灵感生成器页面；修复大量 SFX double-play、硬编码颜色、音频引擎缺陷；增强无障碍支持。',
+    details: [
+      '新增角色灵感生成器：一键生成随机角色灵感组合（性格、外貌、服装、背景、口头禅、缺陷、秘密、爱好），支持锁定、收藏、历史记录、JSON 导出。',
+      'SFX 全面修复：App.tsx、workflowPages.tsx、DocsPage.tsx、AssetGalleryPage.tsx 中全部显式调用 playSound 的交互元素补全 data-sfx-handled，彻底消除 double-play。',
+      '音频引擎修复：ensureContext 添加失败缓存避免重复创建；applyVolumes 移除非空断言；BGM scheduler 添加 AudioContext 状态检查避免 CPU 浪费；DevModePanel 暴露 ctx 到 window.__audioCtx。',
+      '主题兼容性修复：AssetGalleryPage、RelationshipWebPage、workflowPages.tsx、InspirationGeneratorPage 中所有硬编码颜色替换为 CSS 变量，支持 light/deep/paper2gal 主题切换。',
+      '无障碍增强：InspirationGeneratorPage 添加 aria-pressed、aria-live、aria-hidden、aria-label；AudioEditorPage 进度条补全 role="progressbar" + ARIA 属性。',
+      '代码质量：InspirationGeneratorPage 修复重复类型定义、嵌套 setState、timer 泄漏、收藏去重、日语翻译错误；响应式 grid 最小宽度下调。',
+    ],
+  },
   {
     version: '1.8.4',
     date: '2026-05-17',
@@ -4024,7 +4064,8 @@ function loadInitialSettings(): SettingsState {
     if (typeof nextSettings.apiCustom2ForIndexTts !== 'boolean') nextSettings.apiCustom2ForIndexTts = false;
     if (typeof nextSettings.apiCustom3ForIndexTts !== 'boolean') nextSettings.apiCustom3ForIndexTts = false;
 
-    updateAudioSettings(nextSettings.audio);
+    // Defer audio init to App mount effect to avoid double startMusic
+    // updateAudioSettings(nextSettings.audio);
     return nextSettings;
   } catch {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
@@ -4507,6 +4548,12 @@ function App() {
           pageTitle={messages.pageWorldEncyclopediaTitle}
           pageDescription={messages.pageWorldEncyclopediaDescription}
         />
+      ) : screen === 'inspiration-generator' ? (
+        <InspirationGeneratorPage
+          {...sharedPageProps}
+          pageTitle={messages.pageInspirationGeneratorTitle}
+          pageDescription={messages.pageInspirationGeneratorDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4707,6 +4754,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('world-encyclopedia')}>
                 <ActionIcon kind="world-encyclopedia" />
                 <span>{messages.featureWorldEncyclopedia}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('inspiration-generator')}>
+                <ActionIcon kind="inspiration-generator" />
+                <span>{messages.featureInspirationGenerator}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -5653,13 +5704,13 @@ function FaceMakerPage({
           </div>
           <div className="editor-toolbar-actions">
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.unsavedWarning : copy.savedWarning}</span>
-            <button className="secondary-button small-button" type="button" disabled={!canUndo} onClick={() => { playSound('undo'); undo(); }}>
+            <button className="secondary-button small-button" type="button" disabled={!canUndo} onClick={() => { playSound('undo'); undo(); }} data-sfx-handled>
               {copy.undo}
             </button>
-            <button className="secondary-button small-button" type="button" disabled={!canRedo} onClick={() => { playSound('redo'); redo(); }}>
+            <button className="secondary-button small-button" type="button" disabled={!canRedo} onClick={() => { playSound('redo'); redo(); }} data-sfx-handled>
               {copy.redo}
             </button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('select'); randomizeDraft(); }}>
+            <button className="secondary-button small-button" type="button" onClick={() => { playSound('select'); randomizeDraft(); }} data-sfx-handled>
               {copy.randomize}
             </button>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>
@@ -5693,6 +5744,7 @@ function FaceMakerPage({
                       className={`asset-card ${draft[group.key] === item.value ? 'active' : ''}`}
                       type="button"
                       onClick={() => { playSound('buttonClick'); updateDraft(group.key, item.value); }}
+                      data-sfx-handled
                     >
                       <span className="asset-thumb" />
                       <strong>{item.label}</strong>
@@ -5724,10 +5776,10 @@ function FaceMakerPage({
               <span>{copy.workboard}</span>
               <div className="stage-toolbar-actions">
                 <div className="zoom-control">
-                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }}>-</button>
+                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }}>-</button data-sfx-handled>
                   <span className="zoom-value">{Math.round(stageZoom * 100)}%</span>
-                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }}>+</button>
-                  <button className="zoom-btn reset-zoom" type="button" title="Reset view" onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }}>⟲</button>
+                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }}>+</button data-sfx-handled>
+                  <button className="zoom-btn reset-zoom" type="button" title="Reset view" onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }}>⟲</button data-sfx-handled>
                 </div>
                 <div className="bg-switcher">
                   {(['checkerboard', 'solid', 'gradient', 'transparent'] as const).map((bg) => (
@@ -5736,14 +5788,15 @@ function FaceMakerPage({
                       className={`bg-chip ${stageBackground === bg ? 'active' : ''}`}
                       type="button"
                       onClick={() => { playSound('buttonClick'); setStageBackground(bg); }}
+                      data-sfx-handled
                     >
                       {copy[`bg${bg.charAt(0).toUpperCase() + bg.slice(1)}` as keyof FaceMakerCopy]}
                     </button>
                   ))}
                 </div>
-                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label="Preview mode" onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }} />
-                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label="Reference mode" onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }} />
-                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label="Overlay mode" onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }} />
+                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label="Preview mode" onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }} / data-sfx-handled>
+                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label="Reference mode" onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }} / data-sfx-handled>
+                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label="Overlay mode" onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }} / data-sfx-handled>
               </div>
             </div>
             <div className="editor-stage">
@@ -5986,7 +6039,7 @@ function ConfirmReturnModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
         <p className="section-label">{copy.confirmTitle}</p>
@@ -6051,7 +6104,7 @@ function ActionConfirmModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
         <p className="section-label">{title}</p>
@@ -6158,7 +6211,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6300,6 +6353,13 @@ function ActionIcon({
         <path d="M12 26h14" />
       </>
     ),
+    'inspiration-generator': (
+      <>
+        <path d="M20 4l4 8 8 1-6 6 1.5 8.5L20 24l-7.5 3.5L14 19l-6-6 8-1z" />
+        <circle cx="20" cy="30" r="3" />
+        <path d="M17 34h6" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6348,7 +6408,7 @@ function StartModal({
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
 
@@ -6420,6 +6480,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('world-encyclopedia')}>
             <ActionIcon kind="world-encyclopedia" />
             <strong>{messages.actionWorldEncyclopedia}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('inspiration-generator')}>
+            <ActionIcon kind="inspiration-generator" />
+            <strong>{messages.actionInspirationGenerator}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
@@ -6570,7 +6634,7 @@ function ImportModal({
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">×</button>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>×</button>
 
         <p className="section-label">{messages.appSubtitle}</p>
         <h2>{messages.importTitle}</h2>
@@ -6988,7 +7052,7 @@ function SettingsModal({
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card settings-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close">
+        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
           ×
         </button>
 
