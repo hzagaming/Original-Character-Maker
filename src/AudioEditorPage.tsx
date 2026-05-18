@@ -16,6 +16,7 @@ type SharedPageProps = {
   onOpenSettings: () => void;
   onNavigate?: (screen: 'image-converter' | 'docs') => void;
   onOpenDocs?: (toolId?: string, section?: string, errorCode?: string) => void;
+  onSwitchTool?: (toolId: string) => void;
 };
 
 /* ------------------------------------------------------------------ */
@@ -1352,6 +1353,7 @@ export function AudioEditorPage({
         <div className="feature-header-meta">
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('pageSwitch'); onSwitchTool?.('audio-converter'); }}>Audio Converter</button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>
         </div>
       </header>

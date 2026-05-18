@@ -315,7 +315,7 @@ export function AudioConverterPage({
   const [sourceUrl, setSourceUrl] = useState('');
 
   /* ---- Parameters ---- */
-  const [outputFormat, setOutputFormat] = useState<'wav-8' | 'wav-16' | 'wav-24' | 'wav-32' | 'webm' | 'ogg' | 'mp3' | 'mp4' | 'flac'>('wav-16');
+  const [outputFormat, setOutputFormat] = useState<'wav-8' | 'wav-16' | 'wav-24' | 'wav-32' | 'webm' | 'ogg' | 'mp3' | 'mp4'>('wav-16');
   const [sampleRate, setSampleRate] = useState<'original' | '22050' | '44100' | '48000' | '96000' | '192000'>('original');
   const [channels, setChannels] = useState<'original' | 'mono' | 'stereo'>('original');
   const [volume, setVolume] = useState(100);
@@ -383,7 +383,7 @@ export function AudioConverterPage({
       { key: 'wav-16', label: 'WAV 16-bit PCM' },
       { key: 'wav-24', label: 'WAV 24-bit PCM' },
       { key: 'wav-32', label: 'WAV 32-bit Float' },
-      { key: 'flac', label: 'FLAC (WAV container)' },
+
     ];
     const compressed = getSupportedMimeTypes().map((t) => {
       if (t.includes('webm')) return { key: 'webm', label: 'WebM / Opus' };
@@ -533,7 +533,7 @@ export function AudioConverterPage({
       else if (outputFormat === 'wav-8') { blob = audioBufferToWav(buffer, 8); ext = 'wav'; }
       else if (outputFormat === 'wav-24') { blob = audioBufferToWav(buffer, 24); ext = 'wav'; }
       else if (outputFormat === 'wav-32') { blob = audioBufferToWav(buffer, 32); ext = 'wav'; }
-      else if (outputFormat === 'flac') { blob = audioBufferToWav(buffer, 16); ext = 'wav'; addLog('info', 'FLAC encoder not available in browser; using WAV 16-bit fallback'); }
+
       else {
         const mimeMap: Record<string, string> = {
           webm: 'audio/webm;codecs=opus',
@@ -581,7 +581,6 @@ export function AudioConverterPage({
     playSound('downloadSound');
     const extMap: Record<string, string> = {
       'wav-8': 'wav', 'wav-16': 'wav', 'wav-24': 'wav', 'wav-32': 'wav',
-      'flac': 'wav', // fallback to WAV
       'webm': 'webm', 'ogg': 'ogg', 'mp3': 'mp3', 'mp4': 'mp4',
     };
     const ext = extMap[outputFormat] || outputFormat;

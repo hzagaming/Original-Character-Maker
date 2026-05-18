@@ -4764,6 +4764,7 @@ function App() {
           {...sharedPageProps}
           pageTitle={messages.pageAudioEditorTitle}
           pageDescription={messages.pageAudioEditorDescription}
+          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
         />
       ) : screen === 'audio-converter' ? (
         <AudioConverterPage
@@ -6868,7 +6869,7 @@ function StartModal({
   );
 }
 
-type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter';
+type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts';
 
 function ImportModal({
   messages,
@@ -6982,8 +6983,7 @@ function ImportModal({
       'image-converter': 'image-converter',
       'character-gif': 'character-gif',
       'index-tts': 'index-tts',
-      'audio-editor': 'audio-editor',
-      'audio-converter': 'audio-converter',
+
     };
     requestClose();
     navigateTimerRef.current = window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
@@ -6998,8 +6998,7 @@ function ImportModal({
     { key: 'paper2gal', label: messages.featurePaper, icon: 'paper2gal' },
     { key: 'image-converter', label: messages.featureImageConverter, icon: 'image-converter' },
     { key: 'character-gif', label: messages.featureGif, icon: 'character-gif' },
-    { key: 'audio-editor', label: messages.featureAudioEditor, icon: 'audio-editor' },
-    { key: 'audio-converter', label: messages.featureAudioConverter, icon: 'audio-converter' },
+
   ];
 
   if (!isOpen) return null;
@@ -7166,16 +7165,7 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
       try { localStorage.setItem('oc-maker.image-converter', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
-    case 'audio-editor': {
-      if (data.tool !== 'audio-editor') return { success: false, message: 'Tool type mismatch' };
-      try { localStorage.setItem('oc-maker.audio-editor', JSON.stringify(data)); } catch { return { success: false, message: 'Storage failed' }; }
-      return { success: true, message: '' };
-    }
-    case 'audio-converter': {
-      if (data.tool !== 'audio-converter') return { success: false, message: 'Tool type mismatch' };
-      try { localStorage.setItem('oc-maker.audio-converter', JSON.stringify(data)); } catch { return { success: false, message: 'Storage failed' }; }
-      return { success: true, message: '' };
-    }
+
     default:
       return { success: false, message: 'Unknown tool' };
   }
