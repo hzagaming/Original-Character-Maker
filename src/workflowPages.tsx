@@ -10116,3 +10116,4 @@ export { default as CharacterChroniclePage } from './CharacterChroniclePage';
 export { default as WorldEncyclopediaPage } from './WorldEncyclopediaPage';
 export { default as InspirationGeneratorPage } from './InspirationGeneratorPage';
 export { default as CharacterStatsDesignerPage } from './CharacterStatsDesignerPage';
+export { default as ColorPaletteDesignerPage } from './ColorPaletteDesignerPage';

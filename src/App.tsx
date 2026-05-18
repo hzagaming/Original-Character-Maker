@@ -19,7 +19,8 @@ import type {
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage, CharacterCardPage, CharacterChroniclePage, WorldEncyclopediaPage } from './workflowPages';
 import InspirationGeneratorPage from './InspirationGeneratorPage';
-import CharacterStatsPage from './CharacterStatsPage';
+import CharacterStatsDesignerPage from './CharacterStatsDesignerPage';
+import ColorPaletteDesignerPage from './ColorPaletteDesignerPage';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -38,7 +39,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.8';
+const VERSION = '1.9.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -85,6 +86,7 @@ type Messages = {
   featureWorldEncyclopedia: string;
   featureInspirationGenerator: string;
   featureCharacterStats: string;
+  featureColorPalette: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -120,6 +122,7 @@ type Messages = {
   actionWorldEncyclopedia: string;
   actionInspirationGenerator: string;
   actionCharacterStats: string;
+  actionColorPalette: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -251,6 +254,8 @@ type Messages = {
   pageInspirationGeneratorDescription: string;
   pageCharacterStatsTitle: string;
   pageCharacterStatsDescription: string;
+  pageColorPaletteTitle: string;
+  pageColorPaletteDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -515,6 +520,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureWorldEncyclopedia: '世界设定集',
     featureInspirationGenerator: '角色灵感生成器',
     featureCharacterStats: '角色数值设计器',
+    featureColorPalette: '角色配色设计器',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -634,10 +640,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.8.8 新增角色数值设计器：可视化雷达图设计 OC 多维度属性；修复 App.tsx 两处 JSX 语法错误；CharacterStatsDesignerPage 全面主题兼容与本地化。',
-    announcementList1: '新增角色数值设计器：支持标准六维、D&D 经典、JRPG、社交属性、创作能力 5 种预设模板，实时雷达图预览，属性锁定，历史记录与收藏，JSON 导出。',
-    announcementList2: 'UI/UX 修复：修复 App.tsx workflow entry 和 StartModal 中 docs 按钮的 JSX 语法错误；CharacterStatsDesignerPage canvas 雷达图改为动态读取 CSS 变量，全面支持 light/deep/paper2gal 主题切换。',
-    announcementList3: '本地化与代码质量：统一组件命名 CharacterStatsDesignerPage；补全 5 语言 radar chart 标题、日语/韩语 setPrefix 翻译；所有交互按钮 SFX 合规性验证通过；exportJson timeout 纳入统一清理。',
+    announcementDescription: 'v1.9.0 新增角色配色设计器：为 OC 设计专属配色方案，支持色彩和谐规则、图片取色、WCAG 对比度检查与 JSON/CSS 导出。',
+    announcementList1: '新增角色配色设计器：4 色槽自由搭配（主色/辅色/点缀色/文字色），8 种风格预设，5 种色彩和谐规则（互补/类似/三角/分裂/四色），实时预览与 WCAG 对比度检查。',
+    announcementList2: '图片取色功能：上传任意图片即可自动提取 4 种主色调并应用到配色板，支持一键应用提取结果。',
+    announcementList3: '代码质量：全页面 SFX 合规验证通过（12 个按钮全部 data-sfx-handled），timer 统一清理，硬编码颜色替换为 CSS 变量，5 语言完整本地化，组件命名统一。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -681,6 +687,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageInspirationGeneratorDescription: '一键生成随机的角色灵感组合：性格、外貌、服装、背景、口头禅、缺陷、秘密与爱好。支持锁定条目、收藏组合、历史回溯和 JSON 导出。',
     pageCharacterStatsTitle: '角色数值设计器',
     pageCharacterStatsDescription: '为原创角色设计可视化数值面板，支持力量、敏捷、智力、魅力等多维度属性。带雷达图实时预览、预设模板、锁定属性、收藏方案与 JSON 导出。',
+    pageColorPaletteTitle: '角色配色设计器',
+    pageColorPaletteDescription: '为原创角色设计专属配色方案，支持主色、辅色、点缀色与文字色的自由搭配。提供 8 种预设、5 种色彩和谐规则、图片取色、WCAG 对比度检查与 JSON/CSS 导出。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -932,6 +940,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureWorldEncyclopedia: '世界観百科',
     featureInspirationGenerator: 'キャラ灵感生成器',
     featureCharacterStats: 'キャラステータス設計',
+    featureColorPalette: 'カラーパレット設計',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -967,6 +976,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionWorldEncyclopedia: '世界観百科',
     actionInspirationGenerator: 'キャラ灵感生成器',
     actionCharacterStats: 'キャラステータス設計',
+    actionColorPalette: 'カラーパレット設計',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1052,10 +1062,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.8.8 新規キャラステータス設計ツール：レーダーチャートで可視化された OC 多属性設計；App.tsx の JSX 構文エラー 2 件を修正；CharacterStatsDesignerPage のテーマ互換とローカライズを全面的に改善。',
-    announcementList1: '新規キャラステータス設計ツール：標準6次元、D&D クラシック、JRPG、社交属性、創作能力の 5 種類プリセットに対応。リアルタイムレーダーチャートプレビュー、属性ロック、履歴・お気に入り保存、JSON 出力をサポート。',
-    announcementList2: 'UI/UX 修正：App.tsx の workflow entry と StartModal の docs ボタンにあった JSX 構文エラーを修正；CharacterStatsDesignerPage の canvas レーダーチャートが CSS 変数を動的に読み取るよう変更し、light/deep/paper2gal テーマ切り替えに完全対応。',
-    announcementList3: 'ローカライズとコード品質：コンポーネント名を CharacterStatsDesignerPage に統一；5 言語のレーダーチャートタイトル、日本語・韓国語の setPrefix 翻訳を補完；すべてのインタラクティブボタンの SFX 適合性を検証済み；exportJson の timeout を統一クリーンアップに含める。',
+    announcementDescription: 'v1.9.0 新規カラーパレット設計ツール：OC の専用配色を設計し、カラーハーモニー、画像からの色抽出、WCAG コントラストチェック、JSON/CSS 出力に対応。',
+    announcementList1: '新規カラーパレット設計ツール：4 色スロット自由編集（メイン/サブ/アクセント/テキスト）、8 種類スタイルプリセット、5 種類カラーハーモニー（補色/類似色/トライアド/スプリット/テトラード）、リアルタイムプレビューと WCAG コントラストチェック。',
+    announcementList2: '画像からの色抽出：任意の画像をアップロードして 4 種類のメインカラーを自動抽出しパレットに適用。ワンクリックで抽出結果を適用可能。',
+    announcementList3: 'コード品質：全ページの SFX 適合性を検証済み（12 ボタンすべて data-sfx-handled）、タイマー統一クリーンアップ、ハードコード色を CSS 変数に置換、5 言語完全ローカライズ、コンポーネント名統一。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1097,6 +1107,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageInspirationGeneratorDescription: 'ランダムなキャラ灵感コンボを一括生成：性格、外見、服装、背景、口癖、欠点、秘密、趣味。ロック、お気に入り、履歴、JSON 出力に対応。',
     pageCharacterStatsTitle: 'キャラステータス設計',
     pageCharacterStatsDescription: 'オリジナルキャラクターの可視化ステータスパネルを設計。力、敏捷、知性、魅力などの多属性に対応。レーダーチャートのリアルタイムプレビュー、プリセットテンプレート、属性ロック、お気に入り保存、JSON 出力に対応。',
+    pageColorPaletteTitle: 'カラーパレット設計',
+    pageColorPaletteDescription: 'オリジナルキャラクターの専用配色を設計。メイン、サブ、アクセント、テキストの自由な組み合わせに対応。8 種類のプリセット、5 種類のカラーハーモニー、画像からの色抽出、WCAG コントラストチェック、JSON/CSS 出力をサポート。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1348,6 +1360,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureWorldEncyclopedia: 'Encyclopedia',
     featureInspirationGenerator: 'Inspiration Generator',
     featureCharacterStats: 'Stat Designer',
+    featureColorPalette: 'Color Palette',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1383,6 +1396,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionWorldEncyclopedia: 'Encyclopedia',
     actionInspirationGenerator: 'Inspiration Generator',
     actionCharacterStats: 'Stat Designer',
+    actionColorPalette: 'Color Palette',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1468,10 +1482,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.8.8 New Character Stats Designer: visualize OC multi-dimensional attributes with radar charts; fixed two JSX syntax errors in App.tsx; full theme compatibility and localization for CharacterStatsDesignerPage.',
-    announcementList1: 'New Character Stats Designer: supports 5 preset templates (Standard Six, D&D Classic, JRPG, Social Traits, Creative Mind) with real-time radar chart preview, stat locking, history & favorites, and JSON export.',
-    announcementList2: 'UI/UX fixes: fixed JSX syntax errors in App.tsx workflow entry and StartModal docs buttons; CharacterStatsDesignerPage canvas radar chart now dynamically reads CSS variables for full light/deep/paper2gal theme support.',
-    announcementList3: 'Localization and code quality: unified component naming to CharacterStatsDesignerPage; added radar chart titles and fixed Japanese/Korean setPrefix translations across 5 languages; verified SFX compliance for all interactive buttons; exportJson timeout now tracked in unified cleanup.',
+    announcementDescription: 'v1.9.0 New Color Palette Designer: design custom color schemes for your OC with harmony rules, image color extraction, WCAG contrast checking, and JSON/CSS export.',
+    announcementList1: 'New Color Palette Designer: 4-slot freeform color mixing (primary/secondary/accent/text), 8 style presets, 5 harmony rules (complementary/analogous/triadic/split/tetradic), real-time preview with WCAG contrast checking.',
+    announcementList2: 'Image color extraction: upload any image to automatically extract 4 dominant colors and apply them to the palette. One-click application of extraction results.',
+    announcementList3: 'Code quality: full-page SFX compliance verified (all 12 buttons have data-sfx-handled), unified timer cleanup, hardcoded colors replaced with CSS variables, complete 5-language localization, unified component naming.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1513,6 +1527,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageInspirationGeneratorDescription: 'Generate random character inspiration combos in one click: personality, appearance, outfit, background, catchphrase, flaw, secret, and hobby. Supports locking items, saving favorites, history, and JSON export.',
     pageCharacterStatsTitle: 'Stat Designer',
     pageCharacterStatsDescription: 'Design a visual stat panel for your original character with multi-dimensional attributes like Strength, Dexterity, Intelligence, and Charisma. Features real-time radar chart preview, preset templates, stat locking, favorite sets, and JSON export.',
+    pageColorPaletteTitle: 'Color Palette Designer',
+    pageColorPaletteDescription: 'Design a custom color palette for your original character. Supports primary, secondary, accent, and text color mixing with 8 presets, 5 harmony rules, image color extraction, WCAG contrast checking, and JSON/CSS export.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1798,6 +1814,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionWorldEncyclopedia: 'Энциклопедия',
     actionInspirationGenerator: 'Генератор вдохновения',
     actionCharacterStats: 'Дизайнер характеристик',
+    actionColorPalette: 'Цветовая палитра',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1883,10 +1900,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.8.8 Новый дизайнер характеристик: визуальное проектирование многомерных атрибутов ОС через радар-графики; исправлены 2 синтаксические ошибки JSX в App.tsx; полная тематическая совместимость и локализация CharacterStatsDesignerPage.',
-    announcementList1: 'Новый дизайнер характеристик: поддержка 5 шаблонов (Стандарт 6, D&D Классика, JRPG, Социальные, Креативные) с предпросмотром радар-графика в реальном времени, блокировкой атрибутов, историей и избранным, экспортом JSON.',
-    announcementList2: 'Исправления UI/UX: исправлены синтаксические ошибки JSX в кнопках docs workflow entry и StartModal в App.tsx; canvas радар-график CharacterStatsDesignerPage теперь динамически считывает CSS-переменные для полной поддержки переключения тем light/deep/paper2gal.',
-    announcementList3: 'Локализация и качество кода: унифицировано имя компонента на CharacterStatsDesignerPage; добавлены заголовки радар-графика и исправлены переводы setPrefix для японского и корейского языков; проверено соответствие SFX для всех интерактивных кнопок; timeout exportJson теперь отслеживается в единой очистке.',
+    announcementDescription: 'v1.9.0 Новый дизайнер цветовой палитры: создание уникальных цветовых схем для ОС с правилами гармонии, извлечением цвета из изображений, проверкой контраста WCAG и экспортом JSON/CSS.',
+    announcementList1: 'Новый дизайнер цветовой палитры: свободное смешивание 4 цветов (основной/дополнительный/акцентный/текстовый), 8 стилевых шаблонов, 5 правил гармонии (комплементарные/аналоговые/триадные/разделённые/тетрадные), предпросмотр в реальном времени с проверкой контраста WCAG.',
+    announcementList2: 'Извлечение цвета из изображений: загрузите любое изображение для автоматического извлечения 4 доминирующих цветов и их применения к палитре. Применение результатов извлечения в один клик.',
+    announcementList3: 'Качество кода: проверено соответствие SFX для всей страницы (все 12 кнопок имеют data-sfx-handled), единая очистка таймеров, жёстко закодированные цвета заменены на CSS-переменные, полная локализация на 5 языках, унифицированы имена компонентов.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1928,6 +1945,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageInspirationGeneratorDescription: 'Генерация случайных образов персонажей одним кликом: характер, внешность, одежда, прошлое, фраза, недостаток, тайна и хобби. Поддерживает блокировку, избранное, историю и экспорт JSON.',
     pageCharacterStatsTitle: 'Дизайнер характеристик',
     pageCharacterStatsDescription: 'Создавайте визуальную панель характеристик для оригинальных персонажей с многомерными атрибутами: сила, ловкость, интеллект, харизма. Радар-график в реальном времени, шаблоны, блокировка, избранное и экспорт JSON.',
+    pageColorPaletteTitle: 'Дизайнер цветовой палитры',
+    pageColorPaletteDescription: 'Создавайте уникальную цветовую палитру для оригинального персонажа. Поддержка основного, дополнительного, акцентного и текстового цветов. 8 шаблонов, 5 правил гармонии, извлечение цвета из изображений, проверка контраста WCAG, экспорт JSON/CSS.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2622,7 +2641,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageInspirationGeneratorDescription: '랜덤한 캐릭터灵감 콤보를 한 번에 생성: 성격, 외모, 의상, 배경, 입버릇, 결점, 비밀, 취미. 잠금, 즐겨찾기, 기록, JSON 납품하기 지원.',
     pageCharacterStatsTitle: '캐릭터 스탯 디자이너',
     pageCharacterStatsDescription: '레이더 차트로 캐릭터 수치를 시각화합니다. STR, DEX, INT, CHA 등 12가지 스탯을 편집하고 프리셋(밸런스/전투/마법/은신/지원)을 적용, 비교 모드와 JSON/PNG 납품하기를 지원합니다.',
-    announcementDescription: 'v1.8.8 신규 캐릭터 스탯 디자이너: 레이더 차트로 OC 다차원 수치를 시각화 설계; App.tsx JSX 구문 오류 2건 수정; CharacterStatsDesignerPage 전면 테마 호환 및 현지화 개선.',
+    announcementDescription: 'v1.9.0 신규 캐릭터 스탯 디자이너: 레이더 차트로 OC 다차원 수치를 시각화 설계; App.tsx JSX 구문 오류 2건 수정; CharacterStatsDesignerPage 전면 테마 호환 및 현지화 개선.',
     announcementList1: '신규 캐릭터 스탯 디자이너: 표준 6차원, D&D 클래식, JRPG, 사교 속성, 창작 능력 5가지 프리셋 지원. 실시간 레이더 차트 미리보기, 속성 잠금, 기록/즐겨찾기 저장, JSON 납품하기 지원.',
     announcementList2: 'UI/UX 수정: App.tsx workflow entry 및 StartModal의 docs 버튼 JSX 구문 오류 수정; CharacterStatsDesignerPage canvas 레이더 차트가 CSS 변수를 동적으로 읽어 light/deep/paper2gal 테마 전환 완벽 지원.',
     announcementList3: '현지화 및 코드 품질: 컴포넌트명을 CharacterStatsDesignerPage로 통일; 5개 언어 레이더 차트 제목, 일본어/한국어 setPrefix 번역 보완; 모든 인터랙티브 버튼 SFX 적합성 검증 완료; exportJson timeout을 통일 정리에 포함.'
@@ -2816,6 +2835,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.9.0',
+    date: '2026-05-18',
+    title: '1.9.0 角色配色设计器与全面审计',
+    summary:
+      '新增 Color Palette Designer（角色配色设计器）工具页面，支持为 OC 设计专属配色方案；全面审计修复 App.tsx wiring、SFX 合规性、主题兼容性与本地化。',
+    details: [
+      '新增角色配色设计器：4 色槽自由搭配（主色/辅色/点缀色/文字色），8 种风格预设，5 种色彩和谐规则（互补/类似/三角/分裂/四色），实时预览与 WCAG 对比度检查。',
+      '图片取色功能：上传任意图片即可自动提取 4 种主色调并应用到配色板，支持一键应用提取结果。',
+      '完整 wiring：新增 types.ts FeatureScreen、App.tsx 路由/ActionIcon/workflow entry/StartModal tile/5 语言翻译、workflowPages.tsx barrel export。',
+      'SFX 与代码质量：ColorPaletteDesignerPage 全部 12 个按钮 SFX 合规（6 内联 + 6 全局 handler），timer 统一清理，硬编码颜色替换为 CSS 变量，5 语言完整本地化。',
+    ],
+  },
   {
     version: '1.8.8',
     date: '2026-05-18',
@@ -4610,6 +4642,12 @@ function App() {
           pageTitle={messages.pageCharacterStatsTitle}
           pageDescription={messages.pageCharacterStatsDescription}
         />
+      ) : screen === 'color-palette' ? (
+        <ColorPaletteDesignerPage
+          {...sharedPageProps}
+          pageTitle={messages.pageColorPaletteTitle}
+          pageDescription={messages.pageColorPaletteDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4818,6 +4856,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-stats')}>
                 <ActionIcon kind="character-stats" />
                 <span>{messages.featureCharacterStats}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('color-palette')}>
+                <ActionIcon kind="color-palette" />
+                <span>{messages.featureColorPalette}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -6271,7 +6313,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6431,6 +6473,15 @@ function ActionIcon({
         <path d="M8 14l5.5 2.5" />
       </>
     ),
+    'color-palette': (
+      <>
+        <circle cx="12" cy="14" r="5" />
+        <circle cx="28" cy="14" r="5" />
+        <circle cx="20" cy="28" r="5" />
+        <path d="M16 18l2 5" />
+        <path d="M24 18l-2 5" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6559,6 +6610,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('character-stats')}>
             <ActionIcon kind="character-stats" />
             <strong>{messages.actionCharacterStats}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('color-palette')}>
+            <ActionIcon kind="color-palette" />
+            <strong>{messages.actionColorPalette}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
