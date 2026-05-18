@@ -123,8 +123,8 @@ function ensureContext(): AudioContext {
     musicLimiter.connect(masterGain);
     applyVolumes();
   }
-  if (ctx.state === 'suspended') {
-    ctx.resume();
+  if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+    ctx.resume().catch(() => {});
   }
   return ctx;
 }
@@ -314,6 +314,7 @@ function synthesize(params: {
   const cleanupDelay = actualDuration + rel + 0.5;
   setTimeout(() => {
     try {
+      if (!ctx || ctx.state === 'closed') return;
       nodesToCleanup.forEach((n) => n.disconnect());
       if (output !== rootGain) {
         output.disconnect();
@@ -421,9 +422,16 @@ const EVENTS: Record<SoundName, () => void> = {
   fullscreen: () => synthesize({ baseFreq: 500, duration: 0.1, gain: 0.08 }),
 };
 
+// SFX cooldown to prevent rapid-fire node creation
+let lastSfxTime = 0;
+const SFX_COOLDOWN_MS = 16;
+
 export function playSound(name: SoundName) {
   try {
     if (!currentSettings.sfxEnabled) return;
+    const now = performance.now();
+    if (now - lastSfxTime < SFX_COOLDOWN_MS) return;
+    lastSfxTime = now;
     if (currentSettings.useCustomSfx && customSfxAudio) {
       customSfxAudio.currentTime = 0;
       customSfxAudio.play().catch(() => {});
@@ -688,6 +696,7 @@ function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, du
     // Auto-cleanup
     const cleanupDelay = Math.max(0, (stopTime - c.currentTime) * 1000) + 120;
     setTimeout(() => {
+      if (!ctx || ctx.state === 'closed') return;
       try { subOsc.disconnect(); } catch {}
       try { osc1.disconnect(); } catch {}
       try { osc2.disconnect(); } catch {}
@@ -761,6 +770,7 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       clickSrc.stop(t + 0.02);
 
       setTimeout(() => {
+        if (!ctx || ctx.state === 'closed') return;
         try { bodyOsc.disconnect(); bodyGain.disconnect(); } catch {}
         try { clickSrc.disconnect(); clickFilter.disconnect(); clickGain.disconnect(); } catch {}
       }, (stopTime - c.currentTime) * 1000 + 100);
@@ -805,6 +815,7 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       noise.stop(stopTime);
 
       setTimeout(() => {
+        if (!ctx || ctx.state === 'closed') return;
         try { toneOsc.disconnect(); toneGain.disconnect(); } catch {}
         try { noise.disconnect(); noiseFilter.disconnect(); noiseGain.disconnect(); } catch {}
       }, (stopTime - c.currentTime) * 1000 + 100);
@@ -835,6 +846,7 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       noise.stop(stopTime);
 
       setTimeout(() => {
+        if (!ctx || ctx.state === 'closed') return;
         try { noise.disconnect(); filter.disconnect(); gain.disconnect(); } catch {}
       }, (stopTime - c.currentTime) * 1000 + 100);
     }
@@ -912,6 +924,7 @@ function scheduleTick(when: number, preset: MusicPresetData, pitchRatio: number,
 export function startMusic() {
   try {
     if (!currentSettings.musicEnabled) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
     ensureContext();
     if (musicScheduleTimer) return;
     if (currentSettings.useCustomMusic && customMusicAudio) {
@@ -974,18 +987,29 @@ export function initAudio() {
  *  Modern browsers suspend AudioContext until a user gesture occurs.
  */
 let resumeHandlerAttached = false;
+let resumeHandler: (() => void) | null = null;
 export function attachAudioResumeHandler() {
   if (resumeHandlerAttached) return;
   resumeHandlerAttached = true;
-  const events = ['click', 'keydown', 'touchstart'];
-  const handler = () => {
-    if (ctx && ctx.state === 'suspended') {
+  const events = ['click', 'keydown', 'touchstart', 'pointerdown'];
+  resumeHandler = () => {
+    if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted')) {
       ctx.resume().catch(() => {});
     }
   };
   events.forEach((evt) => {
-    document.addEventListener(evt, handler, { passive: true });
+    document.addEventListener(evt, resumeHandler, { passive: true });
   });
+}
+
+export function detachAudioResumeHandler() {
+  if (!resumeHandlerAttached || !resumeHandler) return;
+  resumeHandlerAttached = false;
+  const events = ['click', 'keydown', 'touchstart', 'pointerdown'];
+  events.forEach((evt) => {
+    document.removeEventListener(evt, resumeHandler!);
+  });
+  resumeHandler = null;
 }
 
 export const SOUND_PRESETS: SoundPreset[] = [

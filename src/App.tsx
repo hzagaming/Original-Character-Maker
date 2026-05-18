@@ -22,6 +22,7 @@ import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
   attachAudioResumeHandler,
+  detachAudioResumeHandler,
   initAudio,
   MUSIC_PRESETS_LIST,
   playSound,
@@ -35,7 +36,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.4';
+const VERSION = '1.8.5';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -4057,7 +4058,7 @@ function App() {
     }
     const handleVisibility = () => {
       if (document.hidden) {
-        if (settings.audio.musicEnabled) {
+        if (settingsRef.current.audio.musicEnabled) {
           try { stopMusic(); } catch { /* ignore */ }
         }
       } else {
@@ -4068,6 +4069,7 @@ function App() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       try { stopMusic(); } catch { /* ignore */ }
+      detachAudioResumeHandler();
     };
   }, []);
 
@@ -4151,9 +4153,12 @@ function App() {
       } else if (pressed === map.toggleMute) {
         event.preventDefault();
         const audio = settingsRef.current.audio;
+        const nextMuted = audio.sfxEnabled || audio.musicEnabled;
         updateSettings({
-          audio: { ...audio, sfxEnabled: !audio.sfxEnabled },
+          audio: { ...audio, sfxEnabled: !nextMuted, musicEnabled: !nextMuted },
         });
+        if (nextMuted) { stopMusic(); }
+        else { startMusic(); }
       }
     }
     window.addEventListener('keydown', handleKeyDown);
@@ -7307,8 +7312,8 @@ function SettingsModal({
                     ))}
                   </div>
                   <div className="chip-row" style={{ marginTop: 8 }}>
-                    <button className={`choice-chip ${settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: true } }); startMusic(); }}>{messages.toggleOn}</button>
-                    <button className={`choice-chip ${!settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: false } }); stopMusic(); }}>{messages.toggleOff}</button>
+                    <button className={`choice-chip ${settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: true } }); }}>{messages.toggleOn}</button>
+                    <button className={`choice-chip ${!settings.audio.musicEnabled ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, musicEnabled: false } }); }}>{messages.toggleOff}</button>
                   </div>
                   <div className="contrast-control" style={{ marginTop: 8 }}>
                     <div className="contrast-copy"><strong>{messages.audioMusicVolume}</strong><span>{settings.audio.musicVolume}%</span></div>
