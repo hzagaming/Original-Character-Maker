@@ -23,6 +23,7 @@ import CharacterStatsDesignerPage from './CharacterStatsDesignerPage';
 import ColorPaletteDesignerPage from './ColorPaletteDesignerPage';
 import DialogueGeneratorPage from './DialogueGeneratorPage';
 import CharacterSkillTreePage from './CharacterSkillTreePage';
+import CharacterBattleCardPage from './CharacterBattleCardPage';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -41,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.11.0';
+const VERSION = '1.12.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -91,6 +92,7 @@ type Messages = {
   featureColorPalette: string;
   featureDialogueGenerator: string;
   featureSkillTree: string;
+  featureBattleCard: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -129,6 +131,7 @@ type Messages = {
   actionColorPalette: string;
   actionDialogueGenerator: string;
   actionSkillTree: string;
+  actionBattleCard: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -266,6 +269,8 @@ type Messages = {
   pageDialogueGeneratorDescription: string;
   pageSkillTreeTitle: string;
   pageSkillTreeDescription: string;
+  pageBattleCardTitle: string;
+  pageBattleCardDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -533,6 +538,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureColorPalette: '角色配色设计器',
     featureDialogueGenerator: '角色台词生成器',
     featureSkillTree: '角色技能树设计器',
+    featureBattleCard: '角色战斗卡生成器',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -567,6 +573,11 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterChronicle: '角色编年史',
     actionWorldEncyclopedia: '世界设定集',
     actionInspirationGenerator: '角色灵感生成器',
+    actionCharacterStats: '角色数值设计',
+    actionColorPalette: '角色配色设计',
+    actionDialogueGenerator: '角色台词生成',
+    actionSkillTree: '技能树设计',
+    actionBattleCard: '战斗卡生成',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -652,10 +663,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.11.0 新增角色技能树设计器：为 OC 设计完整的技能体系与成长路线，支持 5 种预设职业模板、节点式可视化编辑、属性解锁条件联动、等级分配、历史收藏与 JSON 导出。',
-    announcementList1: 'CharacterSkillTreePage：全新角色技能树设计器。5 种预设（战士/法师/刺客/辅助/自定义），12 节点技能树模板，SVG 连线可视化，属性联动解锁条件，等级升降分配，历史/收藏/JSON 导出。',
-    announcementList2: '联动设计：自动读取 character-stats 属性计算可用技能点，支持实时属性面板显示，技能解锁状态根据关联属性动态判定。',
-    announcementList3: '代码质量：全部按钮 SFX 合规（data-sfx-handled），requestAnimationFrame Blob URL 清理，loadState schema 校验，5 语言完整本地化。'
+    announcementDescription: 'v1.12.0 新增角色战斗卡生成器：基于角色属性与技能树自动生成游戏风格战斗卡；自动计算 HP/MP/ATK/DEF/SPD/CRT 战斗数值，显示已解锁技能，支持称号生成、PNG 导出与 JSON 导出。',
+    announcementList1: 'CharacterBattleCardPage：全新角色战斗卡生成器。自动读取 character-stats 与 skill-tree 数据，计算 6 项战斗数值，可视化战斗卡面板，游戏风格设计，称号生成系统。',
+    announcementList2: '深度联动：自动读取 skill-tree 历史推断职业类型；6 属性进度条实时显示；已解锁技能列表带类型标签与等级；空状态友好提示。',
+    announcementList3: '代码质量：全部按钮 SFX 合规（data-sfx-handled），html-to-image PNG 导出，requestAnimationFrame Blob URL 清理，5 语言完整本地化，补全 v1.11.0 遗漏的中文 action 翻译。'
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -705,6 +716,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDialogueGeneratorDescription: '为原创角色基于性格标签和场景生成符合人设的台词样本。支持 17 种性格、10 种场景、情感强度调节、口头禅插入，可收藏、历史回溯与 JSON/TXT 导出。',
     pageSkillTreeTitle: '角色技能树设计器',
     pageSkillTreeDescription: '为原创角色设计完整的技能体系与成长路线。支持 5 种预设职业模板（战士/法师/刺客/辅助/自定义），节点式可视化编辑，属性解锁条件联动，等级分配，历史收藏与 JSON 导出。',
+    pageBattleCardTitle: '角色战斗卡生成器',
+    pageBattleCardDescription: '基于角色属性与技能树自动生成游戏风格战斗卡。自动计算 HP/MP/ATK/DEF/SPD/CRT 战斗数值，显示已解锁技能，支持称号生成、PNG 导出与 JSON 导出。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -959,6 +972,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureColorPalette: 'カラーパレット設計',
     featureDialogueGenerator: 'セリフ生成器',
     featureSkillTree: 'スキルツリー設計',
+    featureBattleCard: 'バトルカード',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -997,6 +1011,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionColorPalette: 'カラーパレット設計',
     actionDialogueGenerator: 'セリフ生成器',
     actionSkillTree: 'スキルツリー設計',
+    actionBattleCard: 'バトルカード',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1082,10 +1097,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.11.0 新規キャラクタースキルツリー設計：OC のスキル体系と成長ルートを設計。5 種類のプリセットクラステンプレート、ノード式ビジュアルエディタ、ステータス連携解放条件、レベル割り振り、履歴・お気に入り・JSON 出力をサポート。',
-    announcementList1: 'CharacterSkillTreePage：新規スキルツリー設計ページ。5 種類のプリセット（戦士/魔導士/暗殺者/サポート/カスタム）、12 ノードスキルツリーテンプレート、SVG 連結線ビジュアル、ステータス連携解放条件、レベル上下割り振り、履歴/お気に入り/JSON 出力。',
-    announcementList2: '連携設計：character-stats のステータスを自動読み込みして使用可能スキルポイントを計算。リアルタイムステータスパネル表示をサポート。スキル解放状態は関連ステータスに基づいて動的に判定。',
-    announcementList3: 'コード品質：全ボタン SFX 適合（data-sfx-handled）、requestAnimationFrame Blob URL クリーンアップ、loadState schema 検証、5 言語完全ローカライズ。'
+    announcementDescription: 'v1.12.0 新規キャラクターバトルカード生成：キャラクターのステータスとスキルツリーからゲーム風バトルカードを自動生成。HP/MP/ATK/DEF/SPD/CRT の戦闘数値を自動計算し、解放済スキルを表示。称号生成、PNG 出力、JSON 出力をサポート。',
+    announcementList1: 'CharacterBattleCardPage：新規バトルカード生成ページ。character-stats と skill-tree のデータを自動読み込み、6 項目の戦闘数値を計算。ゲーム風カードパネル、称号生成システム。',
+    announcementList2: '深い連携：skill-tree の履歴から職業タイプを自動推定；6 属性のプログレスバーリアルタイム表示；解放済スキルリストにタイプラベルとレベル；空の状態でも親切なガイド。',
+    announcementList3: 'コード品質：全ボタン SFX 適合（data-sfx-handled）、html-to-image PNG 出力、requestAnimationFrame Blob URL クリーンアップ、5 言語完全ローカライズ。'
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1133,6 +1148,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDialogueGeneratorDescription: 'オリジナルキャラクターの性格タグとシーンに基づいて、キャラクターに合ったセリフサンプルを生成。17 種類の性格、10 種類のシーン、感情の強さ調整、口癖の挿入に対応。お気に入り保存、履歴、JSON/TXT 出力をサポート。',
     pageSkillTreeTitle: 'スキルツリー設計',
     pageSkillTreeDescription: 'オリジナルキャラクターのスキル体系と成長ルートを設計。戦士/魔導士/暗殺者/サポート/カスタムの 5 種類のプリセットに対応。ノード式ビジュアルエディタ、ステータス連携の解放条件、レベル割り振り、履歴・お気に入り保存、JSON 出力をサポート。',
+    pageBattleCardTitle: 'バトルカード生成',
+    pageBattleCardDescription: 'キャラクターのステータスとスキルツリーから自動的にゲーム風バトルカードを生成。HP/MP/ATK/DEF/SPD/CRT の戦闘数値を自動計算し、解放済スキルを表示。称号生成、PNG 出力、JSON 出力に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1387,6 +1404,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureColorPalette: 'Color Palette',
     featureDialogueGenerator: 'Dialogue Gen',
     featureSkillTree: 'Skill Tree',
+    featureBattleCard: 'Battle Card',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1425,6 +1443,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionColorPalette: 'Color Palette',
     actionDialogueGenerator: 'Dialogue Gen',
     actionSkillTree: 'Skill Tree',
+    actionBattleCard: 'Battle Card',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1510,10 +1529,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.11.0 New Character Skill Tree Designer: design a complete skill system and growth path for your OC. Features 5 class presets, node-based visual editor, stat-linked unlock conditions, level allocation, favorites, history, and JSON export.',
-    announcementList1: 'CharacterSkillTreePage: brand-new skill tree designer. 5 presets (Warrior/Mage/Assassin/Support/Custom), 12-node skill tree templates, SVG connection visualization, stat-linked unlock conditions, level up/down allocation, favorites/history/JSON export.',
-    announcementList2: 'Linked design: auto-reads character-stats attributes to calculate available skill points. Supports real-time stat panel display. Skill unlock status is dynamically evaluated based on linked attributes.',
-    announcementList3: 'Code quality: all buttons SFX-compliant (data-sfx-handled), requestAnimationFrame Blob URL cleanup, loadState schema validation, full 5-language localization.'
+    announcementDescription: 'v1.12.0 New Character Battle Card Generator: auto-generate a game-style battle card from character stats and skill tree. Calculates HP/MP/ATK/DEF/SPD/CRT combat values, displays unlocked skills, supports title generation, PNG export and JSON export.',
+    announcementList1: 'CharacterBattleCardPage: brand-new battle card generator. Auto-reads character-stats and skill-tree data, calculates 6 combat values, visual battle card panel with game-style design, title generation system.',
+    announcementList2: 'Deep linkage: auto-infers class type from skill-tree history; 6 attribute progress bars in real-time; unlocked skill list with type tags and levels; friendly empty-state guidance.',
+    announcementList3: 'Code quality: all buttons SFX-compliant (data-sfx-handled), html-to-image PNG export, requestAnimationFrame Blob URL cleanup, full 5-language localization.'
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1561,6 +1580,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDialogueGeneratorDescription: 'Generate character-appropriate dialogue lines based on personality traits and scenes. Supports 17 personality types, 10 scenes, emotion intensity adjustment, catchphrase insertion, with favorites, history, and JSON/TXT export.',
     pageSkillTreeTitle: 'Skill Tree Designer',
     pageSkillTreeDescription: 'Design a complete skill system and growth path for your original character. Features 5 class presets (Warrior/Mage/Assassin/Support/Custom), node-based visual editor, stat-linked unlock conditions, level allocation, favorites, history, and JSON export.',
+    pageBattleCardTitle: 'Battle Card Generator',
+    pageBattleCardDescription: 'Auto-generate a game-style battle card from character stats and skill tree. Calculates HP/MP/ATK/DEF/SPD/CRT combat values, displays unlocked skills, supports title generation, PNG export and JSON export.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1815,6 +1836,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureColorPalette: 'Цветовая палитра',
     featureDialogueGenerator: 'Генератор реплик',
     featureSkillTree: 'Дерево навыков',
+    featureBattleCard: 'Боевая карта',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1853,6 +1875,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionColorPalette: 'Цветовая палитра',
     actionDialogueGenerator: 'Генератор реплик',
     actionSkillTree: 'Дерево навыков',
+    actionBattleCard: 'Боевая карта',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1938,10 +1961,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.11.0 Новый дизайнер дерева навыков: создайте полную систему навыков и путь развития для вашего OC. 5 классовых шаблонов, визуальный редактор на основе узлов, условия разблокировки по характеристикам, распределение уровней, избранное, история, экспорт JSON.',
-    announcementList1: 'CharacterSkillTreePage: полностью новый дизайнер дерева навыков. 5 шаблонов (воин/маг/ассасин/поддержка/свой), 12-узловые шаблоны, SVG визуализация связей, условия разблокировки по характеристикам, распределение уровней, избранное/история/экспорт JSON.',
-    announcementList2: 'Связанный дизайн: автоматическое чтение характеристик character-stats для расчёта доступных очков навыков. Поддерживает панель статов в реальном времени. Статус разблокировки навыков определяется динамически на основе связанных характеристик.',
-    announcementList3: 'Качество кода: все кнопки совместимы с SFX (data-sfx-handled), очистка Blob URL через requestAnimationFrame, schema-валидация loadState, полная локализация на 5 языках.'
+    announcementDescription: 'v1.12.0 Новый генератор боевой карты: автоматическая генерация игровой боевой карты из характеристик и дерева навыков персонажа. Рассчитывает боевые значения HP/MP/ATK/DEF/SPD/CRT, отображает разблокированные навыки, поддерживает генерацию титула, экспорт PNG и JSON.',
+    announcementList1: 'CharacterBattleCardPage: полностью новый генератор боевой карты. Автоматическое чтение данных character-stats и skill-tree, расчёт 6 боевых значений, визуальная панель боевой карты в игровом стиле, система генерации титулов.',
+    announcementList2: 'Глубокая связь: автоматическое определение типа класса из истории skill-tree; 6 прогресс-баров атрибутов в реальном времени; список разблокированных навыков с тегами типов и уровнями; дружелюбное руководство при пустом состоянии.',
+    announcementList3: 'Качество кода: все кнопки совместимы с SFX (data-sfx-handled), экспорт PNG через html-to-image, очистка Blob URL через requestAnimationFrame, полная локализация на 5 языках.'
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1989,6 +2012,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageDialogueGeneratorDescription: 'Генерируйте реплики, соответствующие характеру оригинального персонажа, на основе черт характера и сцен. Поддержка 17 типов личности, 10 сцен, регулировка эмоциональной интенсивности, вставка фраз. Избранное, история, экспорт JSON/TXT.',
     pageSkillTreeTitle: 'Дизайнер дерева навыков',
     pageSkillTreeDescription: 'Создайте полную систему навыков и путь развития для вашего персонажа. 5 классовых шаблонов (воин/маг/ассасин/поддержка/свой), визуальный редактор на основе узлов, условия разблокировки по характеристикам, распределение уровней, избранное, история, экспорт JSON.',
+    pageBattleCardTitle: 'Генератор боевой карты',
+    pageBattleCardDescription: 'Автоматическая генерация игровой боевой карты из характеристик и дерева навыков персонажа. Рассчитывает боевые значения HP/MP/ATK/DEF/SPD/CRT, отображает разблокированные навыки, поддерживает генерацию титула, экспорт PNG и JSON.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2652,6 +2677,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureColorPalette: '캐릭터 컬러 팔레트',
     featureDialogueGenerator: '캐릭터 대사 생성기',
     featureSkillTree: '캐릭터 스킬 트리',
+    featureBattleCard: '캐릭터 배틀 카드',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
@@ -2661,6 +2687,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     actionColorPalette: '캐릭터 컬러 팔레트',
     actionDialogueGenerator: '캐릭터 대사 생성기',
     actionSkillTree: '캐릭터 스킬 트리',
+    actionBattleCard: '캐릭터 배틀 카드',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2695,7 +2722,9 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageDialogueGeneratorDescription: '성격 태그와 장면을 기반으로 OC 전용 대사를 생성합니다. 17가지 성격, 10가지 장면, 감정 강도 조절, 입버릇 삽입을 지원하며 즐겨찾기, 기록, JSON/TXT 납품하기가 가능합니다.',
     pageSkillTreeTitle: '캐릭터 스킬 트리 디자이너',
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
-    announcementDescription: 'v1.11.0 신규 캐릭터 스킬 트리 디자이너: OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계. 5가지 프리셋 직업 템플릿, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
+    pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
+    pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
+    announcementDescription: 'v1.12.0 신규 캐릭터 배틀 카드 생성기: 캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드 자동 생성. PNG/JSON 납품하기, 칭호 생성, 5언어 완전 로컬라이제이션 지원.',
     announcementList1: 'CharacterSkillTreePage: 신규 스킬 트리 디자이너. 5가지 프리셋(전사/마법사/암살자/서포터/커스텀), 12노드 스킬 트리 템플릿, SVG 연결선 비주얼, 스탯 연동 해금 조건, 레벨 상하 배분, 즐겨찾기/기록/JSON 납품하기.',
     announcementList2: '연동 설계: character-stats 속성을 자동 읽어 사용 가능 스킬 포인트 계산. 실시간 속성 패널 표시 지원. 스킬 해금 상태는 연동 속성에 기반해 동적으로 판정.',
     announcementList3: '코드 품질: 전체 버튼 SFX 적합(data-sfx-handled), requestAnimationFrame Blob URL 정리, loadState schema 검증, 5언어 완전 로컬라이제이션.'
@@ -2889,6 +2918,21 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.0',
+    date: '2026-05-18',
+    title: '1.12.0 角色战斗卡生成器',
+    summary:
+      '新增 Character Battle Card Generator（角色战斗卡生成器）工具页面，基于角色属性与技能树自动生成游戏风格战斗卡；自动计算 HP/MP/ATK/DEF/SPD/CRT 战斗数值，显示已解锁技能，支持称号生成、PNG 导出与 JSON 导出。',
+    details: [
+      '新增角色战斗卡生成器：自动读取 character-stats 和 skill-tree 的 localStorage 数据，计算 6 项战斗数值（HP/MP/ATK/DEF/SPD/CRT）。',
+      '可视化战斗卡面板：游戏风格卡片设计，角色信息区（头像占位/名称/称号/等级/职业）、6 属性进度条、已解锁技能列表（带类型标签与等级）。',
+      '深度联动：自动读取 skill-tree 历史记录推断职业类型；支持手动刷新关联数据；空状态友好提示。',
+      '导出功能：基于 html-to-image 导出 2 倍分辨率 PNG；JSON 导出与复制；requestAnimationFrame DOM 清理。',
+      '完整 wiring：新增 types.ts FeatureScreen、App.tsx 路由/ActionIcon/workflow entry/StartModal tile/5 语言翻译、workflowPages.tsx barrel export。',
+      '代码质量：全部按钮 SFX 合规（data-sfx-handled），5 语言完整本地化，补全 v1.11.0 遗漏的中文 action 翻译。',
+    ],
+  },
   {
     version: '1.11.0',
     date: '2026-05-18',
@@ -4765,6 +4809,12 @@ function App() {
           pageTitle={messages.pageSkillTreeTitle}
           pageDescription={messages.pageSkillTreeDescription}
         />
+      ) : screen === 'battle-card' ? (
+        <CharacterBattleCardPage
+          {...sharedPageProps}
+          pageTitle={messages.pageBattleCardTitle}
+          pageDescription={messages.pageBattleCardDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4985,6 +5035,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('skill-tree')}>
                 <ActionIcon kind="skill-tree" />
                 <span>{messages.featureSkillTree}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('battle-card')}>
+                <ActionIcon kind="battle-card" />
+                <span>{messages.featureBattleCard}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}">
                 <ActionIcon kind="docs" />
@@ -6438,7 +6492,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'skill-tree' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'skill-tree' | 'battle-card' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6625,6 +6679,16 @@ function ActionIcon({
         <path d="M24 18l4 4" />
       </>
     ),
+    'battle-card': (
+      <>
+        <rect x="8" y="6" width="24" height="32" rx="3" />
+        <path d="M12 12h16" />
+        <path d="M12 16h10" />
+        <rect x="12" y="22" width="6" height="6" rx="1" />
+        <rect x="22" y="22" width="6" height="6" rx="1" />
+        <path d="M12 32h16" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6765,6 +6829,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('skill-tree')}>
             <ActionIcon kind="skill-tree" />
             <strong>{messages.actionSkillTree}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('battle-card')}>
+            <ActionIcon kind="battle-card" />
+            <strong>{messages.actionBattleCard}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />

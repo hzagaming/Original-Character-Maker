@@ -10119,3 +10119,4 @@ export { default as CharacterStatsDesignerPage } from './CharacterStatsDesignerP
 export { default as ColorPaletteDesignerPage } from './ColorPaletteDesignerPage';
 export { default as DialogueGeneratorPage } from './DialogueGeneratorPage';
 export { default as CharacterSkillTreePage } from './CharacterSkillTreePage';
+export { default as CharacterBattleCardPage } from './CharacterBattleCardPage';
