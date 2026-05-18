@@ -61,7 +61,7 @@ export type FontPreset =
 export type InterfaceMode = 'builtin' | 'custom';
 export type ApiPreset = 'plato' | 'custom1' | 'custom2' | 'custom3';
 
-export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'character-gif' | 'index-tts' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'docs';
+export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'character-gif' | 'index-tts' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'skill-tree' | 'docs';
 export type SettingsTab = 'style' | 'language' | 'audio' | 'animation' | 'performance' | 'api' | 'llm' | 'shortcuts' | 'others' | 'announcement' | 'about';
 export type StartModalStep = 'root' | null;
 

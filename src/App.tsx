@@ -22,6 +22,7 @@ import InspirationGeneratorPage from './InspirationGeneratorPage';
 import CharacterStatsDesignerPage from './CharacterStatsDesignerPage';
 import ColorPaletteDesignerPage from './ColorPaletteDesignerPage';
 import DialogueGeneratorPage from './DialogueGeneratorPage';
+import CharacterSkillTreePage from './CharacterSkillTreePage';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -40,7 +41,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.10.2';
+const VERSION = '1.11.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -89,6 +90,7 @@ type Messages = {
   featureCharacterStats: string;
   featureColorPalette: string;
   featureDialogueGenerator: string;
+  featureSkillTree: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -126,6 +128,7 @@ type Messages = {
   actionCharacterStats: string;
   actionColorPalette: string;
   actionDialogueGenerator: string;
+  actionSkillTree: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -261,6 +264,8 @@ type Messages = {
   pageColorPaletteDescription: string;
   pageDialogueGeneratorTitle: string;
   pageDialogueGeneratorDescription: string;
+  pageSkillTreeTitle: string;
+  pageSkillTreeDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -527,6 +532,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterStats: '角色数值设计器',
     featureColorPalette: '角色配色设计器',
     featureDialogueGenerator: '角色台词生成器',
+    featureSkillTree: '角色技能树设计器',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -646,10 +652,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.10.1 深度审计与稳定性修复：对三个新页面及音频引擎进行全面审计，修复 20+ 处 crash、内存泄漏和逻辑错误。',
-    announcementList1: 'DialogueGeneratorPage：修复 loadState null crash、非法 trait 访问 crash、catchphrase null trim crash、clipboard 未定义 crash、lines undefined crash；解耦模板与口头禅随机数；修复 $ 转义漏洞；loadSet schema 校验。',
-    announcementList2: 'ColorPaletteDesignerPage：修复 saveToHistory TDZ 时序错误；修复图片 ObjectURL 内存泄漏；getImageData 跨域异常处理；loadState 数组类型校验增强。',
-    announcementList3: 'CharacterStatsDesignerPage + audioEngine：修复 regenerateAll stale closure、Canvas ResizeObserver 重绘、rgba 颜色非法替换、Canvas 零尺寸保护；BGM 后台漂移修复、applyVolumes pop 消除、自定义音频 Blob URL 泄漏修复。'
+    announcementDescription: 'v1.11.0 新增角色技能树设计器：为 OC 设计完整的技能体系与成长路线，支持 5 种预设职业模板、节点式可视化编辑、属性解锁条件联动、等级分配、历史收藏与 JSON 导出。',
+    announcementList1: 'CharacterSkillTreePage：全新角色技能树设计器。5 种预设（战士/法师/刺客/辅助/自定义），12 节点技能树模板，SVG 连线可视化，属性联动解锁条件，等级升降分配，历史/收藏/JSON 导出。',
+    announcementList2: '联动设计：自动读取 character-stats 属性计算可用技能点，支持实时属性面板显示，技能解锁状态根据关联属性动态判定。',
+    announcementList3: '代码质量：全部按钮 SFX 合规（data-sfx-handled），requestAnimationFrame Blob URL 清理，loadState schema 校验，5 语言完整本地化。'
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -697,6 +703,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageColorPaletteDescription: '为原创角色设计专属配色方案，支持主色、辅色、点缀色与文字色的自由搭配。提供 8 种预设、5 种色彩和谐规则、图片取色、WCAG 对比度检查与 JSON/CSS 导出。',
     pageDialogueGeneratorTitle: '角色台词生成器',
     pageDialogueGeneratorDescription: '为原创角色基于性格标签和场景生成符合人设的台词样本。支持 17 种性格、10 种场景、情感强度调节、口头禅插入，可收藏、历史回溯与 JSON/TXT 导出。',
+    pageSkillTreeTitle: '角色技能树设计器',
+    pageSkillTreeDescription: '为原创角色设计完整的技能体系与成长路线。支持 5 种预设职业模板（战士/法师/刺客/辅助/自定义），节点式可视化编辑，属性解锁条件联动，等级分配，历史收藏与 JSON 导出。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -950,6 +958,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterStats: 'キャラステータス設計',
     featureColorPalette: 'カラーパレット設計',
     featureDialogueGenerator: 'セリフ生成器',
+    featureSkillTree: 'スキルツリー設計',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -987,6 +996,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterStats: 'キャラステータス設計',
     actionColorPalette: 'カラーパレット設計',
     actionDialogueGenerator: 'セリフ生成器',
+    actionSkillTree: 'スキルツリー設計',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1072,10 +1082,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.10.1 深度監査と安定性修正：3 つの新規ページとオーディオエンジンを全面監査し、20 件以上のクラッシュ、メモリリーク、論理エラーを修正。',
-    announcementList1: 'セリフ生成器：loadState の null クラッシュ、無効な trait アクセス クラッシュ、catchphrase の null trim クラッシュ、clipboard 未定義 クラッシュ、lines undefined クラッシュを修正。テンプレート選択と口癖の乱数を分離。$ エスケープ脆弱性を修正。loadSet に schema 検証を追加。',
-    announcementList2: 'カラーパレット設計：saveToHistory の TDZ 順序エラーを修正。画像 ObjectURL のメモリリークを修正。getImageData にクロスオリジン例外処理を追加。loadState の配列型検証を強化。',
-    announcementList3: 'キャラクタースタット + オーディオエンジン：regenerateAll の stale closure を修正。Canvas ResizeObserver 再描画を追加。rgba 色の不正置換を修正。Canvas ゼロサイズ保護を追加。BGM バックグラウンドドリフトを修正。applyVolumes の pop 音を除去。カスタム音声 Blob URL リークを修正。'
+    announcementDescription: 'v1.11.0 新規キャラクタースキルツリー設計：OC のスキル体系と成長ルートを設計。5 種類のプリセットクラステンプレート、ノード式ビジュアルエディタ、ステータス連携解放条件、レベル割り振り、履歴・お気に入り・JSON 出力をサポート。',
+    announcementList1: 'CharacterSkillTreePage：新規スキルツリー設計ページ。5 種類のプリセット（戦士/魔導士/暗殺者/サポート/カスタム）、12 ノードスキルツリーテンプレート、SVG 連結線ビジュアル、ステータス連携解放条件、レベル上下割り振り、履歴/お気に入り/JSON 出力。',
+    announcementList2: '連携設計：character-stats のステータスを自動読み込みして使用可能スキルポイントを計算。リアルタイムステータスパネル表示をサポート。スキル解放状態は関連ステータスに基づいて動的に判定。',
+    announcementList3: 'コード品質：全ボタン SFX 適合（data-sfx-handled）、requestAnimationFrame Blob URL クリーンアップ、loadState schema 検証、5 言語完全ローカライズ。'
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1121,6 +1131,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageColorPaletteDescription: 'オリジナルキャラクターの専用配色を設計。メイン、サブ、アクセント、テキストの自由な組み合わせに対応。8 種類のプリセット、5 種類のカラーハーモニー、画像からの色抽出、WCAG コントラストチェック、JSON/CSS 出力をサポート。',
     pageDialogueGeneratorTitle: 'セリフ生成器',
     pageDialogueGeneratorDescription: 'オリジナルキャラクターの性格タグとシーンに基づいて、キャラクターに合ったセリフサンプルを生成。17 種類の性格、10 種類のシーン、感情の強さ調整、口癖の挿入に対応。お気に入り保存、履歴、JSON/TXT 出力をサポート。',
+    pageSkillTreeTitle: 'スキルツリー設計',
+    pageSkillTreeDescription: 'オリジナルキャラクターのスキル体系と成長ルートを設計。戦士/魔導士/暗殺者/サポート/カスタムの 5 種類のプリセットに対応。ノード式ビジュアルエディタ、ステータス連携の解放条件、レベル割り振り、履歴・お気に入り保存、JSON 出力をサポート。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1374,6 +1386,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterStats: 'Stat Designer',
     featureColorPalette: 'Color Palette',
     featureDialogueGenerator: 'Dialogue Gen',
+    featureSkillTree: 'Skill Tree',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1411,6 +1424,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterStats: 'Stat Designer',
     actionColorPalette: 'Color Palette',
     actionDialogueGenerator: 'Dialogue Gen',
+    actionSkillTree: 'Skill Tree',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1496,10 +1510,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.10.1 Deep audit and stability fixes: comprehensive audit of three new pages and the audio engine, fixing 20+ crashes, memory leaks, and logic errors.',
-    announcementList1: 'DialogueGeneratorPage: fixed loadState null crash, invalid trait access crash, catchphrase null trim crash, clipboard undefined crash, lines undefined crash; decoupled template selection and catchphrase randomness; fixed \$ escape vulnerability; added loadSet schema validation.',
-    announcementList2: 'ColorPaletteDesignerPage: fixed saveToHistory TDZ ordering error; fixed image ObjectURL memory leak; added getImageData cross-origin exception handling; strengthened loadState array type validation.',
-    announcementList3: 'CharacterStatsDesignerPage + audioEngine: fixed regenerateAll stale closure; added Canvas ResizeObserver redraw; fixed rgba color illegal replacement; added Canvas zero-size protection; fixed BGM background drift; eliminated applyVolumes pop noise; fixed custom audio Blob URL leak.'
+    announcementDescription: 'v1.11.0 New Character Skill Tree Designer: design a complete skill system and growth path for your OC. Features 5 class presets, node-based visual editor, stat-linked unlock conditions, level allocation, favorites, history, and JSON export.',
+    announcementList1: 'CharacterSkillTreePage: brand-new skill tree designer. 5 presets (Warrior/Mage/Assassin/Support/Custom), 12-node skill tree templates, SVG connection visualization, stat-linked unlock conditions, level up/down allocation, favorites/history/JSON export.',
+    announcementList2: 'Linked design: auto-reads character-stats attributes to calculate available skill points. Supports real-time stat panel display. Skill unlock status is dynamically evaluated based on linked attributes.',
+    announcementList3: 'Code quality: all buttons SFX-compliant (data-sfx-handled), requestAnimationFrame Blob URL cleanup, loadState schema validation, full 5-language localization.'
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1545,6 +1559,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageColorPaletteDescription: 'Design a custom color palette for your original character. Supports primary, secondary, accent, and text color mixing with 8 presets, 5 harmony rules, image color extraction, WCAG contrast checking, and JSON/CSS export.',
     pageDialogueGeneratorTitle: 'Dialogue Generator',
     pageDialogueGeneratorDescription: 'Generate character-appropriate dialogue lines based on personality traits and scenes. Supports 17 personality types, 10 scenes, emotion intensity adjustment, catchphrase insertion, with favorites, history, and JSON/TXT export.',
+    pageSkillTreeTitle: 'Skill Tree Designer',
+    pageSkillTreeDescription: 'Design a complete skill system and growth path for your original character. Features 5 class presets (Warrior/Mage/Assassin/Support/Custom), node-based visual editor, stat-linked unlock conditions, level allocation, favorites, history, and JSON export.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1798,6 +1814,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterStats: 'Дизайнер характеристик',
     featureColorPalette: 'Цветовая палитра',
     featureDialogueGenerator: 'Генератор реплик',
+    featureSkillTree: 'Дерево навыков',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1835,6 +1852,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterStats: 'Дизайнер характеристик',
     actionColorPalette: 'Цветовая палитра',
     actionDialogueGenerator: 'Генератор реплик',
+    actionSkillTree: 'Дерево навыков',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1920,10 +1938,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.10.1 Глубокий аудит и исправления стабильности: комплексный аудит трёх новых страниц и аудиодвижка, исправление 20+ сбоев, утечек памяти и логических ошибок.',
-    announcementList1: 'Генератор реплик: исправлены сбои loadState null, доступ к неверному trait, catchphrase null trim, clipboard undefined, lines undefined; разделены случайные числа для выбора шаблона и фраз; исправлена уязвимость экранирования \$; добавлена schema-валидация loadSet.',
-    announcementList2: 'Дизайнер палитры: исправлена ошибка порядка TDZ в saveToHistory; исправлена утечка ObjectURL изображений; добавлена обработка исключений getImageData; усилена проверка типа массива в loadState.',
-    announcementList3: 'Дизайнер статов + аудиодвижок: исправлен stale closure в regenerateAll; добавлена перерисовка Canvas ResizeObserver; исправлена незаконная замена rgba; добавлена защита от нулевого размера Canvas; исправлен дрейф BGM в фоне; устранён щелчок applyVolumes; исправлена утечка Blob URL пользовательского аудио.'
+    announcementDescription: 'v1.11.0 Новый дизайнер дерева навыков: создайте полную систему навыков и путь развития для вашего OC. 5 классовых шаблонов, визуальный редактор на основе узлов, условия разблокировки по характеристикам, распределение уровней, избранное, история, экспорт JSON.',
+    announcementList1: 'CharacterSkillTreePage: полностью новый дизайнер дерева навыков. 5 шаблонов (воин/маг/ассасин/поддержка/свой), 12-узловые шаблоны, SVG визуализация связей, условия разблокировки по характеристикам, распределение уровней, избранное/история/экспорт JSON.',
+    announcementList2: 'Связанный дизайн: автоматическое чтение характеристик character-stats для расчёта доступных очков навыков. Поддерживает панель статов в реальном времени. Статус разблокировки навыков определяется динамически на основе связанных характеристик.',
+    announcementList3: 'Качество кода: все кнопки совместимы с SFX (data-sfx-handled), очистка Blob URL через requestAnimationFrame, schema-валидация loadState, полная локализация на 5 языках.'
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1969,6 +1987,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageColorPaletteDescription: 'Создавайте уникальную цветовую палитру для оригинального персонажа. Поддержка основного, дополнительного, акцентного и текстового цветов. 8 шаблонов, 5 правил гармонии, извлечение цвета из изображений, проверка контраста WCAG, экспорт JSON/CSS.',
     pageDialogueGeneratorTitle: 'Генератор реплик',
     pageDialogueGeneratorDescription: 'Генерируйте реплики, соответствующие характеру оригинального персонажа, на основе черт характера и сцен. Поддержка 17 типов личности, 10 сцен, регулировка эмоциональной интенсивности, вставка фраз. Избранное, история, экспорт JSON/TXT.',
+    pageSkillTreeTitle: 'Дизайнер дерева навыков',
+    pageSkillTreeDescription: 'Создайте полную систему навыков и путь развития для вашего персонажа. 5 классовых шаблонов (воин/маг/ассасин/поддержка/свой), визуальный редактор на основе узлов, условия разблокировки по характеристикам, распределение уровней, избранное, история, экспорт JSON.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2631,6 +2651,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureCharacterStats: '캐릭터 스탯 디자이너',
     featureColorPalette: '캐릭터 컬러 팔레트',
     featureDialogueGenerator: '캐릭터 대사 생성기',
+    featureSkillTree: '캐릭터 스킬 트리',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
@@ -2639,6 +2660,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     actionCharacterStats: '캐릭터 스탯 디자이너',
     actionColorPalette: '캐릭터 컬러 팔레트',
     actionDialogueGenerator: '캐릭터 대사 생성기',
+    actionSkillTree: '캐릭터 스킬 트리',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2671,10 +2693,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageColorPaletteDescription: 'OC 캐릭터 전용 컬러 팔레트를 설계합니다. 주색, 보조색, 강조색, 텍스트색 자유 조합. 8가지 프리셋, 5가지 색 조화 규칙, 이미지 색상 추출, WCAG 대비 체크, JSON/CSS 납품하기 지원.',
     pageDialogueGeneratorTitle: '캐릭터 대사 생성기',
     pageDialogueGeneratorDescription: '성격 태그와 장면을 기반으로 OC 전용 대사를 생성합니다. 17가지 성격, 10가지 장면, 감정 강도 조절, 입버릇 삽입을 지원하며 즐겨찾기, 기록, JSON/TXT 납품하기가 가능합니다.',
-    announcementDescription: 'v1.10.0 신규 캐릭터 대사 생성기: 성격 태그와 장면을 기반으로 OC 전용 대사 생성. 번역 누락, 기록 기능, SFX 적합성을 전면 감사 수정.',
-    announcementList1: '신규 캐릭터 대사 생성기: 17가지 성격 태그 × 10가지 장면 조합, 감정 강도 1-10 슬라이더, 입버릇 자동 삽입, 대사 5개 일괄 생성, JSON/TXT 납품하기.',
-    announcementList2: '템플릿 엔진: 500개 이상의 중국어 대사 템플릿. 츤데레/쿨/열혈/부끄러움/독설/신비로움 등 13가지 성격 포함. 성격당 장면당 2-3개 템플릿. 감정 강도 기반 구두점 교체와 입버릇 보간 지원.',
-    announcementList3: '버그 수정: ColorPaletteDesignerPage 기록 자동 저장(applyPreset/harmony/randomize/extract 모두 트리거), 러시아어/한국어 feature 번역 보완, App.tsx 가져오기 상태색 하드코딩 수정을 CSS 변수화.'
+    pageSkillTreeTitle: '캐릭터 스킬 트리 디자이너',
+    pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
+    announcementDescription: 'v1.11.0 신규 캐릭터 스킬 트리 디자이너: OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계. 5가지 프리셋 직업 템플릿, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
+    announcementList1: 'CharacterSkillTreePage: 신규 스킬 트리 디자이너. 5가지 프리셋(전사/마법사/암살자/서포터/커스텀), 12노드 스킬 트리 템플릿, SVG 연결선 비주얼, 스탯 연동 해금 조건, 레벨 상하 배분, 즐겨찾기/기록/JSON 납품하기.',
+    announcementList2: '연동 설계: character-stats 속성을 자동 읽어 사용 가능 스킬 포인트 계산. 실시간 속성 패널 표시 지원. 스킬 해금 상태는 연동 속성에 기반해 동적으로 판정.',
+    announcementList3: '코드 품질: 전체 버튼 SFX 적합(data-sfx-handled), requestAnimationFrame Blob URL 정리, loadState schema 검증, 5언어 완전 로컬라이제이션.'
   },
   fr: {
     ...translations.en,
@@ -2865,6 +2889,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.11.0',
+    date: '2026-05-18',
+    title: '1.11.0 角色技能树设计器',
+    summary:
+      '新增 Character Skill Tree Designer（角色技能树设计器）工具页面，为 OC 设计完整的技能体系与成长路线；支持 5 种预设职业模板、节点式可视化编辑、属性解锁条件联动、等级分配、历史收藏与 JSON 导出。',
+    details: [
+      '新增角色技能树设计器：5 种预设职业模板（战士/法师/刺客/辅助/自定义），每种含 12 节点技能树框架；节点式可视化编辑器，SVG 贝塞尔曲线连线；技能类型分主动/被动/终极/特质/特殊 5 种，5 层级进阶体系。',
+      '属性联动解锁：自动读取 character-stats 中的角色属性，计算可用技能点（总属性值/3）；每个技能可设定属性需求与前置技能；解锁状态根据关联属性实时动态判定。',
+      '完整 wiring：新增 types.ts FeatureScreen、App.tsx 路由/ActionIcon/workflow entry/StartModal tile/5 语言翻译、workflowPages.tsx barrel export。',
+      '代码质量：全部按钮 SFX 合规（data-sfx-handled），requestAnimationFrame Blob URL 清理避免内存泄漏，loadState schema 校验，5 语言完整本地化。',
+    ],
+  },
   {
     version: '1.10.2',
     date: '2026-05-18',
@@ -4722,6 +4759,12 @@ function App() {
           pageTitle={messages.pageDialogueGeneratorTitle}
           pageDescription={messages.pageDialogueGeneratorDescription}
         />
+      ) : screen === 'skill-tree' ? (
+        <CharacterSkillTreePage
+          {...sharedPageProps}
+          pageTitle={messages.pageSkillTreeTitle}
+          pageDescription={messages.pageSkillTreeDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4939,7 +4982,11 @@ function HomeScreen({
                 <ActionIcon kind="dialogue-generator" />
                 <span>{messages.featureDialogueGenerator}</span>
               </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('skill-tree')}>
+                <ActionIcon kind="skill-tree" />
+                <span>{messages.featureSkillTree}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}">
                 <ActionIcon kind="docs" />
                 <span>{messages.featureDocs}</span>
               </button>
@@ -6391,7 +6438,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'skill-tree' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6568,6 +6615,16 @@ function ActionIcon({
         <path d="M14 26l6-2 6 2" />
       </>
     ),
+    'skill-tree': (
+      <>
+        <circle cx="20" cy="8" r="4" />
+        <path d="M20 12v8" />
+        <circle cx="10" cy="24" r="4" />
+        <path d="M16 18l-4 4" />
+        <circle cx="30" cy="24" r="4" />
+        <path d="M24 18l4 4" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6704,6 +6761,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('dialogue-generator')}>
             <ActionIcon kind="dialogue-generator" />
             <strong>{messages.actionDialogueGenerator}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('skill-tree')}>
+            <ActionIcon kind="skill-tree" />
+            <strong>{messages.actionSkillTree}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />

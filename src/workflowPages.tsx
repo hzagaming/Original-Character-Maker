@@ -10118,3 +10118,4 @@ export { default as InspirationGeneratorPage } from './InspirationGeneratorPage'
 export { default as CharacterStatsDesignerPage } from './CharacterStatsDesignerPage';
 export { default as ColorPaletteDesignerPage } from './ColorPaletteDesignerPage';
 export { default as DialogueGeneratorPage } from './DialogueGeneratorPage';
+export { default as CharacterSkillTreePage } from './CharacterSkillTreePage';
