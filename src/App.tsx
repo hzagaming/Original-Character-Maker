@@ -19,6 +19,7 @@ import type {
 import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
 import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage, CharacterCardPage, CharacterChroniclePage, WorldEncyclopediaPage } from './workflowPages';
 import InspirationGeneratorPage from './InspirationGeneratorPage';
+import CharacterStatsPage from './CharacterStatsPage';
 import DocsPage from './DocsPage';
 import {
   defaultAudioSettings,
@@ -37,7 +38,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.7';
+const VERSION = '1.8.8';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -83,6 +84,7 @@ type Messages = {
   featureCharacterChronicle: string;
   featureWorldEncyclopedia: string;
   featureInspirationGenerator: string;
+  featureCharacterStats: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -117,6 +119,7 @@ type Messages = {
   actionCharacterChronicle: string;
   actionWorldEncyclopedia: string;
   actionInspirationGenerator: string;
+  actionCharacterStats: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -246,6 +249,8 @@ type Messages = {
   pageWorldEncyclopediaDescription: string;
   pageInspirationGeneratorTitle: string;
   pageInspirationGeneratorDescription: string;
+  pageCharacterStatsTitle: string;
+  pageCharacterStatsDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -509,6 +514,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterChronicle: '角色编年史',
     featureWorldEncyclopedia: '世界设定集',
     featureInspirationGenerator: '角色灵感生成器',
+    featureCharacterStats: '角色数值设计器',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -628,10 +634,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.8.7 修复 v1.8.6 关键回归：56+ 按钮 data-sfx-handled 错位修复、音频初始化恢复、useRef 补回、reduceAnimations 支持、CSS 变量补全。',
-    announcementList1: 'Critical 修复：React 18 Strict Mode 下 isMountedRef 永久失效（开发环境功能静默不可用）；并发导入 Race Condition 导致 AudioContext 泄漏和状态覆盖。',
-    announcementList2: '内存与 SFX：AudioContext 导入/导出流程添加上下文追踪 ref，组件卸载时自动关闭；所有下载锚点补全 append/click/remove 流程；为全部 70+ 交互元素添加 data-sfx-handled，彻底消除 double-play。',
-    announcementList3: '无障碍与数据安全：导入/转换进度条添加 role="progressbar" + ARIA 属性；toggle chip 添加 aria-pressed；normalizeBuffer 添加 NaN/Infinity 样本过滤；波形绘制添加 duration <= 0 边界保护；全局音效系统升级 label 选择器和 back-link 统一。版本同步为 1.8.4。',
+    announcementDescription: 'v1.8.8 新增角色数值设计器：可视化雷达图设计 OC 多维度属性；修复 App.tsx 两处 JSX 语法错误；CharacterStatsDesignerPage 全面主题兼容与本地化。',
+    announcementList1: '新增角色数值设计器：支持标准六维、D&D 经典、JRPG、社交属性、创作能力 5 种预设模板，实时雷达图预览，属性锁定，历史记录与收藏，JSON 导出。',
+    announcementList2: 'UI/UX 修复：修复 App.tsx workflow entry 和 StartModal 中 docs 按钮的 JSX 语法错误；CharacterStatsDesignerPage canvas 雷达图改为动态读取 CSS 变量，全面支持 light/deep/paper2gal 主题切换。',
+    announcementList3: '本地化与代码质量：统一组件命名 CharacterStatsDesignerPage；补全 5 语言 radar chart 标题、日语/韩语 setPrefix 翻译；所有交互按钮 SFX 合规性验证通过；exportJson timeout 纳入统一清理。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -673,6 +679,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageWorldEncyclopediaDescription: '构建结构化的世界观百科，创建地点、组织、种族、事件、物品、概念等条目，支持标签、关联角色、搜索筛选和 JSON 导出。',
     pageInspirationGeneratorTitle: '角色灵感生成器',
     pageInspirationGeneratorDescription: '一键生成随机的角色灵感组合：性格、外貌、服装、背景、口头禅、缺陷、秘密与爱好。支持锁定条目、收藏组合、历史回溯和 JSON 导出。',
+    pageCharacterStatsTitle: '角色数值设计器',
+    pageCharacterStatsDescription: '为原创角色设计可视化数值面板，支持力量、敏捷、智力、魅力等多维度属性。带雷达图实时预览、预设模板、锁定属性、收藏方案与 JSON 导出。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -923,6 +931,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterChronicle: 'キャラ年表',
     featureWorldEncyclopedia: '世界観百科',
     featureInspirationGenerator: 'キャラ灵感生成器',
+    featureCharacterStats: 'キャラステータス設計',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -957,6 +966,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterChronicle: 'キャラ年表',
     actionWorldEncyclopedia: '世界観百科',
     actionInspirationGenerator: 'キャラ灵感生成器',
+    actionCharacterStats: 'キャラステータス設計',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1042,10 +1052,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.8.7 v1.8.6 の回帰修正：56+ ボタンの data-sfx-handled 配置ミス修正、オーディオ初期化復旧、useRef 補完、reduceAnimations 対応、CSS 変数補完。',
-    announcementList1: 'Critical 修正：React 18 Strict Mode で isMountedRef が永久に無効化される問題（開発環境で機能が暗黙的に利用不可）；並行インポート Race Condition による AudioContext リークと状態の上書き。',
-    announcementList2: 'メモリと SFX：AudioContext インポート/エクスポートフローにコンテキスト追跡 ref を追加、コンポーネントアンマウント時に自動クローズ；すべてのダウンロードアンカーに append/click/remove フローを補完；70+ のインタラクティブ要素に data-sfx-handled を追加し double-play を完全に排除。',
-    announcementList3: 'アクセシビリティとデータ安全性：インポート/変換プログレスバーに role="progressbar" + ARIA 属性を追加；toggle chip に aria-pressed を追加；normalizeBuffer に NaN/Infinity サンプルフィルタを追加；波形描画に duration <= 0 境界保護を追加；グローバル SFX システムを label セレクターと back-link 統一でアップグレード。バージョンを 1.8.4 に同期。',
+    announcementDescription: 'v1.8.8 新規キャラステータス設計ツール：レーダーチャートで可視化された OC 多属性設計；App.tsx の JSX 構文エラー 2 件を修正；CharacterStatsDesignerPage のテーマ互換とローカライズを全面的に改善。',
+    announcementList1: '新規キャラステータス設計ツール：標準6次元、D&D クラシック、JRPG、社交属性、創作能力の 5 種類プリセットに対応。リアルタイムレーダーチャートプレビュー、属性ロック、履歴・お気に入り保存、JSON 出力をサポート。',
+    announcementList2: 'UI/UX 修正：App.tsx の workflow entry と StartModal の docs ボタンにあった JSX 構文エラーを修正；CharacterStatsDesignerPage の canvas レーダーチャートが CSS 変数を動的に読み取るよう変更し、light/deep/paper2gal テーマ切り替えに完全対応。',
+    announcementList3: 'ローカライズとコード品質：コンポーネント名を CharacterStatsDesignerPage に統一；5 言語のレーダーチャートタイトル、日本語・韓国語の setPrefix 翻訳を補完；すべてのインタラクティブボタンの SFX 適合性を検証済み；exportJson の timeout を統一クリーンアップに含める。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1085,6 +1095,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageWorldEncyclopediaDescription: '構造化された世界観百科を構築。場所、組織、種族、イベント、アイテム、概念などの項目を作成。タグ、関連キャラ、検索フィルタ、JSON 出力に対応。',
     pageInspirationGeneratorTitle: 'キャラ灵感生成器',
     pageInspirationGeneratorDescription: 'ランダムなキャラ灵感コンボを一括生成：性格、外見、服装、背景、口癖、欠点、秘密、趣味。ロック、お気に入り、履歴、JSON 出力に対応。',
+    pageCharacterStatsTitle: 'キャラステータス設計',
+    pageCharacterStatsDescription: 'オリジナルキャラクターの可視化ステータスパネルを設計。力、敏捷、知性、魅力などの多属性に対応。レーダーチャートのリアルタイムプレビュー、プリセットテンプレート、属性ロック、お気に入り保存、JSON 出力に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1335,6 +1347,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterChronicle: 'Chronicle',
     featureWorldEncyclopedia: 'Encyclopedia',
     featureInspirationGenerator: 'Inspiration Generator',
+    featureCharacterStats: 'Stat Designer',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1369,6 +1382,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterChronicle: 'Chronicle',
     actionWorldEncyclopedia: 'Encyclopedia',
     actionInspirationGenerator: 'Inspiration Generator',
+    actionCharacterStats: 'Stat Designer',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1454,10 +1468,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.8.7 Fixes v1.8.6 regressions: 56+ button data-sfx-handled misplacement fixed, audio init restored, useRef added back, reduceAnimations support, CSS variables completed.',
-    announcementList1: 'Critical fixes: isMountedRef permanently broken under React 18 Strict Mode (silently breaks dev environment); concurrent import Race Condition causing AudioContext leaks and state overwrites.',
-    announcementList2: 'Memory and SFX: Added context-tracking refs to AudioContext import/export flows for automatic close on unmount; completed append/click/remove flow for all download anchors; added data-sfx-handled to all 70+ interactive elements, completely eliminating double-play.',
-    announcementList3: 'Accessibility and data safety: Added role="progressbar" + ARIA attributes to import/convert progress bars; added aria-pressed to toggle chips; added NaN/Infinity sample filtering to normalizeBuffer; added duration <= 0 boundary guard to waveform drawing; upgraded global SFX system with label selector and unified back-link sound. Version synchronized to 1.8.4.',
+    announcementDescription: 'v1.8.8 New Character Stats Designer: visualize OC multi-dimensional attributes with radar charts; fixed two JSX syntax errors in App.tsx; full theme compatibility and localization for CharacterStatsDesignerPage.',
+    announcementList1: 'New Character Stats Designer: supports 5 preset templates (Standard Six, D&D Classic, JRPG, Social Traits, Creative Mind) with real-time radar chart preview, stat locking, history & favorites, and JSON export.',
+    announcementList2: 'UI/UX fixes: fixed JSX syntax errors in App.tsx workflow entry and StartModal docs buttons; CharacterStatsDesignerPage canvas radar chart now dynamically reads CSS variables for full light/deep/paper2gal theme support.',
+    announcementList3: 'Localization and code quality: unified component naming to CharacterStatsDesignerPage; added radar chart titles and fixed Japanese/Korean setPrefix translations across 5 languages; verified SFX compliance for all interactive buttons; exportJson timeout now tracked in unified cleanup.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1497,6 +1511,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageWorldEncyclopediaDescription: 'Build a structured world encyclopedia with entries for locations, organizations, races, events, items, and concepts. Supports tags, linked characters, search/filter, and JSON export.',
     pageInspirationGeneratorTitle: 'Inspiration Generator',
     pageInspirationGeneratorDescription: 'Generate random character inspiration combos in one click: personality, appearance, outfit, background, catchphrase, flaw, secret, and hobby. Supports locking items, saving favorites, history, and JSON export.',
+    pageCharacterStatsTitle: 'Stat Designer',
+    pageCharacterStatsDescription: 'Design a visual stat panel for your original character with multi-dimensional attributes like Strength, Dexterity, Intelligence, and Charisma. Features real-time radar chart preview, preset templates, stat locking, favorite sets, and JSON export.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1781,6 +1797,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterChronicle: 'Хроника',
     actionWorldEncyclopedia: 'Энциклопедия',
     actionInspirationGenerator: 'Генератор вдохновения',
+    actionCharacterStats: 'Дизайнер характеристик',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -1866,10 +1883,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.8.7 Исправления регрессий v1.8.6: 56+ кнопок data-sfx-handled исправлено, аудио-инициализация восстановлена, useRef добавлен, поддержка reduceAnimations, CSS-переменные завершены.',
-    announcementList1: 'Критические исправления: isMountedRef навсегда ломается в React 18 Strict Mode (в dev-окружении функции молча не работают); Race Condition при параллельном импорте, вызывающий утечки AudioContext и перезапись состояния.',
-    announcementList2: 'Память и SFX: Добавлены ref-отслеживания контекста в потоки импорта/экспорта AudioContext для автоматического закрытия при размонтировании; дополнены append/click/remove для всех якорей загрузки; добавлен data-sfx-handled ко всем 70+ интерактивным элементам, полностью устранен double-play.',
-    announcementList3: 'Доступность и безопасность данных: Добавлен role="progressbar" + ARIA-атрибуты к индикаторам прогресса импорта/конвертации; добавлен aria-pressed для toggle chip; добавлена фильтрация NaN/Infinity в normalizeBuffer; добавлена защита duration <= 0 для отрисовки волны; обновлена глобальная система SFX с селектором label и единым звуком back-link. Версия синхронизирована с 1.8.4.',
+    announcementDescription: 'v1.8.8 Новый дизайнер характеристик: визуальное проектирование многомерных атрибутов ОС через радар-графики; исправлены 2 синтаксические ошибки JSX в App.tsx; полная тематическая совместимость и локализация CharacterStatsDesignerPage.',
+    announcementList1: 'Новый дизайнер характеристик: поддержка 5 шаблонов (Стандарт 6, D&D Классика, JRPG, Социальные, Креативные) с предпросмотром радар-графика в реальном времени, блокировкой атрибутов, историей и избранным, экспортом JSON.',
+    announcementList2: 'Исправления UI/UX: исправлены синтаксические ошибки JSX в кнопках docs workflow entry и StartModal в App.tsx; canvas радар-график CharacterStatsDesignerPage теперь динамически считывает CSS-переменные для полной поддержки переключения тем light/deep/paper2gal.',
+    announcementList3: 'Локализация и качество кода: унифицировано имя компонента на CharacterStatsDesignerPage; добавлены заголовки радар-графика и исправлены переводы setPrefix для японского и корейского языков; проверено соответствие SFX для всех интерактивных кнопок; timeout exportJson теперь отслеживается в единой очистке.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -1909,6 +1926,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageWorldEncyclopediaDescription: 'Постройте структурированную энциклопедию мира: места, организации, расы, события, предметы и концепты. Поддерживает теги, связанных персонажей, поиск/фильтр и экспорт JSON.',
     pageInspirationGeneratorTitle: 'Генератор вдохновения',
     pageInspirationGeneratorDescription: 'Генерация случайных образов персонажей одним кликом: характер, внешность, одежда, прошлое, фраза, недостаток, тайна и хобби. Поддерживает блокировку, избранное, историю и экспорт JSON.',
+    pageCharacterStatsTitle: 'Дизайнер характеристик',
+    pageCharacterStatsDescription: 'Создавайте визуальную панель характеристик для оригинальных персонажей с многомерными атрибутами: сила, ловкость, интеллект, харизма. Радар-график в реальном времени, шаблоны, блокировка, избранное и экспорт JSON.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2568,11 +2587,13 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureCharacterChronicle: '캐릭터 연대기',
     featureWorldEncyclopedia: '세계관 백과',
     featureInspirationGenerator: '캐릭터灵감 생성기',
+    featureCharacterStats: '캐릭터 스탯 디자이너',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
     actionWorldEncyclopedia: '세계관 백과',
     actionInspirationGenerator: '캐릭터灵감 생성기',
+    actionCharacterStats: '캐릭터 스탯 디자이너',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2599,10 +2620,12 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageWorldEncyclopediaDescription: '구조화된 세계관 백과를 구축합니다. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성하고 태그, 관련 캐릭터, 검색 필터 및 JSON 내보내기를 지원합니다.',
     pageInspirationGeneratorTitle: '캐릭터灵감 생성기',
     pageInspirationGeneratorDescription: '랜덤한 캐릭터灵감 콤보를 한 번에 생성: 성격, 외모, 의상, 배경, 입버릇, 결점, 비밀, 취미. 잠금, 즐겨찾기, 기록, JSON 납품하기 지원.',
-    announcementDescription: 'v1.8.7 v1.8.6 회귀 수정: 56+ 버튼 data-sfx-handled 위치 오류 수정, 오디오 초기화 복원, useRef 복구, reduceAnimations 지원, CSS 변수 보완.',
-    announcementList1: 'Critical 수정: React 18 Strict Mode에서 isMountedRef가 영구적으로 무효화되는 문제(개발 환경에서 기능이 조용히 작동 불가); 동시 가져오기 Race Condition으로 인한 AudioContext 누수 및 상태 덮어쓰기.',
-    announcementList2: '메모리 및 SFX: AudioContext 가져오기/납치내기 흐름에 컨텍스트 추적 ref를 추가하여 컴포넌트 언마운트 시 자동으로 닫기; 모든 다운로드 앵커에 append/click/remove 흐름을 보완; 70개 이상의 인터랙티브 요소에 data-sfx-handled를 추가하여 double-play를 완전히 제거.',
-    announcementList3: '접근성 및 데이터 안전: 가져오기/변환 진행 바에 role="progressbar" + ARIA 속성 추가; 토글 칩에 aria-pressed 추가; normalizeBuffer에 NaN/Infinity 샘플 필터링 추가; 파형 렌더링에 duration <= 0 경계 보호 추가; 글로벌 SFX 시스템을 label 선택기와 통합된 back-link 사운드로 업그레이드. 버전을 1.8.4로 동기화.'
+    pageCharacterStatsTitle: '캐릭터 스탯 디자이너',
+    pageCharacterStatsDescription: '레이더 차트로 캐릭터 수치를 시각화합니다. STR, DEX, INT, CHA 등 12가지 스탯을 편집하고 프리셋(밸런스/전투/마법/은신/지원)을 적용, 비교 모드와 JSON/PNG 납품하기를 지원합니다.',
+    announcementDescription: 'v1.8.8 신규 캐릭터 스탯 디자이너: 레이더 차트로 OC 다차원 수치를 시각화 설계; App.tsx JSX 구문 오류 2건 수정; CharacterStatsDesignerPage 전면 테마 호환 및 현지화 개선.',
+    announcementList1: '신규 캐릭터 스탯 디자이너: 표준 6차원, D&D 클래식, JRPG, 사교 속성, 창작 능력 5가지 프리셋 지원. 실시간 레이더 차트 미리보기, 속성 잠금, 기록/즐겨찾기 저장, JSON 납품하기 지원.',
+    announcementList2: 'UI/UX 수정: App.tsx workflow entry 및 StartModal의 docs 버튼 JSX 구문 오류 수정; CharacterStatsDesignerPage canvas 레이더 차트가 CSS 변수를 동적으로 읽어 light/deep/paper2gal 테마 전환 완벽 지원.',
+    announcementList3: '현지화 및 코드 품질: 컴포넌트명을 CharacterStatsDesignerPage로 통일; 5개 언어 레이더 차트 제목, 일본어/한국어 setPrefix 번역 보완; 모든 인터랙티브 버튼 SFX 적합성 검증 완료; exportJson timeout을 통일 정리에 포함.'
   },
   fr: {
     ...translations.en,
@@ -2793,6 +2816,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.8.8',
+    date: '2026-05-18',
+    title: '1.8.8 角色数值设计器与深度审计',
+    summary:
+      '新增 Character Stats Designer（角色数值设计器）工具页面，支持可视化雷达图设计 OC 多维度属性；全面审计修复 App.tsx JSX 语法错误、CharacterStatsDesignerPage 主题兼容性与本地化问题。',
+    details: [
+      '新增角色数值设计器：5 种预设模板（标准六维、D&D 经典、JRPG、社交属性、创作能力），实时雷达图预览，12 维属性滑块编辑，属性锁定，历史记录与收藏，JSON 导出。',
+      '修复 App.tsx JSX 语法错误：workflow entry 和 StartModal 中的 docs 按钮存在 `>{` 非法 JSX 语法，已修复为正确闭合标签。',
+      '主题兼容性修复：CharacterStatsDesignerPage canvas 雷达图改为运行时动态读取 CSS 变量（--accent-solid、--text-secondary、--text-main 等），全面支持 light/deep/paper2gal 主题切换。',
+      '本地化补全：新增 radarChart 标题翻译（5 语言），修复日语/韩语 setPrefix 翻译错误，统一组件命名 CharacterStatsDesignerPage。',
+      'SFX 与代码质量：全部 20 个 playSound 调用中 6 个内联按钮调用均已配对 data-sfx-handled；exportJson 的 DOM 清理 timeout 纳入 timeoutRefs 统一管理。',
+    ],
+  },
   {
     version: '1.8.7',
     date: '2026-05-18',
@@ -4567,6 +4604,12 @@ function App() {
           pageTitle={messages.pageInspirationGeneratorTitle}
           pageDescription={messages.pageInspirationGeneratorDescription}
         />
+      ) : screen === 'character-stats' ? (
+        <CharacterStatsDesignerPage
+          {...sharedPageProps}
+          pageTitle={messages.pageCharacterStatsTitle}
+          pageDescription={messages.pageCharacterStatsDescription}
+        />
       ) : screen === 'docs' ? (
         <DocsPage
           {...sharedPageProps}
@@ -4771,6 +4814,10 @@ function HomeScreen({
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('inspiration-generator')}>
                 <ActionIcon kind="inspiration-generator" />
                 <span>{messages.featureInspirationGenerator}</span>
+              </button>
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-stats')}>
+                <ActionIcon kind="character-stats" />
+                <span>{messages.featureCharacterStats}</span>
               </button>
               <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
@@ -6224,7 +6271,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'docs';
+  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'docs';
 }) {
   const paths = {
     'face-maker': (
@@ -6373,6 +6420,17 @@ function ActionIcon({
         <path d="M17 34h6" />
       </>
     ),
+    'character-stats': (
+      <>
+        <polygon points="20,6 32,14 28,30 12,30 8,14" />
+        <circle cx="20" cy="18" r="3" />
+        <path d="M20 6v6" />
+        <path d="M32 14l-5.5 2.5" />
+        <path d="M28 30l-4.5-6" />
+        <path d="M12 30l4.5-6" />
+        <path d="M8 14l5.5 2.5" />
+      </>
+    ),
     docs: (
       <>
         <path d="M10 8h10c4 0 7 2 7 6s-3 6-7 6H10z" />
@@ -6497,6 +6555,10 @@ function StartModal({
           <button className="action-tile" type="button" onClick={() => onSelect('inspiration-generator')}>
             <ActionIcon kind="inspiration-generator" />
             <strong>{messages.actionInspirationGenerator}</strong>
+          </button>
+          <button className="action-tile" type="button" onClick={() => onSelect('character-stats')}>
+            <ActionIcon kind="character-stats" />
+            <strong>{messages.actionCharacterStats}</strong>
           </button>
           <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
