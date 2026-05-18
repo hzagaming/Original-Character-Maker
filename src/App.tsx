@@ -40,7 +40,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.10.1';
+const VERSION = '1.10.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -2865,6 +2865,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.10.2',
+    date: '2026-05-18',
+    title: '1.10.2 导出URL泄漏与replace转义修复',
+    summary:
+      '修复第三轮深度审计发现的残余问题：三个新页面的文件导出使用 setTimeout 清理导致组件卸载时 Blob URL 泄漏；DialogueGenerator 的 replace callback 修复未生效。',
+    details: [
+      'DialogueGeneratorPage/ColorPaletteDesignerPage/CharacterStatsDesignerPage：将导出函数的 Blob URL 清理从 setTimeout + timeoutRefs 改为 requestAnimationFrame，避免组件卸载时 clearTimeout 导致 URL 永久泄漏。',
+      'DialogueGeneratorPage：修复口头禅 replace 的 $ 转义漏洞（之前修复未生效，已重新替换为 callback 形式）。',
+      '全局SFX审计：workflowPages.tsx 0 个违规按钮；所有新页面 button 均正确声明 type="button" 和 data-sfx-handled。',
+    ],
+  },
   {
     version: '1.10.1',
     date: '2026-05-18',

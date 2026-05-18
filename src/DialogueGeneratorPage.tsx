@@ -879,7 +879,7 @@ function generateDialogues(
       const phrases = catchphrase.split(/[,，;；]/).map((p) => p.trim()).filter(Boolean);
       const cp = phrases[Math.floor(r2 * phrases.length)] || phrases[0];
       if (cp) {
-        text = text.replace(/$/, ` ……${cp}`);
+        text = text.replace(/$/, () => ` ……${cp}`);
       }
     }
     lines.push({
@@ -1046,8 +1046,7 @@ export default function DialogueGeneratorPage({
       a.download = `dialogue-${Date.now()}.json`;
       document.body.appendChild(a);
       a.click();
-      const t = setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 0);
-      timeoutRefs.current.push(t);
+      requestAnimationFrame(() => { a.remove(); URL.revokeObjectURL(url); });
       playSound('downloadSound');
     } catch { playSound('error'); }
   }, [lines, traits, scene, intensity, catchphrase, language]);
@@ -1062,8 +1061,7 @@ export default function DialogueGeneratorPage({
       a.download = `dialogue-${Date.now()}.txt`;
       document.body.appendChild(a);
       a.click();
-      const t = setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 0);
-      timeoutRefs.current.push(t);
+      requestAnimationFrame(() => { a.remove(); URL.revokeObjectURL(url); });
       playSound('downloadSound');
     } catch { playSound('error'); }
   }, [lines]);

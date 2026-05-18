@@ -351,11 +351,10 @@ export default function ColorPaletteDesignerPage({
       a.download = `color-palette-${Date.now()}.json`;
       document.body.appendChild(a);
       a.click();
-      const t = setTimeout(() => {
+      requestAnimationFrame(() => {
         a.remove();
         URL.revokeObjectURL(url);
-      }, 0);
-      timeoutRefs.current.push(t);
+      });
       playSound('downloadSound');
     } catch {
       playSound('error');
@@ -377,11 +376,10 @@ export default function ColorPaletteDesignerPage({
       a.download = 'oc-color-palette.css';
       document.body.appendChild(a);
       a.click();
-      const t = setTimeout(() => {
+      requestAnimationFrame(() => {
         a.remove();
         URL.revokeObjectURL(url);
-      }, 0);
-      timeoutRefs.current.push(t);
+      });
       playSound('downloadSound');
     } catch {
       playSound('error');
