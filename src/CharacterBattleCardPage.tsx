@@ -265,7 +265,7 @@ export default function CharacterBattleCardPage({
       }
     } catch { setClassName(labels.custom); }
 
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [labels.warrior, labels.mage, labels.assassin, labels.support, labels.custom]);
 
   useEffect(() => {
@@ -300,7 +300,7 @@ export default function CharacterBattleCardPage({
     const idx = Math.min(pool.length - 1, Math.floor(level / 10));
     const chosen = pool[Math.max(0, idx)] ?? pool[0] ?? '?';
     setTitle(chosen);
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [language, level]);
 
   const exportPng = useCallback(async () => {
@@ -316,7 +316,7 @@ export default function CharacterBattleCardPage({
       a.click();
       requestAnimationFrame(() => { a.remove(); });
       showNotice(labels.noticeExportSuccess, 'success');
-      playSound('ui-click');
+      playSound('buttonClick');
     } catch {
       if (isMountedRef.current) showNotice(labels.noticeExportError, 'error');
     } finally {
@@ -343,7 +343,7 @@ export default function CharacterBattleCardPage({
     a.click();
     requestAnimationFrame(() => { a.remove(); URL.revokeObjectURL(url); });
     showNotice(labels.noticeExportSuccess, 'success');
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [characterName, title, level, displayStats, linkedSkills, labels.unknown, labels.noticeExportSuccess, showNotice]);
 
   const copyJson = useCallback(async () => {
@@ -363,7 +363,7 @@ export default function CharacterBattleCardPage({
     <div className="page-container" data-theme={themeKey}>
       <div className="page-header">
         <div className="page-header-left">
-          <button className="back-button" type="button" onClick={() => { playSound('ui-click'); onBack(); }} data-sfx-handled>
+          <button className="back-button" type="button" onClick={() => { playSound('buttonClick'); onBack(); }} data-sfx-handled>
             ← {labels.backHome}
           </button>
           <h1 className="page-title">{pageTitle}</h1>
@@ -379,16 +379,16 @@ export default function CharacterBattleCardPage({
 
       {/* Controls */}
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '16px' }}>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); readLinkedData(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); readLinkedData(); }} data-sfx-handled>
           {labels.readData}
         </button>
-        <button className="primary-button" type="button" onClick={() => { playSound('ui-click'); exportPng(); }} data-sfx-handled disabled={!hasData || isExporting}>
+        <button className="primary-button" type="button" onClick={() => { playSound('buttonClick'); exportPng(); }} data-sfx-handled disabled={!hasData || isExporting}>
           {isExporting ? 'Exporting…' : labels.exportPng}
         </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); exportJson(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); exportJson(); }} data-sfx-handled>
           {labels.exportJson}
         </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); copyJson(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); copyJson(); }} data-sfx-handled>
           {labels.copyJson}
         </button>
       </div>
@@ -440,7 +440,7 @@ export default function CharacterBattleCardPage({
                 placeholder={labels.title}
                 style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem', width: '140px' }}
               />
-              <button className="secondary-button small-button" type="button" onClick={() => { playSound('ui-click'); generateTitle(); }} data-sfx-handled>
+              <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); generateTitle(); }} data-sfx-handled>
                 {labels.generateTitle}
               </button>
             </div>

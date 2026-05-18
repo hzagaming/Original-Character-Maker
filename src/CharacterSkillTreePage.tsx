@@ -405,7 +405,7 @@ export default function CharacterSkillTreePage({
     }));
     setNodes(remapped);
     setSelectedId(null);
-    playSound('ui-click');
+    playSound('buttonClick');
   }, []);
 
   const addNode = useCallback(() => {
@@ -426,7 +426,7 @@ export default function CharacterSkillTreePage({
     };
     setNodes((prev) => [...prev, newNode]);
     setSelectedId(id);
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [labels.newSkill]);
 
   const updateNode = useCallback((id: string, patch: Partial<SkillNode>) => {
@@ -444,14 +444,14 @@ export default function CharacterSkillTreePage({
       }));
     });
     if (selectedId === id) setSelectedId(null);
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [labels.confirmDelete, selectedId]);
 
   const clearAll = useCallback(() => {
     if (!window.confirm(labels.confirmClear)) return;
     setNodes([]);
     setSelectedId(null);
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [labels.confirmClear]);
 
   const levelUp = useCallback((node: SkillNode) => {
@@ -465,13 +465,13 @@ export default function CharacterSkillTreePage({
       return;
     }
     updateNode(node.id, { currentLevel: node.currentLevel + 1 });
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [isUnlocked, availablePoints, updateNode, labels.locked, showNotice]);
 
   const levelDown = useCallback((node: SkillNode) => {
     if (node.currentLevel <= 0) return;
     updateNode(node.id, { currentLevel: node.currentLevel - 1 });
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [updateNode]);
 
   const saveSet = useCallback(() => {
@@ -485,7 +485,7 @@ export default function CharacterSkillTreePage({
     };
     setHistory((prev) => [set, ...prev].slice(0, 50));
     showNotice(labels.saveSet + ' ' + labels.importedSuccess, 'success');
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [nodes, characterName, labels.setPrefix, labels.saveSet, labels.importedSuccess, showNotice]);
 
   const loadSet = useCallback((set: SkillTreeSet) => {
@@ -497,7 +497,7 @@ export default function CharacterSkillTreePage({
     if (set.characterName) setCharacterName(set.characterName);
     setSelectedId(null);
     showNotice(labels.loadSet + ' ' + labels.importedSuccess, 'success');
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [labels.importedError, labels.loadSet, labels.importedSuccess, showNotice]);
 
   const toggleFavorite = useCallback((set: SkillTreeSet) => {
@@ -506,7 +506,7 @@ export default function CharacterSkillTreePage({
       if (exists) return prev.filter((s) => s.id !== set.id);
       return [set, ...prev].slice(0, 30);
     });
-    playSound('ui-click');
+    playSound('buttonClick');
   }, []);
 
   const exportJson = useCallback(() => {
@@ -526,7 +526,7 @@ export default function CharacterSkillTreePage({
     document.body.appendChild(a);
     a.click();
     requestAnimationFrame(() => { a.remove(); URL.revokeObjectURL(url); });
-    playSound('ui-click');
+    playSound('buttonClick');
   }, [nodes, characterName, labels.unnamed]);
 
   const copyJson = useCallback(async () => {
@@ -560,7 +560,7 @@ export default function CharacterSkillTreePage({
 
   const readFromStats = useCallback(() => {
     setLinkedStats(getLinkedStats());
-    playSound('ui-click');
+    playSound('buttonClick');
   }, []);
 
   const selectedNode = nodes.find((n) => n.id === selectedId) ?? null;
@@ -578,7 +578,7 @@ export default function CharacterSkillTreePage({
     <div className="page-container" data-theme={themeKey}>
       <div className="page-header">
         <div className="page-header-left">
-          <button className="back-button" type="button" onClick={() => { playSound('ui-click'); onBack(); }} data-sfx-handled>
+          <button className="back-button" type="button" onClick={() => { playSound('buttonClick'); onBack(); }} data-sfx-handled>
             ← {labels.backHome}
           </button>
           <h1 className="page-title">{pageTitle}</h1>
@@ -604,7 +604,7 @@ export default function CharacterSkillTreePage({
             style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.85rem', width: '140px' }}
           />
         </div>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); readFromStats(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); readFromStats(); }} data-sfx-handled>
           {labels.readFromStats}
         </button>
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -635,25 +635,25 @@ export default function CharacterSkillTreePage({
             key={p.id}
             className="choice-chip"
             type="button"
-            onClick={() => { playSound('ui-click'); applyPreset(p.factory); }}
+            onClick={() => { playSound('buttonClick'); applyPreset(p.factory); }}
             data-sfx-handled
           >
             {labels[p.nameKey] ?? p.nameKey}
           </button>
         ))}
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); addNode(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); addNode(); }} data-sfx-handled>
           + {labels.addNode}
         </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); clearAll(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); clearAll(); }} data-sfx-handled>
           {labels.resetTree}
         </button>
-        <button className="primary-button" type="button" onClick={() => { playSound('ui-click'); saveSet(); }} data-sfx-handled>
+        <button className="primary-button" type="button" onClick={() => { playSound('buttonClick'); saveSet(); }} data-sfx-handled>
           {labels.saveSet}
         </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); exportJson(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); exportJson(); }} data-sfx-handled>
           {labels.exportJson}
         </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); copyJson(); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); copyJson(); }} data-sfx-handled>
           {labels.copyJson}
         </button>
         <label className="secondary-button" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}>
@@ -664,7 +664,7 @@ export default function CharacterSkillTreePage({
             style={{ display: 'none' }}
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) { playSound('ui-click'); importJson(file); }
+              if (file) { playSound('buttonClick'); importJson(file); }
               e.currentTarget.value = '';
             }}
           />
@@ -731,7 +731,7 @@ export default function CharacterSkillTreePage({
                   <button
                     key={node.id}
                     type="button"
-                    onClick={() => { playSound('ui-click'); setSelectedId(node.id); }}
+                    onClick={() => { playSound('buttonClick'); setSelectedId(node.id); }}
                     data-sfx-handled
                     style={{
                       position: 'absolute',
@@ -856,7 +856,7 @@ export default function CharacterSkillTreePage({
                         type="button"
                         className="choice-chip"
                         onClick={() => {
-                          playSound('ui-click');
+                          playSound('buttonClick');
                           updateNode(selectedNode.id, {
                             parentIds: isParent
                               ? selectedNode.parentIds.filter((pid) => pid !== n.id)
@@ -923,7 +923,7 @@ export default function CharacterSkillTreePage({
                   />
                 </div>
               </div>
-              <button className="danger-button" type="button" onClick={() => { playSound('ui-click'); deleteNode(selectedNode.id); }} data-sfx-handled style={{ marginTop: '8px' }}>
+              <button className="danger-button" type="button" onClick={() => { playSound('buttonClick'); deleteNode(selectedNode.id); }} data-sfx-handled style={{ marginTop: '8px' }}>
                 {labels.deleteSkill}
               </button>
             </>
@@ -937,10 +937,10 @@ export default function CharacterSkillTreePage({
 
       {/* History / Favorites toggles */}
       <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); setShowHistory((s) => !s); setShowFavorites(false); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); setShowHistory((s) => !s); setShowFavorites(false); }} data-sfx-handled>
           {labels.history} ({history.length})
         </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); setShowFavorites((s) => !s); setShowHistory(false); }} data-sfx-handled>
+        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); setShowFavorites((s) => !s); setShowHistory(false); }} data-sfx-handled>
           {labels.favorites} ({favorites.length})
         </button>
       </div>
@@ -960,10 +960,10 @@ export default function CharacterSkillTreePage({
                 {set.characterName || labels.unnamed} · {set.nodes.length} {labels.skillName}
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); loadSet(set); }} data-sfx-handled>
+                <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); loadSet(set); }} data-sfx-handled>
                   {labels.loadSet}
                 </button>
-                <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); toggleFavorite(set); }} data-sfx-handled>
+                <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); toggleFavorite(set); }} data-sfx-handled>
                   {labels.favorited}
                 </button>
               </div>
@@ -987,10 +987,10 @@ export default function CharacterSkillTreePage({
                 {set.characterName || labels.unnamed} · {set.nodes.length} {labels.skillName}
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); loadSet(set); }} data-sfx-handled>
+                <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); loadSet(set); }} data-sfx-handled>
                   {labels.loadSet}
                 </button>
-                <button className="danger-button" type="button" onClick={() => { playSound('ui-click'); toggleFavorite(set); }} data-sfx-handled>
+                <button className="danger-button" type="button" onClick={() => { playSound('buttonClick'); toggleFavorite(set); }} data-sfx-handled>
                   {labels.deleteSkill}
                 </button>
               </div>

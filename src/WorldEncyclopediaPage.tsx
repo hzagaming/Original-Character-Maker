@@ -68,16 +68,34 @@ function loadRelationshipNodes(): RelNode[] {
   } catch { return []; }
 }
 
+const VALID_CATEGORIES = new Set<EntryCategory>(['location', 'organization', 'race', 'event', 'item', 'concept', 'custom']);
+
+function normalizeEntry(e: unknown): EncyclopediaEntry | null {
+  if (!e || typeof e !== 'object') return null;
+  const obj = e as Record<string, unknown>;
+  if (typeof obj.id !== 'string' || typeof obj.title !== 'string') return null;
+  const rawCategory = typeof obj.category === 'string' ? obj.category : 'custom';
+  const category = VALID_CATEGORIES.has(rawCategory as EntryCategory) ? (rawCategory as EntryCategory) : 'custom';
+  return {
+    id: obj.id,
+    title: obj.title,
+    category,
+    content: typeof obj.content === 'string' ? obj.content : '',
+    tags: Array.isArray(obj.tags) ? (obj.tags as string[]).filter((t) => typeof t === 'string') : [],
+    relatedCharacterIds: Array.isArray(obj.relatedCharacterIds)
+      ? (obj.relatedCharacterIds as string[]).filter((t) => typeof t === 'string')
+      : [],
+    createdAt: typeof obj.createdAt === 'string' ? obj.createdAt : new Date().toISOString(),
+  };
+}
+
 function loadEntries(): EncyclopediaEntry[] {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (e): e is EncyclopediaEntry =>
-        e && typeof e === 'object' && typeof e.id === 'string' && typeof e.title === 'string',
-    );
+    return parsed.map(normalizeEntry).filter((e): e is EncyclopediaEntry => e !== null);
   } catch { return []; }
 }
 
@@ -117,6 +135,10 @@ const copyBase = {
     noEntries: '还没有条目',
     emptyHint: '点击「添加条目」开始构建你的世界观设定。可以创建地点、组织、种族、事件、物品、概念等多种类型的条目。',
     exportJson: '导出 JSON',
+    importJson: '导入 JSON',
+    pasteJsonHint: '在此粘贴 JSON 数据（可以是带 tool 字段的对象或直接数组）：',
+    importSuccess: '导入成功：已添加 {count} 条',
+    importError: '导入失败：JSON 格式无效',
     copied: '已复制',
     cancel: '取消',
     save: '保存',
@@ -144,6 +166,10 @@ const copyBase = {
     noEntries: '項目がありません',
     emptyHint: '「項目追加」をクリックして世界観設定を作りましょう。場所、組織、種族、イベント、アイテム、概念などの項目を作成できます。',
     exportJson: 'JSON 出力',
+    importJson: 'JSON 取込',
+    pasteJsonHint: 'ここに JSON を貼り付けてください（tool フィールド付きオブジェクトまたは直接配列）：',
+    importSuccess: '取込成功：{count} 件追加',
+    importError: '取込失敗：JSON 形式が不正です',
     copied: 'コピーしました',
     cancel: 'キャンセル',
     save: '保存',
@@ -171,6 +197,10 @@ const copyBase = {
     noEntries: 'No entries yet',
     emptyHint: 'Click "Add Entry" to start building your world encyclopedia. Create locations, organizations, races, events, items, concepts, and more.',
     exportJson: 'Export JSON',
+    importJson: 'Import JSON',
+    pasteJsonHint: 'Paste JSON data here (object with tool field or direct array):',
+    importSuccess: 'Import successful: {count} entries added',
+    importError: 'Import failed: invalid JSON format',
     copied: 'Copied',
     cancel: 'Cancel',
     save: 'Save',
@@ -198,6 +228,10 @@ const copyBase = {
     noEntries: 'Пока нет записей',
     emptyHint: 'Нажмите «Добавить запись», чтобы начать строить энциклопедию мира. Создавайте места, организации, расы, события, предметы, концепты и многое другое.',
     exportJson: 'Экспорт JSON',
+    importJson: 'Импорт JSON',
+    pasteJsonHint: 'Вставьте JSON сюда (объект с полем tool или прямой массив):',
+    importSuccess: 'Импорт успешен: добавлено {count} записей',
+    importError: 'Ошибка импорта: неверный формат JSON',
     copied: 'Скопировано',
     cancel: 'Отмена',
     save: 'Сохранить',
@@ -225,6 +259,10 @@ const copyBase = {
     noEntries: '항목이 없습니다',
     emptyHint: '「항목 추가」를 클릭하여 세계관 설정을 구축하세요. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성할 수 있습니다.',
     exportJson: 'JSON 낳아오기',
+    importJson: 'JSON 가져오기',
+    pasteJsonHint: '여기에 JSON을 붙여넣으세요 (tool 필드가 있는 객체 또는 직접 배열):',
+    importSuccess: '가져오기 성공: {count}개 항목 추가',
+    importError: '가져오기 실패: 잘못된 JSON 형식',
     copied: '복사 완료',
     cancel: '취소',
     save: '저장',
@@ -318,8 +356,8 @@ export default function WorldEncyclopediaPage({
       result = result.filter(
         (e) =>
           e.title.toLowerCase().includes(q) ||
-          e.content.toLowerCase().includes(q) ||
-          e.tags.some((t) => t.toLowerCase().includes(q)),
+          (e.content ?? '').toLowerCase().includes(q) ||
+          (e.tags ?? []).some((t) => t.toLowerCase().includes(q)),
       );
     }
     return result;
@@ -360,29 +398,67 @@ export default function WorldEncyclopediaPage({
   }, [modalEntry]);
 
   const handleExport = useCallback(() => {
-    const data = JSON.stringify(entries, null, 2);
+    const payload = { tool: 'world-encyclopedia', data: entries };
+    const data = JSON.stringify(payload, null, 2);
     navigator.clipboard.writeText(data).then(() => {
       showToast(copy.copied);
       playSound('confirm');
     }).catch(() => playSound('warning'));
   }, [entries, copy.copied, showToast]);
 
+  const handleImport = useCallback(() => {
+    const raw = window.prompt(copy.pasteJsonHint);
+    if (!raw || !raw.trim()) return;
+    try {
+      const parsed = JSON.parse(raw.trim());
+      let arr: EncyclopediaEntry[] = [];
+      if (Array.isArray(parsed)) {
+        arr = parsed;
+      } else if (parsed && Array.isArray(parsed.data)) {
+        arr = parsed.data;
+      }
+      if (!arr.length) {
+        showToast(copy.importError);
+        playSound('warning');
+        return;
+      }
+      const valid = arr
+        .map((e) => normalizeEntry(e))
+        .filter((e): e is EncyclopediaEntry => e !== null);
+      if (!valid.length) {
+        showToast(copy.importError);
+        playSound('warning');
+        return;
+      }
+      setEntries((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const newItems = valid.filter((v) => !existingIds.has(v.id));
+        return [...prev, ...newItems];
+      });
+      showToast(copy.importSuccess.replace('{count}', String(valid.length)));
+      playSound('confirm');
+    } catch {
+      showToast(copy.importError);
+      playSound('warning');
+    }
+  }, [copy.pasteJsonHint, copy.importError, copy.importSuccess, showToast]);
+
   const addTag = useCallback(() => {
     const text = window.prompt(copy.tagPlaceholder);
     if (!text || !text.trim()) return;
-    setModalEntry((m) => m && { ...m, tags: [...m.tags, text.trim()] });
+    setModalEntry((m) => m && { ...m, tags: [...(m.tags ?? []), text.trim()] });
     playSound('confirm');
   }, [copy.tagPlaceholder]);
 
   const removeTag = useCallback((tag: string) => {
-    setModalEntry((m) => m && { ...m, tags: m.tags.filter((t) => t !== tag) });
+    setModalEntry((m) => m && { ...m, tags: (m.tags ?? []).filter((t) => t !== tag) });
     playSound('deleteSound');
   }, []);
 
   const toggleRelCharacter = useCallback((charId: string) => {
     setModalEntry((m) => {
       if (!m) return m;
-      const set = new Set(m.relatedCharacterIds);
+      const set = new Set(m.relatedCharacterIds ?? []);
       if (set.has(charId)) set.delete(charId);
       else set.add(charId);
       return { ...m, relatedCharacterIds: Array.from(set) };
@@ -406,6 +482,9 @@ export default function WorldEncyclopediaPage({
           </button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); handleExport(); }} disabled={entries.length === 0}>
             {copy.exportJson}
+          </button>
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('modalOpen'); handleImport(); }}>
+            {copy.importJson}
           </button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenSettings(); }}>
             {openSettings}
@@ -565,7 +644,7 @@ export default function WorldEncyclopediaPage({
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{copy.tags}</label>
                 <div className="we-tag-row">
-                  {modalEntry.tags.map((t) => (
+                  {(modalEntry.tags ?? []).map((t) => (
                     <span key={t} className="we-tag" style={{ background: 'rgba(var(--accent-rgb),0.08)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
                       {t}
                       <button type="button" data-sfx-handled className="we-tag-remove" onClick={() => removeTag(t)} aria-label={copy.delete}>×</button>
@@ -584,10 +663,10 @@ export default function WorldEncyclopediaPage({
                       <button
                         key={node.id}
                         type="button"
-                        className={`we-rel-chip ${modalEntry.relatedCharacterIds.includes(node.id) ? 'active' : ''}`}
+                        className={`we-rel-chip ${(modalEntry.relatedCharacterIds ?? []).includes(node.id) ? 'active' : ''}`}
                         data-sfx-handled
                         onClick={() => { playSound('select'); toggleRelCharacter(node.id); }}
-                        aria-pressed={modalEntry.relatedCharacterIds.includes(node.id)}
+                        aria-pressed={(modalEntry.relatedCharacterIds ?? []).includes(node.id)}
                       >
                         <span className="we-rel-dot" style={{ background: node.color }} />
                         {node.name}
@@ -629,7 +708,7 @@ function EntryCard({
   onDelete: (id: string) => void;
 }) {
   const color = CATEGORY_COLORS[entry.category];
-  const rels = entry.relatedCharacterIds.map((id) => relNodes.find((n) => n.id === id)).filter(Boolean) as RelNode[];
+  const rels = (entry.relatedCharacterIds ?? []).map((id) => relNodes.find((n) => n.id === id)).filter(Boolean) as RelNode[];
 
   return (
     <div
@@ -663,9 +742,9 @@ function EntryCard({
         </div>
         <h4 className="we-card-title">{entry.title || copy.unnamed}</h4>
         {entry.content && <p className="we-card-content">{entry.content}</p>}
-        {entry.tags.length > 0 && (
+        {(entry.tags ?? []).length > 0 && (
           <div className="we-card-tags">
-            {entry.tags.map((t) => (
+            {(entry.tags ?? []).map((t) => (
               <span key={t} className="we-card-tag">{t}</span>
             ))}
           </div>
@@ -697,7 +776,7 @@ function EntryListItem({
   onDelete: (id: string) => void;
 }) {
   const color = CATEGORY_COLORS[entry.category];
-  const rels = entry.relatedCharacterIds.map((id) => relNodes.find((n) => n.id === id)).filter(Boolean) as RelNode[];
+  const rels = (entry.relatedCharacterIds ?? []).map((id) => relNodes.find((n) => n.id === id)).filter(Boolean) as RelNode[];
 
   return (
     <div
@@ -723,9 +802,9 @@ function EntryListItem({
         </div>
         {entry.content && <p className="we-list-content">{entry.content}</p>}
         <div className="we-list-footer">
-          {entry.tags.length > 0 && (
+          {(entry.tags ?? []).length > 0 && (
             <div className="we-list-tags">
-              {entry.tags.map((t) => (
+              {(entry.tags ?? []).map((t) => (
                 <span key={t} className="we-list-tag">{t}</span>
               ))}
             </div>
