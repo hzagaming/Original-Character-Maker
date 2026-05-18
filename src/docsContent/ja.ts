@@ -3663,6 +3663,7 @@ Key capabilities:
           prevention: '定期的にキャラ関係図のデータをバックアップしてください。',
         },
       ],
+    },
     {
       id: 'character-card',
       title: 'キャラクターカード',

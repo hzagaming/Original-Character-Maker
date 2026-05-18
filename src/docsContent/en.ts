@@ -3707,6 +3707,7 @@ Key capabilities:
           prevention: 'Regularly back up your relationship web data.',
         },
       ],
+    },
     {
       id: 'character-card',
       title: 'Character Card',

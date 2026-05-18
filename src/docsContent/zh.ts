@@ -3743,6 +3743,7 @@ Key capabilities:
           prevention: '定期备份你的角色关系网数据。',
         },
       ],
+    },
     {
       id: 'character-card',
       title: '角色卡',

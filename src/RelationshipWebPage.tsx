@@ -863,7 +863,7 @@ export function RelationshipWebPage({
             <p>{pageDescription}</p>
           </div>
         </div>
-        {/* Canvas -->
+        {/* Canvas */}
         <div
           ref={canvasRef}
           className="rel-canvas"

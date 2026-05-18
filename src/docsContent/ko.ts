@@ -3650,6 +3650,7 @@ Key capabilities:
           prevention: '정기적으로 캐릭터 관계망 데이터를 백업하세요.',
         },
       ],
+    },
     {
       id: 'character-card',
       title: '캐릭터 카드',
