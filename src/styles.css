@@ -63,6 +63,8 @@ a {
   --border: rgba(98, 132, 166, 0.26);
   --shadow: 0 24px 64px rgba(3, 9, 18, 0.34);
   --button-shadow: 0 14px 30px rgba(var(--accent-rgb), 0.22);
+  --danger: #ef476f;
+  --overlay-backdrop: rgba(0, 0, 0, 0.6);
   position: relative;
   min-height: 100vh;
   overflow: hidden;

@@ -37,7 +37,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.8.6';
+const VERSION = '1.8.7';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -628,7 +628,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.8.6 UI/UX/SFX/BGM 全面自检与改进：新增角色灵感生成器；修复大量 SFX double-play、硬编码颜色、音频引擎缺陷；增强无障碍支持。',
+    announcementDescription: 'v1.8.7 修复 v1.8.6 关键回归：56+ 按钮 data-sfx-handled 错位修复、音频初始化恢复、useRef 补回、reduceAnimations 支持、CSS 变量补全。',
     announcementList1: 'Critical 修复：React 18 Strict Mode 下 isMountedRef 永久失效（开发环境功能静默不可用）；并发导入 Race Condition 导致 AudioContext 泄漏和状态覆盖。',
     announcementList2: '内存与 SFX：AudioContext 导入/导出流程添加上下文追踪 ref，组件卸载时自动关闭；所有下载锚点补全 append/click/remove 流程；为全部 70+ 交互元素添加 data-sfx-handled，彻底消除 double-play。',
     announcementList3: '无障碍与数据安全：导入/转换进度条添加 role="progressbar" + ARIA 属性；toggle chip 添加 aria-pressed；normalizeBuffer 添加 NaN/Infinity 样本过滤；波形绘制添加 duration <= 0 边界保护；全局音效系统升级 label 选择器和 back-link 统一。版本同步为 1.8.4。',
@@ -1042,7 +1042,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.8.6 UI/UX/SFX/BGM 全面自检と改善：キャラ灵感生成器を追加；SFX double-play、ハードコード色、オーディオエンジン欠陥を修正；アクセシビリティを強化。',
+    announcementDescription: 'v1.8.7 v1.8.6 の回帰修正：56+ ボタンの data-sfx-handled 配置ミス修正、オーディオ初期化復旧、useRef 補完、reduceAnimations 対応、CSS 変数補完。',
     announcementList1: 'Critical 修正：React 18 Strict Mode で isMountedRef が永久に無効化される問題（開発環境で機能が暗黙的に利用不可）；並行インポート Race Condition による AudioContext リークと状態の上書き。',
     announcementList2: 'メモリと SFX：AudioContext インポート/エクスポートフローにコンテキスト追跡 ref を追加、コンポーネントアンマウント時に自動クローズ；すべてのダウンロードアンカーに append/click/remove フローを補完；70+ のインタラクティブ要素に data-sfx-handled を追加し double-play を完全に排除。',
     announcementList3: 'アクセシビリティとデータ安全性：インポート/変換プログレスバーに role="progressbar" + ARIA 属性を追加；toggle chip に aria-pressed を追加；normalizeBuffer に NaN/Infinity サンプルフィルタを追加；波形描画に duration <= 0 境界保護を追加；グローバル SFX システムを label セレクターと back-link 統一でアップグレード。バージョンを 1.8.4 に同期。',
@@ -1454,7 +1454,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.8.6 Comprehensive UI/UX/SFX/BGM self-audit and improvements: Added Inspiration Generator; fixed SFX double-play, hardcoded colors, audio engine defects; enhanced accessibility.',
+    announcementDescription: 'v1.8.7 Fixes v1.8.6 regressions: 56+ button data-sfx-handled misplacement fixed, audio init restored, useRef added back, reduceAnimations support, CSS variables completed.',
     announcementList1: 'Critical fixes: isMountedRef permanently broken under React 18 Strict Mode (silently breaks dev environment); concurrent import Race Condition causing AudioContext leaks and state overwrites.',
     announcementList2: 'Memory and SFX: Added context-tracking refs to AudioContext import/export flows for automatic close on unmount; completed append/click/remove flow for all download anchors; added data-sfx-handled to all 70+ interactive elements, completely eliminating double-play.',
     announcementList3: 'Accessibility and data safety: Added role="progressbar" + ARIA attributes to import/convert progress bars; added aria-pressed to toggle chips; added NaN/Infinity sample filtering to normalizeBuffer; added duration <= 0 boundary guard to waveform drawing; upgraded global SFX system with label selector and unified back-link sound. Version synchronized to 1.8.4.',
@@ -1866,7 +1866,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.8.6 Комплексный аудит UI/UX/SFX/BGM: Добавлен генератор вдохновения; исправлены SFX double-play, захардкоженные цвета, дефекты аудио-движка; улучшена доступность.',
+    announcementDescription: 'v1.8.7 Исправления регрессий v1.8.6: 56+ кнопок data-sfx-handled исправлено, аудио-инициализация восстановлена, useRef добавлен, поддержка reduceAnimations, CSS-переменные завершены.',
     announcementList1: 'Критические исправления: isMountedRef навсегда ломается в React 18 Strict Mode (в dev-окружении функции молча не работают); Race Condition при параллельном импорте, вызывающий утечки AudioContext и перезапись состояния.',
     announcementList2: 'Память и SFX: Добавлены ref-отслеживания контекста в потоки импорта/экспорта AudioContext для автоматического закрытия при размонтировании; дополнены append/click/remove для всех якорей загрузки; добавлен data-sfx-handled ко всем 70+ интерактивным элементам, полностью устранен double-play.',
     announcementList3: 'Доступность и безопасность данных: Добавлен role="progressbar" + ARIA-атрибуты к индикаторам прогресса импорта/конвертации; добавлен aria-pressed для toggle chip; добавлена фильтрация NaN/Infinity в normalizeBuffer; добавлена защита duration <= 0 для отрисовки волны; обновлена глобальная система SFX с селектором label и единым звуком back-link. Версия синхронизирована с 1.8.4.',
@@ -2599,7 +2599,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageWorldEncyclopediaDescription: '구조화된 세계관 백과를 구축합니다. 장소, 조직, 종족, 이벤트, 아이템, 개념 등의 항목을 생성하고 태그, 관련 캐릭터, 검색 필터 및 JSON 내보내기를 지원합니다.',
     pageInspirationGeneratorTitle: '캐릭터灵감 생성기',
     pageInspirationGeneratorDescription: '랜덤한 캐릭터灵감 콤보를 한 번에 생성: 성격, 외모, 의상, 배경, 입버릇, 결점, 비밀, 취미. 잠금, 즐겨찾기, 기록, JSON 납품하기 지원.',
-    announcementDescription: 'v1.8.6 UI/UX/SFX/BGM 전면 자체 점검 및 개선: 캐릭터灵감 생성기 추가; SFX double-play, 하드코딩 색상, 오디오 엔진 결함 수정; 접근성 강화.',
+    announcementDescription: 'v1.8.7 v1.8.6 회귀 수정: 56+ 버튼 data-sfx-handled 위치 오류 수정, 오디오 초기화 복원, useRef 복구, reduceAnimations 지원, CSS 변수 보완.',
     announcementList1: 'Critical 수정: React 18 Strict Mode에서 isMountedRef가 영구적으로 무효화되는 문제(개발 환경에서 기능이 조용히 작동 불가); 동시 가져오기 Race Condition으로 인한 AudioContext 누수 및 상태 덮어쓰기.',
     announcementList2: '메모리 및 SFX: AudioContext 가져오기/납치내기 흐름에 컨텍스트 추적 ref를 추가하여 컴포넌트 언마운트 시 자동으로 닫기; 모든 다운로드 앵커에 append/click/remove 흐름을 보완; 70개 이상의 인터랙티브 요소에 data-sfx-handled를 추가하여 double-play를 완전히 제거.',
     announcementList3: '접근성 및 데이터 안전: 가져오기/변환 진행 바에 role="progressbar" + ARIA 속성 추가; 토글 칩에 aria-pressed 추가; normalizeBuffer에 NaN/Infinity 샘플 필터링 추가; 파형 렌더링에 duration <= 0 경계 보호 추가; 글로벌 SFX 시스템을 label 선택기와 통합된 back-link 사운드로 업그레이드. 버전을 1.8.4로 동기화.'
@@ -2793,6 +2793,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.8.7',
+    date: '2026-05-18',
+    title: '1.8.7 v1.8.6 回归修复与深度自检',
+    summary:
+      '修复 v1.8.6 引入的 3 项关键回归：SFX 批量替换导致 workflowPages.tsx 56 个按钮 data-sfx-handled 错位、App.tsx 音频初始化 deferred 导致设置不生效、InspirationGeneratorPage useRef 未导入。',
+    details: [
+      '紧急修复 SFX：workflowPages.tsx 和 App.tsx 中 56+ 按钮的 data-sfx-handled 被错误插入到 </button> 关闭标签中，已全部在开始标签补回，彻底消除 double-play。',
+      '修复音频初始化回归：恢复 loadInitialSettings 中的 updateAudioSettings 调用，确保用户保存的音量/预设等设置在冷启动时生效。',
+      '修复 InspirationGeneratorPage：补回 useRef 导入（timer 清理依赖）；exportJson 的 DOM 清理 timeout 纳入统一清理管理。',
+      '修复 reduceAnimations 忽略：InspirationCard 入场动画现在正确检测 settings.performance.reduceAnimations，开启时跳过动画。',
+      '新增 CSS 变量：styles.css 补全 --danger 和 --overlay-backdrop，确保所有硬编码颜色回退有定义。',
+    ],
+  },
   {
     version: '1.8.6',
     date: '2026-05-18',
@@ -4064,8 +4078,7 @@ function loadInitialSettings(): SettingsState {
     if (typeof nextSettings.apiCustom2ForIndexTts !== 'boolean') nextSettings.apiCustom2ForIndexTts = false;
     if (typeof nextSettings.apiCustom3ForIndexTts !== 'boolean') nextSettings.apiCustom3ForIndexTts = false;
 
-    // Defer audio init to App mount effect to avoid double startMusic
-    // updateAudioSettings(nextSettings.audio);
+    updateAudioSettings(nextSettings.audio);
     return nextSettings;
   } catch {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
@@ -5776,10 +5789,10 @@ function FaceMakerPage({
               <span>{copy.workboard}</span>
               <div className="stage-toolbar-actions">
                 <div className="zoom-control">
-                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }}>-</button data-sfx-handled>
+                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }} data-sfx-handled>-</button>
                   <span className="zoom-value">{Math.round(stageZoom * 100)}%</span>
-                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }}>+</button data-sfx-handled>
-                  <button className="zoom-btn reset-zoom" type="button" title="Reset view" onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }}>⟲</button data-sfx-handled>
+                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }} data-sfx-handled>+</button>
+                  <button className="zoom-btn reset-zoom" type="button" title="Reset view" onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }} data-sfx-handled>⟲</button>
                 </div>
                 <div className="bg-switcher">
                   {(['checkerboard', 'solid', 'gradient', 'transparent'] as const).map((bg) => (
@@ -5794,9 +5807,9 @@ function FaceMakerPage({
                     </button>
                   ))}
                 </div>
-                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label="Preview mode" onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }} / data-sfx-handled>
-                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label="Reference mode" onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }} / data-sfx-handled>
-                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label="Overlay mode" onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }} / data-sfx-handled>
+                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label="Preview mode" onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label="Reference mode" onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label="Overlay mode" onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }}  data-sfx-handled />
               </div>
             </div>
             <div className="editor-stage">

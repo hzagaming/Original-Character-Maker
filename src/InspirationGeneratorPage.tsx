@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playSound } from './audioEngine';
 import type { AppLanguage, SettingsState } from './types';
 
@@ -334,6 +334,7 @@ export default function InspirationGeneratorPage({
   openSettings,
   pageTitle,
   pageDescription,
+  settings,
   language,
   onBack,
   onOpenSettings,
@@ -446,10 +447,10 @@ export default function InspirationGeneratorPage({
       a.download = `inspiration-${Date.now()}.json`;
       document.body.appendChild(a);
       a.click();
-      setTimeout(() => {
+      timeoutRefs.current.push(setTimeout(() => {
         a.remove();
         URL.revokeObjectURL(url);
-      }, 0);
+      }, 0));
       playSound('downloadSound');
     } catch {
       playSound('error');
@@ -634,6 +635,7 @@ export default function InspirationGeneratorPage({
               entry={entry}
               language={language}
               labels={labels}
+              reduceAnimations={settings.performance.reduceAnimations}
               onRegenerate={() => regenerateOne(entry.category)}
               onToggleLock={() => toggleLock(entry.category)}
             />
@@ -702,20 +704,26 @@ function InspirationCard({
   entry,
   language,
   labels,
+  reduceAnimations,
   onRegenerate,
   onToggleLock,
 }: {
   entry: InspirationEntry;
   language: AppLanguage;
   labels: Record<string, string>;
+  reduceAnimations?: boolean;
   onRegenerate: () => void;
   onToggleLock: () => void;
 }) {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(!!reduceAnimations);
   useEffect(() => {
+    if (reduceAnimations) {
+      setShow(true);
+      return;
+    }
     const t = setTimeout(() => setShow(true), 60);
     return () => clearTimeout(t);
-  }, []);
+  }, [reduceAnimations]);
 
   return (
     <div

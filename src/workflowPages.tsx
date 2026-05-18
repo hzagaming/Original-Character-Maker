@@ -4743,10 +4743,10 @@ export function StyleTransferPage({
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('style-transfer-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
           </div>
         </div>
 
@@ -5005,7 +5005,7 @@ export function StyleTransferPage({
                       <div className="tool-card" style={{ padding: 12 }}>
                         <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
                           <strong>{transfer.outputTitle}</strong>
-                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button data-sfx-handled>
+                          <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
                         </div>
                         <img
                           className="paper-output-image"
@@ -5014,7 +5014,7 @@ export function StyleTransferPage({
                           style={{ width: '100%', borderRadius: 8, marginBottom: 8 }}
                         />
                         <div className="mini-action-row">
-                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                          <button className="secondary-button small-button" type="button" onClick={async () = data-sfx-handled> {
                             try {
                               const res = await fetch(String(outputUrl));
                               const blob = await res.blob();
@@ -5027,7 +5027,7 @@ export function StyleTransferPage({
                               playSound('downloadSound');
                             } catch { /* ignore */ }
                           }}>{transfer.downloadFile}</button>
-                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                          <button className="secondary-button small-button" type="button" onClick={async () = data-sfx-handled> {
                             try {
                               const res = await fetch(String(outputUrl));
                               const blob = await res.blob();
@@ -5041,18 +5041,18 @@ export function StyleTransferPage({
                     );
                   })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('style-transfer-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
                     {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('style-transfer-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
                     {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('style-transfer-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('style-transfer-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
                   </>} />
                 </div>
               )}
@@ -8119,8 +8119,8 @@ export function TtsExportPage({
                   <h3>{copy.imageConverter.logsTitle}</h3>
                 </div>
                 <div className="tool-header-actions">
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button data-sfx-handled>
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('tts-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button data-sfx-handled>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() = data-sfx-handled> { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() = data-sfx-handled> { downloadText('tts-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button>
                 </div>
               </div>
               <div className="log-scroll" style={{ flex: 1, minHeight: 200 }}>
@@ -8455,8 +8455,8 @@ export function ImageConverterPage({
             <button className="secondary-button small-button" type="button" onClick={() => setSavedSnapshot(currentSnapshot)}>{copy.saveConfig}</button>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(exportJson); }}>{copy.copyJson}</button data-sfx-handled>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('image-converter-config.json', exportJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(exportJson); }}>{copy.copyJson}</button>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('image-converter-config.json', exportJson, 'application/json'); }}>{copy.downloadJson}</button>
           </div>
         </div>
 
@@ -8547,8 +8547,8 @@ export function ImageConverterPage({
                   <h3>{copy.imageConverter.logsTitle}</h3>
                 </div>
                 <div className="tool-header-actions">
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button data-sfx-handled>
-                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button data-sfx-handled>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() = data-sfx-handled> { copyText(logsText); playSound('copySound'); }}>{copy.imageConverter.copyLogs}</button>
+                  <button className="secondary-button small-button" type="button" disabled={logs.length === 0} onClick={() = data-sfx-handled> { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>{copy.imageConverter.downloadLogs}</button>
                 </div>
               </div>
               <div className="log-scroll" style={{ flex: 1, minHeight: 120 }}>
@@ -9063,10 +9063,10 @@ export function CharacterGifPage({
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('character-gif-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
           </div>
         </div>
 
@@ -9357,7 +9357,7 @@ export function CharacterGifPage({
                       <div className="tool-card" style={{ padding: 12 }}>
                         <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
                           <strong>{transfer.outputTitle}</strong>
-                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button data-sfx-handled>
+                          <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
                         </div>
                         <img
                           className="paper-output-image"
@@ -9366,7 +9366,7 @@ export function CharacterGifPage({
                           style={{ width: '100%', borderRadius: 8, marginBottom: 8 }}
                         />
                         <div className="mini-action-row">
-                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                          <button className="secondary-button small-button" type="button" onClick={async () = data-sfx-handled> {
                             try {
                               const res = await fetch(String(outputUrl));
                               const blob = await res.blob();
@@ -9379,7 +9379,7 @@ export function CharacterGifPage({
                               playSound('downloadSound');
                             } catch { /* ignore */ }
                           }}>{transfer.downloadFile}</button>
-                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                          <button className="secondary-button small-button" type="button" onClick={async () = data-sfx-handled> {
                             try {
                               const res = await fetch(String(outputUrl));
                               const blob = await res.blob();
@@ -9393,18 +9393,18 @@ export function CharacterGifPage({
                     );
                   })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('character-gif-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
                     {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('character-gif-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
                     {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('character-gif-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('character-gif-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
                   </>} />
                 </div>
               )}
@@ -9815,10 +9815,10 @@ export function IndexTtsPage({
             <span className={`save-indicator ${isDirty ? 'dirty' : 'clean'}`}>{isDirty ? copy.dirty : copy.clean}</span>
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>{copy.refreshWorkspace}</button>
             <button className="secondary-button small-button" type="button" onClick={saveDraft}>{copy.saveConfig}</button>
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(configJson); }}>{copy.copyJson}</button>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>{copy.importConfig}</button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button data-sfx-handled>
+            <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('index-tts-config.json', configJson, 'application/json'); }}>{copy.downloadJson}</button>
           </div>
         </div>
 
@@ -10023,7 +10023,7 @@ export function IndexTtsPage({
                       <div className="tool-card" style={{ padding: 12 }}>
                         <div className="paper-output-card-header" style={{ marginBottom: 8 }}>
                           <strong>{transfer.outputTitle}</strong>
-                          <button className="secondary-button small-button" type="button" onClick={() => { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button data-sfx-handled>
+                          <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('pageSwitch'); window.open(String(outputUrl), '_blank', 'noopener,noreferrer'); }}>{transfer.openFile}</button>
                         </div>
                         <audio
                           controls
@@ -10031,7 +10031,7 @@ export function IndexTtsPage({
                           src={String(outputUrl)}
                         />
                         <div className="mini-action-row">
-                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                          <button className="secondary-button small-button" type="button" onClick={async () = data-sfx-handled> {
                             try {
                               const res = await fetch(String(outputUrl));
                               const blob = await res.blob();
@@ -10044,7 +10044,7 @@ export function IndexTtsPage({
                               playSound('downloadSound');
                             } catch { /* ignore */ }
                           }}>{transfer.downloadFile}</button>
-                          <button className="secondary-button small-button" type="button" onClick={async () => {
+                          <button className="secondary-button small-button" type="button" onClick={async () = data-sfx-handled> {
                             try {
                               const res = await fetch(String(outputUrl));
                               const blob = await res.blob();
@@ -10058,18 +10058,18 @@ export function IndexTtsPage({
                     );
                   })()}
                   <CollapsibleCodePanel title={transfer.outputTitle} description={result ? transfer.resultReady : transfer.waitingResult} code={resultJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(resultJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('index-tts-result.json', resultJson, 'application/json'); }}>{copy.downloadResult}</button>
                     {!result?.outputUrl && status === 'success' && <button className="primary-button small-button" type="button" onClick={startWorkflow}>{transfer.redo}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.errorTitle} description={error ? error.message : copy.noRecentError} code={errorJson} copy={copy} tone={error ? 'error' : 'default'} defaultOpen={Boolean(error)} autoOpenSignal={error?.message ?? null} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(errorJson); }}>{copy.copyResult}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('index-tts-error.json', errorJson, 'application/json'); }}>{copy.downloadResult}</button>
                     {error && <button className="secondary-button small-button" type="button" onClick={() => setShowErrorPanel(true)}>{transfer.openDetailPanel}</button>}
                   </>} />
                   <CollapsibleCodePanel title={copy.debugTitle} description={transfer.debugDescription} code={debugJson} copy={copy} actions={<>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button data-sfx-handled>
-                    <button className="secondary-button small-button" type="button" onClick={() => { playSound('downloadSound'); downloadText('index-tts-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button data-sfx-handled>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('copySound'); copyText(debugJson); }}>{copy.copyDebug}</button>
+                    <button className="secondary-button small-button" type="button" onClick={() = data-sfx-handled> { playSound('downloadSound'); downloadText('index-tts-debug.json', debugJson, 'application/json'); }}>{copy.downloadDebug}</button>
                   </>} />
                 </div>
               )}
