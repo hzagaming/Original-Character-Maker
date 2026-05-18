@@ -200,6 +200,19 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function withAlpha(color: string, alpha: number): string {
+  if (color.startsWith('rgba(')) {
+    const parts = color.slice(5, -1).split(',');
+    if (parts.length >= 3) return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+  }
+  if (color.startsWith('rgb(')) {
+    const parts = color.slice(4, -1).split(',');
+    if (parts.length >= 3) return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+  }
+  if (color.startsWith('#')) return hexToRgba(color, alpha);
+  return `rgba(159, 178, 198, ${alpha})`;
+}
+
 function resolveCanvasColor(raw: string, fallback: string): string {
   const c = raw || fallback;
   if (c.startsWith('#')) return c;
@@ -217,15 +230,16 @@ function drawRadarChart(
   if (!ctx) return;
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
+  if (!rect.width || !rect.height) return;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
   ctx.scale(dpr, dpr);
 
   const w = rect.width;
   const h = rect.height;
   const cx = w / 2;
   const cy = h / 2;
-  const radius = Math.min(w, h) / 2 - 48;
+  const radius = Math.max(10, Math.min(w, h) / 2 - 48);
   const count = attributes.length;
   if (count < 3) return;
 
@@ -243,11 +257,7 @@ function drawRadarChart(
 
   // Grid rings
   const rings = 5;
-  ctx.strokeStyle = textSecondary.replace(')', ', 0.18)').replace('rgb', 'rgba').startsWith('rgba')
-    ? textSecondary.replace(')', ', 0.18)').replace('rgb', 'rgba')
-    : textSecondary.startsWith('#')
-    ? hexToRgba(textSecondary, 0.18)
-    : 'rgba(159, 178, 198, 0.18)';
+  ctx.strokeStyle = withAlpha(textSecondary, 0.18);
   ctx.lineWidth = 1;
   for (let r = 1; r <= rings; r++) {
     ctx.beginPath();
@@ -264,11 +274,7 @@ function drawRadarChart(
   }
 
   // Axis lines
-  ctx.strokeStyle = textSecondary.replace(')', ', 0.22)').replace('rgb', 'rgba').startsWith('rgba')
-    ? textSecondary.replace(')', ', 0.22)').replace('rgb', 'rgba')
-    : textSecondary.startsWith('#')
-    ? hexToRgba(textSecondary, 0.22)
-    : 'rgba(159, 178, 198, 0.22)';
+  ctx.strokeStyle = withAlpha(textSecondary, 0.22);
   for (let i = 0; i < count; i++) {
     const angle = (Math.PI * 2 / count) * i - Math.PI / 2;
     ctx.beginPath();
@@ -414,6 +420,11 @@ export default function CharacterStatsDesignerPage({
     const canvas = canvasRef.current;
     if (!canvas) return;
     drawRadarChart(canvas, attributes, language);
+    const ro = new ResizeObserver(() => {
+      drawRadarChart(canvas, attributes, language);
+    });
+    ro.observe(canvas);
+    return () => ro.disconnect();
   }, [attributes, language, themeKey]);
 
   const regenerateAll = useCallback(() => {
@@ -433,7 +444,7 @@ export default function CharacterStatsDesignerPage({
       attributes: nextAttrs.map((a) => ({ ...a })),
     };
     setHistory((h) => [snapshot, ...h].slice(0, 50));
-  }, []);
+  }, [labels]);
 
   const regenerateOne = useCallback((id: string) => {
     playSound('refresh');

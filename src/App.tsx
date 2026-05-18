@@ -40,7 +40,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.10.0';
+const VERSION = '1.10.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -646,10 +646,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.10.0 新增角色台词生成器：基于性格标签和场景生成 OC 专属台词；全面审计修复翻译缺失、历史记录功能、SFX 合规性。',
-    announcementList1: '新增角色台词生成器：17 种性格标签 × 10 种场景组合，情感强度 1-10 滑块调节，口头禅自动插入，5 条台词批量生成，JSON/TXT 导出。',
-    announcementList2: '模板引擎：500+ 条中文台词模板，覆盖傲娇/冷酷/热血/害羞/毒舌/神秘等 17 种性格，每种性格 10 场景各 2-3 条模板，支持情感强度标点替换与口头禅插值。',
-    announcementList3: 'Bug 修复：ColorPaletteDesignerPage 历史记录自动保存（applyPreset/harmony/randomize/extract 均触发），俄语/韩语 feature 翻译补全，App.tsx 导入状态色硬编码修复为 CSS 变量。',
+    announcementDescription: 'v1.10.1 深度审计与稳定性修复：对三个新页面及音频引擎进行全面审计，修复 20+ 处 crash、内存泄漏和逻辑错误。',
+    announcementList1: 'DialogueGeneratorPage：修复 loadState null crash、非法 trait 访问 crash、catchphrase null trim crash、clipboard 未定义 crash、lines undefined crash；解耦模板与口头禅随机数；修复 $ 转义漏洞；loadSet schema 校验。',
+    announcementList2: 'ColorPaletteDesignerPage：修复 saveToHistory TDZ 时序错误；修复图片 ObjectURL 内存泄漏；getImageData 跨域异常处理；loadState 数组类型校验增强。',
+    announcementList3: 'CharacterStatsDesignerPage + audioEngine：修复 regenerateAll stale closure、Canvas ResizeObserver 重绘、rgba 颜色非法替换、Canvas 零尺寸保护；BGM 后台漂移修复、applyVolumes pop 消除、自定义音频 Blob URL 泄漏修复。'
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1072,10 +1072,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.10.0 新規セリフ生成器：性格タグとシーンに基づいて OC 専用セリフを生成。翻訳欠落、履歴機能、SFX 適合性を全面監査修正。',
-    announcementList1: '新規セリフ生成器：17 種類の性格タグ × 10 種類のシーンの組み合わせ、感情の強さ 1-10 スライダー調整、口癖の自動挿入、セリフ 5 件一括生成、JSON/TXT 出力。',
-    announcementList2: 'テンプレートエンジン：500 件以上の中国語セリフテンプレート。ツンデレ/クール/熱血/照れ屋/毒舌/謎めいたなど 17 種類の性格に対応。各性格 10 シーンあたり 2〜3 件のテンプレート。感情の強さによる句読点置換と口癖補間に対応。',
-    announcementList3: 'バグ修正：ColorPaletteDesignerPage の履歴記録の自動保存（applyPreset/harmony/randomize/extract すべてトリガー）、ロシア語/韓国語の feature 翻訳補完、App.tsx のインポート状態色のハードコード修正を CSS 変数化。',
+    announcementDescription: 'v1.10.1 深度監査と安定性修正：3 つの新規ページとオーディオエンジンを全面監査し、20 件以上のクラッシュ、メモリリーク、論理エラーを修正。',
+    announcementList1: 'セリフ生成器：loadState の null クラッシュ、無効な trait アクセス クラッシュ、catchphrase の null trim クラッシュ、clipboard 未定義 クラッシュ、lines undefined クラッシュを修正。テンプレート選択と口癖の乱数を分離。$ エスケープ脆弱性を修正。loadSet に schema 検証を追加。',
+    announcementList2: 'カラーパレット設計：saveToHistory の TDZ 順序エラーを修正。画像 ObjectURL のメモリリークを修正。getImageData にクロスオリジン例外処理を追加。loadState の配列型検証を強化。',
+    announcementList3: 'キャラクタースタット + オーディオエンジン：regenerateAll の stale closure を修正。Canvas ResizeObserver 再描画を追加。rgba 色の不正置換を修正。Canvas ゼロサイズ保護を追加。BGM バックグラウンドドリフトを修正。applyVolumes の pop 音を除去。カスタム音声 Blob URL リークを修正。'
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1496,10 +1496,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.10.0 New Dialogue Generator: generate OC-specific lines based on personality traits and scenes; comprehensive audit fixing translation gaps, history functionality, and SFX compliance.',
-    announcementList1: 'New Dialogue Generator: 17 personality traits × 10 scene combinations, emotion intensity 1-10 slider, catchphrase auto-insertion, 5-line batch generation, JSON/TXT export.',
-    announcementList2: 'Template engine: 500+ Chinese dialogue templates covering tsundere/cool/hot-blooded/shy/sarcastic/mysterious and 13 other personalities, 2-3 templates per scene per personality, with intensity-based punctuation replacement and catchphrase interpolation.',
-    announcementList3: 'Bug fixes: ColorPaletteDesignerPage history auto-save (applyPreset/harmony/randomize/extract all trigger), Russian/Korean feature translation completion, App.tsx import status hardcoded color fix to CSS variables.',
+    announcementDescription: 'v1.10.1 Deep audit and stability fixes: comprehensive audit of three new pages and the audio engine, fixing 20+ crashes, memory leaks, and logic errors.',
+    announcementList1: 'DialogueGeneratorPage: fixed loadState null crash, invalid trait access crash, catchphrase null trim crash, clipboard undefined crash, lines undefined crash; decoupled template selection and catchphrase randomness; fixed \$ escape vulnerability; added loadSet schema validation.',
+    announcementList2: 'ColorPaletteDesignerPage: fixed saveToHistory TDZ ordering error; fixed image ObjectURL memory leak; added getImageData cross-origin exception handling; strengthened loadState array type validation.',
+    announcementList3: 'CharacterStatsDesignerPage + audioEngine: fixed regenerateAll stale closure; added Canvas ResizeObserver redraw; fixed rgba color illegal replacement; added Canvas zero-size protection; fixed BGM background drift; eliminated applyVolumes pop noise; fixed custom audio Blob URL leak.'
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1920,10 +1920,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.10.0 Новый генератор реплик: генерация реплик для ОС на основе черт характера и сцен; комплексный аудит исправления пробелов в переводах, функциональности истории и соответствия SFX.',
-    announcementList1: 'Новый генератор реплик: 17 черт характера × 10 сцен, регулятор интенсивности эмоций 1-10, автоматическая вставка фраз, пакетная генерация 5 реплик, экспорт JSON/TXT.',
-    announcementList2: 'Шаблонный движок: 500+ китайских шаблонов реплик, охватывающих тсундэрэ/холодного/горячего/застенчивого/язвительного/загадочного и 13 других личностей, 2-3 шаблона на сцену на личность, с заменой пунктуации на основе интенсивности и интерполяцией фраз.',
-    announcementList3: 'Исправления ошибок: автосохранение истории ColorPaletteDesignerPage (applyPreset/harmony/randomize/extract все запускают), дополнение переводов feature для русского/корейского, исправление жёстко закодированных цветов состояния импорта App.tsx на CSS-переменные.',
+    announcementDescription: 'v1.10.1 Глубокий аудит и исправления стабильности: комплексный аудит трёх новых страниц и аудиодвижка, исправление 20+ сбоев, утечек памяти и логических ошибок.',
+    announcementList1: 'Генератор реплик: исправлены сбои loadState null, доступ к неверному trait, catchphrase null trim, clipboard undefined, lines undefined; разделены случайные числа для выбора шаблона и фраз; исправлена уязвимость экранирования \$; добавлена schema-валидация loadSet.',
+    announcementList2: 'Дизайнер палитры: исправлена ошибка порядка TDZ в saveToHistory; исправлена утечка ObjectURL изображений; добавлена обработка исключений getImageData; усилена проверка типа массива в loadState.',
+    announcementList3: 'Дизайнер статов + аудиодвижок: исправлен stale closure в regenerateAll; добавлена перерисовка Canvas ResizeObserver; исправлена незаконная замена rgba; добавлена защита от нулевого размера Canvas; исправлен дрейф BGM в фоне; устранён щелчок applyVolumes; исправлена утечка Blob URL пользовательского аудио.'
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2865,6 +2865,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.10.1',
+    date: '2026-05-18',
+    title: '1.10.1 深度审计与稳定性修复',
+    summary:
+      '对 Dialogue Generator、Color Palette Designer、Character Stats Designer 三个新页面及音频引擎进行深度审计，修复 20+ 处潜在的 crash、内存泄漏和逻辑错误。',
+    details: [
+      'DialogueGeneratorPage：修复 loadState 返回 null 导致的 mount crash、非法 trait 访问 crash、catchphrase null trim crash、clipboard 未定义 crash、lines undefined crash；解耦模板选择与口头禅随机数；修复 $ 转义漏洞；为 loadSet 增加 schema 校验。',
+      'ColorPaletteDesignerPage：修复 saveToHistory TDZ 时序错误（labels 未初始化即被引用）；修复图片上传 ObjectURL 内存泄漏；为 getImageData 增加跨域异常处理；增强 loadState 数组类型校验。',
+      'CharacterStatsDesignerPage：修复 regenerateAll labels stale closure（切换语言后历史记录名不更新）；添加 Canvas ResizeObserver 重绘；修复 rgba 颜色字符串非法替换；增加 Canvas 零尺寸/负半径保护。',
+      'audioEngine.ts：修复 BGM 后台标签页 nextNoteTime 严重漂移；applyVolumes 改用 setTargetAtTime 消除 pop 声；自定义音频 Blob URL 泄漏修复；自定义音频音量跟随 enabled 状态。',
+    ],
+  },
   {
     version: '1.10.0',
     date: '2026-05-18',

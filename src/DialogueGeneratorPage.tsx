@@ -837,7 +837,7 @@ const TEMPLATES: Record<AppLanguage, Record<PersonalityTrait, Record<DialogueSce
 function getTemplates(lang: AppLanguage, trait: PersonalityTrait, scene: DialogueScene): TemplateEntry[] {
   const pool = TEMPLATES[lang]?.[trait]?.[scene];
   if (pool && pool.length > 0) return pool;
-  return TEMPLATES.zh[trait][scene] ?? [];
+  return TEMPLATES.zh[trait]?.[scene] ?? [];
 }
 
 function seededRandom(seed: string): number {
@@ -874,9 +874,10 @@ function generateDialogues(
       text = text.replace(/！/g, '……').replace(/!/g, '...');
     }
     // Insert catchphrase
-    if (catchphrase.trim() && r > 0.5) {
+    const r2 = seededRandom(`${seedBase}:${i}:cp`);
+    if (catchphrase?.trim() && r2 > 0.5) {
       const phrases = catchphrase.split(/[,，;；]/).map((p) => p.trim()).filter(Boolean);
-      const cp = phrases[Math.floor(r * phrases.length)] || phrases[0];
+      const cp = phrases[Math.floor(r2 * phrases.length)] || phrases[0];
       if (cp) {
         text = text.replace(/$/, ` ……${cp}`);
       }
@@ -903,7 +904,9 @@ function loadState<T>(key: string, fallback: T): T {
     const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') return parsed as T;
+      if (parsed === null) return fallback;
+      if (Array.isArray(fallback) && Array.isArray(parsed)) return parsed as T;
+      if (!Array.isArray(fallback) && typeof parsed === 'object') return parsed as T;
     }
   } catch { /* ignore */ }
   return fallback;
@@ -1012,6 +1015,11 @@ export default function DialogueGeneratorPage({
 
   const copyAll = useCallback(() => {
     const text = lines.map((l) => `${l.text} [${l.tone}]`).join('\n');
+    if (!navigator.clipboard) {
+      setCopied(true);
+      playSound('copySound');
+      return;
+    }
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       playSound('copySound');
@@ -1061,8 +1069,9 @@ export default function DialogueGeneratorPage({
   }, [lines]);
 
   const addToFavorites = useCallback(() => {
-    if (lines.length === 0) { playSound('error'); return; }
+    if (!lines || lines.length === 0) { playSound('error'); return; }
     const isDuplicate = favorites.some((f) =>
+      Array.isArray(f.lines) &&
       f.lines.length === lines.length &&
       f.lines.every((fl, i) => fl.text === lines[i].text),
     );
@@ -1084,11 +1093,11 @@ export default function DialogueGeneratorPage({
   }, [lines, favorites, traits, scene, intensity, catchphrase]);
 
   const loadSet = useCallback((set: DialogueSet) => {
-    setTraits(set.traits);
-    setScene(set.scene);
-    setIntensity(set.intensity);
-    setCatchphrase(set.catchphrase);
-    setLines(set.lines);
+    setTraits(Array.isArray(set.traits) ? set.traits : ['tsundere']);
+    setScene(typeof set.scene === 'string' ? set.scene : 'daily');
+    setIntensity(typeof set.intensity === 'number' ? Math.max(1, Math.min(10, set.intensity)) : 5);
+    setCatchphrase(typeof set.catchphrase === 'string' ? set.catchphrase : '');
+    setLines(Array.isArray(set.lines) ? set.lines : []);
     setShowHistory(false);
     setShowFavorites(false);
     playSound('pageSwitch');
@@ -1218,7 +1227,7 @@ export default function DialogueGeneratorPage({
               onClick={generate}
               disabled={traits.length === 0}
               data-sfx-handled
-              title={traits.length === 0 ? labels.maxTraits : labels.generate}
+              title={traits.length === 0 ? labels.selectTraits : labels.generate}
             >
               {labels.generate}
             </button>
@@ -1352,7 +1361,7 @@ export default function DialogueGeneratorPage({
         </div>
 
         {/* Generated lines */}
-        {lines.length > 0 && (
+        {lines && lines.length > 0 && (
           <div className="tool-card" style={{ padding: 18, marginTop: 8 }}>
             <div className="tool-card-header" style={{ marginBottom: 14 }}>
               <span className="card-caption">{labels.generatedLabel}</span>
@@ -1467,7 +1476,7 @@ function DialogueHistoryCard({
   onLoad: () => void;
   onDelete?: () => void;
 }) {
-  const preview = set.lines.slice(0, 2).map((l) => l.text).join(' · ');
+  const preview = set.lines?.slice(0, 2).map((l) => l.text).join(' · ') ?? '';
   return (
     <div className="tool-card" style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 14 }}>
       <span className="card-caption" style={{ fontSize: 11 }}>{set.name}</span>

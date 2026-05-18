@@ -156,11 +156,12 @@ function applyVolumes() {
   if (!masterGain || !sfxGain || !musicGain || !ctx) return;
   const m = currentSettings.masterVolume / 100;
   const t = ctx.currentTime;
-  masterGain.gain.setValueAtTime(m, t);
-  sfxGain.gain.setValueAtTime(currentSettings.sfxEnabled ? (currentSettings.sfxVolume / 100) * m : 0, t);
-  musicGain.gain.setValueAtTime(currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * m : 0, t);
-  if (customSfxAudio) customSfxAudio.volume = (currentSettings.sfxVolume / 100) * m;
-  if (customMusicAudio) customMusicAudio.volume = (currentSettings.musicVolume / 100) * m;
+  const ramp = 0.02;
+  masterGain.gain.setTargetAtTime(m, t, ramp);
+  sfxGain.gain.setTargetAtTime(currentSettings.sfxEnabled ? (currentSettings.sfxVolume / 100) * m : 0, t, ramp);
+  musicGain.gain.setTargetAtTime(currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * m : 0, t, ramp);
+  if (customSfxAudio) customSfxAudio.volume = currentSettings.sfxEnabled ? (currentSettings.sfxVolume / 100) * m : 0;
+  if (customMusicAudio) customMusicAudio.volume = currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * m : 0;
 }
 
 export function updateAudioSettings(next: Partial<AudioSettings>) {
@@ -470,6 +471,8 @@ export function previewSound(name: SoundName) {
 // ─── Custom audio file support ───
 let customSfxAudio: HTMLAudioElement | null = null;
 let customMusicAudio: HTMLAudioElement | null = null;
+let customSfxUrl: string | null = null;
+let customMusicUrl: string | null = null;
 
 export function setCustomSfx(dataUrl: string | null) {
   if (customSfxAudio) {
@@ -478,9 +481,13 @@ export function setCustomSfx(dataUrl: string | null) {
     customSfxAudio.load();
     customSfxAudio = null;
   }
+  if (customSfxUrl && customSfxUrl.startsWith('blob:')) {
+    URL.revokeObjectURL(customSfxUrl);
+  }
+  customSfxUrl = dataUrl;
   if (dataUrl) {
     customSfxAudio = new Audio(dataUrl);
-    customSfxAudio.volume = (currentSettings.sfxVolume / 100) * (currentSettings.masterVolume / 100);
+    customSfxAudio.volume = currentSettings.sfxEnabled ? (currentSettings.sfxVolume / 100) * (currentSettings.masterVolume / 100) : 0;
   }
   currentSettings = { ...currentSettings, useCustomSfx: !!dataUrl, customSfxDataUrl: dataUrl };
 }
@@ -492,10 +499,14 @@ export function setCustomMusic(dataUrl: string | null) {
     customMusicAudio.load();
     customMusicAudio = null;
   }
+  if (customMusicUrl && customMusicUrl.startsWith('blob:')) {
+    URL.revokeObjectURL(customMusicUrl);
+  }
+  customMusicUrl = dataUrl;
   if (dataUrl) {
     customMusicAudio = new Audio(dataUrl);
     customMusicAudio.loop = true;
-    customMusicAudio.volume = (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100);
+    customMusicAudio.volume = currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100) : 0;
   }
   currentSettings = { ...currentSettings, useCustomMusic: !!dataUrl, customMusicDataUrl: dataUrl };
 }
@@ -980,6 +991,11 @@ export function startMusic() {
       try {
         if (!ctx || ctx.state === 'closed' || ctx.state === 'suspended' || ctx.state === 'interrupted') return;
         const nowTime = ctx.currentTime;
+        // Resync if severely drifted (e.g. after tab backgrounding)
+        if (nextNoteTime < nowTime - 0.5 || nextNoteTime > nowTime + LOOKAHEAD_S * 4) {
+          nextNoteTime = nowTime + 0.05;
+          scheduleBeat = 0;
+        }
         while (nextNoteTime < nowTime + LOOKAHEAD_S) {
           scheduleTick(nextNoteTime, preset, pitchRatio, volume);
           nextNoteTime += beatDuration;

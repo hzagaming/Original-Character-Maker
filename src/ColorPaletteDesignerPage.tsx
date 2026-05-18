@@ -175,7 +175,9 @@ function loadState<T>(key: string, fallback: T): T {
     const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') return parsed as T;
+      if (parsed === null) return fallback;
+      if (Array.isArray(fallback) && Array.isArray(parsed)) return parsed as T;
+      if (!Array.isArray(fallback) && typeof parsed === 'object') return parsed as T;
     }
   } catch { /* ignore */ }
   return fallback;
@@ -197,7 +199,12 @@ function extractDominantColors(image: HTMLImageElement, count = 4): string[] {
   canvas.width = size;
   canvas.height = size;
   ctx.drawImage(image, 0, 0, size, size);
-  const data = ctx.getImageData(0, 0, size, size).data;
+  let data: Uint8ClampedArray;
+  try {
+    data = ctx.getImageData(0, 0, size, size).data;
+  } catch {
+    return [];
+  }
   const buckets = new Map<string, number>();
   for (let i = 0; i < data.length; i += 16) {
     const r = Math.round(data[i] / 16) * 16;
@@ -246,7 +253,7 @@ export default function ColorPaletteDesignerPage({
 }: ColorPalettePageProps) {
   const [colors, setColors] = useState<Record<PaletteSlot, string>>(() => {
     const saved = loadState<Record<PaletteSlot, string>>(STORAGE_KEY, {} as Record<PaletteSlot, string>);
-    if (saved && saved.primary) return saved;
+    if (saved && saved.primary && saved.secondary && saved.accent && saved.text) return saved;
     return { primary: '#4f9df7', secondary: '#8aa4c0', accent: '#f4a261', text: '#eef4fb' };
   });
 
@@ -282,16 +289,6 @@ export default function ColorPaletteDesignerPage({
   useEffect(() => {
     saveState(FAVORITES_KEY, favorites.slice(0, 100));
   }, [favorites]);
-
-  const saveToHistory = useCallback((newColors: Record<PaletteSlot, string>) => {
-    const snapshot: PaletteSet = {
-      id: `${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
-      name: `${labels.setPrefix} ${new Date().toLocaleTimeString()}`,
-      createdAt: new Date().toISOString(),
-      colors: { ...newColors },
-    };
-    setHistory((prev) => [snapshot, ...prev].slice(0, 50));
-  }, [labels.setPrefix]);
 
   const updateColor = useCallback((slot: PaletteSlot, hex: string) => {
     setColors((prev) => ({ ...prev, [slot]: hex }));
@@ -471,8 +468,17 @@ export default function ColorPaletteDesignerPage({
       saveToHistory(nextColors);
       playSound('workflowStart');
     };
-    img.onerror = () => playSound('error');
-    img.src = URL.createObjectURL(file);
+    const objectUrl = URL.createObjectURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      playSound('error');
+    };
+    const origOnload = img.onload;
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      if (origOnload) origOnload.call(img);
+    };
+    img.src = objectUrl;
     e.target.value = '';
   }, [colors, saveToHistory]);
 
@@ -569,6 +575,17 @@ export default function ColorPaletteDesignerPage({
     };
     return map[language] ?? map.en;
   }, [language]);
+
+  const saveToHistory = useCallback((newColors: Record<PaletteSlot, string>) => {
+    const snapshot: PaletteSet = {
+      id: `${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+      name: `${labels.setPrefix} ${new Date().toLocaleTimeString()}`,
+      createdAt: new Date().toISOString(),
+      colors: { ...newColors },
+    };
+    setHistory((prev) => [snapshot, ...prev].slice(0, 50));
+  }, [labels.setPrefix]);
+
 
   const harmonyModes: { key: 'complementary' | 'analogous' | 'triadic' | 'split' | 'tetradic'; labelKey: string }[] = [
     { key: 'complementary', labelKey: 'complementary' },
