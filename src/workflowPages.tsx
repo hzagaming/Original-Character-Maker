@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getApiForFeature, getEffectiveApiBase, getProbeLog, requiresHostedApiBase } from './apiConfig';
 import { playSound } from './audioEngine';
 import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
-import type { AppLanguage, SettingsState, ShortcutAction, TransferError } from './types';
+import type { AppLanguage, FeatureScreen, SettingsState, ShortcutAction, TransferError } from './types';
 import { DraggableErrorPanel } from './components/DraggableErrorPanel';
 
 function safeJsonStringify(value: unknown, space?: number): string {

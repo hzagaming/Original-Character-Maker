@@ -26,10 +26,15 @@ if not exist "server\node_modules" (
 
 :: 检查 .env
 if not exist ".env" (
-    echo [WARNING] 未找到 .env 文件。将从 .env.example 复制...
-    copy .env.example .env
-    echo [WARNING] 请编辑 .env 文件，填入 PLATO_API_KEY 等配置
-    echo.
+    if exist ".env.example" (
+        echo [WARNING] 未找到 .env 文件。将从 .env.example 复制...
+        copy .env.example .env
+        echo [WARNING] 请编辑 .env 文件，填入 PLATO_API_KEY 等配置
+        echo.
+    ) else (
+        echo [WARNING] 未找到 .env 和 .env.example 文件。请手动创建 .env 文件。
+        echo.
+    )
 )
 
 :: 检查后端端口是否被占用

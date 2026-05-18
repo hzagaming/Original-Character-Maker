@@ -48,9 +48,9 @@ const corsOrigin = process.env.CORS_ORIGIN || "*";
 
 module.exports = {
   projectRoot,
-  // Zeabur injects PORT for web services. Keep local development on 3001
-  // through .env/start scripts, but default deployed containers to 8080.
-  port: process.env.PORT ? parseInteger(process.env.PORT, 8080) : 8080,
+  // Zeabur injects PORT=8080 for web services.
+  // Local development defaults to 3001 via .env or start scripts.
+  port: parseInteger(process.env.PORT, 3001),
   corsOrigin,
   publicAppBaseUrl: parsePublicBaseUrl(
     process.env.PUBLIC_APP_BASE_URL ||
