@@ -1779,6 +1779,8 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterChronicle: 'Хроника',
     featureWorldEncyclopedia: 'Энциклопедия',
     featureInspirationGenerator: 'Генератор вдохновения',
+    featureCharacterStats: 'Дизайнер характеристик',
+    featureColorPalette: 'Цветовая палитра',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -2607,6 +2609,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureWorldEncyclopedia: '세계관 백과',
     featureInspirationGenerator: '캐릭터灵감 생성기',
     featureCharacterStats: '캐릭터 스탯 디자이너',
+    featureColorPalette: '캐릭터 컬러 팔레트',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
@@ -2641,6 +2644,8 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageInspirationGeneratorDescription: '랜덤한 캐릭터灵감 콤보를 한 번에 생성: 성격, 외모, 의상, 배경, 입버릇, 결점, 비밀, 취미. 잠금, 즐겨찾기, 기록, JSON 납품하기 지원.',
     pageCharacterStatsTitle: '캐릭터 스탯 디자이너',
     pageCharacterStatsDescription: '레이더 차트로 캐릭터 수치를 시각화합니다. STR, DEX, INT, CHA 등 12가지 스탯을 편집하고 프리셋(밸런스/전투/마법/은신/지원)을 적용, 비교 모드와 JSON/PNG 납품하기를 지원합니다.',
+    pageColorPaletteTitle: '캐릭터 컬러 팔레트 디자이너',
+    pageColorPaletteDescription: 'OC 캐릭터 전용 컬러 팔레트를 설계합니다. 주색, 보조색, 강조색, 텍스트색 자유 조합. 8가지 프리셋, 5가지 색 조화 규칙, 이미지 색상 추출, WCAG 대비 체크, JSON/CSS 납품하기 지원.',
     announcementDescription: 'v1.9.0 신규 캐릭터 스탯 디자이너: 레이더 차트로 OC 다차원 수치를 시각화 설계; App.tsx JSX 구문 오류 2건 수정; CharacterStatsDesignerPage 전면 테마 호환 및 현지화 개선.',
     announcementList1: '신규 캐릭터 스탯 디자이너: 표준 6차원, D&D 클래식, JRPG, 사교 속성, 창작 능력 5가지 프리셋 지원. 실시간 레이더 차트 미리보기, 속성 잠금, 기록/즐겨찾기 저장, JSON 납품하기 지원.',
     announcementList2: 'UI/UX 수정: App.tsx workflow entry 및 StartModal의 docs 버튼 JSX 구문 오류 수정; CharacterStatsDesignerPage canvas 레이더 차트가 CSS 변수를 동적으로 읽어 light/deep/paper2gal 테마 전환 완벽 지원.',
@@ -6809,7 +6814,7 @@ function ImportModal({
 
             {status !== 'idle' && (
               <div className={`notice-banner ${status === 'success' ? '' : 'error'}`} style={{ marginTop: 12, borderColor: status === 'success' ? 'rgba(74, 222, 128, 0.4)' : 'rgba(244, 90, 90, 0.4)', background: status === 'success' ? 'linear-gradient(180deg, rgba(74,222,128,0.12), rgba(255,255,255,0.02))' : 'linear-gradient(180deg, rgba(244,90,90,0.12), rgba(255,255,255,0.02))' }}>
-                <p style={{ margin: 0, color: status === 'success' ? '#86efac' : '#f45a5a' }}>{statusMessage}</p>
+                <p style={{ margin: 0, color: status === 'success' ? 'var(--success, #86efac)' : 'var(--danger, #f45a5a)' }}>{statusMessage}</p>
               </div>
             )}
 

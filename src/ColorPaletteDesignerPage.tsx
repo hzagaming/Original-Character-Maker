@@ -225,6 +225,7 @@ type ColorPalettePageProps = {
   language: AppLanguage;
   onBack: () => void;
   onOpenSettings: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNavigate?: (screen: Exclude<import('./types').FeatureScreen, 'home'>) => void;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOpenDocs?: (toolId?: string, section?: string, errorCode?: string) => void;
@@ -282,20 +283,33 @@ export default function ColorPaletteDesignerPage({
     saveState(FAVORITES_KEY, favorites.slice(0, 100));
   }, [favorites]);
 
+  const saveToHistory = useCallback((newColors: Record<PaletteSlot, string>) => {
+    const snapshot: PaletteSet = {
+      id: `${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+      name: `${labels.setPrefix} ${new Date().toLocaleTimeString()}`,
+      createdAt: new Date().toISOString(),
+      colors: { ...newColors },
+    };
+    setHistory((prev) => [snapshot, ...prev].slice(0, 50));
+  }, [labels.setPrefix]);
+
   const updateColor = useCallback((slot: PaletteSlot, hex: string) => {
     setColors((prev) => ({ ...prev, [slot]: hex }));
   }, []);
 
   const applyPreset = useCallback((preset: ColorPreset) => {
     playSound('select');
-    setColors({ ...preset.colors });
-  }, []);
+    const next = { ...preset.colors };
+    setColors(next);
+    saveToHistory(next);
+  }, [saveToHistory]);
 
   const applyHarmony = useCallback((mode: 'complementary' | 'analogous' | 'triadic' | 'split' | 'tetradic') => {
     playSound('workflowStart');
     const result = generateHarmony(colors.primary, mode);
     setColors(result);
-  }, [colors.primary]);
+    saveToHistory(result);
+  }, [colors.primary, saveToHistory]);
 
   const randomizeColors = useCallback(() => {
     playSound('refresh');
@@ -305,7 +319,8 @@ export default function ColorPaletteDesignerPage({
     const base = hslToHex(h, s, l);
     const result = generateHarmony(base, ['complementary', 'analogous', 'triadic', 'split', 'tetradic'][Math.floor(Math.random() * 5)] as 'complementary');
     setColors(result);
-  }, []);
+    saveToHistory(result);
+  }, [saveToHistory]);
 
   const copyPalette = useCallback(() => {
     const text = Object.entries(colors)
@@ -433,27 +448,33 @@ export default function ColorPaletteDesignerPage({
     img.onload = () => {
       const dominant = extractDominantColors(img, 4);
       setExtractedColors(dominant);
+      let nextColors: Record<PaletteSlot, string>;
       if (dominant.length >= 4) {
-        setColors({
+        nextColors = {
           primary: dominant[0],
           secondary: dominant[1],
           accent: dominant[2],
           text: dominant[3],
-        });
+        };
+        setColors(nextColors);
       } else if (dominant.length > 0) {
-        setColors((prev) => ({
-          primary: dominant[0] || prev.primary,
-          secondary: dominant[1] || prev.secondary,
-          accent: dominant[2] || prev.accent,
-          text: dominant[3] || prev.text,
-        }));
+        nextColors = {
+          primary: dominant[0] || colors.primary,
+          secondary: dominant[1] || colors.secondary,
+          accent: dominant[2] || colors.accent,
+          text: dominant[3] || colors.text,
+        };
+        setColors(nextColors);
+      } else {
+        nextColors = { ...colors };
       }
+      saveToHistory(nextColors);
       playSound('workflowStart');
     };
     img.onerror = () => playSound('error');
     img.src = URL.createObjectURL(file);
     e.target.value = '';
-  }, []);
+  }, [colors, saveToHistory]);
 
   const contrastPrimary = useMemo(() => contrastRatio(colors.primary, colors.text), [colors.primary, colors.text, themeKey]);
   const contrastSecondary = useMemo(() => contrastRatio(colors.secondary, colors.text), [colors.secondary, colors.text, themeKey]);
