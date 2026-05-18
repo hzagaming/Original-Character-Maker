@@ -103,8 +103,8 @@ function getLinkedSkills(): BattleSkill[] {
         id: String(n.id ?? ''),
         name: String(n.name ?? ''),
         type: String(n.type ?? 'active'),
-        level: Number(n.currentLevel ?? 0),
-        maxLevel: Number(n.maxLevel ?? 1),
+        level: Math.max(0, Number.isNaN(Number(n.currentLevel)) ? 0 : Number(n.currentLevel ?? 0)),
+        maxLevel: Math.max(1, Number.isNaN(Number(n.maxLevel)) ? 1 : Number(n.maxLevel ?? 1)),
         description: String(n.description ?? ''),
       }));
   } catch { /* ignore */ }
@@ -140,7 +140,6 @@ export default function CharacterBattleCardPage({
 }) {
   const themeKey = settings.stylePreset ?? 'default';
   const cardRef = useRef<HTMLDivElement>(null);
-  const timeoutRefs = useRef<number[]>([]);
 
   const labels = useMemo(() => {
     const dict: Record<string, Record<string, string>> = {
@@ -205,6 +204,8 @@ export default function CharacterBattleCardPage({
   const [linkedStats, setLinkedStats] = useState<Record<string, number>>({});
   const [linkedSkills, setLinkedSkills] = useState<BattleSkill[]>([]);
   const [notice, setNotice] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const noticeTimeoutRef = useRef<number>(0);
+  const isMountedRef = useRef<boolean>(true);
 
   const battleStats = useMemo(() => calculateBattleStats(linkedStats), [linkedStats]);
 
@@ -259,26 +260,21 @@ export default function CharacterBattleCardPage({
     readLinkedData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
-      for (const id of timeoutRefs.current) clearTimeout(id);
-      timeoutRefs.current = [];
+      isMountedRef.current = false;
+      if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
     };
   }, []);
 
-  const addTimeout = useCallback((fn: () => void, ms: number) => {
-    const id = window.setTimeout(() => {
-      fn();
-      timeoutRefs.current = timeoutRefs.current.filter((t) => t !== id);
-    }, ms);
-    timeoutRefs.current.push(id);
-  }, []);
-
   const showNotice = useCallback((text: string, type: 'success' | 'error') => {
+    if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
     setNotice({ text, type });
-    addTimeout(() => setNotice(null), 2500);
-  }, [addTimeout]);
+    noticeTimeoutRef.current = window.setTimeout(() => {
+      if (isMountedRef.current) setNotice(null);
+      noticeTimeoutRef.current = 0;
+    }, 2500);
+  }, []);
 
   const generateTitle = useCallback(() => {
     const titles: Record<string, string[]> = {
@@ -290,7 +286,8 @@ export default function CharacterBattleCardPage({
     };
     const pool = titles[language] ?? titles.en;
     const idx = Math.min(pool.length - 1, Math.floor(level / 10));
-    setTitle(pool[Math.max(0, idx)]);
+    const chosen = pool[Math.max(0, idx)] ?? pool[0] ?? '?';
+    setTitle(chosen);
     playSound('ui-click');
   }, [language, level]);
 
@@ -298,6 +295,7 @@ export default function CharacterBattleCardPage({
     if (!cardRef.current) return;
     try {
       const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, backgroundColor: 'transparent' });
+      if (!isMountedRef.current) return;
       const a = document.createElement('a');
       a.href = dataUrl;
       a.download = `battle-card-${characterName || 'oc'}.png`;
@@ -307,7 +305,7 @@ export default function CharacterBattleCardPage({
       showNotice(labels.noticeExportSuccess, 'success');
       playSound('ui-click');
     } catch {
-      showNotice(labels.noticeExportError, 'error');
+      if (isMountedRef.current) showNotice(labels.noticeExportError, 'error');
     }
   }, [characterName, labels.noticeExportSuccess, labels.noticeExportError, showNotice]);
 
@@ -369,7 +367,7 @@ export default function CharacterBattleCardPage({
         <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); readLinkedData(); }} data-sfx-handled>
           {labels.readData}
         </button>
-        <button className="primary-button" type="button" onClick={() => { playSound('ui-click'); exportPng(); }} data-sfx-handled>
+        <button className="primary-button" type="button" onClick={() => { playSound('ui-click'); exportPng(); }} data-sfx-handled disabled={!hasData}>
           {labels.exportPng}
         </button>
         <button className="secondary-button" type="button" onClick={() => { playSound('ui-click'); exportJson(); }} data-sfx-handled>
@@ -477,8 +475,8 @@ export default function CharacterBattleCardPage({
                 <div key={skill.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', background: 'var(--bg)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                   <span style={{
                     fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '2px 8px', borderRadius: '6px',
-                    background: skill.type === 'active' ? 'rgba(248,113,113,0.15)' : skill.type === 'passive' ? 'rgba(96,165,250,0.15)' : skill.type === 'ultimate' ? 'rgba(167,139,250,0.15)' : 'rgba(52,211,153,0.15)',
-                    color: skill.type === 'active' ? '#f87171' : skill.type === 'passive' ? '#60a5fa' : skill.type === 'ultimate' ? '#a78bfa' : '#34d399',
+                    background: skill.type === 'active' ? 'rgba(248,113,113,0.15)' : skill.type === 'passive' ? 'rgba(96,165,250,0.15)' : skill.type === 'ultimate' ? 'rgba(167,139,250,0.15)' : skill.type === 'trait' ? 'rgba(52,211,153,0.15)' : 'rgba(251,191,36,0.15)',
+                    color: skill.type === 'active' ? '#f87171' : skill.type === 'passive' ? '#60a5fa' : skill.type === 'ultimate' ? '#a78bfa' : skill.type === 'trait' ? '#34d399' : '#fbbf24',
                   }}>
                     {skill.type}
                   </span>

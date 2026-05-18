@@ -322,7 +322,13 @@ export default function CharacterSkillTreePage({
   const [linkedStats, setLinkedStats] = useState<Record<string, number>>({});
   const [characterName, setCharacterName] = useState('');
   const treeRef = useRef<HTMLDivElement>(null);
-  const timeoutRefs = useRef<number[]>([]);
+  const noticeTimeoutRef = useRef<number>(0);
+
+  useEffect(() => {
+    return () => {
+      if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
+    };
+  }, []);
 
   // Load linked stats on mount
   useEffect(() => {
@@ -348,26 +354,14 @@ export default function CharacterSkillTreePage({
     try { localStorage.setItem('oc-maker.skill-tree.character-name', characterName); } catch { /* ignore */ }
   }, [characterName]);
 
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      for (const id of timeoutRefs.current) clearTimeout(id);
-      timeoutRefs.current = [];
-    };
-  }, []);
-
-  const addTimeout = useCallback((fn: () => void, ms: number) => {
-    const id = window.setTimeout(() => {
-      fn();
-      timeoutRefs.current = timeoutRefs.current.filter((t) => t !== id);
-    }, ms);
-    timeoutRefs.current.push(id);
-  }, []);
-
   const showNotice = useCallback((text: string, type: 'success' | 'error') => {
+    if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
     setNotice({ text, type });
-    addTimeout(() => setNotice(null), 2500);
-  }, [addTimeout]);
+    noticeTimeoutRef.current = window.setTimeout(() => {
+      setNotice(null);
+      noticeTimeoutRef.current = 0;
+    }, 2500);
+  }, []);
 
   const totalPoints = useMemo(() => {
     return Object.values(linkedStats).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
@@ -393,8 +387,19 @@ export default function CharacterSkillTreePage({
   }, [nodes, linkedStats]);
 
   const applyPreset = useCallback((factory: () => SkillNode[]) => {
-    const fresh = factory().map((n) => ({ ...n, id: makeId() }));
-    setNodes(fresh);
+    const original = factory();
+    const idMap = new Map<string, string>();
+    const fresh = original.map((n) => {
+      const newId = makeId();
+      idMap.set(n.id, newId);
+      return { ...n, id: newId };
+    });
+    // Remap parentIds to new ids
+    const remapped = fresh.map((n) => ({
+      ...n,
+      parentIds: n.parentIds.map((pid) => idMap.get(pid) ?? pid).filter(Boolean),
+    }));
+    setNodes(remapped);
     setSelectedId(null);
     playSound('ui-click');
   }, []);

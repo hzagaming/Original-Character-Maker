@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.0';
+const VERSION = '1.12.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -663,10 +663,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.0 新增角色战斗卡生成器：基于角色属性与技能树自动生成游戏风格战斗卡；自动计算 HP/MP/ATK/DEF/SPD/CRT 战斗数值，显示已解锁技能，支持称号生成、PNG 导出与 JSON 导出。',
-    announcementList1: 'CharacterBattleCardPage：全新角色战斗卡生成器。自动读取 character-stats 与 skill-tree 数据，计算 6 项战斗数值，可视化战斗卡面板，游戏风格设计，称号生成系统。',
-    announcementList2: '深度联动：自动读取 skill-tree 历史推断职业类型；6 属性进度条实时显示；已解锁技能列表带类型标签与等级；空状态友好提示。',
-    announcementList3: '代码质量：全部按钮 SFX 合规（data-sfx-handled），html-to-image PNG 导出，requestAnimationFrame Blob URL 清理，5 语言完整本地化，补全 v1.11.0 遗漏的中文 action 翻译。'
+    announcementDescription: 'v1.12.1 全面深度审计与稳定性修复：修复 applyPreset 技能树父子关系断裂、5 语言对象字面量语法错误、showNotice 超时竞争条件、技能类型颜色映射不完整等 10+ 处问题。',
+    announcementList1: 'CharacterSkillTreePage：修复 applyPreset 重新生成节点 ID 时未同步更新 parentIds 的关键 bug（导致预设技能树父子关系完全断裂）；移除冗余的 timeoutRefs/addTimeout 死代码；showNotice 改为排他式单一 timeout 管理。',
+    announcementList2: 'CharacterBattleCardPage：修复 generateTitle NaN 防御（pool[NaN] 导致 setTitle undefined）；补充 trait/special 技能类型 badge 颜色映射；getLinkedSkills 增加 maxLevel/level NaN 与零值校验；导出 PNG 按钮在无关联数据时自动禁用；exportPng 增加 isMounted 卸载保护。',
+    announcementList3: '全局修复：App.tsx 修复 workflow entry 多余引号导致的 JSX 语法错误；修复 5 语言 announcementList3 后缺失逗号的对象语法错误；修复韩语公告列表未同步到 v1.12.0；全部新页面 SFX 审计通过（0 违规）。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1097,10 +1097,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.0 新規キャラクターバトルカード生成：キャラクターのステータスとスキルツリーからゲーム風バトルカードを自動生成。HP/MP/ATK/DEF/SPD/CRT の戦闘数値を自動計算し、解放済スキルを表示。称号生成、PNG 出力、JSON 出力をサポート。',
-    announcementList1: 'CharacterBattleCardPage：新規バトルカード生成ページ。character-stats と skill-tree のデータを自動読み込み、6 項目の戦闘数値を計算。ゲーム風カードパネル、称号生成システム。',
-    announcementList2: '深い連携：skill-tree の履歴から職業タイプを自動推定；6 属性のプログレスバーリアルタイム表示；解放済スキルリストにタイプラベルとレベル；空の状態でも親切なガイド。',
-    announcementList3: 'コード品質：全ボタン SFX 適合（data-sfx-handled）、html-to-image PNG 出力、requestAnimationFrame Blob URL クリーンアップ、5 言語完全ローカライズ。'
+    announcementDescription: 'v1.12.1 全面監査と安定性修正：applyPreset のスキルツリー親子関係切断、5 言語構文エラー、showNotice タイムアウト競合、スキルタイプ色マッピング不完全など 10 件以上の修正。',
+    announcementList1: 'CharacterSkillTreePage：applyPreset でノード ID を再生成した際に parentIds が同期されない重大バグを修正（プリセットスキルツリーの親子関係が完全に切断される）；不要な timeoutRefs/addTimeout デッドコードを削除；showNotice を排他的単一タイムアウト管理に変更。',
+    announcementList2: 'CharacterBattleCardPage：generateTitle の NaN 防御を追加（pool[NaN] で setTitle undefined になる問題）；trait/special スキルタイプのバッジ色マッピングを補完；getLinkedSkills に maxLevel/level の NaN・ゼロ値検証を追加；PNG 出力ボタンを未連携データ時に自動無効化；exportPng に isMounted アンマウント保護を追加。',
+    announcementList3: 'グローバル修正：App.tsx の workflow entry 余分な引用符による JSX 構文エラーを修正；5 言語の announcementList3 後の欠損カンマを修正；韓国語公告リストを v1.12.0 に同期；全新規ページ SFX 監査合格（0 違反）。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1529,10 +1529,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.0 New Character Battle Card Generator: auto-generate a game-style battle card from character stats and skill tree. Calculates HP/MP/ATK/DEF/SPD/CRT combat values, displays unlocked skills, supports title generation, PNG export and JSON export.',
-    announcementList1: 'CharacterBattleCardPage: brand-new battle card generator. Auto-reads character-stats and skill-tree data, calculates 6 combat values, visual battle card panel with game-style design, title generation system.',
-    announcementList2: 'Deep linkage: auto-infers class type from skill-tree history; 6 attribute progress bars in real-time; unlocked skill list with type tags and levels; friendly empty-state guidance.',
-    announcementList3: 'Code quality: all buttons SFX-compliant (data-sfx-handled), html-to-image PNG export, requestAnimationFrame Blob URL cleanup, full 5-language localization.'
+    announcementDescription: 'v1.12.1 Deep audit and stability fixes: fixed applyPreset skill-tree parent linkage breakage, 5-language object literal syntax errors, showNotice timeout race conditions, incomplete skill type color mapping, and 10+ issues.',
+    announcementList1: 'CharacterSkillTreePage: fixed critical applyPreset bug where parentIds were not synchronized after node ID regeneration (causing complete parent-child linkage breakage in preset skill trees); removed redundant timeoutRefs/addTimeout dead code; converted showNotice to exclusive single-timeout management.',
+    announcementList2: 'CharacterBattleCardPage: added NaN defense in generateTitle (pool[NaN] caused setTitle undefined); supplemented trait/special skill type badge color mapping; added maxLevel/level NaN and zero-value validation in getLinkedSkills; disabled PNG export button when no linked data present; added isMounted unmount protection to exportPng.',
+    announcementList3: 'Global fixes: fixed App.tsx workflow entry extra-quote JSX syntax error; fixed missing comma after announcementList3 in all 5 languages; fixed Korean announcement list out of sync with v1.12.0; all new pages passed SFX audit (0 violations).',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1961,10 +1961,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.0 Новый генератор боевой карты: автоматическая генерация игровой боевой карты из характеристик и дерева навыков персонажа. Рассчитывает боевые значения HP/MP/ATK/DEF/SPD/CRT, отображает разблокированные навыки, поддерживает генерацию титула, экспорт PNG и JSON.',
-    announcementList1: 'CharacterBattleCardPage: полностью новый генератор боевой карты. Автоматическое чтение данных character-stats и skill-tree, расчёт 6 боевых значений, визуальная панель боевой карты в игровом стиле, система генерации титулов.',
-    announcementList2: 'Глубокая связь: автоматическое определение типа класса из истории skill-tree; 6 прогресс-баров атрибутов в реальном времени; список разблокированных навыков с тегами типов и уровнями; дружелюбное руководство при пустом состоянии.',
-    announcementList3: 'Качество кода: все кнопки совместимы с SFX (data-sfx-handled), экспорт PNG через html-to-image, очистка Blob URL через requestAnimationFrame, полная локализация на 5 языках.'
+    announcementDescription: 'v1.12.1 Глубокий аудит и исправления стабильности: исправлен разрыв parentIds в applyPreset, синтаксические ошибки объектных литералов 5 языков, гонки таймаутов showNotice, неполное цветовое отображение типов навыков и 10+ проблем.',
+    announcementList1: 'CharacterSkillTreePage: исправлен критический баг applyPreset, при котором parentIds не синхронизировались после регенерации ID узлов (приводивший к полному разрыву родительско-дочерних связей в пресетных деревьях); удалён избыточный мёртвый код timeoutRefs/addTimeout; showNotice переведён на управление единственным эксклюзивным таймаутом.',
+    announcementList2: 'CharacterBattleCardPage: добавлена NaN-защита в generateTitle (pool[NaN] приводил к setTitle undefined); дополнено цветовое отображение бейджей типов навыков trait/special; добавлена валидация maxLevel/level на NaN и нулевые значения в getLinkedSkills; кнопка PNG-экспорта автоматически отключается при отсутствии связанных данных; добавлена защита от размонтирования isMounted в exportPng.',
+    announcementList3: 'Глобальные исправления: исправлена JSX-синтаксическая ошибка лишней кавычки в workflow entry App.tsx; исправлена пропущенная запятая после announcementList3 во всех 5 языках; исправлена рассинхронизация корейского списка объявлений с v1.12.0; все новые страницы прошли SFX-аудит (0 нарушений).',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2724,10 +2724,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.0 신규 캐릭터 배틀 카드 생성기: 캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드 자동 생성. PNG/JSON 납품하기, 칭호 생성, 5언어 완전 로컬라이제이션 지원.',
-    announcementList1: 'CharacterSkillTreePage: 신규 스킬 트리 디자이너. 5가지 프리셋(전사/마법사/암살자/서포터/커스텀), 12노드 스킬 트리 템플릿, SVG 연결선 비주얼, 스탯 연동 해금 조건, 레벨 상하 배분, 즐겨찾기/기록/JSON 납품하기.',
-    announcementList2: '연동 설계: character-stats 속성을 자동 읽어 사용 가능 스킬 포인트 계산. 실시간 속성 패널 표시 지원. 스킬 해금 상태는 연동 속성에 기반해 동적으로 판정.',
-    announcementList3: '코드 품질: 전체 버튼 SFX 적합(data-sfx-handled), requestAnimationFrame Blob URL 정리, loadState schema 검증, 5언어 완전 로컬라이제이션.'
+    announcementDescription: 'v1.12.1 전면 감사 및 안정성 수정: applyPreset 스킬 트리 부모-자식 관계 단절, 5언어 객체 리터럴 구문 오류, showNotice 타임아웃 경쟁 조건, 스킬 타입 색상 매핑 불완전 등 10건 이상 수정.',
+    announcementList1: 'CharacterSkillTreePage: applyPreset에서 노드 ID 재생성 시 parentIds 동기화되지 않는 치명적 버그 수정(프리셋 스킬 트리 부모-자식 관계 완전 단절)；불필요한 timeoutRefs/addTimeout 데드코드 제거；showNotice를 배타적 단일 타임아웃 관리로 변경.',
+    announcementList2: 'CharacterBattleCardPage: generateTitle NaN 방어 추가(pool[NaN]로 setTitle undefined 문제)；trait/special 스킬 타입 배지 색상 매핑 보완；getLinkedSkills에 maxLevel/level NaN 및 영값 검증 추가；PNG 납품 버튼 미연동 데이터 시 자동 비활성화；exportPng에 isMounted 언마운트 보호 추가.',
+    announcementList3: '글로벌 수정: App.tsx workflow entry 여분의 따옴표 JSX 구문 오류 수정；5언어 announcementList3 뒤 누락된 쉼표 수정；한국어 공지 목록 v1.12.0과 동기화；신규 페이지 전체 SFX 감사 통과(0 위반).'
   },
   fr: {
     ...translations.en,
@@ -2918,6 +2918,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.1',
+    date: '2026-05-18',
+    title: '1.12.1 全面深度审计与稳定性修复',
+    summary:
+      '对 v1.11.0/v1.12.0 新增的两个页面及 App.tsx 进行全面深度审计，修复 10+ 处 bug：包括 applyPreset 技能树父子关系断裂、5 语言对象语法错误、showNotice 超时竞争、技能类型颜色映射不完整、generateTitle NaN 防御缺失等。',
+    details: [
+      'CharacterSkillTreePage：修复 applyPreset 重新生成节点 ID 时未同步更新 parentIds 的关键 bug；移除冗余 timeoutRefs/addTimeout 死代码；showNotice 改为排他式单一 timeout 管理。',
+      'CharacterBattleCardPage：修复 generateTitle NaN 防御；补充 trait/special 技能类型 badge 颜色映射；getLinkedSkills 增加 maxLevel/level NaN 与零值校验；导出 PNG 按钮无数据时自动禁用；exportPng 增加 isMounted 卸载保护。',
+      'App.tsx：修复 workflow entry 多余引号导致的 JSX 语法错误；修复 5 语言 announcementList3 后缺失逗号的对象语法错误；修复韩语公告列表未同步；全部新页面 SFX 审计通过（0 违规）。',
+    ],
+  },
   {
     version: '1.12.0',
     date: '2026-05-18',
@@ -5040,7 +5052,7 @@ function HomeScreen({
                 <ActionIcon kind="battle-card" />
                 <span>{messages.featureBattleCard}</span>
               </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}">
+              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
                 <ActionIcon kind="docs" />
                 <span>{messages.featureDocs}</span>
               </button>
