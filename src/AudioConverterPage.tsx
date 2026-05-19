@@ -693,7 +693,7 @@ export function AudioConverterPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button back-link" type="button" onClick={() => { onBack(); }}>{backHome}</button>
+        <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
@@ -875,7 +875,7 @@ export function AudioConverterPage({
                   Download
                 </button>
                 <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { handleReset(); }}>Reset</button>
-                <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
+                <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { playSound('pageSwitch'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
               </div>
 
               {(isConverting || convertProgress > 0) && (

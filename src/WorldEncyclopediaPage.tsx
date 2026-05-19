@@ -144,6 +144,8 @@ const copyBase = {
     save: '保存',
     delete: '删除',
     unnamed: '未命名',
+    noMatchingEntries: '无匹配条目',
+    noRelCharacters: '关系网中暂无角色',
     helpButton: '帮助',
     categoryLabels: CATEGORY_LABELS.zh,
   },
@@ -175,6 +177,8 @@ const copyBase = {
     save: '保存',
     delete: '削除',
     unnamed: '名称未設定',
+    noMatchingEntries: '該当なし',
+    noRelCharacters: '関連キャラがいません',
     helpButton: 'ヘルプ',
     categoryLabels: CATEGORY_LABELS.ja,
   },
@@ -206,6 +210,8 @@ const copyBase = {
     save: 'Save',
     delete: 'Delete',
     unnamed: 'Unnamed',
+    noMatchingEntries: 'No matching entries',
+    noRelCharacters: 'No linked characters',
     helpButton: 'Help',
     categoryLabels: CATEGORY_LABELS.en,
   },
@@ -237,6 +243,8 @@ const copyBase = {
     save: 'Сохранить',
     delete: 'Удалить',
     unnamed: 'Безымянный',
+    noMatchingEntries: 'Нет совпадений',
+    noRelCharacters: 'Нет связанных персонажей',
     helpButton: 'Справка',
     categoryLabels: CATEGORY_LABELS.ru,
   },
@@ -268,6 +276,8 @@ const copyBase = {
     save: '저장',
     delete: '삭제',
     unnamed: '이름 없음',
+    noMatchingEntries: '일치하는 항목 없음',
+    noRelCharacters: '관련 캐릭터 없음',
     helpButton: '도움말',
     categoryLabels: CATEGORY_LABELS.ko,
   },
@@ -295,6 +305,7 @@ function defaultEntry(): EncyclopediaEntry {
 }
 
 export default function WorldEncyclopediaPage({
+  appSubtitle,
   backHome,
   openSettings,
   pageTitle,
@@ -415,6 +426,11 @@ export default function WorldEncyclopediaPage({
       if (Array.isArray(parsed)) {
         arr = parsed;
       } else if (parsed && Array.isArray(parsed.data)) {
+        if (parsed.tool && parsed.tool !== 'world-encyclopedia') {
+          showToast(copy.importError);
+          playSound('warning');
+          return;
+        }
         arr = parsed.data;
       }
       if (!arr.length) {
@@ -430,13 +446,16 @@ export default function WorldEncyclopediaPage({
         playSound('warning');
         return;
       }
-      setEntries((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const newItems = valid.filter((v) => !existingIds.has(v.id));
-        return [...prev, ...newItems];
-      });
-      showToast(copy.importSuccess.replace('{count}', String(valid.length)));
-      playSound('confirm');
+      const existingIds = new Set(entries.map((p) => p.id));
+      const newItems = valid.filter((v) => !existingIds.has(v.id));
+      setEntries((prev) => [...prev, ...newItems]);
+      if (newItems.length > 0) {
+        showToast(copy.importSuccess.replace('{count}', String(newItems.length)));
+        playSound('confirm');
+      } else {
+        showToast(copy.importError);
+        playSound('warning');
+      }
     } catch {
       showToast(copy.importError);
       playSound('warning');
@@ -446,7 +465,12 @@ export default function WorldEncyclopediaPage({
   const addTag = useCallback(() => {
     const text = window.prompt(copy.tagPlaceholder);
     if (!text || !text.trim()) return;
-    setModalEntry((m) => m && { ...m, tags: [...(m.tags ?? []), text.trim()] });
+    setModalEntry((m) => {
+      if (!m) return m;
+      const trimmed = text.trim();
+      if ((m.tags ?? []).includes(trimmed)) return m;
+      return { ...m, tags: [...(m.tags ?? []), trimmed] };
+    });
     playSound('confirm');
   }, [copy.tagPlaceholder]);
 
@@ -498,6 +522,13 @@ export default function WorldEncyclopediaPage({
       </header>
 
       <section className="tool-workbench fade-up delay-2 we-workbench">
+        <div className="tool-header">
+          <div>
+            <p className="section-label">{appSubtitle}</p>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+        </div>
         {/* Toolbar */}
         <div className="we-toolbar">
           <input
@@ -514,6 +545,7 @@ export default function WorldEncyclopediaPage({
               className={`we-filter-chip ${filterCategory === 'all' ? 'active' : ''}`}
               data-sfx-handled
               onClick={() => { playSound('select'); setFilterCategory('all'); }}
+              aria-pressed={filterCategory === 'all'}
             >
               {copy.allCategories} ({categoryCounts.all || 0})
             </button>
@@ -536,6 +568,7 @@ export default function WorldEncyclopediaPage({
               className={`we-view-btn ${viewMode === 'list' ? 'active' : ''}`}
               data-sfx-handled
               onClick={() => { playSound('select'); setViewMode('list'); }}
+              aria-pressed={viewMode === 'list'}
             >
               {copy.listView}
             </button>
@@ -544,6 +577,7 @@ export default function WorldEncyclopediaPage({
               className={`we-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
               data-sfx-handled
               onClick={() => { playSound('select'); setViewMode('grid'); }}
+              aria-pressed={viewMode === 'grid'}
             >
               {copy.gridView}
             </button>
@@ -554,7 +588,7 @@ export default function WorldEncyclopediaPage({
         <div className="we-content">
           {filteredEntries.length === 0 ? (
             <div className="we-empty">
-              <p>{entries.length === 0 ? copy.noEntries : 'No matching entries'}</p>
+              <p>{entries.length === 0 ? copy.noEntries : copy.noMatchingEntries}</p>
               {entries.length === 0 && <p className="tiny-copy">{copy.emptyHint}</p>}
               {entries.length === 0 && (
                 <button className="primary-button" type="button" data-sfx-handled onClick={() => { playSound('modalOpen'); handleAdd(); }} style={{ marginTop: 14 }}>
@@ -597,7 +631,7 @@ export default function WorldEncyclopediaPage({
         <div className="modal-backdrop opening" role="presentation" onClick={() => setModalEntry(null)}>
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 'min(560px, 94vw)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.editEntry}</h3>
+              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{entries.some((e) => e.id === modalEntry.id) ? copy.editEntry : copy.addEntry}</h3>
               <button className="modal-close" type="button" data-sfx-handled onClick={() => { setModalEntry(null); playSound('modalClose'); }} aria-label={copy.cancel}>×</button>
             </div>
             <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -656,7 +690,7 @@ export default function WorldEncyclopediaPage({
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{copy.relatedCharacters}</label>
                 {relNodes.length === 0 ? (
-                  <p className="tiny-copy" style={{ color: 'var(--text-secondary)' }}>No characters in Relationship Web</p>
+                  <p className="tiny-copy" style={{ color: 'var(--text-secondary)' }}>{copy.noRelCharacters}</p>
                 ) : (
                   <div className="we-rel-row">
                     {relNodes.map((node) => (

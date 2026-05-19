@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.3';
+const VERSION = '1.12.4';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -663,10 +663,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.3 全局深度审计与稳定性修复：修复 WorldEncyclopedia 导入崩溃、技能树/战斗卡按钮完全无声、ImportModal 双重音效、导出格式标准化等关键问题。',
-    announcementList1: 'WorldEncyclopediaPage：新增 JSON 导入功能（支持标准对象格式与直接数组）；修复 handleImport 中未定义函数 persist 导致的崩溃；导出 JSON 添加 tool 字段以兼容 ImportModal；新增 normalizeEntry 数据归一化，防御性处理缺失的 tags/relatedCharacterIds；验证 category 有效性。',
-    announcementList2: 'CharacterSkillTreePage & CharacterBattleCardPage：修复无效音效名称 ui-click（audioEngine 中不存在该预设）导致全部相关按钮完全无声的 bug，统一替换为 buttonClick。',
-    announcementList3: 'App.tsx ImportModal：新增 world-encyclopedia 导入支持；修复 action-tile 和 validate 按钮的双重音效播放（内联 playSound 与全局 handler 冲突）；同步更新 screenMap 与 tools 列表。',
+    announcementDescription: 'v1.12.4 第三轮全局深度审计：修复 WorldEncyclopedia 导入计数错误、两处硬编码英文未本地化、Modal 标题不区分添加/编辑、筛选按钮缺少 aria-pressed、pageTitle 未渲染、标签可重复添加、AudioEditor/AudioConverter 返回按钮无声、ImportModal 缺失 character-gif 和 index-tts 导入支持等。',
+    announcementList1: 'WorldEncyclopediaPage：修复导入成功 toast 错误地计算重复条目（现在显示实际新增数量）；本地化 "No matching entries" 和 "No characters in Relationship Web"；Modal 标题根据 add/edit 模式动态切换；筛选 chip 和视图切换按钮添加 aria-pressed；渲染 pageTitle/pageDescription；导入时验证 tool 字段防止误导入其他工具数据；addTag 添加重复标签防护。',
+    announcementList2: 'AudioEditorPage & AudioConverterPage：修复返回按钮缺少 playSound("back") 和 data-sfx-handled；AudioConverter 的 "Audio Editor" 切换按钮添加 playSound("pageSwitch")。',
+    announcementList3: 'App.tsx ImportModal：修复 "Go to Tool" 按钮双重音效；新增 index-tts 到可导入工具列表；为 character-gif 和 index-tts 补全 importToolConfig case；导入失败时显示具体错误原因（而非通用 "Tool mismatch"）。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1097,10 +1097,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.3 グローバル深度監査と安定性修正：WorldEncyclopedia のインポートクラッシュ、スキルツリー/バトルカードのボタン完全無音、ImportModal の重複音效、出力形式の標準化などを修正。',
-    announcementList1: 'WorldEncyclopediaPage：JSON 取込機能を追加（標準オブジェクト形式と直接配列に対応）；handleImport の未定義関数 persist によるクラッシュを修正；JSON 出力に tool フィールドを追加して ImportModal と互換；normalizeEntry でデータ正規化を追加し、欠落 tags/relatedCharacterIds を防御的に処理；category の有効性を検証。',
-    announcementList2: 'CharacterSkillTreePage & CharacterBattleCardPage：無効な音效名 ui-click（audioEngine に存在しない）により関連ボタンが完全に無音になっていたバグを修正し、buttonClick に統一。',
-    announcementList3: 'App.tsx ImportModal：world-encyclopedia の取込サポートを追加；action-tile と validate ボタンの重複音效再生（インライン playSound とグローバル handler の競合）を修正；screenMap と tools リストを同期更新。',
+    announcementDescription: 'v1.12.4 第3ラウンドグローバル深度監査：WorldEncyclopedia の取込カウントエラー、2 箇所の英語ハードコード未ローカライズ、Modal タイトルの追加/編集区別なし、フィルタボタンの aria-pressed 欠如、pageTitle 未描画、タグ重複許可、AudioEditor/AudioConverter の戻るボタン無音、ImportModal の character-gif と index-tts 取込サポート欠如などを修正。',
+    announcementList1: 'WorldEncyclopediaPage：取込成功 toast が重複を含めて誤カウントする問題を修正（実際の追加数を表示）；「No matching entries」「No characters in Relationship Web」をローカライズ；Modal タイトルを add/edit モードで動的切替；フィルタ chip とビュー切替ボタンに aria-pressed を追加；pageTitle/pageDescription を描画；取込時に tool フィールドを検証；addTag に重複タグ防止を追加。',
+    announcementList2: 'AudioEditorPage & AudioConverterPage：戻るボタンに playSound("back") と data-sfx-handled を追加；AudioConverter の「Audio Editor」切替ボタンに playSound("pageSwitch") を追加。',
+    announcementList3: 'App.tsx ImportModal：「Go to Tool」ボタンの重複音效を修正；index-tts を取込可能ツール一覧に追加；character-gif と index-tts の importToolConfig case を補完；取込失敗時に具体的なエラー原因を表示。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1531,10 +1531,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.3 Global deep audit and stability fixes: fixed WorldEncyclopedia import crash, completely silent buttons in Skill Tree/Battle Card, ImportModal double-play sound, export format standardization, and more.',
-    announcementList1: 'WorldEncyclopediaPage: added JSON import (supports standard object format and direct arrays); fixed crash from undefined function persist in handleImport; added tool field to JSON export for ImportModal compatibility; added normalizeEntry data normalization with defensive handling for missing tags/relatedCharacterIds; validated category values.',
-    announcementList2: 'CharacterSkillTreePage & CharacterBattleCardPage: fixed invalid sound name ui-click (preset does not exist in audioEngine) causing all related buttons to be completely silent; unified replacement to buttonClick.',
-    announcementList3: 'App.tsx ImportModal: added world-encyclopedia import support; fixed double-play sound on action-tile and validate buttons (inline playSound conflicting with global handler); synchronized screenMap and tools list updates.',
+    announcementDescription: 'v1.12.4 Third-round global deep audit: fixed WorldEncyclopedia import toast counting duplicates as added, two hardcoded English strings unlocalized, Modal title not distinguishing Add vs Edit, filter buttons missing aria-pressed, pageTitle not rendered, duplicate tags allowed, missing back button SFX on AudioEditor/AudioConverter, missing character-gif and index-tts import support in ImportModal, and more.',
+    announcementList1: 'WorldEncyclopediaPage: fixed import success toast incorrectly counting duplicates (now shows actual new items added); localized "No matching entries" and "No characters in Relationship Web"; Modal title dynamically switches between add/edit modes; added aria-pressed to filter chips and view toggle buttons; rendered pageTitle/pageDescription; validated tool field on import; added duplicate tag prevention to addTag.',
+    announcementList2: 'AudioEditorPage & AudioConverterPage: fixed missing playSound("back") and data-sfx-handled on back buttons; added playSound("pageSwitch") to AudioConverter "Audio Editor" switch button.',
+    announcementList3: 'App.tsx ImportModal: fixed double-play on "Go to Tool" button; added index-tts to importable tools list; added importToolConfig cases for character-gif and index-tts; import failures now show specific error reason instead of generic "Tool mismatch".',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1965,10 +1965,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.3 Глобальный глубокий аудит и исправления стабильности: исправлен краш импорта WorldEncyclopedia, полностью беззвучные кнопки в дереве навыков/боевой карте, двойное воспроизведение звука в ImportModal, стандартизация формата экспорта и др.',
-    announcementList1: 'WorldEncyclopediaPage: добавлен импорт JSON (поддерживает стандартный объект и прямые массивы); исправлен краш из-за неопределённой функции persist в handleImport; добавлено поле tool в JSON-экспорт для совместимости с ImportModal; добавлена нормализация данных normalizeEntry с защитой от отсутствующих tags/relatedCharacterIds; проверена валидность category.',
-    announcementList2: 'CharacterSkillTreePage & CharacterBattleCardPage: исправлено неверное имя звука ui-click (такой пресет не существует в audioEngine), из-за которого все связанные кнопки были полностью беззвучны; заменено на buttonClick.',
-    announcementList3: 'App.tsx ImportModal: добавлена поддержка импорта world-encyclopedia; исправлено двойное воспроизведение звука на кнопках action-tile и validate (конфликт inline playSound с глобальным обработчиком); синхронизированы обновления screenMap и списка tools.',
+    announcementDescription: 'v1.12.4 Третий раунд глобального глубокого аудита: исправлено ошибочное включение дубликатов в счётчик импорта WorldEncyclopedia, две не локализованные английские строки, Modal не различает добавление и редактирование, у кнопок фильтра отсутствует aria-pressed, pageTitle не отображается, разрешены дублирующиеся теги, отсутствует SFX на кнопках назад в AudioEditor/AudioConverter, отсутствует импорт character-gif и index-tts в ImportModal и др.',
+    announcementList1: 'WorldEncyclopediaPage: исправлен счётчик импорта (теперь показывает реальное количество новых записей); локализованы "No matching entries" и "No characters in Relationship Web"; заголовок Modal динамически переключается между добавлением и редактированием; добавлен aria-pressed к фильтрам и переключателям вида; отображены pageTitle/pageDescription; добавлена валидация tool при импорте; добавлена защита от дублирования тегов.',
+    announcementList2: 'AudioEditorPage & AudioConverterPage: добавлен playSound("back") и data-sfx-handled к кнопкам назад; добавлен playSound("pageSwitch") к кнопке переключения "Audio Editor" в AudioConverter.',
+    announcementList3: 'App.tsx ImportModal: исправлено двойное воспроизведение звука на кнопке "Go to Tool"; добавлен index-tts в список импортируемых инструментов; добавлены case importToolConfig для character-gif и index-tts; при ошибке импорта теперь отображается конкретная причина.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2731,10 +2731,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.2 2차 전면 감사 및 종합 수정: getLinkedStats 데이터 구조 파싱 오류, exportPng 로딩 상태 없음, 스킬 타입 배지 비현지화, 뒤로 가기 버튼 API 불일치, 반응형 레이아웃 누락, History/Favorites 빈 상태 누락 등 15건 이상 수정.',
-    announcementList1: 'CharacterSkillTreePage: getLinkedStats 파싱 오류 수정(배열 직접 파싱 지원)；importJson에 isMountedRef 언마운트 보호 추가；JSON 납품 파일명에 불법 문자 필터 추가；History/Favorites에 5언어 빈 상태 추가；뒤로 가기 버튼을 onBack()으로 통일；props 타입 정의에 onBack 추가.',
-    announcementList2: 'CharacterBattleCardPage: getLinkedStats 파싱 오류 수정；exportPng 로딩 상태 추가；스킬 타입 배지에 5언어 현지화 추가；className 추론 stale data 수정；아바타에 aria-label 추가；스킬 목록에 maxHeight+overflowY 추가；뒤로 가기 버튼을 onBack()으로 변경；props 타입 정의에 onBack 추가.',
-    announcementList3: 'UI/UX 및 CSS: 반응형 클래스와 900px/720px 미디어 쿼리 추가；입력창에 focus 스타일 추가；disabled 버튼 스타일과 .danger-button 정의 추가；카드 그림자 최적화.'
+    announcementDescription: 'v1.12.4 3차 글로벌 심층 감사: WorldEncyclopedia 가져오기 토스트가 중복을 추가된 것으로 잘못 계산, 2곳의 영어 하드코딩 미현지화, Modal 제목이 추가/편집을 구분하지 않음, 필터 버튼 aria-pressed 누락, pageTitle 미랜더링, 태그 중복 허용, AudioEditor/AudioConverter 뒤로 가기 버튼 무음, ImportModal character-gif 및 index-tts 가져오기 지원 누락 등 수정.',
+    announcementList1: 'WorldEncyclopediaPage: 가져오기 성공 토스트의 중복 오计数 수정(실제 신규 항목 수 표시)；「No matching entries」「No characters in Relationship Web」현지화；Modal 제목을 추가/편집 모드에 따라 동적 전환；필터 chip 및 보기 전환 버튼에 aria-pressed 추가；pageTitle/pageDescription 렌더링；가져오기 시 tool 필드 검증；addTag에 중복 태그 방지 추가.',
+    announcementList2: 'AudioEditorPage & AudioConverterPage: 뒤로 가기 버튼에 playSound("back") 및 data-sfx-handled 추가；AudioConverter의「Audio Editor」전환 버튼에 playSound("pageSwitch") 추가.',
+    announcementList3: 'App.tsx ImportModal: 「Go to Tool」버튼 이중 음향 수정；가져오기 가능 도구 목록에 index-tts 추가；character-gif 및 index-tts의 importToolConfig case 추가；가져오기 실패 시 구체적인 오류 원인 표시.',
   },
   fr: {
     ...translations.en,
@@ -2925,6 +2925,30 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.4',
+    date: '2026-05-18',
+    title: '1.12.4 第三轮全局深度审计',
+    summary:
+      '对全局进行第三轮深度审计，修复 WorldEncyclopedia 导入计数错误、两处硬编码英文未本地化、Modal 标题不区分添加/编辑、筛选按钮缺少 aria-pressed、pageTitle 未渲染、标签可重复添加、AudioEditor/AudioConverter 返回按钮无声、ImportModal 缺失 character-gif 和 index-tts 导入支持等。',
+    details: [
+      'WorldEncyclopediaPage：修复导入成功 toast 错误地计算重复条目（现在显示实际新增数量）；本地化 "No matching entries" 和 "No characters in Relationship Web"；Modal 标题根据 add/edit 模式动态切换；筛选 chip 和视图切换按钮添加 aria-pressed；渲染 pageTitle/pageDescription；导入时验证 tool 字段防止误导入其他工具数据；addTag 添加重复标签防护。',
+      'AudioEditorPage & AudioConverterPage：修复返回按钮缺少 playSound("back") 和 data-sfx-handled；AudioConverter 的 "Audio Editor" 切换按钮添加 playSound("pageSwitch")。',
+      'App.tsx ImportModal：修复 "Go to Tool" 按钮双重音效；新增 index-tts 到可导入工具列表；为 character-gif 和 index-tts 补全 importToolConfig case；导入失败时显示具体错误原因（而非通用 "Tool mismatch"）。',
+    ],
+  },
+  {
+    version: '1.12.3',
+    date: '2026-05-18',
+    title: '1.12.3 全局深度审计与稳定性修复',
+    summary:
+      '对全局进行第二轮深度审计，修复 WorldEncyclopedia 导入崩溃、技能树/战斗卡按钮完全无声、ImportModal 双重音效、导出格式标准化等关键问题。',
+    details: [
+      'WorldEncyclopediaPage：新增 JSON 导入功能（支持标准对象格式与直接数组）；修复 handleImport 中未定义函数 persist 导致的崩溃；导出 JSON 添加 tool 字段以兼容 ImportModal；新增 normalizeEntry 数据归一化，防御性处理缺失的 tags/relatedCharacterIds；验证 category 有效性。',
+      'CharacterSkillTreePage & CharacterBattleCardPage：修复无效音效名称 ui-click（audioEngine 中不存在该预设）导致全部相关按钮完全无声的 bug，统一替换为 buttonClick。',
+      'App.tsx ImportModal：新增 world-encyclopedia 导入支持；修复 action-tile 和 validate 按钮的双重音效播放（内联 playSound 与全局 handler 冲突）；同步更新 screenMap 与 tools 列表。',
+    ],
+  },
   {
     version: '1.12.2',
     date: '2026-05-18',
@@ -6973,7 +6997,7 @@ function ImportModal({
       playSound('save');
     } else {
       setStatus('error');
-      setStatusMessage(messages.importToolMismatch);
+      setStatusMessage(result.message || messages.importToolMismatch);
       playSound('error');
     }
   }
@@ -7006,6 +7030,7 @@ function ImportModal({
     { key: 'image-converter', label: messages.featureImageConverter, icon: 'image-converter' },
     { key: 'character-gif', label: messages.featureGif, icon: 'character-gif' },
     { key: 'world-encyclopedia', label: messages.featureWorldEncyclopedia, icon: 'world-encyclopedia' },
+    { key: 'index-tts', label: messages.featureIndexTts, icon: 'index-tts' },
   ];
 
   if (!isOpen) return null;
@@ -7067,7 +7092,7 @@ function ImportModal({
                 {messages.importValidate}
               </button>
               {status === 'success' && (
-                <button className="secondary-button" type="button" onClick={goToTool}>
+                <button className="secondary-button" type="button" data-sfx-handled onClick={goToTool}>
                   {messages.importGoToTool}
                 </button>
               )}
@@ -7176,6 +7201,20 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
       if (data.tool !== 'world-encyclopedia') return { success: false, message: 'Tool type mismatch' };
       if (!Array.isArray(data.data)) return { success: false, message: 'Missing data array' };
       try { localStorage.setItem('oc-maker.world-encyclopedia', JSON.stringify(data.data)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'character-gif': {
+      if (data.tool !== 'character-gif') return { success: false, message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
+      try { localStorage.setItem('oc-maker.character-gif', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'index-tts': {
+      if (data.tool !== 'index-tts') return { success: false, message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      const payload = { text: String(data.text ?? ''), referenceAudioName: String(data.referenceAudioName ?? ''), config: data.config, savedSnapshot: '' };
+      try { localStorage.setItem('oc-maker.index-tts', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     default:

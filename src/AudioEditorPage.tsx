@@ -1349,7 +1349,7 @@ export function AudioEditorPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button back-link" type="button" onClick={() => { onBack(); }}>{backHome}</button>
+        <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'overview'); }}>Help</button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-editor', 'buttons'); }}>Tutorial</button>
