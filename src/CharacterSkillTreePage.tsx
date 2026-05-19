@@ -968,7 +968,7 @@ export default function CharacterSkillTreePage({
                 </button>
               </div>
             </div>
-          ))}
+          )))}
         </div>
       )}
 
@@ -995,7 +995,7 @@ export default function CharacterSkillTreePage({
                 </button>
               </div>
             </div>
-          ))}
+          )))}
         </div>
       )}
     </div>
