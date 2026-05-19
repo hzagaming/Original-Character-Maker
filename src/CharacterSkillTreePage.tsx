@@ -215,16 +215,23 @@ function seededRandom(seed: string): number {
 // ─── Component ───
 
 export default function CharacterSkillTreePage({
+  appSubtitle,
   language,
   settings,
   onNavigate,
+  onBack,
+  onOpenSettings,
+  openSettings,
   pageTitle,
   pageDescription,
 }: {
+  appSubtitle: string;
   language: AppLanguage;
   settings: SettingsState;
   onNavigate: (screen: FeatureScreen) => void;
   onBack: () => void;
+  onOpenSettings: () => void;
+  openSettings: string;
   pageTitle: string;
   pageDescription: string;
 }) {
@@ -575,24 +582,42 @@ export default function CharacterSkillTreePage({
   }, [selectedNode?.type]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="page-container" data-theme={themeKey}>
-      <div className="page-header">
-        <div className="page-header-left">
-          <button className="back-button" type="button" onClick={() => { playSound('buttonClick'); onBack(); }} data-sfx-handled>
+    <main className="feature-shell tool-page-shell">
+      <header className="feature-header fade-up delay-1">
+        <div className="feature-header-meta">
+          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {labels.backHome}
           </button>
-          <h1 className="page-title">{pageTitle}</h1>
-          <p className="page-description">{pageDescription}</p>
         </div>
-      </div>
-
-      {notice && (
-        <div className={`notice-banner ${notice.type}`}>
-          {notice.text}
+        <div className="tool-header-actions">
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); saveSet(); }} data-sfx-handled>
+            {labels.saveSet}
+          </button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); exportJson(); }} data-sfx-handled>
+            {labels.exportJson}
+          </button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenSettings(); }} data-sfx-handled>
+            {openSettings}
+          </button>
         </div>
-      )}
+      </header>
 
-      {/* Top stats bar */}
+      <section className="tool-workbench fade-up delay-2">
+        <div className="tool-header">
+          <div>
+            <p className="section-label">{appSubtitle}</p>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+        </div>
+
+        {notice && (
+          <div className={`notice-banner ${notice.type}`}>
+            {notice.text}
+          </div>
+        )}
+
+        {/* Top stats bar */}
       <div className="skill-tree-stats-bar" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', padding: '12px 16px', marginBottom: '12px', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{labels.linkedStats}</span>
@@ -998,7 +1023,8 @@ export default function CharacterSkillTreePage({
           )))}
         </div>
       )}
-    </div>
-  );
+    </section>
+  </main>
+);
 }
 

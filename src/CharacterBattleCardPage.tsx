@@ -127,16 +127,23 @@ function calculateBattleStats(stats: Record<string, number>): Record<string, num
 // ─── Component ───
 
 export default function CharacterBattleCardPage({
+  appSubtitle,
   language,
   settings,
   onNavigate,
+  onBack,
+  onOpenSettings,
+  openSettings,
   pageTitle,
   pageDescription,
 }: {
+  appSubtitle: string;
   language: AppLanguage;
   settings: SettingsState;
   onNavigate: (screen: FeatureScreen) => void;
   onBack: () => void;
+  onOpenSettings: () => void;
+  openSettings: string;
   pageTitle: string;
   pageDescription: string;
 }) {
@@ -360,46 +367,48 @@ export default function CharacterBattleCardPage({
   const hasData = Object.keys(linkedStats).length > 0 || linkedSkills.length > 0;
 
   return (
-    <div className="page-container" data-theme={themeKey}>
-      <div className="page-header">
-        <div className="page-header-left">
-          <button className="back-button" type="button" onClick={() => { playSound('buttonClick'); onBack(); }} data-sfx-handled>
+    <main className="feature-shell tool-page-shell">
+      <header className="feature-header fade-up delay-1">
+        <div className="feature-header-meta">
+          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {labels.backHome}
           </button>
-          <h1 className="page-title">{pageTitle}</h1>
-          <p className="page-description">{pageDescription}</p>
         </div>
-      </div>
-
-      {notice && (
-        <div className={`notice-banner ${notice.type}`}>
-          {notice.text}
+        <div className="tool-header-actions">
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); readLinkedData(); }} data-sfx-handled>
+            {labels.readData}
+          </button>
+          <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); exportPng(); }} data-sfx-handled disabled={!hasData || isExporting}>
+            {isExporting ? 'Exporting…' : labels.exportPng}
+          </button>
+          <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenSettings(); }} data-sfx-handled>
+            {openSettings}
+          </button>
         </div>
-      )}
+      </header>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '16px' }}>
-        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); readLinkedData(); }} data-sfx-handled>
-          {labels.readData}
-        </button>
-        <button className="primary-button" type="button" onClick={() => { playSound('buttonClick'); exportPng(); }} data-sfx-handled disabled={!hasData || isExporting}>
-          {isExporting ? 'Exporting…' : labels.exportPng}
-        </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); exportJson(); }} data-sfx-handled>
-          {labels.exportJson}
-        </button>
-        <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); copyJson(); }} data-sfx-handled>
-          {labels.copyJson}
-        </button>
-      </div>
-
-      {!hasData && (
-        <div className="notice-banner error" style={{ marginBottom: '16px' }}>
-          {labels.noLinkedData}
+      <section className="tool-workbench fade-up delay-2">
+        <div className="tool-header">
+          <div>
+            <p className="section-label">{appSubtitle}</p>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
         </div>
-      )}
 
-      {/* Battle Card */}
+        {notice && (
+          <div className={`notice-banner ${notice.type}`}>
+            {notice.text}
+          </div>
+        )}
+
+        {!hasData && (
+          <div className="notice-banner error" style={{ marginBottom: '16px' }}>
+            {labels.noLinkedData}
+          </div>
+        )}
+
+        {/* Battle Card */}
       <div
         ref={cardRef}
         className="battle-card-panel"
@@ -519,7 +528,7 @@ export default function CharacterBattleCardPage({
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

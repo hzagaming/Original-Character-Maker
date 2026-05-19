@@ -459,6 +459,12 @@ export default function CharacterChroniclePage({
       </header>
 
       <section className="tool-workbench fade-up delay-2 ch-workbench">
+        <div className="tool-header">
+          <div>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+        </div>
         {/* Event List (Editor) */}
         <div className="ch-editor">
           {sortedEvents.length === 0 ? (

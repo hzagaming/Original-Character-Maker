@@ -458,6 +458,12 @@ export default function CharacterCardPage({
       </header>
 
       <section className="tool-workbench fade-up delay-2 cc-workbench">
+        <div className="tool-header">
+          <div>
+            <h2>{pageTitle}</h2>
+            <p>{pageDescription}</p>
+          </div>
+        </div>
         <div className="cc-editor">
           <div className="cc-section">
             <h4>{copy.cardName}</h4>
