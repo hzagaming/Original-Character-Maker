@@ -198,11 +198,13 @@ export default function DocsPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button" type="button" onClick={onBack} data-sfx-handled>
-          {backHome}
-        </button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={onOpenSettings} data-sfx-handled>
+          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+            ← {backHome}
+          </button>
+        </div>
+        <div className="tool-header-actions">
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>
             {openSettings}
           </button>
         </div>
@@ -226,7 +228,7 @@ export default function DocsPage({
               <div className="docs-nav-group">
                 <button
                   className={`docs-nav-item ${activeToolId === 'intro' ? 'active' : ''}`}
-                  type="button" data-sfx-handled
+                  type="button"
                   onClick={() => { setActiveToolId('intro'); setActiveSection(null); if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' }); }}
                 >
                   {messages.docsNavIntro}
@@ -237,7 +239,7 @@ export default function DocsPage({
                 <p className="docs-nav-group-title">{messages.docsNavIndex}</p>
                 <button
                   className={`docs-nav-item ${isIndexView ? 'active' : ''}`}
-                  type="button" data-sfx-handled
+                  type="button"
                   onClick={() => {
                     setActiveToolId('error-index');
                     setActiveSection(null);
@@ -254,7 +256,7 @@ export default function DocsPage({
                   <button
                     key={cat.id}
                     className={`docs-nav-item docs-nav-sub ${activeToolId === `dict-${cat.id}` ? 'active' : ''}`}
-                    type="button" data-sfx-handled
+                    type="button"
                     onClick={() => {
                       setActiveToolId(`dict-${cat.id}`);
                       setActiveSection(null);
@@ -273,7 +275,7 @@ export default function DocsPage({
                     <button
                       key={tool.id}
                       className={`docs-nav-item ${activeToolId === tool.id ? 'active' : ''}`}
-                      type="button" data-sfx-handled
+                      type="button"
                       onClick={() => {
                         setActiveToolId(tool.id);
                         setActiveSection('overview');
@@ -293,7 +295,7 @@ export default function DocsPage({
                     <button
                       key={tool.id}
                       className={`docs-nav-item ${activeToolId === tool.id ? 'active' : ''}`}
-                      type="button" data-sfx-handled
+                      type="button"
                       onClick={() => {
                         setActiveToolId(tool.id);
                         setActiveSection('overview');
@@ -313,7 +315,7 @@ export default function DocsPage({
                     <button
                       key={id}
                       className={`docs-nav-item docs-nav-sub ${activeSection === id ? 'active' : ''}`}
-                      type="button" data-sfx-handled
+                      type="button"
                       onClick={() => scrollToSection(id)}
                     >
                       {sectionLabels[id]}
@@ -335,7 +337,7 @@ export default function DocsPage({
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && (
-                <button className="docs-search-clear" type="button" onClick={() => setSearchQuery('')} data-sfx-handled>
+                <button className="docs-search-clear" type="button" aria-label={messages.clearSearch || 'Clear search'} onClick={() => { playSound('buttonClick'); setSearchQuery(''); }}>
                   ✕
                 </button>
               )}
@@ -373,7 +375,7 @@ export default function DocsPage({
                     <button
                       key={tool.id}
                       className="docs-tool-card"
-                      type="button" data-sfx-handled
+                      type="button"
                       onClick={() => {
                         setActiveToolId(tool.id);
                         setActiveSection('overview');
@@ -591,7 +593,7 @@ function ErrorIndexView({ errors, messages, highlightedErrorCode }: { errors: im
           <button
             key={f.key}
             className={`docs-index-filter ${filter === f.key ? 'active' : ''} ${f.key !== 'all' ? severityClassMap[f.key] : ''}`}
-            type="button" data-sfx-handled
+            type="button"
             onClick={() => setFilter(f.key)}
           >
             <span>{f.label}</span>

@@ -650,6 +650,7 @@ export function AssetGalleryPage({
       <section className="tool-workbench fade-up delay-2">
         <div className="tool-header">
           <div>
+            <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
           </div>
@@ -773,6 +774,7 @@ export function AssetGalleryPage({
                           className="asset-action-btn"
                           type="button"
                           title={copy.downloadOne}
+                          aria-label={copy.downloadOne}
                           data-sfx-handled
                           onClick={(e) => { e.stopPropagation(); handleDownload(item); }}
                         >
@@ -782,6 +784,7 @@ export function AssetGalleryPage({
                           className="asset-action-btn"
                           type="button"
                           title={copy.deleteOne}
+                          aria-label={copy.deleteOne}
                           data-sfx-handled
                           onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
                         >

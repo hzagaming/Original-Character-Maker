@@ -264,6 +264,7 @@ function getCopy(lang: AppLanguage) {
 }
 
 export default function CharacterCardPage({
+  appSubtitle,
   backHome,
   openSettings,
   pageTitle,
@@ -460,6 +461,7 @@ export default function CharacterCardPage({
       <section className="tool-workbench fade-up delay-2 cc-workbench">
         <div className="tool-header">
           <div>
+            <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
           </div>

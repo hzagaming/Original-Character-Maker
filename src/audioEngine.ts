@@ -101,6 +101,7 @@ let masterGain: GainNode | null = null;
 let sfxGain: GainNode | null = null;
 let musicGain: GainNode | null = null;
 let musicLimiter: DynamicsCompressorNode | null = null;
+let musicReverbNode: { mix: AudioNode; nodes: AudioNode[]; convolver: ConvolverNode } | null = null;
 // music state declared below in music engine section
 let currentSettings: AudioSettings = { ...defaultAudioSettings };
 let ctxCreationFailed = false;
@@ -127,8 +128,8 @@ function ensureContext(): AudioContext {
       musicLimiter.attack.value = 0.002;
       musicLimiter.release.value = 0.1;
       musicGain.connect(musicLimiter);
-      musicLimiter.connect(masterGain);
       applyVolumes();
+      rebuildMusicChain();
       // Expose for DevModePanel debugging
       try {
         (window as unknown as { __audioCtx?: AudioContext }).__audioCtx = ctx;
@@ -152,6 +153,26 @@ function now() {
   return ensureContext().currentTime;
 }
 
+function rebuildMusicChain() {
+  if (!musicLimiter || !masterGain || !ctx) return;
+  try {
+    musicLimiter.disconnect();
+    if (musicReverbNode) {
+      musicReverbNode.nodes.forEach((n) => {
+        try { n.disconnect(); } catch { /* ignore */ }
+      });
+      musicReverbNode = null;
+    }
+  } catch { /* ignore */ }
+  const reverbAmount = currentSettings.musicReverb / 100;
+  if (reverbAmount > 0) {
+    musicReverbNode = createReverbMix(musicLimiter, 1 - reverbAmount * 0.45, reverbAmount * 0.45, 1.2);
+    musicReverbNode.mix.connect(masterGain);
+  } else {
+    musicLimiter.connect(masterGain);
+  }
+}
+
 function applyVolumes() {
   if (!masterGain || !sfxGain || !musicGain || !ctx) return;
   const m = currentSettings.masterVolume / 100;
@@ -170,13 +191,19 @@ export function updateAudioSettings(next: Partial<AudioSettings>) {
   const oldUseCustomMusic = currentSettings.useCustomMusic;
   const oldMusicTempo = currentSettings.musicTempo;
   const oldMusicPitch = currentSettings.musicPitch;
+  const oldMusicReverb = currentSettings.musicReverb;
+  const oldMusicFilter = currentSettings.musicFilter;
+  const oldMusicStereoWidth = currentSettings.musicStereoWidth;
   currentSettings = { ...currentSettings, ...next };
   applyVolumes();
   const musicChanged =
     oldMusicPreset !== currentSettings.musicPreset ||
     oldUseCustomMusic !== currentSettings.useCustomMusic ||
     oldMusicTempo !== currentSettings.musicTempo ||
-    oldMusicPitch !== currentSettings.musicPitch;
+    oldMusicPitch !== currentSettings.musicPitch ||
+    oldMusicReverb !== currentSettings.musicReverb ||
+    oldMusicFilter !== currentSettings.musicFilter ||
+    oldMusicStereoWidth !== currentSettings.musicStereoWidth;
   if (currentSettings.musicEnabled && (!wasMusicOn || musicChanged)) {
     stopMusic();
     startMusic();
@@ -651,6 +678,8 @@ function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, du
     const startTime = Math.max(when, c.currentTime);
     const humanDetune = humanize() * 3; // ±3 cents organic drift
     const velocity = volume * (0.92 + humanize() * 0.08); // ±8% velocity
+    const effectiveFilterFreq = filterFreq * (currentSettings.musicFilter / 5000);
+    const effectivePan = stereoPan * (currentSettings.musicStereoWidth / 80);
 
     // ── Oscillator stack ──
     // 1) Sub oscillator (1 octave below) for warmth
@@ -697,13 +726,13 @@ function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, du
     // ── Filter envelope (bright attack, darker sustain) ──
     const filter = c.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(filterFreq * 1.8, startTime);
-    filter.frequency.exponentialRampToValueAtTime(filterFreq * 0.6, startTime + attack + decay * 1.5);
+    filter.frequency.setValueAtTime(effectiveFilterFreq * 1.8, startTime);
+    filter.frequency.exponentialRampToValueAtTime(effectiveFilterFreq * 0.6, startTime + attack + decay * 1.5);
     filter.Q.value = 0.6;
 
     // ── Stereo panner ──
     const panner = c.createStereoPanner ? c.createStereoPanner() : null;
-    if (panner) panner.pan.value = stereoPan;
+    if (panner) panner.pan.value = effectivePan;
 
     // ── Routing ──
     subOsc.connect(subGain);
