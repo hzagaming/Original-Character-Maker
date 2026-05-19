@@ -598,11 +598,13 @@ export default function ColorPaletteDesignerPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button" type="button" onClick={() => { playSound('back'); onBack(); }} data-sfx-handled>
-          {backHome}
-        </button>
         <div className="feature-header-meta">
-          <button className="secondary-button small-button" type="button" onClick={() => { playSound('settingsOpen'); onOpenSettings(); }} data-sfx-handled>
+          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+            ← {backHome}
+          </button>
+        </div>
+        <div className="tool-header-actions">
+          <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>
             {openSettings}
           </button>
         </div>

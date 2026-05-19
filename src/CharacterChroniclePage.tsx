@@ -296,6 +296,7 @@ function defaultEvent(): ChronicleEvent {
 }
 
 export default function CharacterChroniclePage({
+  appSubtitle,
   backHome,
   openSettings,
   pageTitle,
@@ -461,6 +462,7 @@ export default function CharacterChroniclePage({
       <section className="tool-workbench fade-up delay-2 ch-workbench">
         <div className="tool-header">
           <div>
+            <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
           </div>

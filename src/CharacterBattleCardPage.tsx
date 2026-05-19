@@ -528,7 +528,8 @@ export default function CharacterBattleCardPage({
             </div>
           </div>
         )}
-      </section>
-    </main>
-  );
+      </div>
+    </section>
+  </main>
+);
 }

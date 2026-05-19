@@ -294,6 +294,7 @@ async function exportViaMediaRecorder(buffer: AudioBuffer, mimeType: string, cle
 /* ------------------------------------------------------------------ */
 
 export function AudioConverterPage({
+  appSubtitle,
   pageTitle,
   pageDescription,
   backHome,
@@ -693,8 +694,12 @@ export function AudioConverterPage({
   return (
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
-        <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>{backHome}</button>
         <div className="feature-header-meta">
+          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+            ← {backHome}
+          </button>
+        </div>
+        <div className="tool-header-actions">
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'overview'); }}>Help</button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs?.('audio-converter', 'buttons'); }}>Tutorial</button>
           <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('settingsOpen'); onOpenSettings(); }}>{openSettings}</button>

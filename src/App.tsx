@@ -42,13 +42,14 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.4';
+const VERSION = '1.12.5';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
 type Messages = {
   appTitle: string;
   appSubtitle: string;
+  close: string;
   versionLabel: string;
   overviewTitle: string;
   overviewDescription: string;
@@ -494,6 +495,7 @@ const translations: Record<BaseLanguage, Messages> = {
   zh: {
   appTitle: 'Original Character Maker',
   appSubtitle: '自定义 OC 角色中控台',
+  close: '关闭',
   versionLabel: '版本',
   overviewTitle: '单图进，多资产出',
   overviewDescription:
@@ -663,10 +665,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.4 第三轮全局深度审计：修复 WorldEncyclopedia 导入计数错误、两处硬编码英文未本地化、Modal 标题不区分添加/编辑、筛选按钮缺少 aria-pressed、pageTitle 未渲染、标签可重复添加、AudioEditor/AudioConverter 返回按钮无声、ImportModal 缺失 character-gif 和 index-tts 导入支持等。',
-    announcementList1: 'WorldEncyclopediaPage：修复导入成功 toast 错误地计算重复条目（现在显示实际新增数量）；本地化 "No matching entries" 和 "No characters in Relationship Web"；Modal 标题根据 add/edit 模式动态切换；筛选 chip 和视图切换按钮添加 aria-pressed；渲染 pageTitle/pageDescription；导入时验证 tool 字段防止误导入其他工具数据；addTag 添加重复标签防护。',
-    announcementList2: 'AudioEditorPage & AudioConverterPage：修复返回按钮缺少 playSound("back") 和 data-sfx-handled；AudioConverter 的 "Audio Editor" 切换按钮添加 playSound("pageSwitch")。',
-    announcementList3: 'App.tsx ImportModal：修复 "Go to Tool" 按钮双重音效；新增 index-tts 到可导入工具列表；为 character-gif 和 index-tts 补全 importToolConfig case；导入失败时显示具体错误原因（而非通用 "Tool mismatch"）。',
+    announcementDescription: 'v1.12.5 第四轮全局深度审计：UI/UX/SFX/BGM 全面修复。补全 getFeatureDetails 12 个缺失页面 case；修复 CSS 变量/类名缺失；修复 BGM 死字段；修复 Modal 关闭按钮无声、StartModal 双重音效；统一所有独立 Page header/tool-header UI；本地化硬编码 "Close"。',
+    announcementList1: 'App.tsx：补全 getFeatureDetails 缺失的 12 个页面 case；修复 5 个内联 Modal 关闭按钮无声；修复 StartModal action-tile 双重音效；硬编码 "Close" 改为多语言 messages.close。',
+    announcementList2: 'CSS & audioEngine：补定义 --surface/--text 变量和 10+ 个缺失 CSS 类；修复 BGM 死字段 musicReverb/musicFilter/musicStereoWidth（在 BGM 引擎中实际应用）。',
+    announcementList3: '独立 Page UI 统一与 a11y：所有 14 个独立页面 header 统一为 back-link 标准；tool-header 统一渲染 section-label；AudioConverterPage 补回 appSubtitle 解构；多个 icon-only 按钮添加 aria-label；DocsPage 导航按钮修复无声。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -928,6 +930,7 @@ const translations: Record<BaseLanguage, Messages> = {
   ja: {
     appTitle: 'Original Character Maker',
     appSubtitle: 'OC キャラクター統合ハブ',
+    close: '閉じる',
     versionLabel: 'バージョン',
     overviewTitle: 'キャラクター制作入口',
     overviewDescription:
@@ -1097,10 +1100,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.4 第3ラウンドグローバル深度監査：WorldEncyclopedia の取込カウントエラー、2 箇所の英語ハードコード未ローカライズ、Modal タイトルの追加/編集区別なし、フィルタボタンの aria-pressed 欠如、pageTitle 未描画、タグ重複許可、AudioEditor/AudioConverter の戻るボタン無音、ImportModal の character-gif と index-tts 取込サポート欠如などを修正。',
-    announcementList1: 'WorldEncyclopediaPage：取込成功 toast が重複を含めて誤カウントする問題を修正（実際の追加数を表示）；「No matching entries」「No characters in Relationship Web」をローカライズ；Modal タイトルを add/edit モードで動的切替；フィルタ chip とビュー切替ボタンに aria-pressed を追加；pageTitle/pageDescription を描画；取込時に tool フィールドを検証；addTag に重複タグ防止を追加。',
-    announcementList2: 'AudioEditorPage & AudioConverterPage：戻るボタンに playSound("back") と data-sfx-handled を追加；AudioConverter の「Audio Editor」切替ボタンに playSound("pageSwitch") を追加。',
-    announcementList3: 'App.tsx ImportModal：「Go to Tool」ボタンの重複音效を修正；index-tts を取込可能ツール一覧に追加；character-gif と index-tts の importToolConfig case を補完；取込失敗時に具体的なエラー原因を表示。',
+    announcementDescription: 'v1.12.5 第4ラウンドグローバル深度監査：UI/UX/SFX/BGM を全面修正。getFeatureDetails の 12 ページ case を補完；CSS 変数・クラス名欠如を修正；BGM デッドフィールドを修正；Modal 閉じるボタン無音・StartModal 双重音效を修正；全独立 Page の header/tool-header UI を統一；ハードコード "Close" をローカライズ。',
+    announcementList1: 'App.tsx：getFeatureDetails の欠落 12 ページ case を補完；5 つの内联 Modal 閉じるボタン無音を修正；StartModal action-tile の双重音效を修正；ハードコード "Close" を多言語 messages.close に変更。',
+    announcementList2: 'CSS & audioEngine：--surface/--text 変数と 10+ 欠落 CSS クラスを追加；BGM デッドフィールド musicReverb/musicFilter/musicStereoWidth を BGM エンジンに実際に適用。',
+    announcementList3: '独立 Page UI 統一と a11y：14 ページ全ての header を back-link 標準に統一；tool-header に section-label を統一；AudioConverterPage の appSubtitle 分解を補完；複数の icon-only ボタンに aria-label を追加；DocsPage ナビボタンの無音を修正。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1362,6 +1365,7 @@ const translations: Record<BaseLanguage, Messages> = {
   en: {
     appTitle: 'Original Character Maker',
     appSubtitle: 'Custom OC control center',
+    close: 'Close',
     versionLabel: 'Version',
     overviewTitle: 'Character creation entry',
     overviewDescription:
@@ -1531,10 +1535,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.4 Third-round global deep audit: fixed WorldEncyclopedia import toast counting duplicates as added, two hardcoded English strings unlocalized, Modal title not distinguishing Add vs Edit, filter buttons missing aria-pressed, pageTitle not rendered, duplicate tags allowed, missing back button SFX on AudioEditor/AudioConverter, missing character-gif and index-tts import support in ImportModal, and more.',
-    announcementList1: 'WorldEncyclopediaPage: fixed import success toast incorrectly counting duplicates (now shows actual new items added); localized "No matching entries" and "No characters in Relationship Web"; Modal title dynamically switches between add/edit modes; added aria-pressed to filter chips and view toggle buttons; rendered pageTitle/pageDescription; validated tool field on import; added duplicate tag prevention to addTag.',
-    announcementList2: 'AudioEditorPage & AudioConverterPage: fixed missing playSound("back") and data-sfx-handled on back buttons; added playSound("pageSwitch") to AudioConverter "Audio Editor" switch button.',
-    announcementList3: 'App.tsx ImportModal: fixed double-play on "Go to Tool" button; added index-tts to importable tools list; added importToolConfig cases for character-gif and index-tts; import failures now show specific error reason instead of generic "Tool mismatch".',
+    announcementDescription: 'v1.12.5 Fourth-round global deep audit: comprehensive UI/UX/SFX/BGM fixes. Completed getFeatureDetails for 12 missing pages; fixed missing CSS variables/classes; fixed BGM dead fields; fixed silent Modal close buttons and StartModal double SFX; unified all standalone Page header/tool-header UIs; localized hardcoded "Close".',
+    announcementList1: 'App.tsx: completed 12 missing page cases in getFeatureDetails; fixed silent close buttons on 5 inline Modals; fixed StartModal action-tile double SFX; replaced hardcoded "Close" with multilingual messages.close.',
+    announcementList2: 'CSS & audioEngine: added --surface/--text variables and 10+ missing CSS classes; fixed BGM dead fields musicReverb/musicFilter/musicStereoWidth (now actually applied in the BGM engine).',
+    announcementList3: 'Standalone Page UI unification & a11y: unified headers on all 14 standalone pages to back-link standard; unified tool-header section-label rendering; fixed missing appSubtitle destructuring in AudioConverterPage; added aria-label to multiple icon-only buttons; fixed silent DocsPage nav buttons.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1796,6 +1800,7 @@ const translations: Record<BaseLanguage, Messages> = {
   ru: {
     appTitle: 'Original Character Maker',
     appSubtitle: 'Центр управления OC',
+    close: 'Закрыть',
     versionLabel: 'Версия',
     overviewTitle: 'Точка входа в создание персонажа',
     overviewDescription:
@@ -1965,10 +1970,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.4 Третий раунд глобального глубокого аудита: исправлено ошибочное включение дубликатов в счётчик импорта WorldEncyclopedia, две не локализованные английские строки, Modal не различает добавление и редактирование, у кнопок фильтра отсутствует aria-pressed, pageTitle не отображается, разрешены дублирующиеся теги, отсутствует SFX на кнопках назад в AudioEditor/AudioConverter, отсутствует импорт character-gif и index-tts в ImportModal и др.',
-    announcementList1: 'WorldEncyclopediaPage: исправлен счётчик импорта (теперь показывает реальное количество новых записей); локализованы "No matching entries" и "No characters in Relationship Web"; заголовок Modal динамически переключается между добавлением и редактированием; добавлен aria-pressed к фильтрам и переключателям вида; отображены pageTitle/pageDescription; добавлена валидация tool при импорте; добавлена защита от дублирования тегов.',
-    announcementList2: 'AudioEditorPage & AudioConverterPage: добавлен playSound("back") и data-sfx-handled к кнопкам назад; добавлен playSound("pageSwitch") к кнопке переключения "Audio Editor" в AudioConverter.',
-    announcementList3: 'App.tsx ImportModal: исправлено двойное воспроизведение звука на кнопке "Go to Tool"; добавлен index-tts в список импортируемых инструментов; добавлены case importToolConfig для character-gif и index-tts; при ошибке импорта теперь отображается конкретная причина.',
+    announcementDescription: 'v1.12.5 Четвёртый раунд глобального глубокого аудита: комплексное исправление UI/UX/SFX/BGM. Дополнены 12 недостающих case в getFeatureDetails; исправлены отсутствующие CSS-переменные/классы; исправлены мёртвые поля BGM; исправлены беззвучные кнопки закрытия Modal и двойной SFX в StartModal; унифицированы header/tool-header всех автономных страниц; локализован жёстко закодированный "Close".',
+    announcementList1: 'App.tsx: дополнены 12 недостающих case страниц в getFeatureDetails; исправлены беззвучные кнопки закрытия в 5 встроенных Modal; исправлен двойной SFX action-tile в StartModal; заменён жёстко закодированный "Close" на многоязычный messages.close.',
+    announcementList2: 'CSS & audioEngine: добавлены переменные --surface/--text и 10+ отсутствующих CSS-классов; исправлены мёртвые поля BGM musicReverb/musicFilter/musicStereoWidth (теперь реально применяются в BGM-движке).',
+    announcementList3: 'Унификация UI автономных страниц и a11y: унифицированы header всех 14 автономных страниц под стандарт back-link; унифицировано отображение section-label в tool-header; исправлено отсутствующее деструктурирование appSubtitle в AudioConverterPage; добавлен aria-label к нескольким кнопкам только с иконками; исправлены беззвучные кнопки навигации DocsPage.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2658,6 +2663,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
   ko: {
     ...translations.en,
     appSubtitle: '커스텀 OC 캐릭터 허브',
+    close: '닫기',
     overviewTitle: '한 장으로, 더 많은 자산으로',
     overviewDescription:
       'Face Maker, style transfer, Character Prompt / LLM / TTS packaging, and paper2gal asset generation are managed from one entry page.',
@@ -2731,10 +2737,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.4 3차 글로벌 심층 감사: WorldEncyclopedia 가져오기 토스트가 중복을 추가된 것으로 잘못 계산, 2곳의 영어 하드코딩 미현지화, Modal 제목이 추가/편집을 구분하지 않음, 필터 버튼 aria-pressed 누락, pageTitle 미랜더링, 태그 중복 허용, AudioEditor/AudioConverter 뒤로 가기 버튼 무음, ImportModal character-gif 및 index-tts 가져오기 지원 누락 등 수정.',
-    announcementList1: 'WorldEncyclopediaPage: 가져오기 성공 토스트의 중복 오计数 수정(실제 신규 항목 수 표시)；「No matching entries」「No characters in Relationship Web」현지화；Modal 제목을 추가/편집 모드에 따라 동적 전환；필터 chip 및 보기 전환 버튼에 aria-pressed 추가；pageTitle/pageDescription 렌더링；가져오기 시 tool 필드 검증；addTag에 중복 태그 방지 추가.',
-    announcementList2: 'AudioEditorPage & AudioConverterPage: 뒤로 가기 버튼에 playSound("back") 및 data-sfx-handled 추가；AudioConverter의「Audio Editor」전환 버튼에 playSound("pageSwitch") 추가.',
-    announcementList3: 'App.tsx ImportModal: 「Go to Tool」버튼 이중 음향 수정；가져오기 가능 도구 목록에 index-tts 추가；character-gif 및 index-tts의 importToolConfig case 추가；가져오기 실패 시 구체적인 오류 원인 표시.',
+    announcementDescription: 'v1.12.5 4차 글로벌 심층 감사: UI/UX/SFX/BGM 전면 수정. getFeatureDetails 12개 누락 페이지 case 보완; CSS 변수/클류스명 누락 수정; BGM 데드 필드 수정; Modal 닫기 버튼 무음·StartModal 이중 SFX 수정; 모든 독립 Page header/tool-header UI 통일; 하드코딩 "Close" 현지화.',
+    announcementList1: 'App.tsx: getFeatureDetails 누락 12개 페이지 case 보완; 5개 인라인 Modal 닫기 버튼 무음 수정; StartModal action-tile 이중 SFX 수정; 하드코딩 "Close"를 다국어 messages.close로 변경.',
+    announcementList2: 'CSS & audioEngine: --surface/--text 변수와 10+ 누락 CSS 클래스 추가; BGM 데드 필드 musicReverb/musicFilter/musicStereoWidth를 BGM 엔진에 실제 적용.',
+    announcementList3: '독립 Page UI 통일 및 a11y: 14개 독립 페이지 header를 back-link 표준으로 통일; tool-header에 section-label 통일 렌더링; AudioConverterPage의 appSubtitle 분해 보완; 다수 icon-only 버튼에 aria-label 추가; DocsPage 남비 버튼 무음 수정.',
   },
   fr: {
     ...translations.en,
@@ -2925,6 +2931,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.5',
+    date: '2026-05-18',
+    title: '1.12.5 第四轮全局深度审计：UI/UX/SFX/BGM 全面修复',
+    summary:
+      '对全局进行第四轮深度审计，修复 getFeatureDetails 缺失 12 个页面 case、CSS 变量与类名缺失、BGM 死字段、Modal 关闭按钮无声、StartModal 双重音效、DocsPage 导航按钮无声、icon-only 按钮缺少 aria-label、所有独立 Page header/tool-header UI 统一、硬编码 "Close" 未本地化等。',
+    details: [
+      'App.tsx：补全 getFeatureDetails 缺失的 12 个页面 case（asset-gallery 到 docs），避免运行时返回 Unknown；修复 5 个内联 Modal 关闭按钮完全无声（全局 handler 特殊处理 modal-close 类）；修复 StartModal action-tile 双重音效（添加 data-sfx-handled）；硬编码 "Close" 改为多语言 messages.close。',
+      'CSS：补定义缺失的 CSS 变量 --surface 和 --text；新增 .modal-overlay、.modal-card-wide、.toast-enter、.toast-surface、.docs-error-highlighted、.skill-tree-stats-bar、.skill-tree-canvas、.set-list、.set-card、.devmode-resize 等类；修复 CharacterBattleCardPage 和 CharacterSkillTreePage 的透明背景问题。',
+      'audioEngine.ts：修复 BGM 死字段 musicReverb/musicFilter/musicStereoWidth（在 updateAudioSettings 中检测变化并重启音乐；在 scheduleMusicNote 中应用 filter 和 stereo width；新增 rebuildMusicChain 为音乐总线添加共享 reverb）。',
+      '独立 Page 组件 UI 统一：所有 14 个独立页面（AssetGallery/AudioConverter/AudioEditor/BattleCard/Card/Chronicle/SkillTree/StatsDesigner/ColorPalette/Dialogue/Docs/Inspiration/RelationshipWeb/WorldEncyclopedia）的 header 统一为 back-link 在 feature-header-meta 内带 ← 前缀；tool-header 统一渲染 section-label（appSubtitle）+ pageTitle + pageDescription；AudioConverterPage 补回遗漏的 appSubtitle 解构。',
+      '可访问性：DocsPage 搜索清除按钮、RelationshipWebPage 画布重置按钮、AssetGalleryPage 下载/删除按钮添加 aria-label；DocsPage 导航/索引/过滤按钮移除 data-sfx-handled 让全局 handler 自动播放 buttonClick。',
+    ],
+  },
   {
     version: '1.12.4',
     date: '2026-05-18',
@@ -4530,7 +4550,7 @@ function App() {
 
       // Skip elements that have their own explicit sound handling (avoids double-play)
       if (el.classList.contains('collapsible-toggle') || el.classList.contains('toolbar-group-header') || el.classList.contains('tool-card-header')) return;
-      if ((el as HTMLElement).closest('[data-sfx-handled]')) return;
+      if (!el.classList.contains('modal-close') && (el as HTMLElement).closest('[data-sfx-handled]')) return;
 
       // Determine appropriate sound based on element type and context
       const isClose = el.classList.contains('modal-close');
@@ -6376,7 +6396,7 @@ function ConfirmReturnModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{copy.confirmTitle}</p>
@@ -6441,7 +6461,7 @@ function ActionConfirmModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{title}</p>
@@ -6793,7 +6813,7 @@ function StartModal({
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
           ×
         </button>
 
@@ -6802,95 +6822,95 @@ function StartModal({
         <p className="modal-description">{messages.startModalDescription}</p>
 
         <div className="action-grid root-grid">
-          <button className="action-tile" type="button" onClick={() => onSelect('face-maker')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('face-maker')}>
             <ActionIcon kind="face-maker" />
             <strong>{messages.actionFace}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('style-transfer')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('style-transfer')}>
             <ActionIcon kind="style-transfer" />
             <strong>{messages.actionStyle}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('prompt-suite')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('prompt-suite')}>
             <ActionIcon kind="prompt-suite" />
             <strong>{messages.actionPromptSuite}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('llm-hub')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('llm-hub')}>
             <ActionIcon kind="llm-hub" />
             <strong>{messages.actionLlmHub}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('tts-export')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('tts-export')}>
             <ActionIcon kind="tts-export" />
             <strong>{messages.actionTtsExport}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('paper2gal')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('paper2gal')}>
             <ActionIcon kind="paper2gal" />
             <strong>{messages.actionPaper2Gal}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('image-converter')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('image-converter')}>
             <ActionIcon kind="image-converter" />
             <strong>{messages.actionImageConverter}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('character-gif')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-gif')}>
             <ActionIcon kind="character-gif" />
             <strong>{messages.actionGif}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('index-tts')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('index-tts')}>
             <ActionIcon kind="index-tts" />
             <strong>{messages.actionIndexTts}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('audio-editor')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('audio-editor')}>
             <ActionIcon kind="audio-editor" />
             <strong>{messages.actionAudioEditor}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('audio-converter')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('audio-converter')}>
             <ActionIcon kind="audio-converter" />
             <strong>{messages.actionAudioConverter}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('asset-gallery')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('asset-gallery')}>
             <ActionIcon kind="asset-gallery" />
             <strong>{messages.actionAssetGallery}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('relationship-web')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('relationship-web')}>
             <ActionIcon kind="relationship-web" />
             <strong>{messages.actionRelationshipWeb}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('character-card')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-card')}>
             <ActionIcon kind="character-card" />
             <strong>{messages.actionCharacterCard}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('character-chronicle')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-chronicle')}>
             <ActionIcon kind="character-chronicle" />
             <strong>{messages.actionCharacterChronicle}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('world-encyclopedia')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('world-encyclopedia')}>
             <ActionIcon kind="world-encyclopedia" />
             <strong>{messages.actionWorldEncyclopedia}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('inspiration-generator')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('inspiration-generator')}>
             <ActionIcon kind="inspiration-generator" />
             <strong>{messages.actionInspirationGenerator}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('character-stats')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-stats')}>
             <ActionIcon kind="character-stats" />
             <strong>{messages.actionCharacterStats}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('color-palette')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('color-palette')}>
             <ActionIcon kind="color-palette" />
             <strong>{messages.actionColorPalette}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('dialogue-generator')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('dialogue-generator')}>
             <ActionIcon kind="dialogue-generator" />
             <strong>{messages.actionDialogueGenerator}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('skill-tree')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('skill-tree')}>
             <ActionIcon kind="skill-tree" />
             <strong>{messages.actionSkillTree}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('battle-card')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('battle-card')}>
             <ActionIcon kind="battle-card" />
             <strong>{messages.actionBattleCard}</strong>
           </button>
-          <button className="action-tile" type="button" onClick={() => onSelect('docs')}>
+          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('docs')}>
             <ActionIcon kind="docs" />
             <strong>{messages.featureDocs}</strong>
           </button>
@@ -7038,7 +7058,7 @@ function ImportModal({
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>×</button>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>×</button>
 
         <p className="section-label">{messages.appSubtitle}</p>
         <h2>{messages.importTitle}</h2>
@@ -7466,7 +7486,7 @@ function SettingsModal({
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card settings-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
           ×
         </button>
 
@@ -8619,6 +8639,126 @@ function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Mes
         pipelineTitle: 'Convert / Download',
         todoOne: '补音频导入与格式选择',
         todoTwo: '补参数调整与批量转换',
+      };
+    case 'asset-gallery':
+      return {
+        title: messages.pageAssetGalleryTitle,
+        description: messages.pageAssetGalleryDescription,
+        workspaceTitle: 'Asset Gallery',
+        panelTitle: 'Assets / Filters',
+        pipelineTitle: 'Preview / Export',
+        todoOne: '补资产导入、分类与搜索',
+        todoTwo: '补批量导出与预览弹窗',
+      };
+    case 'relationship-web':
+      return {
+        title: messages.pageRelationshipWebTitle,
+        description: messages.pageRelationshipWebDescription,
+        workspaceTitle: 'Relationship Canvas',
+        panelTitle: 'Nodes / Connections',
+        pipelineTitle: 'Export / Import',
+        todoOne: '补节点拖拽、连线编辑',
+        todoTwo: '补关系类型与布局算法',
+      };
+    case 'character-card':
+      return {
+        title: messages.pageCharacterCardTitle,
+        description: messages.pageCharacterCardDescription,
+        workspaceTitle: 'Card Editor',
+        panelTitle: 'Fields / Theme',
+        pipelineTitle: 'Preview / Export',
+        todoOne: '补字段编辑与主题切换',
+        todoTwo: '补 PNG 导出与模板选择',
+      };
+    case 'character-chronicle':
+      return {
+        title: messages.pageCharacterChronicleTitle,
+        description: messages.pageCharacterChronicleDescription,
+        workspaceTitle: 'Chronicle Editor',
+        panelTitle: 'Events / Timeline',
+        pipelineTitle: 'Export / Import',
+        todoOne: '补事件增删改与排序',
+        todoTwo: '补时间轴可视化与导出',
+      };
+    case 'world-encyclopedia':
+      return {
+        title: messages.pageWorldEncyclopediaTitle,
+        description: messages.pageWorldEncyclopediaDescription,
+        workspaceTitle: 'Encyclopedia Editor',
+        panelTitle: 'Entries / Categories',
+        pipelineTitle: 'Search / Export',
+        todoOne: '补条目编辑与分类管理',
+        todoTwo: '补全文搜索与 JSON 导出',
+      };
+    case 'inspiration-generator':
+      return {
+        title: messages.pageInspirationGeneratorTitle,
+        description: messages.pageInspirationGeneratorDescription,
+        workspaceTitle: 'Generator Workspace',
+        panelTitle: 'Prompts / Presets',
+        pipelineTitle: 'Results / History',
+        todoOne: '补 Prompt 模板与预设管理',
+        todoTwo: '补结果收藏与历史记录',
+      };
+    case 'character-stats':
+      return {
+        title: messages.pageCharacterStatsTitle,
+        description: messages.pageCharacterStatsDescription,
+        workspaceTitle: 'Stats Designer',
+        panelTitle: 'Attributes / Radar',
+        pipelineTitle: 'Presets / Export',
+        todoOne: '补属性配置与雷达图',
+        todoTwo: '补预设导入与数值平衡',
+      };
+    case 'color-palette':
+      return {
+        title: messages.pageColorPaletteTitle,
+        description: messages.pageColorPaletteDescription,
+        workspaceTitle: 'Palette Designer',
+        panelTitle: 'Colors / Harmonies',
+        pipelineTitle: 'Export / Apply',
+        todoOne: '补色彩选择与调和算法',
+        todoTwo: '补导出格式与角色关联',
+      };
+    case 'dialogue-generator':
+      return {
+        title: messages.pageDialogueGeneratorTitle,
+        description: messages.pageDialogueGeneratorDescription,
+        workspaceTitle: 'Dialogue Workspace',
+        panelTitle: 'Characters / Tone',
+        pipelineTitle: 'Lines / Export',
+        todoOne: '补角色选择与语气配置',
+        todoTwo: '补台词生成与批量导出',
+      };
+    case 'skill-tree':
+      return {
+        title: messages.pageSkillTreeTitle,
+        description: messages.pageSkillTreeDescription,
+        workspaceTitle: 'Skill Tree Canvas',
+        panelTitle: 'Nodes / Connections',
+        pipelineTitle: 'Export / Import',
+        todoOne: '补节点编辑与连线系统',
+        todoTwo: '补技能类型与 JSON 导出',
+      };
+    case 'battle-card':
+      return {
+        title: messages.pageBattleCardTitle,
+        description: messages.pageBattleCardDescription,
+        workspaceTitle: 'Battle Card Editor',
+        panelTitle: 'Stats / Skills',
+        pipelineTitle: 'Preview / Export',
+        todoOne: '补属性自动计算与技能标签',
+        todoTwo: '补战斗卡 PNG 导出',
+      };
+    case 'docs':
+      return {
+        title: messages.pageDocsTitle,
+        description: messages.pageDocsDescription,
+        workspaceTitle: 'Documentation',
+        panelTitle: 'Topics / Search',
+        pipelineTitle: 'Content / Navigation',
+        todoOne: '补文档内容与搜索索引',
+        todoTwo: '补多语言文档与快捷键参考',
       };
     default:
       return {

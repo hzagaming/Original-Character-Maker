@@ -859,6 +859,7 @@ export function RelationshipWebPage({
       <section className="tool-workbench fade-up delay-2" style={{ padding: 0, overflow: 'hidden', display: 'flex' }}>
         <div className="tool-header" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5, padding: '14px 20px', pointerEvents: 'none' }}>
           <div>
+            <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
           </div>
@@ -1015,7 +1016,7 @@ export function RelationshipWebPage({
           <div className="rel-canvas-controls">
             <button className="rel-canvas-btn" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setZoom((z) => Math.min(z * 1.15, 3)); }} title={copy.zoomIn}>+</button>
             <button className="rel-canvas-btn" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setZoom((z) => Math.max(z / 1.15, 0.3)); }} title={copy.zoomOut}>−</button>
-            <button className="rel-canvas-btn" type="button" data-sfx-handled onClick={handleResetView} title={copy.resetView}>⌖</button>
+            <button className="rel-canvas-btn" type="button" data-sfx-handled onClick={handleResetView} title={copy.resetView} aria-label={copy.resetView}>⌖</button>
           </div>
 
           {/* Canvas hint */}
