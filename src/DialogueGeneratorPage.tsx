@@ -986,10 +986,11 @@ export default function DialogueGeneratorPage({
   }, [favorites]);
 
   const toggleTrait = useCallback((t: PersonalityTrait) => {
-    playSound('toggleOn');
-    setTraits((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : prev.length < 3 ? [...prev, t] : prev,
-    );
+    setTraits((prev) => {
+      const willAdd = !prev.includes(t) && prev.length < 3;
+      playSound(willAdd ? 'toggleOn' : 'toggleOff');
+      return prev.includes(t) ? prev.filter((x) => x !== t) : prev.length < 3 ? [...prev, t] : prev;
+    });
   }, []);
 
   const generate = useCallback(() => {

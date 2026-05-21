@@ -1157,15 +1157,15 @@ export function RelationshipWebPage({
                           style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
                         />
                       </div>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => setAvatarPickerOpen(true)}>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setAvatarPickerOpen(true); }}>
                         {copy.selectAvatar}
                       </button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => setNodeModal((m) => m && { ...m, avatarAssetId: undefined })}>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setNodeModal((m) => m && { ...m, avatarAssetId: undefined }); }}>
                         {copy.clearAvatar}
                       </button>
                     </>
                   ) : (
-                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => setAvatarPickerOpen(true)}>
+                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setAvatarPickerOpen(true); }}>
                       {copy.fromAssetGallery}
                     </button>
                   )}

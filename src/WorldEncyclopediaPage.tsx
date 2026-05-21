@@ -537,7 +537,6 @@ export default function WorldEncyclopediaPage({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={copy.searchPlaceholder}
-            data-sfx-handled
           />
           <div className="we-filter-row">
             <button
@@ -643,7 +642,6 @@ export default function WorldEncyclopediaPage({
                   value={modalEntry.title}
                   onChange={(e) => setModalEntry((m) => m && { ...m, title: e.target.value })}
                   placeholder={copy.entryTitle}
-                  data-sfx-handled
                   autoFocus
                 />
               </div>
@@ -671,8 +669,7 @@ export default function WorldEncyclopediaPage({
                   className="tool-input"
                   rows={5}
                   value={modalEntry.content}
-                  onChange={(e) => setModalEntry((m) => m && { ...m, content: e.target.value })}
-                  data-sfx-handled
+                  onChange={(e) => setModalEntry((m) => m && { ...m, content: e.target.value })
                 />
               </div>
               <div>

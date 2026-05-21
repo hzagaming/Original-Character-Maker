@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.5';
+const VERSION = '1.12.6';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -665,10 +665,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.5 第四轮全局深度审计：UI/UX/SFX/BGM 全面修复。补全 getFeatureDetails 12 个缺失页面 case；修复 CSS 变量/类名缺失；修复 BGM 死字段；修复 Modal 关闭按钮无声、StartModal 双重音效；统一所有独立 Page header/tool-header UI；本地化硬编码 "Close"。',
-    announcementList1: 'App.tsx：补全 getFeatureDetails 缺失的 12 个页面 case；修复 5 个内联 Modal 关闭按钮无声；修复 StartModal action-tile 双重音效；硬编码 "Close" 改为多语言 messages.close。',
-    announcementList2: 'CSS & audioEngine：补定义 --surface/--text 变量和 10+ 个缺失 CSS 类；修复 BGM 死字段 musicReverb/musicFilter/musicStereoWidth（在 BGM 引擎中实际应用）。',
-    announcementList3: '独立 Page UI 统一与 a11y：所有 14 个独立页面 header 统一为 back-link 标准；tool-header 统一渲染 section-label；AudioConverterPage 补回 appSubtitle 解构；多个 icon-only 按钮添加 aria-label；DocsPage 导航按钮修复无声。',
+    announcementDescription: 'v1.12.6 SFX/BGM 补充修复与 ImportModal 完整化：修复 6 处遗漏的 double-play/无声按钮、trait 切换音效逻辑错误、BGM reverb 链重建不完整；补全 audio-editor 和 audio-converter 的导入支持。',
+    announcementList1: 'SFX 补充修复：DocsPage 搜索清除按钮补 data-sfx-handled 消除 double-play；ColorPaletteDesignerPage 提取颜色按钮、RelationshipWebPage 3 个头像按钮、ImportModal "Go to Tool" 补充 playSound；WorldEncyclopediaPage 输入框移除 data-sfx-handled 恢复 inputFocus；DialogueGenerator toggleTrait 改为条件播放 toggleOn/toggleOff。',
+    announcementList2: 'BGM 修复：updateAudioSettings 在 musicReverb 变化时调用 rebuildMusicChain()，确保混响实时生效。',
+    announcementList3: 'ImportModal 完整化：ImportableTool、importToolConfig、screenMap、tools 数组全部补全 audio-editor 和 audio-converter，支持导入这两个工具的 JSON 配置。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1100,10 +1100,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.5 第4ラウンドグローバル深度監査：UI/UX/SFX/BGM を全面修正。getFeatureDetails の 12 ページ case を補完；CSS 変数・クラス名欠如を修正；BGM デッドフィールドを修正；Modal 閉じるボタン無音・StartModal 双重音效を修正；全独立 Page の header/tool-header UI を統一；ハードコード "Close" をローカライズ。',
-    announcementList1: 'App.tsx：getFeatureDetails の欠落 12 ページ case を補完；5 つの内联 Modal 閉じるボタン無音を修正；StartModal action-tile の双重音效を修正；ハードコード "Close" を多言語 messages.close に変更。',
-    announcementList2: 'CSS & audioEngine：--surface/--text 変数と 10+ 欠落 CSS クラスを追加；BGM デッドフィールド musicReverb/musicFilter/musicStereoWidth を BGM エンジンに実際に適用。',
-    announcementList3: '独立 Page UI 統一と a11y：14 ページ全ての header を back-link 標準に統一；tool-header に section-label を統一；AudioConverterPage の appSubtitle 分解を補完；複数の icon-only ボタンに aria-label を追加；DocsPage ナビボタンの無音を修正。',
+    announcementDescription: 'v1.12.6 SFX/BGM 補正と ImportModal 完全化：6 箇所の double-play/無音ボタン、trait 切替音效ロジックエラー、BGM reverb チェーン再構築不全を修正；audio-editor と audio-converter のインポートサポートを補完。',
+    announcementList1: 'SFX 補正：DocsPage 検索クリアボタンに data-sfx-handled を追加して double-play 解消；ColorPaletteDesignerPage 色抽出ボタン、RelationshipWebPage 3 つのアバターボタン、ImportModal "Go to Tool" に playSound を追加；WorldEncyclopediaPage 入力欄から data-sfx-handled を削除して inputFocus を復活；DialogueGenerator toggleTrait を追加/削除状態で toggleOn/toggleOff を条件再生。',
+    announcementList2: 'BGM 修正：updateAudioSettings で musicReverb 変更時に rebuildMusicChain() を呼び出し、リバーブをリアルタイム反映。',
+    announcementList3: 'ImportModal 完全化：ImportableTool、importToolConfig、screenMap、tools 配列に audio-editor と audio-converter を追加し、両ツールの JSON 設定インポートをサポート。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1535,10 +1535,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.5 Fourth-round global deep audit: comprehensive UI/UX/SFX/BGM fixes. Completed getFeatureDetails for 12 missing pages; fixed missing CSS variables/classes; fixed BGM dead fields; fixed silent Modal close buttons and StartModal double SFX; unified all standalone Page header/tool-header UIs; localized hardcoded "Close".',
-    announcementList1: 'App.tsx: completed 12 missing page cases in getFeatureDetails; fixed silent close buttons on 5 inline Modals; fixed StartModal action-tile double SFX; replaced hardcoded "Close" with multilingual messages.close.',
-    announcementList2: 'CSS & audioEngine: added --surface/--text variables and 10+ missing CSS classes; fixed BGM dead fields musicReverb/musicFilter/musicStereoWidth (now actually applied in the BGM engine).',
-    announcementList3: 'Standalone Page UI unification & a11y: unified headers on all 14 standalone pages to back-link standard; unified tool-header section-label rendering; fixed missing appSubtitle destructuring in AudioConverterPage; added aria-label to multiple icon-only buttons; fixed silent DocsPage nav buttons.',
+    announcementDescription: 'v1.12.6 SFX/BGM follow-up fixes and ImportModal completion: fixed 6 missed double-play/silent buttons, trait toggle sound logic error, incomplete BGM reverb chain rebuild; added audio-editor and audio-converter import support.',
+    announcementList1: 'SFX follow-up: added data-sfx-handled to DocsPage search clear button to eliminate double-play; added playSound to ColorPaletteDesignerPage extract button, RelationshipWebPage 3 avatar buttons, ImportModal "Go to Tool"; removed data-sfx-handled from WorldEncyclopediaPage inputs to restore inputFocus; changed DialogueGenerator toggleTrait to conditionally play toggleOn/toggleOff based on add/remove state.',
+    announcementList2: 'BGM fix: updateAudioSettings now calls rebuildMusicChain() when musicReverb changes, ensuring reverb takes effect in real time.',
+    announcementList3: 'ImportModal completion: ImportableTool, importToolConfig, screenMap, and tools array now fully include audio-editor and audio-converter, supporting JSON config import for both tools.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1970,10 +1970,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.5 Четвёртый раунд глобального глубокого аудита: комплексное исправление UI/UX/SFX/BGM. Дополнены 12 недостающих case в getFeatureDetails; исправлены отсутствующие CSS-переменные/классы; исправлены мёртвые поля BGM; исправлены беззвучные кнопки закрытия Modal и двойной SFX в StartModal; унифицированы header/tool-header всех автономных страниц; локализован жёстко закодированный "Close".',
-    announcementList1: 'App.tsx: дополнены 12 недостающих case страниц в getFeatureDetails; исправлены беззвучные кнопки закрытия в 5 встроенных Modal; исправлен двойной SFX action-tile в StartModal; заменён жёстко закодированный "Close" на многоязычный messages.close.',
-    announcementList2: 'CSS & audioEngine: добавлены переменные --surface/--text и 10+ отсутствующих CSS-классов; исправлены мёртвые поля BGM musicReverb/musicFilter/musicStereoWidth (теперь реально применяются в BGM-движке).',
-    announcementList3: 'Унификация UI автономных страниц и a11y: унифицированы header всех 14 автономных страниц под стандарт back-link; унифицировано отображение section-label в tool-header; исправлено отсутствующее деструктурирование appSubtitle в AudioConverterPage; добавлен aria-label к нескольким кнопкам только с иконками; исправлены беззвучные кнопки навигации DocsPage.',
+    announcementDescription: 'v1.12.6 Дополнительное исправление SFX/BGM и завершение ImportModal: исправлены 6 пропущенных кнопок с double-play/отсутствием звука, ошибка логики звука переключения trait, неполное восстановление цепочки reverb BGM; добавлена поддержка импорта audio-editor и audio-converter.',
+    announcementList1: 'Дополнительное исправление SFX: добавлен data-sfx-handled к кнопке очистки поиска DocsPage для устранения double-play; добавлен playSound к кнопке извлечения цвета ColorPaletteDesignerPage, 3 кнопкам аватара RelationshipWebPage, кнопке "Go to Tool" ImportModal; удалён data-sfx-handled из полей ввода WorldEncyclopediaPage для восстановления inputFocus; изменён toggleTrait DialogueGenerator на условное воспроизведение toggleOn/toggleOff в зависимости от добавления/удаления.',
+    announcementList2: 'Исправление BGM: updateAudioSettings теперь вызывает rebuildMusicChain() при изменении musicReverb, обеспечивая реальное применение реверберации.',
+    announcementList3: 'Завершение ImportModal: ImportableTool, importToolConfig, screenMap и массив tools теперь полностью включают audio-editor и audio-converter, поддерживая импорт JSON-конфигурации обоих инструментов.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2737,10 +2737,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.5 4차 글로벌 심층 감사: UI/UX/SFX/BGM 전면 수정. getFeatureDetails 12개 누락 페이지 case 보완; CSS 변수/클류스명 누락 수정; BGM 데드 필드 수정; Modal 닫기 버튼 무음·StartModal 이중 SFX 수정; 모든 독립 Page header/tool-header UI 통일; 하드코딩 "Close" 현지화.',
-    announcementList1: 'App.tsx: getFeatureDetails 누락 12개 페이지 case 보완; 5개 인라인 Modal 닫기 버튼 무음 수정; StartModal action-tile 이중 SFX 수정; 하드코딩 "Close"를 다국어 messages.close로 변경.',
-    announcementList2: 'CSS & audioEngine: --surface/--text 변수와 10+ 누락 CSS 클래스 추가; BGM 데드 필드 musicReverb/musicFilter/musicStereoWidth를 BGM 엔진에 실제 적용.',
-    announcementList3: '독립 Page UI 통일 및 a11y: 14개 독립 페이지 header를 back-link 표준으로 통일; tool-header에 section-label 통일 렌더링; AudioConverterPage의 appSubtitle 분해 보완; 다수 icon-only 버튼에 aria-label 추가; DocsPage 남비 버튼 무음 수정.',
+    announcementDescription: 'v1.12.6 SFX/BGM 보완 수정 및 ImportModal 완성화: 6개 누락된 double-play/무음 버튼, trait 전환 음향 로직 오류, BGM reverb 체인 재구성 불완전 수정; audio-editor 및 audio-converter 가져오기 지원 보완.',
+    announcementList1: 'SFX 보완 수정: DocsPage 검색 지우기 버튼에 data-sfx-handled 추가로 double-play 제거; ColorPaletteDesignerPage 색상 추출 버튼, RelationshipWebPage 3개 아바타 버튼, ImportModal "Go to Tool"에 playSound 추가; WorldEncyclopediaPage 입력란에서 data-sfx-handled 제거로 inputFocus 복원; DialogueGenerator toggleTrait를 추가/제거 상태에 따라 toggleOn/toggleOff 조걼 재생.',
+    announcementList2: 'BGM 수정: updateAudioSettings에서 musicReverb 변경 시 rebuildMusicChain() 호출, 리버브 실시간 반영 보장.',
+    announcementList3: 'ImportModal 완성화: ImportableTool, importToolConfig, screenMap, tools 배열에 audio-editor 및 audio-converter 완전 추가, 두 도구의 JSON 설정 가져오기 지원.',
   },
   fr: {
     ...translations.en,
@@ -2931,6 +2931,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.6',
+    date: '2026-05-18',
+    title: '1.12.6 SFX/BGM 补充修复与 ImportModal 完整化',
+    summary:
+      '补充修复第四轮审计中遗漏的 SFX 问题：6 处 double-play 或无声按钮、DialogueGenerator trait 切换音效逻辑错误、BGM reverb 链重建不完整；补全 ImportModal 缺失的 audio-editor 和 audio-converter 导入支持。',
+    details: [
+      'SFX 补充修复：DocsPage 搜索清除按钮添加 data-sfx-handled 消除 double-play；ColorPaletteDesignerPage 提取颜色按钮、RelationshipWebPage 3 个头像选择按钮、App.tsx ImportModal "Go to Tool" 按钮补充 playSound；WorldEncyclopediaPage 搜索框和 Modal 输入框移除 data-sfx-handled 恢复 inputFocus 音效；DialogueGeneratorPage toggleTrait 改为根据添加/移除状态分别播放 toggleOn/toggleOff。',
+      'BGM 修复：audioEngine.ts updateAudioSettings 在 musicReverb 变化时调用 rebuildMusicChain()，确保混响设置实时生效。',
+      'ImportModal 完整化：ImportableTool 类型、importToolConfig、screenMap、tools 数组全部补全 audio-editor 和 audio-converter，支持导入这两个工具的 JSON 配置。',
+    ],
+  },
   {
     version: '1.12.5',
     date: '2026-05-18',
@@ -6920,7 +6932,7 @@ function StartModal({
   );
 }
 
-type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts' | 'world-encyclopedia';
+type ImportableTool = 'face-maker' | 'style-transfer' | 'prompt-suite' | 'paper2gal' | 'llm-hub' | 'tts-export' | 'image-converter' | 'character-gif' | 'index-tts' | 'world-encyclopedia' | 'audio-editor' | 'audio-converter';
 
 function ImportModal({
   messages,
@@ -7023,6 +7035,7 @@ function ImportModal({
   }
 
   function goToTool() {
+    playSound('pageSwitch');
     if (!selectedTool) return;
     const screenMap: Record<ImportableTool, Exclude<FeatureScreen, 'home'>> = {
       'face-maker': 'face-maker',
@@ -7035,6 +7048,8 @@ function ImportModal({
       'character-gif': 'character-gif',
       'index-tts': 'index-tts',
       'world-encyclopedia': 'world-encyclopedia',
+      'audio-editor': 'audio-editor',
+      'audio-converter': 'audio-converter',
     };
     requestClose();
     navigateTimerRef.current = window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
@@ -7051,6 +7066,8 @@ function ImportModal({
     { key: 'character-gif', label: messages.featureGif, icon: 'character-gif' },
     { key: 'world-encyclopedia', label: messages.featureWorldEncyclopedia, icon: 'world-encyclopedia' },
     { key: 'index-tts', label: messages.featureIndexTts, icon: 'index-tts' },
+    { key: 'audio-editor', label: messages.featureAudioEditor, icon: 'audio-editor' },
+    { key: 'audio-converter', label: messages.featureAudioConverter, icon: 'audio-converter' },
   ];
 
   if (!isOpen) return null;
@@ -7235,6 +7252,20 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
       if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
       const payload = { text: String(data.text ?? ''), referenceAudioName: String(data.referenceAudioName ?? ''), config: data.config, savedSnapshot: '' };
       try { localStorage.setItem('oc-maker.index-tts', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'audio-editor': {
+      if (data.tool !== 'audio-editor') return { success: false, message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
+      try { localStorage.setItem('oc-maker.audio-editor', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      return { success: true, message: '' };
+    }
+    case 'audio-converter': {
+      if (data.tool !== 'audio-converter') return { success: false, message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
+      try { localStorage.setItem('oc-maker.audio-converter', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     default:

@@ -337,7 +337,7 @@ export default function DocsPage({
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && (
-                <button className="docs-search-clear" type="button" aria-label={messages.clearSearch || 'Clear search'} onClick={() => { playSound('buttonClick'); setSearchQuery(''); }}>
+                <button className="docs-search-clear" type="button" aria-label={messages.clearSearch || 'Clear search'} data-sfx-handled onClick={() => { playSound('buttonClick'); setSearchQuery(''); }}>
                   ✕
                 </button>
               )}

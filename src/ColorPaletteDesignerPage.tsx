@@ -713,7 +713,7 @@ export default function ColorPaletteDesignerPage({
           <button
             className="secondary-button small-button"
             type="button"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}
             data-sfx-handled
           >
             {labels.extractLabel}

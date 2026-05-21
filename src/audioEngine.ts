@@ -196,6 +196,11 @@ export function updateAudioSettings(next: Partial<AudioSettings>) {
   const oldMusicStereoWidth = currentSettings.musicStereoWidth;
   currentSettings = { ...currentSettings, ...next };
   applyVolumes();
+  if (
+    oldMusicReverb !== currentSettings.musicReverb
+  ) {
+    rebuildMusicChain();
+  }
   const musicChanged =
     oldMusicPreset !== currentSettings.musicPreset ||
     oldUseCustomMusic !== currentSettings.useCustomMusic ||
