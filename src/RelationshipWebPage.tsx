@@ -834,7 +834,7 @@ export function RelationshipWebPage({
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
-          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+          <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
           <span className="version-pill" style={{ minHeight: 40, padding: '0 14px' }}>
@@ -856,14 +856,15 @@ export function RelationshipWebPage({
         </div>
       </header>
 
-      <section className="tool-workbench fade-up delay-2" style={{ padding: 0, overflow: 'hidden', display: 'flex' }}>
-        <div className="tool-header" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5, padding: '14px 20px', pointerEvents: 'none' }}>
+      <section className="tool-workbench fade-up delay-2 rel-workbench">
+        <div className="tool-header">
           <div>
             <p className="section-label">{appSubtitle}</p>
             <h2>{pageTitle}</h2>
             <p>{pageDescription}</p>
           </div>
         </div>
+        <div className="rel-layout">
         {/* Canvas */}
         <div
           ref={canvasRef}
@@ -1101,6 +1102,7 @@ export function RelationshipWebPage({
             </div>
           )}
         </aside>
+        </div>
       </section>
 
       {/* Node Modal */}

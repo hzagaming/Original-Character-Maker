@@ -611,7 +611,7 @@ export function AssetGalleryPage({
     >
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
-          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+          <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
           <span className="version-pill" style={{ minHeight: 40, padding: '0 14px' }}>
@@ -659,8 +659,8 @@ export function AssetGalleryPage({
         <div className="tool-grid transfer-grid">
           <div className="tool-column">
             {/* Toolbar */}
-            <section className="tool-card" style={{ padding: 18 }}>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+            <section className="tool-card asset-toolbar-card">
+              <div className="asset-toolbar-row">
                 <div className="chip-row">
                   {(['all', 'image', 'audio', 'gif', 'video'] as const).map((f) => (
                     <button
@@ -676,18 +676,17 @@ export function AssetGalleryPage({
                 </div>
                 <input
                   type="text"
-                  className="tool-input"
+                  className="tool-input asset-search-input"
                   placeholder={copy.searchPlaceholder}
                   aria-label={copy.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ minWidth: 200, maxWidth: 320 }}
                 />
               </div>
 
               {selectedIds.size > 0 && (
-                <div style={{ marginTop: 14, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span className="tiny-copy" style={{ color: 'var(--accent-solid)' }}>
+                <div className="asset-selection-row">
+                  <span className="tiny-copy asset-selection-count">
                     {copy.itemsSelected.replace('{count}', String(selectedIds.size))}
                   </span>
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={selectAll}>{copy.selectAll}</button>
@@ -710,11 +709,6 @@ export function AssetGalleryPage({
             ) : (
               <div
                 className="asset-gallery-grid"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                  gap: 14,
-                }}
               >
                 {filteredAssets.map((item) => {
                   const isSelected = selectedIds.has(item.id);

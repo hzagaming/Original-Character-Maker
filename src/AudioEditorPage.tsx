@@ -1350,7 +1350,7 @@ export function AudioEditorPage({
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
-          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+          <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
         </div>
@@ -1703,7 +1703,7 @@ export function AudioEditorPage({
         </div>
       </section>
 
-      {_settings.others.showErrorPanel && errors.length > 0 && (
+      {_settings.others?.showErrorPanel && errors.length > 0 && (
         <DraggableErrorPanel
           error={errors[0] ? { code: errors[0].code, stage: 'audio-editor', message: errors[0].message, hint: errors[0].hint, details: {} } : null}
           labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}

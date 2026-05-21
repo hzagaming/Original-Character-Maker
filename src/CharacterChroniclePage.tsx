@@ -434,7 +434,7 @@ export default function CharacterChroniclePage({
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
-          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+          <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
           <span className="version-pill" style={{ minHeight: 40, padding: '0 14px' }}>
@@ -467,6 +467,7 @@ export default function CharacterChroniclePage({
             <p>{pageDescription}</p>
           </div>
         </div>
+        <div className="ch-layout">
         {/* Event List (Editor) */}
         <div className="ch-editor">
           {sortedEvents.length === 0 ? (
@@ -559,6 +560,7 @@ export default function CharacterChroniclePage({
               </div>
             )}
           </div>
+        </div>
         </div>
       </section>
 

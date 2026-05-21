@@ -7394,6 +7394,7 @@ function SettingsModal({
         });
         setCustomSfx(dataUrl);
       } else {
+        setCustomMusic(dataUrl);
         onUpdate({
           audio: {
             ...settings.audio,
@@ -7402,7 +7403,8 @@ function SettingsModal({
             customMusicName: file.name,
           },
         });
-        setCustomMusic(dataUrl);
+        stopMusic();
+        startMusic();
       }
     };
     reader.onerror = () => {
@@ -7423,6 +7425,7 @@ function SettingsModal({
       });
       setCustomSfx(null);
     } else {
+      setCustomMusic(null);
       onUpdate({
         audio: {
           ...settings.audio,
@@ -7431,7 +7434,8 @@ function SettingsModal({
           customMusicName: '',
         },
       });
-      setCustomMusic(null);
+      stopMusic();
+      startMusic();
     }
   }
 
@@ -7841,7 +7845,7 @@ function SettingsModal({
                 <section className="settings-section">
                   <h3>{messages.audioCustomSfx}</h3>
                   <div className="chip-row">
-                    <label className="primary-button" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <label className="primary-button" data-sfx-handled onClick={() => playSound('buttonClick')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                       <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadAudio('sfx', f); }} />
                       {messages.audioUploadFile}
                     </label>
@@ -7863,7 +7867,7 @@ function SettingsModal({
                 <section className="settings-section">
                   <h3>{messages.audioCustomMusic}</h3>
                   <div className="chip-row">
-                    <label className="primary-button" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <label className="primary-button" data-sfx-handled onClick={() => playSound('buttonClick')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                       <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadAudio('music', f); }} />
                       {messages.audioUploadFile}
                     </label>
@@ -7876,8 +7880,8 @@ function SettingsModal({
                   </div>
                   {settings.audio.customMusicDataUrl && (
                     <div className="chip-row" style={{ marginTop: 8 }}>
-                      <button className={`choice-chip ${settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: true } }); startMusic(); }}>{messages.audioCustomActive}</button>
-                      <button className={`choice-chip ${!settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: false } }); stopMusic(); }}>{messages.toggleOff}</button>
+                      <button className={`choice-chip ${settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { setCustomMusic(settings.audio.customMusicDataUrl); onUpdate({ audio: { ...settings.audio, useCustomMusic: true } }); stopMusic(); startMusic(); }}>{messages.audioCustomActive}</button>
+                      <button className={`choice-chip ${!settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: false } }); stopMusic(); startMusic(); }}>{messages.toggleOff}</button>
                     </div>
                   )}
                 </section>

@@ -439,7 +439,7 @@ export default function CharacterCardPage({
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
-          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+          <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
         </div>
@@ -466,6 +466,7 @@ export default function CharacterCardPage({
             <p>{pageDescription}</p>
           </div>
         </div>
+        <div className="cc-layout">
         <div className="cc-editor">
           <div className="cc-section">
             <h4>{copy.cardName}</h4>
@@ -689,6 +690,7 @@ export default function CharacterCardPage({
               )}
             </div>
           </div>
+        </div>
         </div>
       </section>
 

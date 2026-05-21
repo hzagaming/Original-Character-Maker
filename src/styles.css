@@ -2897,11 +2897,7 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .back-link {
-  margin-top: 18px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--accent-solid);
+  margin-top: 0;
 }
 
 .settings-modal {
@@ -5433,6 +5429,41 @@ input[type='range']:focus::-moz-range-thumb {
 
 /* ─── Asset Gallery Styles ─── */
 
+.asset-toolbar-card {
+  padding: 18px;
+}
+
+.asset-toolbar-row,
+.asset-selection-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.asset-selection-row {
+  justify-content: flex-start;
+  margin-top: 14px;
+  gap: 10px;
+}
+
+.asset-selection-count {
+  color: var(--accent-solid);
+}
+
+.asset-search-input {
+  min-width: 200px;
+  max-width: 320px;
+  flex: 1 1 220px;
+}
+
+.asset-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
 .asset-gallery-grid .asset-card {
   display: flex;
   flex-direction: column;
@@ -5590,15 +5621,28 @@ input[type='range']:focus::-moz-range-thumb {
 
 /* ─── Relationship Web Styles ─── */
 
+.rel-workbench {
+  overflow: visible;
+}
+
+.rel-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: 18px;
+  align-items: stretch;
+  min-height: 620px;
+}
+
 .rel-canvas {
   position: relative;
-  flex: 1;
+  min-height: 620px;
   overflow: hidden;
   background:
     radial-gradient(circle at 1px 1px, rgba(var(--accent-rgb), 0.06) 1px, transparent 0),
     var(--bg);
   background-size: 24px 24px, auto;
-  border-right: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
 }
 
 .rel-world {
@@ -5753,11 +5797,12 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .rel-side-panel {
-  width: 300px;
-  min-width: 260px;
-  max-width: 340px;
-  background: var(--bg-soft);
-  border-left: 1px solid var(--border);
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  background: var(--panel);
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
   display: flex;
   flex-direction: column;
   overflow: auto;
@@ -5993,13 +6038,24 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 @media (max-width: 900px) {
+  .rel-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.45fr);
+  }
   .rel-side-panel {
-    width: 240px;
-    min-width: 220px;
+    width: auto;
+    min-width: 0;
   }
 }
 
 @media (max-width: 720px) {
+  .rel-layout {
+    display: block;
+  }
+
+  .rel-canvas {
+    min-height: 520px;
+  }
+
   .rel-side-panel {
     position: fixed;
     bottom: 0;
@@ -6026,19 +6082,22 @@ input[type='range']:focus::-moz-range-thumb {
 /* ─── Character Card Exporter ─── */
 
 .cc-workbench {
-  display: flex;
-  flex-direction: row;
-  gap: 0;
-  overflow: hidden;
-  padding: 0;
+  display: block;
+  overflow: visible;
+}
+
+.cc-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
 }
 
 .cc-editor {
-  width: 360px;
-  min-width: 300px;
-  max-width: 420px;
-  background: var(--bg-soft);
-  border-right: 1px solid var(--border);
+  min-width: 0;
+  background: var(--panel);
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
   overflow-y: auto;
   padding: 20px;
   display: flex;
@@ -6196,11 +6255,14 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .cc-preview-area {
-  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg);
+  min-width: 0;
+  min-height: 640px;
+  background: var(--panel);
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
 }
 
 .cc-preview-label {
@@ -6632,15 +6694,12 @@ input[type='range']:focus::-moz-range-thumb {
 
 /* Mobile */
 @media (max-width: 900px) {
-  .cc-workbench { flex-direction: column; }
+  .cc-layout { grid-template-columns: 1fr; }
   .cc-editor {
-    width: 100%;
-    max-width: 100%;
-    min-width: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
+    min-width: 0;
     max-height: 45vh;
   }
+  .cc-preview-area { min-height: 520px; }
   .cc-card { width: 340px; min-height: 480px; }
   .cc-tmpl-fields,
   .cc-tmpl-detailed-grid,
@@ -6666,19 +6725,22 @@ input[type='range']:focus::-moz-range-thumb {
 /* ─── Character Chronicle ─── */
 
 .ch-workbench {
-  display: flex;
-  flex-direction: row;
-  gap: 0;
-  overflow: hidden;
-  padding: 0;
+  display: block;
+  overflow: visible;
+}
+
+.ch-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 400px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
 }
 
 .ch-editor {
-  width: 340px;
-  min-width: 280px;
-  max-width: 400px;
-  background: var(--bg-soft);
-  border-right: 1px solid var(--border);
+  min-width: 0;
+  background: var(--panel);
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
   overflow-y: auto;
   padding: 20px;
   display: flex;
@@ -6810,11 +6872,14 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .ch-preview {
-  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg);
+  min-width: 0;
+  min-height: 620px;
+  background: var(--panel);
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
 }
 
 .ch-preview-label {
@@ -7039,15 +7104,12 @@ input[type='range']:focus::-moz-range-thumb {
 
 /* Mobile */
 @media (max-width: 900px) {
-  .ch-workbench { flex-direction: column; }
+  .ch-layout { grid-template-columns: 1fr; }
   .ch-editor {
-    width: 100%;
-    max-width: 100%;
-    min-width: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
+    min-width: 0;
     max-height: 40vh;
   }
+  .ch-preview { min-height: 520px; }
   .ch-timeline-line { left: 18px; }
   .ch-tnode.left,
   .ch-tnode.right {
@@ -7069,17 +7131,16 @@ input[type='range']:focus::-moz-range-thumb {
 /* ─── World Encyclopedia ─── */
 
 .we-workbench {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  overflow: hidden;
-  padding: 0;
+  display: block;
+  overflow: visible;
 }
 
 .we-toolbar {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-soft);
+  margin-bottom: 18px;
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
+  background: var(--panel);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -7145,9 +7206,12 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .we-content {
-  flex: 1;
+  min-height: 420px;
   overflow-y: auto;
   padding: 20px;
+  border: var(--border-width) solid var(--border);
+  border-radius: 26px;
+  background: var(--panel);
 }
 
 .we-empty {

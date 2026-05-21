@@ -370,7 +370,7 @@ export default function CharacterBattleCardPage({
     <main className="feature-shell tool-page-shell">
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
-          <button className="back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
+          <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {labels.backHome}
           </button>
         </div>
