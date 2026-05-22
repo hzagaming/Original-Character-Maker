@@ -679,7 +679,15 @@ export default function CharacterSkillTreePage({
         <button className="secondary-button" type="button" onClick={() => { playSound('buttonClick'); copyJson(); }} data-sfx-handled>
           {labels.copyJson}
         </button>
-        <label className="secondary-button" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}>
+        <label
+          className="secondary-button"
+          style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+          data-sfx-handled
+          tabIndex={0}
+          role="button"
+          aria-label={labels.loadSet}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); e.currentTarget.click(); } }}
+        >
           <span>{labels.loadSet}</span>
           <input
             type="file"
@@ -687,7 +695,7 @@ export default function CharacterSkillTreePage({
             style={{ display: 'none' }}
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) { playSound('buttonClick'); importJson(file); }
+              if (file) { importJson(file); }
               e.currentTarget.value = '';
             }}
           />

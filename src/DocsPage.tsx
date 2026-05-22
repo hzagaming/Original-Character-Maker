@@ -34,6 +34,9 @@ type DocsLabels = {
   docsSectionParameters: string;
   docsSectionErrors: string;
   clearSearch: string;
+  docsSearchPlaceholder: string;
+  docsSearchResults: string;
+  docsSearchNoResults: string;
 };
 
 type DocsPageProps = {
@@ -333,7 +336,7 @@ export default function DocsPage({
               <input
                 className="docs-search-input"
                 type="text"
-                placeholder="搜索错误代码、描述、原因或解决方案..."
+                placeholder={messages.docsSearchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={messages.clearSearch}
@@ -346,12 +349,12 @@ export default function DocsPage({
             </div>
             {searchQuery.trim() && (
               <article className="docs-article">
-                <h1>搜索结果</h1>
+                <h1>{messages.docsSearchResults}</h1>
                 <p className="docs-dictionary-desc">
                   找到 {searchResults.length} 条与「{searchQuery}」相关的结果
                 </p>
                 {searchResults.length === 0 ? (
-                  <div className="docs-search-empty">没有找到匹配的结果，请尝试其他关键词。</div>
+                  <div className="docs-search-empty">{messages.docsSearchNoResults}</div>
                 ) : (
                   <div className="docs-errors-list">
                     {searchResults.slice(0, 100).map((err, i) => (

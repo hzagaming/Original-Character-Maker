@@ -229,7 +229,7 @@ function createReverbMix(input: AudioNode, dryGain: number, wetGain: number, dec
   const c = ensureContext();
   const convolver = c.createConvolver();
   const rate = c.sampleRate;
-  const length = Math.floor(rate * decay);
+  const length = Math.max(1, Math.floor(rate * decay));
   const impulse = c.createBuffer(2, length, rate);
   for (let ch = 0; ch < 2; ch++) {
     const data = impulse.getChannelData(ch);
@@ -315,7 +315,7 @@ function synthesize(params: {
     oscs.forEach((o) => {
       o.connect(filter);
       o.start(when);
-      o.stop(when + actualDuration + preset.release + 0.01);
+      o.stop(when + actualDuration + Math.max(preset.release, userRel) + 0.01);
       nodesToCleanup.push(o);
     });
     filter.connect(voiceGain);
@@ -324,7 +324,7 @@ function synthesize(params: {
 
   // noise
   if (preset.noiseMix > 0) {
-    const bufferSize = Math.floor(c.sampleRate * actualDuration);
+    const bufferSize = Math.max(1, Math.floor(c.sampleRate * actualDuration));
     const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
@@ -376,14 +376,11 @@ function synthesize(params: {
   }
   output.connect(sfxGain!);
 
-  const cleanupDelay = actualDuration + userRel + 0.5;
+  const cleanupDelay = actualDuration + Math.max(preset.release, userRel) + 0.5;
   setTimeout(() => {
     try {
       if (!ctx || ctx.state === 'closed') return;
       nodesToCleanup.forEach((n) => n.disconnect());
-      if (output !== rootGain) {
-        output.disconnect();
-      }
       if (reverbConvolver) {
         reverbConvolver.buffer = null;
       }
@@ -689,10 +686,9 @@ function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, du
     const c = ctx;
     const mg = musicGain;
     if (!c || !mg) return;
-    const stopTime = when + duration + 0.08;
-    if (stopTime <= c.currentTime) return;
-
     const startTime = Math.max(when, c.currentTime);
+    const stopTime = startTime + duration + 0.08;
+    if (stopTime <= c.currentTime) return;
     const humanDetune = humanize() * 3; // ±3 cents organic drift
     const velocity = volume * (0.92 + humanize() * 0.08); // ±8% velocity
     const effectiveFilterFreq = filterFreq * (currentSettings.musicFilter / 5000);
@@ -744,7 +740,7 @@ function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, du
     const filter = c.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(effectiveFilterFreq * 1.8, startTime);
-    filter.frequency.exponentialRampToValueAtTime(effectiveFilterFreq * 0.6, startTime + attack + decay * 1.5);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(effectiveFilterFreq * 0.6, 1), startTime + attack + decay * 1.5);
     filter.Q.value = 0.6;
 
     // ── Stereo panner ──

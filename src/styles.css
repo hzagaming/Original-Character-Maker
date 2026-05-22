@@ -2781,10 +2781,8 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .modal-card-wide {
-  width: min(1320px, calc(100vw - 40px));
-}
   position: relative;
-  width: min(1120px, calc(100vw - 40px));
+  width: min(1320px, calc(100vw - 40px));
   max-height: calc(100vh - 40px);
   margin: auto;
   overflow: auto;

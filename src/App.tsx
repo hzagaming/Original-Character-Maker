@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.8';
+const VERSION = '1.12.9';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -297,6 +297,9 @@ type Messages = {
   docsSectionParameters: string;
   docsSectionErrors: string;
   clearSearch: string;
+  docsSearchPlaceholder: string;
+  docsSearchResults: string;
+  docsSearchNoResults: string;
   docsNavIndex: string;
   docsFilterAll: string;
   docsFilterCritical: string;
@@ -666,10 +669,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.8 第六轮全局深度审计：修复 audioEngine.ts 未定义变量、AudioEditorPage 未解构 prop、ImportModal 硬编码英文泄漏、SFX 叠加播放、死字段/死代码清理。',
-    announcementList1: '致命修复：audioEngine.ts cleanupDelay 使用已删除变量 rel 导致 setTimeout 永不执行，SFX 后 AudioNode 无法清理；AudioEditorPage 解构列表缺少 onSwitchTool 导致 ReferenceError。',
-    announcementList2: 'ImportModal 本地化：importToolConfig 硬编码英文改为 error code + 翻译映射；AudioEditor 编辑按钮移除 buttonClick 叠加；上传区 label 与 DraggableErrorPanel 补全 SFX。',
-    announcementList3: '死代码清理：BattleCard/SkillTree 移除死字段 backHome 与未使用 prop；Converter labels 移除未使用字段；DocsPage 移除 clearSearch fallback；en 翻译补全 clearSearch；ko 公告同步更新。',
+    announcementDescription: 'v1.12.9 第七轮全局深度审计：修复 audioEngine.ts Web Audio API 边界崩溃、CSS 语法错误、可访问性缺失、DocsPage 硬编码中文、语言选择器不完整。',
+    announcementList1: 'audioEngine.ts 鲁棒性：exponentialRamp 防御目标值为 0；oscillator stop 使用 max(preset.release, userRel)；buffer length 防御为 0；移除重复 disconnect；stopTime 基于 startTime 计算。',
+    announcementList2: 'CSS 与可访问性：修复 styles.css .modal-card-wide orphaned declarations；SkillTreePage Load Set label 补全 tabIndex/role/aria-label；DocsPage 搜索文本从硬编码改为翻译键。',
+    announcementList3: '本地化补全：languageOptions 从 10 种扩展到 30 种；workflowPages "重做中" 改为翻译键；en/ja/ru/zh 补全 docsSearchPlaceholder/Results/NoResults。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -753,6 +756,9 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionParameters: '参数说明',
     docsSectionErrors: '报错与解决',
     clearSearch: '清除搜索',
+    docsSearchPlaceholder: '搜索错误代码、描述、原因或解决方案...',
+    docsSearchResults: '搜索结果',
+    docsSearchNoResults: '没有找到匹配的结果，请尝试其他关键词。',
     moduleCanvas: '主工作区画布',
     modulePanel: '右侧参数 / 功能面板',
     modulePipeline: '任务队列与输出结果区',
@@ -1102,10 +1108,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.8 第6回グローバル深度監査：audioEngine.ts の未定義変数、AudioEditorPage の未解构 prop、ImportModal の英語ハードコード漏洩、SFX 重複再生、デッドコード削除を修正。',
-    announcementList1: '致命的修正：audioEngine.ts の cleanupDelay が削除済み変数 rel を使用し setTimeout が永不実行になり、SFX 後の AudioNode が自動解放されない；AudioEditorPage の解构リストに onSwitchTool がなく ReferenceError。',
-    announcementList2: 'ImportModal 多言語化：importToolConfig の英語ハードコードをエラーコード＋翻訳マッピングに変更；AudioEditor の編集ボタンから buttonClick 重複を削除；アップロードラベルと DraggableErrorPanel に SFX を追加。',
-    announcementList3: 'デッドコード削除：BattleCard/SkillTree の死フィールド backHome と未使用 prop を削除；Converter labels の未使用フィールドを削除；DocsPage の clearSearch fallback を削除；en 翻訳に clearSearch を追加；ko お知らせを同期更新。',
+    announcementDescription: 'v1.12.9 第7回グローバル深度監査：audioEngine.ts の Web Audio API 境界クラッシュ、CSS 構文エラー、アクセシビリティ欠損、DocsPage の中国語ハードコード、言語セレクタの不完全性を修正。',
+    announcementList1: 'audioEngine.ts 堅牢性：exponentialRamp の目標値を 0 に防御；oscillator stop を max(preset.release, userRel) に；buffer length を 0 に防御；重複 disconnect を削除；stopTime を startTime ベースに計算。',
+    announcementList2: 'CSS とアクセシビリティ：styles.css .modal-card-wide の orphaned declarations を修正；SkillTreePage Load Set ラベルに tabIndex/role/aria-label を追加；DocsPage 検索テキストを翻訳キーに変更。',
+    announcementList3: '多言語化補完：languageOptions を 10 言語から 30 言語に拡張；workflowPages の「重做中」を翻訳キーに；en/ja/ru/zh に docsSearchPlaceholder/Results/NoResults を追加。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1189,6 +1195,9 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionParameters: 'パラメータ説明',
     docsSectionErrors: 'エラーと解決',
     clearSearch: '検索をクリア',
+    docsSearchPlaceholder: 'エラーコード、説明、原因、解決策を検索...',
+    docsSearchResults: '検索結果',
+    docsSearchNoResults: '一致する結果が見つかりませんでした。別のキーワードをお試しください。',
     moduleCanvas: 'メイン作業領域',
     modulePanel: '右側パネル',
     modulePipeline: 'タスクと出力',
@@ -1538,10 +1547,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.8 Sixth-round global deep audit: fixed audioEngine.ts undefined variable, AudioEditorPage missing prop destructuring, ImportModal hardcoded English leak, SFX overlapping playback, and dead code cleanup.',
-    announcementList1: 'Critical fixes: audioEngine.ts cleanupDelay used deleted variable rel causing setTimeout to never fire and AudioNode leak after SFX; AudioEditorPage destructuring missing onSwitchTool causing ReferenceError.',
-    announcementList2: 'ImportModal localization: importToolConfig hardcoded English converted to error codes + translation mapping; AudioEditor edit buttons removed buttonClick overlap; upload labels and DraggableErrorPanel callbacks gained SFX.',
-    announcementList3: 'Dead code cleanup: BattleCard/SkillTree removed dead backHome fields and unused onNavigate prop; Converter labels removed unused fields; DocsPage removed clearSearch fallback; en translation completed with clearSearch; ko announcement synced.',
+    announcementDescription: 'v1.12.9 Seventh-round global deep audit: fixed audioEngine.ts Web Audio API boundary crashes, CSS syntax error, accessibility gaps, DocsPage hardcoded Chinese, and incomplete language selector.',
+    announcementList1: 'audioEngine.ts robustness: exponentialRamp target value defended against 0; oscillator stop uses max(preset.release, userRel); buffer length defended against 0; removed duplicate disconnect; stopTime recalculated based on startTime.',
+    announcementList2: 'CSS & accessibility: fixed styles.css .modal-card-wide orphaned declarations; SkillTreePage Load Set label added tabIndex/role/aria-label; DocsPage search text converted from hardcoded to translation keys.',
+    announcementList3: 'Localization completion: languageOptions expanded from 10 to 30 languages; workflowPages "Redoing…" converted to translation key; en/ja/ru/zh completed with docsSearchPlaceholder/Results/NoResults.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1625,6 +1634,9 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionParameters: 'Parameters',
     docsSectionErrors: 'Errors & Solutions',
     clearSearch: 'Clear search',
+    docsSearchPlaceholder: 'Search error codes, descriptions, causes, or solutions...',
+    docsSearchResults: 'Search Results',
+    docsSearchNoResults: 'No matching results found. Try different keywords.',
     moduleCanvas: 'Main workspace',
     modulePanel: 'Control panel',
     modulePipeline: 'Task queue and outputs',
@@ -1974,10 +1986,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.8 Шестой раунд глобального аудита: исправлены неопределённая переменная в audioEngine.ts, недостающее деструктурирование prop в AudioEditorPage, утечка английского текста в ImportModal, наложение SFX и очистка мёртвого кода.',
-    announcementList1: 'Критические исправления: cleanupDelay в audioEngine.ts использовал удалённую переменную rel, из-за чего setTimeout никогда не срабатывал и AudioNode не освобождались после SFX; в деструктурировании AudioEditorPage отсутствовал onSwitchTool, вызывая ReferenceError.',
-    announcementList2: 'Локализация ImportModal: хардкод английского в importToolConfig заменён на коды ошибок + маппинг переводов; убрано наложение buttonClick в кнопках редактирования AudioEditor; добавлен SFX для зоны загрузки и callbacks DraggableErrorPanel.',
-    announcementList3: 'Очистка мёртвого кода: удалены мёртвые поля backHome и неиспользуемый prop onNavigate в BattleCard/SkillTree; удалены неиспользуемые поля в Converter labels; убран fallback clearSearch в DocsPage; добавлен clearSearch в en; синхронизировано объявление ko.',
+    announcementDescription: 'v1.12.9 Седьмой раунд глобального аудита: исправлены краевые случаи Web Audio API в audioEngine.ts, синтаксическая ошибка CSS, пробелы в доступности, хардкод на китайском в DocsPage, неполный селектор языков.',
+    announcementList1: 'Устойчивость audioEngine.ts: защита exponentialRamp от целевого значения 0; oscillator stop использует max(preset.release, userRel); защита buffer length от 0; удалено дублирующее disconnect; stopTime пересчитан от startTime.',
+    announcementList2: 'CSS и доступность: исправлены orphaned declarations в styles.css .modal-card-wide; label Load Set в SkillTreePage получил tabIndex/role/aria-label; поисковый текст DocsPage переведён на ключи локализации.',
+    announcementList3: 'Завершение локализации: languageOptions расширен с 10 до 30 языков; хардкод «Redoing…» в workflowPages переведён на ключ; en/ja/ru/zh дополнены docsSearchPlaceholder/Results/NoResults.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2271,6 +2283,26 @@ const languageOptions: Array<{
   { value: 'es', label: 'Español' },
   { value: 'it', label: 'Italiano' },
   { value: 'pt', label: 'Português' },
+  { value: 'cs', label: 'Čeština' },
+  { value: 'da', label: 'Dansk' },
+  { value: 'nl', label: 'Nederlands' },
+  { value: 'el', label: 'Ελληνικά' },
+  { value: 'hi', label: 'हिन्दी' },
+  { value: 'hu', label: 'Magyar' },
+  { value: 'id', label: 'Bahasa Indonesia' },
+  { value: 'no', label: 'Norsk' },
+  { value: 'pl', label: 'Polski' },
+  { value: 'ro', label: 'Română' },
+  { value: 'sk', label: 'Slovenčina' },
+  { value: 'sv', label: 'Svenska' },
+  { value: 'th', label: 'ไทย' },
+  { value: 'tr', label: 'Türkçe' },
+  { value: 'uk', label: 'Українська' },
+  { value: 'vi', label: 'Tiếng Việt' },
+  { value: 'ms', label: 'Bahasa Melayu' },
+  { value: 'fi', label: 'Suomi' },
+  { value: 'bg', label: 'Български' },
+  { value: 'lt', label: 'Lietuvių' },
 ];
 
 const defaultShortcutMap: ShortcutMap = {
@@ -2742,10 +2774,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.8 6차 글로벌 심층 감사: audioEngine.ts 미정의 변수, AudioEditorPage 미해체 prop, ImportModal 영어 하드코드 누출, SFX 중복 재생, 데드 코드 제거를 수정.',
-    announcementList1: '치명적 수정: audioEngine.ts cleanupDelay가 삭제된 변수 rel을 사용해 setTimeout이 영원히 실행되지 않고 SFX 후 AudioNode가 자동 해제되지 않음; AudioEditorPage 해체 목록에 onSwitchTool이 없어 ReferenceError 발생.',
-    announcementList2: 'ImportModal 다국어화: importToolConfig 영어 하드코드를 오류 코드 + 번역 매핑으로 변경; AudioEditor 편집 버튼에서 buttonClick 중복 제거; 업로드 레이블과 DraggableErrorPanel에 SFX 추가.',
-    announcementList3: '데드 코드 제거: BattleCard/SkillTree에서 죽은 필드 backHome과 미사용 prop 제거; Converter labels에서 미사용 필드 제거; DocsPage에서 clearSearch fallback 제거; en 번역에 clearSearch 추가; ko 공지 동기화 업데이트.',
+    announcementDescription: 'v1.12.9 7차 글로벌 심층 감사: audioEngine.ts Web Audio API 경계 충돌, CSS 구문 오류, 접근성 결함, DocsPage 중국어 하드코드, 언어 선택기 불완전성을 수정.',
+    announcementList1: 'audioEngine.ts 견고성: exponentialRamp 목표값을 0으로 방어; oscillator stop을 max(preset.release, userRel)로; buffer length을 0으로 방어; 중복 disconnect 제거; stopTime을 startTime 기반으로 재계산.',
+    announcementList2: 'CSS 및 접근성: styles.css .modal-card-wide orphaned declarations 수정; SkillTreePage Load Set 레이블에 tabIndex/role/aria-label 추가; DocsPage 검색 텍스트를 번역 키로 변경.',
+    announcementList3: '현지화 완성: languageOptions를 10개 언어에서 30개 언어로 확장; workflowPages "Redoing…"를 번역 키로 변환; en/ja/ru/zh에 docsSearchPlaceholder/Results/NoResults 추가.',
   },
   fr: {
     ...translations.en,
@@ -2936,6 +2968,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.9',
+    date: '2026-05-18',
+    title: '1.12.9 第七轮全局深度审计：audioEngine 鲁棒性/CSS/可访问性/本地化',
+    summary:
+      '对 v1.12.8 进行最严格的第七轮全局深度审计，修复 audioEngine.ts 多处 Web Audio API 边界崩溃、CSS 语法错误、可访问性缺失、DocsPage 硬编码中文、语言选择器不完整。',
+    details: [
+      'audioEngine.ts 鲁棒性修复：scheduleMusicNote 中 exponentialRampToValueAtTime 目标值防御为 0（musicFilter=0 时 BGM 完全静音且节点泄漏）；synthesize() 中 oscillator stop 时间使用 Math.max(preset.release, userRel) 防止用户 release 被截断；noise buffer 和 reverb impulse buffer 的 length 防御为 0（createBuffer 要求 length>0）；cleanup 中移除重复的 output.disconnect()；stopTime 基于 startTime 重新计算，修复 tab 后台切回后的音符截头。',
+      'CSS 语法错误：styles.css .modal-card-wide 规则后存在 orphaned declarations（无选择器），导致浏览器跳过整个规则块；已合并为完整的 .modal-card-wide 规则。',
+      '可访问性修复：CharacterSkillTreePage "Load Set" label 补充 tabIndex/role/aria-label/onKeyDown，键盘用户可触发文件选择；DocsPage 搜索框 placeholder、搜索结果标题、空状态文本从硬编码中文改为翻译键（docsSearchPlaceholder/docsSearchResults/docsSearchNoResults）。',
+      '本地化补全：App.tsx languageOptions 从 10 种补全到 30 种（AppLanguage 全部覆盖）；workflowPages.tsx 硬编码 "重做中" 改为 paper.redoBusy 翻译键；DocsPage 搜索相关文本纳入翻译字典。',
+    ],
+  },
   {
     version: '1.12.8',
     date: '2026-05-18',
@@ -5020,7 +5065,7 @@ function GlobalFooterBar({ version, messages }: { version: string; messages: Mes
       <div className="app-global-footer-inner">
         <span className="app-global-footer-version">{messages.footerBarVersion} {version}</span>
         <span className="app-global-footer-separator">·</span>
-        <a className="app-global-footer-link" href="https://github.com/28zhong.lecheng/Original-Character-Maker" target="_blank" rel="noopener noreferrer">
+        <a className="app-global-footer-link" href="https://github.com/hzagaming/Original-Character-Maker" target="_blank" rel="noopener noreferrer">
           {messages.footerBarGithub}
         </a>
         <span className="app-global-footer-separator">·</span>

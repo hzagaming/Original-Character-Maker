@@ -541,6 +541,7 @@ type UiCopySet = {
     redoWorkflow: string;
     redoCurrentResult: string;
     retryStep: string;
+    redoBusy: string;
     workflowConcurrency: string;
     workflowConcurrencyHint: string;
     hint: string;
@@ -1251,6 +1252,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: '重做当前结果',
       redoCurrentResult: '重做当前结果',
       retryStep: '重试此步骤',
+      redoBusy: paper.redoBusy,
       workflowConcurrency: '工作流并发',
       workflowConcurrencyHint: '默认开启表达图、CG 和抠图并行。关闭后会按顺序一个一个生成。',
       expressionCount: '表情版本数',
@@ -1708,6 +1710,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: '結果を再生成',
       redoCurrentResult: 'この結果を再生成',
       retryStep: 'このステップを再試行',
+      redoBusy: '再生成中',
       workflowConcurrency: 'workflow 並列実行',
       workflowConcurrencyHint: '既定では表情、CG、切り抜きを並列実行します。オフにすると 1 つずつ順番に生成します。',
       expressionCount: '表情バージョン数',
@@ -2165,6 +2168,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: 'Redo this result',
       redoCurrentResult: 'Redo this result',
       retryStep: 'Retry this step',
+      redoBusy: 'Redoing…',
       workflowConcurrency: 'Workflow concurrency',
       workflowConcurrencyHint: 'Expressions, CG, and cutout run in parallel by default. Turn it off to run one step at a time.',
       expressionCount: 'Expression variants',
@@ -2622,6 +2626,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: 'Переделать результат',
       redoCurrentResult: 'Переделать этот результат',
       retryStep: 'Повторить этот шаг',
+      redoBusy: 'Повтор…',
       workflowConcurrency: 'Параллельный workflow',
       workflowConcurrencyHint: 'По умолчанию выражения, CG и вырезание идут параллельно. Если выключить, workflow пойдет строго по шагам.',
       expressionCount: 'Число эмоций',
@@ -6981,7 +6986,7 @@ export function Paper2GalPage({
                               onClick={() => void handleRedoResult(stepName)}
                               disabled={redoBusy}
                             >
-                              {redoBusy ? '重做中' : stepStatus === 'failed' ? paper.retryStep : paper.redoCurrentResult}
+                              {redoBusy ? paper.redoBusy : stepStatus === 'failed' ? paper.retryStep : paper.redoCurrentResult}
                             </button>
                           </div>
                         )}
@@ -7106,7 +7111,7 @@ export function Paper2GalPage({
                             {copiedActionKey === copyKey ? copy.copied : paper.copyAsset}
                           </button>
                           <button className="secondary-button small-button" type="button" onClick={() => void handleRedoResult(card.stepName)} disabled={redoBusy}>
-                            {redoBusy ? '重做中' : paper.redoCurrentResult}
+                            {redoBusy ? paper.redoBusy : paper.redoCurrentResult}
                           </button>
                         </div>
                       </article>
