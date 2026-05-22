@@ -306,10 +306,46 @@ export function AudioEditorPage({
   backHome,
   openSettings,
   settings: _settings,
+  language,
   onBack,
   onOpenSettings,
   onOpenDocs,
 }: SharedPageProps) {
+  const labels = useMemo(() => {
+    const dict: Record<string, Record<string, string>> = {
+      zh: {
+        resetAll: '全部重置', source: '来源', importAudio: '导入音频', replace: '替换',
+        operations: '操作', play: '播放', pause: '暂停', stop: '停止',
+        undo: '撤销', redo: '重做', export: '导出', exporting: '导出中…',
+        exportComplete: '导出完成', ready: '就绪', noExportsYet: '暂无导出结果', download: '下载', remove: '移除',
+      },
+      ja: {
+        resetAll: 'すべてリセット', source: 'ソース', importAudio: '音声をインポート', replace: '置換',
+        operations: '操作', play: '再生', pause: '一時停止', stop: '停止',
+        undo: '元に戻す', redo: 'やり直し', export: '書き出し', exporting: '書き出し中…',
+        exportComplete: '書き出し完了', ready: '準備完了', noExportsYet: '書き出し履歴なし', download: 'ダウンロード', remove: '削除',
+      },
+      en: {
+        resetAll: 'Reset All', source: 'Source', importAudio: 'Import Audio', replace: 'Replace',
+        operations: 'Operations', play: 'Play', pause: 'Pause', stop: 'Stop',
+        undo: 'Undo', redo: 'Redo', export: 'Export', exporting: 'Exporting…',
+        exportComplete: 'Export complete', ready: 'Ready', noExportsYet: 'No exports yet.', download: 'Download', remove: 'Remove',
+      },
+      ru: {
+        resetAll: 'Сбросить все', source: 'Источник', importAudio: 'Импорт аудио', replace: 'Заменить',
+        operations: 'Операции', play: 'Воспроизвести', pause: 'Пауза', stop: 'Стоп',
+        undo: 'Отменить', redo: 'Повторить', export: 'Экспорт', exporting: 'Экспорт…',
+        exportComplete: 'Экспорт завершён', ready: 'Готово', noExportsYet: 'Нет экспортов', download: 'Скачать', remove: 'Удалить',
+      },
+      ko: {
+        resetAll: '모두 초기화', source: '소스', importAudio: '오디오 가져오기', replace: '교체',
+        operations: '작업', play: '재생', pause: '일시정지', stop: '정지',
+        undo: '실행 취소', redo: '다시 실행', export: '납품', exporting: '납품 중…',
+        exportComplete: '납품 완료', ready: '준비 완료', noExportsYet: '납품 내역 없음', download: '다운로드', remove: '제거',
+      },
+    };
+    return dict[language] ?? dict.en;
+  }, [language]);
   /* ---- Single shared AudioContext ---- */
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -1372,7 +1408,7 @@ export function AudioEditorPage({
             <p>{pageDescription}</p>
           </div>
           <div className="tool-header-actions">
-            <button className="secondary-button small-button" type="button" disabled={isImporting || isExporting} data-sfx-handled onClick={() => { resetAll(); }}>Reset All</button>
+            <button className="secondary-button small-button" type="button" disabled={isImporting || isExporting} data-sfx-handled onClick={() => { resetAll(); }}>{labels.resetAll}</button>
           </div>
         </div>
 
@@ -1382,12 +1418,12 @@ export function AudioEditorPage({
             <section className="tool-card">
               <div className="tool-card-header">
                 <div>
-                  <span className="card-caption">Source</span>
-                  <h3>{editBuffer ? fileName : 'Import Audio'}</h3>
+                  <span className="card-caption">{labels.source}</span>
+                  <h3>{editBuffer ? fileName : labels.importAudio}</h3>
                 </div>
                 {editBuffer && (
                   <button className="secondary-button small-button" type="button" disabled={isImporting} data-sfx-handled onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
-                    Replace
+                    {labels.replace}
                   </button>
                 )}
               </div>
@@ -1431,7 +1467,7 @@ export function AudioEditorPage({
                             boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
                           }}
                         >
-                          <h3>Import Audio</h3>
+                          <h3>{labels.importAudio}</h3>
                           <p>Click or drag MP3, WAV, OGG, FLAC, M4A here</p>
                         </label>
                       </>
@@ -1488,22 +1524,22 @@ export function AudioEditorPage({
                   <div className="tool-card-header">
                     <div>
                       <span className="card-caption">Edit</span>
-                      <h3>Operations</h3>
+                      <h3>{labels.operations}</h3>
                     </div>
                   </div>
                   <div className="tool-card-section">
                     <div className="tool-actions-row">
                       <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); togglePlay(); }}>
-                        {isPlaying ? 'Pause' : 'Play'}
+                        {isPlaying ? labels.pause : labels.play}
                       </button>
                       <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); stopPlayback(); setCurrentTime(0); }}>
-                        Stop
+                        {labels.stop}
                       </button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>Undo</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>Redo</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>{labels.undo}</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>{labels.redo}</button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
@@ -1613,7 +1649,7 @@ export function AudioEditorPage({
             <section className="tool-card">
               <div className="tool-card-header">
                 <div>
-                  <span className="card-caption">Export</span>
+                  <span className="card-caption">{labels.export}</span>
                   <h3>Export Settings</h3>
                 </div>
               </div>
@@ -1630,10 +1666,10 @@ export function AudioEditorPage({
                   ))}
                 </select>
                 <button className="primary-button small-button" type="button" data-sfx-handled onClick={() => { handleExport(); }} disabled={isExporting}>
-                  {isExporting ? `Exporting ${exportProgress}%…` : 'Export'}
+                  {isExporting ? `${labels.exporting.replace('…', '')} ${exportProgress}%…` : labels.export}
                 </button>
                 <span className={`status-badge ${isExporting ? 'running' : exportProgress >= 100 ? 'success' : 'idle'}`}>
-                  {isExporting ? 'Exporting…' : exportProgress >= 100 ? 'Export complete' : 'Ready'}
+                  {isExporting ? labels.exporting : exportProgress >= 100 ? labels.exportComplete : labels.ready}
                 </span>
               </div>
               {(isExporting || exportProgress > 0) && (
@@ -1643,7 +1679,7 @@ export function AudioEditorPage({
               )}
               <div className="tool-card-divider" />
               {exports.length === 0 ? (
-                <p className="tiny-copy empty-state">No exports yet.</p>
+                <p className="tiny-copy empty-state">{labels.noExportsYet}</p>
               ) : (
                 <div className="result-grid">
                   {exports.map((rec) => (
@@ -1654,8 +1690,8 @@ export function AudioEditorPage({
                       </div>
                       <audio key={rec.id} controls src={rec.url} className="tool-audio" aria-label={`Exported audio: ${rec.fileName}`} />
                       <div className="mini-action-row">
-                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}>Download</button>
-                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => removeExport(rec.id)}>Remove</button>
+                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('downloadSound'); const a = document.createElement('a'); a.href = rec.url; a.download = rec.fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}>{labels.download}</button>
+                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => removeExport(rec.id)}>{labels.remove}</button>
                       </div>
                     </div>
                   ))}

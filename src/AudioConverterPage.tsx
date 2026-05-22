@@ -306,6 +306,36 @@ export function AudioConverterPage({
   onOpenDocs,
   onSwitchTool,
 }: SharedPageProps) {
+  const labels = useMemo(() => {
+    const dict: Record<string, Record<string, string>> = {
+      zh: {
+        source: '来源', importAudio: '导入音频', replace: '替换', convert: '转换',
+        converting: '转换中…', importing: '导入中…', reset: '重置', results: '结果', noExportsYet: '暂无导出结果',
+        download: '下载', remove: '移除', ready: '就绪', convertComplete: '转换完成',
+      },
+      ja: {
+        source: 'ソース', importAudio: '音声をインポート', replace: '置換', convert: '変換',
+        converting: '変換中…', importing: 'インポート中…', reset: 'リセット', results: '結果', noExportsYet: '書き出し履歴なし',
+        download: 'ダウンロード', remove: '削除', ready: '準備完了', convertComplete: '変換完了',
+      },
+      en: {
+        source: 'Source', importAudio: 'Import Audio', replace: 'Replace', convert: 'Convert',
+        converting: 'Converting…', importing: 'Importing…', reset: 'Reset', results: 'Results', noExportsYet: 'No exports yet.',
+        download: 'Download', remove: 'Remove', ready: 'Ready', convertComplete: 'Conversion complete',
+      },
+      ru: {
+        source: 'Источник', importAudio: 'Импорт аудио', replace: 'Заменить', convert: 'Конвертировать',
+        converting: 'Конвертация…', importing: 'Импорт…', reset: 'Сброс', results: 'Результаты', noExportsYet: 'Нет экспортов',
+        download: 'Скачать', remove: 'Удалить', ready: 'Готово', convertComplete: 'Конвертация завершена',
+      },
+      ko: {
+        source: '소스', importAudio: '오디오 가져오기', replace: '교체', convert: '변환',
+        converting: '변환 중…', importing: '가져오는 중…', reset: '초기화', results: '결과', noExportsYet: '납품 내역 없음',
+        download: '다운로드', remove: '제거', ready: '준비 완료', convertComplete: '변환 완료',
+      },
+    };
+    return dict[language] ?? dict.en;
+  }, [language]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sourceUrlRef = useRef('');
   const resultUrlRef = useRef('');
@@ -722,12 +752,12 @@ export function AudioConverterPage({
             <section className="tool-card">
               <div className="tool-card-header">
                 <div>
-                  <span className="card-caption">Source</span>
-                  <h3>{sourceFile ? sourceFile.name : 'Import Audio'}</h3>
+                  <span className="card-caption">{labels.source}</span>
+                  <h3>{sourceFile ? sourceFile.name : labels.importAudio}</h3>
                 </div>
                 {sourceFile && (
                   <button className="secondary-button small-button" type="button" disabled={isImporting || isConverting} data-sfx-handled onClick={() => { playSound('buttonClick'); fileInputRef.current?.click(); }}>
-                    {isImporting ? 'Importing…' : 'Replace'}
+                    {isImporting ? labels.importing : labels.replace}
                   </button>
                 )}
               </div>
@@ -762,7 +792,7 @@ export function AudioConverterPage({
                           boxShadow: isDragOver ? '0 0 0 4px rgba(var(--accent-rgb), 0.10)' : undefined,
                         }}
                       >
-                        <h3>Import Audio</h3>
+                        <h3>{labels.importAudio}</h3>
                         <p>Click or drag MP3, WAV, OGG, FLAC, M4A, AAC, WEBM here</p>
                       </label>
                     )}
@@ -875,12 +905,12 @@ export function AudioConverterPage({
 
               <div className="tool-actions-row">
                 <button className="primary-button" type="button" data-sfx-handled onClick={handleConvert} disabled={!sourceBuffer || isConverting || isImporting}>
-                  {isConverting ? `Converting ${convertProgress}%…` : 'Convert'}
+                  {isConverting ? `${labels.converting.replace('…', '')} ${convertProgress}%…` : labels.convert}
                 </button>
                 <button className="secondary-button" type="button" data-sfx-handled onClick={handleDownload} disabled={!resultUrl}>
                   Download
                 </button>
-                <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { handleReset(); }}>Reset</button>
+                <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { handleReset(); }}>{labels.reset}</button>
                 <button className="secondary-button" type="button" disabled={isConverting} data-sfx-handled onClick={() => { playSound('pageSwitch'); onSwitchTool?.('audio-editor'); }}>Audio Editor</button>
               </div>
 
@@ -904,8 +934,8 @@ export function AudioConverterPage({
                 aria-expanded={isResultOpen}
               >
                 <div>
-                  <span className="card-caption">Results</span>
-                  <h3>{resultUrl ? 'Converted File' : 'No exports yet'}</h3>
+                  <span className="card-caption">{labels.results}</span>
+                  <h3>{resultUrl ? 'Converted File' : labels.noExportsYet}</h3>
                 </div>
                 <span className="collapsible-state">{isResultOpen ? 'Hide' : 'Show'}</span>
               </div>
@@ -916,7 +946,7 @@ export function AudioConverterPage({
                       <audio key={resultUrl} controls src={resultUrl} className="tool-audio" aria-label="Converted audio" />
                       <div className="result-meta">
                         <span className="tiny-copy">{resultFormat} · {formatBytes(resultBlob?.size || 0)}</span>
-                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleDownload}>Download</button>
+                        <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleDownload}>{labels.download}</button>
                       </div>
                     </>
                   ) : (
@@ -946,7 +976,7 @@ export function AudioConverterPage({
                 <>
                   <div className="tool-header-actions">
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} data-sfx-handled onClick={async () => { const ok = await copyText(logsText); playSound(ok ? 'copySound' : 'error'); if (!ok) addLog('error', 'Clipboard access denied'); }}>Copy</button>
-                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} data-sfx-handled onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>Download</button>
+                    <button className="secondary-button small-button" type="button" disabled={logs.length === 0} data-sfx-handled onClick={() => { downloadText('converter-logs.txt', logsText); playSound('downloadSound'); }}>{labels.download}</button>
                     <button className="secondary-button small-button" type="button" disabled={logs.length === 0} data-sfx-handled onClick={() => { playSound('deleteSound'); setLogs([]); }}>Clear</button>
                   </div>
                   <div className="log-scroll" aria-live="polite" aria-atomic="false">
