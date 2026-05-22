@@ -376,7 +376,7 @@ function synthesize(params: {
   }
   output.connect(sfxGain!);
 
-  const cleanupDelay = actualDuration + rel + 0.5;
+  const cleanupDelay = actualDuration + userRel + 0.5;
   setTimeout(() => {
     try {
       if (!ctx || ctx.state === 'closed') return;

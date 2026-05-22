@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.7';
+const VERSION = '1.12.8';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -666,10 +666,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.7 第五轮全局深度审计：修复 7 处 modal-close double-play、BGM 混响内存泄漏、SFX ADSR/Pan 死设置、ImportModal JSON 防御、多页面本地化与可访问性缺失。',
-    announcementList1: 'SFX/BGM 修复：移除 7 处 modal-close 重复音效；audioEngine.ts 释放混响 convolver.buffer 防止内存泄漏；synthesize() 接入用户 ADSR/Pan 设置。',
-    announcementList2: 'ImportModal 与本地化：validateAndImport 增加 JSON 类型校验；BattleCard/SkillTree 统一 backHome prop；DocsPage 补全 clearSearch；AudioEditor/Converter 核心文本 5 语本地化。',
-    announcementList3: '可访问性：3 处输入框补全 aria-label；版本与公告同步到 1.12.7。',
+    announcementDescription: 'v1.12.8 第六轮全局深度审计：修复 audioEngine.ts 未定义变量、AudioEditorPage 未解构 prop、ImportModal 硬编码英文泄漏、SFX 叠加播放、死字段/死代码清理。',
+    announcementList1: '致命修复：audioEngine.ts cleanupDelay 使用已删除变量 rel 导致 setTimeout 永不执行，SFX 后 AudioNode 无法清理；AudioEditorPage 解构列表缺少 onSwitchTool 导致 ReferenceError。',
+    announcementList2: 'ImportModal 本地化：importToolConfig 硬编码英文改为 error code + 翻译映射；AudioEditor 编辑按钮移除 buttonClick 叠加；上传区 label 与 DraggableErrorPanel 补全 SFX。',
+    announcementList3: '死代码清理：BattleCard/SkillTree 移除死字段 backHome 与未使用 prop；Converter labels 移除未使用字段；DocsPage 移除 clearSearch fallback；en 翻译补全 clearSearch；ko 公告同步更新。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1102,10 +1102,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.7 第5回グローバル深度監査：7 件の modal-close ダブルプレイ、BGM リバーブ メモリリーク、SFX ADSR/Pan 無効設定、ImportModal JSON 防御、多言語化とアクセシビリティを修正。',
-    announcementList1: 'SFX/BGM 修正：7 件の modal-close 重複音を削除；audioEngine.ts が convolver.buffer を解放してメモリリーク防止；synthesize() にユーザー ADSR/Pan 設定を反映。',
-    announcementList2: 'ImportModal と多言語化：validateAndImport に JSON 型チェックを追加；BattleCard/SkillTree の backHome prop を統一；DocsPage に clearSearch を追加；AudioEditor/Converter の核心テキストを 5 言語化。',
-    announcementList3: 'アクセシビリティ：3 つの入力欄に aria-label を追加；バージョンとお知らせを 1.12.7 に同期。',
+    announcementDescription: 'v1.12.8 第6回グローバル深度監査：audioEngine.ts の未定義変数、AudioEditorPage の未解构 prop、ImportModal の英語ハードコード漏洩、SFX 重複再生、デッドコード削除を修正。',
+    announcementList1: '致命的修正：audioEngine.ts の cleanupDelay が削除済み変数 rel を使用し setTimeout が永不実行になり、SFX 後の AudioNode が自動解放されない；AudioEditorPage の解构リストに onSwitchTool がなく ReferenceError。',
+    announcementList2: 'ImportModal 多言語化：importToolConfig の英語ハードコードをエラーコード＋翻訳マッピングに変更；AudioEditor の編集ボタンから buttonClick 重複を削除；アップロードラベルと DraggableErrorPanel に SFX を追加。',
+    announcementList3: 'デッドコード削除：BattleCard/SkillTree の死フィールド backHome と未使用 prop を削除；Converter labels の未使用フィールドを削除；DocsPage の clearSearch fallback を削除；en 翻訳に clearSearch を追加；ko お知らせを同期更新。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1538,10 +1538,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.7 Fifth-round global deep audit: fixed 7 modal-close double-plays, BGM reverb memory leak, SFX ADSR/Pan dead settings, ImportModal JSON guard, and localization/accessibility gaps across pages.',
-    announcementList1: 'SFX/BGM fixes: removed 7 modal-close duplicate sounds; audioEngine.ts releases convolver.buffer to prevent memory leak; synthesize() now respects user ADSR/Pan settings.',
-    announcementList2: 'ImportModal & localization: added JSON type guard to validateAndImport; unified backHome prop in BattleCard/SkillTree; added clearSearch to DocsPage; localized core AudioEditor/Converter text into 5 languages.',
-    announcementList3: 'Accessibility: added aria-label to 3 input fields; synced version and announcement to 1.12.7.',
+    announcementDescription: 'v1.12.8 Sixth-round global deep audit: fixed audioEngine.ts undefined variable, AudioEditorPage missing prop destructuring, ImportModal hardcoded English leak, SFX overlapping playback, and dead code cleanup.',
+    announcementList1: 'Critical fixes: audioEngine.ts cleanupDelay used deleted variable rel causing setTimeout to never fire and AudioNode leak after SFX; AudioEditorPage destructuring missing onSwitchTool causing ReferenceError.',
+    announcementList2: 'ImportModal localization: importToolConfig hardcoded English converted to error codes + translation mapping; AudioEditor edit buttons removed buttonClick overlap; upload labels and DraggableErrorPanel callbacks gained SFX.',
+    announcementList3: 'Dead code cleanup: BattleCard/SkillTree removed dead backHome fields and unused onNavigate prop; Converter labels removed unused fields; DocsPage removed clearSearch fallback; en translation completed with clearSearch; ko announcement synced.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1624,6 +1624,7 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionButtons: 'Buttons',
     docsSectionParameters: 'Parameters',
     docsSectionErrors: 'Errors & Solutions',
+    clearSearch: 'Clear search',
     moduleCanvas: 'Main workspace',
     modulePanel: 'Control panel',
     modulePipeline: 'Task queue and outputs',
@@ -1973,10 +1974,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.7 Пятый раунд глобального аудита: исправлены 7 двойных воспроизведений modal-close, утечка памяти BGM-реверберации, нерабочие параметры SFX ADSR/Pan, защита JSON в ImportModal, а также локализация и доступность.',
-    announcementList1: 'Исправления SFX/BGM: удалены 7 дублирующих звуков modal-close; audioEngine.ts освобождает convolver.buffer для предотвращения утечки памяти; synthesize() теперь учитывает пользовательские настройки ADSR/Pan.',
-    announcementList2: 'ImportModal и локализация: добавлена проверка типа JSON в validateAndImport; унифицирован prop backHome в BattleCard/SkillTree; добавлен clearSearch в DocsPage; основной текст AudioEditor/Converter локализован на 5 языков.',
-    announcementList3: 'Доступность: добавлены aria-label к 3 полям ввода; версия и объявления синхронизированы с 1.12.7.',
+    announcementDescription: 'v1.12.8 Шестой раунд глобального аудита: исправлены неопределённая переменная в audioEngine.ts, недостающее деструктурирование prop в AudioEditorPage, утечка английского текста в ImportModal, наложение SFX и очистка мёртвого кода.',
+    announcementList1: 'Критические исправления: cleanupDelay в audioEngine.ts использовал удалённую переменную rel, из-за чего setTimeout никогда не срабатывал и AudioNode не освобождались после SFX; в деструктурировании AudioEditorPage отсутствовал onSwitchTool, вызывая ReferenceError.',
+    announcementList2: 'Локализация ImportModal: хардкод английского в importToolConfig заменён на коды ошибок + маппинг переводов; убрано наложение buttonClick в кнопках редактирования AudioEditor; добавлен SFX для зоны загрузки и callbacks DraggableErrorPanel.',
+    announcementList3: 'Очистка мёртвого кода: удалены мёртвые поля backHome и неиспользуемый prop onNavigate в BattleCard/SkillTree; удалены неиспользуемые поля в Converter labels; убран fallback clearSearch в DocsPage; добавлен clearSearch в en; синхронизировано объявление ko.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2741,10 +2742,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.7 UI/UX/SFX/BGM 심층 재점검: BGM 리버브 단위, 기존 설정 마이그레이션, 커스텀 BGM 전환, 오디오 편집/변환 도구의 SFX와 중복 작업 방지를 수정.',
-    announcementList1: 'BGM 수정: 음악 리버브를 0-100%로 통일해 기본값 30이 3000%로 표시되지 않도록 수정; 기존 0-1 저장값은 자동으로 백분율로 이전.',
-    announcementList2: 'SFX/BGM 경험: SFX 팬 값이 다시 100으로 나뉘어 거의 들리지 않던 문제 수정; 커스텀 BGM 재시작 정리, 오디오 도구 SFX와 중복 작업 방지 보강.',
-    announcementList3: '버전 및 공지: VERSION, package.json, package-lock.json을 1.12.7로 동기화; 1.12.6은 이전 공지로 이동.',
+    announcementDescription: 'v1.12.8 6차 글로벌 심층 감사: audioEngine.ts 미정의 변수, AudioEditorPage 미해체 prop, ImportModal 영어 하드코드 누출, SFX 중복 재생, 데드 코드 제거를 수정.',
+    announcementList1: '치명적 수정: audioEngine.ts cleanupDelay가 삭제된 변수 rel을 사용해 setTimeout이 영원히 실행되지 않고 SFX 후 AudioNode가 자동 해제되지 않음; AudioEditorPage 해체 목록에 onSwitchTool이 없어 ReferenceError 발생.',
+    announcementList2: 'ImportModal 다국어화: importToolConfig 영어 하드코드를 오류 코드 + 번역 매핑으로 변경; AudioEditor 편집 버튼에서 buttonClick 중복 제거; 업로드 레이블과 DraggableErrorPanel에 SFX 추가.',
+    announcementList3: '데드 코드 제거: BattleCard/SkillTree에서 죽은 필드 backHome과 미사용 prop 제거; Converter labels에서 미사용 필드 제거; DocsPage에서 clearSearch fallback 제거; en 번역에 clearSearch 추가; ko 공지 동기화 업데이트.',
   },
   fr: {
     ...translations.en,
@@ -2935,6 +2936,22 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.8',
+    date: '2026-05-18',
+    title: '1.12.8 第六轮全局深度审计：类型安全/SFX/死代码清理',
+    summary:
+      '对 v1.12.7 进行最严格的第六轮全局深度审计，修复 audioEngine.ts 未定义变量导致的内存泄漏、AudioEditorPage 未解构 prop 导致的运行时错误、ImportModal 硬编码英文泄漏、SFX 叠加播放、死字段/死代码清理。',
+    details: [
+      '致命修复：audioEngine.ts synthesize() 中 cleanupDelay 使用已删除的变量 rel，导致 setTimeout 永不执行，每次 SFX 后 AudioNode 无法自动清理；已改为 userRel。',
+      '致命修复：AudioEditorPage.tsx 解构列表缺少 onSwitchTool，但 JSX 中直接引用，导致 ReferenceError；已补回解构。',
+      'ImportModal 本地化：importToolConfig 返回的硬编码英文错误消息（Tool type mismatch / Missing config / Storage failed）改为 error code，validateAndImport 映射到对应翻译键，彻底消除英文泄漏。',
+      'SFX 体验优化：AudioEditorPage 编辑操作按钮（Undo/Redo/Trim/Split/Delete 等）的 inline buttonClick 与函数内部专用音效叠加，已移除 buttonClick，仅保留操作专属音效。',
+      'AudioEditorPage/AudioConverterPage 上传区 label 补充 onClick 音效；AudioEditorPage DraggableErrorPanel 全部回调补充 playSound，与 AudioConverterPage 保持一致。',
+      '死代码清理：CharacterBattleCardPage/CharacterSkillTreePage 移除本地 labels 中的死字段 backHome、未使用的 onNavigate prop 和 FeatureScreen import；AudioConverterPage labels 移除未使用的 remove/ready/convertComplete；DocsPage 移除 clearSearch fallback。',
+      '本地化补全：App.tsx en 翻译补入 clearSearch；ko 公告内容更新为与 v1.12.7/v1.12.8 修复一致。',
+    ],
+  },
   {
     version: '1.12.7',
     date: '2026-05-18',
@@ -7065,7 +7082,12 @@ function ImportModal({
       playSound('save');
     } else {
       setStatus('error');
-      setStatusMessage(result.message || messages.importToolMismatch);
+      const statusMsg =
+        result.code === 'mismatch' ? messages.importToolMismatch :
+        result.code === 'missing' ? messages.importInvalidConfig :
+        result.code === 'storage' ? messages.importInvalidConfig :
+        result.message || messages.importToolMismatch;
+      setStatusMessage(statusMsg);
       playSound('error');
     }
   }
@@ -7177,23 +7199,23 @@ function ImportModal({
   );
 }
 
-function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): { success: boolean; message: string } {
+function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): { success: boolean; message: string; code?: 'mismatch' | 'missing' | 'storage' } {
   switch (tool) {
     case 'face-maker': {
-      if (data.tool !== 'face-maker') return { success: false, message: 'Tool type mismatch' };
-      if (!data.draft || typeof data.draft !== 'object') return { success: false, message: 'Missing draft config' };
-      try { localStorage.setItem('oc-maker.face-maker-import', JSON.stringify(data.draft)); } catch { return { success: false, message: 'Storage failed' }; }
+      if (data.tool !== 'face-maker') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.draft || typeof data.draft !== 'object') return { success: false, code: 'missing', message: 'Missing draft config' };
+      try { localStorage.setItem('oc-maker.face-maker-import', JSON.stringify(data.draft)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'style-transfer': {
-      if (data.tool !== 'style-transfer') return { success: false, message: 'Tool type mismatch' };
-      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      if (data.tool !== 'style-transfer') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, code: 'missing', message: 'Missing config' };
       const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
-      try { localStorage.setItem('oc-maker.style-transfer', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.style-transfer', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'prompt-suite': {
-      if (data.tool !== 'prompt-suite') return { success: false, message: 'Tool type mismatch' };
+      if (data.tool !== 'prompt-suite') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
       const payload = {
         selectedTemplate: String(data.selectedTemplate ?? 'world'),
         documentHtml: String(data.documentHtml ?? ''),
@@ -7203,7 +7225,7 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
         ttsConfig: (data.ttsConfig as Record<string, unknown>) || {},
         savedSnapshot: '',
       };
-      try { localStorage.setItem('oc-maker.prompt-suite', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.prompt-suite', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'paper2gal': {
@@ -7217,7 +7239,7 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
           promptOverrides: (config.promptOverrides as Record<string, unknown>) || {},
           savedSnapshot: '',
         };
-        try { localStorage.setItem('oc-maker.paper2gal', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+        try { localStorage.setItem('oc-maker.paper2gal', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
         return { success: true, message: '' };
       }
       // Also accept legacy debug export format if it contains promptOverrides
@@ -7230,28 +7252,28 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
           promptOverrides: data.promptOverrides as Record<string, unknown>,
           savedSnapshot: '',
         };
-        try { localStorage.setItem('oc-maker.paper2gal', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+        try { localStorage.setItem('oc-maker.paper2gal', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
         return { success: true, message: '' };
       }
-      return { success: false, message: 'Tool type mismatch or missing config' };
+      return { success: false, code: 'mismatch', message: 'Tool type mismatch or missing config' };
     }
     case 'llm-hub': {
-      if (data.tool !== 'llm-hub') return { success: false, message: 'Tool type mismatch' };
-      if (!data.llmConfig || typeof data.llmConfig !== 'object') return { success: false, message: 'Missing llmConfig' };
+      if (data.tool !== 'llm-hub') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.llmConfig || typeof data.llmConfig !== 'object') return { success: false, code: 'missing', message: 'Missing llmConfig' };
       const payload = { llmConfig: data.llmConfig, savedSnapshot: '', presets: Array.isArray(data.presets) ? data.presets : [] };
-      try { localStorage.setItem('oc-maker.llm-hub-v2', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.llm-hub-v2', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'tts-export': {
-      if (data.tool !== 'tts-export') return { success: false, message: 'Tool type mismatch' };
-      if (!data.ttsConfig || typeof data.ttsConfig !== 'object') return { success: false, message: 'Missing ttsConfig' };
+      if (data.tool !== 'tts-export') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.ttsConfig || typeof data.ttsConfig !== 'object') return { success: false, code: 'missing', message: 'Missing ttsConfig' };
       const payload = { ttsConfig: data.ttsConfig, savedSnapshot: '' };
-      try { localStorage.setItem('oc-maker.tts-export', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.tts-export', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'image-converter': {
-      if (data.tool !== 'image-converter') return { success: false, message: 'Tool type mismatch' };
-      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      if (data.tool !== 'image-converter') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, code: 'missing', message: 'Missing config' };
       const config = data.config as Record<string, unknown>;
       const payload = {
         outputFormat: String(config.outputFormat ?? 'image/png'),
@@ -7267,45 +7289,45 @@ function importToolConfig(tool: ImportableTool, data: Record<string, unknown>): 
         grayscale: Number(config.grayscale ?? 0),
         savedSnapshot: '',
       };
-      try { localStorage.setItem('oc-maker.image-converter', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.image-converter', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'world-encyclopedia': {
-      if (data.tool !== 'world-encyclopedia') return { success: false, message: 'Tool type mismatch' };
-      if (!Array.isArray(data.data)) return { success: false, message: 'Missing data array' };
-      try { localStorage.setItem('oc-maker.world-encyclopedia', JSON.stringify(data.data)); } catch { return { success: false, message: 'Storage failed' }; }
+      if (data.tool !== 'world-encyclopedia') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!Array.isArray(data.data)) return { success: false, code: 'missing', message: 'Missing data array' };
+      try { localStorage.setItem('oc-maker.world-encyclopedia', JSON.stringify(data.data)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'character-gif': {
-      if (data.tool !== 'character-gif') return { success: false, message: 'Tool type mismatch' };
-      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      if (data.tool !== 'character-gif') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, code: 'missing', message: 'Missing config' };
       const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
-      try { localStorage.setItem('oc-maker.character-gif', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.character-gif', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'index-tts': {
-      if (data.tool !== 'index-tts') return { success: false, message: 'Tool type mismatch' };
-      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      if (data.tool !== 'index-tts') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, code: 'missing', message: 'Missing config' };
       const payload = { text: String(data.text ?? ''), referenceAudioName: String(data.referenceAudioName ?? ''), config: data.config, savedSnapshot: '' };
-      try { localStorage.setItem('oc-maker.index-tts', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.index-tts', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'audio-editor': {
-      if (data.tool !== 'audio-editor') return { success: false, message: 'Tool type mismatch' };
-      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      if (data.tool !== 'audio-editor') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, code: 'missing', message: 'Missing config' };
       const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
-      try { localStorage.setItem('oc-maker.audio-editor', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.audio-editor', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     case 'audio-converter': {
-      if (data.tool !== 'audio-converter') return { success: false, message: 'Tool type mismatch' };
-      if (!data.config || typeof data.config !== 'object') return { success: false, message: 'Missing config' };
+      if (data.tool !== 'audio-converter') return { success: false, code: 'mismatch', message: 'Tool type mismatch' };
+      if (!data.config || typeof data.config !== 'object') return { success: false, code: 'missing', message: 'Missing config' };
       const payload = { inputFileName: String(data.inputFileName ?? ''), config: data.config, savedSnapshot: '' };
-      try { localStorage.setItem('oc-maker.audio-converter', JSON.stringify(payload)); } catch { return { success: false, message: 'Storage failed' }; }
+      try { localStorage.setItem('oc-maker.audio-converter', JSON.stringify(payload)); } catch { return { success: false, code: 'storage', message: 'Storage failed' }; }
       return { success: true, message: '' };
     }
     default:
-      return { success: false, message: 'Unknown tool' };
+      return { success: false, code: 'mismatch', message: 'Unknown tool' };
   }
 }
 

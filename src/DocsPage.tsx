@@ -336,7 +336,7 @@ export default function DocsPage({
                 placeholder="搜索错误代码、描述、原因或解决方案..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label={messages.clearSearch || 'Clear search'}
+                aria-label={messages.clearSearch}
               />
               {searchQuery && (
                 <button className="docs-search-clear" type="button" aria-label={messages.clearSearch || 'Clear search'} data-sfx-handled onClick={() => { playSound('buttonClick'); setSearchQuery(''); }}>

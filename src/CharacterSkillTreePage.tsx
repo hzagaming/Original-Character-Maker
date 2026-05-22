@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playSound } from './audioEngine';
-import type { AppLanguage, FeatureScreen, SettingsState } from './types';
+import type { AppLanguage, SettingsState } from './types';
 
 // ─── Types ───
 
@@ -218,7 +218,6 @@ export default function CharacterSkillTreePage({
   appSubtitle,
   language,
   settings,
-  onNavigate,
   onBack,
   onOpenSettings,
   openSettings,
@@ -228,7 +227,6 @@ export default function CharacterSkillTreePage({
   appSubtitle: string;
   language: AppLanguage;
   settings: SettingsState;
-  onNavigate: (screen: FeatureScreen) => void;
   onBack: () => void;
   onOpenSettings: () => void;
   openSettings: string;
@@ -241,7 +239,7 @@ export default function CharacterSkillTreePage({
     const dict: Record<string, Record<string, string>> = {
       zh: {
         presetWarrior: '战士', presetMage: '法师', presetAssassin: '刺客', presetSupport: '辅助', presetCustom: '自定义',
-        backHome: '返回首页', newSkill: '新建技能', deleteSkill: '删除', saveSet: '保存方案', loadSet: '加载方案', exportJson: '导出 JSON',
+        newSkill: '新建技能', deleteSkill: '删除', saveSet: '保存方案', loadSet: '加载方案', exportJson: '导出 JSON',
         history: '历史', favorites: '收藏', clearAll: '清空', linkedStats: '关联属性',
         availablePoints: '可用技能点', totalPoints: '总技能点', unlocked: '已解锁', locked: '未解锁',
         skillName: '技能名称', skillDesc: '技能描述', skillType: '类型', skillTier: '层级',
@@ -256,7 +254,7 @@ export default function CharacterSkillTreePage({
       },
       ja: {
         presetWarrior: '戦士', presetMage: '魔導士', presetAssassin: '暗殺者', presetSupport: 'サポート', presetCustom: 'カスタム',
-        backHome: 'ホームへ戻る', newSkill: '新規スキル', deleteSkill: '削除', saveSet: '保存', loadSet: '読込', exportJson: 'JSON 出力',
+        newSkill: '新規スキル', deleteSkill: '削除', saveSet: '保存', loadSet: '読込', exportJson: 'JSON 出力',
         history: '履歴', favorites: 'お気に入り', clearAll: '全削除', linkedStats: '連携ステータス',
         availablePoints: '使用可能ポイント', totalPoints: '合計ポイント', unlocked: '解放済', locked: '未解放',
         skillName: 'スキル名', skillDesc: '説明', skillType: 'タイプ', skillTier: 'ティア',
@@ -271,7 +269,7 @@ export default function CharacterSkillTreePage({
       },
       en: {
         presetWarrior: 'Warrior', presetMage: 'Mage', presetAssassin: 'Assassin', presetSupport: 'Support', presetCustom: 'Custom',
-        backHome: 'Back home', newSkill: 'New Skill', deleteSkill: 'Delete', saveSet: 'Save Set', loadSet: 'Load Set', exportJson: 'Export JSON',
+        newSkill: 'New Skill', deleteSkill: 'Delete', saveSet: 'Save Set', loadSet: 'Load Set', exportJson: 'Export JSON',
         history: 'History', favorites: 'Favorites', clearAll: 'Clear All', linkedStats: 'Linked Stats',
         availablePoints: 'Available Points', totalPoints: 'Total Points', unlocked: 'Unlocked', locked: 'Locked',
         skillName: 'Skill Name', skillDesc: 'Description', skillType: 'Type', skillTier: 'Tier',
@@ -286,7 +284,7 @@ export default function CharacterSkillTreePage({
       },
       ru: {
         presetWarrior: 'Воин', presetMage: 'Маг', presetAssassin: 'Ассасин', presetSupport: 'Поддержка', presetCustom: 'Свой',
-        backHome: 'На главную', newSkill: 'Новый навык', deleteSkill: 'Удалить', saveSet: 'Сохранить', loadSet: 'Загрузить', exportJson: 'Экспорт JSON',
+        newSkill: 'Новый навык', deleteSkill: 'Удалить', saveSet: 'Сохранить', loadSet: 'Загрузить', exportJson: 'Экспорт JSON',
         history: 'История', favorites: 'Избранное', clearAll: 'Очистить', linkedStats: 'Связанные хар-ки',
         availablePoints: 'Доступно очков', totalPoints: 'Всего очков', unlocked: 'Разблокировано', locked: 'Заблокировано',
         skillName: 'Название', skillDesc: 'Описание', skillType: 'Тип', skillTier: 'Уровень',
@@ -300,7 +298,7 @@ export default function CharacterSkillTreePage({
         confirmDelete: 'Удалить этот навык?', confirmClear: 'Очистить всё дерево?',
       },
       ko: {
-        backHome: '홈으로', presetWarrior: '전사', presetMage: '마법사', presetAssassin: '암살자', presetSupport: '서포터', presetCustom: '커스텀',
+        presetWarrior: '전사', presetMage: '마법사', presetAssassin: '암살자', presetSupport: '서포터', presetCustom: '커스텀',
         newSkill: '신규 스킬', deleteSkill: '삭제', saveSet: '저장', loadSet: '불러오기', exportJson: 'JSON 내보내기',
         history: '히스토리', favorites: '즐겨찾기', clearAll: '전체 삭제', linkedStats: '연동 스탯',
         availablePoints: '사용 가능 포인트', totalPoints: '총 포인트', unlocked: '해금됨', locked: '잠김',

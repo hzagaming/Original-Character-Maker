@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toPng } from 'html-to-image';
 import { playSound } from './audioEngine';
-import type { AppLanguage, FeatureScreen, SettingsState } from './types';
+import type { AppLanguage, SettingsState } from './types';
 
 // ─── Types ───
 
@@ -130,7 +130,6 @@ export default function CharacterBattleCardPage({
   appSubtitle,
   language,
   settings,
-  onNavigate,
   onBack,
   onOpenSettings,
   openSettings,
@@ -140,7 +139,6 @@ export default function CharacterBattleCardPage({
   appSubtitle: string;
   language: AppLanguage;
   settings: SettingsState;
-  onNavigate: (screen: FeatureScreen) => void;
   onBack: () => void;
   onOpenSettings: () => void;
   openSettings: string;
@@ -153,7 +151,7 @@ export default function CharacterBattleCardPage({
   const labels = useMemo(() => {
     const dict: Record<string, Record<string, string>> = {
       zh: {
-        backHome: '返回首页', readData: '读取关联数据', noLinkedData: '暂无关联数据，请先创建角色属性或技能树。',
+        readData: '读取关联数据', noLinkedData: '暂无关联数据，请先创建角色属性或技能树。',
         characterName: '角色名称', title: '称号', level: '等级', className: '职业',
         typeActive: '主动', typePassive: '被动', typeUltimate: '终极', typeTrait: '特质', typeSpecial: '特殊',
         exportPng: '导出 PNG', exportJson: '导出 JSON', copyJson: '复制 JSON', copied: '已复制',
@@ -164,7 +162,7 @@ export default function CharacterBattleCardPage({
         noticeExportSuccess: '导出成功', noticeExportError: '导出失败', exporting: '导出中…',
       },
       ja: {
-        backHome: 'ホームへ戻る', readData: '連携データ読込', noLinkedData: '連携データがありません。先にキャラステータスまたはスキルツリーを作成してください。',
+        readData: '連携データ読込', noLinkedData: '連携データがありません。先にキャラステータスまたはスキルツリーを作成してください。',
         characterName: 'キャラ名', title: '称号', level: 'レベル', className: '職業',
         typeActive: 'アクティブ', typePassive: 'パッシブ', typeUltimate: 'アルティメット', typeTrait: '特性', typeSpecial: '特殊',
         exportPng: 'PNG 出力', exportJson: 'JSON 出力', copyJson: 'JSON コピー', copied: 'コピー済',
@@ -175,7 +173,7 @@ export default function CharacterBattleCardPage({
         noticeExportSuccess: '出力成功', noticeExportError: '出力失敗', exporting: '出力中…',
       },
       en: {
-        backHome: 'Back home', readData: 'Read linked data', noLinkedData: 'No linked data yet. Create character stats or a skill tree first.',
+        readData: 'Read linked data', noLinkedData: 'No linked data yet. Create character stats or a skill tree first.',
         characterName: 'Name', title: 'Title', level: 'Level', className: 'Class',
         typeActive: 'Active', typePassive: 'Passive', typeUltimate: 'Ultimate', typeTrait: 'Trait', typeSpecial: 'Special',
         exportPng: 'Export PNG', exportJson: 'Export JSON', copyJson: 'Copy JSON', copied: 'Copied',
@@ -186,7 +184,7 @@ export default function CharacterBattleCardPage({
         noticeExportSuccess: 'Export successful', noticeExportError: 'Export failed', exporting: 'Exporting…',
       },
       ru: {
-        backHome: 'На главную', readData: 'Считать данные', noLinkedData: 'Нет связанных данных. Сначала создайте характеристики или дерево навыков.',
+        readData: 'Считать данные', noLinkedData: 'Нет связанных данных. Сначала создайте характеристики или дерево навыков.',
         characterName: 'Имя', title: 'Титул', level: 'Уровень', className: 'Класс',
         typeActive: 'Активный', typePassive: 'Пассивный', typeUltimate: 'Ультимат', typeTrait: 'Черта', typeSpecial: 'Особый',
         exportPng: 'Экспорт PNG', exportJson: 'Экспорт JSON', copyJson: 'Копировать JSON', copied: 'Скопировано',
@@ -197,7 +195,7 @@ export default function CharacterBattleCardPage({
         noticeExportSuccess: 'Экспорт успешен', noticeExportError: 'Ошибка экспорта', exporting: 'Экспорт…',
       },
       ko: {
-        backHome: '홈으로', readData: '연동 데이터 읽기', noLinkedData: '연동 데이터가 없습니다. 먼저 캐릭터 스탯이나 스킬 트리를 생성하세요.',
+        readData: '연동 데이터 읽기', noLinkedData: '연동 데이터가 없습니다. 먼저 캐릭터 스탯이나 스킬 트리를 생성하세요.',
         characterName: '이름', title: '칭호', level: '레벨', className: '직업',
         typeActive: '액티브', typePassive: '패시브', typeUltimate: '궁극', typeTrait: '특성', typeSpecial: '특수',
         exportPng: 'PNG 납품하기', exportJson: 'JSON 납품하기', copyJson: 'JSON 복사', copied: '복사됨',

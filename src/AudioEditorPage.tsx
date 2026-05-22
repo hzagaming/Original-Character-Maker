@@ -310,6 +310,7 @@ export function AudioEditorPage({
   onBack,
   onOpenSettings,
   onOpenDocs,
+  onSwitchTool,
 }: SharedPageProps) {
   const labels = useMemo(() => {
     const dict: Record<string, Record<string, string>> = {
@@ -1457,6 +1458,7 @@ export function AudioEditorPage({
                           htmlFor="audio-import"
                           className="upload-dropzone"
                           data-sfx-handled
+                          onClick={() => playSound('buttonClick')}
                           onKeyDown={(e) => { if (e.repeat) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
                           tabIndex={0}
                           role="button"
@@ -1538,22 +1540,22 @@ export function AudioEditorPage({
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); undo(); }} disabled={historyIdx <= 0}>{labels.undo}</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); redo(); }} disabled={historyIdx >= history.length - 1}>{labels.redo}</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { undo(); }} disabled={historyIdx <= 0}>{labels.undo}</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { redo(); }} disabled={historyIdx >= history.length - 1}>{labels.redo}</button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('trim'); }} disabled={!selection}>Trim</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('split'); }} disabled={!selection}>Split</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('delete'); }} disabled={!selection}>Delete</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('duplicate'); }} disabled={!selection}>Duplicate</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('trim'); }} disabled={!selection}>Trim</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('split'); }} disabled={!selection}>Split</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('delete'); }} disabled={!selection}>Delete</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('duplicate'); }} disabled={!selection}>Duplicate</button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('reverse'); }}>Reverse</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('fade'); }}>Fade</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('normalize'); }}>Normalize</button>
-                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); applyEdit('mono'); }}>Mono</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('reverse'); }}>Reverse</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('fade'); }}>Fade</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('normalize'); }}>Normalize</button>
+                      <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { applyEdit('mono'); }}>Mono</button>
                     </div>
                     <div className="tool-card-divider" />
                     <div className="tool-actions-row">
@@ -1746,15 +1748,16 @@ export function AudioEditorPage({
         <DraggableErrorPanel
           error={errors[0] ? { code: errors[0].code, stage: 'audio-editor', message: errors[0].message, hint: errors[0].hint, details: {} } : null}
           labels={{ title: 'Error', stage: 'Stage', message: 'Message', hint: 'Hint', details: 'Details', copyText: 'Copy', downloadJson: 'Download JSON', openDocs: 'Open Docs', retry: 'Retry' }}
-          onClose={() => setErrors([])}
-          onCopy={() => { if (errors[0]) navigator.clipboard.writeText(`${errors[0].code}: ${errors[0].message}`).catch(() => {}); }}
+          onClose={() => { playSound('back'); setErrors([]); }}
+          onCopy={() => { playSound('copySound'); if (errors[0]) navigator.clipboard.writeText(`${errors[0].code}: ${errors[0].message}`).catch(() => {}); }}
           onDownload={() => {
+            playSound('downloadSound');
             const blob = new Blob([JSON.stringify(errors, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'audio-editor-errors.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
           }}
-          onRetry={() => setErrors([])}
-          onOpenDocs={(code) => onOpenDocs?.('audio-editor', undefined, code)}
+          onRetry={() => { playSound('confirm'); setErrors([]); }}
+          onOpenDocs={(code) => { playSound('buttonClick'); onOpenDocs?.('audio-editor', undefined, code); }}
           docAnchor={errors[0]?.code}
         />
       )}

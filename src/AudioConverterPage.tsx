@@ -311,27 +311,27 @@ export function AudioConverterPage({
       zh: {
         source: '来源', importAudio: '导入音频', replace: '替换', convert: '转换',
         converting: '转换中…', importing: '导入中…', reset: '重置', results: '结果', noExportsYet: '暂无导出结果',
-        download: '下载', remove: '移除', ready: '就绪', convertComplete: '转换完成',
+        download: '下载',
       },
       ja: {
         source: 'ソース', importAudio: '音声をインポート', replace: '置換', convert: '変換',
         converting: '変換中…', importing: 'インポート中…', reset: 'リセット', results: '結果', noExportsYet: '書き出し履歴なし',
-        download: 'ダウンロード', remove: '削除', ready: '準備完了', convertComplete: '変換完了',
+        download: 'ダウンロード',
       },
       en: {
         source: 'Source', importAudio: 'Import Audio', replace: 'Replace', convert: 'Convert',
         converting: 'Converting…', importing: 'Importing…', reset: 'Reset', results: 'Results', noExportsYet: 'No exports yet.',
-        download: 'Download', remove: 'Remove', ready: 'Ready', convertComplete: 'Conversion complete',
+        download: 'Download',
       },
       ru: {
         source: 'Источник', importAudio: 'Импорт аудио', replace: 'Заменить', convert: 'Конвертировать',
         converting: 'Конвертация…', importing: 'Импорт…', reset: 'Сброс', results: 'Результаты', noExportsYet: 'Нет экспортов',
-        download: 'Скачать', remove: 'Удалить', ready: 'Готово', convertComplete: 'Конвертация завершена',
+        download: 'Скачать',
       },
       ko: {
         source: '소스', importAudio: '오디오 가져오기', replace: '교체', convert: '변환',
         converting: '변환 중…', importing: '가져오는 중…', reset: '초기화', results: '결과', noExportsYet: '납품 내역 없음',
-        download: '다운로드', remove: '제거', ready: '준비 완료', convertComplete: '변환 완료',
+        download: '다운로드',
       },
     };
     return dict[language] ?? dict.en;
@@ -782,6 +782,7 @@ export function AudioConverterPage({
                         htmlFor="audio-converter-import"
                         className="upload-dropzone"
                         data-sfx-handled
+                        onClick={() => playSound('buttonClick')}
                         onKeyDown={(e) => { if (e.repeat) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound('buttonClick'); fileInputRef.current?.click(); } }}
                         tabIndex={0}
                         role="button"
