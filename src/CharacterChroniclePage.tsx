@@ -570,7 +570,7 @@ export default function CharacterChroniclePage({
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 'min(560px, 94vw)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.editEvent}</h3>
-              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setModalEvent(null); playSound('modalClose'); }} aria-label={copy.cancel}>×</button>
+              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setModalEvent(null); }} aria-label={copy.cancel}>×</button>
             </div>
             <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
@@ -680,7 +680,7 @@ export default function CharacterChroniclePage({
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 'min(600px, 94vw)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.selectImage}</h3>
-              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setImagePickerOpen(false); playSound('modalClose'); }} aria-label={copy.cancel}>×</button>
+              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setImagePickerOpen(false); }} aria-label={copy.cancel}>×</button>
             </div>
             <div style={{ padding: 22, maxHeight: 'min(420px, 60vh)', overflow: 'auto' }}>
               {galleryImages.length === 0 ? (

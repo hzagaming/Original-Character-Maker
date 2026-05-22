@@ -1111,7 +1111,7 @@ export function RelationshipWebPage({
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.editNode}</h3>
-              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setNodeModal(null); playSound('modalClose'); }} aria-label={copy.cancel}>×</button>
+              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setNodeModal(null); }} aria-label={copy.cancel}>×</button>
             </div>
             <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
@@ -1196,7 +1196,7 @@ export function RelationshipWebPage({
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.editEdge}</h3>
-              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setEdgeModal(null); playSound('modalClose'); }} aria-label={copy.cancel}>×</button>
+              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setEdgeModal(null); }} aria-label={copy.cancel}>×</button>
             </div>
             <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
@@ -1254,7 +1254,7 @@ export function RelationshipWebPage({
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 'min(600px, 94vw)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.selectAvatar}</h3>
-              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setAvatarPickerOpen(false); playSound('modalClose'); }} aria-label={copy.cancel}>×</button>
+              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setAvatarPickerOpen(false); }} aria-label={copy.cancel}>×</button>
             </div>
             <div style={{ padding: 22, maxHeight: 'min(420px, 60vh)', overflow: 'auto' }}>
               {galleryImages.length === 0 ? (

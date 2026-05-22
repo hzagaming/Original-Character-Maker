@@ -985,8 +985,10 @@ export function AudioEditorPage({
 
   const handleExport = useCallback(
     async () => {
+      if (isExporting) return;
       if (!editBuffer) {
         addLog('info', 'Cannot export: no audio loaded');
+        playSound('error');
         return;
       }
       setIsExporting(true);
@@ -1080,7 +1082,7 @@ export function AudioEditorPage({
         }
       }
     },
-    [editBuffer, exportFormat, fileName, fadeIn, fadeOut, isReversed, doNormalize, noiseReduction, addLog]
+    [isExporting, editBuffer, exportFormat, fileName, fadeIn, fadeOut, isReversed, doNormalize, noiseReduction, addLog]
   );
 
   const removeExport = useCallback((id: string) => {
@@ -1619,8 +1621,9 @@ export function AudioEditorPage({
                 <select
                   className="settings-input tool-select"
                   aria-label="Export format"
+                  data-sfx-handled
                   value={exportFormat}
-                  onChange={(e) => setExportFormat(e.target.value as typeof exportFormat)}
+                  onChange={(e) => { playSound('buttonClick'); setExportFormat(e.target.value as typeof exportFormat); }}
                 >
                   {supportedFormats.map((f: { key: string; label: string }) => (
                     <option key={f.key} value={f.key}>{f.label}</option>

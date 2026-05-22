@@ -700,7 +700,7 @@ export default function CharacterCardPage({
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 'min(640px, 94vw)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.selectImage}</h3>
-              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setPickerMode(null); playSound('modalClose'); }} aria-label={copy.cancel}>×</button>
+              <button className="modal-close" type="button" data-sfx-handled onClick={() => { setPickerMode(null); }} aria-label={copy.cancel}>×</button>
             </div>
             <div style={{ padding: 22, maxHeight: 'min(420px, 60vh)', overflow: 'auto' }}>
               {galleryImages.length === 0 ? (

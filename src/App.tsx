@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.6';
+const VERSION = '1.12.7';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -296,6 +296,7 @@ type Messages = {
   docsSectionButtons: string;
   docsSectionParameters: string;
   docsSectionErrors: string;
+  clearSearch: string;
   docsNavIndex: string;
   docsFilterAll: string;
   docsFilterCritical: string;
@@ -665,10 +666,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.6 SFX/BGM 补充修复与 ImportModal 完整化：修复 6 处遗漏的 double-play/无声按钮、trait 切换音效逻辑错误、BGM reverb 链重建不完整；补全 audio-editor 和 audio-converter 的导入支持。',
-    announcementList1: 'SFX 补充修复：DocsPage 搜索清除按钮补 data-sfx-handled 消除 double-play；ColorPaletteDesignerPage 提取颜色按钮、RelationshipWebPage 3 个头像按钮、ImportModal "Go to Tool" 补充 playSound；WorldEncyclopediaPage 输入框移除 data-sfx-handled 恢复 inputFocus；DialogueGenerator toggleTrait 改为条件播放 toggleOn/toggleOff。',
-    announcementList2: 'BGM 修复：updateAudioSettings 在 musicReverb 变化时调用 rebuildMusicChain()，确保混响实时生效。',
-    announcementList3: 'ImportModal 完整化：ImportableTool、importToolConfig、screenMap、tools 数组全部补全 audio-editor 和 audio-converter，支持导入这两个工具的 JSON 配置。',
+    announcementDescription: 'v1.12.7 UI/UX/SFX/BGM 深度复查：修复 BGM 混响滑条单位错误、补全旧设置迁移、清理自定义音乐切换，并补强音频编辑/转换工具的 SFX 与并发防护。',
+    announcementList1: 'BGM 修复：音乐混响设置统一为 0-100%，不再把默认 30 显示成 3000%；旧版 0-1 保存值会自动迁移成百分比。',
+    announcementList2: 'SFX/BGM 体验：修复 SFX 声像参数被再次除以 100 导致几乎无效的问题；自定义 BGM 切换统一重启流程，音频编辑/转换补齐 SFX 与重复任务防护。',
+    announcementList3: '版本与公告：应用 VERSION、package.json、package-lock.json 同步到 1.12.7；1.12.6 已移入往期公告。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -751,6 +752,7 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionButtons: '按钮讲解',
     docsSectionParameters: '参数说明',
     docsSectionErrors: '报错与解决',
+    clearSearch: '清除搜索',
     moduleCanvas: '主工作区画布',
     modulePanel: '右侧参数 / 功能面板',
     modulePipeline: '任务队列与输出结果区',
@@ -1100,10 +1102,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.6 SFX/BGM 補正と ImportModal 完全化：6 箇所の double-play/無音ボタン、trait 切替音效ロジックエラー、BGM reverb チェーン再構築不全を修正；audio-editor と audio-converter のインポートサポートを補完。',
-    announcementList1: 'SFX 補正：DocsPage 検索クリアボタンに data-sfx-handled を追加して double-play 解消；ColorPaletteDesignerPage 色抽出ボタン、RelationshipWebPage 3 つのアバターボタン、ImportModal "Go to Tool" に playSound を追加；WorldEncyclopediaPage 入力欄から data-sfx-handled を削除して inputFocus を復活；DialogueGenerator toggleTrait を追加/削除状態で toggleOn/toggleOff を条件再生。',
-    announcementList2: 'BGM 修正：updateAudioSettings で musicReverb 変更時に rebuildMusicChain() を呼び出し、リバーブをリアルタイム反映。',
-    announcementList3: 'ImportModal 完全化：ImportableTool、importToolConfig、screenMap、tools 配列に audio-editor と audio-converter を追加し、両ツールの JSON 設定インポートをサポート。',
+    announcementDescription: 'v1.12.7 UI/UX/SFX/BGM 深度再チェック：BGM リバーブスライダーの単位不一致、旧設定移行、カスタム BGM 切替、音声編集/変換ツールの SFX と重複実行防止を修正。',
+    announcementList1: 'BGM 修正：音楽リバーブを 0-100% に統一し、既定値 30 が 3000% と表示される問題を解消；旧 0-1 保存値は自動で百分率へ移行。',
+    announcementList2: 'SFX/BGM 体験：SFX パンが再度 100 で割られてほぼ無効になる問題を修正；カスタム BGM 切替を整理し、音声編集/変換の SFX と重複防止を補強。',
+    announcementList3: 'バージョンとお知らせ：VERSION、package.json、package-lock.json を 1.12.7 に同期；1.12.6 は履歴へ移動。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1186,6 +1188,7 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionButtons: 'ボタン解説',
     docsSectionParameters: 'パラメータ説明',
     docsSectionErrors: 'エラーと解決',
+    clearSearch: '検索をクリア',
     moduleCanvas: 'メイン作業領域',
     modulePanel: '右側パネル',
     modulePipeline: 'タスクと出力',
@@ -1535,10 +1538,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.6 SFX/BGM follow-up fixes and ImportModal completion: fixed 6 missed double-play/silent buttons, trait toggle sound logic error, incomplete BGM reverb chain rebuild; added audio-editor and audio-converter import support.',
-    announcementList1: 'SFX follow-up: added data-sfx-handled to DocsPage search clear button to eliminate double-play; added playSound to ColorPaletteDesignerPage extract button, RelationshipWebPage 3 avatar buttons, ImportModal "Go to Tool"; removed data-sfx-handled from WorldEncyclopediaPage inputs to restore inputFocus; changed DialogueGenerator toggleTrait to conditionally play toggleOn/toggleOff based on add/remove state.',
-    announcementList2: 'BGM fix: updateAudioSettings now calls rebuildMusicChain() when musicReverb changes, ensuring reverb takes effect in real time.',
-    announcementList3: 'ImportModal completion: ImportableTool, importToolConfig, screenMap, and tools array now fully include audio-editor and audio-converter, supporting JSON config import for both tools.',
+    announcementDescription: 'v1.12.7 UI/UX/SFX/BGM deep follow-up: fixed the BGM reverb slider unit mismatch, added saved-setting migration, cleaned up custom music switching, and tightened audio editor/converter SFX and task guards.',
+    announcementList1: 'BGM fix: music reverb now consistently uses 0-100%, so the default 30 no longer appears as 3000%; old 0-1 saved values are migrated automatically.',
+    announcementList2: 'SFX/BGM experience: fixed SFX pan being divided by 100 twice, unified custom BGM restarts, added editor export-selector SFX, and blocked duplicate converter jobs.',
+    announcementList3: 'Version and announcement: VERSION, package.json, and package-lock.json are synced to 1.12.7; 1.12.6 has moved into announcement history.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1970,10 +1973,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.6 Дополнительное исправление SFX/BGM и завершение ImportModal: исправлены 6 пропущенных кнопок с double-play/отсутствием звука, ошибка логики звука переключения trait, неполное восстановление цепочки reverb BGM; добавлена поддержка импорта audio-editor и audio-converter.',
-    announcementList1: 'Дополнительное исправление SFX: добавлен data-sfx-handled к кнопке очистки поиска DocsPage для устранения double-play; добавлен playSound к кнопке извлечения цвета ColorPaletteDesignerPage, 3 кнопкам аватара RelationshipWebPage, кнопке "Go to Tool" ImportModal; удалён data-sfx-handled из полей ввода WorldEncyclopediaPage для восстановления inputFocus; изменён toggleTrait DialogueGenerator на условное воспроизведение toggleOn/toggleOff в зависимости от добавления/удаления.',
-    announcementList2: 'Исправление BGM: updateAudioSettings теперь вызывает rebuildMusicChain() при изменении musicReverb, обеспечивая реальное применение реверберации.',
-    announcementList3: 'Завершение ImportModal: ImportableTool, importToolConfig, screenMap и массив tools теперь полностью включают audio-editor и audio-converter, поддерживая импорт JSON-конфигурации обоих инструментов.',
+    announcementDescription: 'v1.12.7 Глубокая проверка UI/UX/SFX/BGM: исправлены единицы реверберации BGM, миграция старых настроек, переключение пользовательской музыки, SFX и защита задач в аудиоинструментах.',
+    announcementList1: 'Исправление BGM: реверберация музыки теперь единообразно использует 0-100%, поэтому значение по умолчанию 30 больше не отображается как 3000%; старые значения 0-1 мигрируют автоматически.',
+    announcementList2: 'Опыт SFX/BGM: исправлен почти неработающий пан SFX из-за повторного деления на 100; переключение BGM унифицировано, аудиоинструменты получили SFX и защиту повторных задач.',
+    announcementList3: 'Версии и объявления: VERSION, package.json и package-lock.json синхронизированы до 1.12.7; 1.12.6 перенесена в историю объявлений.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2056,6 +2059,7 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionButtons: 'Кнопки',
     docsSectionParameters: 'Параметры',
     docsSectionErrors: 'Ошибки и решения',
+    clearSearch: 'Очистить поиск',
     moduleCanvas: 'Основное рабочее поле',
     modulePanel: 'Панель управления',
     modulePipeline: 'Очередь задач и вывод',
@@ -2737,10 +2741,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.6 SFX/BGM 보완 수정 및 ImportModal 완성화: 6개 누락된 double-play/무음 버튼, trait 전환 음향 로직 오류, BGM reverb 체인 재구성 불완전 수정; audio-editor 및 audio-converter 가져오기 지원 보완.',
-    announcementList1: 'SFX 보완 수정: DocsPage 검색 지우기 버튼에 data-sfx-handled 추가로 double-play 제거; ColorPaletteDesignerPage 색상 추출 버튼, RelationshipWebPage 3개 아바타 버튼, ImportModal "Go to Tool"에 playSound 추가; WorldEncyclopediaPage 입력란에서 data-sfx-handled 제거로 inputFocus 복원; DialogueGenerator toggleTrait를 추가/제거 상태에 따라 toggleOn/toggleOff 조걼 재생.',
-    announcementList2: 'BGM 수정: updateAudioSettings에서 musicReverb 변경 시 rebuildMusicChain() 호출, 리버브 실시간 반영 보장.',
-    announcementList3: 'ImportModal 완성화: ImportableTool, importToolConfig, screenMap, tools 배열에 audio-editor 및 audio-converter 완전 추가, 두 도구의 JSON 설정 가져오기 지원.',
+    announcementDescription: 'v1.12.7 UI/UX/SFX/BGM 심층 재점검: BGM 리버브 단위, 기존 설정 마이그레이션, 커스텀 BGM 전환, 오디오 편집/변환 도구의 SFX와 중복 작업 방지를 수정.',
+    announcementList1: 'BGM 수정: 음악 리버브를 0-100%로 통일해 기본값 30이 3000%로 표시되지 않도록 수정; 기존 0-1 저장값은 자동으로 백분율로 이전.',
+    announcementList2: 'SFX/BGM 경험: SFX 팬 값이 다시 100으로 나뉘어 거의 들리지 않던 문제 수정; 커스텀 BGM 재시작 정리, 오디오 도구 SFX와 중복 작업 방지 보강.',
+    announcementList3: '버전 및 공지: VERSION, package.json, package-lock.json을 1.12.7로 동기화; 1.12.6은 이전 공지로 이동.',
   },
   fr: {
     ...translations.en,
@@ -2931,6 +2935,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.12.7',
+    date: '2026-05-22',
+    title: '1.12.7 UI/UX/SFX/BGM 深度复查与版本同步',
+    summary:
+      '对 v1.12.6 之后的全局 UI/UX/SFX/BGM 进行复查，修复 BGM 混响滑条单位错误、旧设置兼容迁移、自定义音乐切换、音频工具 SFX 与转换任务防护问题。',
+    details: [
+      'BGM 设置修复：音乐混响使用 0-100% 数据模型，修复默认值 30 被 UI 误显示为 3000%、滑条范围只有 0-1 的问题。',
+      '设置迁移：loadInitialSettings 会把旧版保存的 0-1 musicReverb 值自动迁移为 0-100 百分比，同时对 musicFilter、musicStereoWidth、sfxPan 增加边界夹取。',
+      '音频工具体验：修复 audioEngine.ts 中 sfxPan 被再次除以 100 导致声像几乎无效的问题；新增 restartMusicPlayback() 统一处理 BGM 重启；音频编辑器导出格式选择补齐 SFX；音频转换器阻止重复转换任务。',
+      '版本同步：App VERSION、package.json、package-lock.json 统一更新到 1.12.7；1.12.6 保留在历史公告。',
+    ],
+  },
   {
     version: '1.12.6',
     date: '2026-05-18',
@@ -4308,6 +4325,18 @@ function loadInitialSettings(): SettingsState {
     } else {
       nextSettings.audio = { ...defaultAudioSettings, ...nextSettings.audio };
     }
+    const audioSettings = nextSettings.audio;
+    const musicReverb = Number(audioSettings.musicReverb);
+    if (!Number.isFinite(musicReverb)) {
+      audioSettings.musicReverb = defaultAudioSettings.musicReverb;
+    } else if (musicReverb > 0 && musicReverb <= 1) {
+      audioSettings.musicReverb = Math.round(musicReverb * 100);
+    } else {
+      audioSettings.musicReverb = Math.min(100, Math.max(0, Math.round(musicReverb)));
+    }
+    audioSettings.musicFilter = Math.min(10000, Math.max(200, Math.round(Number(audioSettings.musicFilter) || defaultAudioSettings.musicFilter)));
+    audioSettings.musicStereoWidth = Math.min(100, Math.max(0, Math.round(Number(audioSettings.musicStereoWidth) || defaultAudioSettings.musicStereoWidth)));
+    audioSettings.sfxPan = Math.min(1, Math.max(-1, Number(audioSettings.sfxPan) || 0));
 
     if (!nextSettings.animation || typeof nextSettings.animation !== 'object') {
       nextSettings.animation = { ...defaultSettings.animation };
@@ -7021,6 +7050,12 @@ function ImportModal({
       playSound('error');
       return;
     }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      setStatus('error');
+      setStatusMessage(messages.importInvalidConfig);
+      playSound('error');
+      return;
+    }
 
     const result = importToolConfig(selectedTool, data);
     if (result.success) {
@@ -7409,6 +7444,11 @@ function SettingsModal({
     }
   }
 
+  function restartMusicPlayback() {
+    stopMusic();
+    startMusic();
+  }
+
   function handleUploadAudio(type: 'sfx' | 'music', file: File) {
     if (!file.type.startsWith('audio/')) return;
     const reader = new FileReader();
@@ -7434,8 +7474,7 @@ function SettingsModal({
             customMusicName: file.name,
           },
         });
-        stopMusic();
-        startMusic();
+        restartMusicPlayback();
       }
     };
     reader.onerror = () => {
@@ -7465,8 +7504,7 @@ function SettingsModal({
           customMusicName: '',
         },
       });
-      stopMusic();
-      startMusic();
+      restartMusicPlayback();
     }
   }
 
@@ -7911,8 +7949,8 @@ function SettingsModal({
                   </div>
                   {settings.audio.customMusicDataUrl && (
                     <div className="chip-row" style={{ marginTop: 8 }}>
-                      <button className={`choice-chip ${settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { setCustomMusic(settings.audio.customMusicDataUrl); onUpdate({ audio: { ...settings.audio, useCustomMusic: true } }); stopMusic(); startMusic(); }}>{messages.audioCustomActive}</button>
-                      <button className={`choice-chip ${!settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: false } }); stopMusic(); startMusic(); }}>{messages.toggleOff}</button>
+                      <button className={`choice-chip ${settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { setCustomMusic(settings.audio.customMusicDataUrl); onUpdate({ audio: { ...settings.audio, useCustomMusic: true } }); restartMusicPlayback(); }}>{messages.audioCustomActive}</button>
+                      <button className={`choice-chip ${!settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: false } }); }}>{messages.toggleOff}</button>
                     </div>
                   )}
                 </section>
@@ -7953,9 +7991,9 @@ function SettingsModal({
                     </div>
                     <h4 style={{ margin: '8px 0 0', fontSize: '0.95rem', color: 'var(--text-main)' }}>{messages.audioSpatialTitle}</h4>
                     <div className="contrast-control">
-                      <div className="contrast-copy"><strong>{messages.audioMusicReverb}</strong><span>{Math.round(settings.audio.musicReverb * 100)}%</span></div>
+                      <div className="contrast-copy"><strong>{messages.audioMusicReverb}</strong><span>{Math.round(settings.audio.musicReverb)}%</span></div>
                       <div className="contrast-slider-row">
-                        <input className="contrast-slider" type="range" min="0" max="1" step="0.05" value={settings.audio.musicReverb} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicReverb: Number(e.target.value) } })} />
+                        <input className="contrast-slider" type="range" min="0" max="100" step="5" value={settings.audio.musicReverb} onChange={(e) => onUpdate({ audio: { ...settings.audio, musicReverb: Number(e.target.value) } })} />
                       </div>
                     </div>
                     <div className="contrast-control">

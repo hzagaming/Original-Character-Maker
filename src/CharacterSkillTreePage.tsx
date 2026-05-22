@@ -586,7 +586,7 @@ export default function CharacterSkillTreePage({
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
           <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
-            ← {labels.backHome}
+            ← {backHome}
           </button>
         </div>
         <div className="tool-header-actions">

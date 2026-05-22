@@ -161,7 +161,7 @@ export default function CharacterBattleCardPage({
         warrior: '战士', mage: '法师', assassin: '刺客', support: '辅助', custom: '自定义', unknown: '未知',
         totalAttributes: '总属性', skillPoints: '技能点', generateTitle: '生成称号',
         hpFull: '生命值', mpFull: '魔力值', atkFull: '攻击力', defFull: '防御力', spdFull: '速度', crtFull: '暴击率',
-        noticeExportSuccess: '导出成功', noticeExportError: '导出失败',
+        noticeExportSuccess: '导出成功', noticeExportError: '导出失败', exporting: '导出中…',
       },
       ja: {
         backHome: 'ホームへ戻る', readData: '連携データ読込', noLinkedData: '連携データがありません。先にキャラステータスまたはスキルツリーを作成してください。',
@@ -172,7 +172,7 @@ export default function CharacterBattleCardPage({
         warrior: '戦士', mage: '魔導士', assassin: '暗殺者', support: 'サポート', custom: 'カスタム', unknown: '不明',
         totalAttributes: '合計ステータス', skillPoints: 'スキルポイント', generateTitle: '称号生成',
         hpFull: 'HP', mpFull: 'MP', atkFull: '攻撃力', defFull: '防御力', spdFull: '素早さ', crtFull: '会心率',
-        noticeExportSuccess: '出力成功', noticeExportError: '出力失敗',
+        noticeExportSuccess: '出力成功', noticeExportError: '出力失敗', exporting: '出力中…',
       },
       en: {
         backHome: 'Back home', readData: 'Read linked data', noLinkedData: 'No linked data yet. Create character stats or a skill tree first.',
@@ -183,7 +183,7 @@ export default function CharacterBattleCardPage({
         warrior: 'Warrior', mage: 'Mage', assassin: 'Assassin', support: 'Support', custom: 'Custom', unknown: 'Unknown',
         totalAttributes: 'Total Attributes', skillPoints: 'Skill Points', generateTitle: 'Generate Title',
         hpFull: 'HP', mpFull: 'MP', atkFull: 'ATK', defFull: 'DEF', spdFull: 'SPD', crtFull: 'CRT Rate',
-        noticeExportSuccess: 'Export successful', noticeExportError: 'Export failed',
+        noticeExportSuccess: 'Export successful', noticeExportError: 'Export failed', exporting: 'Exporting…',
       },
       ru: {
         backHome: 'На главную', readData: 'Считать данные', noLinkedData: 'Нет связанных данных. Сначала создайте характеристики или дерево навыков.',
@@ -194,7 +194,7 @@ export default function CharacterBattleCardPage({
         warrior: 'Воин', mage: 'Маг', assassin: 'Ассасин', support: 'Поддержка', custom: 'Свой', unknown: 'Неизвестно',
         totalAttributes: 'Всего хар-к', skillPoints: 'Очки навыков', generateTitle: 'Сгенерировать титул',
         hpFull: 'HP', mpFull: 'MP', atkFull: 'АТК', defFull: 'ЗАЩ', spdFull: 'СКО', crtFull: 'Шанс крита',
-        noticeExportSuccess: 'Экспорт успешен', noticeExportError: 'Ошибка экспорта',
+        noticeExportSuccess: 'Экспорт успешен', noticeExportError: 'Ошибка экспорта', exporting: 'Экспорт…',
       },
       ko: {
         backHome: '홈으로', readData: '연동 데이터 읽기', noLinkedData: '연동 데이터가 없습니다. 먼저 캐릭터 스탯이나 스킬 트리를 생성하세요.',
@@ -205,7 +205,7 @@ export default function CharacterBattleCardPage({
         warrior: '전사', mage: '마법사', assassin: '암살자', support: '서포터', custom: '커스텀', unknown: '알 수 없음',
         totalAttributes: '총 스탯', skillPoints: '스킬 포인트', generateTitle: '칭호 생성',
         hpFull: 'HP', mpFull: 'MP', atkFull: '공격력', defFull: '방어력', spdFull: '속도', crtFull: '치명타율',
-        noticeExportSuccess: '납품 성공', noticeExportError: '납품 실패',
+        noticeExportSuccess: '납품 성공', noticeExportError: '납품 실패', exporting: '납품 중…',
       },
     };
     const base = dict[language] ?? dict.en;
@@ -371,7 +371,7 @@ export default function CharacterBattleCardPage({
       <header className="feature-header fade-up delay-1">
         <div className="feature-header-meta">
           <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
-            ← {labels.backHome}
+            ← {backHome}
           </button>
         </div>
         <div className="tool-header-actions">
@@ -379,7 +379,7 @@ export default function CharacterBattleCardPage({
             {labels.readData}
           </button>
           <button className="primary-button small-button" type="button" onClick={() => { playSound('buttonClick'); exportPng(); }} data-sfx-handled disabled={!hasData || isExporting}>
-            {isExporting ? 'Exporting…' : labels.exportPng}
+            {isExporting ? labels.exporting : labels.exportPng}
           </button>
           <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); onOpenSettings(); }} data-sfx-handled>
             {openSettings}
@@ -440,6 +440,7 @@ export default function CharacterBattleCardPage({
                 value={characterName}
                 onChange={(e) => setCharacterName(e.target.value)}
                 placeholder={labels.characterName}
+                aria-label={labels.characterName}
                 style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '1.1rem', fontWeight: 600, width: '160px' }}
               />
               <input
@@ -447,6 +448,7 @@ export default function CharacterBattleCardPage({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={labels.title}
+                aria-label={labels.title}
                 style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem', width: '140px' }}
               />
               <button className="secondary-button small-button" type="button" onClick={() => { playSound('buttonClick'); generateTitle(); }} data-sfx-handled>

@@ -462,6 +462,7 @@ export function AudioConverterPage({
 
   /* ---- Convert ---- */
   const handleConvert = useCallback(async () => {
+    if (isConverting) return;
     if (!sourceBuffer) {
       addLog('error', 'Cannot convert: no audio file loaded');
       playSound('error');
@@ -574,7 +575,7 @@ export function AudioConverterPage({
         }, 800);
       }
     }
-  }, [sourceBuffer, outputFormat, sampleRate, channels, volume, speed, pitch, doNormalize, fadeIn, fadeOut, noiseReduction, addLog]);
+  }, [isConverting, sourceBuffer, outputFormat, sampleRate, channels, volume, speed, pitch, doNormalize, fadeIn, fadeOut, noiseReduction, addLog]);
 
   /* ---- Download ---- */
   const handleDownload = useCallback(() => {

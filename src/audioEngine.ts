@@ -161,6 +161,9 @@ function rebuildMusicChain() {
       musicReverbNode.nodes.forEach((n) => {
         try { n.disconnect(); } catch { /* ignore */ }
       });
+      if (musicReverbNode.convolver) {
+        try { musicReverbNode.convolver.buffer = null; } catch { /* ignore */ }
+      }
       musicReverbNode = null;
     }
   } catch { /* ignore */ }
@@ -342,22 +345,31 @@ function synthesize(params: {
     nodesToCleanup.push(noiseSrc, noiseFilter, noiseGain);
   }
 
-  // ADSR envelope on rootGain
-  const atk = preset.attack;
-  const dec = preset.decay;
-  const sus = preset.sustain;
-  const rel = preset.release;
+  // ADSR envelope on rootGain (user-advanced overrides preset defaults)
+  const userAtk = Math.max(0, currentSettings.sfxAttack) / 1000;
+  const userDec = Math.max(0, currentSettings.sfxDecay) / 1000;
+  const userSus = Math.max(0, Math.min(100, currentSettings.sfxSustain)) / 100;
+  const userRel = Math.max(0, currentSettings.sfxRelease) / 1000;
 
   rootGain.gain.setValueAtTime(0, when);
-  rootGain.gain.linearRampToValueAtTime(1, when + Math.min(atk, actualDuration * 0.2));
-  rootGain.gain.exponentialRampToValueAtTime(Math.max(sus, 0.001), when + Math.min(atk + dec, actualDuration * 0.6));
-  rootGain.gain.setValueAtTime(Math.max(sus, 0.001), when + actualDuration);
-  rootGain.gain.exponentialRampToValueAtTime(0.0001, when + actualDuration + rel);
+  rootGain.gain.linearRampToValueAtTime(1, when + Math.min(userAtk, actualDuration * 0.2));
+  rootGain.gain.exponentialRampToValueAtTime(Math.max(userSus, 0.001), when + Math.min(userAtk + userDec, actualDuration * 0.6));
+  rootGain.gain.setValueAtTime(Math.max(userSus, 0.001), when + actualDuration);
+  rootGain.gain.exponentialRampToValueAtTime(0.0001, when + actualDuration + userRel);
 
   let output: AudioNode = rootGain;
+  // user pan
+  const userPan = Math.max(-1, Math.min(1, currentSettings.sfxPan));
+  if (userPan !== 0 && c.createStereoPanner) {
+    const panner = c.createStereoPanner();
+    panner.pan.value = userPan;
+    rootGain.connect(panner);
+    output = panner;
+    nodesToCleanup.push(panner);
+  }
   let reverbConvolver: ConvolverNode | null = null;
   if (reverbWet > 0) {
-    const reverb = createReverbMix(rootGain, 1 - reverbWet * 0.5, reverbWet * 0.5, 1.5);
+    const reverb = createReverbMix(output, 1 - reverbWet * 0.5, reverbWet * 0.5, 1.5);
     output = reverb.mix;
     nodesToCleanup.push(...reverb.nodes);
     reverbConvolver = reverb.convolver;
