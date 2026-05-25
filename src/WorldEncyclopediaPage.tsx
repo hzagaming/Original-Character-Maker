@@ -670,7 +670,7 @@ export default function WorldEncyclopediaPage({
                   className="tool-input"
                   rows={5}
                   value={modalEntry.content}
-                  onChange={(e) => setModalEntry((m) => m && { ...m, content: e.target.value })
+                  onChange={(e) => setModalEntry((m) => m && { ...m, content: e.target.value })}
                 />
               </div>
               <div>
