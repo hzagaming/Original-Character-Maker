@@ -474,7 +474,7 @@ export default function ColorPaletteDesignerPage({
     const origOnload = img.onload;
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
-      if (origOnload) origOnload.call(img);
+      if (origOnload) origOnload.call(img, new Event('load'));
     };
     img.src = objectUrl;
     e.target.value = '';
@@ -574,7 +574,7 @@ export default function ColorPaletteDesignerPage({
     return map[language] ?? map.en;
   }, [language]);
 
-  const saveToHistory = useCallback((newColors: Record<PaletteSlot, string>) => {
+  function saveToHistory(newColors: Record<PaletteSlot, string>) {
     const snapshot: PaletteSet = {
       id: `${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
       name: `${labels.setPrefix} ${new Date().toLocaleTimeString()}`,
@@ -582,7 +582,7 @@ export default function ColorPaletteDesignerPage({
       colors: { ...newColors },
     };
     setHistory((prev) => [snapshot, ...prev].slice(0, 50));
-  }, [labels.setPrefix]);
+  }
 
 
   const harmonyModes: { key: 'complementary' | 'analogous' | 'triadic' | 'split' | 'tetradic'; labelKey: string }[] = [

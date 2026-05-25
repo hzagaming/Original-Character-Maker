@@ -216,6 +216,7 @@ function seededRandom(seed: string): number {
 
 export default function CharacterSkillTreePage({
   appSubtitle,
+  backHome,
   language,
   settings,
   onBack,
@@ -225,6 +226,7 @@ export default function CharacterSkillTreePage({
   pageDescription,
 }: {
   appSubtitle: string;
+  backHome: string;
   language: AppLanguage;
   settings: SettingsState;
   onBack: () => void;

@@ -444,7 +444,7 @@ export default function CharacterStatsDesignerPage({
       attributes: nextAttrs.map((a) => ({ ...a })),
     };
     setHistory((h) => [snapshot, ...h].slice(0, 50));
-  }, [labels]);
+  }, [language]);
 
   const regenerateOne = useCallback((id: string) => {
     playSound('refresh');

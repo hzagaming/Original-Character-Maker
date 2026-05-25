@@ -128,6 +128,7 @@ function calculateBattleStats(stats: Record<string, number>): Record<string, num
 
 export default function CharacterBattleCardPage({
   appSubtitle,
+  backHome,
   language,
   settings,
   onBack,
@@ -137,6 +138,7 @@ export default function CharacterBattleCardPage({
   pageDescription,
 }: {
   appSubtitle: string;
+  backHome: string;
   language: AppLanguage;
   settings: SettingsState;
   onBack: () => void;

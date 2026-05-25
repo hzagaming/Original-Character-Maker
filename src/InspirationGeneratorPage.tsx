@@ -26,7 +26,10 @@ export type InspirationSet = {
   entries: InspirationEntry[];
 };
 
-type PoolMap = Record<AppLanguage, Record<InspirationCategory, string[]>>;
+type PoolMap = Partial<Record<AppLanguage, Record<InspirationCategory, string[]>>> & {
+  zh: Record<InspirationCategory, string[]>;
+  en: Record<InspirationCategory, string[]>;
+};
 
 const POOLS: PoolMap = {
   zh: {

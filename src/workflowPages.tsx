@@ -542,7 +542,7 @@ type UiCopySet = {
     redoCurrentResult: string;
     retryStep: string;
     redoBusy: string;
-    redoConflict: string;
+    redoConflict: (step: string) => string;
     workflowConcurrency: string;
     workflowConcurrencyHint: string;
     hint: string;

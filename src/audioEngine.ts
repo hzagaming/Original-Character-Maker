@@ -1070,7 +1070,7 @@ export function initAudio() {
  *  Modern browsers suspend AudioContext until a user gesture occurs.
  */
 let resumeHandlerAttached = false;
-let resumeHandler: (() => void) | null = null;
+let resumeHandler: EventListener | null = null;
 export function attachAudioResumeHandler() {
   if (resumeHandlerAttached) return;
   resumeHandlerAttached = true;
@@ -1083,7 +1083,9 @@ export function attachAudioResumeHandler() {
     }
   };
   events.forEach((evt) => {
-    document.addEventListener(evt, resumeHandler, { passive: true });
+    if (resumeHandler) {
+      document.addEventListener(evt, resumeHandler, { passive: true });
+    }
   });
 }
 

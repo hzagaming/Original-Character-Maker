@@ -34,7 +34,23 @@ export type DialogueSet = {
 
 // ─── Trait pools per language ───
 
-const TRAIT_LABELS: Record<AppLanguage, Record<PersonalityTrait, string>> = {
+type LocalizedTraitLabels = Partial<Record<AppLanguage, Record<PersonalityTrait, string>>> & {
+  zh: Record<PersonalityTrait, string>;
+  en: Record<PersonalityTrait, string>;
+};
+
+type LocalizedSceneLabels = Partial<Record<AppLanguage, Record<DialogueScene, string>>> & {
+  zh: Record<DialogueScene, string>;
+  en: Record<DialogueScene, string>;
+};
+
+type DialogueTemplateMap = Record<PersonalityTrait, Record<DialogueScene, TemplateEntry[]>>;
+type LocalizedDialogueTemplates = Partial<Record<AppLanguage, DialogueTemplateMap>> & {
+  zh: DialogueTemplateMap;
+  en: DialogueTemplateMap;
+};
+
+const TRAIT_LABELS: LocalizedTraitLabels = {
   zh: {
     tsundere: '傲娇', cool: '冷酷', hotblooded: '热血', calm: '冷静',
     shy: '害羞', cheerful: '开朗', mysterious: '神秘', sarcastic: '毒舌',
@@ -67,7 +83,7 @@ const TRAIT_LABELS: Record<AppLanguage, Record<PersonalityTrait, string>> = {
   },
 };
 
-const SCENE_LABELS: Record<AppLanguage, Record<DialogueScene, string>> = {
+const SCENE_LABELS: LocalizedSceneLabels = {
   zh: {
     battle: '战斗', daily: '日常', emotional: '情感', crisis: '危机',
     comedy: '搞笑', farewell: '离别', reunion: '重逢', confession: '告白',
@@ -99,7 +115,7 @@ const SCENE_LABELS: Record<AppLanguage, Record<DialogueScene, string>> = {
 
 type TemplateEntry = { text: string; tone: string };
 
-const TEMPLATES: Record<AppLanguage, Record<PersonalityTrait, Record<DialogueScene, TemplateEntry[]>>> = {
+const TEMPLATES: LocalizedDialogueTemplates = {
   zh: {
     tsundere: {
       battle: [

@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.13.0';
+const VERSION = '1.13.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -671,10 +671,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.13.0 第八轮全局深度审计：修复 audioEngine.ts 致命 TDZ 回归、Web Audio API 非法自动化、翻译泄漏、可访问性缺口。',
-    announcementList1: '致命修复：audioEngine.ts userRel 声明在 oscillator stop() 之后导致 TDZ，任何 SFX 播放都会抛出 ReferenceError；已将 ADSR 声明移到 oscillator 创建之前。',
-    announcementList2: 'audioEngine.ts 鲁棒性：防御 duration<=0.001 和 filter frequency 起点为 0 的非法自动化；effectivePan clamp 到 [-1,1]；userAtk/Dec/Rel 上限 500ms。',
-    announcementList3: '翻译泄漏与可访问性：workflowPages zh.redoBusy 运行时错误；ru 缺失 docsSearch 翻译；ImportModal 误用 importError；DocsPage/workflowPages 硬编码中文改为翻译键；onBack 补充 back 音效；移除 spin 死代码。',
+    announcementDescription: 'v1.13.1 音频工具补充审计：同步包版本，修复音频编辑器 Pan 范围、导入/导出并发穿透、构建阻断项，并补齐音频转换/剪辑工具 UI 本地化。',
+    announcementList1: '版本与构建：App VERSION、package.json、package-lock.json 统一到 1.13.1；修复多语言类型、弹窗关闭 labels、角色工具 backHome、audioEngine 事件监听等构建阻断项。',
+    announcementList2: '音频编辑器修复：Pan 滑条为 -100..100，但 StereoPannerNode 需要 -1..1，播放链现会正确归一化；导入/导出增加 ref 级防重复触发。',
+    announcementList3: 'UI/UX/SFX：音频转换器和音频剪辑工具的按钮、面板标题、空状态、错误面板、日志区等硬编码英文改为本地 labels，保持与其他工具结构和语言体验一致。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1112,10 +1112,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.13.0 第8回グローバル深度監査：audioEngine.ts の致命的 TDZ 回帰、Web Audio API の違法オートメーション、翻訳漏洩、アクセシビリティの欠損を修正。',
-    announcementList1: '致命的修正：audioEngine.ts の userRel が oscillator stop() の後に宣言され TDZ を引き起こし、SFX 再生時に ReferenceError が発生；ADSR 宣言を oscillator 作成前に移動。',
-    announcementList2: 'audioEngine.ts 堅牢性：duration<=0.001 と filter frequency 起点 0 の違法オートメーションを防御；effectivePan を [-1,1] に clamp；userAtk/Dec/Rel の上限を 500ms に。',
-    announcementList3: '翻訳漏洩とアクセシビリティ：workflowPages zh.redoBusy の実行時エラー；ru の docsSearch 翻訳欠損；ImportModal の importError 誤用；DocsPage/workflowPages の中国語ハードコードを翻訳キーに；onBack に back 音效を追加；spin 死コードを削除。',
+    announcementDescription: 'v1.13.1 音声ツール補足監査：package 版を同期し、音声編集の Pan 範囲、重複実行、ビルド阻害、音声変換/編集 UI のローカライズを修正。',
+    announcementList1: 'バージョンとビルド：App VERSION、package.json、package-lock.json を 1.13.1 に統一；多言語型、モーダル閉じる label、backHome、audioEngine イベント監視のビルド阻害を修正。',
+    announcementList2: '音声編集修正：Pan スライダーは -100..100 だが StereoPannerNode は -1..1 を要求するため、再生チェーンで正しく正規化；インポート/書き出しに ref レベルの重複防止を追加。',
+    announcementList3: 'UI/UX/SFX：音声変換と音声編集のボタン、パネル見出し、空状態、エラーパネル、ログ領域の英語ハードコードを labels 化し、他ツールと同じ言語体験へ調整。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1553,10 +1553,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.13.0 Eighth-round global deep audit: fixed audioEngine.ts fatal TDZ regression, Web Audio API illegal automation, translation leaks, and accessibility gaps.',
-    announcementList1: 'Critical fix: audioEngine.ts userRel declared after oscillator stop() caused TDZ, making every SFX playback throw ReferenceError; moved ADSR declarations before oscillator creation.',
-    announcementList2: 'audioEngine.ts robustness: defended against illegal automation for duration<=0.001 and filter frequency starting at 0; clamped effectivePan to [-1,1]; capped userAtk/Dec/Rel at 500ms.',
-    announcementList3: 'Translation leaks & accessibility: workflowPages zh.redoBusy runtime error; ru missing docsSearch translations; ImportModal misused importError; DocsPage/workflowPages hardcoded Chinese converted to keys; onBack gained back sound; removed spin dead code.',
+    announcementDescription: 'v1.13.1 audio tool follow-up audit: synced package versions, fixed audio editor pan range, import/export concurrency, build blockers, and localized audio converter/editor UI.',
+    announcementList1: 'Version/build: App VERSION, package.json, and package-lock.json now use 1.13.1; fixed build blockers in language types, modal close labels, backHome props, and audioEngine listeners.',
+    announcementList2: 'Audio editor fix: the Pan slider is -100..100 while StereoPannerNode expects -1..1, so playback now normalizes correctly; import/export also use ref-level duplicate guards.',
+    announcementList3: 'UI/UX/SFX: audio converter/editor buttons, panel titles, empty states, error panels, and log areas now use local labels instead of hardcoded English, matching the rest of the tool structure.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1994,10 +1994,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.13.0 Восьмой раунд глобального аудита: исправлены фатальная TDZ-регрессия в audioEngine.ts, незаконная автоматизация Web Audio API, утечки переводов, пробелы в доступности.',
-    announcementList1: 'Критическое исправление: userRel в audioEngine.ts объявлен после oscillator stop(), вызывая TDZ и ReferenceError при каждом воспроизведении SFX; объявления ADSR перенесены перед созданием oscillator.',
-    announcementList2: 'Устойчивость audioEngine.ts: защита от незаконной автоматизации при duration<=0.001 и стартовой частоте фильтра 0; clamp effectivePan в [-1,1]; верхний предел userAtk/Dec/Rel 500 мс.',
-    announcementList3: 'Утечки переводов и доступность: runtime-ошибка zh.redoBusy в workflowPages; отсутствие docsSearch-переводов в ru; неправильное использование importError в ImportModal; хардкод на китайском в DocsPage/workflowPages переведён на ключи; onBack получил звук back; удалён мёртвый код spin.',
+    announcementDescription: 'v1.13.1 Дополнительный аудит аудиоинструментов: синхронизация версий, исправление Pan, повторов импорта/экспорта, блокеров сборки и локализации UI.',
+    announcementList1: 'Версия/сборка: App VERSION, package.json и package-lock.json теперь 1.13.1; исправлены блокеры сборки в типах языков, label закрытия модалок, backHome и слушателях audioEngine.',
+    announcementList2: 'Исправление аудиоредактора: Pan-слайдер -100..100, а StereoPannerNode требует -1..1, поэтому воспроизведение теперь нормализует значение; импорт/экспорт получили ref-защиту от дублей.',
+    announcementList3: 'UI/UX/SFX: кнопки, заголовки панелей, пустые состояния, панели ошибок и логи аудиоконвертера/редактора переведены на local labels вместо хардкода на английском.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2787,10 +2787,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.13.0 8차 글로벌 심층 감사: audioEngine.ts 치명적 TDZ 회귀, Web Audio API 불법 자동화, 번역 누출, 접근성 결함을 수정.',
-    announcementList1: '치명적 수정: audioEngine.ts userRel이 oscillator stop() 뒤에 선언되어 TDZ를 유발하고 SFX 재생 시 ReferenceError 발생; ADSR 선언을 oscillator 생성 전으로 이동.',
-    announcementList2: 'audioEngine.ts 견고성: duration<=0.001 및 filter frequency 시작점 0의 불법 자동화 방어; effectivePan을 [-1,1]로 클램프; userAtk/Dec/Rel 상한 500ms.',
-    announcementList3: '번역 누출 및 접근성: workflowPages zh.redoBusy 런타임 오류; ru docsSearch 번역 누락; ImportModal importError 오용; DocsPage/workflowPages 중국어 하드코드를 번역 키로 변환; onBack에 back 효과음 추가; spin 데드 코드 제거.',
+    announcementDescription: 'v1.13.1 오디오 도구 보충 감사: package 버전 동기화, Pan 범위, 중복 실행 방지, 빌드 차단 항목, 오디오 변환/편집 UI 현지화를 수정.',
+    announcementList1: '버전/빌드: App VERSION, package.json, package-lock.json을 1.13.1로 통일; 언어 타입, 모달 닫기 label, backHome, audioEngine 이벤트 리스너 빌드 차단 문제 수정.',
+    announcementList2: '오디오 편집기 수정: Pan 슬라이더는 -100..100이지만 StereoPannerNode는 -1..1을 요구하므로 재생 체인에서 올바르게 정규화; 가져오기/내보내기에 ref 수준 중복 방지 추가.',
+    announcementList3: 'UI/UX/SFX: 오디오 변환기/편집기의 버튼, 패널 제목, 빈 상태, 오류 패널, 로그 영역을 하드코딩 영어 대신 local labels로 전환해 다른 도구와 언어 경험을 맞춤.',
   },
   fr: {
     ...translations.en,
@@ -2981,6 +2981,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.13.1',
+    date: '2026-05-25',
+    title: '1.13.1 音频工具补充审计：构建修复/版本同步/Pan/并发防护/本地化',
+    summary:
+      '继续复查 v1.13.0 后的音频转换器和音频剪辑工具，并补掉构建链路暴露的跨页面问题：package 版本滞后、音频编辑器 Pan 范围错误、导入/导出重复触发、新音频工具 UI 硬编码英文泄漏，以及多语言/弹窗/角色工具/audioEngine 类型问题。',
+    details: [
+      '版本同步：App VERSION、package.json、package-lock.json 统一更新到 1.13.1；v1.13.0 保留在历史公告。',
+      '构建修复：补齐弹窗关闭 labels 传参、角色战斗卡/技能树 backHome props、多语言数据 fallback 类型、ColorPalette/CharacterStats TDZ、audioEngine resume 事件监听类型。',
+      'AudioEditorPage：Pan 滑条仍按 -100..100 展示，但传入 StereoPannerNode 前会归一化为 -1..1，避免超出 Web Audio 规范范围。',
+      '并发防护：AudioEditorPage 导入和导出新增 ref 级别防重复触发；AudioConverterPage 转换流程保留 ref 防护，避免快速连点或错误面板重试穿透按钮禁用。',
+      'UI/UX/SFX 本地化：AudioEditorPage 与 AudioConverterPage 的工具按钮、面板标题、空状态、日志区、错误面板 labels 从硬编码英文迁移到本地 labels，和其他工具的结构与语言体验保持一致。',
+    ],
+  },
   {
     version: '1.13.0',
     date: '2026-05-18',
@@ -6470,7 +6484,7 @@ function FaceMakerPage({
       </footer>
 
       {isConfirmOpen && (
-        <ConfirmReturnModal copy={copy} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />
+        <ConfirmReturnModal copy={copy} closeLabel={messages.close} isDirty={isDirty} onCancel={() => setIsConfirmOpen(false)} onConfirm={onBack} />
       )}
       {isResetOpen ? (
         <ActionConfirmModal
@@ -6478,6 +6492,7 @@ function FaceMakerPage({
           description={copy.refreshWorkspaceDescription}
           cancelLabel={copy.continueEdit}
           confirmLabel={copy.refreshWorkspaceConfirm}
+          closeLabel={messages.close}
           onCancel={() => setIsResetOpen(false)}
           onConfirm={resetDraft}
         />
@@ -6488,11 +6503,13 @@ function FaceMakerPage({
 
 function ConfirmReturnModal({
   copy,
+  closeLabel,
   isDirty,
   onCancel,
   onConfirm,
 }: {
   copy: FaceMakerCopy;
+  closeLabel: string;
   isDirty: boolean;
   onCancel: () => void;
   onConfirm: () => void;
@@ -6527,7 +6544,7 @@ function ConfirmReturnModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={closeLabel} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{copy.confirmTitle}</p>
@@ -6552,6 +6569,7 @@ function ActionConfirmModal({
   description,
   cancelLabel,
   confirmLabel,
+  closeLabel,
   onCancel,
   onConfirm,
 }: {
@@ -6559,6 +6577,7 @@ function ActionConfirmModal({
   description: string;
   cancelLabel: string;
   confirmLabel: string;
+  closeLabel: string;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -6592,7 +6611,7 @@ function ActionConfirmModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={closeLabel} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{title}</p>

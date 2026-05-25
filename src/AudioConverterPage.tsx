@@ -397,7 +397,7 @@ export function AudioConverterPage({
   /* ---- Import state ---- */
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
-  const importTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const importTimeoutRef = useRef<number | null>(null);
   const importCtxRef = useRef<AudioContext | null>(null);
   const exportCtxRef = useRef<AudioContext | null>(null);
   const isImportingRef = useRef(false);
@@ -740,10 +740,10 @@ export function AudioConverterPage({
   /* ---- Panel collapse ---- */
   const [isResultOpen, setIsResultOpen] = useState(true);
   const [isLogsOpen, setIsLogsOpen] = useState(true);
-  const progressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressTimeoutRef = useRef<number | null>(null);
 
   /* ---- Slider throttle ---- */
-  const sliderThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sliderThrottleRef = useRef<number | null>(null);
   const playSliderThrottled = useCallback(() => {
     if (sliderThrottleRef.current) return;
     playSound('sliderChange');
