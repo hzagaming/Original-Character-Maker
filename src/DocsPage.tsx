@@ -37,6 +37,8 @@ type DocsLabels = {
   docsSearchPlaceholder: string;
   docsSearchResults: string;
   docsSearchNoResults: string;
+  docsSearchFound: string;
+  docsSearchMore: string;
 };
 
 type DocsPageProps = {
@@ -351,7 +353,7 @@ export default function DocsPage({
               <article className="docs-article">
                 <h1>{messages.docsSearchResults}</h1>
                 <p className="docs-dictionary-desc">
-                  找到 {searchResults.length} 条与「{searchQuery}」相关的结果
+                  {messages.docsSearchFound.replace('{count}', String(searchResults.length)).replace('{query}', searchQuery)}
                 </p>
                 {searchResults.length === 0 ? (
                   <div className="docs-search-empty">{messages.docsSearchNoResults}</div>
@@ -361,7 +363,7 @@ export default function DocsPage({
                       <ErrorCard key={i} error={err} messages={messages} isHighlighted={highlightedErrorCode === err.code} />
                     ))}
                     {searchResults.length > 100 && (
-                      <div className="docs-search-more">还有 {searchResults.length - 100} 条结果，请尝试更精确的关键词。</div>
+                      <div className="docs-search-more">{messages.docsSearchMore.replace('{count}', String(searchResults.length - 100))}</div>
                     )}
                   </div>
                 )}

@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.12.9';
+const VERSION = '1.13.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -300,6 +300,8 @@ type Messages = {
   docsSearchPlaceholder: string;
   docsSearchResults: string;
   docsSearchNoResults: string;
+  docsSearchFound: string;
+  docsSearchMore: string;
   docsNavIndex: string;
   docsFilterAll: string;
   docsFilterCritical: string;
@@ -669,10 +671,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.12.9 第七轮全局深度审计：修复 audioEngine.ts Web Audio API 边界崩溃、CSS 语法错误、可访问性缺失、DocsPage 硬编码中文、语言选择器不完整。',
-    announcementList1: 'audioEngine.ts 鲁棒性：exponentialRamp 防御目标值为 0；oscillator stop 使用 max(preset.release, userRel)；buffer length 防御为 0；移除重复 disconnect；stopTime 基于 startTime 计算。',
-    announcementList2: 'CSS 与可访问性：修复 styles.css .modal-card-wide orphaned declarations；SkillTreePage Load Set label 补全 tabIndex/role/aria-label；DocsPage 搜索文本从硬编码改为翻译键。',
-    announcementList3: '本地化补全：languageOptions 从 10 种扩展到 30 种；workflowPages "重做中" 改为翻译键；en/ja/ru/zh 补全 docsSearchPlaceholder/Results/NoResults。',
+    announcementDescription: 'v1.13.0 第八轮全局深度审计：修复 audioEngine.ts 致命 TDZ 回归、Web Audio API 非法自动化、翻译泄漏、可访问性缺口。',
+    announcementList1: '致命修复：audioEngine.ts userRel 声明在 oscillator stop() 之后导致 TDZ，任何 SFX 播放都会抛出 ReferenceError；已将 ADSR 声明移到 oscillator 创建之前。',
+    announcementList2: 'audioEngine.ts 鲁棒性：防御 duration<=0.001 和 filter frequency 起点为 0 的非法自动化；effectivePan clamp 到 [-1,1]；userAtk/Dec/Rel 上限 500ms。',
+    announcementList3: '翻译泄漏与可访问性：workflowPages zh.redoBusy 运行时错误；ru 缺失 docsSearch 翻译；ImportModal 误用 importError；DocsPage/workflowPages 硬编码中文改为翻译键；onBack 补充 back 音效；移除 spin 死代码。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -759,6 +761,8 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSearchPlaceholder: '搜索错误代码、描述、原因或解决方案...',
     docsSearchResults: '搜索结果',
     docsSearchNoResults: '没有找到匹配的结果，请尝试其他关键词。',
+    docsSearchFound: '找到 {count} 条与「{query}」相关的结果',
+    docsSearchMore: '还有 {count} 条结果，请尝试更精确的关键词。',
     moduleCanvas: '主工作区画布',
     modulePanel: '右侧参数 / 功能面板',
     modulePipeline: '任务队列与输出结果区',
@@ -1108,10 +1112,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.12.9 第7回グローバル深度監査：audioEngine.ts の Web Audio API 境界クラッシュ、CSS 構文エラー、アクセシビリティ欠損、DocsPage の中国語ハードコード、言語セレクタの不完全性を修正。',
-    announcementList1: 'audioEngine.ts 堅牢性：exponentialRamp の目標値を 0 に防御；oscillator stop を max(preset.release, userRel) に；buffer length を 0 に防御；重複 disconnect を削除；stopTime を startTime ベースに計算。',
-    announcementList2: 'CSS とアクセシビリティ：styles.css .modal-card-wide の orphaned declarations を修正；SkillTreePage Load Set ラベルに tabIndex/role/aria-label を追加；DocsPage 検索テキストを翻訳キーに変更。',
-    announcementList3: '多言語化補完：languageOptions を 10 言語から 30 言語に拡張；workflowPages の「重做中」を翻訳キーに；en/ja/ru/zh に docsSearchPlaceholder/Results/NoResults を追加。',
+    announcementDescription: 'v1.13.0 第8回グローバル深度監査：audioEngine.ts の致命的 TDZ 回帰、Web Audio API の違法オートメーション、翻訳漏洩、アクセシビリティの欠損を修正。',
+    announcementList1: '致命的修正：audioEngine.ts の userRel が oscillator stop() の後に宣言され TDZ を引き起こし、SFX 再生時に ReferenceError が発生；ADSR 宣言を oscillator 作成前に移動。',
+    announcementList2: 'audioEngine.ts 堅牢性：duration<=0.001 と filter frequency 起点 0 の違法オートメーションを防御；effectivePan を [-1,1] に clamp；userAtk/Dec/Rel の上限を 500ms に。',
+    announcementList3: '翻訳漏洩とアクセシビリティ：workflowPages zh.redoBusy の実行時エラー；ru の docsSearch 翻訳欠損；ImportModal の importError 誤用；DocsPage/workflowPages の中国語ハードコードを翻訳キーに；onBack に back 音效を追加；spin 死コードを削除。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1198,6 +1202,8 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSearchPlaceholder: 'エラーコード、説明、原因、解決策を検索...',
     docsSearchResults: '検索結果',
     docsSearchNoResults: '一致する結果が見つかりませんでした。別のキーワードをお試しください。',
+    docsSearchFound: '「{query}」に関連する結果が {count} 件見つかりました',
+    docsSearchMore: 'さらに {count} 件の結果があります。より正確なキーワードをお試しください。',
     moduleCanvas: 'メイン作業領域',
     modulePanel: '右側パネル',
     modulePipeline: 'タスクと出力',
@@ -1547,10 +1553,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.12.9 Seventh-round global deep audit: fixed audioEngine.ts Web Audio API boundary crashes, CSS syntax error, accessibility gaps, DocsPage hardcoded Chinese, and incomplete language selector.',
-    announcementList1: 'audioEngine.ts robustness: exponentialRamp target value defended against 0; oscillator stop uses max(preset.release, userRel); buffer length defended against 0; removed duplicate disconnect; stopTime recalculated based on startTime.',
-    announcementList2: 'CSS & accessibility: fixed styles.css .modal-card-wide orphaned declarations; SkillTreePage Load Set label added tabIndex/role/aria-label; DocsPage search text converted from hardcoded to translation keys.',
-    announcementList3: 'Localization completion: languageOptions expanded from 10 to 30 languages; workflowPages "Redoing…" converted to translation key; en/ja/ru/zh completed with docsSearchPlaceholder/Results/NoResults.',
+    announcementDescription: 'v1.13.0 Eighth-round global deep audit: fixed audioEngine.ts fatal TDZ regression, Web Audio API illegal automation, translation leaks, and accessibility gaps.',
+    announcementList1: 'Critical fix: audioEngine.ts userRel declared after oscillator stop() caused TDZ, making every SFX playback throw ReferenceError; moved ADSR declarations before oscillator creation.',
+    announcementList2: 'audioEngine.ts robustness: defended against illegal automation for duration<=0.001 and filter frequency starting at 0; clamped effectivePan to [-1,1]; capped userAtk/Dec/Rel at 500ms.',
+    announcementList3: 'Translation leaks & accessibility: workflowPages zh.redoBusy runtime error; ru missing docsSearch translations; ImportModal misused importError; DocsPage/workflowPages hardcoded Chinese converted to keys; onBack gained back sound; removed spin dead code.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1637,6 +1643,8 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSearchPlaceholder: 'Search error codes, descriptions, causes, or solutions...',
     docsSearchResults: 'Search Results',
     docsSearchNoResults: 'No matching results found. Try different keywords.',
+    docsSearchFound: 'Found {count} results related to 「{query}」',
+    docsSearchMore: '{count} more results. Try more precise keywords.',
     moduleCanvas: 'Main workspace',
     modulePanel: 'Control panel',
     modulePipeline: 'Task queue and outputs',
@@ -1986,10 +1994,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.12.9 Седьмой раунд глобального аудита: исправлены краевые случаи Web Audio API в audioEngine.ts, синтаксическая ошибка CSS, пробелы в доступности, хардкод на китайском в DocsPage, неполный селектор языков.',
-    announcementList1: 'Устойчивость audioEngine.ts: защита exponentialRamp от целевого значения 0; oscillator stop использует max(preset.release, userRel); защита buffer length от 0; удалено дублирующее disconnect; stopTime пересчитан от startTime.',
-    announcementList2: 'CSS и доступность: исправлены orphaned declarations в styles.css .modal-card-wide; label Load Set в SkillTreePage получил tabIndex/role/aria-label; поисковый текст DocsPage переведён на ключи локализации.',
-    announcementList3: 'Завершение локализации: languageOptions расширен с 10 до 30 языков; хардкод «Redoing…» в workflowPages переведён на ключ; en/ja/ru/zh дополнены docsSearchPlaceholder/Results/NoResults.',
+    announcementDescription: 'v1.13.0 Восьмой раунд глобального аудита: исправлены фатальная TDZ-регрессия в audioEngine.ts, незаконная автоматизация Web Audio API, утечки переводов, пробелы в доступности.',
+    announcementList1: 'Критическое исправление: userRel в audioEngine.ts объявлен после oscillator stop(), вызывая TDZ и ReferenceError при каждом воспроизведении SFX; объявления ADSR перенесены перед созданием oscillator.',
+    announcementList2: 'Устойчивость audioEngine.ts: защита от незаконной автоматизации при duration<=0.001 и стартовой частоте фильтра 0; clamp effectivePan в [-1,1]; верхний предел userAtk/Dec/Rel 500 мс.',
+    announcementList3: 'Утечки переводов и доступность: runtime-ошибка zh.redoBusy в workflowPages; отсутствие docsSearch-переводов в ru; неправильное использование importError в ImportModal; хардкод на китайском в DocsPage/workflowPages переведён на ключи; onBack получил звук back; удалён мёртвый код spin.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2073,6 +2081,11 @@ const translations: Record<BaseLanguage, Messages> = {
     docsSectionParameters: 'Параметры',
     docsSectionErrors: 'Ошибки и решения',
     clearSearch: 'Очистить поиск',
+    docsSearchPlaceholder: 'Поиск кодов ошибок, описаний, причин или решений...',
+    docsSearchResults: 'Результаты поиска',
+    docsSearchNoResults: 'Совпадений не найдено. Попробуйте другие ключевые слова.',
+    docsSearchFound: 'Найдено {count} результатов по запросу 「{query}」',
+    docsSearchMore: 'Ещё {count} результатов. Попробуйте более точные ключевые слова.',
     moduleCanvas: 'Основное рабочее поле',
     modulePanel: 'Панель управления',
     modulePipeline: 'Очередь задач и вывод',
@@ -2774,10 +2787,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.12.9 7차 글로벌 심층 감사: audioEngine.ts Web Audio API 경계 충돌, CSS 구문 오류, 접근성 결함, DocsPage 중국어 하드코드, 언어 선택기 불완전성을 수정.',
-    announcementList1: 'audioEngine.ts 견고성: exponentialRamp 목표값을 0으로 방어; oscillator stop을 max(preset.release, userRel)로; buffer length을 0으로 방어; 중복 disconnect 제거; stopTime을 startTime 기반으로 재계산.',
-    announcementList2: 'CSS 및 접근성: styles.css .modal-card-wide orphaned declarations 수정; SkillTreePage Load Set 레이블에 tabIndex/role/aria-label 추가; DocsPage 검색 텍스트를 번역 키로 변경.',
-    announcementList3: '현지화 완성: languageOptions를 10개 언어에서 30개 언어로 확장; workflowPages "Redoing…"를 번역 키로 변환; en/ja/ru/zh에 docsSearchPlaceholder/Results/NoResults 추가.',
+    announcementDescription: 'v1.13.0 8차 글로벌 심층 감사: audioEngine.ts 치명적 TDZ 회귀, Web Audio API 불법 자동화, 번역 누출, 접근성 결함을 수정.',
+    announcementList1: '치명적 수정: audioEngine.ts userRel이 oscillator stop() 뒤에 선언되어 TDZ를 유발하고 SFX 재생 시 ReferenceError 발생; ADSR 선언을 oscillator 생성 전으로 이동.',
+    announcementList2: 'audioEngine.ts 견고성: duration<=0.001 및 filter frequency 시작점 0의 불법 자동화 방어; effectivePan을 [-1,1]로 클램프; userAtk/Dec/Rel 상한 500ms.',
+    announcementList3: '번역 누출 및 접근성: workflowPages zh.redoBusy 런타임 오류; ru docsSearch 번역 누락; ImportModal importError 오용; DocsPage/workflowPages 중국어 하드코드를 번역 키로 변환; onBack에 back 효과음 추가; spin 데드 코드 제거.',
   },
   fr: {
     ...translations.en,
@@ -2968,6 +2981,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.13.0',
+    date: '2026-05-18',
+    title: '1.13.0 第八轮全局深度审计：audioEngine TDZ/翻译泄漏/可访问性',
+    summary:
+      '对 v1.12.9 进行最严格的第八轮全局深度审计，修复 audioEngine.ts 致命 TDZ 回归、Web Audio API 非法自动化、翻译泄漏、可访问性缺口。',
+    details: [
+      '致命修复：audioEngine.ts synthesize() 中 userRel 声明在 oscillator stop() 之后，导致 Temporal Dead Zone —— 任何 SFX 播放都会抛出 ReferenceError，整个音效系统失效。已将 ADSR 声明移到所有 oscillator 创建之前。',
+      'audioEngine.ts 鲁棒性：scheduleMusicNote 防御 duration<=0.001（避免同时间点非法指数 ramp）；filter frequency 起点防御为 0（避免从 0 开始的 exponentialRamp）；effectivePan 手动 clamp 到 [-1, 1]；userAtk/userDec/userRel 添加上限 500ms。',
+      '翻译泄漏修复：workflowPages zh.redoBusy 写成 paper.redoBusy 导致运行时错误；App.tsx ru 缺失 docsSearchPlaceholder/Results/NoResults；ImportModal reader.onerror 误用 importError（应为 importReadError）；DocsPage 搜索描述和 workflowPages redo 冲突提示从硬编码中文改为翻译键（docsSearchFound/More、paper.redoConflict）。',
+      '可访问性：sharedPageProps.onBack 补充 playSound("back")；CharacterSkillTreePage Load Set label 补充完整键盘支持。',
+      '死代码清理：styles.css 移除未引用的 spin keyframe；AudioEditor/AudioConverter labels 补全大量专业术语翻译字段。',
+    ],
+  },
   {
     version: '1.12.9',
     date: '2026-05-18',
@@ -4329,7 +4356,7 @@ const defaultSettings: SettingsState = {
     responseFormat: 'text',
     seed: 0,
     topK: 40,
-    systemPrompt: '你是一位擅长原创角色设计的创意助手。请根据用户提供的信息，生成富有想象力的角色设定、对话和世界观的文本内容。',
+    systemPrompt: '',
     timeoutMs: 30000,
     retryCount: 2,
   },
@@ -4770,7 +4797,7 @@ function App() {
     privacyNote: messages.privacyNote,
     settings,
     language: settings.language,
-    onBack: () => setScreen('home'),
+    onBack: () => { playSound('back'); setScreen('home'); },
     onOpenSettings: () => openSettings('style'),
     onNavigate: (screen: Exclude<FeatureScreen, 'home'>) => {
       playSound('pageSwitch');
@@ -7096,7 +7123,7 @@ function ImportModal({
     };
     reader.onerror = () => {
       setStatus('error');
-      setStatusMessage(messages.importError);
+      setStatusMessage(messages.importReadError);
     };
     reader.readAsText(file);
     event.target.value = '';

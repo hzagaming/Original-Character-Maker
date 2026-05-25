@@ -542,6 +542,7 @@ type UiCopySet = {
     redoCurrentResult: string;
     retryStep: string;
     redoBusy: string;
+    redoConflict: string;
     workflowConcurrency: string;
     workflowConcurrencyHint: string;
     hint: string;
@@ -1252,7 +1253,8 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoWorkflow: '重做当前结果',
       redoCurrentResult: '重做当前结果',
       retryStep: '重试此步骤',
-      redoBusy: paper.redoBusy,
+      redoBusy: '重做中',
+      redoConflict: (step: string) => `这个结果已经在重做中：${step}。请等它完成后再重做同一张图。`,
       workflowConcurrency: '工作流并发',
       workflowConcurrencyHint: '默认开启表达图、CG 和抠图并行。关闭后会按顺序一个一个生成。',
       expressionCount: '表情版本数',
@@ -1711,6 +1713,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoCurrentResult: 'この結果を再生成',
       retryStep: 'このステップを再試行',
       redoBusy: '再生成中',
+      redoConflict: (step: string) => `この結果はすでに再生成中です：${step}。完了するまで同じ画像を再生成しないでください。`,
       workflowConcurrency: 'workflow 並列実行',
       workflowConcurrencyHint: '既定では表情、CG、切り抜きを並列実行します。オフにすると 1 つずつ順番に生成します。',
       expressionCount: '表情バージョン数',
@@ -2169,6 +2172,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoCurrentResult: 'Redo this result',
       retryStep: 'Retry this step',
       redoBusy: 'Redoing…',
+      redoConflict: (step: string) => `This result is already being redone: ${step}. Please wait until it completes before redoing the same image.`,
       workflowConcurrency: 'Workflow concurrency',
       workflowConcurrencyHint: 'Expressions, CG, and cutout run in parallel by default. Turn it off to run one step at a time.',
       expressionCount: 'Expression variants',
@@ -2627,6 +2631,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       redoCurrentResult: 'Переделать этот результат',
       retryStep: 'Повторить этот шаг',
       redoBusy: 'Повтор…',
+      redoConflict: (step: string) => `Этот результат уже обрабатывается повторно: ${step}. Подождите завершения перед повторной обработкой того же изображения.`,
       workflowConcurrency: 'Параллельный workflow',
       workflowConcurrencyHint: 'По умолчанию выражения, CG и вырезание идут параллельно. Если выключить, workflow пойдет строго по шагам.',
       expressionCount: 'Число эмоций',
@@ -6654,7 +6659,7 @@ export function Paper2GalPage({
     }
 
     if (hasRedoConflict(stepName, redoStepsInFlight, workflow)) {
-      setMessage({ type: 'info', text: `这个结果已经在重做中：${stepLabels[stepName]}。请等它完成后再重做同一张图。` });
+      setMessage({ type: 'info', text: paper.redoConflict(stepLabels[stepName]) });
       return;
     }
 

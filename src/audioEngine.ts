@@ -275,6 +275,13 @@ function synthesize(params: {
   const filterFreq = Math.min(currentSettings.sfxFilterFreq * preset.filterFreqBase / 5000, c.sampleRate / 2);
   const reverbWet = currentSettings.sfxReverb / 100;
 
+  // Pre-calc ADSR before any oscillator creation (fixes TDZ + bounds)
+  const userAtk = Math.min(500, Math.max(0, currentSettings.sfxAttack)) / 1000;
+  const userDec = Math.min(500, Math.max(0, currentSettings.sfxDecay)) / 1000;
+  const userSus = Math.max(0, Math.min(100, currentSettings.sfxSustain)) / 100;
+  const userRel = Math.min(500, Math.max(0, currentSettings.sfxRelease)) / 1000;
+  const releaseTime = Math.max(preset.release, userRel);
+
   const freqs = chord ? chord.map((f) => f * pitchRatio) : [baseFreq * pitchRatio];
 
   const rootGain = c.createGain();
@@ -291,7 +298,7 @@ function synthesize(params: {
     const osc = c.createOscillator();
     osc.type = preset.waveform;
     osc.frequency.setValueAtTime(f, when);
-    if (slideTo) {
+    if (slideTo && actualDuration > 0) {
       osc.frequency.exponentialRampToValueAtTime(slideTo * pitchRatio, when + actualDuration);
     }
     osc.detune.value = detuneTotal;
@@ -315,7 +322,7 @@ function synthesize(params: {
     oscs.forEach((o) => {
       o.connect(filter);
       o.start(when);
-      o.stop(when + actualDuration + Math.max(preset.release, userRel) + 0.01);
+      o.stop(when + actualDuration + releaseTime + 0.01);
       nodesToCleanup.push(o);
     });
     filter.connect(voiceGain);
@@ -341,16 +348,11 @@ function synthesize(params: {
     noiseFilter.connect(noiseGain);
     noiseGain.connect(rootGain);
     noiseSrc.start(when);
-    noiseSrc.stop(when + actualDuration + 0.01);
+    noiseSrc.stop(when + actualDuration + releaseTime + 0.01);
     nodesToCleanup.push(noiseSrc, noiseFilter, noiseGain);
   }
 
   // ADSR envelope on rootGain (user-advanced overrides preset defaults)
-  const userAtk = Math.max(0, currentSettings.sfxAttack) / 1000;
-  const userDec = Math.max(0, currentSettings.sfxDecay) / 1000;
-  const userSus = Math.max(0, Math.min(100, currentSettings.sfxSustain)) / 100;
-  const userRel = Math.max(0, currentSettings.sfxRelease) / 1000;
-
   rootGain.gain.setValueAtTime(0, when);
   rootGain.gain.linearRampToValueAtTime(1, when + Math.min(userAtk, actualDuration * 0.2));
   rootGain.gain.exponentialRampToValueAtTime(Math.max(userSus, 0.001), when + Math.min(userAtk + userDec, actualDuration * 0.6));
@@ -688,11 +690,11 @@ function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, du
     if (!c || !mg) return;
     const startTime = Math.max(when, c.currentTime);
     const stopTime = startTime + duration + 0.08;
-    if (stopTime <= c.currentTime) return;
+    if (stopTime <= c.currentTime || duration <= 0.001) return;
     const humanDetune = humanize() * 3; // ±3 cents organic drift
     const velocity = volume * (0.92 + humanize() * 0.08); // ±8% velocity
     const effectiveFilterFreq = filterFreq * (currentSettings.musicFilter / 5000);
-    const effectivePan = stereoPan * (currentSettings.musicStereoWidth / 80);
+    const effectivePan = Math.max(-1, Math.min(1, stereoPan * (currentSettings.musicStereoWidth / 80)));
 
     // ── Oscillator stack ──
     // 1) Sub oscillator (1 octave below) for warmth
@@ -739,7 +741,7 @@ function scheduleMusicNote(when: number, freq: number, voice: OscillatorType, du
     // ── Filter envelope (bright attack, darker sustain) ──
     const filter = c.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(effectiveFilterFreq * 1.8, startTime);
+    filter.frequency.setValueAtTime(Math.max(effectiveFilterFreq * 1.8, 1), startTime);
     filter.frequency.exponentialRampToValueAtTime(Math.max(effectiveFilterFreq * 0.6, 1), startTime + attack + decay * 1.5);
     filter.Q.value = 0.6;
 
