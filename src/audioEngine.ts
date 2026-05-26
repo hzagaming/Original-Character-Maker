@@ -209,9 +209,11 @@ export function updateAudioSettings(next: Partial<AudioSettings>) {
     oldUseCustomMusic !== currentSettings.useCustomMusic ||
     oldMusicTempo !== currentSettings.musicTempo ||
     oldMusicPitch !== currentSettings.musicPitch ||
-    oldMusicReverb !== currentSettings.musicReverb ||
-    oldMusicFilter !== currentSettings.musicFilter ||
-    oldMusicStereoWidth !== currentSettings.musicStereoWidth;
+    (!currentSettings.useCustomMusic && (
+      oldMusicReverb !== currentSettings.musicReverb ||
+      oldMusicFilter !== currentSettings.musicFilter ||
+      oldMusicStereoWidth !== currentSettings.musicStereoWidth
+    ));
   if (currentSettings.musicEnabled && (!wasMusicOn || musicChanged)) {
     stopMusic();
     startMusic();
@@ -277,9 +279,9 @@ function synthesize(params: {
 
   // Pre-calc ADSR before any oscillator creation (fixes TDZ + bounds)
   const userAtk = Math.min(500, Math.max(0, currentSettings.sfxAttack)) / 1000;
-  const userDec = Math.min(500, Math.max(0, currentSettings.sfxDecay)) / 1000;
+  const userDec = Math.min(1000, Math.max(0, currentSettings.sfxDecay)) / 1000;
   const userSus = Math.max(0, Math.min(100, currentSettings.sfxSustain)) / 100;
-  const userRel = Math.min(500, Math.max(0, currentSettings.sfxRelease)) / 1000;
+  const userRel = Math.min(2000, Math.max(0, currentSettings.sfxRelease)) / 1000;
   const releaseTime = Math.max(preset.release, userRel);
 
   const freqs = chord ? chord.map((f) => f * pitchRatio) : [baseFreq * pitchRatio];

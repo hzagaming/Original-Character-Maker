@@ -162,6 +162,7 @@ export default function CharacterBattleCardPage({
         totalAttributes: '总属性', skillPoints: '技能点', generateTitle: '生成称号',
         hpFull: '生命值', mpFull: '魔力值', atkFull: '攻击力', defFull: '防御力', spdFull: '速度', crtFull: '暴击率',
         noticeExportSuccess: '导出成功', noticeExportError: '导出失败', exporting: '导出中…',
+        characterAvatar: '角色头像',
       },
       ja: {
         readData: '連携データ読込', noLinkedData: '連携データがありません。先にキャラステータスまたはスキルツリーを作成してください。',
@@ -173,6 +174,7 @@ export default function CharacterBattleCardPage({
         totalAttributes: '合計ステータス', skillPoints: 'スキルポイント', generateTitle: '称号生成',
         hpFull: 'HP', mpFull: 'MP', atkFull: '攻撃力', defFull: '防御力', spdFull: '素早さ', crtFull: '会心率',
         noticeExportSuccess: '出力成功', noticeExportError: '出力失敗', exporting: '出力中…',
+        characterAvatar: 'キャラアイコン',
       },
       en: {
         readData: 'Read linked data', noLinkedData: 'No linked data yet. Create character stats or a skill tree first.',
@@ -184,6 +186,7 @@ export default function CharacterBattleCardPage({
         totalAttributes: 'Total Attributes', skillPoints: 'Skill Points', generateTitle: 'Generate Title',
         hpFull: 'HP', mpFull: 'MP', atkFull: 'ATK', defFull: 'DEF', spdFull: 'SPD', crtFull: 'CRT Rate',
         noticeExportSuccess: 'Export successful', noticeExportError: 'Export failed', exporting: 'Exporting…',
+        characterAvatar: 'Character avatar',
       },
       ru: {
         readData: 'Считать данные', noLinkedData: 'Нет связанных данных. Сначала создайте характеристики или дерево навыков.',
@@ -195,6 +198,7 @@ export default function CharacterBattleCardPage({
         totalAttributes: 'Всего хар-к', skillPoints: 'Очки навыков', generateTitle: 'Сгенерировать титул',
         hpFull: 'HP', mpFull: 'MP', atkFull: 'АТК', defFull: 'ЗАЩ', spdFull: 'СКО', crtFull: 'Шанс крита',
         noticeExportSuccess: 'Экспорт успешен', noticeExportError: 'Ошибка экспорта', exporting: 'Экспорт…',
+        characterAvatar: 'Аватар персонажа',
       },
       ko: {
         readData: '연동 데이터 읽기', noLinkedData: '연동 데이터가 없습니다. 먼저 캐릭터 스탯이나 스킬 트리를 생성하세요.',
@@ -206,6 +210,7 @@ export default function CharacterBattleCardPage({
         totalAttributes: '총 스탯', skillPoints: '스킬 포인트', generateTitle: '칭호 생성',
         hpFull: 'HP', mpFull: 'MP', atkFull: '공격력', defFull: '방어력', spdFull: '속도', crtFull: '치명타율',
         noticeExportSuccess: '납품 성공', noticeExportError: '납품 실패', exporting: '납품 중…',
+        characterAvatar: '캐릭터 아바타',
       },
     };
     const base = dict[language] ?? dict.en;
@@ -425,7 +430,7 @@ export default function CharacterBattleCardPage({
         {/* Header row */}
         <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap' }}>
           {/* Avatar placeholder */}
-          <div role="img" aria-label={labels.characterName || 'Character avatar'} style={{
+          <div role="img" aria-label={labels.characterAvatar} style={{
             width: '96px', height: '96px', borderRadius: '50%',
             background: 'var(--bg)', border: '3px solid var(--accent)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',

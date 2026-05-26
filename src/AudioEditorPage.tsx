@@ -1758,7 +1758,7 @@ export function AudioEditorPage({
             {/* Logs */}
             <section className="tool-card">
               <div
-                className="tool-card-header collapsible"
+                className="tool-card-header collapsible" data-sfx-handled
                 onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }}
                 role="button"

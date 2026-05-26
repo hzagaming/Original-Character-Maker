@@ -956,7 +956,7 @@ export function AudioConverterPage({
             {/* Results panel */}
             <section className="tool-card">
               <div
-                className="tool-card-header collapsible"
+                className="tool-card-header collapsible" data-sfx-handled
                 onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }}
                 role="button"
@@ -989,7 +989,7 @@ export function AudioConverterPage({
             {/* Logs panel */}
             <section className="tool-card">
               <div
-                className="tool-card-header collapsible"
+                className="tool-card-header collapsible" data-sfx-handled
                 onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }}
                 role="button"

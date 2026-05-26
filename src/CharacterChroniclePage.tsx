@@ -414,7 +414,7 @@ export default function CharacterChroniclePage({
       playSound('confirm');
     } catch {
       playSound('warning');
-      showToast(copy.exportError || 'Export failed');
+      showToast(copy.exportError);
     } finally {
       setIsExporting(false);
     }

@@ -191,6 +191,8 @@ const copyBase = {
     helpButton: '帮助', cardHint: '选择模板并填写信息，右侧实时预览并导出 PNG 图片',
     exportSuccess: '卡片导出成功',
     exportError: '导出失败，请尝试缩小图片或降低质量',
+    tmplRelations: '关系', tmplProfile: '设定', tmplBio: '简介',
+    tmplUnnamed: '未命名', tmplNoName: '?', tmplMadeWith: '由 OC Maker 制作',
   },
   ja: {
     cardName: 'キャラ名', cardAlias: '別名', themeColor: 'テーマカラー', avatar: 'アイコン',
@@ -206,6 +208,8 @@ const copyBase = {
     helpButton: 'ヘルプ', cardHint: 'テンプレートを選んで情報を入力し、プレビュー確認後 PNG を出力',
     exportSuccess: 'カードを出力しました',
     exportError: '出力に失敗しました。画像を小さくするか品質を下げてお試しください',
+    tmplRelations: '関係', tmplProfile: 'プロフィール', tmplBio: '紹介',
+    tmplUnnamed: '名前未設定', tmplNoName: '?', tmplMadeWith: 'OC Maker で作成',
   },
   en: {
     cardName: 'Character Name', cardAlias: 'Alias', themeColor: 'Theme Color', avatar: 'Avatar',
@@ -221,6 +225,8 @@ const copyBase = {
     helpButton: 'Help', cardHint: 'Choose a template, fill in the info, preview live, then export PNG',
     exportSuccess: 'Card exported successfully',
     exportError: 'Export failed. Try a smaller image or lower quality.',
+    tmplRelations: 'Relations', tmplProfile: 'Profile', tmplBio: 'Bio',
+    tmplUnnamed: 'Unnamed', tmplNoName: '?', tmplMadeWith: 'Made with OC Maker',
   },
   ru: {
     cardName: 'Имя персонажа', cardAlias: 'Псевдоним', themeColor: 'Цвет темы', avatar: 'Аватар',
@@ -236,6 +242,8 @@ const copyBase = {
     helpButton: 'Справка', cardHint: 'Выберите шаблон, заполните данные, посмотрите превью и экспортируйте PNG',
     exportSuccess: 'Карточка экспортирована',
     exportError: 'Ошибка экспорта. Попробуйте уменьшить изображение или понизить качество.',
+    tmplRelations: 'Отношения', tmplProfile: 'Профиль', tmplBio: 'Биография',
+    tmplUnnamed: 'Без имени', tmplNoName: '?', tmplMadeWith: 'Создано в OC Maker',
   },
   ko: {
     cardName: '캐릭터 이름', cardAlias: '별명', themeColor: '테마 색상', avatar: '아바타',
@@ -251,6 +259,8 @@ const copyBase = {
     helpButton: '도움말', cardHint: '템플릿을 선택하고 정보를 입력한 뒤 PNG로 내보내세요',
     exportSuccess: '카드를 내보내왔습니다',
     exportError: '내보내기 실패. 이미지 크기를 줄이거나 품질을 낮춰 보세요.',
+    tmplRelations: '관계', tmplProfile: '프로필', tmplBio: '소개',
+    tmplUnnamed: '이름 없음', tmplNoName: '?', tmplMadeWith: 'OC Maker 제작',
   },
 };
 
@@ -345,7 +355,7 @@ export default function CharacterCardPage({
       playSound('confirm');
     } catch {
       playSound('warning');
-      showToast(copy.exportError || 'Export failed');
+      showToast(copy.exportError);
     } finally {
       setIsExporting(false);
     }
@@ -670,6 +680,7 @@ export default function CharacterCardPage({
                   card={card}
                   avatarUrl={avatarImg?.dataUrl}
                   relations={importedRelations}
+                  copy={copy}
                 />
               )}
               {card.template === 'detailed' && (
@@ -678,6 +689,7 @@ export default function CharacterCardPage({
                   avatarUrl={avatarImg?.dataUrl}
                   mainUrl={mainImg?.dataUrl}
                   relations={importedRelations}
+                  copy={copy}
                 />
               )}
               {card.template === 'gallery' && (
@@ -686,6 +698,7 @@ export default function CharacterCardPage({
                   avatarUrl={avatarImg?.dataUrl}
                   mainUrl={mainImg?.dataUrl}
                   relations={importedRelations}
+                  copy={copy}
                 />
               )}
             </div>
@@ -752,10 +765,12 @@ function MinimalCardTemplate({
   card,
   avatarUrl,
   relations,
+  copy,
 }: {
   card: CardData;
   avatarUrl?: string;
   relations: { name: string; typeLabel: string; color: string }[];
+  copy: ReturnType<typeof getCopy>;
 }) {
   const accent = card.themeColor;
   return (
@@ -765,11 +780,11 @@ function MinimalCardTemplate({
           <img src={avatarUrl} alt="" className="cc-tmpl-avatar" />
         ) : (
           <div className="cc-tmpl-avatar-placeholder" style={{ background: `${accent}30`, color: accent }}>
-            {(card.name || '?').charAt(0).toUpperCase()}
+            {(card.name || copy.tmplNoName).charAt(0).toUpperCase()}
           </div>
         )}
         <div className="cc-tmpl-name-block">
-          <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.6rem' }}>{card.name || 'Unnamed'}</h2>
+          <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.6rem' }}>{card.name || copy.tmplUnnamed}</h2>
           {card.alias && <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{card.alias}</p>}
         </div>
       </div>
@@ -799,7 +814,7 @@ function MinimalCardTemplate({
 
       {relations.length > 0 && (
         <div className="cc-tmpl-relations">
-          <div className="cc-tmpl-section-title" style={{ color: accent }}>Relations</div>
+          <div className="cc-tmpl-section-title" style={{ color: accent }}>{copy.tmplRelations}</div>
           <div className="cc-tmpl-relation-list">
             {relations.map((r, i) => (
               <span key={i} className="cc-tmpl-relation-chip" style={{ background: `${r.color}18`, color: r.color, border: `1px solid ${r.color}44` }}>
@@ -812,7 +827,7 @@ function MinimalCardTemplate({
       )}
 
       <div className="cc-tmpl-footer">
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>Made with OC Maker</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>{copy.tmplMadeWith}</span>
       </div>
     </div>
   );
@@ -823,11 +838,13 @@ function DetailedCardTemplate({
   avatarUrl,
   mainUrl,
   relations,
+  copy,
 }: {
   card: CardData;
   avatarUrl?: string;
   mainUrl?: string;
   relations: { name: string; typeLabel: string; color: string }[];
+  copy: ReturnType<typeof getCopy>;
 }) {
   const accent = card.themeColor;
   return (
@@ -844,11 +861,11 @@ function DetailedCardTemplate({
           <img src={avatarUrl} alt="" className="cc-tmpl-detailed-avatar" style={{ borderColor: accent }} />
         ) : (
           <div className="cc-tmpl-detailed-avatar-placeholder" style={{ background: `${accent}30`, color: accent, borderColor: accent }}>
-            {(card.name || '?').charAt(0).toUpperCase()}
+            {(card.name || copy.tmplNoName).charAt(0).toUpperCase()}
           </div>
         )}
         <div className="cc-tmpl-detailed-title">
-          <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.5rem' }}>{card.name || 'Unnamed'}</h2>
+          <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.5rem' }}>{card.name || copy.tmplUnnamed}</h2>
           {card.alias && <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)' }}>{card.alias}</p>}
         </div>
       </div>
@@ -865,7 +882,7 @@ function DetailedCardTemplate({
 
       {card.fields.some((f) => f.label && f.value) && (
         <div className="cc-tmpl-detailed-section">
-          <div className="cc-tmpl-section-title" style={{ color: accent }}>Profile</div>
+          <div className="cc-tmpl-section-title" style={{ color: accent }}>{copy.tmplProfile}</div>
           <div className="cc-tmpl-detailed-grid">
             {card.fields.filter((f) => f.label && f.value).map((f) => (
               <div key={f.id} className="cc-tmpl-detailed-grid-item">
@@ -879,14 +896,14 @@ function DetailedCardTemplate({
 
       {card.bio && (
         <div className="cc-tmpl-detailed-section">
-          <div className="cc-tmpl-section-title" style={{ color: accent }}>Bio</div>
+          <div className="cc-tmpl-section-title" style={{ color: accent }}>{copy.tmplBio}</div>
           <p className="cc-tmpl-detailed-bio">{card.bio}</p>
         </div>
       )}
 
       {relations.length > 0 && (
         <div className="cc-tmpl-detailed-section">
-          <div className="cc-tmpl-section-title" style={{ color: accent }}>Relations</div>
+          <div className="cc-tmpl-section-title" style={{ color: accent }}>{copy.tmplRelations}</div>
           <div className="cc-tmpl-detailed-relations">
             {relations.map((r, i) => (
               <div key={i} className="cc-tmpl-detailed-relation-item">
@@ -900,7 +917,7 @@ function DetailedCardTemplate({
       )}
 
       <div className="cc-tmpl-footer">
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>Made with OC Maker</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>{copy.tmplMadeWith}</span>
       </div>
     </div>
   );
@@ -911,11 +928,13 @@ function GalleryCardTemplate({
   avatarUrl,
   mainUrl,
   relations,
+  copy,
 }: {
   card: CardData;
   avatarUrl?: string;
   mainUrl?: string;
   relations: { name: string; typeLabel: string; color: string }[];
+  copy: ReturnType<typeof getCopy>;
 }) {
   const accent = card.themeColor;
   return (
@@ -925,10 +944,10 @@ function GalleryCardTemplate({
           <img src={avatarUrl} alt="" className="cc-tmpl-gallery-avatar" style={{ borderColor: accent }} />
         ) : (
           <div className="cc-tmpl-gallery-avatar-placeholder" style={{ background: `${accent}30`, color: accent, borderColor: accent }}>
-            {(card.name || '?').charAt(0).toUpperCase()}
+            {(card.name || copy.tmplNoName).charAt(0).toUpperCase()}
           </div>
         )}
-        <h2 style={{ margin: '12px 0 4px', color: 'var(--text-main)', fontSize: '1.4rem', textAlign: 'center' }}>{card.name || 'Unnamed'}</h2>
+        <h2 style={{ margin: '12px 0 4px', color: 'var(--text-main)', fontSize: '1.4rem', textAlign: 'center' }}>{card.name || copy.tmplUnnamed}</h2>
         {card.alias && <p style={{ margin: 0, color: 'var(--text-secondary)', textAlign: 'center' }}>{card.alias}</p>}
       </div>
 
@@ -963,7 +982,7 @@ function GalleryCardTemplate({
 
       {relations.length > 0 && (
         <div className="cc-tmpl-gallery-relations">
-          <div className="cc-tmpl-section-title" style={{ color: accent, textAlign: 'center' }}>Relations</div>
+          <div className="cc-tmpl-section-title" style={{ color: accent, textAlign: 'center' }}>{copy.tmplRelations}</div>
           <div className="cc-tmpl-gallery-relation-grid">
             {relations.map((r, i) => (
               <div key={i} className="cc-tmpl-gallery-relation-item" style={{ borderColor: `${r.color}44` }}>
@@ -977,7 +996,7 @@ function GalleryCardTemplate({
       )}
 
       <div className="cc-tmpl-footer" style={{ marginTop: 16 }}>
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>Made with OC Maker</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>{copy.tmplMadeWith}</span>
       </div>
     </div>
   );

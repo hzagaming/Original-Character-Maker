@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.13.1';
+const VERSION = '1.13.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -671,10 +671,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.13.1 音频工具补充审计：同步包版本，修复音频编辑器 Pan 范围、导入/导出并发穿透、构建阻断项，并补齐音频转换/剪辑工具 UI 本地化。',
-    announcementList1: '版本与构建：App VERSION、package.json、package-lock.json 统一到 1.13.1；修复多语言类型、弹窗关闭 labels、角色工具 backHome、audioEngine 事件监听等构建阻断项。',
-    announcementList2: '音频编辑器修复：Pan 滑条为 -100..100，但 StereoPannerNode 需要 -1..1，播放链现会正确归一化；导入/导出增加 ref 级防重复触发。',
-    announcementList3: 'UI/UX/SFX：音频转换器和音频剪辑工具的按钮、面板标题、空状态、错误面板、日志区等硬编码英文改为本地 labels，保持与其他工具结构和语言体验一致。',
+    announcementDescription: 'v1.13.2 第九轮深度审计：修复 SFX slider/engine 不匹配、自定义音乐播放中断、19 处 SFX 合规性缺口，并完成 CharacterCard/FaceMaker/Toolbar 的硬编码本地化与全局 fallback 清理。',
+    announcementList1: '音频引擎：SFX Decay slider max=1000ms、Release slider max=2000ms，但 engine 仅 clamp 到 500ms，现已统一；自定义音乐播放时切换 musicReverb 不再从头播放。',
+    announcementList2: 'SFX 合规性：19 个可折叠面板标题（.tool-card-header）补充 data-sfx-handled，确保点击音效不重复触发。',
+    announcementList3: '本地化与清理：CharacterCard 三模板、FaceMaker 舞台控件、workflowPages 编辑器 toolbar 共 30+ 硬编码文本全部多语言化；移除 12 处冗余 fallback。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1112,10 +1112,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.13.1 音声ツール補足監査：package 版を同期し、音声編集の Pan 範囲、重複実行、ビルド阻害、音声変換/編集 UI のローカライズを修正。',
-    announcementList1: 'バージョンとビルド：App VERSION、package.json、package-lock.json を 1.13.1 に統一；多言語型、モーダル閉じる label、backHome、audioEngine イベント監視のビルド阻害を修正。',
-    announcementList2: '音声編集修正：Pan スライダーは -100..100 だが StereoPannerNode は -1..1 を要求するため、再生チェーンで正しく正規化；インポート/書き出しに ref レベルの重複防止を追加。',
-    announcementList3: 'UI/UX/SFX：音声変換と音声編集のボタン、パネル見出し、空状態、エラーパネル、ログ領域の英語ハードコードを labels 化し、他ツールと同じ言語体験へ調整。',
+    announcementDescription: 'v1.13.2 第九回深度監査：SFX slider/engine の不整合、カスタム音楽の再生中断、19 件の SFX 適合性を修正。CharacterCard/FaceMaker/Toolbar のハードコードをローカライズし、グローバル fallback を一掃。',
+    announcementList1: 'オーディオエンジン：SFX Decay slider max=1000ms、Release slider max=2000ms に対し engine が 500ms に制限していたのを統一；カスタム音楽再生中に musicReverb を変更しても先頭から再生しなくなりました。',
+    announcementList2: 'SFX 適合性：19 個の折りたたみパネルヘッダー（.tool-card-header）に data-sfx-handled を追加し、クリック音の重複を防止。',
+    announcementList3: 'ローカライズとクリーンアップ：CharacterCard 3 テンプレート、FaceMaker ステージコントロール、workflowPages エディタ toolbar の合計 30+ ハードコードテキストを多言語化；12 カ所の冗長 fallback を削除。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1553,10 +1553,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.13.1 audio tool follow-up audit: synced package versions, fixed audio editor pan range, import/export concurrency, build blockers, and localized audio converter/editor UI.',
-    announcementList1: 'Version/build: App VERSION, package.json, and package-lock.json now use 1.13.1; fixed build blockers in language types, modal close labels, backHome props, and audioEngine listeners.',
-    announcementList2: 'Audio editor fix: the Pan slider is -100..100 while StereoPannerNode expects -1..1, so playback now normalizes correctly; import/export also use ref-level duplicate guards.',
-    announcementList3: 'UI/UX/SFX: audio converter/editor buttons, panel titles, empty states, error panels, and log areas now use local labels instead of hardcoded English, matching the rest of the tool structure.',
+    announcementDescription: 'v1.13.2 Ninth-round deep audit: fixed SFX slider/engine mismatch, custom music playback restart, 19 SFX compliance gaps, and completed CharacterCard/FaceMaker/Toolbar hardcoded localization plus global fallback cleanup.',
+    announcementList1: 'Audio engine: SFX Decay slider max=1000ms and Release slider max=2000ms were clamped to 500ms in the engine—now unified; switching musicReverb during custom music playback no longer restarts from 0.',
+    announcementList2: 'SFX compliance: added data-sfx-handled to 19 collapsible panel headers (.tool-card-header) to prevent double sound triggers.',
+    announcementList3: 'Localization & cleanup: 30+ hardcoded texts across CharacterCard templates, FaceMaker stage controls, and workflowPages editor toolbar are now multilingual; removed 12 redundant fallbacks.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1994,10 +1994,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.13.1 Дополнительный аудит аудиоинструментов: синхронизация версий, исправление Pan, повторов импорта/экспорта, блокеров сборки и локализации UI.',
-    announcementList1: 'Версия/сборка: App VERSION, package.json и package-lock.json теперь 1.13.1; исправлены блокеры сборки в типах языков, label закрытия модалок, backHome и слушателях audioEngine.',
-    announcementList2: 'Исправление аудиоредактора: Pan-слайдер -100..100, а StereoPannerNode требует -1..1, поэтому воспроизведение теперь нормализует значение; импорт/экспорт получили ref-защиту от дублей.',
-    announcementList3: 'UI/UX/SFX: кнопки, заголовки панелей, пустые состояния, панели ошибок и логи аудиоконвертера/редактора переведены на local labels вместо хардкода на английском.',
+    announcementDescription: 'v1.13.2 Девятый глубокий аудит: исправлено несоответствие SFX slider/engine, перезапуск кастомной музыки, 19 пробелов в SFX, завершена локализация CharacterCard/FaceMaker/Toolbar и очистка глобальных fallback.',
+    announcementList1: 'Аудиодвижок: SFX Decay slider max=1000ms и Release slider max=2000ms обрезались до 500ms — теперь едино; переключение musicReverb при кастомной музыке больше не перезапускает с начала.',
+    announcementList2: 'SFX: добавлен data-sfx-handled к 19 заголовкам сворачиваемых панелей (.tool-card-header) для предотвращения двойного звука.',
+    announcementList3: 'Локализация и очистка: 30+ захардкоженных текстов в шаблонах CharacterCard, контролах FaceMaker и toolbar редактора workflowPages теперь многоязычны; удалены 12 избыточных fallback.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2787,10 +2787,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.13.1 오디오 도구 보충 감사: package 버전 동기화, Pan 범위, 중복 실행 방지, 빌드 차단 항목, 오디오 변환/편집 UI 현지화를 수정.',
-    announcementList1: '버전/빌드: App VERSION, package.json, package-lock.json을 1.13.1로 통일; 언어 타입, 모달 닫기 label, backHome, audioEngine 이벤트 리스너 빌드 차단 문제 수정.',
-    announcementList2: '오디오 편집기 수정: Pan 슬라이더는 -100..100이지만 StereoPannerNode는 -1..1을 요구하므로 재생 체인에서 올바르게 정규화; 가져오기/내보내기에 ref 수준 중복 방지 추가.',
-    announcementList3: 'UI/UX/SFX: 오디오 변환기/편집기의 버튼, 패널 제목, 빈 상태, 오류 패널, 로그 영역을 하드코딩 영어 대신 local labels로 전환해 다른 도구와 언어 경험을 맞춤.',
+    announcementDescription: 'v1.13.2 아홉 번째 심층 감사: SFX 슬라이더/엔진 불일치, 커스텀 음악 재생 재시작, 19개 SFX 적합성 수정, CharacterCard/FaceMaker/Toolbar 하드코딩 현지화 및 전역 fallback 정리 완료.',
+    announcementList1: '오디오 엔진: SFX Decay slider max=1000ms, Release slider max=2000ms가 엔진에서 500ms로 잘렸던 것을 통일; 커스텀 음악 재생 중 musicReverb 변경 시 처음부터 다시 재생하지 않음.',
+    announcementList2: 'SFX 적합성: 19개 접이식 패널 헤더(.tool-card-header)에 data-sfx-handled 추가로 클릭 사운드 중복 방지.',
+    announcementList3: '현지화 및 정리: CharacterCard 3개 템플릿, FaceMaker 스테이지 컨트롤, workflowPages 에디터 toolbar의 30+ 하드코딩 텍스트를 다국어화; 12개冗餘 fallback 제거.',
   },
   fr: {
     ...translations.en,
@@ -5359,6 +5359,11 @@ type FaceMakerCopy = {
   presetMature: string;
   presetCool: string;
   presetSporty: string;
+  quickPresets: string;
+  resetView: string;
+  previewMode: string;
+  referenceMode: string;
+  overlayMode: string;
 };
 
 const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
@@ -5432,6 +5437,11 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     presetMature: '成熟型',
     presetCool: '冷酷型',
     presetSporty: '运动型',
+    quickPresets: '快速预设',
+    resetView: '重置视图',
+    previewMode: '预览模式',
+    referenceMode: '参考模式',
+    overlayMode: '叠加模式',
   },
   ja: {
     saved: '保存済み',
@@ -5503,6 +5513,11 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     presetMature: '大人っぽい',
     presetCool: 'クール',
     presetSporty: 'スポーティ',
+    quickPresets: 'クイックプリセット',
+    resetView: '表示をリセット',
+    previewMode: 'プレビューモード',
+    referenceMode: '参考モード',
+    overlayMode: 'オーバーレイモード',
   },
   en: {
     saved: 'Saved',
@@ -5574,6 +5589,11 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     presetMature: 'Mature',
     presetCool: 'Cool',
     presetSporty: 'Sporty',
+    quickPresets: 'Quick Presets',
+    resetView: 'Reset view',
+    previewMode: 'Preview mode',
+    referenceMode: 'Reference mode',
+    overlayMode: 'Overlay mode',
   },
   ru: {
     saved: 'Сохранено',
@@ -5645,6 +5665,11 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     presetMature: 'Зрелый',
     presetCool: 'Крутой',
     presetSporty: 'Спортивный',
+    quickPresets: 'Быстрые пресеты',
+    resetView: 'Сбросить вид',
+    previewMode: 'Режим предпросмотра',
+    referenceMode: 'Режим ссылки',
+    overlayMode: 'Режим наложения',
   },
 };
 
@@ -6256,7 +6281,7 @@ function FaceMakerPage({
               </section>
             ))}
             <section className="editor-panel-block preset-panel">
-              <h3>快速预设</h3>
+              <h3>{copy.quickPresets}</h3>
               <div className="preset-grid">
                 {(['cute', 'mature', 'cool', 'sporty'] as const).map((p) => (
                   <button
@@ -6281,7 +6306,7 @@ function FaceMakerPage({
                   <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }} data-sfx-handled>-</button>
                   <span className="zoom-value">{Math.round(stageZoom * 100)}%</span>
                   <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }} data-sfx-handled>+</button>
-                  <button className="zoom-btn reset-zoom" type="button" title="Reset view" onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }} data-sfx-handled>⟲</button>
+                  <button className="zoom-btn reset-zoom" type="button" title={copy.resetView} onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }} data-sfx-handled>⟲</button>
                 </div>
                 <div className="bg-switcher">
                   {(['checkerboard', 'solid', 'gradient', 'transparent'] as const).map((bg) => (
@@ -6296,9 +6321,9 @@ function FaceMakerPage({
                     </button>
                   ))}
                 </div>
-                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label="Preview mode" onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }}  data-sfx-handled />
-                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label="Reference mode" onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }}  data-sfx-handled />
-                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label="Overlay mode" onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label={copy.previewMode} onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label={copy.referenceMode} onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label={copy.overlayMode} onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }}  data-sfx-handled />
               </div>
             </div>
             <div className="editor-stage">

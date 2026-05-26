@@ -520,6 +520,22 @@ type UiCopySet = {
     exportTextOption: string;
     exportJsonOption: string;
     exportAllOption: string;
+    tbSub: string;
+    tbSup: string;
+    tbCode: string;
+    tbOutdent: string;
+    tbIndent: string;
+    tbQuote: string;
+    tbPre: string;
+    tbLink: string;
+    tbTable: string;
+    tbCallout: string;
+    tbDetails: string;
+    tbBadge: string;
+    tbImage: string;
+    tbCodeBlock: string;
+    tbAll: string;
+    tbClear: string;
   };
   paper: {
     sourceTitle: string;
@@ -1236,6 +1252,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       exportTextOption: '导出纯文本',
       exportJsonOption: '导出封装 JSON',
       exportAllOption: '全部导出',
+      tbSub: '下标', tbSup: '上标', tbCode: '代码', tbOutdent: '减少缩进', tbIndent: '增加缩进',
+      tbQuote: '引用', tbPre: '预格式化', tbLink: '链接', tbTable: '表格',
+      tbCallout: '提示块', tbDetails: '折叠', tbBadge: '标签', tbImage: '图片',
+      tbCodeBlock: '代码块', tbAll: '全选', tbClear: '清除格式',
     },
     paper: {
       sourceTitle: '素材输入',
@@ -1695,6 +1715,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       exportTextOption: 'プレーンテキストを書き出す',
       exportJsonOption: '封装 JSON を書き出す',
       exportAllOption: '全部書き出す',
+      tbSub: '下付き', tbSup: '上付き', tbCode: 'コード', tbOutdent: 'インデント解除', tbIndent: 'インデント',
+      tbQuote: '引用', tbPre: '整形済み', tbLink: 'リンク', tbTable: '表',
+      tbCallout: 'コールアウト', tbDetails: '折りたたみ', tbBadge: 'バッジ', tbImage: '画像',
+      tbCodeBlock: 'コードブロック', tbAll: 'すべて選択', tbClear: 'クリア',
     },
     paper: {
       sourceTitle: '素材入力',
@@ -2154,6 +2178,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       exportTextOption: 'Export plain text',
       exportJsonOption: 'Export wrapper JSON',
       exportAllOption: 'Export all',
+      tbSub: 'Sub', tbSup: 'Sup', tbCode: 'Code', tbOutdent: 'Outdent', tbIndent: 'Indent',
+      tbQuote: 'Quote', tbPre: 'Pre', tbLink: 'Link', tbTable: 'Table',
+      tbCallout: 'Callout', tbDetails: 'Details', tbBadge: 'Badge', tbImage: 'Image',
+      tbCodeBlock: 'Code block', tbAll: 'All', tbClear: 'Clear',
     },
     paper: {
       sourceTitle: 'Asset input',
@@ -2613,6 +2641,10 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
       exportTextOption: 'Экспортировать обычный текст',
       exportJsonOption: 'Экспортировать wrapper JSON',
       exportAllOption: 'Экспортировать всё',
+      tbSub: 'Подстр.', tbSup: 'Надстр.', tbCode: 'Код', tbOutdent: 'Уменьшить отступ', tbIndent: 'Увеличить отступ',
+      tbQuote: 'Цитата', tbPre: 'Преформат.', tbLink: 'Ссылка', tbTable: 'Таблица',
+      tbCallout: 'Блок', tbDetails: 'Сворачивание', tbBadge: 'Бейдж', tbImage: 'Изображение',
+      tbCodeBlock: 'Блок кода', tbAll: 'Выбрать всё', tbClear: 'Очистить',
     },
     paper: {
       sourceTitle: 'Входные материалы',
@@ -4764,7 +4796,7 @@ export function StyleTransferPage({
           <div className="tool-column">
             {/* Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.inputTitle}</span>
                   <h3>{transfer.inputTitle}</h3>
@@ -4790,7 +4822,7 @@ export function StyleTransferPage({
 
             {/* Parameters Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.paramsTitle}</span>
                   <h3>{transfer.paramsTitle}</h3>
@@ -4808,14 +4840,14 @@ export function StyleTransferPage({
                         <option>Anime Transfer XL v4</option>
                         <option>Painterly Diffusion Mix</option>
                         <option>Paper2Gal Bridge Preview</option>
-                        <option value="custom">{transfer.customModelOption || 'Custom Model'}</option>
+                        <option value="custom">{transfer.customModelOption}</option>
                       </select>
                       {config.model === 'custom' && (
                         <input
                           className="settings-input"
                           style={{ marginTop: 8 }}
                           type="text"
-                          placeholder={transfer.customModelPlaceholder || 'Enter custom model name'}
+                          placeholder={transfer.customModelPlaceholder}
                           value={config.customModel}
                           onChange={(e) => updateConfig('customModel', e.target.value)}
                         />
@@ -4961,7 +4993,7 @@ export function StyleTransferPage({
           <div className="tool-column side">
             {/* Progress & Logs */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{copy.progressTitle}</span>
                   <h3>{copy.progressTitle}</h3>
@@ -4998,7 +5030,7 @@ export function StyleTransferPage({
 
             {/* Results */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{copy.resultsTitle}</span>
                   <h3>{copy.resultsTitle}</h3>
@@ -5860,9 +5892,9 @@ export function PromptSuitePage({
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('italic')}>I</button>
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('underline')}>U</button>
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('strikeThrough')}>S</button>
-                          <button className="toolbar-button" type="button" onClick={() => executeCommand('subscript')}>Sub</button>
-                          <button className="toolbar-button" type="button" onClick={() => executeCommand('superscript')}>Sup</button>
-                          <button className="toolbar-button" type="button" onClick={insertInlineCode}>Code</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('subscript')}>{promptCopy.tbSub}</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('superscript')}>{promptCopy.tbSup}</button>
+                          <button className="toolbar-button" type="button" onClick={insertInlineCode}>{promptCopy.tbCode}</button>
                           <label className="toolbar-color">
                             <span>{promptCopy.textColor}</span>
                             <input type="color" value={toolbarState.textColor} onChange={(event) => handleTextColorChange(event.target.value)} />
@@ -5885,23 +5917,23 @@ export function PromptSuitePage({
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('justifyFull')}>J</button>
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('insertUnorderedList')}>UL</button>
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('insertOrderedList')}>OL</button>
-                          <button className="toolbar-button" type="button" onClick={() => executeCommand('outdent')}>Out</button>
-                          <button className="toolbar-button" type="button" onClick={() => executeCommand('indent')}>In</button>
-                          <button className="toolbar-button" type="button" onClick={() => handleBlockStyleChange('blockquote')}>Quote</button>
-                          <button className="toolbar-button" type="button" onClick={() => handleBlockStyleChange('pre')}>Pre</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('outdent')}>{promptCopy.tbOutdent}</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('indent')}>{promptCopy.tbIndent}</button>
+                          <button className="toolbar-button" type="button" onClick={() => handleBlockStyleChange('blockquote')}>{promptCopy.tbQuote}</button>
+                          <button className="toolbar-button" type="button" onClick={() => handleBlockStyleChange('pre')}>{promptCopy.tbPre}</button>
                         </div>
                       ) : null}
 
                       {section.key === 'insert' ? (
                         <div className="toolbar-group-controls">
-                          <button className="toolbar-button" type="button" onClick={insertLink}>Link</button>
-                          <button className="toolbar-button" type="button" onClick={insertTable}>Table</button>
+                          <button className="toolbar-button" type="button" onClick={insertLink}>{promptCopy.tbLink}</button>
+                          <button className="toolbar-button" type="button" onClick={insertTable}>{promptCopy.tbTable}</button>
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('insertHorizontalRule')}>HR</button>
-                          <button className="toolbar-button" type="button" onClick={insertCalloutBlock}>Callout</button>
-                          <button className="toolbar-button" type="button" onClick={insertDetailsBlock}>Details</button>
-                          <button className="toolbar-button" type="button" onClick={insertBadgeBlock}>Badge</button>
-                          <button className="toolbar-button" type="button" onClick={insertImageBlock}>Image</button>
-                          <button className="toolbar-button" type="button" onClick={() => insertHtml('<pre><code>// code block</code></pre>')}>Code block</button>
+                          <button className="toolbar-button" type="button" onClick={insertCalloutBlock}>{promptCopy.tbCallout}</button>
+                          <button className="toolbar-button" type="button" onClick={insertDetailsBlock}>{promptCopy.tbDetails}</button>
+                          <button className="toolbar-button" type="button" onClick={insertBadgeBlock}>{promptCopy.tbBadge}</button>
+                          <button className="toolbar-button" type="button" onClick={insertImageBlock}>{promptCopy.tbImage}</button>
+                          <button className="toolbar-button" type="button" onClick={() => insertHtml('<pre><code>// code block</code></pre>')}>{promptCopy.tbCodeBlock}</button>
                           <button className="toolbar-button toolbar-button-highlight" type="button" onClick={() => setIsCustomInsertOpen(true)}>
                             {promptCopy.customInsertButton}
                           </button>
@@ -5912,8 +5944,8 @@ export function PromptSuitePage({
                         <div className="toolbar-group-controls">
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('undo')}>↺</button>
                           <button className="toolbar-button" type="button" onClick={() => executeCommand('redo')}>↻</button>
-                          <button className="toolbar-button" type="button" onClick={() => executeCommand('selectAll')}>All</button>
-                          <button className="toolbar-button" type="button" onClick={() => executeCommand('removeFormat')}>Clear</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('selectAll')}>{promptCopy.tbAll}</button>
+                          <button className="toolbar-button" type="button" onClick={() => executeCommand('removeFormat')}>{promptCopy.tbClear}</button>
                         </div>
                       ) : null}
                     </div>
@@ -8014,7 +8046,7 @@ export function TtsExportPage({
             </section>
 
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{promptCopy.ttsAdvancedParams}</span>
                   <h3 style={{ margin: 0 }}>{promptCopy.ttsAdvancedParams}</h3>
@@ -8046,7 +8078,7 @@ export function TtsExportPage({
             </section>
 
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{promptCopy.ttsAudioPostProcessing}</span>
                   <h3 style={{ margin: 0 }}>{promptCopy.ttsAudioPostProcessing}</h3>
@@ -8077,7 +8109,7 @@ export function TtsExportPage({
             </section>
 
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{promptCopy.ttsPronunciation}</span>
                   <h3 style={{ margin: 0 }}>{promptCopy.ttsPronunciation}</h3>
@@ -9084,7 +9116,7 @@ export function CharacterGifPage({
           <div className="tool-column">
             {/* Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.inputTitle}</span>
                   <h3>{transfer.inputTitle}</h3>
@@ -9110,7 +9142,7 @@ export function CharacterGifPage({
 
             {/* Parameters Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.paramsTitle}</span>
                   <h3>{transfer.paramsTitle}</h3>
@@ -9128,14 +9160,14 @@ export function CharacterGifPage({
                         <option>Anime Transfer XL v4</option>
                         <option>Painterly Diffusion Mix</option>
                         <option>Paper2Gal Bridge Preview</option>
-                        <option value="custom">{transfer.customModelOption || 'Custom Model'}</option>
+                        <option value="custom">{transfer.customModelOption}</option>
                       </select>
                       {config.model === 'custom' && (
                         <input
                           className="settings-input"
                           style={{ marginTop: 8 }}
                           type="text"
-                          placeholder={transfer.customModelPlaceholder || 'Enter custom model name'}
+                          placeholder={transfer.customModelPlaceholder}
                           value={config.customModel}
                           onChange={(e) => updateConfig('customModel', e.target.value)}
                         />
@@ -9313,7 +9345,7 @@ export function CharacterGifPage({
           <div className="tool-column side">
             {/* Progress & Logs */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{copy.progressTitle}</span>
                   <h3>{copy.progressTitle}</h3>
@@ -9350,7 +9382,7 @@ export function CharacterGifPage({
 
             {/* Results */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{copy.resultsTitle}</span>
                   <h3>{copy.resultsTitle}</h3>
@@ -9836,7 +9868,7 @@ export function IndexTtsPage({
           <div className="tool-column">
             {/* Text Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.textTitle}</span>
                   <h3>{transfer.textTitle}</h3>
@@ -9861,7 +9893,7 @@ export function IndexTtsPage({
 
             {/* Reference Audio Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.referenceAudioTitle}</span>
                   <h3>{transfer.referenceAudioTitle}</h3>
@@ -9893,7 +9925,7 @@ export function IndexTtsPage({
 
             {/* Parameters Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.paramsTitle}</span>
                   <h3>{transfer.paramsTitle}</h3>
@@ -9908,14 +9940,14 @@ export function IndexTtsPage({
                       <select className="settings-input tool-select" value={config.model} onChange={(e) => updateConfig('model', e.target.value)}>
                         <option>index-tts-1.5</option>
                         <option>index-tts-2</option>
-                        <option value="custom">{transfer.customModelOption || 'Custom Model'}</option>
+                        <option value="custom">{transfer.customModelOption}</option>
                       </select>
                       {config.model === 'custom' && (
                         <input
                           className="settings-input"
                           style={{ marginTop: 8 }}
                           type="text"
-                          placeholder={transfer.customModelPlaceholder || 'Enter custom model name'}
+                          placeholder={transfer.customModelPlaceholder}
                           value={config.customModel}
                           onChange={(e) => updateConfig('customModel', e.target.value)}
                         />
@@ -9979,7 +10011,7 @@ export function IndexTtsPage({
           <div className="tool-column side">
             {/* Progress & Logs */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{copy.progressTitle}</span>
                   <h3>{copy.progressTitle}</h3>
@@ -10016,7 +10048,7 @@ export function IndexTtsPage({
 
             {/* Results */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{copy.resultsTitle}</span>
                   <h3>{copy.resultsTitle}</h3>

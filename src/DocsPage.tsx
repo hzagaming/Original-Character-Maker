@@ -344,7 +344,7 @@ export default function DocsPage({
                 aria-label={messages.clearSearch}
               />
               {searchQuery && (
-                <button className="docs-search-clear" type="button" aria-label={messages.clearSearch || 'Clear search'} data-sfx-handled onClick={() => { playSound('buttonClick'); setSearchQuery(''); }}>
+                <button className="docs-search-clear" type="button" aria-label={messages.clearSearch} data-sfx-handled onClick={() => { playSound('buttonClick'); setSearchQuery(''); }}>
                   ✕
                 </button>
               )}
