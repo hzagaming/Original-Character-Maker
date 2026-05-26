@@ -3862,7 +3862,7 @@ function ConfirmReturnModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={copy.close} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{copy.confirmReturnTitle}</p>
@@ -3930,7 +3930,7 @@ function ConfirmActionModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={copy.close} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{title}</p>
@@ -4119,7 +4119,7 @@ function ExportOptionsModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={copy.close} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{promptCopy.exportOptionsTitle}</p>
@@ -4372,7 +4372,7 @@ function EditorExperimentalModal({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label="Close" data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={copy.close} data-sfx-handled>
           ×
         </button>
         <h2>{title}</h2>
@@ -4796,7 +4796,7 @@ export function StyleTransferPage({
           <div className="tool-column">
             {/* Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.inputTitle}</span>
                   <h3>{transfer.inputTitle}</h3>
@@ -9116,7 +9116,7 @@ export function CharacterGifPage({
           <div className="tool-column">
             {/* Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.inputTitle}</span>
                   <h3>{transfer.inputTitle}</h3>
@@ -9893,7 +9893,7 @@ export function IndexTtsPage({
 
             {/* Reference Audio Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
                 <div>
                   <span className="card-caption">{transfer.referenceAudioTitle}</span>
                   <h3>{transfer.referenceAudioTitle}</h3>

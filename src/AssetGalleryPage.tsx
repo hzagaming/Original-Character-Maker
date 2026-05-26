@@ -586,7 +586,6 @@ export function AssetGalleryPage({
       setPreviewAsset(null);
       setIsClosingPreview(false);
     }, 220);
-    playSound('modalClose');
   }, []);
 
   const closePreviewSilent = useCallback(() => {
@@ -906,8 +905,8 @@ export function AssetGalleryPage({
                 {previewAsset.sourceTool && <span>{copy.sourceTool}: {previewAsset.sourceTool}</span>}
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button className="secondary-button small-button" type="button" onClick={() => handleDownload(previewAsset)}>{copy.downloadOne}</button>
-                <button className="secondary-button small-button" type="button" style={{ color: 'var(--danger, #ef476f)' }} onClick={() => { handleDelete(previewAsset.id); closePreviewSilent(); }}>{copy.deleteOne}</button>
+                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => handleDownload(previewAsset)}>{copy.downloadOne}</button>
+                <button className="secondary-button small-button" type="button" data-sfx-handled style={{ color: 'var(--danger, #ef476f)' }} onClick={() => { handleDelete(previewAsset.id); closePreviewSilent(); }}>{copy.deleteOne}</button>
               </div>
             </div>
           </section>

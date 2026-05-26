@@ -407,7 +407,7 @@ export default function CharacterChroniclePage({
       }
       const link = document.createElement('a');
       const firstDate = sortedEvents[0]?.date || 'timeline';
-      link.download = `${copy.exportTimeline || 'timeline'}-${firstDate}.png`;
+      link.download = `${copy.exportTimeline}-${firstDate}.png`;
       link.href = dataUrl;
       link.click();
       showToast(copy.exportSuccess);

@@ -623,7 +623,6 @@ export default function CharacterCardPage({
                 type="checkbox"
                 checked={card.importRelations}
                 onChange={(e) => setCard((c) => ({ ...c, importRelations: e.target.checked }))}
-                data-sfx-handled
               />
               <span>{copy.importRelations}</span>
             </label>

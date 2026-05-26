@@ -140,6 +140,9 @@ function ensureContext(): AudioContext {
       throw new Error('AudioContext creation failed');
     }
   }
+  if (ctx && ctx.state === 'closed') {
+    ctx = null;
+  }
   if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted')) {
     ctx.resume().catch(() => {});
   }
@@ -285,10 +288,12 @@ function synthesize(params: {
   const releaseTime = Math.max(preset.release, userRel);
 
   const freqs = chord ? chord.map((f) => f * pitchRatio) : [baseFreq * pitchRatio];
+  const nodesToCleanup: AudioNode[] = [];
 
+  try {
   const rootGain = c.createGain();
   rootGain.gain.value = 0;
-  const nodesToCleanup: AudioNode[] = [rootGain];
+  nodesToCleanup.push(rootGain);
 
   freqs.forEach((f, fi) => {
     const voiceGain = c.createGain();
@@ -392,6 +397,9 @@ function synthesize(params: {
       // ignore already-disconnected nodes
     }
   }, cleanupDelay * 1000);
+  } catch {
+    try { nodesToCleanup.forEach((n) => n.disconnect()); } catch {}
+  }
 }
 
 // ─── Sound event definitions ───
@@ -1040,7 +1048,6 @@ export function startMusic() {
         // Resync if severely drifted (e.g. after tab backgrounding)
         if (nextNoteTime < nowTime - 0.5 || nextNoteTime > nowTime + LOOKAHEAD_S * 4) {
           nextNoteTime = nowTime + 0.05;
-          scheduleBeat = 0;
         }
         while (nextNoteTime < nowTime + LOOKAHEAD_S) {
           scheduleTick(nextNoteTime, preset, pitchRatio, volume);

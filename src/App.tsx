@@ -42,7 +42,7 @@ import {
   updateAudioSettings,
 } from './audioEngine';
 
-const VERSION = '1.13.2';
+const VERSION = '1.13.3';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -671,10 +671,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.13.2 第九轮深度审计：修复 SFX slider/engine 不匹配、自定义音乐播放中断、19 处 SFX 合规性缺口，并完成 CharacterCard/FaceMaker/Toolbar 的硬编码本地化与全局 fallback 清理。',
-    announcementList1: '音频引擎：SFX Decay slider max=1000ms、Release slider max=2000ms，但 engine 仅 clamp 到 500ms，现已统一；自定义音乐播放时切换 musicReverb 不再从头播放。',
-    announcementList2: 'SFX 合规性：19 个可折叠面板标题（.tool-card-header）补充 data-sfx-handled，确保点击音效不重复触发。',
-    announcementList3: '本地化与清理：CharacterCard 三模板、FaceMaker 舞台控件、workflowPages 编辑器 toolbar 共 30+ 硬编码文本全部多语言化；移除 12 处冗余 fallback。',
+    announcementDescription: 'v1.13.3 第十轮深度审计：修复 SFX 回归（静默按钮/双重播放）、BGM 后台 stutter、AudioContext 永久死亡、SFX 异常泄漏，并补齐可访问性缺口。',
+    announcementList1: 'SFX 修复：workflowPages 3 个 tool-card-header 的 data-sfx-handled 阻断子按钮音效导致静默；AssetGalleryPage/App faceMaker 7 个按钮回调与全局 handler 双重播放；CharacterCardPage 复选框因 data-sfx-handled 完全静默。全部修复。',
+    announcementList2: '音频引擎：BGM scheduler 后台标签页 drift guard 重置 scheduleBeat=0 导致音乐从头开始，已改为只同步时间；ensureContext() 新增 closed 状态检测与自动重建；synthesize() 新增 try/catch 防止异常时 AudioNode 泄漏。',
+    announcementList3: 'UI/UX：workflowPages 4 个 modal close 按钮 aria-label 从硬编码英文改为多语言；App faceMaker ⟲ 按钮补充 aria-label，.tool-dot 补充 title；CharacterChroniclePage 移除最后一处冗余 fallback。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1112,10 +1112,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.13.2 第九回深度監査：SFX slider/engine の不整合、カスタム音楽の再生中断、19 件の SFX 適合性を修正。CharacterCard/FaceMaker/Toolbar のハードコードをローカライズし、グローバル fallback を一掃。',
-    announcementList1: 'オーディオエンジン：SFX Decay slider max=1000ms、Release slider max=2000ms に対し engine が 500ms に制限していたのを統一；カスタム音楽再生中に musicReverb を変更しても先頭から再生しなくなりました。',
-    announcementList2: 'SFX 適合性：19 個の折りたたみパネルヘッダー（.tool-card-header）に data-sfx-handled を追加し、クリック音の重複を防止。',
-    announcementList3: 'ローカライズとクリーンアップ：CharacterCard 3 テンプレート、FaceMaker ステージコントロール、workflowPages エディタ toolbar の合計 30+ ハードコードテキストを多言語化；12 カ所の冗長 fallback を削除。',
+    announcementDescription: 'v1.13.3 第十回深度監査：SFX 回帰（無音ボタン/二重再生）、BGM バックグラウンドスタッター、AudioContext 永久停止、SFX 例外リークを修正し、アクセシビリティ缺口を補完。',
+    announcementList1: 'SFX 修正：workflowPages 3 個の tool-card-header の data-sfx-handled が子ボタン音を遮断して無音に；AssetGalleryPage/App faceMaker の 7 個ボタンでコールバックとグローバル handler が二重再生；CharacterCardPage チェックボックスが data-sfx-handled で完全無音。全て修正。',
+    announcementList2: 'オーディオエンジン：BGM scheduler のバックグラウンドタブ drift guard が scheduleBeat=0 をリセットして音楽を先頭から再生する問題を、時間同期のみに変更；ensureContext() に closed 状態検出と自動再構築を追加；synthesize() に try/catch を追加して例外時の AudioNode リークを防止。',
+    announcementList3: 'UI/UX：workflowPages の 4 個 modal close ボタンの aria-label を英語ハードコードから多言語化；App faceMaker ⟲ ボタンに aria-label を追加、.tool-dot に title を追加；CharacterChroniclePage の最後の冗長 fallback を削除。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1553,10 +1553,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.13.2 Ninth-round deep audit: fixed SFX slider/engine mismatch, custom music playback restart, 19 SFX compliance gaps, and completed CharacterCard/FaceMaker/Toolbar hardcoded localization plus global fallback cleanup.',
-    announcementList1: 'Audio engine: SFX Decay slider max=1000ms and Release slider max=2000ms were clamped to 500ms in the engine—now unified; switching musicReverb during custom music playback no longer restarts from 0.',
-    announcementList2: 'SFX compliance: added data-sfx-handled to 19 collapsible panel headers (.tool-card-header) to prevent double sound triggers.',
-    announcementList3: 'Localization & cleanup: 30+ hardcoded texts across CharacterCard templates, FaceMaker stage controls, and workflowPages editor toolbar are now multilingual; removed 12 redundant fallbacks.',
+    announcementDescription: 'v1.13.3 Tenth-round deep audit: fixed SFX regressions (silent buttons/double-play), BGM background stutter, AudioContext permanent death, SFX exception leaks, and filled accessibility gaps.',
+    announcementList1: 'SFX fixes: workflowPages 3 tool-card-header data-sfx-handled blocked child button sounds causing silence; AssetGalleryPage/App faceMaker 7 buttons double-played from callback + global handler; CharacterCardPage checkbox was completely silent from data-sfx-handled. All fixed.',
+    announcementList2: 'Audio engine: BGM scheduler background-tab drift guard resetting scheduleBeat=0 caused music to restart from beginning, now only resyncs time; ensureContext() added closed-state detection and auto-rebuild; synthesize() added try/catch to prevent AudioNode leaks on exception.',
+    announcementList3: 'UI/UX: workflowPages 4 modal close buttons aria-label changed from hardcoded English to multilingual; App faceMaker ⟲ button added aria-label, .tool-dot added title; CharacterChroniclePage removed last redundant fallback.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1994,10 +1994,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.13.2 Девятый глубокий аудит: исправлено несоответствие SFX slider/engine, перезапуск кастомной музыки, 19 пробелов в SFX, завершена локализация CharacterCard/FaceMaker/Toolbar и очистка глобальных fallback.',
-    announcementList1: 'Аудиодвижок: SFX Decay slider max=1000ms и Release slider max=2000ms обрезались до 500ms — теперь едино; переключение musicReverb при кастомной музыке больше не перезапускает с начала.',
-    announcementList2: 'SFX: добавлен data-sfx-handled к 19 заголовкам сворачиваемых панелей (.tool-card-header) для предотвращения двойного звука.',
-    announcementList3: 'Локализация и очистка: 30+ захардкоженных текстов в шаблонах CharacterCard, контролах FaceMaker и toolbar редактора workflowPages теперь многоязычны; удалены 12 избыточных fallback.',
+    announcementDescription: 'v1.13.3 Десятый глубокий аудит: исправлены SFX регрессии (бесшумные кнопки/двойной звук), фоновый заикание BGM, перманентная смерть AudioContext, утечки SFX-исключений и заполнены пробелы доступности.',
+    announcementList1: 'Исправления SFX: data-sfx-handled у 3 заголовков tool-card-header в workflowPages блокировал звуки дочерних кнопок, вызывая тишину; 7 кнопок в AssetGalleryPage/App faceMaker двойно воспроизводили звук от коллбэка + глобального обработчика; чекбокс в CharacterCardPage был полностью бесшумен из-за data-sfx-handled. Всё исправлено.',
+    announcementList2: 'Аудиодвижок: фоновый guard drift BGM scheduler сбрасывал scheduleBeat=0, заставляя музыку начинаться сначала — теперь только ресинхронизирует время; ensureContext() добавлено обнаружение состояния closed и автопересоздание; synthesize() добавлен try/catch для предотвращения утечек AudioNode при исключениях.',
+    announcementList3: 'UI/UX: aria-label 4 кнопок закрытия модалок в workflowPages изменён с захардкоженного английского на многоязычный; кнопка ⟲ в App faceMaker получила aria-label, .tool-dot получил title; CharacterChroniclePage удалён последний избыточный fallback.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2787,10 +2787,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.13.2 아홉 번째 심층 감사: SFX 슬라이더/엔진 불일치, 커스텀 음악 재생 재시작, 19개 SFX 적합성 수정, CharacterCard/FaceMaker/Toolbar 하드코딩 현지화 및 전역 fallback 정리 완료.',
-    announcementList1: '오디오 엔진: SFX Decay slider max=1000ms, Release slider max=2000ms가 엔진에서 500ms로 잘렸던 것을 통일; 커스텀 음악 재생 중 musicReverb 변경 시 처음부터 다시 재생하지 않음.',
-    announcementList2: 'SFX 적합성: 19개 접이식 패널 헤더(.tool-card-header)에 data-sfx-handled 추가로 클릭 사운드 중복 방지.',
-    announcementList3: '현지화 및 정리: CharacterCard 3개 템플릿, FaceMaker 스테이지 컨트롤, workflowPages 에디터 toolbar의 30+ 하드코딩 텍스트를 다국어화; 12개冗餘 fallback 제거.',
+    announcementDescription: 'v1.13.3 열 번째 심층 감사: SFX 회귀(무음 버튼/이중 재생)、BGM 백그라운드 끊김、AudioContext 영구 종료、SFX 예외 누수를 수정하고 접근성缺口을 보완.',
+    announcementList1: 'SFX 수정: workflowPages 3개 tool-card-header의 data-sfx-handled이 자식 버튼 사운드를 차단해 무음 발생；AssetGalleryPage/App faceMaker 7개 버튼에서 콜백과 글로벌 handler가 이중 재생；CharacterCardPage 체크박스가 data-sfx-handled로 완전 무음。모두 수정。',
+    announcementList2: '오디오 엔진: BGM scheduler 백그라운드 탭 drift guard가 scheduleBeat=0을 리셋해 음악을 처음부터 재생하는 문제를 시간 동기화만 하도록 변경；ensureContext()에 closed 상태 감지 및 자동 재생성 추가；synthesize()에 try/catch 추가해 예외 시 AudioNode 누수 방지。',
+    announcementList3: 'UI/UX: workflowPages 4개 modal close 버튼 aria-label을 하드코딩 영어에서 다국어로 변경；App faceMaker ⟲ 버튼에 aria-label 추가, .tool-dot에 title 추가；CharacterChroniclePage 마지막冗餘 fallback 제거。',
   },
   fr: {
     ...translations.en,
@@ -2981,6 +2981,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.13.2',
+    date: '2026-05-25',
+    title: '1.13.2 第九轮深度审计：SFX slider/engine 不匹配、自定义音乐中断、本地化与 fallback 清理',
+    summary:
+      '修复 SFX Decay/Release slider 与 engine clamp 不匹配、自定义音乐切换 musicReverb 时从头播放、19 处 SFX 合规性缺口，并完成 CharacterCard/FaceMaker/Toolbar 硬编码本地化与全局 fallback 清理。',
+    details: [
+      'audioEngine.ts: Decay clamp 500→1000ms、Release clamp 500→2000ms，匹配 UI slider。',
+      'audioEngine.ts: custom music 时排除 musicReverb/filter/stereoWidth 变化触发 restart。',
+      'SFX 合规性: 19 个 .tool-card-header 补充 data-sfx-handled。',
+      '本地化: CharacterCard 三模板、FaceMaker 舞台控件、workflowPages toolbar 30+ 硬编码文本多语言化。',
+      '清理: 移除 12 处冗余 fallback。',
+    ],
+  },
   {
     version: '1.13.1',
     date: '2026-05-25',
@@ -6243,17 +6257,17 @@ function FaceMakerPage({
             <button className="secondary-button small-button" type="button" onClick={() => setIsResetOpen(true)}>
               {copy.reset}
             </button>
-            <button className="secondary-button small-button" type="button" onClick={saveDraft}>
+            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={saveDraft}>
               {copy.saveDraft}
             </button>
             <button className="secondary-button small-button" type="button" onClick={() => importFileRef.current?.click()}>
               {copy.importConfig}
             </button>
             <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={handleImportFile} />
-            <button className="primary-button small-button" type="button" onClick={exportDraft}>
+            <button className="primary-button small-button" type="button" data-sfx-handled onClick={exportDraft}>
               {copy.export}
             </button>
-            <button className="primary-button small-button" type="button" onClick={() => void exportPng()}>
+            <button className="primary-button small-button" type="button" data-sfx-handled onClick={() => void exportPng()}>
               {copy.exportPng}
             </button>
           </div>
@@ -6288,6 +6302,7 @@ function FaceMakerPage({
                     key={p}
                     className="preset-card"
                     type="button"
+                    data-sfx-handled
                     onClick={() => applyPreset(p)}
                   >
                     <span className="preset-thumb" />
@@ -6306,7 +6321,7 @@ function FaceMakerPage({
                   <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }} data-sfx-handled>-</button>
                   <span className="zoom-value">{Math.round(stageZoom * 100)}%</span>
                   <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }} data-sfx-handled>+</button>
-                  <button className="zoom-btn reset-zoom" type="button" title={copy.resetView} onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }} data-sfx-handled>⟲</button>
+                  <button className="zoom-btn reset-zoom" type="button" title={copy.resetView} aria-label={copy.resetView} onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }} data-sfx-handled>⟲</button>
                 </div>
                 <div className="bg-switcher">
                   {(['checkerboard', 'solid', 'gradient', 'transparent'] as const).map((bg) => (
@@ -6321,9 +6336,9 @@ function FaceMakerPage({
                     </button>
                   ))}
                 </div>
-                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label={copy.previewMode} onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }}  data-sfx-handled />
-                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label={copy.referenceMode} onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }}  data-sfx-handled />
-                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label={copy.overlayMode} onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${!showReference && !showOverlay ? 'active' : ''}`} type="button" aria-label={copy.previewMode} title={copy.previewMode} onClick={() => { playSound('buttonClick'); setShowReference(false); setShowOverlay(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${showReference ? 'active' : ''}`} type="button" aria-label={copy.referenceMode} title={copy.referenceMode} onClick={() => { playSound('buttonClick'); setShowReference((v) => !v); setShowOverlay(false); }}  data-sfx-handled />
+                <button className={`tool-dot ${showOverlay ? 'active' : ''}`} type="button" aria-label={copy.overlayMode} title={copy.overlayMode} onClick={() => { playSound('buttonClick'); setShowOverlay((v) => !v); setShowReference(false); }}  data-sfx-handled />
               </div>
             </div>
             <div className="editor-stage">
