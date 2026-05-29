@@ -1,5 +1,3 @@
-import { preload, removeBackground, type Config } from '@imgly/background-removal';
-
 export type ExpressionName = 'thinking' | 'surprise' | 'angry';
 
 export const DEFAULT_CUTOUT_ASSET_PUBLIC_PATH =
@@ -10,7 +8,19 @@ const CUTOUT_MAX_SOURCE_EDGE = 1536;
 const CUTOUT_RETRY_COUNT = 2;
 const CUTOUT_RETRY_DELAY_MS = 900;
 
-function buildCutoutConfig(publicPath: string): Config {
+/* Lazy-load @imgly/background-removal so its heavy ONNX WASM assets don't
+ * end up in the initial chunks. Only fetched when the user actually enters
+ * Paper2Gal and triggers a cutout. */
+let imglyMod: typeof import('@imgly/background-removal') | null = null;
+
+async function loadImglyModule() {
+  if (!imglyMod) {
+    imglyMod = await import('@imgly/background-removal');
+  }
+  return imglyMod;
+}
+
+function buildCutoutConfig(publicPath: string): import('@imgly/background-removal').Config {
   const normalizedPublicPath = publicPath.endsWith('/') ? publicPath : `${publicPath}/`;
   return {
     publicPath: normalizedPublicPath,
@@ -21,7 +31,7 @@ function buildCutoutConfig(publicPath: string): Config {
       format: 'image/png',
       quality: 0.95,
     },
-    progress: (key, current, total) => {
+    progress: (key: string, current: number, total: number) => {
       if (total > 0) {
         console.info(`[Paper2Gal cutout] ${key}: ${current}/${total}`);
       } else {
@@ -33,7 +43,8 @@ function buildCutoutConfig(publicPath: string): Config {
 
 export async function ensureCutoutModelLoaded(publicPath: string) {
   if (preloadedPublicPaths.has(publicPath)) return;
-  await preload(buildCutoutConfig(publicPath));
+  const mod = await loadImglyModule();
+  await mod.preload(buildCutoutConfig(publicPath));
   preloadedPublicPaths.add(publicPath);
 }
 
@@ -188,7 +199,8 @@ export async function generateCutoutPngBlob(source: Blob, publicPath: string): P
   for (let attempt = 0; attempt <= CUTOUT_RETRY_COUNT; attempt += 1) {
     try {
       await ensureCutoutModelLoaded(publicPath);
-      return await removeBackground(preparedSource, config);
+      const mod = await loadImglyModule();
+      return await mod.removeBackground(preparedSource, config);
     } catch (error) {
       lastError = error;
       console.warn(`[Paper2Gal cutout] IMG.LY attempt ${attempt + 1} failed`, error);

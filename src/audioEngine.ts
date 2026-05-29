@@ -496,16 +496,27 @@ const EVENTS: Record<SoundName, () => void> = {
   fullscreen: () => synthesize({ baseFreq: 500, duration: 0.1, gain: 0.08 }),
 };
 
-// SFX cooldown to prevent rapid-fire node creation
-let lastSfxTime = 0;
-const SFX_COOLDOWN_MS = 16;
+// SFX cooldown per category to prevent rapid-fire node creation
+// slider/input sounds need longer cooldowns to avoid noise during drag
+const SFX_COOLDOWNS: Record<string, number> = {
+  sliderChange: 80,
+  inputFocus: 120,
+  buttonHover: 90,
+  cardHover: 120,
+  tick: 40,
+  keyPress: 40,
+  pageSwitch: 300,
+  default: 16,
+};
+const lastSfxTimes: Record<string, number> = {};
 
 export function playSound(name: SoundName) {
   try {
     if (!currentSettings.sfxEnabled) return;
     const now = performance.now();
-    if (now - lastSfxTime < SFX_COOLDOWN_MS) return;
-    lastSfxTime = now;
+    const cooldown = SFX_COOLDOWNS[name] || SFX_COOLDOWNS.default;
+    if (now - (lastSfxTimes[name] || 0) < cooldown) return;
+    lastSfxTimes[name] = now;
     if (currentSettings.useCustomSfx && customSfxAudio) {
       customSfxAudio.currentTime = 0;
       customSfxAudio.play().catch(() => {});
@@ -519,6 +530,55 @@ export function playSound(name: SoundName) {
 
 export function previewSound(name: SoundName) {
   playSound(name);
+}
+
+/** Unified feedback sound for success / error / warning toast and banners. */
+export function playFeedback(type: 'success' | 'error' | 'warning') {
+  const map: Record<'success' | 'error' | 'warning', SoundName> = {
+    success: 'success',
+    error: 'error',
+    warning: 'warning',
+  };
+  playSound(map[type] ?? 'info');
+}
+
+/** Apply one-touch audio presets. Preserves advanced parameters. */
+export function applyAudioPreset(preset: 'mute' | 'feedbackOnly' | 'bgmOnly' | 'quiet'): AudioSettings {
+  const base = { ...currentSettings };
+  switch (preset) {
+    case 'mute':
+      base.sfxEnabled = false;
+      base.musicEnabled = false;
+      base.soundOnInteract = false;
+      break;
+    case 'feedbackOnly':
+      base.sfxEnabled = true;
+      base.musicEnabled = false;
+      base.soundOnInteract = true;
+      base.sfxVolume = Math.max(base.sfxVolume, 60);
+      base.masterVolume = Math.max(base.masterVolume, 60);
+      break;
+    case 'bgmOnly':
+      base.sfxEnabled = false;
+      base.musicEnabled = true;
+      base.soundOnInteract = false;
+      base.musicVolume = Math.max(base.musicVolume, 25);
+      base.masterVolume = Math.max(base.masterVolume, 60);
+      break;
+    case 'quiet':
+      base.sfxEnabled = true;
+      base.musicEnabled = true;
+      base.soundOnInteract = true;
+      base.sfxVolume = Math.min(base.sfxVolume, 35);
+      base.musicVolume = Math.min(base.musicVolume, 15);
+      base.masterVolume = Math.max(base.masterVolume, 50);
+      break;
+  }
+  return base;
+}
+
+export function isAudioBlocked(): boolean {
+  return ctxCreationFailed || (!!ctx && ctx.state === 'suspended');
 }
 
 // ─── Custom audio file support ───
@@ -1012,8 +1072,18 @@ export function startMusic() {
     if (typeof document !== 'undefined' && document.hidden) return;
     ensureContext();
     if (musicScheduleTimer) return;
-    // Don't schedule if the context isn't running yet (browser autoplay policy)
-    if (!ctx || ctx.state !== 'running') return;
+    if (!ctx) return;
+    // If context is suspended/interrupted, try to resume first (browser autoplay policy)
+    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+      ctx.resume().catch(() => {}).then(() => {
+        // Only restart if the context actually became running to avoid infinite recursion
+        if (ctx && ctx.state === 'running' && currentSettings.musicEnabled) {
+          startMusic();
+        }
+      });
+      return;
+    }
+    if (ctx.state !== 'running') return;
     if (currentSettings.useCustomMusic && customMusicAudio) {
       if (customMusicAudio.paused) {
         customMusicAudio.currentTime = 0;
@@ -1080,15 +1150,22 @@ export function initAudio() {
  */
 let resumeHandlerAttached = false;
 let resumeHandler: EventListener | null = null;
+let hasUserInteracted = false;
+export function getHasUserInteracted(): boolean { return hasUserInteracted; }
 export function attachAudioResumeHandler() {
   if (resumeHandlerAttached) return;
   resumeHandlerAttached = true;
   const events = ['click', 'keydown', 'touchstart', 'pointerdown'];
   resumeHandler = () => {
+    if (!hasUserInteracted) {
+      hasUserInteracted = true;
+    }
     if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted')) {
       ctx.resume().catch(() => {}).then(() => {
         if (currentSettings.musicEnabled) startMusic();
       });
+    } else if (currentSettings.musicEnabled) {
+      startMusic();
     }
   };
   events.forEach((evt) => {

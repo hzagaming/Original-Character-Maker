@@ -51,6 +51,9 @@ function useBeforeUnloadGuard(isDirty: boolean) {
 }
 
 const ASSETS_STORAGE_KEY = 'oc-maker.asset-gallery';
+const ASSET_DB_NAME = 'oc-maker.asset-gallery-db';
+const ASSET_DB_STORE = 'asset-data';
+const ASSET_DB_VERSION = 1;
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 const MAX_ASSETS = 200;
 
@@ -94,16 +97,98 @@ function loadAssetMetas(): AssetMeta[] {
   }
 }
 
-function saveAssetMetas(metas: AssetMeta[]) {
+function saveAssetMetas(metas: AssetMeta[]): boolean {
   try {
     window.localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(metas));
+    return true;
   } catch {
-    // ignore quota errors
+    return false;
   }
 }
 
 function metaKey(id: string) {
   return `oc-maker.asset-data.${id}`;
+}
+
+function openAssetDb(): Promise<IDBDatabase | null> {
+  if (typeof window === 'undefined' || !('indexedDB' in window)) {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolve) => {
+    const request = window.indexedDB.open(ASSET_DB_NAME, ASSET_DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(ASSET_DB_STORE)) {
+        db.createObjectStore(ASSET_DB_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => resolve(null);
+    request.onblocked = () => resolve(null);
+  });
+}
+
+async function readAssetDataFromIndexedDb(id: string): Promise<string | null> {
+  const db = await openAssetDb();
+  if (!db) return null;
+
+  return new Promise((resolve) => {
+    const tx = db.transaction(ASSET_DB_STORE, 'readonly');
+    const store = tx.objectStore(ASSET_DB_STORE);
+    const request = store.get(id);
+    request.onsuccess = () => resolve(typeof request.result === 'string' ? request.result : null);
+    request.onerror = () => resolve(null);
+    tx.oncomplete = () => db.close();
+    tx.onerror = () => db.close();
+    tx.onabort = () => db.close();
+  });
+}
+
+async function writeAssetDataToIndexedDb(id: string, dataUrl: string): Promise<boolean> {
+  const db = await openAssetDb();
+  if (!db) return false;
+
+  return new Promise((resolve) => {
+    const tx = db.transaction(ASSET_DB_STORE, 'readwrite');
+    const store = tx.objectStore(ASSET_DB_STORE);
+    store.put(dataUrl, id);
+    tx.oncomplete = () => {
+      db.close();
+      resolve(true);
+    };
+    tx.onerror = () => {
+      db.close();
+      resolve(false);
+    };
+    tx.onabort = () => {
+      db.close();
+      resolve(false);
+    };
+  });
+}
+
+async function deleteAssetDataFromIndexedDb(id: string): Promise<void> {
+  const db = await openAssetDb();
+  if (!db) return;
+
+  await new Promise<void>((resolve) => {
+    const tx = db.transaction(ASSET_DB_STORE, 'readwrite');
+    const store = tx.objectStore(ASSET_DB_STORE);
+    store.delete(id);
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    tx.onerror = () => {
+      db.close();
+      resolve();
+    };
+    tx.onabort = () => {
+      db.close();
+      resolve();
+    };
+  });
 }
 
 function loadAssetDataUrl(id: string): string | null {
@@ -114,11 +199,34 @@ function loadAssetDataUrl(id: string): string | null {
   }
 }
 
-function saveAssetDataUrl(id: string, dataUrl: string) {
+async function loadAssetDataUrlAsync(id: string): Promise<string | null> {
+  // Prefer IndexedDB; fall back to localStorage and migrate if found.
+  const fromDb = await readAssetDataFromIndexedDb(id);
+  if (fromDb) return fromDb;
+
+  const fromLs = loadAssetDataUrl(id);
+  if (fromLs) {
+    // Best-effort migration to IndexedDB, then clear localStorage
+    void writeAssetDataToIndexedDb(id, fromLs).then((ok) => {
+      if (ok) {
+        try { window.localStorage.removeItem(metaKey(id)); } catch { /* ignore */ }
+      }
+    });
+    return fromLs;
+  }
+  return null;
+}
+
+async function saveAssetDataUrl(id: string, dataUrl: string): Promise<boolean> {
+  if (await writeAssetDataToIndexedDb(id, dataUrl)) {
+    return true;
+  }
+
   try {
     window.localStorage.setItem(metaKey(id), dataUrl);
+    return true;
   } catch {
-    // ignore quota errors
+    return false;
   }
 }
 
@@ -128,6 +236,7 @@ function removeAssetDataUrl(id: string) {
   } catch {
     // ignore
   }
+  void deleteAssetDataFromIndexedDb(id);
 }
 
 const uiCopy: Record<
@@ -153,6 +262,7 @@ const uiCopy: Record<
     closePreview: string;
     downloadOne: string;
     deleteOne: string;
+    cancel: string;
     sourceTool: string;
     createdAt: string;
     fileSize: string;
@@ -165,6 +275,7 @@ const uiCopy: Record<
     deleteConfirm: string;
     deleteConfirmPlural: string;
     assetOverview: string;
+    saveFailed: string;
   }
 > = {
   zh: {
@@ -188,6 +299,7 @@ const uiCopy: Record<
     closePreview: '关闭预览',
     downloadOne: '下载',
     deleteOne: '删除',
+    cancel: '取消',
     sourceTool: '来源',
     createdAt: '创建时间',
     fileSize: '大小',
@@ -200,6 +312,7 @@ const uiCopy: Record<
     deleteConfirm: '确定要删除「{name}」吗？此操作不可撤销。',
     deleteConfirmPlural: '确定要删除选中的 {count} 项资产吗？此操作不可撤销。',
     assetOverview: '资产概览',
+    saveFailed: '保存失败：存储空间可能已满，请清理后重试',
   },
   ja: {
     importTitle: 'アセットをインポート',
@@ -222,6 +335,7 @@ const uiCopy: Record<
     closePreview: 'プレビューを閉じる',
     downloadOne: 'ダウンロード',
     deleteOne: '削除',
+    cancel: 'キャンセル',
     sourceTool: 'ソース',
     createdAt: '作成日時',
     fileSize: 'サイズ',
@@ -234,6 +348,7 @@ const uiCopy: Record<
     deleteConfirm: '「{name}」を削除してもよろしいですか？この操作は元に戻せません。',
     deleteConfirmPlural: '選択した {count} 件のアセットを削除してもよろしいですか？この操作は元に戻せません。',
     assetOverview: 'アセット概要',
+    saveFailed: '保存に失敗しました：ストレージ容量が不足している可能性があります',
   },
   en: {
     importTitle: 'Import Assets',
@@ -256,6 +371,7 @@ const uiCopy: Record<
     closePreview: 'Close Preview',
     downloadOne: 'Download',
     deleteOne: 'Delete',
+    cancel: 'Cancel',
     sourceTool: 'Source',
     createdAt: 'Created',
     fileSize: 'Size',
@@ -268,6 +384,7 @@ const uiCopy: Record<
     deleteConfirm: 'Delete "{name}"? This cannot be undone.',
     deleteConfirmPlural: 'Delete {count} selected assets? This cannot be undone.',
     assetOverview: 'Asset Overview',
+    saveFailed: 'Save failed: storage quota may be exceeded. Please clear some space and try again.',
   },
   ru: {
     importTitle: 'Импорт активов',
@@ -290,6 +407,7 @@ const uiCopy: Record<
     closePreview: 'Закрыть предпросмотр',
     downloadOne: 'Скачать',
     deleteOne: 'Удалить',
+    cancel: 'Отмена',
     sourceTool: 'Источник',
     createdAt: 'Создано',
     fileSize: 'Размер',
@@ -302,6 +420,7 @@ const uiCopy: Record<
     deleteConfirm: 'Удалить «{name}»? Это действие нельзя отменить.',
     deleteConfirmPlural: 'Удалить {count} выбранных активов? Это действие нельзя отменить.',
     assetOverview: 'Обзор активов',
+    saveFailed: 'Ошибка сохранения: возможно, превышена квота хранилища',
   },
   ko: {
     importTitle: '에셋 가져오기',
@@ -324,6 +443,7 @@ const uiCopy: Record<
     closePreview: '미리보기 닫기',
     downloadOne: '다운로드',
     deleteOne: '삭제',
+    cancel: '취소',
     sourceTool: '출처',
     createdAt: '생성일',
     fileSize: '크기',
@@ -336,6 +456,7 @@ const uiCopy: Record<
     deleteConfirm: '「{name}」을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
     deleteConfirmPlural: '선택한 {count}개의 에셋을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
     assetOverview: '에셋 개요',
+    saveFailed: '저장 실패: 저장 공간이 부족할 수 있습니다',
   },
 };
 
@@ -365,6 +486,7 @@ export function AssetGalleryPage({
   const copy = getCopy(language);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounter = useRef(0);
+  const previewCloseTimerRef = useRef<number>(0);
 
   const [assets, setAssets] = useState<AssetItem[]>(() => {
     const metas = loadAssetMetas();
@@ -384,6 +506,42 @@ export function AssetGalleryPage({
   const [isDragOver, setIsDragOver] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [isClosingPreview, setIsClosingPreview] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ ids: string[]; message: string } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateStoredAssets() {
+      const metas = loadAssetMetas();
+      const restored = (
+        await Promise.all(
+          metas.map(async (m) => {
+            const dataUrl = await loadAssetDataUrlAsync(m.id);
+            return dataUrl ? { ...m, dataUrl } : null;
+          }),
+        )
+      ).filter((a): a is AssetItem => a !== null);
+
+      if (cancelled || restored.length === 0) {
+        return;
+      }
+
+      setAssets((current) => {
+        const merged = new Map<string, AssetItem>();
+        restored.forEach((item) => merged.set(item.id, item));
+        current.forEach((item) => merged.set(item.id, item));
+        return Array.from(merged.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      });
+    }
+
+    void hydrateStoredAssets();
+    return () => {
+      cancelled = true;
+      if (previewCloseTimerRef.current) {
+        window.clearTimeout(previewCloseTimerRef.current);
+      }
+    };
+  }, []);
 
   // Persist meta list whenever assets change
   useEffect(() => {
@@ -395,8 +553,11 @@ export function AssetGalleryPage({
       sourceTool: a.sourceTool,
       createdAt: a.createdAt,
     }));
-    saveAssetMetas(metas);
-  }, [assets]);
+    if (!saveAssetMetas(metas)) {
+      setToast(copy.saveFailed ?? 'Save failed: storage quota may be exceeded');
+      playSound('error');
+    }
+  }, [assets, copy.saveFailed]);
 
   // Toast auto-dismiss
   useEffect(() => {
@@ -447,7 +608,10 @@ export function AssetGalleryPage({
           size: file.size,
           createdAt: new Date().toISOString(),
         };
-        saveAssetDataUrl(id, dataUrl);
+        const saved = await saveAssetDataUrl(id, dataUrl);
+        if (!saved) {
+          throw new Error('asset storage quota exceeded');
+        }
         setAssets((prev) => [item, ...prev]);
         setToast(copy.importSuccess.replace('{name}', file.name));
         playSound('uploadComplete');
@@ -463,27 +627,46 @@ export function AssetGalleryPage({
     (id: string) => {
       const item = assets.find((a) => a.id === id);
       if (!item) return;
-      if (!window.confirm(copy.deleteConfirm.replace('{name}', item.name))) return;
-      removeAssetDataUrl(id);
-      setAssets((prev) => prev.filter((a) => a.id !== id));
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
+      setPendingDelete({
+        ids: [id],
+        message: copy.deleteConfirm.replace('{name}', item.name),
       });
-      playSound('deleteSound');
+      playSound('warning');
     },
     [assets, copy],
   );
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(copy.deleteConfirmPlural.replace('{count}', String(selectedIds.size)))) return;
-    selectedIds.forEach((id) => removeAssetDataUrl(id));
-    setAssets((prev) => prev.filter((a) => !selectedIds.has(a.id)));
-    setSelectedIds(new Set());
-    playSound('deleteSound');
+    setPendingDelete({
+      ids: Array.from(selectedIds),
+      message: copy.deleteConfirmPlural.replace('{count}', String(selectedIds.size)),
+    });
+    playSound('warning');
   }, [selectedIds, copy]);
+
+  const confirmDelete = useCallback(() => {
+    if (!pendingDelete) return;
+    const deleteSet = new Set(pendingDelete.ids);
+    pendingDelete.ids.forEach((id) => removeAssetDataUrl(id));
+    setAssets((prev) => prev.filter((a) => !deleteSet.has(a.id)));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      pendingDelete.ids.forEach((id) => next.delete(id));
+      return next;
+    });
+    if (previewAsset && deleteSet.has(previewAsset.id)) {
+      setPreviewAsset(null);
+      setIsClosingPreview(false);
+    }
+    setPendingDelete(null);
+    playSound('deleteSound');
+  }, [pendingDelete, previewAsset]);
+
+  const cancelDelete = useCallback(() => {
+    setPendingDelete(null);
+    playSound('modalClose');
+  }, []);
 
   const handleDownload = useCallback((item: AssetItem) => {
     const a = document.createElement('a');
@@ -582,19 +765,29 @@ export function AssetGalleryPage({
 
   const closePreview = useCallback(() => {
     setIsClosingPreview(true);
-    window.setTimeout(() => {
+    if (previewCloseTimerRef.current) {
+      window.clearTimeout(previewCloseTimerRef.current);
+    }
+    previewCloseTimerRef.current = window.setTimeout(() => {
       setPreviewAsset(null);
       setIsClosingPreview(false);
     }, 220);
   }, []);
 
-  const closePreviewSilent = useCallback(() => {
-    setIsClosingPreview(true);
-    window.setTimeout(() => {
-      setPreviewAsset(null);
-      setIsClosingPreview(false);
-    }, 220);
-  }, []);
+  useEffect(() => {
+    if (!pendingDelete && !previewAsset) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      if (pendingDelete) {
+        cancelDelete();
+        return;
+      }
+      closePreview();
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cancelDelete, closePreview, pendingDelete, previewAsset]);
 
   const totalSize = useMemo(() => assets.reduce((sum, a) => sum + a.size, 0), [assets]);
 
@@ -613,7 +806,7 @@ export function AssetGalleryPage({
           <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
-          <span className="version-pill" style={{ minHeight: 40, padding: '0 14px' }}>
+          <span className="version-pill">
             {copy.itemsCount.replace('{count}', String(assets.length))} · {formatBytes(totalSize)}
           </span>
         </div>
@@ -691,18 +884,18 @@ export function AssetGalleryPage({
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={selectAll}>{copy.selectAll}</button>
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={deselectAll}>{copy.deselectAll}</button>
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleDownloadSelected}>{copy.downloadSelected}</button>
-                  <button className="secondary-button small-button" type="button" data-sfx-handled style={{ color: 'var(--danger, #ef476f)' }} onClick={handleDeleteSelected}>{copy.deleteSelected}</button>
+                  <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleDeleteSelected}>{copy.deleteSelected}</button>
                 </div>
               )}
             </section>
 
             {/* Gallery grid */}
             {filteredAssets.length === 0 ? (
-              <section className="tool-card empty-state" style={{ minHeight: 320, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
+              <section className="tool-card empty-state">
                 <div>
                   <h3>{copy.emptyTitle}</h3>
                   <p className="muted-copy">{copy.emptyHint}</p>
-                  <p className="tiny-copy" style={{ marginTop: 8 }}>{copy.importHint}</p>
+                  <p className="tiny-copy">{copy.importHint}</p>
                 </div>
               </section>
             ) : (
@@ -795,17 +988,17 @@ export function AssetGalleryPage({
           <div className="tool-column side">
             <section className="tool-card info-panel">
               <h3>{copy.assetOverview}</h3>
-              <div className="metric-box" style={{ marginTop: 12 }}>
+              <div className="metric-box">
                 <strong>{assets.length}</strong>
                 <span>{copy.itemsCount.replace('{count}', String(assets.length))}</span>
               </div>
-              <div className="metric-box" style={{ marginTop: 10 }}>
+              <div className="metric-box">
                 <strong>{formatBytes(totalSize)}</strong>
                 <span>{language === 'zh' ? '总占用' : language === 'ja' ? '合計容量' : language === 'ru' ? 'Общий размер' : language === 'ko' ? '총 용량' : 'Total Size'}</span>
               </div>
               <div className="tool-card-divider" />
               <p className="tiny-copy">{copy.importHint}</p>
-              <p className="tiny-copy" style={{ marginTop: 8 }}>{privacyNote}</p>
+              <p className="tiny-copy">{privacyNote}</p>
             </section>
           </div>
         </div>
@@ -815,7 +1008,7 @@ export function AssetGalleryPage({
       {isDragOver && (
         <div
           className="modal-backdrop"
-          style={{ background: 'var(--overlay-backdrop, rgba(0,0,0,0.6))', zIndex: 90 }}
+          style={{ zIndex: 90 }}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -835,8 +1028,8 @@ export function AssetGalleryPage({
               color: 'var(--text-main)',
             }}
           >
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '1.4rem', margin: '0 0 8px' }}>📥</p>
+            <div>
+              <p className="upload-dropzone-icon">📥</p>
               <p>{copy.dropActiveHint}</p>
             </div>
           </div>
@@ -865,6 +1058,37 @@ export function AssetGalleryPage({
         </div>
       )}
 
+      {/* Delete Confirm Modal */}
+      {pendingDelete && (
+        <div
+          className="modal-backdrop opening"
+          role="presentation"
+          onClick={cancelDelete}
+          style={{ zIndex: 115 }}
+        >
+          <section
+            className="modal-card modal-surface confirm-modal opening"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="asset-delete-confirm-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="modal-close" type="button" data-sfx-handled onClick={cancelDelete} aria-label={copy.cancel}>×</button>
+            <p className="section-label">{copy.deleteOne}</p>
+            <h2 id="asset-delete-confirm-title">{copy.deleteOne}</h2>
+            <p className="modal-description">{pendingDelete.message}</p>
+            <div className="confirm-actions">
+              <button className="secondary-button" type="button" data-sfx-handled onClick={cancelDelete}>
+                {copy.cancel}
+              </button>
+              <button className="primary-button" type="button" data-sfx-handled onClick={confirmDelete}>
+                {copy.deleteOne}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
       {/* Preview Modal */}
       {previewAsset && (
         <div
@@ -880,19 +1104,27 @@ export function AssetGalleryPage({
             onClick={(e) => e.stopPropagation()}
             style={{ maxWidth: 'min(900px, 94vw)', maxHeight: 'min(760px, 92vh)', display: 'flex', flexDirection: 'column' }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.previewTitle}</h3>
+            <div className="modal-header">
+              <h3>{copy.previewTitle}</h3>
               <button className="modal-close" type="button" data-sfx-handled onClick={closePreview} aria-label={copy.closePreview}>×</button>
             </div>
             <div style={{ flex: 1, overflow: 'auto', padding: 22, display: 'grid', placeItems: 'center', minHeight: 200 }}>
               {previewAsset.type === 'image' || previewAsset.type === 'gif' ? (
-                <img src={previewAsset.dataUrl} alt={previewAsset.name} style={{ maxWidth: '100%', maxHeight: 'min(560px, 70vh)', borderRadius: 16, objectFit: 'contain' }} />
+                (() => {
+                  const q = _settings.performance.imagePreviewQuality;
+                  const previewStyle: React.CSSProperties = q === 'low'
+                    ? { maxWidth: '60%', maxHeight: 'min(360px, 45vh)', borderRadius: 16, objectFit: 'contain' }
+                    : q === 'medium'
+                      ? { maxWidth: '80%', maxHeight: 'min(460px, 58vh)', borderRadius: 16, objectFit: 'contain' }
+                      : { maxWidth: '100%', maxHeight: 'min(560px, 70vh)', borderRadius: 16, objectFit: 'contain' };
+                  return <img src={previewAsset.dataUrl} alt={previewAsset.name} style={previewStyle} />;
+                })()
               ) : previewAsset.type === 'audio' ? (
                 <audio controls src={previewAsset.dataUrl} style={{ width: '100%', maxWidth: 520 }} />
               ) : previewAsset.type === 'video' ? (
                 <video controls src={previewAsset.dataUrl} style={{ maxWidth: '100%', maxHeight: 'min(480px, 60vh)', borderRadius: 16 }} />
               ) : (
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <div className="empty-state">
                   <p style={{ fontSize: '2.5rem', margin: 0 }}>📄</p>
                   <p>{previewAsset.name}</p>
                 </div>
@@ -906,7 +1138,7 @@ export function AssetGalleryPage({
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => handleDownload(previewAsset)}>{copy.downloadOne}</button>
-                <button className="secondary-button small-button" type="button" data-sfx-handled style={{ color: 'var(--danger, #ef476f)' }} onClick={() => { handleDelete(previewAsset.id); closePreviewSilent(); }}>{copy.deleteOne}</button>
+                <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => handleDelete(previewAsset.id)}>{copy.deleteOne}</button>
               </div>
             </div>
           </section>

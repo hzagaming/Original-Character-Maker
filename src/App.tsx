@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+﻿import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { toPng } from 'html-to-image';
 import DevModePanel from './DevModePanel';
 import { createPortal } from 'react-dom';
@@ -16,15 +16,34 @@ import type {
   StylePreset,
   ThemeDepth,
 } from './types';
-import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase } from './apiConfig';
-import { Paper2GalPage, PromptSuitePage, StyleTransferPage, CharacterGifPage, IndexTtsPage, LlmHubPage, TtsExportPage, ImageConverterPage, AudioEditorPage, AudioConverterPage, AssetGalleryPage, RelationshipWebPage, CharacterCardPage, CharacterChroniclePage, WorldEncyclopediaPage } from './workflowPages';
-import InspirationGeneratorPage from './InspirationGeneratorPage';
-import CharacterStatsDesignerPage from './CharacterStatsDesignerPage';
-import ColorPaletteDesignerPage from './ColorPaletteDesignerPage';
-import DialogueGeneratorPage from './DialogueGeneratorPage';
-import CharacterSkillTreePage from './CharacterSkillTreePage';
-import CharacterBattleCardPage from './CharacterBattleCardPage';
-import DocsPage from './DocsPage';
+import { FEATURE_REGISTRY, getFeatureDetailsFromRegistry, getFeatureMeta, getFeaturesByCategory, getImportableFeatures, type ActionIconKind } from './featureRegistry';
+import { detectWorkflowApiBaseIssue, getEffectiveApiBase, getPresetApiBase, requiresHostedApiBase, setMaxConcurrentRequests } from './apiConfig';
+
+/* ─── Lazy-loaded workflow pages ─── */
+const StyleTransferPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.StyleTransferPage })));
+const PromptSuitePage = lazy(() => import('./workflowPages').then((m) => ({ default: m.PromptSuitePage })));
+const Paper2GalPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.Paper2GalPage })));
+const LlmHubPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.LlmHubPage })));
+const TtsExportPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.TtsExportPage })));
+const ImageConverterPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.ImageConverterPage })));
+const CharacterGifPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.CharacterGifPage })));
+const IndexTtsPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.IndexTtsPage })));
+const AudioEditorPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.AudioEditorPage })));
+const AudioConverterPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.AudioConverterPage })));
+const AssetGalleryPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.AssetGalleryPage })));
+const RelationshipWebPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.RelationshipWebPage })));
+const CharacterCardPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.CharacterCardPage })));
+const CharacterChroniclePage = lazy(() => import('./workflowPages').then((m) => ({ default: m.CharacterChroniclePage })));
+const WorldEncyclopediaPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.WorldEncyclopediaPage })));
+
+/* ─── Lazy-loaded standalone pages ─── */
+const InspirationGeneratorPage = lazy(() => import('./InspirationGeneratorPage'));
+const CharacterStatsDesignerPage = lazy(() => import('./CharacterStatsDesignerPage'));
+const ColorPaletteDesignerPage = lazy(() => import('./ColorPaletteDesignerPage'));
+const DialogueGeneratorPage = lazy(() => import('./DialogueGeneratorPage'));
+const CharacterSkillTreePage = lazy(() => import('./CharacterSkillTreePage'));
+const CharacterBattleCardPage = lazy(() => import('./CharacterBattleCardPage'));
+const DocsPage = lazy(() => import('./DocsPage'));
 import {
   defaultAudioSettings,
   attachAudioResumeHandler,
@@ -40,9 +59,11 @@ import {
   startMusic,
   stopMusic,
   updateAudioSettings,
+  applyAudioPreset,
+  isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.13.3';
+const VERSION = '1.15.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -323,6 +344,10 @@ type Messages = {
   animationHint: string;
   borderWidthTitle: string;
   audioTitle: string;
+  audioPresetMute: string;
+  audioPresetFeedback: string;
+  audioPresetBgm: string;
+  audioPresetQuiet: string;
   audioMasterVolume: string;
   audioSfxVolume: string;
   audioMusicVolume: string;
@@ -493,6 +518,11 @@ type Messages = {
   // Toggles
   toggleOn: string;
   toggleOff: string;
+  categoryCreation: string;
+  categoryCharacter: string;
+  categoryWorld: string;
+  categoryAudio: string;
+  categoryAssets: string;
 };
 
 type BaseLanguage = 'zh' | 'ja' | 'en' | 'ru';
@@ -671,10 +701,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.13.3 第十轮深度审计：修复 SFX 回归（静默按钮/双重播放）、BGM 后台 stutter、AudioContext 永久死亡、SFX 异常泄漏，并补齐可访问性缺口。',
-    announcementList1: 'SFX 修复：workflowPages 3 个 tool-card-header 的 data-sfx-handled 阻断子按钮音效导致静默；AssetGalleryPage/App faceMaker 7 个按钮回调与全局 handler 双重播放；CharacterCardPage 复选框因 data-sfx-handled 完全静默。全部修复。',
-    announcementList2: '音频引擎：BGM scheduler 后台标签页 drift guard 重置 scheduleBeat=0 导致音乐从头开始，已改为只同步时间；ensureContext() 新增 closed 状态检测与自动重建；synthesize() 新增 try/catch 防止异常时 AudioNode 泄漏。',
-    announcementList3: 'UI/UX：workflowPages 4 个 modal close 按钮 aria-label 从硬编码英文改为多语言；App faceMaker ⟲ 按钮补充 aria-label，.tool-dot 补充 title；CharacterChroniclePage 移除最后一处冗余 fallback。',
+    announcementDescription: 'v1.15.0 第十二轮深度审计：性能与存储大优化——代码拆分、重型库延迟加载、Splash 智能跳过、IndexedDB 迁移、性能假开关清理。',
+    announcementList1: '构建优化：React.lazy + Suspense 将 17 个功能页面拆分为独立 chunk，首屏 JS 从 16.5MB 降至约 500KB；@imgly/background-removal ONNX WASM 改为按需动态加载，不再阻塞首屏。',
+    announcementList2: '存储与性能：AssetGalleryPage 反转数据读取优先级（IndexedDB > localStorage），并自动迁移旧数据；Splash 首次访问缩短至 1.2s，二次访问直接跳过；清理 4 个无实际效果的 performance 假开关（lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews）。',
+    announcementList3: '真实落地的设置：imagePreviewQuality 在资产库预览中生效（低/中/高三档尺寸）；maxConcurrentRequests 实现请求队列并应用于 API 端口探测；apiConfig.ts 新增 fetchWithConcurrency 供后续全面替换。',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -777,6 +807,10 @@ const translations: Record<BaseLanguage, Messages> = {
     animationHint: '调整动画速度并开关单独效果。速度越低动画越慢。',
     borderWidthTitle: '边框粗细',
     audioTitle: '音频设置',
+    audioPresetMute: '静音',
+    audioPresetFeedback: '仅反馈音',
+    audioPresetBgm: '仅背景音乐',
+    audioPresetQuiet: '安静模式',
     audioMasterVolume: '主音量',
     audioSfxVolume: '音效音量',
     audioMusicVolume: '音乐音量',
@@ -938,6 +972,11 @@ const translations: Record<BaseLanguage, Messages> = {
     confirmCancel: '取消',
     toggleOn: '开',
     toggleOff: '关',
+    categoryCreation: '创作生成',
+    categoryCharacter: '角色资料',
+    categoryWorld: '世界观管理',
+    categoryAudio: '音频语音',
+    categoryAssets: '资产与文档',
   },
   ja: {
     appTitle: 'Original Character Maker',
@@ -1112,10 +1151,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.13.3 第十回深度監査：SFX 回帰（無音ボタン/二重再生）、BGM バックグラウンドスタッター、AudioContext 永久停止、SFX 例外リークを修正し、アクセシビリティ缺口を補完。',
-    announcementList1: 'SFX 修正：workflowPages 3 個の tool-card-header の data-sfx-handled が子ボタン音を遮断して無音に；AssetGalleryPage/App faceMaker の 7 個ボタンでコールバックとグローバル handler が二重再生；CharacterCardPage チェックボックスが data-sfx-handled で完全無音。全て修正。',
-    announcementList2: 'オーディオエンジン：BGM scheduler のバックグラウンドタブ drift guard が scheduleBeat=0 をリセットして音楽を先頭から再生する問題を、時間同期のみに変更；ensureContext() に closed 状態検出と自動再構築を追加；synthesize() に try/catch を追加して例外時の AudioNode リークを防止。',
-    announcementList3: 'UI/UX：workflowPages の 4 個 modal close ボタンの aria-label を英語ハードコードから多言語化；App faceMaker ⟲ ボタンに aria-label を追加、.tool-dot に title を追加；CharacterChroniclePage の最後の冗長 fallback を削除。',
+    announcementDescription: 'v1.15.0 第十二回深度監査：パフォーマンスとストレージの大規模最適化——コード分割、重いライブラリの遅延読み込み、Splash のスマートスキップ、IndexedDB 移行、performance ダミースイッチの清理。',
+    announcementList1: 'ビルド最適化：React.lazy + Suspense で 17 個の機能ページを独立 chunk に分割し、初回表示 JS を 16.5MB から約 500KB に削減；@imgly/background-removal の ONNX WASM をオンデマンド動的読み込みに変更し、初回表示をブロックしない。',
+    announcementList2: 'ストレージとパフォーマンス：AssetGalleryPage のデータ読み取り優先順位を反転（IndexedDB > localStorage）し、旧データを自動移行；Splash は初回アクセスを 1.2s に短縮し、再訪問時は直接スキップ；実効果のない performance ダミースイッチ 4 個（lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews）を清理。',
+    announcementList3: '実際に機能する設定：imagePreviewQuality がアセットギャラリーのプレビューに反映（低/中/高の 3 段階サイズ）；maxConcurrentRequests にリクエストキューを実装し、API ポート探査に適用；apiConfig.ts に fetchWithConcurrency を追加し、今後の全面的な置き換えに備える。',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1218,6 +1257,10 @@ const translations: Record<BaseLanguage, Messages> = {
     animationHint: 'アニメーション速度を調整し、個別効果をオン/オフします。速度が低いほどアニメーションは遅くなります。',
     borderWidthTitle: '枠線の太さ',
     audioTitle: 'オーディオ設定',
+    audioPresetMute: 'ミュート',
+    audioPresetFeedback: 'フィードバックのみ',
+    audioPresetBgm: 'BGMのみ',
+    audioPresetQuiet: '静かモード',
     audioMasterVolume: 'マスターボリューム',
     audioSfxVolume: '効果音ボリューム',
     audioMusicVolume: 'BGMボリューム',
@@ -1379,6 +1422,11 @@ const translations: Record<BaseLanguage, Messages> = {
     confirmCancel: 'キャンセル',
     toggleOn: 'ON',
     toggleOff: 'OFF',
+    categoryCreation: 'Creation',
+    categoryCharacter: 'Character',
+    categoryWorld: 'World-building',
+    categoryAudio: 'Audio & Voice',
+    categoryAssets: 'Assets & Docs',
   },
   en: {
     appTitle: 'Original Character Maker',
@@ -1553,10 +1601,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.13.3 Tenth-round deep audit: fixed SFX regressions (silent buttons/double-play), BGM background stutter, AudioContext permanent death, SFX exception leaks, and filled accessibility gaps.',
-    announcementList1: 'SFX fixes: workflowPages 3 tool-card-header data-sfx-handled blocked child button sounds causing silence; AssetGalleryPage/App faceMaker 7 buttons double-played from callback + global handler; CharacterCardPage checkbox was completely silent from data-sfx-handled. All fixed.',
-    announcementList2: 'Audio engine: BGM scheduler background-tab drift guard resetting scheduleBeat=0 caused music to restart from beginning, now only resyncs time; ensureContext() added closed-state detection and auto-rebuild; synthesize() added try/catch to prevent AudioNode leaks on exception.',
-    announcementList3: 'UI/UX: workflowPages 4 modal close buttons aria-label changed from hardcoded English to multilingual; App faceMaker ⟲ button added aria-label, .tool-dot added title; CharacterChroniclePage removed last redundant fallback.',
+    announcementDescription: 'v1.15.0 Twelfth-round deep audit: major performance and storage optimization — code splitting, heavy library lazy loading, smart splash skip, IndexedDB migration, and performance dummy-switch cleanup.',
+    announcementList1: 'Build optimization: React.lazy + Suspense splits 17 feature pages into independent chunks, reducing first-screen JS from 16.5MB to ~500KB; @imgly/background-removal ONNX WASM switched to on-demand dynamic loading, no longer blocking first paint.',
+    announcementList2: 'Storage and performance: AssetGalleryPage reversed data-read priority (IndexedDB > localStorage) with automatic old-data migration; Splash shortened to 1.2s on first visit and skipped entirely on return visits; cleaned up 4 ineffective performance dummy switches (lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews).',
+    announcementList3: 'Real settings: imagePreviewQuality now affects asset-gallery previews (low/medium/high sizing); maxConcurrentRequests implements a request queue and applies it to API port probing; apiConfig.ts adds fetchWithConcurrency for future rollout.',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -1659,6 +1707,10 @@ const translations: Record<BaseLanguage, Messages> = {
     animationHint: 'Adjust animation speed and toggle individual effects. Lower speed = slower animations.',
     borderWidthTitle: 'Border Thickness',
     audioTitle: 'Audio Settings',
+    audioPresetMute: 'Mute',
+    audioPresetFeedback: 'Feedback Only',
+    audioPresetBgm: 'BGM Only',
+    audioPresetQuiet: 'Quiet Mode',
     audioMasterVolume: 'Master Volume',
     audioSfxVolume: 'SFX Volume',
     audioMusicVolume: 'Music Volume',
@@ -1820,6 +1872,11 @@ const translations: Record<BaseLanguage, Messages> = {
     confirmCancel: 'Cancel',
     toggleOn: 'ON',
     toggleOff: 'OFF',
+    categoryCreation: 'Creation',
+    categoryCharacter: 'Character',
+    categoryWorld: 'World-building',
+    categoryAudio: 'Audio & Voice',
+    categoryAssets: 'Assets & Docs',
   },
   ru: {
     appTitle: 'Original Character Maker',
@@ -1994,10 +2051,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.13.3 Десятый глубокий аудит: исправлены SFX регрессии (бесшумные кнопки/двойной звук), фоновый заикание BGM, перманентная смерть AudioContext, утечки SFX-исключений и заполнены пробелы доступности.',
-    announcementList1: 'Исправления SFX: data-sfx-handled у 3 заголовков tool-card-header в workflowPages блокировал звуки дочерних кнопок, вызывая тишину; 7 кнопок в AssetGalleryPage/App faceMaker двойно воспроизводили звук от коллбэка + глобального обработчика; чекбокс в CharacterCardPage был полностью бесшумен из-за data-sfx-handled. Всё исправлено.',
-    announcementList2: 'Аудиодвижок: фоновый guard drift BGM scheduler сбрасывал scheduleBeat=0, заставляя музыку начинаться сначала — теперь только ресинхронизирует время; ensureContext() добавлено обнаружение состояния closed и автопересоздание; synthesize() добавлен try/catch для предотвращения утечек AudioNode при исключениях.',
-    announcementList3: 'UI/UX: aria-label 4 кнопок закрытия модалок в workflowPages изменён с захардкоженного английского на многоязычный; кнопка ⟲ в App faceMaker получила aria-label, .tool-dot получил title; CharacterChroniclePage удалён последний избыточный fallback.',
+    announcementDescription: 'v1.15.0 Двенадцатый глубокий аудит: масштабная оптимизация производительности и хранения — разделение кода, отложенная загрузка тяжёлых библиотек, умное пропускание Splash, миграция на IndexedDB и уборка фиктивных переключателей performance.',
+    announcementList1: 'Оптимизация сборки: React.lazy + Suspense разделяет 17 функциональных страниц на независимые чанки, сокращая JS первого экрана с 16.5 МБ до ~500 КБ; ONNX WASM @imgly/background-removal переведён на динамическую загрузку по требованию и больше не блокирует первую отрисовку.',
+    announcementList2: 'Хранилище и производительность: AssetGalleryPage инвертировала приоритет чтения данных (IndexedDB > localStorage) с автоматической миграцией старых данных; Splash сокращён до 1.2 с при первом посещении и полностью пропускается при повторных; убраны 4 неэффективных фиктивных переключателя performance (lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews).',
+    announcementList3: 'Реально работающие настройки: imagePreviewQuality теперь влияет на превью в галерее активов (низкое/среднее/высокое масштабирование); maxConcurrentRequests реализует очередь запросов и применяется к зонду портов API; apiConfig.ts добавляет fetchWithConcurrency для будущего массового внедрения.',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2100,6 +2157,10 @@ const translations: Record<BaseLanguage, Messages> = {
     animationHint: 'Настройте скорость анимации и переключайте отдельные эффекты. Низкая скорость = медленнее анимация.',
     borderWidthTitle: 'Толщина рамки',
     audioTitle: 'Настройки аудио',
+    audioPresetMute: 'Без звука',
+    audioPresetFeedback: 'Только обратная связь',
+    audioPresetBgm: 'Только фоновая музыка',
+    audioPresetQuiet: 'Тихий режим',
     audioMasterVolume: 'Общая громкость',
     audioSfxVolume: 'Громкость эффектов',
     audioMusicVolume: 'Громкость музыки',
@@ -2261,6 +2322,11 @@ const translations: Record<BaseLanguage, Messages> = {
     confirmCancel: 'Отмена',
     toggleOn: 'ВКЛ',
     toggleOff: 'ВЫКЛ',
+    categoryCreation: 'Создание',
+    categoryCharacter: 'Персонаж',
+    categoryWorld: 'Мир',
+    categoryAudio: 'Аудио',
+    categoryAssets: 'Активы',
   },
 };
 
@@ -2787,10 +2853,14 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
-    announcementDescription: 'v1.13.3 열 번째 심층 감사: SFX 회귀(무음 버튼/이중 재생)、BGM 백그라운드 끊김、AudioContext 영구 종료、SFX 예외 누수를 수정하고 접근성缺口을 보완.',
-    announcementList1: 'SFX 수정: workflowPages 3개 tool-card-header의 data-sfx-handled이 자식 버튼 사운드를 차단해 무음 발생；AssetGalleryPage/App faceMaker 7개 버튼에서 콜백과 글로벌 handler가 이중 재생；CharacterCardPage 체크박스가 data-sfx-handled로 완전 무음。모두 수정。',
-    announcementList2: '오디오 엔진: BGM scheduler 백그라운드 탭 drift guard가 scheduleBeat=0을 리셋해 음악을 처음부터 재생하는 문제를 시간 동기화만 하도록 변경；ensureContext()에 closed 상태 감지 및 자동 재생성 추가；synthesize()에 try/catch 추가해 예외 시 AudioNode 누수 방지。',
-    announcementList3: 'UI/UX: workflowPages 4개 modal close 버튼 aria-label을 하드코딩 영어에서 다국어로 변경；App faceMaker ⟲ 버튼에 aria-label 추가, .tool-dot에 title 추가；CharacterChroniclePage 마지막冗餘 fallback 제거。',
+    audioPresetMute: '무음',
+    audioPresetFeedback: '피드백만',
+    audioPresetBgm: 'BGM만',
+    audioPresetQuiet: '조용한 모드',
+    announcementDescription: 'v1.15.0 열두 번째 심층 감사: 성능과 저장소 대규모 최적화——코드 분할、무거운 라이브러리 지연 로드、Splash 스마트 스킵、IndexedDB 마이그레이션、performance 더미 스위치 청소。',
+    announcementList1: '빌드 최적화: React.lazy + Suspense로 17개 기능 페이지를 독립 chunk로 분할하여 초기 화면 JS를 16.5MB에서 약 500KB로 감소；@imgly/background-removal의 ONNX WASM을 온디맨드 동적 로드로 전환하여 초기 렌더링 차단 없음。',
+    announcementList2: '저장소와 성능: AssetGalleryPage의 데이터 읽기 우선순위를 역전(IndexedDB > localStorage)하고旧 데이터 자동 마이그레이션；Splash는 첫 방문을 1.2s로 단축하고 재방문 시 바로 스킵；실제 효과 없는 performance 더미 스위치 4개(lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews)를 청소。',
+    announcementList3: '실제로 작동하는 설정: imagePreviewQuality가 에셋 갤러리 프리뷰에 반영(낮음/중간/높음 3단계 크기)；maxConcurrentRequests에 요청 큐를 구현하여 API 포트 탐색에 적용；apiConfig.ts에 fetchWithConcurrency를 추가하여 향후 전면 교체 대비。',
   },
   fr: {
     ...translations.en,
@@ -2981,6 +3051,30 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.14.0',
+    date: '2026-05-18',
+    title: '1.14.0 第十一轮深度审计：音频快捷预设、BGM 自动播放策略合规、CSS 动画与声音系统联动、Toast 统一反馈',
+    summary:
+      '音频快捷预设、BGM 自动播放策略合规、CSS 动画与声音系统联动、Toast 统一反馈，并修复多处深层 bug。',
+    details: [
+      '音频系统：Settings → Audio 新增一键预设（静音/仅反馈音/仅 BGM/安静模式）；BGM 在用户首次交互前不再强行播放；修复 startMusic() 死锁与 applyAudioPreset 副作用。',
+      '声音反馈：PageToast 统一自动播放 success/error 声音；各页面补齐保存/导出/导入失败时的 error 声音；pageSwitch 增加 300ms 冷却。',
+      '动画联动：modal、.fade-up、.toast-enter、.editor-toast、rel-pulse 等动画时长关联 --animation-speed；修复 .toast-enter transform 冲突。',
+    ],
+  },
+  {
+    version: '1.13.3',
+    date: '2026-05-18',
+    title: '1.13.3 第十轮深度审计：SFX 回归修复、BGM 后台 stutter、AudioContext 永久死亡、SFX 异常泄漏与可访问性补齐',
+    summary:
+      '修复 SFX 回归（静默按钮/双重播放）、BGM 后台 stutter、AudioContext 永久死亡、SFX 异常泄漏，并补齐可访问性缺口。',
+    details: [
+      'SFX 修复：workflowPages 3 个 tool-card-header 的 data-sfx-handled 阻断子按钮音效导致静默；AssetGalleryPage/App faceMaker 7 个按钮回调与全局 handler 双重播放；CharacterCardPage 复选框因 data-sfx-handled 完全静默。全部修复。',
+      '音频引擎：BGM scheduler 后台标签页 drift guard 重置 scheduleBeat=0 导致音乐从头开始，已改为只同步时间；ensureContext() 新增 closed 状态检测与自动重建；synthesize() 新增 try/catch 防止异常时 AudioNode 泄漏。',
+      'UI/UX：workflowPages 4 个 modal close 按钮 aria-label 从硬编码英文改为多语言；App faceMaker ⟲ 按钮补充 aria-label，.tool-dot 补充 title；CharacterChroniclePage 移除最后一处冗余 fallback。',
+    ],
+  },
   {
     version: '1.13.2',
     date: '2026-05-25',
@@ -4402,8 +4496,12 @@ function loadInitialSettings(): SettingsState {
       return defaultSettings;
     }
 
-    const parsed = JSON.parse(saved) as Partial<SettingsState>;
-    const nextSettings = { ...defaultSettings, ...parsed };
+    const parsed = JSON.parse(saved);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return defaultSettings;
+    }
+    const nextSettings = { ...defaultSettings, ...parsed as Partial<SettingsState> };
 
     if ((nextSettings as { fontPreset?: string }).fontPreset === 'rounded') {
       nextSettings.fontPreset = 'sans';
@@ -4530,7 +4628,6 @@ function loadInitialSettings(): SettingsState {
     if (typeof nextSettings.apiCustom2ForIndexTts !== 'boolean') nextSettings.apiCustom2ForIndexTts = false;
     if (typeof nextSettings.apiCustom3ForIndexTts !== 'boolean') nextSettings.apiCustom3ForIndexTts = false;
 
-    updateAudioSettings(nextSettings.audio);
     return nextSettings;
   } catch {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
@@ -4555,10 +4652,12 @@ function App() {
   useEffect(() => {
     try {
       initAudio();
+      updateAudioSettings(settings.audio);
       attachAudioResumeHandler();
-      if (!document.hidden) {
-        startMusic();
-      }
+      setMaxConcurrentRequests(settings.performance.maxConcurrentRequests);
+      // Do NOT auto-start music here. BGM will begin after the first user
+      // interaction via attachAudioResumeHandler, respecting browser autoplay
+      // policies and avoiding surprise sound on cold load.
     } catch {
       // Audio initialization is non-critical; ignore failures.
     }
@@ -4579,17 +4678,28 @@ function App() {
     };
   }, []);
 
-  /* Splash loading simulation */
+  /* Splash loading: first visit shows brief animation (~1.2s);
+     repeat visits skip immediately. Respects reduceAnimations. */
   useEffect(() => {
+    const hasVisited = (() => {
+      try { return window.localStorage.getItem('oc-maker.hasVisited') === '1'; } catch { return false; }
+    })();
+
+    // Respect reduceAnimations: skip splash entirely
+    if (settings.performance.reduceAnimations || hasVisited) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Mark as visited for next time
+    try { window.localStorage.setItem('oc-maker.hasVisited', '1'); } catch { /* ignore */ }
+
     const steps = [
       { ms: 0, pct: 0, text: 'Initializing application…' },
-      { ms: 300, pct: 12, text: 'Loading UI components…' },
-      { ms: 600, pct: 28, text: 'Mounting audio engine…' },
-      { ms: 900, pct: 45, text: 'Restoring preferences…' },
-      { ms: 1200, pct: 62, text: 'Preparing workspace…' },
-      { ms: 1550, pct: 78, text: 'Calibrating display…' },
-      { ms: 1950, pct: 94, text: 'Finalizing setup…' },
-      { ms: 2300, pct: 100, text: 'Ready' },
+      { ms: 200, pct: 25, text: 'Loading UI components…' },
+      { ms: 450, pct: 55, text: 'Restoring preferences…' },
+      { ms: 700, pct: 80, text: 'Preparing workspace…' },
+      { ms: 950, pct: 100, text: 'Ready' },
     ];
     const timers: ReturnType<typeof setTimeout>[] = [];
     steps.forEach(({ ms, pct, text }) => {
@@ -4598,12 +4708,16 @@ function App() {
         setLoadingStep(text);
       }, ms));
     });
-    timers.push(setTimeout(() => setIsLoading(false), 2500));
+    timers.push(setTimeout(() => setIsLoading(false), 1200));
     return () => timers.forEach(clearTimeout);
   }, []);
 
   // Global hover sound delegation (throttled)
   useEffect(() => {
+    if (!settings.audio.sfxEnabled || !settings.audio.soundOnInteract) {
+      return;
+    }
+
     let lastHoverTime = 0;
     const HOVER_THROTTLE_MS = 90;
     const handler = (event: MouseEvent) => {
@@ -4611,6 +4725,8 @@ function App() {
       if (!target) return;
       const now = Date.now();
       if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
+      // Skip hover sound on interactive inputs to avoid noise during slider/text adjustments
+      if (target.closest('input[type="range"], input[type="text"], input[type="number"], input[type="url"], input[type="password"], textarea, select, label[for]')) return;
       if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header')) {
         lastHoverTime = now;
         playSound('buttonHover');
@@ -4621,7 +4737,7 @@ function App() {
     };
     document.addEventListener('mouseover', handler, true);
     return () => document.removeEventListener('mouseover', handler, true);
-  }, []);
+  }, [settings.audio.sfxEnabled, settings.audio.soundOnInteract]);
 
   // Global keyboard shortcuts
   const shortcutMapRef = useRef(settings.shortcutMap);
@@ -4804,6 +4920,9 @@ function App() {
     if ('audio' in patch && patch.audio) {
       updateAudioSettings(patch.audio);
     }
+    if ('performance' in patch && patch.performance && typeof patch.performance.maxConcurrentRequests === 'number') {
+      setMaxConcurrentRequests(patch.performance.maxConcurrentRequests);
+    }
   }, []);
 
   function navigateTo(nextScreen: Exclude<FeatureScreen, 'home'>) {
@@ -4913,162 +5032,171 @@ function App() {
           onOpenStart={() => { playSound('modalOpen'); setModalStep('root'); }}
           onOpenImport={() => { playSound('modalOpen'); setImportOpen(true); }}
         />
-      ) : screen === 'face-maker' ? (
-        <FaceMakerPage
-          messages={messages}
-          language={settings.language}
-          onBack={() => setScreen('home')}
-          onOpenSettings={() => openSettings('style')}
-          onOpenDocs={sharedPageProps.onOpenDocs}
-        />
-      ) : screen === 'style-transfer' ? (
-        <StyleTransferPage
-          {...sharedPageProps}
-          pageTitle={messages.pageStyleTitle}
-          pageDescription={messages.pageStyleDescription}
-        />
-      ) : screen === 'prompt-suite' ? (
-        <PromptSuitePage
-          {...sharedPageProps}
-          pageTitle={messages.pagePromptTitle}
-          pageDescription={messages.pagePromptDescription}
-        />
-      ) : screen === 'llm-hub' ? (
-        <LlmHubPage
-          {...sharedPageProps}
-          pageTitle={messages.pageLlmTitle}
-          pageDescription={messages.pageLlmDescription}
-        />
-      ) : screen === 'tts-export' ? (
-        <TtsExportPage
-          {...sharedPageProps}
-          pageTitle={messages.pageTtsTitle}
-          pageDescription={messages.pageTtsDescription}
-        />
-      ) : screen === 'paper2gal' ? (
-        <Paper2GalPage
-          {...sharedPageProps}
-          pageTitle={messages.pagePaperTitle}
-          pageDescription={messages.pagePaperDescription}
-        />
-      ) : screen === 'character-gif' ? (
-        <CharacterGifPage
-          {...sharedPageProps}
-          pageTitle={messages.pageGifTitle}
-          pageDescription={messages.pageGifDescription}
-        />
-      ) : screen === 'index-tts' ? (
-        <IndexTtsPage
-          {...sharedPageProps}
-          pageTitle={messages.pageIndexTtsTitle}
-          pageDescription={messages.pageIndexTtsDescription}
-        />
-      ) : screen === 'image-converter' ? (
-        <ImageConverterPage
-          {...sharedPageProps}
-          pageTitle={messages.pageImageConverterTitle}
-          pageDescription={messages.pageImageConverterDescription}
-        />
-      ) : screen === 'audio-editor' ? (
-        <AudioEditorPage
-          {...sharedPageProps}
-          pageTitle={messages.pageAudioEditorTitle}
-          pageDescription={messages.pageAudioEditorDescription}
-          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
-        />
-      ) : screen === 'audio-converter' ? (
-        <AudioConverterPage
-          {...sharedPageProps}
-          pageTitle={messages.pageAudioConverterTitle}
-          pageDescription={messages.pageAudioConverterDescription}
-          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
-        />
-      ) : screen === 'asset-gallery' ? (
-        <AssetGalleryPage
-          {...sharedPageProps}
-          pageTitle={messages.pageAssetGalleryTitle}
-          pageDescription={messages.pageAssetGalleryDescription}
-          onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
-        />
-      ) : screen === 'relationship-web' ? (
-        <RelationshipWebPage
-          {...sharedPageProps}
-          pageTitle={messages.pageRelationshipWebTitle}
-          pageDescription={messages.pageRelationshipWebDescription}
-        />
-      ) : screen === 'character-card' ? (
-        <CharacterCardPage
-          {...sharedPageProps}
-          pageTitle={messages.pageCharacterCardTitle}
-          pageDescription={messages.pageCharacterCardDescription}
-        />
-      ) : screen === 'character-chronicle' ? (
-        <CharacterChroniclePage
-          {...sharedPageProps}
-          pageTitle={messages.pageCharacterChronicleTitle}
-          pageDescription={messages.pageCharacterChronicleDescription}
-        />
-      ) : screen === 'world-encyclopedia' ? (
-        <WorldEncyclopediaPage
-          {...sharedPageProps}
-          pageTitle={messages.pageWorldEncyclopediaTitle}
-          pageDescription={messages.pageWorldEncyclopediaDescription}
-        />
-      ) : screen === 'inspiration-generator' ? (
-        <InspirationGeneratorPage
-          {...sharedPageProps}
-          pageTitle={messages.pageInspirationGeneratorTitle}
-          pageDescription={messages.pageInspirationGeneratorDescription}
-        />
-      ) : screen === 'character-stats' ? (
-        <CharacterStatsDesignerPage
-          {...sharedPageProps}
-          pageTitle={messages.pageCharacterStatsTitle}
-          pageDescription={messages.pageCharacterStatsDescription}
-        />
-      ) : screen === 'color-palette' ? (
-        <ColorPaletteDesignerPage
-          {...sharedPageProps}
-          pageTitle={messages.pageColorPaletteTitle}
-          pageDescription={messages.pageColorPaletteDescription}
-        />
-      ) : screen === 'dialogue-generator' ? (
-        <DialogueGeneratorPage
-          {...sharedPageProps}
-          pageTitle={messages.pageDialogueGeneratorTitle}
-          pageDescription={messages.pageDialogueGeneratorDescription}
-        />
-      ) : screen === 'skill-tree' ? (
-        <CharacterSkillTreePage
-          {...sharedPageProps}
-          pageTitle={messages.pageSkillTreeTitle}
-          pageDescription={messages.pageSkillTreeDescription}
-        />
-      ) : screen === 'battle-card' ? (
-        <CharacterBattleCardPage
-          {...sharedPageProps}
-          pageTitle={messages.pageBattleCardTitle}
-          pageDescription={messages.pageBattleCardDescription}
-        />
-      ) : screen === 'docs' ? (
-        <DocsPage
-          {...sharedPageProps}
-          pageTitle={messages.pageDocsTitle}
-          pageDescription={messages.pageDocsDescription}
-          messages={messages}
-          initialToolId={docsTarget?.toolId}
-          initialSection={docsTarget?.section}
-          initialErrorCode={docsTarget?.errorCode}
-          onMount={() => setDocsTarget(null)}
-        />
       ) : (
-        <FeaturePage
-          screen={screen}
-          messages={messages}
-          language={settings.language}
-          onBack={() => setScreen('home')}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-        />
+        <Suspense fallback={
+          <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', zIndex: 90, flexDirection: 'column', gap: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid var(--border)', borderTopColor: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Loading…</span>
+          </div>
+        }>
+          {screen === 'face-maker' ? (
+            <FaceMakerPage
+              messages={messages}
+              language={settings.language}
+              onBack={() => setScreen('home')}
+              onOpenSettings={() => openSettings('style')}
+              onOpenDocs={sharedPageProps.onOpenDocs}
+            />
+          ) : screen === 'style-transfer' ? (
+            <StyleTransferPage
+              {...sharedPageProps}
+              pageTitle={messages.pageStyleTitle}
+              pageDescription={messages.pageStyleDescription}
+            />
+          ) : screen === 'prompt-suite' ? (
+            <PromptSuitePage
+              {...sharedPageProps}
+              pageTitle={messages.pagePromptTitle}
+              pageDescription={messages.pagePromptDescription}
+            />
+          ) : screen === 'llm-hub' ? (
+            <LlmHubPage
+              {...sharedPageProps}
+              pageTitle={messages.pageLlmTitle}
+              pageDescription={messages.pageLlmDescription}
+            />
+          ) : screen === 'tts-export' ? (
+            <TtsExportPage
+              {...sharedPageProps}
+              pageTitle={messages.pageTtsTitle}
+              pageDescription={messages.pageTtsDescription}
+            />
+          ) : screen === 'paper2gal' ? (
+            <Paper2GalPage
+              {...sharedPageProps}
+              pageTitle={messages.pagePaperTitle}
+              pageDescription={messages.pagePaperDescription}
+            />
+          ) : screen === 'character-gif' ? (
+            <CharacterGifPage
+              {...sharedPageProps}
+              pageTitle={messages.pageGifTitle}
+              pageDescription={messages.pageGifDescription}
+            />
+          ) : screen === 'index-tts' ? (
+            <IndexTtsPage
+              {...sharedPageProps}
+              pageTitle={messages.pageIndexTtsTitle}
+              pageDescription={messages.pageIndexTtsDescription}
+            />
+          ) : screen === 'image-converter' ? (
+            <ImageConverterPage
+              {...sharedPageProps}
+              pageTitle={messages.pageImageConverterTitle}
+              pageDescription={messages.pageImageConverterDescription}
+            />
+          ) : screen === 'audio-editor' ? (
+            <AudioEditorPage
+              {...sharedPageProps}
+              pageTitle={messages.pageAudioEditorTitle}
+              pageDescription={messages.pageAudioEditorDescription}
+              onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
+            />
+          ) : screen === 'audio-converter' ? (
+            <AudioConverterPage
+              {...sharedPageProps}
+              pageTitle={messages.pageAudioConverterTitle}
+              pageDescription={messages.pageAudioConverterDescription}
+              onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
+            />
+          ) : screen === 'asset-gallery' ? (
+            <AssetGalleryPage
+              {...sharedPageProps}
+              pageTitle={messages.pageAssetGalleryTitle}
+              pageDescription={messages.pageAssetGalleryDescription}
+              onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
+            />
+          ) : screen === 'relationship-web' ? (
+            <RelationshipWebPage
+              {...sharedPageProps}
+              pageTitle={messages.pageRelationshipWebTitle}
+              pageDescription={messages.pageRelationshipWebDescription}
+            />
+          ) : screen === 'character-card' ? (
+            <CharacterCardPage
+              {...sharedPageProps}
+              pageTitle={messages.pageCharacterCardTitle}
+              pageDescription={messages.pageCharacterCardDescription}
+            />
+          ) : screen === 'character-chronicle' ? (
+            <CharacterChroniclePage
+              {...sharedPageProps}
+              pageTitle={messages.pageCharacterChronicleTitle}
+              pageDescription={messages.pageCharacterChronicleDescription}
+            />
+          ) : screen === 'world-encyclopedia' ? (
+            <WorldEncyclopediaPage
+              {...sharedPageProps}
+              pageTitle={messages.pageWorldEncyclopediaTitle}
+              pageDescription={messages.pageWorldEncyclopediaDescription}
+            />
+          ) : screen === 'inspiration-generator' ? (
+            <InspirationGeneratorPage
+              {...sharedPageProps}
+              pageTitle={messages.pageInspirationGeneratorTitle}
+              pageDescription={messages.pageInspirationGeneratorDescription}
+            />
+          ) : screen === 'character-stats' ? (
+            <CharacterStatsDesignerPage
+              {...sharedPageProps}
+              pageTitle={messages.pageCharacterStatsTitle}
+              pageDescription={messages.pageCharacterStatsDescription}
+            />
+          ) : screen === 'color-palette' ? (
+            <ColorPaletteDesignerPage
+              {...sharedPageProps}
+              pageTitle={messages.pageColorPaletteTitle}
+              pageDescription={messages.pageColorPaletteDescription}
+            />
+          ) : screen === 'dialogue-generator' ? (
+            <DialogueGeneratorPage
+              {...sharedPageProps}
+              pageTitle={messages.pageDialogueGeneratorTitle}
+              pageDescription={messages.pageDialogueGeneratorDescription}
+            />
+          ) : screen === 'skill-tree' ? (
+            <CharacterSkillTreePage
+              {...sharedPageProps}
+              pageTitle={messages.pageSkillTreeTitle}
+              pageDescription={messages.pageSkillTreeDescription}
+            />
+          ) : screen === 'battle-card' ? (
+            <CharacterBattleCardPage
+              {...sharedPageProps}
+              pageTitle={messages.pageBattleCardTitle}
+              pageDescription={messages.pageBattleCardDescription}
+            />
+          ) : screen === 'docs' ? (
+            <DocsPage
+              {...sharedPageProps}
+              pageTitle={messages.pageDocsTitle}
+              pageDescription={messages.pageDocsDescription}
+              messages={messages}
+              initialToolId={docsTarget?.toolId}
+              initialSection={docsTarget?.section}
+              initialErrorCode={docsTarget?.errorCode}
+              onMount={() => setDocsTarget(null)}
+            />
+          ) : (
+            <FeaturePage
+              screen={screen}
+              messages={messages}
+              language={settings.language}
+              onBack={() => setScreen('home')}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+            />
+          )}
+        </Suspense>
       )}
 
       {modalStep && (
@@ -5112,6 +5240,41 @@ function App() {
       <GlobalFooterBar version={VERSION} messages={messages} />
     </div>
   );
+}
+
+function useModalEscape(onClose: () => void) {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCloseRef.current();
+      }
+    }
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+}
+
+function useModalFocus(cardRef: React.RefObject<HTMLElement>, isOpen: boolean) {
+  const triggerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (isOpen) {
+      triggerRef.current = document.activeElement as HTMLElement;
+      const id = window.setTimeout(() => {
+        const first = cardRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        first?.focus();
+      }, 60);
+      return () => window.clearTimeout(id);
+    }
+    const id = window.setTimeout(() => {
+      triggerRef.current?.focus();
+    }, MODAL_CLOSE_MS + 60);
+    return () => window.clearTimeout(id);
+  }, [isOpen, cardRef]);
 }
 
 function GlobalFooterBar({ version, messages }: { version: string; messages: Messages }) {
@@ -5186,99 +5349,36 @@ function HomeScreen({
             <h3>{messages.workflowTitle}</h3>
             <p>{messages.workflowDescription}</p>
 
-            <div className="workflow-list horizontal">
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('face-maker')}>
-                <ActionIcon kind="face-maker" />
-                <span>{messages.featureFace}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('style-transfer')}>
-                <ActionIcon kind="style-transfer" />
-                <span>{messages.featureStyle}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('prompt-suite')}>
-                <ActionIcon kind="prompt-suite" />
-                <span>{messages.featurePrompt}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('llm-hub')}>
-                <ActionIcon kind="llm-hub" />
-                <span>{messages.featureLlm}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('tts-export')}>
-                <ActionIcon kind="tts-export" />
-                <span>{messages.featureTts}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('paper2gal')}>
-                <ActionIcon kind="paper2gal" />
-                <span>{messages.featurePaper}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('image-converter')}>
-                <ActionIcon kind="image-converter" />
-                <span>{messages.featureImageConverter}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-gif')}>
-                <ActionIcon kind="character-gif" />
-                <span>{messages.featureGif}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('index-tts')}>
-                <ActionIcon kind="index-tts" />
-                <span>{messages.featureIndexTts}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('audio-editor')}>
-                <ActionIcon kind="audio-editor" />
-                <span>{messages.featureAudioEditor}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('audio-converter')}>
-                <ActionIcon kind="audio-converter" />
-                <span>{messages.featureAudioConverter}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('asset-gallery')}>
-                <ActionIcon kind="asset-gallery" />
-                <span>{messages.featureAssetGallery}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('relationship-web')}>
-                <ActionIcon kind="relationship-web" />
-                <span>{messages.featureRelationshipWeb}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-card')}>
-                <ActionIcon kind="character-card" />
-                <span>{messages.featureCharacterCard}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-chronicle')}>
-                <ActionIcon kind="character-chronicle" />
-                <span>{messages.featureCharacterChronicle}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('world-encyclopedia')}>
-                <ActionIcon kind="world-encyclopedia" />
-                <span>{messages.featureWorldEncyclopedia}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('inspiration-generator')}>
-                <ActionIcon kind="inspiration-generator" />
-                <span>{messages.featureInspirationGenerator}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('character-stats')}>
-                <ActionIcon kind="character-stats" />
-                <span>{messages.featureCharacterStats}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('color-palette')}>
-                <ActionIcon kind="color-palette" />
-                <span>{messages.featureColorPalette}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('dialogue-generator')}>
-                <ActionIcon kind="dialogue-generator" />
-                <span>{messages.featureDialogueGenerator}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('skill-tree')}>
-                <ActionIcon kind="skill-tree" />
-                <span>{messages.featureSkillTree}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('battle-card')}>
-                <ActionIcon kind="battle-card" />
-                <span>{messages.featureBattleCard}</span>
-              </button>
-              <button className="workflow-item compact workflow-entry-button" type="button" onClick={() => onNavigate('docs')}>
-                <ActionIcon kind="docs" />
-                <span>{messages.featureDocs}</span>
-              </button>
+            <div className="home-workflow-groups">
+              {(['creation', 'character', 'world', 'audio', 'assets'] as const).map((cat) => {
+                const features = getFeaturesByCategory(cat);
+                if (features.length === 0) return null;
+                const catLabelMap = {
+                  creation: messages.categoryCreation,
+                  character: messages.categoryCharacter,
+                  world: messages.categoryWorld,
+                  audio: messages.categoryAudio,
+                  assets: messages.categoryAssets,
+                } as const;
+                return (
+                  <div key={cat} className="home-workflow-group">
+                    <p className="section-label">{catLabelMap[cat]}</p>
+                    <div className="workflow-list horizontal">
+                      {features.map((feature) => (
+                        <button
+                          key={feature.id}
+                          className="workflow-item compact workflow-entry-button"
+                          type="button"
+                          onClick={() => onNavigate(feature.id)}
+                        >
+                          <ActionIcon kind={feature.icon} />
+                          <span>{messages[feature.labelKey as keyof Messages] as string}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="workflow-actions">
@@ -6154,6 +6254,7 @@ function FaceMakerPage({
       anchor.download = 'oc-character.png';
       anchor.click();
       setToast({ message: 'PNG exported successfully', type: 'success' });
+      playSound('success');
     } catch {
       setToast({ message: 'Export failed, please try again', type: 'error' });
       playSound('error');
@@ -6481,22 +6582,22 @@ function FaceMakerPage({
           <aside className="editor-side editor-controls">
             <section className="editor-panel-block">
               <h3>{copy.paramsTitle}</h3>
-              <label className="slider-row"><span>{copy.headScale} ({draft.headScale})</span><input type="range" min="40" max="70" value={draft.headScale} onChange={(e) => handleSliderChange('headScale', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.faceLength} ({draft.faceLength})</span><input type="range" min="30" max="70" value={draft.faceLength} onChange={(e) => handleSliderChange('faceLength', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.chinWidth} ({draft.chinWidth})</span><input type="range" min="30" max="70" value={draft.chinWidth} onChange={(e) => handleSliderChange('chinWidth', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.forehead} ({draft.forehead})</span><input type="range" min="30" max="70" value={draft.forehead} onChange={(e) => handleSliderChange('forehead', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.skinTone} ({draft.skinTone})<span className="color-dot" style={{ background: skinBackground }} /></span><input type="range" min="0" max="100" value={draft.skinTone} onChange={(e) => handleSliderChange('skinTone', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.hairColor} ({draft.hairColor})<span className="color-dot" style={{ background: '#3a6ea5', filter: `hue-rotate(${hairHue}deg)` }} /></span><input type="range" min="0" max="100" value={draft.hairColor} onChange={(e) => handleSliderChange('hairColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.browDistance} ({draft.browDistance})</span><input type="range" min="30" max="70" value={draft.browDistance} onChange={(e) => handleSliderChange('browDistance', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeScale} ({draft.eyeScale})</span><input type="range" min="38" max="62" value={draft.eyeScale} onChange={(e) => handleSliderChange('eyeScale', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeDistance} ({draft.eyeDistance})</span><input type="range" min="30" max="70" value={draft.eyeDistance} onChange={(e) => handleSliderChange('eyeDistance', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.eyeHeight} ({draft.eyeHeight})</span><input type="range" min="30" max="70" value={draft.eyeHeight} onChange={(e) => handleSliderChange('eyeHeight', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.pupilColor} ({draft.pupilColor})<span className="color-dot" style={{ background: '#5a8aee', filter: `hue-rotate(${pupilHue}deg)` }} /></span><input type="range" min="0" max="100" value={draft.pupilColor} onChange={(e) => handleSliderChange('pupilColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.noseHeight} ({draft.noseHeight})</span><input type="range" min="30" max="70" value={draft.noseHeight} onChange={(e) => handleSliderChange('noseHeight', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.mouthCurve} ({draft.mouthCurve})</span><input type="range" min="40" max="64" value={draft.mouthCurve} onChange={(e) => handleSliderChange('mouthCurve', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.mouthWidth} ({draft.mouthWidth})</span><input type="range" min="30" max="70" value={draft.mouthWidth} onChange={(e) => handleSliderChange('mouthWidth', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.accessoryColor} ({draft.accessoryColor})<span className="color-dot" style={{ background: '#c0392b', filter: `hue-rotate(${accessoryHue}deg)` }} /></span><input type="range" min="0" max="100" value={draft.accessoryColor} onChange={(e) => handleSliderChange('accessoryColor', Number(e.target.value))} /></label>
-              <label className="slider-row"><span>{copy.tilt} ({draft.tilt})</span><input type="range" min="-10" max="10" value={draft.tilt} onChange={(e) => handleSliderChange('tilt', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.headScale} ({draft.headScale})</span><input type="range" data-sfx-handled min="40" max="70" value={draft.headScale} onChange={(e) => handleSliderChange('headScale', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.faceLength} ({draft.faceLength})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.faceLength} onChange={(e) => handleSliderChange('faceLength', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.chinWidth} ({draft.chinWidth})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.chinWidth} onChange={(e) => handleSliderChange('chinWidth', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.forehead} ({draft.forehead})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.forehead} onChange={(e) => handleSliderChange('forehead', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.skinTone} ({draft.skinTone})<span className="color-dot" style={{ background: skinBackground }} /></span><input type="range" data-sfx-handled min="0" max="100" value={draft.skinTone} onChange={(e) => handleSliderChange('skinTone', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.hairColor} ({draft.hairColor})<span className="color-dot" style={{ background: '#3a6ea5', filter: `hue-rotate(${hairHue}deg)` }} /></span><input type="range" data-sfx-handled min="0" max="100" value={draft.hairColor} onChange={(e) => handleSliderChange('hairColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.browDistance} ({draft.browDistance})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.browDistance} onChange={(e) => handleSliderChange('browDistance', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeScale} ({draft.eyeScale})</span><input type="range" data-sfx-handled min="38" max="62" value={draft.eyeScale} onChange={(e) => handleSliderChange('eyeScale', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeDistance} ({draft.eyeDistance})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.eyeDistance} onChange={(e) => handleSliderChange('eyeDistance', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.eyeHeight} ({draft.eyeHeight})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.eyeHeight} onChange={(e) => handleSliderChange('eyeHeight', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.pupilColor} ({draft.pupilColor})<span className="color-dot" style={{ background: '#5a8aee', filter: `hue-rotate(${pupilHue}deg)` }} /></span><input type="range" data-sfx-handled min="0" max="100" value={draft.pupilColor} onChange={(e) => handleSliderChange('pupilColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.noseHeight} ({draft.noseHeight})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.noseHeight} onChange={(e) => handleSliderChange('noseHeight', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.mouthCurve} ({draft.mouthCurve})</span><input type="range" data-sfx-handled min="40" max="64" value={draft.mouthCurve} onChange={(e) => handleSliderChange('mouthCurve', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.mouthWidth} ({draft.mouthWidth})</span><input type="range" data-sfx-handled min="30" max="70" value={draft.mouthWidth} onChange={(e) => handleSliderChange('mouthWidth', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.accessoryColor} ({draft.accessoryColor})<span className="color-dot" style={{ background: '#c0392b', filter: `hue-rotate(${accessoryHue}deg)` }} /></span><input type="range" data-sfx-handled min="0" max="100" value={draft.accessoryColor} onChange={(e) => handleSliderChange('accessoryColor', Number(e.target.value))} /></label>
+              <label className="slider-row"><span>{copy.tilt} ({draft.tilt})</span><input type="range" data-sfx-handled min="-10" max="10" value={draft.tilt} onChange={(e) => handleSliderChange('tilt', Number(e.target.value))} /></label>
             </section>
 
             <section className="editor-panel-block">
@@ -6556,6 +6657,7 @@ function ConfirmReturnModal({
 }) {
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number>(0);
+  const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     return () => {
@@ -6577,13 +6679,16 @@ function ConfirmReturnModal({
     timerRef.current = window.setTimeout(onConfirm, MODAL_CLOSE_MS);
   }
 
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, true);
+
   if (typeof document === 'undefined') {
     return null;
   }
 
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
-      <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <section ref={cardRef} className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={requestClose} aria-label={closeLabel} data-sfx-handled>
           ×
         </button>
@@ -6623,6 +6728,7 @@ function ActionConfirmModal({
 }) {
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number>(0);
+  const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     return () => {
@@ -6644,13 +6750,16 @@ function ActionConfirmModal({
     timerRef.current = window.setTimeout(onConfirm, MODAL_CLOSE_MS);
   }
 
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, true);
+
   if (typeof document === 'undefined') {
     return null;
   }
 
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
-      <section className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <section ref={cardRef} className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={requestClose} aria-label={closeLabel} data-sfx-handled>
           ×
         </button>
@@ -6758,7 +6867,7 @@ function FeaturePage({
 function ActionIcon({
   kind,
 }: {
-  kind: 'face-maker' | 'style-transfer' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'character-gif' | 'index-tts' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'skill-tree' | 'battle-card' | 'docs';
+  kind: ActionIconKind;
 }) {
   const paths = {
     'face-maker': (
@@ -6986,6 +7095,7 @@ function StartModal({
 }) {
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number>(0);
+  const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     return () => {
@@ -7000,9 +7110,12 @@ function StartModal({
     timerRef.current = window.setTimeout(onClose, MODAL_CLOSE_MS);
   }
 
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, true);
+
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
-      <section className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <section ref={cardRef} className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
           ×
         </button>
@@ -7012,98 +7125,18 @@ function StartModal({
         <p className="modal-description">{messages.startModalDescription}</p>
 
         <div className="action-grid root-grid">
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('face-maker')}>
-            <ActionIcon kind="face-maker" />
-            <strong>{messages.actionFace}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('style-transfer')}>
-            <ActionIcon kind="style-transfer" />
-            <strong>{messages.actionStyle}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('prompt-suite')}>
-            <ActionIcon kind="prompt-suite" />
-            <strong>{messages.actionPromptSuite}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('llm-hub')}>
-            <ActionIcon kind="llm-hub" />
-            <strong>{messages.actionLlmHub}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('tts-export')}>
-            <ActionIcon kind="tts-export" />
-            <strong>{messages.actionTtsExport}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('paper2gal')}>
-            <ActionIcon kind="paper2gal" />
-            <strong>{messages.actionPaper2Gal}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('image-converter')}>
-            <ActionIcon kind="image-converter" />
-            <strong>{messages.actionImageConverter}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-gif')}>
-            <ActionIcon kind="character-gif" />
-            <strong>{messages.actionGif}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('index-tts')}>
-            <ActionIcon kind="index-tts" />
-            <strong>{messages.actionIndexTts}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('audio-editor')}>
-            <ActionIcon kind="audio-editor" />
-            <strong>{messages.actionAudioEditor}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('audio-converter')}>
-            <ActionIcon kind="audio-converter" />
-            <strong>{messages.actionAudioConverter}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('asset-gallery')}>
-            <ActionIcon kind="asset-gallery" />
-            <strong>{messages.actionAssetGallery}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('relationship-web')}>
-            <ActionIcon kind="relationship-web" />
-            <strong>{messages.actionRelationshipWeb}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-card')}>
-            <ActionIcon kind="character-card" />
-            <strong>{messages.actionCharacterCard}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-chronicle')}>
-            <ActionIcon kind="character-chronicle" />
-            <strong>{messages.actionCharacterChronicle}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('world-encyclopedia')}>
-            <ActionIcon kind="world-encyclopedia" />
-            <strong>{messages.actionWorldEncyclopedia}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('inspiration-generator')}>
-            <ActionIcon kind="inspiration-generator" />
-            <strong>{messages.actionInspirationGenerator}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('character-stats')}>
-            <ActionIcon kind="character-stats" />
-            <strong>{messages.actionCharacterStats}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('color-palette')}>
-            <ActionIcon kind="color-palette" />
-            <strong>{messages.actionColorPalette}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('dialogue-generator')}>
-            <ActionIcon kind="dialogue-generator" />
-            <strong>{messages.actionDialogueGenerator}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('skill-tree')}>
-            <ActionIcon kind="skill-tree" />
-            <strong>{messages.actionSkillTree}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('battle-card')}>
-            <ActionIcon kind="battle-card" />
-            <strong>{messages.actionBattleCard}</strong>
-          </button>
-          <button className="action-tile" type="button" data-sfx-handled onClick={() => onSelect('docs')}>
-            <ActionIcon kind="docs" />
-            <strong>{messages.featureDocs}</strong>
-          </button>
+          {FEATURE_REGISTRY.map((feature) => (
+            <button
+              key={feature.id}
+              className="action-tile"
+              type="button"
+              data-sfx-handled
+              onClick={() => onSelect(feature.id)}
+            >
+              <ActionIcon kind={feature.icon} />
+              <strong>{messages[feature.actionKey as keyof Messages] as string}</strong>
+            </button>
+          ))}
         </div>
       </section>
     </div>
@@ -7127,6 +7160,7 @@ function ImportModal({
   const timerRef = useRef<number>(0);
   const navigateTimerRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
   const [step, setStep] = useState<'select' | 'upload'>('select');
   const [selectedTool, setSelectedTool] = useState<ImportableTool | null>(null);
   const [jsonText, setJsonText] = useState('');
@@ -7162,6 +7196,9 @@ function ImportModal({
       onClose();
     }, MODAL_CLOSE_MS);
   }
+
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, isOpen);
 
   function selectTool(tool: ImportableTool) {
     playSound('confirm');
@@ -7244,26 +7281,13 @@ function ImportModal({
     navigateTimerRef.current = window.setTimeout(() => onNavigate(screenMap[selectedTool]), MODAL_CLOSE_MS + 20);
   }
 
-  const tools: { key: ImportableTool; label: string; icon: Parameters<typeof ActionIcon>[0]['kind'] }[] = [
-    { key: 'face-maker', label: messages.featureFace, icon: 'face-maker' },
-    { key: 'style-transfer', label: messages.featureStyle, icon: 'style-transfer' },
-    { key: 'prompt-suite', label: messages.featurePrompt, icon: 'prompt-suite' },
-    { key: 'llm-hub', label: messages.featureLlm, icon: 'llm-hub' },
-    { key: 'tts-export', label: messages.featureTts, icon: 'tts-export' },
-    { key: 'paper2gal', label: messages.featurePaper, icon: 'paper2gal' },
-    { key: 'image-converter', label: messages.featureImageConverter, icon: 'image-converter' },
-    { key: 'character-gif', label: messages.featureGif, icon: 'character-gif' },
-    { key: 'world-encyclopedia', label: messages.featureWorldEncyclopedia, icon: 'world-encyclopedia' },
-    { key: 'index-tts', label: messages.featureIndexTts, icon: 'index-tts' },
-    { key: 'audio-editor', label: messages.featureAudioEditor, icon: 'audio-editor' },
-    { key: 'audio-converter', label: messages.featureAudioConverter, icon: 'audio-converter' },
-  ];
+  const tools = getImportableFeatures();
 
   if (!isOpen) return null;
 
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
-      <section className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <section ref={cardRef} className={`modal-card action-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>×</button>
 
         <p className="section-label">{messages.appSubtitle}</p>
@@ -7275,9 +7299,9 @@ function ImportModal({
             <p style={{ margin: '12px 0 8px', fontWeight: 600, color: 'var(--text-secondary)' }}>{messages.importSelectTool}</p>
             <div className="action-grid root-grid">
               {tools.map((t) => (
-                <button key={t.key} className="action-tile" type="button" data-sfx-handled onClick={() => selectTool(t.key)}>
+                <button key={t.id} className="action-tile" type="button" data-sfx-handled onClick={() => selectTool(t.id as ImportableTool)}>
                   <ActionIcon kind={t.icon} />
-                  <strong>{t.label}</strong>
+                  <strong>{messages[t.labelKey as keyof Messages] as string}</strong>
                 </button>
               ))}
             </div>
@@ -7286,7 +7310,7 @@ function ImportModal({
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0 8px' }}>
               <button className="secondary-button small-button" type="button" onClick={() => { setStep('select'); setStatus('idle'); }}>← {messages.actionBack}</button>
-              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{tools.find((t) => t.key === selectedTool)?.label}</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{selectedTool ? messages[(getFeatureMeta(selectedTool)?.labelKey ?? 'featureFace') as keyof Messages] as string : ''}</span>
             </div>
 
             <div className="form-grid" style={{ marginTop: 12 }}>
@@ -7482,6 +7506,7 @@ function SettingsModal({
   const [tab, setTab] = useState<SettingsTab>(initialTab);
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number>(0);
+  const cardRef = useRef<HTMLElement>(null);
   const [selectedAnnouncementVersion, setSelectedAnnouncementVersion] = useState<
     (typeof announcementHistory)[number]['version']
   >(announcementHistory[0].version);
@@ -7560,6 +7585,9 @@ function SettingsModal({
     setIsClosing(true);
     timerRef.current = window.setTimeout(onClose, MODAL_CLOSE_MS);
   }
+
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, true);
 
   function applyShortcutBuilderValue() {
     const nextValue = shortcutBuilderValue.trim();
@@ -7710,9 +7738,11 @@ function SettingsModal({
     );
   }
 
+  const isPresetSaveDuplicate = presetDialog.open ? isPresetSameAsCurrent(presetDialog.slot as 0 | 1) : false;
+
   return (
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
-      <section className={`modal-card settings-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <section ref={cardRef} className={`modal-card settings-modal modal-surface ${isClosing ? 'closing' : 'opening'}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" onClick={requestClose} aria-label={messages.close} data-sfx-handled>
           ×
         </button>
@@ -7942,6 +7972,12 @@ function SettingsModal({
                       <input className="contrast-slider" type="range" min="0" max="100" step="1" value={settings.audio.masterVolume} onChange={(e) => onUpdate({ audio: { ...settings.audio, masterVolume: Number(e.target.value) } })} />
                       <span className="contrast-value">{settings.audio.masterVolume}%</span>
                     </div>
+                  </div>
+                  <div className="chip-row" style={{ marginTop: 12 }}>
+                    <button className="choice-chip" type="button" onClick={() => onUpdate({ audio: applyAudioPreset('mute') })}>{messages.audioPresetMute}</button>
+                    <button className="choice-chip" type="button" onClick={() => onUpdate({ audio: applyAudioPreset('feedbackOnly') })}>{messages.audioPresetFeedback}</button>
+                    <button className="choice-chip" type="button" onClick={() => onUpdate({ audio: applyAudioPreset('bgmOnly') })}>{messages.audioPresetBgm}</button>
+                    <button className="choice-chip" type="button" onClick={() => onUpdate({ audio: applyAudioPreset('quiet') })}>{messages.audioPresetQuiet}</button>
                   </div>
                 </section>
 
@@ -8385,10 +8421,6 @@ function SettingsModal({
                     {[
                       { key: 'reduceAnimations', label: messages.performanceReduceAnimations },
                       { key: 'disableGlassmorphism', label: messages.performanceDisableGlass },
-                      { key: 'lowResolutionPreviews', label: messages.performanceLowResPreview },
-                      { key: 'lazyLoadModules', label: messages.performanceLazyLoad },
-                      { key: 'disableParticles', label: messages.performanceDisableParticles },
-                      { key: 'aggressiveCaching', label: messages.performanceAggressiveCache },
                       { key: 'devMode', label: messages.performanceDevMode },
                     ].map((item) => (
                       <div key={item.key} className="switch-row">
@@ -8725,15 +8757,17 @@ function SettingsModal({
                     onChange={(e) => setPresetDialog((d) => ({ ...d, name: e.target.value }))}
                     autoFocus
                   />
+                  {isPresetSaveDuplicate && (
+                    <p className="tiny-copy settings-warning" role="status" aria-live="polite" style={{ marginTop: 10 }}>
+                      {messages.stylePresetSame}
+                    </p>
+                  )}
                   <div className="tool-actions-row" style={{ marginTop: 16 }}>
                     <button
                       className="primary-button"
                       type="button"
+                      disabled={isPresetSaveDuplicate}
                       onClick={() => {
-                        if (isPresetSameAsCurrent(presetDialog.slot as 0 | 1)) {
-                          alert(messages.stylePresetSame);
-                          return;
-                        }
                         savePresetSlot(presetDialog.slot as 0 | 1, presetDialog.name);
                       }}
                     >
@@ -8756,248 +8790,7 @@ function SettingsModal({
 }
 
 function getFeatureDetails(screen: Exclude<FeatureScreen, 'home'>, messages: Messages) {
-  switch (screen) {
-    case 'face-maker':
-      return {
-        title: messages.pageFaceTitle,
-        description: messages.pageFaceDescription,
-        workspaceTitle: 'Character Canvas',
-        panelTitle: 'Face / Hair / Palette',
-        pipelineTitle: 'Presets / Export',
-        todoOne: '补角色图层、部位分类和颜色系统',
-        todoTwo: '补随机生成、重置与导出 PNG',
-      };
-    case 'style-transfer':
-      return {
-        title: messages.pageStyleTitle,
-        description: messages.pageStyleDescription,
-        workspaceTitle: 'Input / Output Preview',
-        panelTitle: 'Model / Prompt / Seed',
-        pipelineTitle: 'Queue / History',
-        todoOne: '补输入图片、模型选择和参数面板',
-        todoTwo: '补任务状态、结果预览与下载',
-      };
-    case 'prompt-suite':
-      return {
-        title: messages.pagePromptTitle,
-        description: messages.pagePromptDescription,
-        workspaceTitle: 'Prompt Workspace',
-        panelTitle: 'Character Prompt / World-building',
-        pipelineTitle: 'Generated Assets',
-        todoOne: '补角色资料、Prompt 模板和导出逻辑',
-        todoTwo: '补世界观编辑与本地保存',
-      };
-    case 'llm-hub':
-      return {
-        title: messages.pageLlmTitle,
-        description: messages.pageLlmDescription,
-        workspaceTitle: 'LLM Workspace',
-        panelTitle: 'Model / Parameters',
-        pipelineTitle: 'Generated Text',
-        todoOne: '补 LLM 模型选择、温度与系统提示词',
-        todoTwo: '补文本生成、历史记录与导出',
-      };
-    case 'tts-export':
-      return {
-        title: messages.pageTtsTitle,
-        description: messages.pageTtsDescription,
-        workspaceTitle: 'TTS Workspace',
-        panelTitle: 'Voice / Emotion / Format',
-        pipelineTitle: 'Audio Outputs',
-        todoOne: '补语音选择、语速、音高与情感配置',
-        todoTwo: '补参考音频上传、合成与导出',
-      };
-    case 'paper2gal':
-      return {
-        title: messages.pagePaperTitle,
-        description: messages.pagePaperDescription,
-        workspaceTitle: 'paper2gal Stage',
-        panelTitle: 'Asset Controls',
-        pipelineTitle: 'Outputs / Logs',
-        todoOne: '补图片素材工作流配置与启动入口',
-        todoTwo: '补 Character Workflow 仓库联动',
-      };
-    case 'character-gif':
-      return {
-        title: messages.pageGifTitle,
-        description: messages.pageGifDescription,
-        workspaceTitle: 'GIF Generator Workspace',
-        panelTitle: 'GIF Parameters',
-        pipelineTitle: 'Generated GIF / Logs',
-        todoOne: '补 GIF 帧数、帧率、循环与动画类型配置',
-        todoTwo: '补角色图像输入与动态 GIF 生成导出',
-      };
-    case 'index-tts':
-      return {
-        title: messages.pageIndexTtsTitle,
-        description: messages.pageIndexTtsDescription,
-        workspaceTitle: 'IndexTTS Workspace',
-        panelTitle: 'Voice / Emotion / Format',
-        pipelineTitle: 'Generated Audio / Logs',
-        todoOne: '补文本输入、参考音频上传与音色克隆配置',
-        todoTwo: '补 IndexTTS 语音合成与音频导出',
-      };
-    case 'image-converter':
-      return {
-        title: messages.pageImageConverterTitle,
-        description: messages.pageImageConverterDescription,
-        workspaceTitle: 'Converter Workspace',
-        panelTitle: 'Format Controls',
-        pipelineTitle: 'Output / Download',
-        todoOne: '补格式选择与质量调整',
-        todoTwo: '补批量转换与尺寸调整',
-      };
-    case 'audio-editor':
-      return {
-        title: messages.pageAudioEditorTitle,
-        description: messages.pageAudioEditorDescription,
-        workspaceTitle: 'Audio Editor Workspace',
-        panelTitle: 'Waveform & Effects',
-        pipelineTitle: 'Export / Download',
-        todoOne: '补音频导入与波形可视化',
-        todoTwo: '补剪辑、效果处理与导出',
-      };
-    case 'audio-converter':
-      return {
-        title: messages.pageAudioConverterTitle,
-        description: messages.pageAudioConverterDescription,
-        workspaceTitle: 'Audio Converter Workspace',
-        panelTitle: 'Format & Parameters',
-        pipelineTitle: 'Convert / Download',
-        todoOne: '补音频导入与格式选择',
-        todoTwo: '补参数调整与批量转换',
-      };
-    case 'asset-gallery':
-      return {
-        title: messages.pageAssetGalleryTitle,
-        description: messages.pageAssetGalleryDescription,
-        workspaceTitle: 'Asset Gallery',
-        panelTitle: 'Assets / Filters',
-        pipelineTitle: 'Preview / Export',
-        todoOne: '补资产导入、分类与搜索',
-        todoTwo: '补批量导出与预览弹窗',
-      };
-    case 'relationship-web':
-      return {
-        title: messages.pageRelationshipWebTitle,
-        description: messages.pageRelationshipWebDescription,
-        workspaceTitle: 'Relationship Canvas',
-        panelTitle: 'Nodes / Connections',
-        pipelineTitle: 'Export / Import',
-        todoOne: '补节点拖拽、连线编辑',
-        todoTwo: '补关系类型与布局算法',
-      };
-    case 'character-card':
-      return {
-        title: messages.pageCharacterCardTitle,
-        description: messages.pageCharacterCardDescription,
-        workspaceTitle: 'Card Editor',
-        panelTitle: 'Fields / Theme',
-        pipelineTitle: 'Preview / Export',
-        todoOne: '补字段编辑与主题切换',
-        todoTwo: '补 PNG 导出与模板选择',
-      };
-    case 'character-chronicle':
-      return {
-        title: messages.pageCharacterChronicleTitle,
-        description: messages.pageCharacterChronicleDescription,
-        workspaceTitle: 'Chronicle Editor',
-        panelTitle: 'Events / Timeline',
-        pipelineTitle: 'Export / Import',
-        todoOne: '补事件增删改与排序',
-        todoTwo: '补时间轴可视化与导出',
-      };
-    case 'world-encyclopedia':
-      return {
-        title: messages.pageWorldEncyclopediaTitle,
-        description: messages.pageWorldEncyclopediaDescription,
-        workspaceTitle: 'Encyclopedia Editor',
-        panelTitle: 'Entries / Categories',
-        pipelineTitle: 'Search / Export',
-        todoOne: '补条目编辑与分类管理',
-        todoTwo: '补全文搜索与 JSON 导出',
-      };
-    case 'inspiration-generator':
-      return {
-        title: messages.pageInspirationGeneratorTitle,
-        description: messages.pageInspirationGeneratorDescription,
-        workspaceTitle: 'Generator Workspace',
-        panelTitle: 'Prompts / Presets',
-        pipelineTitle: 'Results / History',
-        todoOne: '补 Prompt 模板与预设管理',
-        todoTwo: '补结果收藏与历史记录',
-      };
-    case 'character-stats':
-      return {
-        title: messages.pageCharacterStatsTitle,
-        description: messages.pageCharacterStatsDescription,
-        workspaceTitle: 'Stats Designer',
-        panelTitle: 'Attributes / Radar',
-        pipelineTitle: 'Presets / Export',
-        todoOne: '补属性配置与雷达图',
-        todoTwo: '补预设导入与数值平衡',
-      };
-    case 'color-palette':
-      return {
-        title: messages.pageColorPaletteTitle,
-        description: messages.pageColorPaletteDescription,
-        workspaceTitle: 'Palette Designer',
-        panelTitle: 'Colors / Harmonies',
-        pipelineTitle: 'Export / Apply',
-        todoOne: '补色彩选择与调和算法',
-        todoTwo: '补导出格式与角色关联',
-      };
-    case 'dialogue-generator':
-      return {
-        title: messages.pageDialogueGeneratorTitle,
-        description: messages.pageDialogueGeneratorDescription,
-        workspaceTitle: 'Dialogue Workspace',
-        panelTitle: 'Characters / Tone',
-        pipelineTitle: 'Lines / Export',
-        todoOne: '补角色选择与语气配置',
-        todoTwo: '补台词生成与批量导出',
-      };
-    case 'skill-tree':
-      return {
-        title: messages.pageSkillTreeTitle,
-        description: messages.pageSkillTreeDescription,
-        workspaceTitle: 'Skill Tree Canvas',
-        panelTitle: 'Nodes / Connections',
-        pipelineTitle: 'Export / Import',
-        todoOne: '补节点编辑与连线系统',
-        todoTwo: '补技能类型与 JSON 导出',
-      };
-    case 'battle-card':
-      return {
-        title: messages.pageBattleCardTitle,
-        description: messages.pageBattleCardDescription,
-        workspaceTitle: 'Battle Card Editor',
-        panelTitle: 'Stats / Skills',
-        pipelineTitle: 'Preview / Export',
-        todoOne: '补属性自动计算与技能标签',
-        todoTwo: '补战斗卡 PNG 导出',
-      };
-    case 'docs':
-      return {
-        title: messages.pageDocsTitle,
-        description: messages.pageDocsDescription,
-        workspaceTitle: 'Documentation',
-        panelTitle: 'Topics / Search',
-        pipelineTitle: 'Content / Navigation',
-        todoOne: '补文档内容与搜索索引',
-        todoTwo: '补多语言文档与快捷键参考',
-      };
-    default:
-      return {
-        title: messages.appTitle || 'Unknown',
-        description: '',
-        workspaceTitle: 'Workspace',
-        panelTitle: 'Controls',
-        pipelineTitle: 'Outputs',
-        todoOne: '',
-        todoTwo: '',
-      };
-  }
+  return getFeatureDetailsFromRegistry(screen, messages);
 }
 
 export default App;

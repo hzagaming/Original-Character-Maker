@@ -53,7 +53,7 @@ async function probeSameOrigin(): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
-    const response = await fetch('/api/health', {
+    const response = await fetchWithConcurrency('/api/health', {
       method: 'GET',
       signal: controller.signal,
     });
@@ -72,7 +72,7 @@ async function probePort(port: number): Promise<string | null> {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
-    const response = await fetch(`http://localhost:${port}/api/health`, {
+    const response = await fetchWithConcurrency(`http://localhost:${port}/api/health`, {
       method: 'GET',
       signal: controller.signal,
     });
@@ -389,4 +389,52 @@ export function getApiForFeature(
   }
 
   return null;
+}
+
+// ─── Concurrent request limiter ───
+let _maxConcurrent = 4;
+const _requestQueue: Array<() => void> = [];
+let _activeCount = 0;
+
+export function setMaxConcurrentRequests(n: number): void {
+  _maxConcurrent = Math.max(1, Math.min(20, Number(n) || 4));
+}
+
+export function getMaxConcurrentRequests(): number {
+  return _maxConcurrent;
+}
+
+function runNext(): void {
+  if (_activeCount >= _maxConcurrent) return;
+  const next = _requestQueue.shift();
+  if (!next) return;
+  _activeCount += 1;
+  next();
+}
+
+export async function fetchWithConcurrency(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    function execute() {
+      fetch(input, init)
+        .then((response) => {
+          _activeCount -= 1;
+          runNext();
+          resolve(response);
+        })
+        .catch((error) => {
+          _activeCount -= 1;
+          runNext();
+          reject(error);
+        });
+    }
+    if (_activeCount < _maxConcurrent) {
+      _activeCount += 1;
+      execute();
+    } else {
+      _requestQueue.push(execute);
+    }
+  });
 }

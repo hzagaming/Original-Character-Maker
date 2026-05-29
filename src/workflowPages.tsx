@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { usePageToast, PageToast } from './components/PageToast';
 import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getApiForFeature, getEffectiveApiBase, getProbeLog, requiresHostedApiBase } from './apiConfig';
 import { playSound } from './audioEngine';
 import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
@@ -12,6 +13,43 @@ function safeJsonStringify(value: unknown, space?: number): string {
   } catch {
     return '{"error":"JSON serialization failed"}';
   }
+}
+
+const MODAL_CLOSE_MS = 220;
+
+function useModalEscape(onClose: () => void) {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCloseRef.current();
+      }
+    }
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+}
+
+function useModalFocus(cardRef: React.RefObject<HTMLElement | null>, isOpen: boolean) {
+  const triggerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (isOpen) {
+      triggerRef.current = document.activeElement as HTMLElement;
+      const id = window.setTimeout(() => {
+        const first = cardRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        first?.focus();
+      }, 60);
+      return () => window.clearTimeout(id);
+    }
+    const id = window.setTimeout(() => {
+      triggerRef.current?.focus();
+    }, MODAL_CLOSE_MS + 60);
+    return () => window.clearTimeout(id);
+  }, [isOpen, cardRef]);
 }
 
 type SharedPageProps = {
@@ -134,6 +172,7 @@ type UiCopySet = {
   dirty: string;
   clean: string;
   continueEdit: string;
+  close: string;
   confirmReturnTitle: string;
   confirmReturnDirty: string;
   confirmReturnClean: string;
@@ -197,6 +236,7 @@ type UiCopySet = {
   tutorialButton: string;
   importInvalidConfig: string;
   importReadError: string;
+  saveFailed: string;
   llmSystemPromptDefault: string;
   llmTestMessagePlaceholder: string;
   llmPresetNamePlaceholder: string;
@@ -866,6 +906,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     dirty: '未保存',
     clean: '已保存',
     continueEdit: '继续编辑',
+    close: '关闭',
     confirmReturnTitle: '确定返回首页吗？',
     confirmReturnDirty: '你还没保存当前页面内容，返回后未保存的调整不会保留。',
     confirmReturnClean: '当前页面内容已经保存，返回首页后可以稍后继续处理。',
@@ -929,6 +970,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     tutorialButton: '教程',
     importInvalidConfig: '无效的配置数据',
     importReadError: '文件读取失败',
+    saveFailed: '保存失败（存储空间可能已满）',
     llmSystemPromptDefault: '你是一位擅长原创角色设计的创意助手。请根据用户提供的信息，生成富有想象力的角色设定、对话和世界观的文本内容。',
     llmTestMessagePlaceholder: '输入测试消息…',
     llmPresetNamePlaceholder: '预设名称',
@@ -1329,6 +1371,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     dirty: '未保存',
     clean: '保存済み',
     continueEdit: '編集を続ける',
+    close: '閉じる',
     confirmReturnTitle: 'ホームに戻りますか？',
     confirmReturnDirty: '現在のページ内容はまだ保存されていません。戻ると未保存の変更は失われます。',
     confirmReturnClean: '現在の内容は保存済みです。ホームに戻って後で続けられます。',
@@ -1392,6 +1435,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     tutorialButton: 'チュートリアル',
     importInvalidConfig: '無効な設定データ',
     importReadError: 'ファイルの読み取りに失敗',
+    saveFailed: '保存に失敗しました（ストレージがいっぱいの可能性があります）',
     llmSystemPromptDefault: 'あなたはオリジナルキャラクターデザインに長けたクリエイティブアシスタントです。ユーザーが提供する情報に基づいて、想像力豊かなキャラクター設定、会話、世界観のテキストを生成してください。',
     llmTestMessagePlaceholder: 'テストメッセージを入力…',
     llmPresetNamePlaceholder: 'プリセット名',
@@ -1792,6 +1836,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     dirty: 'Unsaved',
     clean: 'Saved',
     continueEdit: 'Keep editing',
+    close: 'Close',
     confirmReturnTitle: 'Return to the homepage?',
     confirmReturnDirty: 'This page still has unsaved changes. Returning now will discard the current draft.',
     confirmReturnClean: 'This page is already saved. You can safely go back and continue later.',
@@ -1855,6 +1900,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     tutorialButton: 'Tutorial',
     importInvalidConfig: 'Invalid configuration data',
     importReadError: 'File read failed',
+    saveFailed: 'Save failed (storage may be full)',
     llmSystemPromptDefault: 'You are a helpful creative assistant for original character design. Please generate imaginative character settings, dialogues, and world-building text based on the information provided by the user.',
     llmTestMessagePlaceholder: 'Type a test message…',
     llmPresetNamePlaceholder: 'Preset name',
@@ -2255,6 +2301,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     dirty: 'Не сохранено',
     clean: 'Сохранено',
     continueEdit: 'Продолжить редактирование',
+    close: 'Закрыть',
     confirmReturnTitle: 'Вернуться на главную?',
     confirmReturnDirty: 'На этой странице есть несохранённые изменения. Если вернуться сейчас, текущий черновик будет потерян.',
     confirmReturnClean: 'Содержимое уже сохранено. Можно безопасно вернуться и продолжить позже.',
@@ -2318,6 +2365,7 @@ const uiCopy: Record<BaseLanguage, UiCopySet> = {
     tutorialButton: 'Руководство',
     importInvalidConfig: 'Неверные данные конфигурации',
     importReadError: 'Ошибка чтения файла',
+    saveFailed: 'Ошибка сохранения (возможно, хранилище заполнено)',
     llmSystemPromptDefault: 'Вы — творческий ассистент по дизайну оригинальных персонажей. Пожалуйста, генерируйте содержательные тексты персонажей, диалоги и описания миров на основе информации, предоставленной пользователем.',
     llmTestMessagePlaceholder: 'Введите тестовое сообщение…',
     llmPresetNamePlaceholder: 'Название пресета',
@@ -3139,13 +3187,15 @@ function readLocalState<T>(key: string, fallback: T): T {
   }
 }
 
-function writeLocalState<T>(key: string, value: T) {
-  if (typeof window === 'undefined') return;
+function writeLocalState<T>(key: string, value: T, onError?: () => void): boolean {
+  if (typeof window === 'undefined') return false;
 
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch {
-    // Ignore storage failures when storage is unavailable.
+    onError?.();
+    return false;
   }
 }
 
@@ -3831,6 +3881,7 @@ function ConfirmReturnModal({
 }) {
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number>(0);
+  const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     return () => {
@@ -3850,6 +3901,9 @@ function ConfirmReturnModal({
     timerRef.current = window.setTimeout(onConfirm, 220);
   }
 
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, true);
+
   if (typeof document === 'undefined') {
     return null;
   }
@@ -3857,6 +3911,7 @@ function ConfirmReturnModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section
+        ref={cardRef}
         className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`}
         role="dialog"
         aria-modal="true"
@@ -3899,6 +3954,7 @@ function ConfirmActionModal({
 }) {
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number>(0);
+  const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     return () => {
@@ -3918,6 +3974,9 @@ function ConfirmActionModal({
     timerRef.current = window.setTimeout(onConfirm, 220);
   }
 
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, true);
+
   if (typeof document === 'undefined') {
     return null;
   }
@@ -3925,12 +3984,13 @@ function ConfirmActionModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section
+        ref={cardRef}
         className={`modal-card confirm-modal modal-surface ${isClosing ? 'closing' : 'opening'}`}
         role="dialog"
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label={copy.close} data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={cancelLabel} data-sfx-handled>
           ×
         </button>
         <p className="section-label">{title}</p>
@@ -4346,6 +4406,7 @@ function EditorExperimentalModal({
 }) {
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number>(0);
+  const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     return () => {
@@ -4360,6 +4421,9 @@ function EditorExperimentalModal({
     timerRef.current = window.setTimeout(onClose, 220);
   }
 
+  useModalEscape(requestClose);
+  useModalFocus(cardRef, true);
+
   if (typeof document === 'undefined') {
     return null;
   }
@@ -4367,12 +4431,13 @@ function EditorExperimentalModal({
   return createPortal(
     <div className={`modal-backdrop ${isClosing ? 'closing' : 'opening'}`} role="presentation" onClick={requestClose}>
       <section
+        ref={cardRef}
         className={`modal-card modal-surface editor-experimental-modal ${isClosing ? 'closing' : 'opening'}`}
         role="dialog"
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" type="button" onClick={requestClose} aria-label={copy.close} data-sfx-handled>
+        <button className="modal-close" type="button" onClick={requestClose} aria-label={title} data-sfx-handled>
           ×
         </button>
         <h2>{title}</h2>
@@ -4398,6 +4463,7 @@ export function StyleTransferPage({
   onNavigate,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const transfer = copy.transfer;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -4489,8 +4555,8 @@ export function StyleTransferPage({
   useBeforeUnloadGuard(isDirty);
 
   useEffect(() => {
-    writeLocalState(STYLE_TRANSFER_STORAGE_KEY, { inputFileName, config, savedSnapshot });
-  }, [config, inputFileName, savedSnapshot]);
+    writeLocalState(STYLE_TRANSFER_STORAGE_KEY, { inputFileName, config, savedSnapshot }, () => showToast(copy.saveFailed));
+  }, [config, inputFileName, savedSnapshot, showToast, copy.saveFailed]);
 
   // Fake-progress effect removed: StyleTransferPage now calls real API in startWorkflow().
 
@@ -4513,19 +4579,18 @@ export function StyleTransferPage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'style-transfer') { playSound('error'); alert(copy.importConfig + ': ' + copy.transfer.errorHintValidation); return; }
-        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        if (data.tool !== 'style-transfer') { showToast(copy.importConfig + ': ' + copy.transfer.errorHintValidation); return; }
+        if (!data.config || typeof data.config !== 'object') { showToast(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
         const imported = { ...defaultConfig, ...(data.config as Record<string, unknown>) } as typeof defaultConfig;
         setConfig(imported);
         setInputFileName(String(data.inputFileName ?? ''));
         setSavedSnapshot(JSON.stringify({ inputFileName: String(data.inputFileName ?? ''), config: imported }));
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -4564,6 +4629,7 @@ export function StyleTransferPage({
       setError(validationError);
       setShowErrorPanel(true);
       setLogs([{ time: timestamp(), level: 'error', text: `${validationError.code}: ${validationError.message}` }]);
+      playSound('workflowFail');
       return;
     }
     setStatus('running');
@@ -4765,6 +4831,7 @@ export function StyleTransferPage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>{backHome}</button>
         <div className="feature-header-meta">
@@ -4796,7 +4863,7 @@ export function StyleTransferPage({
           <div className="tool-column">
             {/* Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isInputOpen}>
                 <div>
                   <span className="card-caption">{transfer.inputTitle}</span>
                   <h3>{transfer.inputTitle}</h3>
@@ -4822,7 +4889,7 @@ export function StyleTransferPage({
 
             {/* Parameters Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isParamsOpen}>
                 <div>
                   <span className="card-caption">{transfer.paramsTitle}</span>
                   <h3>{transfer.paramsTitle}</h3>
@@ -4993,19 +5060,21 @@ export function StyleTransferPage({
           <div className="tool-column side">
             {/* Progress & Logs */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isLogsOpen}>
                 <div>
                   <span className="card-caption">{copy.progressTitle}</span>
                   <h3>{copy.progressTitle}</h3>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span className={`status-badge ${status}`}>{copy[statusLabelKey]}</span>
+                  <span className={`status-badge ${status}`} aria-live="polite">{copy[statusLabelKey]}</span>
                   <span className="collapsible-state">{isLogsOpen ? copy.hideDetails : copy.showDetails}</span>
                 </div>
               </div>
               {isLogsOpen && (
                 <>
-                  <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+                  <div className="progress-track" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={copy.progressTitle}>
+                    <div className="progress-fill" style={{ width: `${progress}%` }} />
+                  </div>
                   <div className="progress-meta">
                     <span>{copy.workflowId}</span>
                     <strong>{result?.workflowId?.toString() ?? `draft-${status}`}</strong>
@@ -5030,7 +5099,7 @@ export function StyleTransferPage({
 
             {/* Results */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isResultOpen}>
                 <div>
                   <span className="card-caption">{copy.resultsTitle}</span>
                   <h3>{copy.resultsTitle}</h3>
@@ -5166,6 +5235,7 @@ export function PromptSuitePage({
   onOpenSettings,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const promptCopy = copy.prompt;
   const editorRef = useRef<HTMLDivElement>(null);
@@ -5301,8 +5371,8 @@ export function PromptSuitePage({
       llmConfig,
       ttsConfig,
       savedSnapshot,
-    });
-  }, [customFonts, documentHtml, llmConfig, savedSnapshot, selectedTemplate, toolbarState, ttsConfig]);
+    }, () => showToast(copy.saveFailed));
+  }, [customFonts, documentHtml, llmConfig, savedSnapshot, selectedTemplate, toolbarState, ttsConfig, showToast, copy.saveFailed]);
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== documentHtml) {
@@ -5719,7 +5789,7 @@ export function PromptSuitePage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'prompt-suite') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        if (data.tool !== 'prompt-suite') { showToast(copy.importConfig + ': ' + copy.importToolMismatch); return; }
         const nextTemplate = String(data.selectedTemplate ?? initialTemplate.key);
         const nextHtml = sanitizeHtml(String(data.documentHtml ?? initialTemplate.html));
         setSelectedTemplate(nextTemplate);
@@ -5739,11 +5809,10 @@ export function PromptSuitePage({
         }));
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -5768,6 +5837,7 @@ export function PromptSuitePage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>
           {backHome}
@@ -6130,6 +6200,7 @@ export function Paper2GalPage({
   onNavigate,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const paper = copy.paper;
   const baseLanguage = resolveBaseLanguage(language);
@@ -6211,8 +6282,8 @@ export function Paper2GalPage({
       aiConcurrencyEnabled,
       promptOverrides,
       savedSnapshot,
-    });
-  }, [aiConcurrencyEnabled, inputFileName, message, promptOverrides, savedSnapshot, workflow]);
+    }, () => showToast(copy.saveFailed));
+  }, [aiConcurrencyEnabled, inputFileName, message, promptOverrides, savedSnapshot, workflow, showToast, copy.saveFailed]);
 
   useEffect(() => {
     return () => {
@@ -6566,6 +6637,9 @@ export function Paper2GalPage({
   }, []);
 
   function flashCopied(key: string) {
+    if (flashTimerRef.current) {
+      window.clearTimeout(flashTimerRef.current);
+    }
     setCopiedActionKey(key);
     flashTimerRef.current = window.setTimeout(() => {
       setCopiedActionKey((current) => (current === key ? '' : current));
@@ -6738,8 +6812,7 @@ export function Paper2GalPage({
           overrides = data.promptOverrides as Record<string, unknown>;
           concurrency = Boolean(data.aiConcurrencyEnabled ?? true);
         } else {
-          playSound('error');
-          alert(copy.importConfig + ': ' + copy.importToolMismatch);
+          showToast(copy.importConfig + ': ' + copy.importToolMismatch);
           return;
         }
         setPromptOverrides(normalizePaperPromptOverrides(migratePaperPromptOverrides(overrides)));
@@ -6747,11 +6820,10 @@ export function Paper2GalPage({
         setSavedSnapshot('');
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -6794,6 +6866,7 @@ export function Paper2GalPage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>
           {backHome}
@@ -6977,9 +7050,9 @@ export function Paper2GalPage({
                   <span className="card-caption">{copy.progressTitle}</span>
                   <h3>{copy.progressTitle}</h3>
                 </div>
-                <span className={`status-badge ${badgeClass}`}>{badgeLabel}</span>
+                <span className={`status-badge ${badgeClass}`} aria-live="polite">{badgeLabel}</span>
               </div>
-              <div className="progress-track">
+              <div className="progress-track" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={copy.progressTitle}>
                 <div className="progress-fill" style={{ width: `${progress}%` }} />
               </div>
               <div className="progress-meta">
@@ -7274,6 +7347,7 @@ export function LlmHubPage({
   onNavigate,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const promptCopy = copy.prompt;
 
@@ -7341,25 +7415,24 @@ export function LlmHubPage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'llm-hub') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
-        if (!data.llmConfig || typeof data.llmConfig !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        if (data.tool !== 'llm-hub') { showToast(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        if (!data.llmConfig || typeof data.llmConfig !== 'object') { showToast(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
         const imported = { ...fullDefaultConfig, ...(data.llmConfig as Record<string, unknown>) };
         setLlmConfig(imported as typeof fullDefaultConfig);
         setSavedSnapshot(JSON.stringify({ llmConfig: imported }));
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
 
   useEffect(() => {
-    writeLocalState('oc-maker.llm-hub-v2', { llmConfig, savedSnapshot, presets });
-  }, [llmConfig, savedSnapshot, presets]);
+    writeLocalState('oc-maker.llm-hub-v2', { llmConfig, savedSnapshot, presets }, () => showToast(copy.saveFailed));
+  }, [llmConfig, savedSnapshot, presets, showToast, copy.saveFailed]);
 
   useEffect(() => {
     return () => { abortControllerRef.current?.abort(); };
@@ -7490,6 +7563,7 @@ export function LlmHubPage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>
           {backHome}
@@ -7747,6 +7821,7 @@ export function TtsExportPage({
   onNavigate,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const promptCopy = copy.prompt;
   const initialTtsConfig = {
@@ -7875,19 +7950,18 @@ export function TtsExportPage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'tts-export') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
-        if (!data.ttsConfig || typeof data.ttsConfig !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        if (data.tool !== 'tts-export') { showToast(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        if (!data.ttsConfig || typeof data.ttsConfig !== 'object') { showToast(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
         const imported = { ...initialTtsConfig, ...(data.ttsConfig as Record<string, unknown>) };
         setTtsConfig(imported as typeof initialTtsConfig);
         setSavedSnapshot(JSON.stringify({ ttsConfig: imported }));
         setLogs([]);
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -7900,8 +7974,8 @@ export function TtsExportPage({
   useBeforeUnloadGuard(isDirty);
 
   useEffect(() => {
-    writeLocalState('oc-maker.tts-export', { ttsConfig, savedSnapshot });
-  }, [ttsConfig, savedSnapshot]);
+    writeLocalState('oc-maker.tts-export', { ttsConfig, savedSnapshot }, () => showToast(copy.saveFailed));
+  }, [ttsConfig, savedSnapshot, showToast, copy.saveFailed]);
 
   useEffect(() => {
     setTtsConfig((current) => (current.language !== language ? { ...current, language } : current));
@@ -7939,6 +8013,7 @@ export function TtsExportPage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>
           {backHome}
@@ -8046,7 +8121,7 @@ export function TtsExportPage({
             </section>
 
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isAdvancedOpen ? 'collapse' : 'expand'); setIsAdvancedOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isAdvancedOpen}>
                 <div>
                   <span className="card-caption">{promptCopy.ttsAdvancedParams}</span>
                   <h3 style={{ margin: 0 }}>{promptCopy.ttsAdvancedParams}</h3>
@@ -8078,7 +8153,7 @@ export function TtsExportPage({
             </section>
 
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isAudioPostOpen ? 'collapse' : 'expand'); setIsAudioPostOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isAudioPostOpen}>
                 <div>
                   <span className="card-caption">{promptCopy.ttsAudioPostProcessing}</span>
                   <h3 style={{ margin: 0 }}>{promptCopy.ttsAudioPostProcessing}</h3>
@@ -8109,7 +8184,7 @@ export function TtsExportPage({
             </section>
 
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isPronunciationOpen ? 'collapse' : 'expand'); setIsPronunciationOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isPronunciationOpen}>
                 <div>
                   <span className="card-caption">{promptCopy.ttsPronunciation}</span>
                   <h3 style={{ margin: 0 }}>{promptCopy.ttsPronunciation}</h3>
@@ -8227,6 +8302,7 @@ export function ImageConverterPage({
   onNavigate,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -8239,8 +8315,8 @@ export function ImageConverterPage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'image-converter') { playSound('error'); alert(copy.importConfig + ': ' + copy.importToolMismatch); return; }
-        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        if (data.tool !== 'image-converter') { showToast(copy.importConfig + ': ' + copy.importToolMismatch); return; }
+        if (!data.config || typeof data.config !== 'object') { showToast(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
         const cfg = data.config as Record<string, unknown>;
         setOutputFormat(String(cfg.outputFormat ?? 'image/png'));
         setQuality(Number(cfg.quality ?? 92));
@@ -8268,11 +8344,10 @@ export function ImageConverterPage({
         }));
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -8320,8 +8395,8 @@ export function ImageConverterPage({
   const isDirty = currentSnapshot !== savedSnapshot;
 
   useEffect(() => {
-    writeLocalState(IMAGE_CONVERTER_STORAGE_KEY, { outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot });
-  }, [outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot]);
+    writeLocalState(IMAGE_CONVERTER_STORAGE_KEY, { outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot }, () => showToast(copy.saveFailed));
+  }, [outputFormat, quality, maxWidth, maxHeight, maintainAspect, brightness, contrast, saturation, blur, hueRotate, grayscale, savedSnapshot, showToast, copy.saveFailed]);
 
   useEffect(() => {
     return () => {
@@ -8475,6 +8550,7 @@ export function ImageConverterPage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>{backHome}</button>
         <div className="feature-header-meta">
@@ -8701,6 +8777,7 @@ export function CharacterGifPage({
   onNavigate,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const transfer = copy.characterGif;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -8797,8 +8874,8 @@ export function CharacterGifPage({
   useBeforeUnloadGuard(isDirty);
 
   useEffect(() => {
-    writeLocalState(CHARACTER_GIF_STORAGE_KEY, { inputFileName, config, savedSnapshot });
-  }, [config, inputFileName, savedSnapshot]);
+    writeLocalState(CHARACTER_GIF_STORAGE_KEY, { inputFileName, config, savedSnapshot }, () => showToast(copy.saveFailed));
+  }, [config, inputFileName, savedSnapshot, showToast, copy.saveFailed]);
 
   useEffect(() => {
     return () => { if (inputPreviewUrl) URL.revokeObjectURL(inputPreviewUrl); };
@@ -8819,19 +8896,18 @@ export function CharacterGifPage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'character-gif') { playSound('error'); alert(copy.importConfig + ': ' + copy.characterGif.errorHintValidation); return; }
-        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        if (data.tool !== 'character-gif') { showToast(copy.importConfig + ': ' + copy.characterGif.errorHintValidation); return; }
+        if (!data.config || typeof data.config !== 'object') { showToast(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
         const imported = { ...defaultConfig, ...(data.config as Record<string, unknown>) } as typeof defaultConfig;
         setConfig(imported);
         setInputFileName(String(data.inputFileName ?? ''));
         setSavedSnapshot(JSON.stringify({ inputFileName: String(data.inputFileName ?? ''), config: imported }));
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -8870,6 +8946,7 @@ export function CharacterGifPage({
       setError(validationError);
       setShowErrorPanel(true);
       setLogs([{ time: timestamp(), level: 'error', text: `${validationError.code}: ${validationError.message}` }]);
+      playSound('workflowFail');
       return;
     }
     setStatus('running');
@@ -9085,6 +9162,7 @@ export function CharacterGifPage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>{backHome}</button>
         <div className="feature-header-meta">
@@ -9116,7 +9194,7 @@ export function CharacterGifPage({
           <div className="tool-column">
             {/* Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isParamsOpen}>
                 <div>
                   <span className="card-caption">{transfer.inputTitle}</span>
                   <h3>{transfer.inputTitle}</h3>
@@ -9142,7 +9220,7 @@ export function CharacterGifPage({
 
             {/* Parameters Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isParamsOpen}>
                 <div>
                   <span className="card-caption">{transfer.paramsTitle}</span>
                   <h3>{transfer.paramsTitle}</h3>
@@ -9345,19 +9423,21 @@ export function CharacterGifPage({
           <div className="tool-column side">
             {/* Progress & Logs */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isLogsOpen}>
                 <div>
                   <span className="card-caption">{copy.progressTitle}</span>
                   <h3>{copy.progressTitle}</h3>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span className={`status-badge ${status}`}>{copy[statusLabelKey]}</span>
+                  <span className={`status-badge ${status}`} aria-live="polite">{copy[statusLabelKey]}</span>
                   <span className="collapsible-state">{isLogsOpen ? copy.hideDetails : copy.showDetails}</span>
                 </div>
               </div>
               {isLogsOpen && (
                 <>
-                  <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+                  <div className="progress-track" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={copy.progressTitle}>
+                    <div className="progress-fill" style={{ width: `${progress}%` }} />
+                  </div>
                   <div className="progress-meta">
                     <span>{copy.workflowId}</span>
                     <strong>{result?.workflowId?.toString() ?? `draft-${status}`}</strong>
@@ -9382,7 +9462,7 @@ export function CharacterGifPage({
 
             {/* Results */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isResultOpen}>
                 <div>
                   <span className="card-caption">{copy.resultsTitle}</span>
                   <h3>{copy.resultsTitle}</h3>
@@ -9522,6 +9602,7 @@ export function IndexTtsPage({
   onNavigate,
   onOpenDocs,
 }: SharedPageProps) {
+  const { toast, showToast } = usePageToast();
   const copy = localizedUiCopy[language];
   const transfer = copy.indexTts;
   const textInputRef = useRef<HTMLTextAreaElement>(null);
@@ -9580,8 +9661,8 @@ export function IndexTtsPage({
   useBeforeUnloadGuard(isDirty);
 
   useEffect(() => {
-    writeLocalState(INDEX_TTS_STORAGE_KEY, { text, referenceAudioName, config, savedSnapshot });
-  }, [config, text, referenceAudioName, savedSnapshot]);
+    writeLocalState(INDEX_TTS_STORAGE_KEY, { text, referenceAudioName, config, savedSnapshot }, () => showToast(copy.saveFailed));
+  }, [config, text, referenceAudioName, savedSnapshot, showToast, copy.saveFailed]);
 
   useEffect(() => {
     return () => { abortControllerRef.current?.abort(); };
@@ -9598,8 +9679,8 @@ export function IndexTtsPage({
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result ?? '{}')) as Record<string, unknown>;
-        if (data.tool !== 'index-tts') { playSound('error'); alert(copy.importConfig + ': ' + copy.indexTts.importToolMismatch); return; }
-        if (!data.config || typeof data.config !== 'object') { playSound('error'); alert(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
+        if (data.tool !== 'index-tts') { showToast(copy.importConfig + ': ' + copy.indexTts.importToolMismatch); return; }
+        if (!data.config || typeof data.config !== 'object') { showToast(copy.importConfig + ': ' + copy.importInvalidConfig); return; }
         const imported = { ...defaultConfig, ...(data.config as Record<string, unknown>) } as typeof defaultConfig;
         setConfig(imported);
         setText(String(data.text ?? ''));
@@ -9607,11 +9688,10 @@ export function IndexTtsPage({
         setSavedSnapshot(JSON.stringify({ text: String(data.text ?? ''), referenceAudioName: String(data.referenceAudioName ?? ''), config: imported }));
         playSound('save');
       } catch {
-        playSound('error');
-        alert(copy.importConfig + ': ' + copy.importInvalidJson);
+        showToast(copy.importConfig + ': ' + copy.importInvalidJson);
       }
     };
-    reader.onerror = () => { playSound('error'); alert(copy.importConfig + ': ' + copy.importReadError); };
+    reader.onerror = () => { showToast(copy.importConfig + ': ' + copy.importReadError); };
     reader.readAsText(file);
     event.target.value = '';
   }
@@ -9648,6 +9728,7 @@ export function IndexTtsPage({
       setError(validationError);
       setShowErrorPanel(true);
       setLogs([{ time: timestamp(), level: 'error', text: `${validationError.code}: ${validationError.message}` }]);
+      playSound('workflowFail');
       return;
     }
     setStatus('running');
@@ -9837,6 +9918,7 @@ export function IndexTtsPage({
 
   return (
     <main className="feature-shell tool-page-shell">
+      <PageToast toast={toast} />
       <header className="feature-header fade-up delay-1">
         <button className="secondary-button small-button" type="button" onClick={() => setIsConfirmOpen(true)}>{backHome}</button>
         <div className="feature-header-meta">
@@ -9868,7 +9950,7 @@ export function IndexTtsPage({
           <div className="tool-column">
             {/* Text Input Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isInputOpen}>
                 <div>
                   <span className="card-caption">{transfer.textTitle}</span>
                   <h3>{transfer.textTitle}</h3>
@@ -9893,7 +9975,7 @@ export function IndexTtsPage({
 
             {/* Reference Audio Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} onClick={() => { playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isInputOpen ? 'collapse' : 'expand'); setIsInputOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isInputOpen}>
                 <div>
                   <span className="card-caption">{transfer.referenceAudioTitle}</span>
                   <h3>{transfer.referenceAudioTitle}</h3>
@@ -9925,7 +10007,7 @@ export function IndexTtsPage({
 
             {/* Parameters Card */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isParamsOpen ? 'collapse' : 'expand'); setIsParamsOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isParamsOpen}>
                 <div>
                   <span className="card-caption">{transfer.paramsTitle}</span>
                   <h3>{transfer.paramsTitle}</h3>
@@ -10011,19 +10093,21 @@ export function IndexTtsPage({
           <div className="tool-column side">
             {/* Progress & Logs */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isLogsOpen ? 'collapse' : 'expand'); setIsLogsOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isLogsOpen}>
                 <div>
                   <span className="card-caption">{copy.progressTitle}</span>
                   <h3>{copy.progressTitle}</h3>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span className={`status-badge ${status}`}>{copy[statusLabelKey]}</span>
+                  <span className={`status-badge ${status}`} aria-live="polite">{copy[statusLabelKey]}</span>
                   <span className="collapsible-state">{isLogsOpen ? copy.hideDetails : copy.showDetails}</span>
                 </div>
               </div>
               {isLogsOpen && (
                 <>
-                  <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+                  <div className="progress-track" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={copy.progressTitle}>
+                    <div className="progress-fill" style={{ width: `${progress}%` }} />
+                  </div>
                   <div className="progress-meta">
                     <span>{copy.workflowId}</span>
                     <strong>{result?.workflowId?.toString() ?? `draft-${status}`}</strong>
@@ -10048,7 +10132,7 @@ export function IndexTtsPage({
 
             {/* Results */}
             <section className="tool-card">
-              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} role="button" tabIndex={0}>
+              <div className="tool-card-header" style={{ cursor: 'pointer' }} data-sfx-handled onClick={() => { playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSound(isResultOpen ? 'collapse' : 'expand'); setIsResultOpen((v) => !v); } }} role="button" tabIndex={0} aria-expanded={isResultOpen}>
                 <div>
                   <span className="card-caption">{copy.resultsTitle}</span>
                   <h3>{copy.resultsTitle}</h3>

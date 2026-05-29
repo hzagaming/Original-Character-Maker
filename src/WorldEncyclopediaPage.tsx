@@ -99,8 +99,8 @@ function loadEntries(): EncyclopediaEntry[] {
   } catch { return []; }
 }
 
-function saveEntries(entries: EncyclopediaEntry[]) {
-  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); } catch { /* ignore */ }
+function saveEntries(entries: EncyclopediaEntry[]): boolean {
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); return true; } catch { return false; }
 }
 
 function useBeforeUnloadGuard(isDirty: boolean) {
@@ -140,6 +140,7 @@ const copyBase = {
     importSuccess: '导入成功：已添加 {count} 条',
     importError: '导入失败：JSON 格式无效',
     copied: '已复制',
+    exportFailed: '导出失败（剪贴板权限可能被拒绝）',
     cancel: '取消',
     save: '保存',
     delete: '删除',
@@ -148,6 +149,7 @@ const copyBase = {
     noRelCharacters: '关系网中暂无角色',
     helpButton: '帮助',
     categoryLabels: CATEGORY_LABELS.zh,
+    saveFailed: '保存失败（存储空间可能已满）',
   },
   ja: {
     addEntry: '項目追加',
@@ -173,6 +175,7 @@ const copyBase = {
     importSuccess: '取込成功：{count} 件追加',
     importError: '取込失敗：JSON 形式が不正です',
     copied: 'コピーしました',
+    exportFailed: '出力失敗（クリップボード権限が拒否された可能性があります）',
     cancel: 'キャンセル',
     save: '保存',
     delete: '削除',
@@ -181,6 +184,7 @@ const copyBase = {
     noRelCharacters: '関連キャラがいません',
     helpButton: 'ヘルプ',
     categoryLabels: CATEGORY_LABELS.ja,
+    saveFailed: '保存に失敗しました（ストレージがいっぱいの可能性があります）',
   },
   en: {
     addEntry: 'Add Entry',
@@ -206,6 +210,7 @@ const copyBase = {
     importSuccess: 'Import successful: {count} entries added',
     importError: 'Import failed: invalid JSON format',
     copied: 'Copied',
+    exportFailed: 'Export failed (clipboard permission may be denied)',
     cancel: 'Cancel',
     save: 'Save',
     delete: 'Delete',
@@ -214,6 +219,7 @@ const copyBase = {
     noRelCharacters: 'No linked characters',
     helpButton: 'Help',
     categoryLabels: CATEGORY_LABELS.en,
+    saveFailed: 'Save failed (storage may be full)',
   },
   ru: {
     addEntry: 'Добавить запись',
@@ -239,6 +245,7 @@ const copyBase = {
     importSuccess: 'Импорт успешен: добавлено {count} записей',
     importError: 'Ошибка импорта: неверный формат JSON',
     copied: 'Скопировано',
+    exportFailed: 'Ошибка экспорта (возможно, доступ к буферу обмена запрещён)',
     cancel: 'Отмена',
     save: 'Сохранить',
     delete: 'Удалить',
@@ -247,6 +254,7 @@ const copyBase = {
     noRelCharacters: 'Нет связанных персонажей',
     helpButton: 'Справка',
     categoryLabels: CATEGORY_LABELS.ru,
+    saveFailed: 'Ошибка сохранения (возможно, хранилище заполнено)',
   },
   ko: {
     addEntry: '항목 추가',
@@ -272,6 +280,7 @@ const copyBase = {
     importSuccess: '가져오기 성공: {count}개 항목 추가',
     importError: '가져오기 실패: 잘못된 JSON 형식',
     copied: '복사 완료',
+    exportFailed: '낳아오기 실패 (클립보드 권한이 거부되었을 수 있습니다)',
     cancel: '취소',
     save: '저장',
     delete: '삭제',
@@ -280,6 +289,7 @@ const copyBase = {
     noRelCharacters: '관련 캐릭터 없음',
     helpButton: '도움말',
     categoryLabels: CATEGORY_LABELS.ko,
+    saveFailed: '저장 실패 (저장 공간이 부족할 수 있습니다)',
   },
 };
 
@@ -327,7 +337,7 @@ export default function WorldEncyclopediaPage({
 
   useBeforeUnloadGuard(entries.length > 0);
 
-  useEffect(() => { saveEntries(entries); }, [entries]);
+
 
   useEffect(() => {
     setRelNodes(loadRelationshipNodes());
@@ -356,6 +366,8 @@ export default function WorldEncyclopediaPage({
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 2200);
   }, []);
+
+  useEffect(() => { if (!saveEntries(entries)) { playSound('error'); showToast(copy.saveFailed); } }, [entries, showToast, copy.saveFailed]);
 
   const filteredEntries = useMemo(() => {
     let result = [...entries];
@@ -414,7 +426,7 @@ export default function WorldEncyclopediaPage({
     navigator.clipboard.writeText(data).then(() => {
       showToast(copy.copied);
       playSound('confirm');
-    }).catch(() => playSound('warning'));
+    }).catch(() => { playSound('warning'); showToast(copy.exportFailed || copy.copied + ' (failed)'); });
   }, [entries, copy.copied, showToast]);
 
   const handleImport = useCallback(() => {

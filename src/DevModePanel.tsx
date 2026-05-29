@@ -252,10 +252,6 @@ export default function DevModePanel({ version, settings, effectiveApiEndpoint, 
     const perfFlags = [
       settings.performance.reduceAnimations && 'noAnim',
       settings.performance.disableGlassmorphism && 'noGlass',
-      settings.performance.lowResolutionPreviews && 'lowRes',
-      settings.performance.lazyLoadModules && 'lazyLoad',
-      settings.performance.disableParticles && 'noPart',
-      settings.performance.aggressiveCaching && 'aggrCache',
       settings.performance.devMode && 'dev',
     ].filter(Boolean);
     const lines: string[] = [];
@@ -486,9 +482,9 @@ export default function DevModePanel({ version, settings, effectiveApiEndpoint, 
           <Row label="Reduce Anim" value={settings.performance.reduceAnimations ? 'Y' : 'N'} />
           <Row label="No Glass" value={settings.performance.disableGlassmorphism ? 'Y' : 'N'} />
           <Row label="Low Res" value={settings.performance.lowResolutionPreviews ? 'Y' : 'N'} />
-          <Row label="Lazy Load" value={settings.performance.lazyLoadModules ? 'Y' : 'N'} />
-          <Row label="No Particles" value={settings.performance.disableParticles ? 'Y' : 'N'} />
-          <Row label="Aggressive Cache" value={settings.performance.aggressiveCaching ? 'Y' : 'N'} />
+          <Row label="Lazy Load" value="auto (code-split)" />
+          <Row label="No Particles" value="N/A" />
+          <Row label="Aggressive Cache" value="N/A" />
         </Section>
 
         {/* API */}

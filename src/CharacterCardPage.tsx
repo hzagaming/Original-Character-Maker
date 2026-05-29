@@ -139,8 +139,8 @@ function loadCard(): CardData {
   } catch { return defaultCard(); }
 }
 
-function saveCard(data: CardData) {
-  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch { /* ignore */ }
+function saveCard(data: CardData): boolean {
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; } catch { return false; }
 }
 
 function defaultCard(): CardData {
@@ -191,6 +191,7 @@ const copyBase = {
     helpButton: '帮助', cardHint: '选择模板并填写信息，右侧实时预览并导出 PNG 图片',
     exportSuccess: '卡片导出成功',
     exportError: '导出失败，请尝试缩小图片或降低质量',
+    saveFailed: '保存失败（存储空间可能已满）',
     tmplRelations: '关系', tmplProfile: '设定', tmplBio: '简介',
     tmplUnnamed: '未命名', tmplNoName: '?', tmplMadeWith: '由 OC Maker 制作',
   },
@@ -208,6 +209,7 @@ const copyBase = {
     helpButton: 'ヘルプ', cardHint: 'テンプレートを選んで情報を入力し、プレビュー確認後 PNG を出力',
     exportSuccess: 'カードを出力しました',
     exportError: '出力に失敗しました。画像を小さくするか品質を下げてお試しください',
+    saveFailed: '保存に失敗しました（ストレージがいっぱいの可能性があります）',
     tmplRelations: '関係', tmplProfile: 'プロフィール', tmplBio: '紹介',
     tmplUnnamed: '名前未設定', tmplNoName: '?', tmplMadeWith: 'OC Maker で作成',
   },
@@ -225,6 +227,7 @@ const copyBase = {
     helpButton: 'Help', cardHint: 'Choose a template, fill in the info, preview live, then export PNG',
     exportSuccess: 'Card exported successfully',
     exportError: 'Export failed. Try a smaller image or lower quality.',
+    saveFailed: 'Save failed (storage may be full)',
     tmplRelations: 'Relations', tmplProfile: 'Profile', tmplBio: 'Bio',
     tmplUnnamed: 'Unnamed', tmplNoName: '?', tmplMadeWith: 'Made with OC Maker',
   },
@@ -242,6 +245,7 @@ const copyBase = {
     helpButton: 'Справка', cardHint: 'Выберите шаблон, заполните данные, посмотрите превью и экспортируйте PNG',
     exportSuccess: 'Карточка экспортирована',
     exportError: 'Ошибка экспорта. Попробуйте уменьшить изображение или понизить качество.',
+    saveFailed: 'Ошибка сохранения (возможно, хранилище заполнено)',
     tmplRelations: 'Отношения', tmplProfile: 'Профиль', tmplBio: 'Биография',
     tmplUnnamed: 'Без имени', tmplNoName: '?', tmplMadeWith: 'Создано в OC Maker',
   },
@@ -259,6 +263,7 @@ const copyBase = {
     helpButton: '도움말', cardHint: '템플릿을 선택하고 정보를 입력한 뒤 PNG로 내보내세요',
     exportSuccess: '카드를 내보내왔습니다',
     exportError: '내보내기 실패. 이미지 크기를 줄이거나 품질을 낮춰 보세요.',
+    saveFailed: '저장 실패 (저장 공간이 부족할 수 있습니다)',
     tmplRelations: '관계', tmplProfile: '프로필', tmplBio: '소개',
     tmplUnnamed: '이름 없음', tmplNoName: '?', tmplMadeWith: 'OC Maker 제작',
   },
@@ -296,7 +301,7 @@ export default function CharacterCardPage({
 
   useBeforeUnloadGuard(card.name.length > 0);
 
-  useEffect(() => { saveCard(card); }, [card]);
+
 
   useEffect(() => {
     const imgs = loadGalleryImages();
@@ -327,6 +332,8 @@ export default function CharacterCardPage({
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 2200);
   }, []);
+
+  useEffect(() => { if (!saveCard(card)) { playSound('error'); showToast(copy.saveFailed); } }, [card, showToast, copy.saveFailed]);
 
   const handleExport = useCallback(async () => {
     if (!cardRef.current || !card.name.trim()) return;
@@ -486,7 +493,6 @@ export default function CharacterCardPage({
               value={card.name}
               onChange={(e) => setCard((c) => ({ ...c, name: e.target.value }))}
               placeholder={copy.emptyNameHint}
-              data-sfx-handled
             />
           </div>
 
@@ -497,7 +503,6 @@ export default function CharacterCardPage({
               className="tool-input"
               value={card.alias}
               onChange={(e) => setCard((c) => ({ ...c, alias: e.target.value }))}
-              data-sfx-handled
             />
           </div>
 
@@ -596,7 +601,6 @@ export default function CharacterCardPage({
                     value={f.label}
                     placeholder={copy.fieldLabel}
                     onChange={(e) => updateField(f.id, { label: e.target.value })}
-                    data-sfx-handled
                   />
                   <input
                     type="text"
@@ -604,7 +608,6 @@ export default function CharacterCardPage({
                     value={f.value}
                     placeholder={copy.fieldValue}
                     onChange={(e) => updateField(f.id, { value: e.target.value })}
-                    data-sfx-handled
                   />
                   <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => removeField(f.id)} aria-label={copy.delete}>
                     {copy.delete}
@@ -612,7 +615,7 @@ export default function CharacterCardPage({
                 </div>
               ))}
             </div>
-            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={addField} style={{ marginTop: 8 }}>
+            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={addField}>
               {copy.addField}
             </button>
           </div>
@@ -710,13 +713,13 @@ export default function CharacterCardPage({
       {pickerMode && (
         <div className="modal-backdrop opening" role="presentation" onClick={() => setPickerMode(null)}>
           <section className="modal-card modal-surface opening" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 'min(640px, 94vw)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{copy.selectImage}</h3>
+            <div className="modal-header">
+              <h3>{copy.selectImage}</h3>
               <button className="modal-close" type="button" data-sfx-handled onClick={() => { setPickerMode(null); }} aria-label={copy.cancel}>×</button>
             </div>
-            <div style={{ padding: 22, maxHeight: 'min(420px, 60vh)', overflow: 'auto' }}>
+            <div className="modal-body modal-body-scroll">
               {galleryImages.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <div className="empty-state">
                   <p>{copy.noImage}</p>
                 </div>
               ) : (

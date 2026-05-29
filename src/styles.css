@@ -292,8 +292,8 @@ a {
   border: var(--border-width) solid var(--border);
   background: var(--panel);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .top-banner {
@@ -303,7 +303,7 @@ a {
   gap: 18px;
   min-height: 132px;
   padding: 24px 28px;
-  border-radius: 28px;
+  border-radius: 16px;
 }
 
 .top-banner-copy h1 {
@@ -365,7 +365,7 @@ a {
 }
 
 .home-card {
-  border-radius: 30px;
+  border-radius: 18px;
   padding: 24px 26px;
   min-height: 250px;
 }
@@ -398,7 +398,7 @@ a {
 
 .home-hero-card {
   margin-top: 22px;
-  border-radius: 30px;
+  border-radius: 18px;
   padding: 26px;
 }
 
@@ -463,6 +463,23 @@ a {
   font-size: clamp(1.7rem, 3.1vw, 2.45rem);
 }
 
+.home-workflow-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.home-workflow-group .section-label {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+}
+
+.home-workflow-group .workflow-list.horizontal {
+  margin-top: 0;
+}
+
 .overview-card p,
 .workflow-card p {
   margin-top: 14px;
@@ -479,7 +496,7 @@ a {
 .metric-box {
   min-height: 98px;
   padding: 16px 18px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
@@ -523,7 +540,7 @@ a {
 .workflow-item.compact {
   min-height: 108px;
   padding: 18px 16px;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   flex-direction: column;
@@ -622,12 +639,12 @@ a {
   padding: 0 30px;
   font-size: 1.18rem;
   font-weight: 700;
-  border-radius: 20px;
+  border-radius: 12px;
 }
 
 .primary-button {
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.96), rgba(var(--accent-rgb), 0.82));
+  background: rgba(var(--accent-rgb), 0.92);
   box-shadow: var(--button-shadow);
 }
 
@@ -637,7 +654,12 @@ a {
   border-color: var(--border);
 }
 
-.primary-button:hover,
+.primary-button:hover {
+  transform: translateY(-1px);
+  background: rgba(var(--accent-rgb), 1);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.3), 0 14px 32px rgba(var(--accent-rgb), 0.18);
+}
+
 .secondary-button:hover,
 .choice-chip:hover,
 .palette-chip:hover,
@@ -652,7 +674,7 @@ a {
 .toggle-chip:hover {
   transform: translateY(-1px);
   border-color: rgba(var(--accent-rgb), 0.55);
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.18), rgba(var(--accent-rgb), 0.08));
+  background: rgba(var(--accent-rgb), 0.12);
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 12px 28px rgba(var(--accent-rgb), 0.12);
 }
 
@@ -809,7 +831,7 @@ a {
 .feature-intro-card,
 .feature-layout-card,
 .info-panel {
-  border-radius: 28px;
+  border-radius: 16px;
   padding: 24px 26px;
 }
 
@@ -849,7 +871,7 @@ a {
 .layout-card {
   min-height: 144px;
   padding: 22px;
-  border-radius: 24px;
+  border-radius: 14px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
@@ -903,7 +925,7 @@ a {
 }
 
 .tool-workbench {
-  border-radius: 30px;
+  border-radius: 18px;
   padding: 22px;
 }
 
@@ -1028,7 +1050,7 @@ a {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background:
     linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%) 0 0 / 28px 28px,
@@ -1218,7 +1240,7 @@ input[type='range']:focus::-moz-range-thumb {
 
 .range-field {
   padding: 14px 16px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
@@ -1488,7 +1510,7 @@ input[type='range']:focus::-moz-range-thumb {
   display: grid;
   gap: 10px;
   padding: 16px;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
@@ -1741,7 +1763,7 @@ input[type='range']:focus::-moz-range-thumb {
   display: grid;
   gap: 12px;
   padding: 14px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.025);
 }
@@ -1932,7 +1954,7 @@ input[type='range']:focus::-moz-range-thumb {
 .rich-editor-surface {
   min-height: 360px;
   padding: 18px;
-  border-radius: 24px;
+  border-radius: 14px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   outline: none;
@@ -2054,7 +2076,7 @@ input[type='range']:focus::-moz-range-thumb {
   gap: 14px;
   margin-bottom: 18px;
   padding: 16px;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.028);
 }
@@ -2084,7 +2106,7 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .editor-workbench {
-  border-radius: 30px;
+  border-radius: 18px;
   padding: 20px;
 }
 
@@ -2157,7 +2179,7 @@ input[type='range']:focus::-moz-range-thumb {
 
 .editor-panel-block,
 .editor-stage-shell {
-  border-radius: 28px;
+  border-radius: 16px;
   padding: 18px;
 }
 
@@ -2183,7 +2205,7 @@ input[type='range']:focus::-moz-range-thumb {
   width: 100%;
   min-height: 74px;
   padding: 12px 14px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
@@ -2574,7 +2596,7 @@ input[type='range']:focus::-moz-range-thumb {
 .eye-pair.sharp span {
   width: 38px;
   height: 16px;
-  border-radius: 20px 8px 16px 12px;
+  border-radius: 12px 8px 16px 12px;
   rotate: -6deg;
 }
 
@@ -2591,7 +2613,7 @@ input[type='range']:focus::-moz-range-thumb {
 .eye-pair.idol span {
   width: 40px;
   height: 20px;
-  border-radius: 20px 20px 14px 14px;
+  border-radius: 12px 20px 14px 14px;
 }
 
 .mouth-line {
@@ -2743,7 +2765,7 @@ input[type='range']:focus::-moz-range-thumb {
   background: rgba(5, 10, 16, 0.54);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  animation: modalBackdropIn 220ms ease forwards;
+  animation: modalBackdropIn calc(220ms * var(--animation-speed, 1)) ease forwards;
 }
 
 .app-shell.preset-paper2gal .modal-backdrop {
@@ -2751,7 +2773,7 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .modal-backdrop.closing {
-  animation: modalBackdropOut 220ms ease forwards;
+  animation: modalBackdropOut calc(220ms * var(--animation-speed, 1)) ease forwards;
 }
 
 .modal-overlay {
@@ -2774,7 +2796,7 @@ input[type='range']:focus::-moz-range-thumb {
   max-height: calc(100vh - 40px);
   margin: auto;
   overflow: auto;
-  border-radius: 30px;
+  border-radius: 18px;
   padding: 28px;
   color: var(--text-main);
   background: var(--panel-elevated);
@@ -2786,18 +2808,18 @@ input[type='range']:focus::-moz-range-thumb {
   max-height: calc(100vh - 40px);
   margin: auto;
   overflow: auto;
-  border-radius: 30px;
+  border-radius: 18px;
   padding: 28px;
   color: var(--text-main);
   background: var(--panel-elevated);
 }
 
 .modal-surface.opening {
-  animation: modalSurfaceIn 220ms ease forwards;
+  animation: modalSurfaceIn calc(220ms * var(--animation-speed, 1)) ease forwards;
 }
 
 .modal-surface.closing {
-  animation: modalSurfaceOut 220ms ease forwards;
+  animation: modalSurfaceOut calc(220ms * var(--animation-speed, 1)) ease forwards;
 }
 
 .modal-close {
@@ -2850,7 +2872,7 @@ input[type='range']:focus::-moz-range-thumb {
   gap: 18px;
   min-height: 92px;
   padding: 0 22px;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
@@ -2922,7 +2944,7 @@ input[type='range']:focus::-moz-range-thumb {
 .settings-tab {
   min-height: 70px;
   padding: 0 24px;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.02);
   color: var(--text-main);
@@ -2937,7 +2959,7 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .settings-section {
-  border-radius: 28px;
+  border-radius: 16px;
   padding: 24px;
 }
 
@@ -2989,7 +3011,7 @@ input[type='range']:focus::-moz-range-thumb {
   width: 100%;
   min-height: 68px;
   padding: 0 20px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
@@ -2999,7 +3021,7 @@ input[type='range']:focus::-moz-range-thumb {
 .settings-textarea {
   width: 100%;
   padding: 18px 20px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
@@ -3084,7 +3106,7 @@ input[type='range']:focus::-moz-range-thumb {
   width: 68px;
   height: 68px;
   padding: 6px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
@@ -3175,7 +3197,7 @@ input[type='range']:focus::-moz-range-thumb {
   display: grid;
   gap: 2px;
   padding: 16px 18px;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
@@ -3217,7 +3239,7 @@ input[type='range']:focus::-moz-range-thumb {
   flex-direction: column;
   min-height: 100%;
   padding: 22px;
-  border-radius: 24px;
+  border-radius: 14px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.03);
 }
@@ -3257,31 +3279,31 @@ input[type='range']:focus::-moz-range-thumb {
 
 .fade-up {
   opacity: 0;
-  animation: fadeUp calc(620ms * var(--animation-speed)) ease forwards;
+  animation: fadeUp calc(620ms * var(--animation-speed, 1)) ease forwards;
 }
 
 .delay-1 {
-  animation-delay: calc(60ms * var(--animation-speed));
+  animation-delay: calc(60ms * var(--animation-speed, 1));
 }
 
 .delay-2 {
-  animation-delay: calc(140ms * var(--animation-speed));
+  animation-delay: calc(140ms * var(--animation-speed, 1));
 }
 
 .delay-3 {
-  animation-delay: calc(220ms * var(--animation-speed));
+  animation-delay: calc(220ms * var(--animation-speed, 1));
 }
 
 .delay-4 {
-  animation-delay: calc(300ms * var(--animation-speed));
+  animation-delay: calc(300ms * var(--animation-speed, 1));
 }
 
 .delay-5 {
-  animation-delay: calc(380ms * var(--animation-speed));
+  animation-delay: calc(380ms * var(--animation-speed, 1));
 }
 
 .delay-6 {
-  animation-delay: calc(460ms * var(--animation-speed));
+  animation-delay: calc(460ms * var(--animation-speed, 1));
 }
 
 @keyframes fadeUp {
@@ -3294,6 +3316,22 @@ input[type='range']:focus::-moz-range-thumb {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes toastFadeUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes modalBackdropIn {
@@ -3471,7 +3509,7 @@ input[type='range']:focus::-moz-range-thumb {
   .editor-stage-shell,
   .modal-card,
   .settings-section {
-    border-radius: 24px;
+    border-radius: 14px;
   }
 
   .top-banner,
@@ -4073,7 +4111,7 @@ input[type='range']:focus::-moz-range-thumb {
 .top-shape.hoodie {
   width: 102px;
   height: 100px;
-  border-radius: 24px 24px 6px 6px;
+  border-radius: 14px 24px 6px 6px;
   background: linear-gradient(180deg, #5a8a6e, #3d6b52);
 }
 
@@ -4531,7 +4569,7 @@ input[type='range']:focus::-moz-range-thumb {
   font-weight: 600;
   backdrop-filter: blur(12px);
   z-index: 20;
-  animation: toastIn 0.25s ease;
+  animation: toastIn calc(250ms * var(--animation-speed, 1)) ease;
   white-space: nowrap;
 }
 .editor-toast.success {
@@ -4568,7 +4606,7 @@ input[type='range']:focus::-moz-range-thumb {
 
 .docs-sidebar-inner {
   padding: 16px;
-  border-radius: 20px;
+  border-radius: 12px;
   background: var(--panel-soft);
   border: 1px solid var(--border);
 }
@@ -4624,7 +4662,7 @@ input[type='range']:focus::-moz-range-thumb {
 
 .docs-article {
   padding: 22px;
-  border-radius: 20px;
+  border-radius: 12px;
   background: var(--panel-soft);
   border: 1px solid var(--border);
 }
@@ -5368,7 +5406,7 @@ input[type='range']:focus::-moz-range-thumb {
   flex-direction: column;
   min-height: 220px;
   height: 220px;
-  border-radius: 22px;
+  border-radius: 12px;
   border: var(--border-width) solid var(--border);
   background: rgba(255, 255, 255, 0.02);
   overflow: hidden;
@@ -5458,7 +5496,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: stretch;
   gap: 0;
   padding: 0;
-  border-radius: 22px;
+  border-radius: 12px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.03);
   border: var(--border-width) solid var(--border);
@@ -5697,7 +5735,7 @@ input[type='range']:focus::-moz-range-thumb {
 
 .rel-node.source .rel-node-avatar {
   box-shadow: 0 0 0 4px #fbbf2488, 0 6px 20px rgba(0, 0, 0, 0.35);
-  animation: rel-pulse 1.2s ease-in-out infinite;
+  animation: rel-pulse calc(1.2s * var(--animation-speed, 1)) ease-in-out infinite;
 }
 
 @keyframes rel-pulse {
@@ -5760,7 +5798,7 @@ input[type='range']:focus::-moz-range-thumb {
   color: var(--text-secondary);
   background: var(--panel);
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   pointer-events: none;
   backdrop-filter: blur(6px);
   border: 1px solid var(--border);
@@ -5777,11 +5815,11 @@ input[type='range']:focus::-moz-range-thumb {
   color: var(--text-main);
   background: rgba(251, 191, 36, 0.15);
   padding: 8px 18px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid rgba(251, 191, 36, 0.35);
   pointer-events: none;
   backdrop-filter: blur(6px);
-  animation: fadeUp 300ms ease;
+  animation: fadeUp calc(300ms * var(--animation-speed, 1)) ease;
 }
 
 .rel-side-panel {
@@ -5933,7 +5971,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.02);
   color: var(--text-main);
@@ -6165,7 +6203,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -6275,7 +6313,7 @@ input[type='range']:focus::-moz-range-thumb {
 .cc-card {
   width: 420px;
   min-height: 580px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
   overflow: hidden;
@@ -6359,7 +6397,7 @@ input[type='range']:focus::-moz-range-thumb {
 .cc-tmpl-tag {
   display: inline-block;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -6425,7 +6463,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -7033,7 +7071,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text-main);
@@ -7068,7 +7106,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text-main);
@@ -7149,7 +7187,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text-main);
@@ -7468,7 +7506,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text-main);
@@ -7502,7 +7540,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -7538,7 +7576,7 @@ input[type='range']:focus::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text-main);
@@ -7669,7 +7707,7 @@ input[type='range']:focus::-moz-range-thumb {
   box-shadow: var(--shadow);
   color: var(--text-main);
   font-size: 0.92rem;
-  animation: fadeUp 280ms ease forwards;
+  animation: toastFadeUp calc(280ms * var(--animation-speed, 1)) ease forwards;
 }
 
 /* ─── Docs error highlighted ─── */
@@ -7749,4 +7787,186 @@ input[type='range']:focus::-moz-range-thumb {
 
 .devmode-resize:hover {
   background: var(--accent-soft);
+}
+
+/* ─── Empty State ─── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 160px;
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-state strong {
+  color: var(--text-main);
+  font-size: 1.05rem;
+}
+
+/* ─── Notice Banner ─── */
+.notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.92rem;
+}
+
+.notice-banner.success {
+  border-color: rgba(var(--success-rgb), 0.35);
+  background: rgba(var(--success-rgb), 0.08);
+}
+
+.notice-banner.error {
+  border-color: rgba(var(--danger-rgb), 0.35);
+  background: rgba(var(--danger-rgb), 0.08);
+}
+
+/* ─── Mobile fixes ─── */
+@media (max-width: 720px) {
+  .primary-button,
+  .secondary-button {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .giant-button {
+    min-width: 0;
+    font-size: 1rem;
+  }
+
+  .feature-header-meta,
+  .tool-header-actions {
+    gap: 8px;
+  }
+
+  .feature-header-meta .back-link,
+  .tool-header-actions .secondary-button {
+    padding: 0 12px;
+    min-height: 40px;
+    font-size: 0.88rem;
+  }
+
+  .home-workflow-groups {
+    gap: 14px;
+  }
+
+  .workflow-list.horizontal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .workflow-item.compact {
+    min-height: 88px;
+    padding: 12px 10px;
+  }
+
+  .workflow-item span {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .workflow-list.horizontal {
+    grid-template-columns: 1fr;
+  }
+
+  .action-grid.root-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─── Feature Header Meta ─── */
+.feature-header-meta .version-pill {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+/* ─── Modal Header & Body ─── */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.modal-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-body-scroll {
+  max-height: min(420px, 60vh);
+  overflow: auto;
+}
+
+/* ─── Form Field Label ─── */
+.field-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+/* ─── Danger Button ─── */
+.danger-button {
+  color: var(--danger, #ef476f);
+}
+
+/* ─── Upload Dropzone ─── */
+.upload-dropzone {
+  text-align: center;
+}
+
+.upload-dropzone-icon {
+  font-size: 1.4rem;
+  margin: 0 0 8px;
+}
+
+/* ─── Toast positioning fix ─── */
+.toast-enter {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+/* ─── Page header title block ─── */
+.page-header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-header-title h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  line-height: 1.1;
+}
+
+.page-header-title p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
 }
