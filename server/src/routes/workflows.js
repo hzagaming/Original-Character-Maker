@@ -221,6 +221,9 @@ router.post("/", upload.single("image"), async (req, res, next) => {
       message: "Workflow accepted and started.",
       workflow
     });
+    if (req.file?.path) {
+      try { await fs.rm(req.file.path, { force: true }); } catch { /* ignore */ }
+    }
   } catch (error) {
     if (req.file?.path) {
       await fs.rm(req.file.path, { force: true }).catch(() => null);

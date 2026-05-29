@@ -96,7 +96,11 @@ function makeOutputShape() {
 
 function persistWorkflow(workflow) {
   ensureStateDir();
-  fs.writeFileSync(getSnapshotPath(workflow.id), JSON.stringify(workflow, null, 2), "utf8");
+  try {
+    fs.writeFileSync(getSnapshotPath(workflow.id), JSON.stringify(workflow, null, 2), "utf8");
+  } catch (err) {
+    console.error(`[WorkflowStore] Failed to persist workflow ${workflow.id}:`, err.message);
+  }
 }
 
 function mergeOutputShape(current, patch) {

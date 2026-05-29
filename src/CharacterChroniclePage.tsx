@@ -105,8 +105,8 @@ function loadEvents(): ChronicleEvent[] {
   } catch { return []; }
 }
 
-function saveEvents(events: ChronicleEvent[]) {
-  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch { /* ignore */ }
+function saveEvents(events: ChronicleEvent[]): boolean {
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); return true; } catch { return false; }
 }
 
 function useBeforeUnloadGuard(isDirty: boolean) {
@@ -151,6 +151,7 @@ const copyBase = {
     noImage: '无图片',
     noRelCharacters: '关系网中没有角色',
     eventTypes: EVENT_TYPE_LABELS.zh,
+    saveFailed: '保存失败（存储空间可能已满）',
   },
   ja: {
     addEvent: 'イベント追加',
@@ -180,6 +181,7 @@ const copyBase = {
     noImage: '画像なし',
     noRelCharacters: '関係図にキャラがいません',
     eventTypes: EVENT_TYPE_LABELS.ja,
+    saveFailed: '保存に失敗しました（ストレージがいっぱいの可能性があります）',
   },
   en: {
     addEvent: 'Add Event',
@@ -210,6 +212,7 @@ const copyBase = {
     noImage: 'No image',
     noRelCharacters: 'No characters in Relationship Web',
     eventTypes: EVENT_TYPE_LABELS.en,
+    saveFailed: 'Save failed (storage may be full)',
   },
   ru: {
     addEvent: 'Добавить событие',
@@ -240,6 +243,7 @@ const copyBase = {
     noImage: 'Нет изображения',
     noRelCharacters: 'В Сети отношений нет персонажей',
     eventTypes: EVENT_TYPE_LABELS.ru,
+    saveFailed: 'Ошибка сохранения (возможно, хранилище заполнено)',
   },
   ko: {
     addEvent: '이벤트 추가',
@@ -270,6 +274,7 @@ const copyBase = {
     noImage: '이미지 없음',
     noRelCharacters: '관계망에 캐릭터가 없습니다',
     eventTypes: EVENT_TYPE_LABELS.ko,
+    saveFailed: '저장 실패 (저장 공간이 부족할 수 있습니다)',
   },
 };
 
@@ -320,7 +325,7 @@ export default function CharacterChroniclePage({
 
   useBeforeUnloadGuard(events.length > 0);
 
-  useEffect(() => { saveEvents(events); }, [events]);
+
 
   useEffect(() => {
     const imgs = loadGalleryImages();
@@ -359,6 +364,8 @@ export default function CharacterChroniclePage({
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 2200);
   }, []);
+
+  useEffect(() => { if (!saveEvents(events)) { playSound('error'); showToast(copy.saveFailed); } }, [events, showToast, copy.saveFailed]);
 
   const handleAddEvent = useCallback(() => {
     setModalEvent(defaultEvent());

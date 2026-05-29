@@ -15,24 +15,29 @@ async function normalizeExpressionImage(inputPath, options = {}) {
   const tempPath = path.join(parsed.dir, `${parsed.name}.normalized.${process.pid}.${Date.now()}.tmp.png`);
 
   const metadata = await sharp(inputPath).metadata();
-  await sharp(inputPath, { failOn: "none" })
-    .rotate()
-    .resize(width, height, {
-      fit: "contain",
-      withoutEnlargement: false,
-      background: { r: 255, g: 255, b: 255, alpha: 0 }
-    })
-    .png({
-      compressionLevel: 9,
-      adaptiveFiltering: true
-    })
-    .toFile(tempPath);
+  try {
+    await sharp(inputPath, { failOn: "none" })
+      .rotate()
+      .resize(width, height, {
+        fit: "contain",
+        withoutEnlargement: false,
+        background: { r: 255, g: 255, b: 255, alpha: 0 }
+      })
+      .png({
+        compressionLevel: 9,
+        adaptiveFiltering: true
+      })
+      .toFile(tempPath);
 
-  await fs.rename(tempPath, normalizedPath);
-  await fs.copyFile(normalizedPath, finalPath);
-  await fs.rm(normalizedPath, { force: true }).catch(() => null);
-  if (path.resolve(finalPath) !== path.resolve(inputPath)) {
-    await fs.rm(inputPath, { force: true }).catch(() => null);
+    await fs.rename(tempPath, normalizedPath);
+    await fs.copyFile(normalizedPath, finalPath);
+    await fs.rm(normalizedPath, { force: true }).catch(() => null);
+    if (path.resolve(finalPath) !== path.resolve(inputPath)) {
+      await fs.rm(inputPath, { force: true }).catch(() => null);
+    }
+  } catch (err) {
+    try { await fs.rm(tempPath, { force: true }); } catch {}
+    throw err;
   }
 
   return {

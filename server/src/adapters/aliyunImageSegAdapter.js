@@ -73,8 +73,12 @@ function shouldFallbackToUpload(error) {
 async function downloadResultImage(imageUrl, destinationPath) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
-  const response = await fetch(imageUrl, { signal: controller.signal });
-  clearTimeout(timeout);
+  let response;
+  try {
+    response = await fetch(imageUrl, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!response.ok) {
     throw new AppError(
       `Aliyun imageseg result download failed with status ${response.status}.`,

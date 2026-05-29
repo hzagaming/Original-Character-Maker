@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+﻿import React, { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { toPng } from 'html-to-image';
 import DevModePanel from './DevModePanel';
 import { createPortal } from 'react-dom';
@@ -479,7 +479,7 @@ type Messages = {
   apiConfirmClearAgain: string;
   // Others
   othersTitle: string;
-  othersTooltips: string;
+  loading: string;
   othersConfirmDestructive: string;
   othersKeyboardHints: string;
   othersSmoothScroll: string;
@@ -936,7 +936,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiConfirmClear: '确定要清除此 API 配置吗？',
     apiConfirmClearAgain: '请再次确认：此操作不可撤销，是否继续清除？',
     othersTitle: '其他设置',
-    othersTooltips: '显示工具提示',
+    loading: '加载中…',
     othersConfirmDestructive: '破坏性操作二次确认',
     othersKeyboardHints: '显示键盘快捷键提示',
     othersSmoothScroll: '平滑滚动',
@@ -1386,7 +1386,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiConfirmClear: 'このAPI設定をクリアしますか？',
     apiConfirmClearAgain: '再度確認：この操作は取り消せません。クリアを続行しますか？',
     othersTitle: 'その他の設定',
-    othersTooltips: 'ツールチップを表示',
+    loading: '読み込み中…',
     othersConfirmDestructive: '破壊的操作の二重確認',
     othersKeyboardHints: 'キーボードショートカットヒントを表示',
     othersSmoothScroll: 'スムーズスクロール',
@@ -1836,7 +1836,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiConfirmClear: 'Are you sure you want to clear this API configuration?',
     apiConfirmClearAgain: 'Please confirm again: this action cannot be undone. Continue to clear?',
     othersTitle: 'Other Settings',
-    othersTooltips: 'Show Tooltips',
+    loading: 'Loading…',
     othersConfirmDestructive: 'Double-Confirm Destructive Actions',
     othersKeyboardHints: 'Show Keyboard Shortcut Hints',
     othersSmoothScroll: 'Smooth Scrolling',
@@ -2286,7 +2286,7 @@ const translations: Record<BaseLanguage, Messages> = {
     apiConfirmClear: 'Вы уверены, что хотите очистить эту конфигурацию API?',
     apiConfirmClearAgain: 'Пожалуйста, подтвердите ещё раз: это действие нельзя отменить. Продолжить очистку?',
     othersTitle: 'Другие настройки',
-    othersTooltips: 'Показывать подсказки',
+    loading: 'Загрузка…',
     othersConfirmDestructive: 'Двойное подтверждение разрушительных действий',
     othersKeyboardHints: 'Показывать подсказки горячих клавиш',
     othersSmoothScroll: 'Плавная прокрутка',
@@ -5033,13 +5033,9 @@ function App() {
           onOpenImport={() => { playSound('modalOpen'); setImportOpen(true); }}
         />
       ) : (
-        <Suspense fallback={
-          <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', zIndex: 90, flexDirection: 'column', gap: 16 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid var(--border)', borderTopColor: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
-            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Loading…</span>
-          </div>
-        }>
-          {screen === 'face-maker' ? (
+        <Suspense fallback={<PageLoadingSpinner message={messages.loading} />}>
+          <div className={`page-transition-wrapper ${settings.animation.pageTransitions ? 'pt-enabled' : ''}`}>
+            {screen === 'face-maker' ? (
             <FaceMakerPage
               messages={messages}
               language={settings.language}
@@ -5196,6 +5192,7 @@ function App() {
               onOpenSettings={() => setIsSettingsOpen(true)}
             />
           )}
+          </div>
         </Suspense>
       )}
 
@@ -5294,6 +5291,53 @@ function GlobalFooterBar({ version, messages }: { version: string; messages: Mes
       <div className="app-global-footer-privacy">{messages.privacyNote}</div>
     </footer>
   );
+}
+
+/* ─── Shared UI components ─── */
+function PageLoadingSpinner({ message }: { message: string }) {
+  return (
+    <div className="page-loading-fallback">
+      <div className="spinner" />
+      <span className="label">{message}</span>
+    </div>
+  );
+}
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode; messages: Messages; onReset: () => void },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; messages: Messages; onReset: () => void }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[ErrorBoundary]', error, info.componentStack);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary-fallback">
+          <h2>{this.props.messages.announcementTitle || 'Error'}</h2>
+          <p>{this.props.messages.performanceHint || 'Something went wrong. You can try resetting the page.'}</p>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() => {
+              this.setState({ hasError: false });
+              this.props.onReset();
+            }}
+          >
+            {this.props.messages.startButton || 'Reset'}
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function HomeScreen({
@@ -8587,7 +8631,6 @@ function SettingsModal({
                   <h3>{messages.othersTitle}</h3>
                   <div className="switch-list">
                     {[
-                      { key: 'showTooltips', label: messages.othersTooltips },
                       { key: 'confirmDestructiveActions', label: messages.othersConfirmDestructive },
                       { key: 'showKeyboardHints', label: messages.othersKeyboardHints },
                       { key: 'smoothScroll', label: messages.othersSmoothScroll },

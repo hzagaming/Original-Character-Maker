@@ -96,8 +96,8 @@ function loadNodes(): RelNode[] {
   }
 }
 
-function saveNodes(nodes: RelNode[]) {
-  try { window.localStorage.setItem(NODES_KEY, JSON.stringify(nodes)); } catch {}
+function saveNodes(nodes: RelNode[]): boolean {
+  try { window.localStorage.setItem(NODES_KEY, JSON.stringify(nodes)); return true; } catch { return false; }
 }
 
 function loadEdges(): RelEdge[] {
@@ -123,8 +123,8 @@ function loadEdges(): RelEdge[] {
   }
 }
 
-function saveEdges(edges: RelEdge[]) {
-  try { window.localStorage.setItem(EDGES_KEY, JSON.stringify(edges)); } catch {}
+function saveEdges(edges: RelEdge[]): boolean {
+  try { window.localStorage.setItem(EDGES_KEY, JSON.stringify(edges)); return true; } catch { return false; }
 }
 
 function uid() {
@@ -197,6 +197,7 @@ const copyBase = {
     edgeLabelPlaceholder: '可选标签',
     noImagesInGallery: '资产库中没有图片',
     importImagesFirst: '请先前往资产库导入角色图片',
+    saveFailed: '保存失败（存储空间可能已满）',
   },
   ja: {
     addNode: 'キャラ追加',
@@ -246,6 +247,7 @@ const copyBase = {
     edgeLabelPlaceholder: '任意ラベル',
     noImagesInGallery: 'アセットライブラリに画像がありません',
     importImagesFirst: '先にアセットライブラリでキャラ画像をインポートしてください',
+    saveFailed: '保存に失敗しました（ストレージがいっぱいの可能性があります）',
   },
   en: {
     addNode: 'Add Character',
@@ -295,6 +297,7 @@ const copyBase = {
     edgeLabelPlaceholder: 'Optional label',
     noImagesInGallery: 'No images in Asset Gallery',
     importImagesFirst: 'Please import character images to Asset Gallery first',
+    saveFailed: 'Save failed (storage may be full)',
   },
   ru: {
     addNode: 'Добавить персонажа',
@@ -344,6 +347,7 @@ const copyBase = {
     edgeLabelPlaceholder: 'Опциональная метка',
     noImagesInGallery: 'В галерее активов нет изображений',
     importImagesFirst: 'Сначала импортируйте изображения персонажей в галерею активов',
+    saveFailed: 'Ошибка сохранения (возможно, хранилище заполнено)',
   },
   ko: {
     addNode: '캐릭터 추가',
@@ -393,6 +397,7 @@ const copyBase = {
     edgeLabelPlaceholder: '선택적 라벨',
     noImagesInGallery: '에셋 갤러리에 이미지가 없습니다',
     importImagesFirst: '먼저 에셋 갤러리에서 캐릭터 이미지를 가져오세요',
+    saveFailed: '저장 실패 (저장 공간이 부족할 수 있습니다)',
   },
 };
 
@@ -424,6 +429,8 @@ export function RelationshipWebPage({
   onOpenDocs,
 }: SharedPageProps) {
   const copy = getCopy(language);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [nodes, setNodes] = useState<RelNode[]>(() => loadNodes());
   const [edges, setEdges] = useState<RelEdge[]>(() => loadEdges());
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -452,8 +459,20 @@ export function RelationshipWebPage({
   const isTouchDragging = useRef(false);
 
   // Persist
-  useEffect(() => { saveNodes(nodes); }, [nodes]);
-  useEffect(() => { saveEdges(edges); }, [edges]);
+  useEffect(() => {
+    if (saveNodes(nodes)) return;
+    playSound('error');
+    setToast(copy.saveFailed);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2200);
+  }, [nodes, copy.saveFailed]);
+  useEffect(() => {
+    if (saveEdges(edges)) return;
+    playSound('error');
+    setToast(copy.saveFailed);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2200);
+  }, [edges, copy.saveFailed]);
   useBeforeUnloadGuard(nodes.length > 0 || edges.length > 0);
 
   // Keep refs in sync to avoid effect re-registration
@@ -492,14 +511,14 @@ export function RelationshipWebPage({
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (selectedNodeIdRef.current) {
           const node = nodesRef.current.find((n) => n.id === selectedNodeIdRef.current);
-          if (node && window.confirm(copy.deleteConfirmNode.replace('{name}', node.name))) {
+          if (node && (!_settings.others.confirmDestructiveActions || window.confirm(copy.deleteConfirmNode.replace('{name}', node.name)))) {
             setNodes((prev) => prev.filter((n) => n.id !== selectedNodeIdRef.current));
             setEdges((prev) => prev.filter((e) => e.sourceId !== selectedNodeIdRef.current && e.targetId !== selectedNodeIdRef.current));
             setSelectedNodeId(null);
             playSound('deleteSound');
           }
         } else if (selectedEdgeIdRef.current) {
-          if (window.confirm(copy.deleteConfirmEdge)) {
+          if (!_settings.others.confirmDestructiveActions || window.confirm(copy.deleteConfirmEdge)) {
             setEdges((prev) => prev.filter((e) => e.id !== selectedEdgeIdRef.current));
             setSelectedEdgeId(null);
             playSound('deleteSound');
@@ -768,19 +787,19 @@ export function RelationshipWebPage({
   const handleDeleteNode = useCallback((id: string) => {
     const node = nodes.find((n) => n.id === id);
     if (!node) return;
-    if (!window.confirm(copy.deleteConfirmNode.replace('{name}', node.name))) return;
+    if (_settings.others.confirmDestructiveActions && !window.confirm(copy.deleteConfirmNode.replace('{name}', node.name))) return;
     setNodes((prev) => prev.filter((n) => n.id !== id));
     setEdges((prev) => prev.filter((e) => e.sourceId !== id && e.targetId !== id));
     if (selectedNodeId === id) setSelectedNodeId(null);
     playSound('deleteSound');
-  }, [nodes, copy.deleteConfirmNode, selectedNodeId]);
+  }, [nodes, copy.deleteConfirmNode, selectedNodeId, _settings.others.confirmDestructiveActions]);
 
   const handleDeleteEdge = useCallback((id: string) => {
-    if (!window.confirm(copy.deleteConfirmEdge)) return;
+    if (_settings.others.confirmDestructiveActions && !window.confirm(copy.deleteConfirmEdge)) return;
     setEdges((prev) => prev.filter((e) => e.id !== id));
     if (selectedEdgeId === id) setSelectedEdgeId(null);
     playSound('deleteSound');
-  }, [copy.deleteConfirmEdge, selectedEdgeId]);
+  }, [copy.deleteConfirmEdge, selectedEdgeId, _settings.others.confirmDestructiveActions]);
 
   const handleSaveNode = useCallback(() => {
     if (!nodeModal) return;
@@ -837,7 +856,7 @@ export function RelationshipWebPage({
           <button className="secondary-button small-button back-link" type="button" data-sfx-handled onClick={() => { playSound('back'); onBack(); }}>
             ← {backHome}
           </button>
-          <span className="version-pill" style={{ minHeight: 40, padding: '0 14px' }}>
+          <span className="version-pill">
             {copy.nodesCount.replace('{count}', String(nodes.length))} · {copy.edgesCount.replace('{count}', String(edges.length))}
           </span>
         </div>
@@ -855,6 +874,12 @@ export function RelationshipWebPage({
           )}
         </div>
       </header>
+
+      {toast && (
+        <div className="editor-toast" style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 2000 }}>
+          {toast}
+        </div>
+      )}
 
       <section className="tool-workbench fade-up delay-2 rel-workbench">
         <div className="tool-header">

@@ -155,6 +155,9 @@ router.post("/", upload.single("image"), async (req, res, next) => {
       prompt: fullPrompt,
       debug: result.debug,
     });
+    if (req.file?.path) {
+      try { await fs.rm(req.file.path, { force: true }); } catch { /* ignore cleanup errors */ }
+    }
   } catch (error) {
     if (req.file?.path) {
       try {

@@ -441,7 +441,7 @@ export default function CharacterSkillTreePage({
   }, []);
 
   const deleteNode = useCallback((id: string) => {
-    if (!window.confirm(labels.confirmDelete)) return;
+    if (settings.others.confirmDestructiveActions && !window.confirm(labels.confirmDelete)) return;
     setNodes((prev) => {
       const filtered = prev.filter((n) => n.id !== id);
       // Also remove this id from parentIds of other nodes
@@ -452,14 +452,14 @@ export default function CharacterSkillTreePage({
     });
     if (selectedId === id) setSelectedId(null);
     playSound('buttonClick');
-  }, [labels.confirmDelete, selectedId]);
+  }, [labels.confirmDelete, selectedId, settings.others.confirmDestructiveActions]);
 
   const clearAll = useCallback(() => {
-    if (!window.confirm(labels.confirmClear)) return;
+    if (settings.others.confirmDestructiveActions && !window.confirm(labels.confirmClear)) return;
     setNodes([]);
     setSelectedId(null);
     playSound('buttonClick');
-  }, [labels.confirmClear]);
+  }, [labels.confirmClear, settings.others.confirmDestructiveActions]);
 
   const levelUp = useCallback((node: SkillNode) => {
     if (!isUnlocked(node)) {

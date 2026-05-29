@@ -1,5 +1,6 @@
 import type { DocsContent } from './types';
 import { enhanceDocsContent } from './richErrorManual';
+import { getExtraTools } from './extraTools';
 
 // Fully translated languages
 import { docsContent as docsContentZh } from './zh';
@@ -85,5 +86,10 @@ const contentMap: Record<string, DocsContent> = {
 export type { DocsContent, DocsErrorSeverity, DocsErrorItem, DocsErrorCategory, DocsErrorDetailBlock, DocsButtonItem, DocsParamItem, DocsToolSection } from './types';
 
 export function getDocsContent(language: string): DocsContent {
-  return enhanceDocsContent(contentMap[language] ?? contentMap['zh'], language);
+  const base = enhanceDocsContent(contentMap[language] ?? contentMap['zh'], language);
+  const extra = getExtraTools(language);
+  return {
+    ...base,
+    tools: [...base.tools, ...extra],
+  };
 }

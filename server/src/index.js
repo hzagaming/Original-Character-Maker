@@ -5,12 +5,10 @@ const { isZeaburEnvironment, printEnvDiagnostics } = require("./utils/envCheck")
 
 process.on("uncaughtException", (error) => {
   console.error("[Backend] FATAL uncaughtException", error);
-  process.exit(1);
 });
 
 process.on("unhandledRejection", (reason) => {
   console.error("[Backend] FATAL unhandledRejection", reason);
-  process.exit(1);
 });
 
 async function bootstrap() {
