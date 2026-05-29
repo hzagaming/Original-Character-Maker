@@ -63,7 +63,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.15.0';
+const VERSION = '1.15.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 

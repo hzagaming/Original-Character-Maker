@@ -114,6 +114,341 @@ Assets are stored in a two-tier system:
       { code: 'BATTLE_CARD_IMAGE_TOO_LARGE', message: 'Background image exceeds canvas limit.', severity: 'error', category: 'Import', location: 'CharacterBattleCardPage → setBackgroundImage', cause: 'The uploaded background image is larger than the browser canvas maximum size (typically 32,768 pixels in either dimension).', solution: 'Resize the image to under 4096x4096 pixels before uploading.', steps: ['Open the image in an editor', 'Scale down to 2048x2048 or smaller', 'Re-upload as background'], relatedCodes: ['BATTLE_CARD_EXPORT_FAILED'], prevention: 'Pre-scale background images before importing them into the battle card designer.' },
     ],
   },
+  {
+    id: 'character-skill-tree',
+    title: 'Character Skill Tree',
+    overview: `The Character Skill Tree is a visual node-based editor for designing character abilities, talents, and progression paths. It supports radial, horizontal, and vertical layouts with customizable node shapes, connection styles, and prerequisite chains.
+
+[Node Types]
+- Passive: Always-active bonuses (e.g., +10% HP, +5% critical chance)
+- Active: Skills that must be manually triggered in combat
+- Ultimate: Powerful long-cooldown abilities with dramatic visual effects
+- Trait: Innate character qualities that affect dialogue and story options
+
+[Layout Systems]
+- Radial: Nodes arranged in concentric rings around a central root
+- Horizontal: Left-to-right progression tree
+- Vertical: Top-down hierarchical tree
+- Freeform: Completely manual node positioning
+
+[Connection Styles]
+- Straight: Direct line between nodes
+- Curved: Bézier curve with adjustable tension
+- Orthogonal: Right-angle path resembling circuit diagrams
+- Dashed: Indicates optional or conditional prerequisites
+
+[Data Export]
+- JSON: Full tree structure with coordinates and metadata
+- PNG: Screenshot of the current tree view
+- CSV: Flat list of all nodes for spreadsheet analysis
+- Markdown: Human-readable skill list for wiki/documentation`,
+    buttons: [
+      { name: 'Add Node', description: 'Creates a new skill node at the cursor position or center of the viewport.' },
+      { name: 'Delete Node', description: 'Removes the selected node and all its outgoing connections.' },
+      { name: 'Connect Nodes', description: 'Draws a prerequisite link from one node to another.' },
+      { name: 'Disconnect Nodes', description: 'Removes the link between two connected nodes.' },
+      { name: 'Auto-Layout', description: 'Automatically rearranges all nodes according to the current layout algorithm.' },
+      { name: 'Clear Tree', description: 'Deletes all nodes after confirmation. Use with caution.' },
+      { name: 'Import Tree JSON', description: 'Loads a previously exported tree structure.' },
+      { name: 'Export Tree JSON', description: 'Saves the complete tree structure to a JSON file.' },
+      { name: 'Toggle Node Details', description: 'Shows or hides the detailed properties panel for the selected node.' },
+      { name: 'Toggle Connection Style', description: 'Cycles through straight, curved, orthogonal, and dashed connection styles.' },
+    ],
+    parameters: [
+      { name: 'Tree Layout', description: 'Selects the automatic arrangement algorithm: radial, horizontal, vertical, or freeform.', tips: 'Radial works best for fantasy class trees; horizontal suits tech/skill trees.' },
+      { name: 'Node Size', description: 'Sets the default diameter of new nodes in pixels.', tips: 'Larger nodes (60px+) are easier to read on touchscreens.' },
+      { name: 'Connection Style', description: 'Determines the visual appearance of links between nodes.', tips: 'Curved looks organic and natural; orthogonal feels technical and precise.' },
+      { name: 'Max Depth', description: 'Limits how many prerequisite layers deep a tree can go.', tips: 'Shallow trees (3-4 layers) are easier to balance for gameplay.' },
+      { name: 'Color Theme', description: 'Applies a preset color scheme to node categories.', tips: 'Use contrasting colors for different branches to improve readability.' },
+      { name: 'Grid Snap', description: 'When enabled, nodes snap to an invisible grid for clean alignment.', tips: 'Disable for organic-looking trees; enable for formal/classical layouts.' },
+    ],
+    errors: [
+      { code: 'SKILL_TREE_CYCLIC_DEPENDENCY', message: 'Cannot create circular prerequisite chain.', severity: 'error', category: 'Validation', location: 'CharacterSkillTreePage → connectNodes', cause: 'The target node already depends on the source node (directly or indirectly), creating a cycle.', solution: 'Remove an existing connection to break the cycle before adding the new one.', steps: ['Identify the loop in the tree', 'Delete one connection in the loop', 'Retry the connection'], relatedCodes: [], prevention: 'Plan your tree structure on paper before building it digitally.' },
+      { code: 'SKILL_TREE_MAX_DEPTH_EXCEEDED', message: 'Tree exceeds the maximum depth limit.', severity: 'warning', category: 'Validation', location: 'CharacterSkillTreePage → addNode', cause: 'The new node would be placed deeper than the configured Max Depth setting.', solution: 'Increase the Max Depth parameter or reorganize the tree to be shallower.', steps: ['Open the tree settings panel', 'Increase Max Depth by 1-2 layers', 'Retry adding the node'], relatedCodes: [], prevention: 'Set Max Depth to a generous value (10+) during brainstorming, then tighten it for final design.' },
+      { code: 'SKILL_TREE_IMPORT_INVALID', message: 'Imported JSON schema mismatch.', severity: 'error', category: 'Import', location: 'CharacterSkillTreePage → importTree', cause: 'The imported JSON file is missing required fields or uses an outdated schema version.', solution: 'Export a fresh tree from the current app version and re-import.', steps: ['Create a new simple tree in the current version', 'Export it as JSON', 'Compare structure with the failing file', 'Fix or recreate the file'], relatedCodes: [], prevention: 'Always keep a backup of tree exports when upgrading the app.' },
+      { code: 'SKILL_TREE_STORAGE_FULL', message: 'Browser storage quota exceeded on save.', severity: 'error', category: 'Storage', location: 'CharacterSkillTreePage → autoSave', cause: 'The tree JSON is too large for localStorage, typically caused by hundreds of nodes with long descriptions.', solution: 'Delete unused nodes, shorten descriptions, or export the tree to disk and clear the editor.', steps: ['Select and delete redundant nodes', 'Shorten node descriptions', 'Export tree to JSON file', 'Clear editor and re-import if needed'], relatedCodes: [], prevention: 'Keep node descriptions under 200 characters; use external documents for lengthy lore.' },
+    ],
+  },
+  {
+    id: 'character-stats-designer',
+    title: 'Character Stats Designer',
+    overview: `The Character Stats Designer helps you create balanced numerical attributes for your original characters, suitable for RPGs, tabletop games, visual novels with stat checks, or any system requiring quantified character capabilities.
+
+[Stat Systems]
+- Point-Buy: Allocate a fixed pool of points across all stats
+- Dice Roll: Simulate rolling dice (e.g., 4d6 drop lowest) for each stat
+- Template-Based: Start from a preset archetype (Warrior, Mage, Rogue, etc.) and tweak
+- Custom Formula: Define your own calculation rules
+
+[Core Stats]
+- STR (Strength): Physical power, melee damage, carrying capacity
+- DEX (Dexterity): Agility, accuracy, dodge chance, stealth
+- CON (Constitution): Health, stamina, resistance to poison/disease
+- INT (Intelligence): Magic power, knowledge, puzzle-solving
+- WIS (Wisdom): Perception, intuition, willpower, divine magic
+- CHA (Charisma): Persuasion, leadership, appearance, bardic magic
+- Additional custom stats can be added freely
+
+[Visualization]
+- Radar Chart: Six-axis polygon showing relative strengths
+- Bar Chart: Traditional vertical bars for easy comparison
+- Table: Plain text table for copying into documents
+- Tier List: Ranks stats from S to F tier
+
+[Integration]
+- Export to Battle Card for combat power display
+- Export to Skill Tree as unlock prerequisites
+- Export to Character Card as attribute sidebar`,
+    buttons: [
+      { name: 'Reset Stats', description: 'Restores all stats to their default/base values.' },
+      { name: 'Roll Random', description: 'Applies random values according to the current stat system rules.' },
+      { name: 'Load Template', description: 'Fills stats from a preset archetype (Warrior, Mage, Rogue, etc.).' },
+      { name: 'Save Template', description: 'Saves the current stat distribution as a reusable template.' },
+      { name: 'Export Stats JSON', description: 'Downloads the complete stats object as a JSON file.' },
+      { name: 'Import Stats JSON', description: 'Loads a previously exported stats JSON file.' },
+      { name: 'Lock Stat', description: 'Prevents a specific stat from being modified by random rolls or templates.' },
+      { name: 'Unlock Stat', description: 'Allows a previously locked stat to be modified again.' },
+      { name: 'Auto-Balance Points', description: 'Redistributes remaining points to maintain total budget equality.' },
+      { name: 'Copy as Plain Text', description: 'Copies a formatted text summary to the clipboard.' },
+    ],
+    parameters: [
+      { name: 'Stat System', description: 'Determines how stat values are generated and constrained.', tips: 'Point-Buy gives full control; Dice Roll adds randomness; Template-Based is fastest for beginners.' },
+      { name: 'Total Points Available', description: 'The sum of all stat allocations cannot exceed this value.', tips: '27 points is standard D&D 5e point-buy; increase for high-power campaigns.' },
+      { name: 'Min/Max per Stat', description: 'Hard floor and ceiling for individual stat values.', tips: 'Set minimum to 1 to prevent zero-stats; maximum prevents min-max abuse.' },
+      { name: 'Number of Stats', description: 'How many attributes the character has (default 6).', tips: 'Reduce to 3 (Body/Mind/Soul) for simple systems; expand to 12 for complex RPGs.' },
+      { name: 'Decimal Precision', description: 'Whether stats use whole numbers or allow decimals.', tips: 'Integers are standard; decimals allow finer granularity (e.g., 12.5 STR).' },
+      { name: 'Display Format', description: 'How stats are shown: raw number, modifier (+/-), or percentage.', tips: 'Modifiers (e.g., +3) are most intuitive for tabletop play.' },
+    ],
+    errors: [
+      { code: 'STATS_TOTAL_EXCEEDED', message: 'Allocated points exceed total budget.', severity: 'error', category: 'Validation', location: 'CharacterStatsDesignerPage → updateStat', cause: 'The sum of all stat values is greater than the Total Points Available setting.', solution: 'Reduce one or more stats, or increase the Total Points Available budget.', steps: ['Identify the stat you can lower', 'Reduce it by the overflow amount', 'Or increase Total Points Available in settings'], relatedCodes: [], prevention: 'Use Auto-Balance Points after making manual adjustments.' },
+      { code: 'STATS_BELOW_MINIMUM', message: 'Stat value below system minimum.', severity: 'warning', category: 'Validation', location: 'CharacterStatsDesignerPage → updateStat', cause: 'A stat was set lower than the configured Min per Stat value.', solution: 'Raise the stat to at least the minimum, or lower the minimum threshold in settings.', steps: ['Check the Min per Stat setting', 'Adjust the offending stat upward', 'Or lower the minimum if the system allows it'], relatedCodes: ['STATS_TOTAL_EXCEEDED'], prevention: 'Set minimum to 0 for highly flexible systems.' },
+      { code: 'STATS_TEMPLATE_CORRUPTED', message: 'Template file unreadable.', severity: 'error', category: 'Import', location: 'CharacterStatsDesignerPage → loadTemplate', cause: 'The template JSON is malformed, truncated, or encrypted.', solution: 'Re-export the template from a working instance or recreate it manually.', steps: ['Open the template file in a text editor', 'Check for JSON syntax errors', 'Fix or recreate the file'], relatedCodes: [], prevention: 'Always validate JSON with an online linter before sharing templates.' },
+      { code: 'STATS_IMPORT_VERSION_MISMATCH', message: 'Imported stats from incompatible app version.', severity: 'warning', category: 'Import', location: 'CharacterStatsDesignerPage → importStats', cause: 'The exported stats JSON uses an older or newer schema with different field names.', solution: 'Manually map old fields to new ones, or recreate the character in the current version.', steps: ['Open the JSON file', 'Compare field names with current export format', 'Rename or add missing fields', 'Re-import'], relatedCodes: [], prevention: 'Include app version in export filenames (e.g., stats-v1.15.json).' },
+    ],
+  },
+  {
+    id: 'color-palette-designer',
+    title: 'Color Palette Designer',
+    overview: `The Color Palette Designer generates harmonious color schemes for your original characters. It supports extraction from reference images, algorithmic generation based on color theory, and manual fine-tuning for every swatch.
+
+[Generation Modes]
+- Extract from Image: Upload a reference image and extract dominant colors
+- Harmonious Rules: Generate palettes using complementary, analogous, triadic, split-complementary, tetradic, or monochromatic rules
+- Manual Picker: Build a palette from scratch with HSL/HEX/RGB inputs
+- Random: Generate unexpected combinations for inspiration
+
+[Color Theory Rules]
+- Complementary: Colors opposite each other on the color wheel (high contrast)
+- Analogous: Colors adjacent on the wheel (harmonious, low contrast)
+- Triadic: Three evenly spaced colors (balanced, vibrant)
+- Split-Complementary: Base color + two adjacent to its complement (safe contrast)
+- Tetradic: Four colors forming a rectangle on the wheel (rich, complex)
+- Monochromatic: Variations of a single hue (elegant, minimalist)
+
+[Export Formats]
+- CSS Variables: Ready-to-paste :root color definitions
+- JSON: Structured palette object for apps and scripts
+- Tailwind Config: tailwind.config.js colors section
+- ASE: Adobe Swatch Exchange for Photoshop/Illustrator
+- PNG Swatch: Image strip of all colors for reference
+
+[Applications]
+- Character design: Hair, eye, skin, outfit color coordination
+- Worldbuilding: Faction colors, region palettes, magic school themes
+- UI theming: Accent colors for apps and websites
+- Art direction: Consistent color language across a project`,
+    buttons: [
+      { name: 'Extract from Image', description: 'Analyzes a reference image and extracts the most prominent colors.' },
+      { name: 'Generate Harmonious', description: 'Creates a palette based on the selected color theory rule.' },
+      { name: 'Random Palette', description: 'Generates a completely random palette for unexpected inspiration.' },
+      { name: 'Add Color', description: 'Inserts a new swatch into the current palette.' },
+      { name: 'Remove Color', description: 'Deletes the selected swatch from the palette.' },
+      { name: 'Lock Color', description: 'Prevents a specific color from changing during regeneration.' },
+      { name: 'Sort by Hue', description: 'Reorders palette colors from red to violet.' },
+      { name: 'Sort by Lightness', description: 'Reorders palette colors from dark to light.' },
+      { name: 'Export CSS', description: 'Generates CSS custom properties for all palette colors.' },
+      { name: 'Export JSON', description: 'Downloads the palette as a structured JSON file.' },
+      { name: 'Copy HEX', description: 'Copies the HEX code of the selected color to the clipboard.' },
+      { name: 'Copy Tailwind Config', description: 'Generates a Tailwind CSS colors object ready for tailwind.config.js.' },
+    ],
+    parameters: [
+      { name: 'Palette Size', description: 'Number of colors in the generated palette (3~10).', tips: '3-4 colors for simple designs; 6-8 for complex characters with many outfit pieces.' },
+      { name: 'Generation Algorithm', description: 'The color theory rule used for automatic generation.', tips: 'Complementary for high contrast; Analogous for soft, natural looks; Triadic for playful energy.' },
+      { name: 'Base Hue', description: 'The anchor color around which the palette is built.', tips: 'Set this to your character\'s primary hair or eye color for natural coordination.' },
+      { name: 'Saturation Range', description: 'How vivid or muted the generated colors are.', tips: 'Narrow range (10-30%) for pastel/grayscale; wide range (50-100%) for vibrant anime styles.' },
+      { name: 'Lightness Range', description: 'How dark or bright the generated colors are.', tips: 'Ensure at least one color is dark enough for text and one light enough for backgrounds.' },
+      { name: 'Color Format', description: 'Display format: HEX, RGB, or HSL.', tips: 'HEX is most common for web; HSL is best for programmatic adjustment.' },
+    ],
+    errors: [
+      { code: 'PALETTE_IMAGE_EXTRACT_FAILED', message: 'Could not extract dominant colors from image.', severity: 'error', category: 'Import', location: 'ColorPaletteDesignerPage → extractFromImage', cause: 'The image is too small, too monochromatic, or uses an unsupported color space.', solution: 'Use a larger, more colorful reference image, or manually build the palette.', steps: ['Check image is at least 200x200 pixels', 'Ensure it contains multiple distinct colors', 'Retry extraction', 'Or switch to manual mode'], relatedCodes: [], prevention: 'Use high-quality reference images with visible color variety.' },
+      { code: 'PALETTE_COLOR_COUNT_INVALID', message: 'Requested palette size out of range.', severity: 'warning', category: 'Validation', location: 'ColorPaletteDesignerPage → generatePalette', cause: 'Palette Size is set below 3 or above 10.', solution: 'Adjust Palette Size to a value between 3 and 10.', steps: ['Open the palette settings', 'Set Size to 3-10', 'Regenerate'], relatedCodes: [], prevention: 'The UI should enforce this range, but manual JSON imports may bypass it.' },
+      { code: 'PALETTE_EXPORT_CLIPBOARD_FAILED', message: 'Clipboard write denied.', severity: 'warning', category: 'Export', location: 'ColorPaletteDesignerPage → copyHex', cause: 'The browser denied clipboard access, usually because the page lacks focus or the user has not interacted with it.', solution: 'Click inside the page first, then retry the copy operation.', steps: ['Click anywhere on the page', 'Press the Copy HEX button again'], relatedCodes: [], prevention: 'Clipboard access requires a recent user gesture in most browsers.' },
+      { code: 'PALETTE_STORAGE_FULL', message: 'Cannot save palette to local storage.', severity: 'error', category: 'Storage', location: 'ColorPaletteDesignerPage → savePalette', cause: 'localStorage or IndexedDB quota is full.', solution: 'Delete old palettes or export them to disk before saving new ones.', steps: ['Open Saved Palettes panel', 'Delete unused palettes', 'Retry saving'], relatedCodes: [], prevention: 'Regularly export palettes to JSON files and clear browser storage.' },
+    ],
+  },
+  {
+    id: 'dev-mode-panel',
+    title: 'Developer Mode Panel',
+    overview: `The Developer Mode Panel provides advanced debugging and diagnostic tools for power users and contributors. It offers visibility into the application's internal state, API communication, and storage usage without requiring browser DevTools.
+
+[Features]
+- Debug Report: One-click export of full app state (settings, audio config, API endpoints, performance flags)
+- Console Log Viewer: Captures and filters console output by severity (debug/info/warn/error)
+- API Request Monitor: Traces all fetch calls with timing, status codes, and response previews
+- localStorage Inspector: Browse, edit, and delete localStorage keys in a structured table
+- Feature Flags: Toggle experimental features on/off at runtime
+- React Component Tree: Lightweight component hierarchy viewer
+- Memory Profiler: Tracks JS heap size and DOM node count over time
+- FPS Counter: Real-time frame rate monitor with graph history
+
+[Use Cases]
+- Troubleshooting API connection issues
+- Verifying settings are persisted correctly
+- Monitoring memory leaks during long sessions
+- Testing experimental UI features before general release
+- Generating bug reports with full context for GitHub issues
+
+[Warning]
+Changes made in the Dev Mode Panel can corrupt app state. Always export your settings before experimenting. The panel is hidden by default and must be enabled in Settings → Performance → Developer Debug Mode.`,
+    buttons: [
+      { name: 'Toggle Dev Mode', description: 'Shows or hides the Dev Mode Panel floating button.' },
+      { name: 'Clear Logs', description: 'Empties the captured console log buffer.' },
+      { name: 'Export Logs', description: 'Downloads the current log buffer as a text file.' },
+      { name: 'Toggle Feature Flag', description: 'Enables or disables a specific experimental feature.' },
+      { name: 'Override API Endpoint', description: 'Temporarily changes the API base URL for testing.' },
+      { name: 'Force Reload Translations', description: 'Refetches all translation files without restarting the app.' },
+      { name: 'Simulate Error', description: 'Triggers a synthetic JavaScript error to test Error Boundary behavior.' },
+      { name: 'View localStorage', description: 'Opens the localStorage inspector table.' },
+      { name: 'View Session Storage', description: 'Opens the sessionStorage inspector table.' },
+      { name: 'Run Diagnostics', description: 'Executes a full system check and reports findings.' },
+      { name: 'Toggle React Strict Mode', description: 'Enables or disables React StrictMode wrapper (requires reload).' },
+    ],
+    parameters: [
+      { name: 'Log Level Filter', description: 'Only captures console messages at or above this severity.', tips: 'Set to "warn" in production to reduce noise; "debug" for deep troubleshooting.' },
+      { name: 'Max Log Entries', description: 'Maximum number of log lines kept in memory.', tips: '1000 is suitable for most sessions; increase to 5000+ for extended debugging.' },
+      { name: 'API Mock Delay', description: 'Artificially delays API responses by N milliseconds.', tips: 'Use 500-2000ms to test loading states and race conditions.' },
+      { name: 'Feature Flag Overrides', description: 'JSON object mapping flag names to boolean values.', tips: 'Invalid flag names are silently ignored; valid changes take effect immediately.' },
+      { name: 'localStorage Key Filter', description: 'Regex pattern to filter which localStorage keys are displayed.', tips: 'Use "^oc-maker" to show only app-specific keys.' },
+      { name: 'Auto-export on Error', description: 'When enabled, automatically downloads a debug report when an unhandled error occurs.', tips: 'Useful for beta testers who cannot open DevTools.' },
+    ],
+    errors: [
+      { code: 'DEV_FLAG_INVALID', message: 'Feature flag name not recognized.', severity: 'warning', category: 'Configuration', location: 'DevModePanel → toggleFlag', cause: 'The provided flag name does not exist in the application\'s feature flag registry.', solution: 'Check the list of available flags and use the exact name.', steps: ['Open Feature Flags panel', 'Review the available flag list', 'Use the exact flag name'], relatedCodes: [], prevention: 'Feature flag names are case-sensitive and version-dependent.' },
+      { code: 'DEV_API_OVERRIDE_MALFORMED', message: 'Custom API URL format invalid.', severity: 'error', category: 'Configuration', location: 'DevModePanel → overrideApi', cause: 'The entered URL is not a valid HTTP/HTTPS URL.', solution: 'Enter a complete URL starting with http:// or https://, including the domain.', steps: ['Clear the API override field', 'Type a valid URL (e.g., http://localhost:3001)', 'Press Apply'], relatedCodes: [], prevention: 'Use the copy-paste API base URL from a working environment.' },
+      { code: 'DEV_LOG_EXPORT_FAILED', message: 'Log blob generation failed.', severity: 'error', category: 'Export', location: 'DevModePanel → exportLogs', cause: 'The log buffer is too large to serialize into a Blob, or the browser blocked the download.', solution: 'Clear old logs to reduce buffer size, then retry export.', steps: ['Click Clear Logs', 'Reproduce the issue briefly', 'Click Export Logs again'], relatedCodes: [], prevention: 'Export logs regularly instead of letting the buffer grow indefinitely.' },
+      { code: 'DEV_STORAGE_CORRUPTED', message: 'localStorage contains invalid JSON.', severity: 'error', category: 'Storage', location: 'DevModePanel → viewLocalStorage', cause: 'A localStorage value was manually edited or truncated, making it unparseable.', solution: 'Delete the corrupted key or reset all app data.', steps: ['Identify the corrupted key in the inspector', 'Click Delete next to it', 'Or use Settings → Performance → Reset All'], relatedCodes: [], prevention: 'Never manually edit localStorage values outside the app UI.' },
+    ],
+  },
+  {
+    id: 'dialogue-generator',
+    title: 'Dialogue Generator',
+    overview: `The Dialogue Generator creates character-driven conversations, scene scripts, and narrative exchanges using AI language models. It respects each character's established personality traits, speech patterns, and relationships to produce authentic-sounding dialogue.
+
+[Input Sources]
+- Character Profiles: Pulls name, personality tags, and backstory from Character Card
+- Scene Context: Setting, mood, time of day, and ongoing plot events
+- Tone Settings: Formal, casual, comedic, dramatic, sarcastic, melancholic
+- Relationship Matrix: How speakers feel about each other affects word choice and subtext
+
+[Output Formats]
+- Script: Standard screenplay format (Speaker: Line)
+- Novel: Prose narration with dialogue tags
+- RPG: Tabletop-style exchanges with emotion annotations
+- Chat: Messaging app-style bubbles with timestamps
+- JSON: Structured data for game engine integration
+
+[Advanced Features]
+- Emotion tagging: Each line can be annotated with an emotion icon
+- Stage directions: Automatically inserts action beats between lines
+- Branching: Generate multiple response options for player choice systems
+- Voice suggestions: Recommends voice actor archetypes for each character
+- Localization: Translate generated dialogue into all supported languages`,
+    buttons: [
+      { name: 'Generate Dialogue', description: 'Submits the scene context to the AI model and returns a complete exchange.' },
+      { name: 'Regenerate Last', description: 'Re-rolls the most recent generation with the same inputs but different random seed.' },
+      { name: 'Copy Result', description: 'Copies the entire generated dialogue to the clipboard.' },
+      { name: 'Export as TXT', description: 'Downloads the dialogue as a plain text file.' },
+      { name: 'Export as JSON', description: 'Downloads structured dialogue data for game engine use.' },
+      { name: 'Add Speaker', description: 'Introduces a new character into the current conversation.' },
+      { name: 'Remove Speaker', description: 'Removes a character from the current conversation.' },
+      { name: 'Set Scene Context', description: 'Opens the scene description editor to adjust setting and mood.' },
+      { name: 'Toggle Emotion Tags', description: 'Shows or hides emotion annotations next to each line.' },
+      { name: 'Stop Generation', description: 'Cancels an in-progress AI generation request.' },
+    ],
+    parameters: [
+      { name: 'LLM Model', description: 'The AI model used for generation.', tips: 'GPT-4-class models produce the most natural dialogue; smaller models are faster but may repeat phrases.' },
+      { name: 'Max Tokens', description: 'Maximum length of the generated response.', tips: '2048 tokens covers ~10-15 lines of dialogue; increase for longer scenes.' },
+      { name: 'Temperature', description: 'Controls randomness: low for consistent characters, high for creative surprises.', tips: '0.7 is a balanced default; 0.3 for strict canon compliance; 1.2 for wild improvisation.' },
+      { name: 'Character Count', description: 'How many distinct speakers participate in the scene.', tips: '2 speakers is easiest for the model; 4+ may require more context tokens.' },
+      { name: 'Scene Genre', description: 'The narrative genre guiding tone and vocabulary.', tips: 'Fantasy uses archaic/formal speech; Sci-Fi uses technical jargon; Slice of Life uses casual modern language.' },
+      { name: 'Tone', description: 'The emotional atmosphere of the scene.', tips: 'Dramatic scenes benefit from high temperature; comedic scenes need precise timing.' },
+      { name: 'Language', description: 'The output language for generated dialogue.', tips: 'Generating in the character\'s native language first, then translating, often yields more authentic results.' },
+      { name: 'Include Stage Directions', description: 'When enabled, action beats and descriptions are inserted between dialogue lines.', tips: 'Enable for script/novel formats; disable for chat/RPG formats.' },
+      { name: 'Max Turns', description: 'Maximum number of back-and-forth exchanges.', tips: '10-20 turns is typical; increase for extended conversations.' },
+    ],
+    errors: [
+      { code: 'DIALOGUE_NO_CHARACTERS', message: 'No speakers configured.', severity: 'error', category: 'Validation', location: 'DialogueGeneratorPage → generateDialogue', cause: 'At least one character must be added to the speaker list before generating.', solution: 'Click Add Speaker and select or create a character profile.', steps: ['Click Add Speaker', 'Choose a character from the dropdown', 'Click Generate Dialogue'], relatedCodes: [], prevention: 'The app remembers your last used speakers; set them up once and reuse.' },
+      { code: 'DIALOGUE_GENERATION_EMPTY', message: 'LLM returned empty response.', severity: 'warning', category: 'API', location: 'DialogueGeneratorPage → generateDialogue', cause: 'The AI model produced no output, usually due to overly restrictive system prompts or token limits.', solution: 'Increase Max Tokens, loosen the system prompt, or switch to a more capable model.', steps: ['Increase Max Tokens by 50%', 'Simplify the scene context', 'Retry generation'], relatedCodes: [], prevention: 'Keep scene context under 500 characters for reliable generation.' },
+      { code: 'DIALOGUE_CONTEXT_TOO_LONG', message: 'Scene context exceeds token budget.', severity: 'error', category: 'Validation', location: 'DialogueGeneratorPage → generateDialogue', cause: 'The combined length of character profiles + scene context + system prompt exceeds the model\'s context window.', solution: 'Shorten character descriptions, reduce the number of speakers, or use a model with a larger context window.', steps: ['Trim character profiles to 2-3 sentences each', 'Reduce speaker count to 2-3', 'Switch to a model with 8k+ context'], relatedCodes: ['DIALOGUE_GENERATION_EMPTY'], prevention: 'Maintain a "character cheat sheet" with only essential traits for generation.' },
+      { code: 'DIALOGUE_EXPORT_FAILED', message: 'File download interrupted.', severity: 'warning', category: 'Export', location: 'DialogueGeneratorPage → exportTxt', cause: 'The browser blocked the download, or the generated file was too large.', solution: 'Copy the dialogue to clipboard and paste it into a text editor instead.', steps: ['Click Copy Result', 'Open a text editor', 'Paste and save manually'], relatedCodes: [], prevention: 'For very long dialogues, export in chunks of 50 lines at a time.' },
+    ],
+  },
+  {
+    id: 'inspiration-generator',
+    title: 'Inspiration Generator',
+    overview: `The Inspiration Generator produces creative prompts and character concepts using AI. It is designed to break writer\'s block by offering unexpected combinations of traits, backgrounds, and visual elements that you might not have considered.
+
+[Inspiration Categories]
+- Appearance: Hair style, eye color, body type, distinguishing marks, fashion sense
+- Personality: MBTI type, alignment, core virtues/flaws, speech patterns
+- Backstory: Origin, pivotal events, relationships, secrets, goals
+- Worldbuilding: Faction affiliation, homeland, cultural traditions, social class
+- Item/Artifact: Signature weapon, heirloom, magical item, companion creature
+- Plot Hook: Inciting incident, mystery, prophecy, rivalry, quest motivation
+
+[Generation Modes]
+- Full Character: Generates appearance + personality + backstory + item in one pass
+- Quick Prompt: A single evocative sentence suitable for AI image generators
+- Combo Roulette: Randomly mixes traits from different categories for wild combinations
+- Themed: Constrains generation to a specific genre (cyberpunk, high fantasy, horror, etc.)
+- Mirror: Generates an opposite/rival version of an existing character
+
+[Seed System]
+Every generation uses a numeric seed. Using the same seed with the same settings produces identical results, allowing you to share interesting characters with friends by sending them the seed number.
+
+[Applications]
+- OC design: Starting point for new original characters
+- NPC creation: Quickly populate a game world with memorable side characters
+- Writing prompts: Overcome blank page syndrome with structured starting points
+- Art commissions: Provide detailed reference prompts to artists
+- RPG campaigns: Generate player characters or memorable antagonists`,
+    buttons: [
+      { name: 'Generate Inspiration', description: 'Creates a new set of character concepts based on current settings.' },
+      { name: 'Copy Prompt', description: 'Copies the generated prompt text to the clipboard.' },
+      { name: 'Use in Face Maker', description: 'Sends the generated appearance description to the Face Maker module.' },
+      { name: 'Use in Style Transfer', description: 'Sends the generated visual prompt to the Style Transfer module.' },
+      { name: 'Save to Favorites', description: 'Bookmarks the current generation for later reference.' },
+      { name: 'Load from Favorites', description: 'Recalls a previously saved generation from the favorites list.' },
+      { name: 'Regenerate with Seed', description: 'Reproduces an exact generation using a specific seed number.' },
+      { name: 'Randomize Seed', description: 'Generates a completely new random seed for unpredictable results.' },
+      { name: 'Export Prompts', description: 'Downloads all generated prompts as a JSON file.' },
+      { name: 'Clear History', description: 'Empties the generation history after confirmation.' },
+    ],
+    parameters: [
+      { name: 'Inspiration Category', description: 'Which aspect of character design to focus on.', tips: 'Full Character gives the most complete results; Quick Prompt is best for image generation.' },
+      { name: 'Creativity Level', description: 'How unusual the generated concepts are.', tips: 'Low creativity produces familiar archetypes; high creativity generates bizarre but memorable combinations.' },
+      { name: 'Output Language', description: 'The language of the generated text.', tips: 'Generate in your target language; translations may lose nuance in personality descriptions.' },
+      { name: 'Max Results per Generation', description: 'How many alternative concepts are produced in one batch.', tips: '3-5 is ideal for browsing; 10+ is useful for rapid prototyping.' },
+      { name: 'Seed Value', description: 'The random seed that controls reproducibility.', tips: 'Leave empty for random; enter a specific number to recreate a favorite result.' },
+      { name: 'Include Image Prompts', description: 'When enabled, appends Stable Diffusion / Midjourney compatible prompt syntax.', tips: 'Enable if you plan to generate visual art from the character concept.' },
+      { name: 'Filter Maturity Level', description: 'Excludes concepts above the selected maturity rating.', tips: 'Set to "Teen" for general audiences; "Mature" allows darker themes.' },
+    ],
+    errors: [
+      { code: 'INSPIRATION_CATEGORY_EMPTY', message: 'Selected category has no prompts configured.', severity: 'warning', category: 'Configuration', location: 'InspirationGeneratorPage → generateInspiration', cause: 'The chosen inspiration category has an empty prompt template list.', solution: 'Select a different category or check for app updates that add more prompts.', steps: ['Choose another category from the dropdown', 'Retry generation'], relatedCodes: [], prevention: 'Categories are populated from server-side prompt packs; ensure you have the latest version.' },
+      { code: 'INSPIRATION_API_TIMEOUT', message: 'LLM response timeout.', severity: 'error', category: 'API', location: 'InspirationGeneratorPage → generateInspiration', cause: 'The AI model took too long to respond, usually due to high server load.', solution: 'Retry the generation after a short wait, or switch to a faster model.', steps: ['Wait 10-30 seconds', 'Click Generate Inspiration again'], relatedCodes: ['DIALOGUE_GENERATION_EMPTY'], prevention: 'Use local models or smaller LLMs for faster, more reliable generation.' },
+      { code: 'INSPIRATION_HISTORY_FULL', message: 'Local history quota reached.', severity: 'warning', category: 'Storage', location: 'InspirationGeneratorPage → saveToHistory', cause: 'The generation history has exceeded the browser storage limit.', solution: 'Export old generations to disk and clear the history.', steps: ['Click Export Prompts', 'Save the JSON file', 'Click Clear History', 'Retry saving'], relatedCodes: [], prevention: 'Export and clear history weekly if you generate frequently.' },
+      { code: 'INSPIRATION_SEED_INVALID', message: 'Seed value is not a valid integer.', severity: 'warning', category: 'Validation', location: 'InspirationGeneratorPage → regenerateWithSeed', cause: 'The entered seed is not a whole number, or is outside the safe integer range.', solution: 'Enter a whole number between 0 and 9007199254740991.', steps: ['Clear the seed field', 'Enter a simple number like 12345', 'Click Regenerate'], relatedCodes: [], prevention: 'Only enter plain digits; avoid commas, decimals, or scientific notation.' },
+    ],
+  },
 ];
 
 const zh: DocsToolSection[] = [
@@ -226,6 +561,341 @@ const zh: DocsToolSection[] = [
       { code: 'BATTLE_CARD_EXPORT_FAILED', message: 'Canvas 导出失败。', severity: 'error', category: '导出', location: 'CharacterBattleCardPage → exportPng', cause: '生成的卡片太大超出浏览器 canvas 限制，或 canvas 被跨域图片污染。', solution: '降低分辨率倍数，或确保所有图片来自同一来源。', steps: ['将分辨率设为 1x', '移除自定义背景图片', '重试导出'], relatedCodes: [], prevention: '避免使用外部背景图片；使用内置渐变和图案。' },
       { code: 'BATTLE_CARD_FONT_LOAD_FAILED', message: '卡片字体加载失败。', severity: 'warning', category: '渲染', location: 'CharacterBattleCardPage → renderCard', cause: '自定义卡片字体（Noto Sans SC / JetBrains Mono）无法从 Google Fonts CDN 加载。', solution: '检查网络连接后重试。卡片将回退到系统字体。', steps: ['确认网络连接正常', '等待几秒让字体加载', '重新生成卡片'], relatedCodes: [], prevention: '字体在首次加载后会被缓存；后续卡片生成不会遇到此问题。' },
       { code: 'BATTLE_CARD_IMAGE_TOO_LARGE', message: '背景图片超出 canvas 限制。', severity: 'error', category: '导入', location: 'CharacterBattleCardPage → setBackgroundImage', cause: '上传的背景图片大于浏览器 canvas 最大尺寸（通常任一维度为 32,768 像素）。', solution: '上传前将图片缩放至 4096x4096 像素以下。', steps: ['在编辑器中打开图片', '缩放至 2048x2048 或更小', '重新上传为背景'], relatedCodes: ['BATTLE_CARD_EXPORT_FAILED'], prevention: '导入战斗卡设计器前预先缩放背景图片。' },
+    ],
+  },
+  {
+    id: 'character-skill-tree',
+    title: '角色技能树',
+    overview: `角色技能树是一个基于节点的可视化编辑器，用于设计角色的能力、天赋和成长路径。它支持径向、水平和垂直布局，可自定义节点形状、连接样式和前置条件链。
+
+[节点类型]
+- 被动：始终生效的加成（如 +10% HP、+5% 暴击率）
+- 主动：战斗中需要手动触发的技能
+- 终极：强大的长冷却能力，带有华丽的视觉效果
+- 特质：影响对话和剧情选项的天生角色品质
+
+[布局系统]
+- 径向：节点围绕中心根节点排列成同心圆
+- 水平：从左到右的进度树
+- 垂直：自上而下的层级树
+- 自由：完全手动定位节点
+
+[连接样式]
+- 直线：节点之间的直接连线
+- 曲线：带可调张力的贝塞尔曲线
+- 正交：直角路径，类似电路图
+- 虚线：表示可选或条件性前置条件
+
+[数据导出]
+- JSON：包含坐标和元数据的完整树结构
+- PNG：当前树视图的截图
+- CSV：所有节点的平面列表，供表格分析
+- Markdown：适合 Wiki/文档的人类可读技能列表`,
+    buttons: [
+      { name: '添加节点', description: '在光标位置或视口中心创建新技能节点。' },
+      { name: '删除节点', description: '删除选定节点及其所有出向连接。' },
+      { name: '连接节点', description: '从一个节点到另一个节点绘制前置条件链接。' },
+      { name: '断开节点', description: '移除两个已连接节点之间的链接。' },
+      { name: '自动布局', description: '按照当前布局算法自动重新排列所有节点。' },
+      { name: '清空树', description: '删除所有节点（需确认）。请谨慎使用。' },
+      { name: '导入树 JSON', description: '加载先前导出的树结构。' },
+      { name: '导出树 JSON', description: '将完整树结构保存为 JSON 文件。' },
+      { name: '切换节点详情', description: '显示或隐藏选定节点的详细属性面板。' },
+      { name: '切换连接样式', description: '在直线、曲线、正交和虚线连接样式之间循环切换。' },
+    ],
+    parameters: [
+      { name: '树布局', description: '选择自动排列算法：径向、水平、垂直或自由。', tips: '径向适合奇幻职业树；水平适合科技/技能树。' },
+      { name: '节点尺寸', description: '设置新节点的默认直径（像素）。', tips: '较大的节点（60px+）在触摸屏上更容易点击。' },
+      { name: '连接样式', description: '决定节点之间链接的视觉外观。', tips: '曲线看起来自然有机；正交感觉技术精确。' },
+      { name: '最大深度', description: '限制树的先决条件层数。', tips: '浅层树（3-4 层）更容易在游戏设计中保持平衡。' },
+      { name: '配色主题', description: '为节点类别应用预设配色方案。', tips: '对不同分支使用对比色以提高可读性。' },
+      { name: '网格吸附', description: '启用后，节点会吸附到隐形网格以实现整齐对齐。', tips: '有机外观禁用；正式/古典布局启用。' },
+    ],
+    errors: [
+      { code: 'SKILL_TREE_CYCLIC_DEPENDENCY', message: '无法创建循环前置条件链。', severity: 'error', category: '验证', location: 'CharacterSkillTreePage → connectNodes', cause: '目标节点已经依赖源节点（直接或间接），形成循环。', solution: '删除现有连接以打破循环，然后再添加新连接。', steps: ['识别树中的循环', '删除循环中的一条连接', '重试连接'], relatedCodes: [], prevention: '在纸上规划树结构后再在编辑器中构建。' },
+      { code: 'SKILL_TREE_MAX_DEPTH_EXCEEDED', message: '树超出最大深度限制。', severity: 'warning', category: '验证', location: 'CharacterSkillTreePage → addNode', cause: '新节点将被放置在超过配置的 Max Depth 设置的位置。', solution: '增加 Max Depth 参数或重新组织树使其更浅。', steps: ['打开树设置面板', '将 Max Depth 增加 1-2 层', '重试添加节点'], relatedCodes: [], prevention: '头脑风暴时设置较大的 Max Depth（10+），最终设计时再收紧。' },
+      { code: 'SKILL_TREE_IMPORT_INVALID', message: '导入的 JSON 模式不匹配。', severity: 'error', category: '导入', location: 'CharacterSkillTreePage → importTree', cause: '导入的 JSON 文件缺少必填字段或使用了过时的模式版本。', solution: '从当前应用版本导出新树并重新导入。', steps: ['在当前版本中创建一个简单树', '将其导出为 JSON', '与失败的文件比较结构', '修复或重新创建文件'], relatedCodes: [], prevention: '升级应用时保留树导出的备份副本。' },
+      { code: 'SKILL_TREE_STORAGE_FULL', message: '保存时浏览器存储配额已满。', severity: 'error', category: '存储', location: 'CharacterSkillTreePage → autoSave', cause: '树 JSON 太大超出 localStorage，通常由数百个带有长描述的节点导致。', solution: '删除未使用的节点，缩短描述，或将树导出到磁盘后清空编辑器。', steps: ['选择并删除冗余节点', '缩短节点描述', '将树导出为 JSON 文件', '清空编辑器并在需要时重新导入'], relatedCodes: [], prevention: '保持节点描述在 200 字以内；冗长背景请使用外部文档。' },
+    ],
+  },
+  {
+    id: 'character-stats-designer',
+    title: '角色属性设计器',
+    overview: `角色属性设计器帮助你为原创角色创建平衡的数值属性，适用于 RPG、桌面游戏、带属性检定的视觉小说，或任何需要量化角色能力的系统。
+
+[属性系统]
+- 点数分配：在全部属性中分配固定点数池
+- 骰子掷点：为每个属性模拟掷骰（如 4d6 去最低）
+- 模板基础：从预设原型（战士、法师、盗贼等）开始并调整
+- 自定义公式：定义自己的计算规则
+
+[核心属性]
+- 力量（STR）：物理力量、近战伤害、负重能力
+- 敏捷（DEX）：敏捷、准确度、闪避、潜行
+- 体质（CON）：生命值、耐力、抗毒/疾病
+- 智力（INT）：魔法力量、知识、解谜
+- 智慧（WIS）：感知、直觉、意志力、神术
+- 魅力（CHA）：说服、领导力、外貌、吟游魔法
+- 可自由添加额外的自定义属性
+
+[可视化]
+- 雷达图：六轴多边形显示相对优势
+- 柱状图：传统垂直条便于比较
+- 表格：纯文本表格，方便复制到文档
+- 等级表：将属性从 S 排到 F 级
+
+[数据联动]
+- 导出到战斗卡显示战斗力
+- 导出到技能树作为解锁先决条件
+- 导出到角色设定卡作为属性侧边栏`,
+    buttons: [
+      { name: '重置属性', description: '将所有属性恢复到默认值。' },
+      { name: '随机掷点', description: '按照当前属性系统规则应用随机值。' },
+      { name: '加载模板', description: '从预设原型（战士、法师、盗贼等）填充属性。' },
+      { name: '保存模板', description: '将当前属性分布保存为可复用模板。' },
+      { name: '导出属性 JSON', description: '将完整属性对象下载为 JSON 文件。' },
+      { name: '导入属性 JSON', description: '加载先前导出的属性 JSON 文件。' },
+      { name: '锁定属性', description: '防止特定属性被随机掷点或模板修改。' },
+      { name: '解锁属性', description: '允许先前锁定的属性再次被修改。' },
+      { name: '自动平衡点数', description: '重新分配剩余点数以保持总预算相等。' },
+      { name: '复制为纯文本', description: '将格式化文本摘要复制到剪贴板。' },
+    ],
+    parameters: [
+      { name: '属性系统', description: '决定属性值如何生成和约束。', tips: '点数分配给予完全控制；骰子掷点增加随机性；模板基础最适合新手。' },
+      { name: '可用总点数', description: '所有属性分配之和不能超过此值。', tips: '27 点是标准 D&D 5e 点数分配；高战力战役可增加。' },
+      { name: '单属性最小/最大值', description: '单个属性的硬性下限和上限。', tips: '最小值设为 1 防止零属性；最大值防止极端加点。' },
+      { name: '属性数量', description: '角色拥有的属性数量（默认 6）。', tips: '简化为 3（身/心/魂）适合简单系统；扩展到 12 适合复杂 RPG。' },
+      { name: '小数精度', description: '属性使用整数还是允许小数。', tips: '整数是标准；小数允许更细的粒度（如 12.5 力量）。' },
+      { name: '显示格式', description: '属性的显示方式：原始数值、修正值（+/-）或百分比。', tips: '修正值（如 +3）对桌面游戏最直观。' },
+    ],
+    errors: [
+      { code: 'STATS_TOTAL_EXCEEDED', message: '分配点数超出总预算。', severity: 'error', category: '验证', location: 'CharacterStatsDesignerPage → updateStat', cause: '所有属性值之和大于可用总点数设置。', solution: '降低一个或多个属性，或增加可用总点数预算。', steps: ['确定可以降低的属性', '将其降低溢出量', '或在设置中增加总点数'], relatedCodes: [], prevention: '手动调整后使用自动平衡点数功能。' },
+      { code: 'STATS_BELOW_MINIMUM', message: '属性值低于系统最小值。', severity: 'warning', category: '验证', location: 'CharacterStatsDesignerPage → updateStat', cause: '属性被设置为低于配置的单属性最小值。', solution: '将属性提升到至少最小值，或在设置中降低最小阈值。', steps: ['检查单属性最小值设置', '向上调整违规属性', '或降低最小值（如果系统允许）'], relatedCodes: ['STATS_TOTAL_EXCEEDED'], prevention: '对高灵活度系统将最小值设为 0。' },
+      { code: 'STATS_TEMPLATE_CORRUPTED', message: '模板文件无法读取。', severity: 'error', category: '导入', location: 'CharacterStatsDesignerPage → loadTemplate', cause: '模板 JSON 格式错误、截断或加密。', solution: '从正常实例重新导出模板，或手动重新创建。', steps: ['在文本编辑器中打开模板文件', '检查 JSON 语法错误', '修复或重新创建文件'], relatedCodes: [], prevention: '分享模板前始终用在线 JSON 验证器检查。' },
+      { code: 'STATS_IMPORT_VERSION_MISMATCH', message: '导入的属性来自不兼容的应用版本。', severity: 'warning', category: '导入', location: 'CharacterStatsDesignerPage → importStats', cause: '导出的属性 JSON 使用不同字段名的旧版或新版模式。', solution: '手动映射旧字段到新字段，或在当前版本中重新创建角色。', steps: ['打开 JSON 文件', '将字段名与当前导出格式比较', '重命名或添加缺失字段', '重新导入'], relatedCodes: [], prevention: '导出文件名中包含应用版本号（如 stats-v1.15.json）。' },
+    ],
+  },
+  {
+    id: 'color-palette-designer',
+    title: '配色方案设计器',
+    overview: `配色方案设计器为原创角色生成和谐的配色方案。它支持从参考图片提取颜色、基于色彩理论的算法生成，以及每个色样的手动微调。
+
+[生成模式]
+- 从图片提取：上传参考图片并提取主导颜色
+- 和谐规则：使用互补、类似、三色、分裂互补、四色或单色规则生成
+- 手动选择：从零开始用 HSL/HEX/RGB 输入构建
+- 随机：生成意想不到的组合以激发灵感
+
+[色彩理论规则]
+- 互补：色轮上相对的颜色（高对比度）
+- 类似：色轮上相邻的颜色（和谐、低对比度）
+- 三色：色轮上均匀分布的三种颜色（平衡、鲜明）
+- 分裂互补：基色 + 其补色两侧的两个颜色（安全对比）
+- 四色：色轮上形成矩形的四种颜色（丰富、复杂）
+- 单色：单一色相的变化（优雅、极简）
+
+[导出格式]
+- CSS 变量：可直接粘贴的 :root 颜色定义
+- JSON：供应用和脚本使用的结构化调色板对象
+- Tailwind Config：tailwind.config.js 的 colors 部分
+- ASE：Adobe Swatch Exchange，供 Photoshop/Illustrator 使用
+- PNG 色板：所有颜色的参考图片条
+
+[应用场景]
+- 角色设计：头发、眼睛、皮肤、服装颜色协调
+- 世界观构建：阵营颜色、区域调色板、魔法学院主题
+- UI 主题：应用和网站的强调色
+- 美术指导：项目中一致的配色语言`,
+    buttons: [
+      { name: '从图片提取', description: '分析参考图片并提取最突出的颜色。' },
+      { name: '生成和谐配色', description: '基于选定的色彩理论规则创建调色板。' },
+      { name: '随机调色板', description: '生成完全随机的调色板以获得意外灵感。' },
+      { name: '添加颜色', description: '在当前调色板中插入新色样。' },
+      { name: '删除颜色', description: '从调色板中删除选定的色样。' },
+      { name: '锁定颜色', description: '防止特定颜色在重新生成时改变。' },
+      { name: '按色相排序', description: '将调色板颜色从红到紫重新排序。' },
+      { name: '按明度排序', description: '将调色板颜色从暗到亮重新排序。' },
+      { name: '导出 CSS', description: '为所有调色板颜色生成 CSS 自定义属性。' },
+      { name: '导出 JSON', description: '将调色板下载为结构化 JSON 文件。' },
+      { name: '复制 HEX', description: '将选定颜色的 HEX 代码复制到剪贴板。' },
+      { name: '复制 Tailwind Config', description: '生成可直接用于 tailwind.config.js 的 Tailwind CSS colors 对象。' },
+    ],
+    parameters: [
+      { name: '调色板大小', description: '生成调色板中的颜色数量（3~10）。', tips: '简单设计用 3-4 色；复杂角色用 6-8 色（服装部件多）。' },
+      { name: '生成算法', description: '用于自动生成的色彩理论规则。', tips: '互补用于高对比度；类似用于柔和自然的外观；三色用于活泼的能量感。' },
+      { name: '基色色相', description: '围绕其构建调色板的锚定颜色。', tips: '设置为角色主要发色或瞳色以实现自然协调。' },
+      { name: '饱和度范围', description: '生成颜色的鲜艳或柔和程度。', tips: '窄范围（10-30%）适合 pastel/灰度；宽范围（50-100%）适合鲜艳动漫风格。' },
+      { name: '明度范围', description: '生成颜色的明暗程度。', tips: '确保至少有一种颜色足够深用于文本，一种足够浅用于背景。' },
+      { name: '颜色格式', description: '显示格式：HEX、RGB 或 HSL。', tips: 'HEX 是网页最常见；HSL 最适合程序调整。' },
+    ],
+    errors: [
+      { code: 'PALETTE_IMAGE_EXTRACT_FAILED', message: '无法从图片提取主导颜色。', severity: 'error', category: '导入', location: 'ColorPaletteDesignerPage → extractFromImage', cause: '图片太小、太单色，或使用了不支持的色彩空间。', solution: '使用更大、更多彩的参考图片，或手动构建调色板。', steps: ['确认图片至少 200x200 像素', '确保包含多种不同颜色', '重试提取', '或切换到手动模式'], relatedCodes: [], prevention: '使用包含可见颜色 variety 的高质量参考图片。' },
+      { code: 'PALETTE_COLOR_COUNT_INVALID', message: '请求的调色板大小超出范围。', severity: 'warning', category: '验证', location: 'ColorPaletteDesignerPage → generatePalette', cause: '调色板大小设为低于 3 或高于 10。', solution: '将调色板大小调整到 3 到 10 之间。', steps: ['打开调色板设置', '将大小设为 3-10', '重新生成'], relatedCodes: [], prevention: 'UI 应强制执行此范围，但手动 JSON 导入可能绕过它。' },
+      { code: 'PALETTE_EXPORT_CLIPBOARD_FAILED', message: '剪贴板写入被拒绝。', severity: 'warning', category: '导出', location: 'ColorPaletteDesignerPage → copyHex', cause: '浏览器拒绝了剪贴板访问，通常因为页面没有焦点或用户尚未与之交互。', solution: '先点击页面内部，然后重试复制操作。', steps: ['点击页面任意位置', '再次按复制 HEX 按钮'], relatedCodes: [], prevention: '剪贴板访问在大多数浏览器中需要近期的用户手势。' },
+      { code: 'PALETTE_STORAGE_FULL', message: '无法保存调色板到本地存储。', severity: 'error', category: '存储', location: 'ColorPaletteDesignerPage → savePalette', cause: 'localStorage 或 IndexedDB 配额已满。', solution: '删除旧调色板或将其导出到磁盘后再保存新调色板。', steps: ['打开已保存调色板面板', '删除未使用的调色板', '重试保存'], relatedCodes: [], prevention: '定期将调色板导出为 JSON 文件并清空浏览器存储。' },
+    ],
+  },
+  {
+    id: 'dev-mode-panel',
+    title: '开发者模式面板',
+    overview: `开发者模式面板为高级用户和贡献者提供高级调试和诊断工具。它提供对应用内部状态、API 通信和存储使用情况的可见性，无需打开浏览器开发者工具。
+
+[功能]
+- 调试报告：一键导出完整应用状态（设置、音频配置、API 端点、性能标志）
+- 控制台日志查看器：按严重程度（debug/info/warn/error）捕获和过滤控制台输出
+- API 请求监控器：追踪所有 fetch 调用，包括耗时、状态码和响应预览
+- localStorage 检查器：在结构化表格中浏览、编辑和删除 localStorage 键
+- 功能标志：在运行时切换实验性功能
+- React 组件树：轻量级组件层级查看器
+- 内存分析器：追踪 JS 堆大小和 DOM 节点数随时间变化
+- FPS 计数器：带图表历史的实时帧率监控
+
+[使用场景]
+- 排查 API 连接问题
+- 验证设置是否正确持久化
+- 监控长时间会话中的内存泄漏
+- 在正式发布前测试实验性 UI 功能
+- 生成包含完整上下文的问题报告供 GitHub 使用
+
+[警告]
+开发者模式面板中的更改可能损坏应用状态。实验前请始终导出您的设置。面板默认隐藏，必须在 设置 → 性能 → 开发者调试模式 中启用。`,
+    buttons: [
+      { name: '切换开发模式', description: '显示或隐藏开发者模式面板浮动按钮。' },
+      { name: '清空日志', description: '清空已捕获的控制台日志缓冲区。' },
+      { name: '导出日志', description: '将当前日志缓冲区下载为文本文件。' },
+      { name: '切换功能标志', description: '启用或禁用特定实验性功能。' },
+      { name: '覆盖 API 端点', description: '临时更改 API 基础 URL 用于测试。' },
+      { name: '强制重载翻译', description: '不重启应用即可重新获取所有翻译文件。' },
+      { name: '模拟错误', description: '触发合成 JavaScript 错误以测试错误边界行为。' },
+      { name: '查看 localStorage', description: '打开 localStorage 检查器表格。' },
+      { name: '查看 Session Storage', description: '打开 sessionStorage 检查器表格。' },
+      { name: '运行诊断', description: '执行完整的系统检查并报告发现。' },
+      { name: '切换 React 严格模式', description: '启用或禁用 React StrictMode 包装器（需要重载）。' },
+    ],
+    parameters: [
+      { name: '日志级别过滤器', description: '仅捕获此严重程度及以上的控制台消息。', tips: '生产环境设为"warn"以减少噪音；深度排查设为"debug"。' },
+      { name: '最大日志条目数', description: '内存中保留的日志行数上限。', tips: '1000 适合大多数会话；扩展调试可增加到 5000+。' },
+      { name: 'API 模拟延迟', description: '人为将 API 响应延迟 N 毫秒。', tips: '使用 500-2000ms 测试加载状态和竞态条件。' },
+      { name: '功能标志覆盖', description: '将标志名称映射到布尔值的 JSON 对象。', tips: '无效标志名会被静默忽略；有效更改立即生效。' },
+      { name: 'localStorage 键过滤器', description: '用于过滤显示哪些 localStorage 键的正则表达式。', tips: '使用 "^oc-maker" 仅显示应用专属键。' },
+      { name: '错误时自动导出', description: '启用后，发生未处理错误时自动下载调试报告。', tips: '对无法打开开发者工具的 beta 测试者很有用。' },
+    ],
+    errors: [
+      { code: 'DEV_FLAG_INVALID', message: '功能标志名称未被识别。', severity: 'warning', category: '配置', location: 'DevModePanel → toggleFlag', cause: '提供的标志名不存在于应用的功能标志注册表中。', solution: '检查可用标志列表并使用精确名称。', steps: ['打开功能标志面板', '查看可用标志列表', '使用精确标志名'], relatedCodes: [], prevention: '功能标志名区分大小写且与版本相关。' },
+      { code: 'DEV_API_OVERRIDE_MALFORMED', message: '自定义 API URL 格式无效。', severity: 'error', category: '配置', location: 'DevModePanel → overrideApi', cause: '输入的 URL 不是有效的 HTTP/HTTPS URL。', solution: '输入以 http:// 或 https:// 开头的完整 URL，包含域名。', steps: ['清空 API 覆盖字段', '输入有效 URL（如 http://localhost:3001）', '按应用'], relatedCodes: [], prevention: '从正常环境复制粘贴 API 基础 URL。' },
+      { code: 'DEV_LOG_EXPORT_FAILED', message: '日志 Blob 生成失败。', severity: 'error', category: '导出', location: 'DevModePanel → exportLogs', cause: '日志缓冲区太大无法序列化为 Blob，或浏览器阻止了下载。', solution: '清空旧日志以减小缓冲区大小，然后重试导出。', steps: ['点击清空日志', '简短复现问题', '再次点击导出日志'], relatedCodes: [], prevention: '定期导出日志，不要让缓冲区无限增长。' },
+      { code: 'DEV_STORAGE_CORRUPTED', message: 'localStorage 包含无效 JSON。', severity: 'error', category: '存储', location: 'DevModePanel → viewLocalStorage', cause: 'localStorage 值被手动编辑或截断，导致无法解析。', solution: '删除损坏的键或重置所有应用数据。', steps: ['在检查器中识别损坏的键', '点击旁边的删除', '或使用 设置 → 性能 → 重置全部'], relatedCodes: [], prevention: '切勿在应用 UI 外手动编辑 localStorage 值。' },
+    ],
+  },
+  {
+    id: 'dialogue-generator',
+    title: '对话生成器',
+    overview: `对话生成器使用 AI 语言模型创建角色驱动的对话、场景脚本和叙事交流。它尊重每个角色已建立的性格特征、语言模式和关系，生成听起来真实的对话。
+
+[输入来源]
+- 角色档案：从角色设定卡拉取名称、性格标签和背景故事
+- 场景上下文：场景设定、氛围、时间和正在进行的剧情事件
+- 语气设置：正式、随意、喜剧、戏剧、讽刺、忧郁
+- 关系矩阵：说话者之间的相互感受影响措辞和潜台词
+
+[输出格式]
+- 脚本：标准剧本格式（说话者：台词）
+- 小说：带对话标签的散文叙述
+- RPG：桌面风格交流，带情绪注释
+- 聊天：带时间戳的消息应用风格气泡
+- JSON：供游戏引擎集成的结构化数据
+
+[高级功能]
+- 情绪标签：每行台词可附加情绪图标注释
+- 舞台指示：自动在台词之间插入动作节拍
+- 分支：为玩家选择系统生成多个回应选项
+- 配音建议：为每个角色推荐配音演员原型
+- 本地化：将生成的对话翻译成所有支持的语言`,
+    buttons: [
+      { name: '生成对话', description: '将场景上下文提交给 AI 模型并返回完整交流。' },
+      { name: '重新生成上一条', description: '用相同输入但不同随机种子重新生成最近一次结果。' },
+      { name: '复制结果', description: '将生成的全部对话复制到剪贴板。' },
+      { name: '导出为 TXT', description: '将对话下载为纯文本文件。' },
+      { name: '导出为 JSON', description: '下载供游戏引擎使用的结构化对话数据。' },
+      { name: '添加说话者', description: '将新角色引入当前对话。' },
+      { name: '移除说话者', description: '从当前对话中移除一个角色。' },
+      { name: '设置场景上下文', description: '打开场景描述编辑器以调整设定和氛围。' },
+      { name: '切换情绪标签', description: '显示或隐藏每行台词旁边的情绪注释。' },
+      { name: '停止生成', description: '取消进行中的 AI 生成请求。' },
+    ],
+    parameters: [
+      { name: 'LLM 模型', description: '用于生成的 AI 模型。', tips: 'GPT-4 级别模型产生最自然的对话；较小模型更快但可能重复短语。' },
+      { name: '最大 Token 数', description: '生成响应的最大长度。', tips: '2048 token 约覆盖 10-15 行对话；增加以处理更长场景。' },
+      { name: '温度', description: '控制随机性：低值保持角色一致，高值带来创意惊喜。', tips: '0.7 是平衡默认值；0.3 严格遵循设定；1.2 用于狂野即兴。' },
+      { name: '角色数量', description: '参与场景的不同说话者数量。', tips: '2 个说话者对模型最容易；4+ 可能需要更多上下文 token。' },
+      { name: '场景类型', description: '指导语气和词汇的叙事类型。', tips: '奇幻使用古风/正式语言；科幻使用技术术语；日常系使用现代口语。' },
+      { name: '语气', description: '场景的情感氛围。', tips: '戏剧场景受益于高温；喜剧场景需要精确时机。' },
+      { name: '语言', description: '生成对话的输出语言。', tips: '先用角色母语生成，再翻译，通常能得到更真实的结果。' },
+      { name: '包含舞台指示', description: '启用后，动作节拍和描述会插入到对话行之间。', tips: '脚本/小说格式启用；聊天/RPG 格式禁用。' },
+      { name: '最大轮数', description: '来回交流的最大次数。', tips: '10-20 轮是典型值；增加以处理扩展对话。' },
+    ],
+    errors: [
+      { code: 'DIALOGUE_NO_CHARACTERS', message: '未配置说话者。', severity: 'error', category: '验证', location: 'DialogueGeneratorPage → generateDialogue', cause: '生成前必须至少向说话者列表添加一个角色。', solution: '点击添加说话者并从下拉菜单选择或创建角色档案。', steps: ['点击添加说话者', '从下拉菜单选择角色', '点击生成对话'], relatedCodes: [], prevention: '应用会记住您最后使用的说话者；设置一次即可复用。' },
+      { code: 'DIALOGUE_GENERATION_EMPTY', message: 'LLM 返回空响应。', severity: 'warning', category: 'API', location: 'DialogueGeneratorPage → generateDialogue', cause: 'AI 模型未产生输出，通常由于过于严格的系统提示或 token 限制。', solution: '增加最大 Token 数，放宽系统提示，或切换到更强大的模型。', steps: ['将最大 Token 数增加 50%', '简化场景上下文', '重试生成'], relatedCodes: [], prevention: '保持场景上下文在 500 字以内以确保可靠生成。' },
+      { code: 'DIALOGUE_CONTEXT_TOO_LONG', message: '场景上下文超出 token 预算。', severity: 'error', category: '验证', location: 'DialogueGeneratorPage → generateDialogue', cause: '角色档案 + 场景上下文 + 系统提示的组合长度超出模型的上下文窗口。', solution: '缩短角色描述，减少说话者数量，或使用上下文窗口更大的模型。', steps: ['将每个角色档案缩减为 2-3 句话', '将说话者数量减至 2-3 个', '切换到 8k+ 上下文模型'], relatedCodes: ['DIALOGUE_GENERATION_EMPTY'], prevention: '为生成维护仅包含 essential 特征的"角色速查表"。' },
+      { code: 'DIALOGUE_EXPORT_FAILED', message: '文件下载中断。', severity: 'warning', category: '导出', location: 'DialogueGeneratorPage → exportTxt', cause: '浏览器阻止了下载，或生成的文件太大。', solution: '将对话复制到剪贴板并粘贴到文本编辑器中。', steps: ['点击复制结果', '打开文本编辑器', '粘贴并手动保存'], relatedCodes: [], prevention: '对于非常长的对话，每次导出 50 行左右。' },
+    ],
+  },
+  {
+    id: 'inspiration-generator',
+    title: '灵感生成器',
+    overview: `灵感生成器使用 AI 产生创意提示和角色概念。它旨在通过提供你可能未曾考虑过的特质、背景和视觉元素的意外组合来打破写作障碍。
+
+[灵感类别]
+- 外貌：发型、瞳色、体型、 distinguishing marks、时尚感
+- 性格：MBTI 类型、阵营、核心美德/缺陷、语言模式
+- 背景故事：出身、关键事件、关系、秘密、目标
+- 世界观构建：阵营归属、故乡、文化传统、社会阶层
+- 物品/神器：标志性武器、传家宝、魔法物品、伙伴生物
+- 剧情钩子：触发事件、谜团、预言、竞争关系、任务动机
+
+[生成模式]
+- 完整角色：一次性生成外貌 + 性格 + 背景 + 物品
+- 快速提示：适合 AI 图像生成器的一句话描述
+- 组合轮盘：随机混合不同类别的特质产生狂野组合
+- 主题化：限制在特定类型内生成（赛博朋克、高奇幻、恐怖等）
+- 镜像：生成现有角色的对立/竞争对手版本
+
+[种子系统]
+每次生成使用一个数字种子。在相同设置下使用相同种子会产生相同结果，允许你通过发送种子号码与朋友分享有趣的角色。
+
+[应用场景]
+- OC 设计：新原创角色的起点
+- NPC 创建：快速填充游戏世界中有趣的配角
+- 写作提示：用结构化起点克服空白页综合症
+- 美术委托：向画师提供详细的参考提示
+- RPG 战役：生成玩家角色或令人难忘的反派`,
+    buttons: [
+      { name: '生成灵感', description: '基于当前设置创建一组新的角色概念。' },
+      { name: '复制提示', description: '将生成的提示文本复制到剪贴板。' },
+      { name: '用于捏脸', description: '将生成的外貌描述发送到捏脸模块。' },
+      { name: '用于转画风', description: '将生成的视觉提示发送到转画风模块。' },
+      { name: '收藏', description: '将当前生成结果加入书签供日后参考。' },
+      { name: '从收藏加载', description: '从收藏列表中调用先前保存的生成结果。' },
+      { name: '用种子重新生成', description: '使用特定种子号码复现精确的生成结果。' },
+      { name: '随机化种子', description: '生成全新的随机种子以获得不可预测的结果。' },
+      { name: '导出提示', description: '将所有生成的提示下载为 JSON 文件。' },
+      { name: '清空历史', description: '清空生成历史（需确认）。' },
+    ],
+    parameters: [
+      { name: '灵感类别', description: '聚焦角色设计的哪个方面。', tips: '完整角色给出最完整的结果；快速提示最适合图像生成。' },
+      { name: '创意等级', description: '生成概念的异常程度。', tips: '低创意产生熟悉的原型；高创意生成怪异但令人难忘的组合。' },
+      { name: '输出语言', description: '生成文本的语言。', tips: '用目标语言生成；翻译可能在性格描述中丢失细微差别。' },
+      { name: '每批最大结果数', description: '一次生成产生多少个替代概念。', tips: '浏览用 3-5 个；快速原型用 10+ 个。' },
+      { name: '种子值', description: '控制可复现性的随机种子。', tips: '留空随机；输入特定数字以复现喜爱的结果。' },
+      { name: '包含图像提示', description: '启用后，附加 Stable Diffusion / Midjourney 兼容的提示语法。', tips: '如果你计划从角色概念生成视觉 artwork，请启用。' },
+      { name: '成熟度过滤', description: '排除超过所选成熟度评级的概念。', tips: '一般受众设为"青少年"；"成熟"允许更黑暗的主题。' },
+    ],
+    errors: [
+      { code: 'INSPIRATION_CATEGORY_EMPTY', message: '选定类别没有配置提示。', severity: 'warning', category: '配置', location: 'InspirationGeneratorPage → generateInspiration', cause: '所选灵感类别的提示模板列表为空。', solution: '选择不同类别或检查应用更新以获取更多提示。', steps: ['从下拉菜单选择其他类别', '重试生成'], relatedCodes: [], prevention: '类别由服务端提示包填充；确保使用最新版本。' },
+      { code: 'INSPIRATION_API_TIMEOUT', message: 'LLM 响应超时。', severity: 'error', category: 'API', location: 'InspirationGeneratorPage → generateInspiration', cause: 'AI 模型响应时间过长，通常由于服务器负载高。', solution: '短暂等待后重试生成，或切换到更快的模型。', steps: ['等待 10-30 秒', '再次点击生成灵感'], relatedCodes: ['DIALOGUE_GENERATION_EMPTY'], prevention: '使用本地模型或较小 LLM 以获得更快、更可靠的生成。' },
+      { code: 'INSPIRATION_HISTORY_FULL', message: '本地历史配额已满。', severity: 'warning', category: '存储', location: 'InspirationGeneratorPage → saveToHistory', cause: '生成历史超出浏览器存储限制。', solution: '将旧生成结果导出到磁盘并清空历史。', steps: ['点击导出提示', '保存 JSON 文件', '点击清空历史', '重试保存'], relatedCodes: [], prevention: '如果频繁生成，每周导出并清空历史。' },
+      { code: 'INSPIRATION_SEED_INVALID', message: '种子值不是有效的整数。', severity: 'warning', category: '验证', location: 'InspirationGeneratorPage → regenerateWithSeed', cause: '输入的种子不是整数，或超出安全整数范围。', solution: '输入 0 到 9007199254740991 之间的整数。', steps: ['清空种子字段', '输入简单数字如 12345', '点击重新生成'], relatedCodes: [], prevention: '只输入纯数字；避免逗号、小数或科学计数法。' },
     ],
   },
 ];
