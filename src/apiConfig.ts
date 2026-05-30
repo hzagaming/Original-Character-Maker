@@ -393,11 +393,19 @@ export function getApiForFeature(
 
 // ─── Concurrent request limiter ───
 let _maxConcurrent = 4;
-const _requestQueue: Array<() => void> = [];
+type QueuedRequest = {
+  execute: () => void;
+  reject: (reason?: unknown) => void;
+  signal?: AbortSignal | null;
+  onAbort?: () => void;
+};
+
+const _requestQueue: QueuedRequest[] = [];
 let _activeCount = 0;
 
 export function setMaxConcurrentRequests(n: number): void {
   _maxConcurrent = Math.max(1, Math.min(20, Number(n) || 4));
+  runNext();
 }
 
 export function getMaxConcurrentRequests(): number {
@@ -408,8 +416,25 @@ function runNext(): void {
   if (_activeCount >= _maxConcurrent) return;
   const next = _requestQueue.shift();
   if (!next) return;
+
+  if (next.signal?.aborted) {
+    next.reject(createAbortError());
+    runNext();
+    return;
+  }
+
+  if (next.signal && next.onAbort) {
+    next.signal.removeEventListener('abort', next.onAbort);
+  }
+
   _activeCount += 1;
-  next();
+  next.execute();
+}
+
+function createAbortError(): Error {
+  const error = new Error('The operation was aborted.');
+  error.name = 'AbortError';
+  return error;
 }
 
 export async function fetchWithConcurrency(
@@ -417,24 +442,48 @@ export async function fetchWithConcurrency(
   init?: RequestInit,
 ): Promise<Response> {
   return new Promise((resolve, reject) => {
+    const signal = init?.signal;
+
+    if (signal?.aborted) {
+      reject(createAbortError());
+      return;
+    }
+
+    const finish = () => {
+      _activeCount = Math.max(0, _activeCount - 1);
+      runNext();
+    };
+
     function execute() {
       fetch(input, init)
         .then((response) => {
-          _activeCount -= 1;
-          runNext();
+          finish();
           resolve(response);
         })
         .catch((error) => {
-          _activeCount -= 1;
-          runNext();
+          finish();
           reject(error);
         });
     }
+
     if (_activeCount < _maxConcurrent) {
       _activeCount += 1;
       execute();
     } else {
-      _requestQueue.push(execute);
+      const queued: QueuedRequest = { execute, reject, signal };
+      queued.onAbort = () => {
+        const index = _requestQueue.indexOf(queued);
+        if (index !== -1) {
+          _requestQueue.splice(index, 1);
+          reject(createAbortError());
+        }
+      };
+
+      if (signal) {
+        signal.addEventListener('abort', queued.onAbort, { once: true });
+      }
+
+      _requestQueue.push(queued);
     }
   });
 }

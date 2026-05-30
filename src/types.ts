@@ -190,7 +190,6 @@ export interface PerformanceSettings {
 }
 
 export interface OtherSettings {
-  showTooltips: boolean;
   confirmDestructiveActions: boolean;
   showKeyboardHints: boolean;
   smoothScroll: boolean;

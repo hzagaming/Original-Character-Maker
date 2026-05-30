@@ -28,15 +28,15 @@ const TtsExportPage = lazy(() => import('./workflowPages').then((m) => ({ defaul
 const ImageConverterPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.ImageConverterPage })));
 const CharacterGifPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.CharacterGifPage })));
 const IndexTtsPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.IndexTtsPage })));
-const AudioEditorPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.AudioEditorPage })));
-const AudioConverterPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.AudioConverterPage })));
-const AssetGalleryPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.AssetGalleryPage })));
-const RelationshipWebPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.RelationshipWebPage })));
-const CharacterCardPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.CharacterCardPage })));
-const CharacterChroniclePage = lazy(() => import('./workflowPages').then((m) => ({ default: m.CharacterChroniclePage })));
-const WorldEncyclopediaPage = lazy(() => import('./workflowPages').then((m) => ({ default: m.WorldEncyclopediaPage })));
 
 /* ─── Lazy-loaded standalone pages ─── */
+const AudioEditorPage = lazy(() => import('./AudioEditorPage').then((m) => ({ default: m.AudioEditorPage })));
+const AudioConverterPage = lazy(() => import('./AudioConverterPage').then((m) => ({ default: m.AudioConverterPage })));
+const AssetGalleryPage = lazy(() => import('./AssetGalleryPage').then((m) => ({ default: m.AssetGalleryPage })));
+const RelationshipWebPage = lazy(() => import('./RelationshipWebPage').then((m) => ({ default: m.RelationshipWebPage })));
+const CharacterCardPage = lazy(() => import('./CharacterCardPage'));
+const CharacterChroniclePage = lazy(() => import('./CharacterChroniclePage'));
+const WorldEncyclopediaPage = lazy(() => import('./WorldEncyclopediaPage'));
 const InspirationGeneratorPage = lazy(() => import('./InspirationGeneratorPage'));
 const CharacterStatsDesignerPage = lazy(() => import('./CharacterStatsDesignerPage'));
 const ColorPaletteDesignerPage = lazy(() => import('./ColorPaletteDesignerPage'));
@@ -63,7 +63,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.15.2';
+const VERSION = '1.16.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -523,6 +523,9 @@ type Messages = {
   categoryWorld: string;
   categoryAudio: string;
   categoryAssets: string;
+  errorBoundaryTitle: string;
+  errorBoundaryDescription: string;
+  errorBoundaryReset: string;
 };
 
 type BaseLanguage = 'zh' | 'ja' | 'en' | 'ru';
@@ -701,10 +704,13 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.15.0 第十二轮深度审计：性能与存储大优化——代码拆分、重型库延迟加载、Splash 智能跳过、IndexedDB 迁移、性能假开关清理。',
-    announcementList1: '构建优化：React.lazy + Suspense 将 17 个功能页面拆分为独立 chunk，首屏 JS 从 16.5MB 降至约 500KB；@imgly/background-removal ONNX WASM 改为按需动态加载，不再阻塞首屏。',
-    announcementList2: '存储与性能：AssetGalleryPage 反转数据读取优先级（IndexedDB > localStorage），并自动迁移旧数据；Splash 首次访问缩短至 1.2s，二次访问直接跳过；清理 4 个无实际效果的 performance 假开关（lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews）。',
-    announcementList3: '真实落地的设置：imagePreviewQuality 在资产库预览中生效（低/中/高三档尺寸）；maxConcurrentRequests 实现请求队列并应用于 API 端口探测；apiConfig.ts 新增 fetchWithConcurrency 供后续全面替换。',
+    announcementDescription: 'v1.16.0 第十三轮深度审计：SFX/BGM 全面修复、ErrorBoundary 实际挂载、用户手册补全与死代码清理。',
+    announcementList1: 'SFX/BGM 审计：修复 5 处缺失音效——FaceMakerPage 与 FeaturePage 的返回按钮、FeaturePage 的设置按钮、全局快捷键 goHome 与 openSettings 均未播放对应音效；ErrorBoundary 从「仅定义」变为真正包裹 Suspense 路由。',
+    announcementList2: 'UI/UX 与稳定性：ErrorBoundary 添加独立翻译键（5 语言），不再误用「公告」「性能提示」等不相关文案；清理 showTooltips 死设置残余；修复 extraTools 文档中的中英混杂与无效转义。',
+    announcementList3: '文档补全：用户手册大规模扩展，新增 8 个缺失模块的完整文档（asset-gallery、character-battle-card、character-skill-tree、character-stats-designer、color-palette-designer、dev-mode-panel、dialogue-generator、inspiration-generator），全部中英双语覆盖。',
+    errorBoundaryTitle: '出错了',
+    errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
+    errorBoundaryReset: '重置页面',
     aboutTitle: '关于',
     aboutDescription: '这个项目会作为你的 OC 角色创作入口，集中管理角色编辑、画风处理和系列素材生成。',
     paperSiteLabel: '前往 paper2gal',
@@ -1151,10 +1157,13 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.15.0 第十二回深度監査：パフォーマンスとストレージの大規模最適化——コード分割、重いライブラリの遅延読み込み、Splash のスマートスキップ、IndexedDB 移行、performance ダミースイッチの清理。',
-    announcementList1: 'ビルド最適化：React.lazy + Suspense で 17 個の機能ページを独立 chunk に分割し、初回表示 JS を 16.5MB から約 500KB に削減；@imgly/background-removal の ONNX WASM をオンデマンド動的読み込みに変更し、初回表示をブロックしない。',
-    announcementList2: 'ストレージとパフォーマンス：AssetGalleryPage のデータ読み取り優先順位を反転（IndexedDB > localStorage）し、旧データを自動移行；Splash は初回アクセスを 1.2s に短縮し、再訪問時は直接スキップ；実効果のない performance ダミースイッチ 4 個（lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews）を清理。',
-    announcementList3: '実際に機能する設定：imagePreviewQuality がアセットギャラリーのプレビューに反映（低/中/高の 3 段階サイズ）；maxConcurrentRequests にリクエストキューを実装し、API ポート探査に適用；apiConfig.ts に fetchWithConcurrency を追加し、今後の全面的な置き換えに備える。',
+    announcementDescription: 'v1.16.0 第十三回深度監査：SFX/BGM 全面修正、ErrorBoundary 実装完了、マニュアル補完とデッドコード削除。',
+    announcementList1: 'SFX/BGM 監査：5 箇所の欠落音效を修正——FaceMakerPage と FeaturePage の戻るボタン、FeaturePage の設定ボタン、グローバルショートカット goHome と openSettings に対応音效が未再生だった；ErrorBoundary を「定義のみ」から Suspense ルートを実際にラップする形に変更。',
+    announcementList2: 'UI/UX と安定性：ErrorBoundary に独立した翻訳キーを追加（5 言語）、「お知らせ」「性能ヒント」などの不適切なフォールバックを解消；showTooltips デッド設定の残骸を削除；extraTools ドキュメントの中日混在と無効エスケープを修正。',
+    announcementList3: 'マニュアル補完：ユーザーマニュアルを大規模拡張し、8 個の欠落モジュールを完全ドキュメント化（asset-gallery、character-battle-card、character-skill-tree、character-stats-designer、color-palette-designer、dev-mode-panel、dialogue-generator、inspiration-generator）、全て中英バイリンガル対応。',
+    errorBoundaryTitle: 'エラーが発生しました',
+    errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
+    errorBoundaryReset: 'ページをリセット',
     aboutTitle: '情報',
     aboutDescription: 'このプロジェクトは OC 制作の統合入口として機能します。',
     paperSiteLabel: 'paper2gal へ移動',
@@ -1601,10 +1610,13 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.15.0 Twelfth-round deep audit: major performance and storage optimization — code splitting, heavy library lazy loading, smart splash skip, IndexedDB migration, and performance dummy-switch cleanup.',
-    announcementList1: 'Build optimization: React.lazy + Suspense splits 17 feature pages into independent chunks, reducing first-screen JS from 16.5MB to ~500KB; @imgly/background-removal ONNX WASM switched to on-demand dynamic loading, no longer blocking first paint.',
-    announcementList2: 'Storage and performance: AssetGalleryPage reversed data-read priority (IndexedDB > localStorage) with automatic old-data migration; Splash shortened to 1.2s on first visit and skipped entirely on return visits; cleaned up 4 ineffective performance dummy switches (lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews).',
-    announcementList3: 'Real settings: imagePreviewQuality now affects asset-gallery previews (low/medium/high sizing); maxConcurrentRequests implements a request queue and applies it to API port probing; apiConfig.ts adds fetchWithConcurrency for future rollout.',
+    announcementDescription: 'v1.16.0 Thirteenth-round deep audit: full SFX/BGM fix, ErrorBoundary actually mounted, manual expansion, and dead-code cleanup.',
+    announcementList1: 'SFX/BGM audit: fixed 5 missing sound effects — FaceMakerPage and FeaturePage back buttons, FeaturePage settings button, and global shortcuts goHome / openSettings were silent; ErrorBoundary changed from "defined only" to actually wrapping Suspense routes.',
+    announcementList2: 'UI/UX & stability: added dedicated ErrorBoundary translation keys (5 languages), eliminating misleading fallbacks like "Announcement" and "Performance hint"; removed showTooltips dead-setting residue; fixed extraTools Chinese-English mix and invalid escape sequences.',
+    announcementList3: 'Manual expansion: massively expanded user documentation with full entries for 8 previously missing modules (asset-gallery, character-battle-card, character-skill-tree, character-stats-designer, color-palette-designer, dev-mode-panel, dialogue-generator, inspiration-generator), all covered in both English and Chinese.',
+    errorBoundaryTitle: 'Error',
+    errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
+    errorBoundaryReset: 'Reset Page',
     aboutTitle: 'About',
     aboutDescription: 'This project is the unified entry point for your OC creation workflow.',
     paperSiteLabel: 'Open paper2gal',
@@ -2051,10 +2063,13 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.15.0 Двенадцатый глубокий аудит: масштабная оптимизация производительности и хранения — разделение кода, отложенная загрузка тяжёлых библиотек, умное пропускание Splash, миграция на IndexedDB и уборка фиктивных переключателей performance.',
-    announcementList1: 'Оптимизация сборки: React.lazy + Suspense разделяет 17 функциональных страниц на независимые чанки, сокращая JS первого экрана с 16.5 МБ до ~500 КБ; ONNX WASM @imgly/background-removal переведён на динамическую загрузку по требованию и больше не блокирует первую отрисовку.',
-    announcementList2: 'Хранилище и производительность: AssetGalleryPage инвертировала приоритет чтения данных (IndexedDB > localStorage) с автоматической миграцией старых данных; Splash сокращён до 1.2 с при первом посещении и полностью пропускается при повторных; убраны 4 неэффективных фиктивных переключателя performance (lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews).',
-    announcementList3: 'Реально работающие настройки: imagePreviewQuality теперь влияет на превью в галерее активов (низкое/среднее/высокое масштабирование); maxConcurrentRequests реализует очередь запросов и применяется к зонду портов API; apiConfig.ts добавляет fetchWithConcurrency для будущего массового внедрения.',
+    announcementDescription: 'v1.16.0 Тринадцатый глубокий аудит: полное исправление SFX/BGM, реальный монтаж ErrorBoundary, дополнение руководства и очистка мёртвого кода.',
+    announcementList1: 'Аудит SFX/BGM: исправлены 5 пропущенных звуковых эффектов — кнопки «назад» в FaceMakerPage и FeaturePage, кнопка настроек в FeaturePage, глобальные горячие клавиши goHome и openSettings не воспроизводили звук; ErrorBoundary изменён с «только определён» на реальную обёртку маршрутов Suspense.',
+    announcementList2: 'UI/UX и стабильность: добавлены независимые ключи перевода для ErrorBoundary (5 языков), устранены вводящие в заблуждение fallback-значения вроде «Объявление» и «Подсказка производительности»; удалены остатки мёртвой настройки showTooltips; исправлены смешение китайского/английского и неверные экранирования в extraTools.',
+    announcementList3: 'Дополнение руководства: масштабное расширение документации с полными записями для 8 ранее отсутствующих модулей (asset-gallery, character-battle-card, character-skill-tree, character-stats-designer, color-palette-designer, dev-mode-panel, dialogue-generator, inspiration-generator), всё на английском и китайском.',
+    errorBoundaryTitle: 'Ошибка',
+    errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
+    errorBoundaryReset: 'Сбросить страницу',
     aboutTitle: 'О проекте',
     aboutDescription: 'Этот проект служит единым входом в ваш рабочий процесс создания OC.',
     paperSiteLabel: 'Открыть paper2gal',
@@ -2857,10 +2872,13 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.15.0 열두 번째 심층 감사: 성능과 저장소 대규모 최적화——코드 분할、무거운 라이브러리 지연 로드、Splash 스마트 스킵、IndexedDB 마이그레이션、performance 더미 스위치 청소。',
-    announcementList1: '빌드 최적화: React.lazy + Suspense로 17개 기능 페이지를 독립 chunk로 분할하여 초기 화면 JS를 16.5MB에서 약 500KB로 감소；@imgly/background-removal의 ONNX WASM을 온디맨드 동적 로드로 전환하여 초기 렌더링 차단 없음。',
-    announcementList2: '저장소와 성능: AssetGalleryPage의 데이터 읽기 우선순위를 역전(IndexedDB > localStorage)하고旧 데이터 자동 마이그레이션；Splash는 첫 방문을 1.2s로 단축하고 재방문 시 바로 스킵；실제 효과 없는 performance 더미 스위치 4개(lazyLoadModules/disableParticles/aggressiveCaching/lowResolutionPreviews)를 청소。',
-    announcementList3: '실제로 작동하는 설정: imagePreviewQuality가 에셋 갤러리 프리뷰에 반영(낮음/중간/높음 3단계 크기)；maxConcurrentRequests에 요청 큐를 구현하여 API 포트 탐색에 적용；apiConfig.ts에 fetchWithConcurrency를 추가하여 향후 전면 교체 대비。',
+    announcementDescription: 'v1.16.0 열세 번째 심층 감사: SFX/BGM 전면 수정、ErrorBoundary 실제 마운트、매뉴얼 보완 및 데드코드 제거。',
+    announcementList1: 'SFX/BGM 감사: 5곳의 누락된 효과음 수정——FaceMakerPage와 FeaturePage 뒤로 가기 버튼、FeaturePage 설정 버튼、전역 단축키 goHome과 openSettings에 효과음이 재생되지 않았음；ErrorBoundary를 "정의만"에서 실제로 Suspense 라우트를 감싸는 형태로 변경。',
+    announcementList2: 'UI/UX 및 안정성: ErrorBoundary에 독립 번역 키 추가(5개 언어)、"공지" "성능 힌트" 등 부적절한 fallback 제거；showTooltips 데드 설정 잔여물 제거；extraTools 문서의 한영 혼용 및 무효 이스케이프 수정。',
+    announcementList3: '매뉴얼 보완: 사용자 매뉴얼을 대규모 확장하여 기존에 없던 8개 모듈의 완전한 문서 추가(asset-gallery、character-battle-card、character-skill-tree、character-stats-designer、color-palette-designer、dev-mode-panel、dialogue-generator、inspiration-generator)、모두 영어와 중국어 병행 제공。',
+    errorBoundaryTitle: '오류',
+    errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
+    errorBoundaryReset: '페이지 재설정',
   },
   fr: {
     ...translations.en,
@@ -3051,6 +3069,46 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.15.2',
+    date: '2026-05-18',
+    title: '1.15.2 用户手册大规模扩展：补全 8 个缺失模块文档',
+    summary:
+      '为 asset-gallery、character-battle-card、character-skill-tree、character-stats-designer、color-palette-designer、dev-mode-panel、dialogue-generator、inspiration-generator 8 个模块补充完整的 DocsToolSection 文档。',
+    details: [
+      '新增 extraTools.ts 文档模块，合并入主 docsContent 系统，支持中英双语切换。',
+      '每个模块包含完整概述、按钮说明、参数详解和典型错误码。',
+      '文档通过 getExtraTools(language) 动态加载，不增加主文档文件体积。',
+    ],
+  },
+  {
+    version: '1.15.1',
+    date: '2026-05-18',
+    title: '1.15.1 UI/UX 美化与文档扩展',
+    summary:
+      '全局 CSS 细节打磨、动画系统实际落地、死设置清理、错误边界与加载体验优化。',
+    details: [
+      'CSS 全局增强：::selection 强调色背景、*:focus-visible 统一焦点环、::placeholder 与 caret-color、img/video/svg 自适应、touch-action: manipulation、overscroll-behavior: contain。',
+      'animationPageTransitions 从死设置变为实际功能，通过 .page-transition-wrapper CSS 类实现页面切换淡入动画。',
+      '新增 React ErrorBoundary 组件（当时仅定义，v1.16.0 实际挂载）。',
+      '多语言 PageLoadingSpinner 替代内联 Suspense fallback，支持 5 种基础语言。',
+      '移除 showTooltips 死设置及其在 types.ts、App.tsx、5 语言翻译中的残余。',
+      '创建 extraTools.ts，完成 asset-gallery 与 character-battle-card 的文档。',
+    ],
+  },
+  {
+    version: '1.15.0',
+    date: '2026-05-18',
+    title: '1.15.0 第十二轮深度审计：性能与存储大优化',
+    summary:
+      'React.lazy + Suspense 代码拆分、重型 ONNX 库按需加载、Splash 智能跳过、IndexedDB 优先存储、性能假开关清理。',
+    details: [
+      '构建优化：17 个功能页面拆分为独立 chunk，首屏 JS 从 16.5MB 降至约 500KB；@imgly/background-removal ONNX WASM 改为按需动态加载。',
+      '存储与性能：AssetGalleryPage 反转数据读取优先级（IndexedDB > localStorage）并自动迁移旧数据；Splash 首次访问 1.2s，二次访问直接跳过。',
+      '清理 4 个无实际效果的 performance 假开关：lazyLoadModules、disableParticles、aggressiveCaching、lowResolutionPreviews。',
+      'imagePreviewQuality 在资产库预览中实际生效（低/中/高三档尺寸）；maxConcurrentRequests 实现请求队列并应用于 API 端口探测。',
+    ],
+  },
   {
     version: '1.14.0',
     date: '2026-05-18',
@@ -4455,7 +4513,6 @@ const defaultSettings: SettingsState = {
     maxConcurrentRequests: 4,
   },
   others: {
-    showTooltips: true,
     confirmDestructiveActions: true,
     showKeyboardHints: true,
     smoothScroll: true,
@@ -4758,10 +4815,11 @@ function App() {
 
       if (pressed === map.goHome) {
         event.preventDefault();
+        playSound('pageSwitch');
         setScreen('home');
       } else if (pressed === map.openSettings) {
         event.preventDefault();
-        setIsSettingsOpen(true);
+        openSettings('style');
       } else if (pressed === map.toggleFullscreen) {
         event.preventDefault();
         if (!document.fullscreenElement) {
@@ -5033,13 +5091,14 @@ function App() {
           onOpenImport={() => { playSound('modalOpen'); setImportOpen(true); }}
         />
       ) : (
-        <Suspense fallback={<PageLoadingSpinner message={messages.loading} />}>
-          <div className={`page-transition-wrapper ${settings.animation.pageTransitions ? 'pt-enabled' : ''}`}>
+        <ErrorBoundary messages={messages} onReset={() => setScreen('home')}>
+          <Suspense fallback={<PageLoadingSpinner message={messages.loading} />}>
+            <div className={`page-transition-wrapper ${settings.animation.pageTransitions ? 'pt-enabled' : ''}`}>
             {screen === 'face-maker' ? (
             <FaceMakerPage
               messages={messages}
               language={settings.language}
-              onBack={() => setScreen('home')}
+              onBack={() => { playSound('back'); setScreen('home'); }}
               onOpenSettings={() => openSettings('style')}
               onOpenDocs={sharedPageProps.onOpenDocs}
             />
@@ -5188,12 +5247,13 @@ function App() {
               screen={screen}
               messages={messages}
               language={settings.language}
-              onBack={() => setScreen('home')}
-              onOpenSettings={() => setIsSettingsOpen(true)}
+              onBack={() => { playSound('back'); setScreen('home'); }}
+              onOpenSettings={() => openSettings('style')}
             />
           )}
-          </div>
-        </Suspense>
+            </div>
+          </Suspense>
+        </ErrorBoundary>
       )}
 
       {modalStep && (
@@ -5321,8 +5381,8 @@ class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <div className="error-boundary-fallback">
-          <h2>{this.props.messages.announcementTitle || 'Error'}</h2>
-          <p>{this.props.messages.performanceHint || 'Something went wrong. You can try resetting the page.'}</p>
+          <h2>{this.props.messages.errorBoundaryTitle}</h2>
+          <p>{this.props.messages.errorBoundaryDescription}</p>
           <button
             className="primary-button"
             type="button"
@@ -5331,7 +5391,7 @@ class ErrorBoundary extends React.Component<
               this.props.onReset();
             }}
           >
-            {this.props.messages.startButton || 'Reset'}
+            {this.props.messages.errorBoundaryReset}
           </button>
         </div>
       );

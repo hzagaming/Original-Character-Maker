@@ -2,91 +2,61 @@ import type { DocsContent } from './types';
 import { enhanceDocsContent } from './richErrorManual';
 import { getExtraTools } from './extraTools';
 
-// Fully translated languages
-import { docsContent as docsContentZh } from './zh';
-import { docsContent as docsContentEn } from './en';
-import { docsContent as docsContentJa } from './ja';
-import { docsContent as docsContentRu } from './ru';
-import { docsContent as docsContentKo } from './ko';
+type DocsContentModule = { docsContent: DocsContent };
+type DocsContentLoader = () => Promise<DocsContentModule>;
 
-// Skeleton translations (intro + titles translated; detailed content in English as placeholder)
-import { docsContent as docsContentFr } from './fr';
-import { docsContent as docsContentDe } from './de';
-import { docsContent as docsContentEs } from './es';
-import { docsContent as docsContentIt } from './it';
-import { docsContent as docsContentPt } from './pt';
-import { docsContent as docsContentCs } from './cs';
-import { docsContent as docsContentDa } from './da';
-import { docsContent as docsContentNl } from './nl';
-import { docsContent as docsContentEl } from './el';
-import { docsContent as docsContentHi } from './hi';
-import { docsContent as docsContentHu } from './hu';
-import { docsContent as docsContentId } from './id';
-import { docsContent as docsContentNo } from './no';
-import { docsContent as docsContentPl } from './pl';
-import { docsContent as docsContentRo } from './ro';
-import { docsContent as docsContentSk } from './sk';
-import { docsContent as docsContentSv } from './sv';
-import { docsContent as docsContentTh } from './th';
-import { docsContent as docsContentTr } from './tr';
-import { docsContent as docsContentUk } from './uk';
-import { docsContent as docsContentVi } from './vi';
-import { docsContent as docsContentMs } from './ms';
-import { docsContent as docsContentFi } from './fi';
-import { docsContent as docsContentBg } from './bg';
-import { docsContent as docsContentLt } from './lt';
-
-const contentMap: Record<string, DocsContent> = {
-  zh: docsContentZh,
-  en: docsContentEn,
-  ja: docsContentJa,
-  ru: docsContentRu,
-  ko: docsContentKo,
-  fr: docsContentFr,
-  de: docsContentDe,
-  es: docsContentEs,
-  it: docsContentIt,
-  pt: docsContentPt,
-  cs: docsContentCs,
-  da: docsContentDa,
-  nl: docsContentNl,
-  el: docsContentEl,
-  hi: docsContentHi,
-  hu: docsContentHu,
-  id: docsContentId,
-  no: docsContentNo,
-  pl: docsContentPl,
-  ro: docsContentRo,
-  sk: docsContentSk,
-  sv: docsContentSv,
-  th: docsContentTh,
-  tr: docsContentTr,
-  uk: docsContentUk,
-  vi: docsContentVi,
-  ms: docsContentMs,
-  fi: docsContentFi,
-  bg: docsContentBg,
-  lt: docsContentLt,
-  // Additional locale aliases
-  'zh-CN': docsContentZh,
-  'zh-TW': docsContentZh,
-  'ja-JP': docsContentJa,
-  'ko-KR': docsContentKo,
-  'en-US': docsContentEn,
-  'en-GB': docsContentEn,
-  'fr-FR': docsContentFr,
-  'de-DE': docsContentDe,
-  'es-ES': docsContentEs,
-  'it-IT': docsContentIt,
-  'pt-PT': docsContentPt,
-  'pt-BR': docsContentPt,
-  'ru-RU': docsContentRu,
+const contentLoaders: Record<string, DocsContentLoader> = {
+  zh: () => import('./zh'),
+  en: () => import('./en'),
+  ja: () => import('./ja'),
+  ru: () => import('./ru'),
+  ko: () => import('./ko'),
+  fr: () => import('./fr'),
+  de: () => import('./de'),
+  es: () => import('./es'),
+  it: () => import('./it'),
+  pt: () => import('./pt'),
+  cs: () => import('./cs'),
+  da: () => import('./da'),
+  nl: () => import('./nl'),
+  el: () => import('./el'),
+  hi: () => import('./hi'),
+  hu: () => import('./hu'),
+  id: () => import('./id'),
+  no: () => import('./no'),
+  pl: () => import('./pl'),
+  ro: () => import('./ro'),
+  sk: () => import('./sk'),
+  sv: () => import('./sv'),
+  th: () => import('./th'),
+  tr: () => import('./tr'),
+  uk: () => import('./uk'),
+  vi: () => import('./vi'),
+  ms: () => import('./ms'),
+  fi: () => import('./fi'),
+  bg: () => import('./bg'),
+  lt: () => import('./lt'),
+  'zh-CN': () => import('./zh'),
+  'zh-TW': () => import('./zh'),
+  'ja-JP': () => import('./ja'),
+  'ko-KR': () => import('./ko'),
+  'en-US': () => import('./en'),
+  'en-GB': () => import('./en'),
+  'fr-FR': () => import('./fr'),
+  'de-DE': () => import('./de'),
+  'es-ES': () => import('./es'),
+  'it-IT': () => import('./it'),
+  'pt-PT': () => import('./pt'),
+  'pt-BR': () => import('./pt'),
+  'ru-RU': () => import('./ru'),
 };
 
 export type { DocsContent, DocsErrorSeverity, DocsErrorItem, DocsErrorCategory, DocsErrorDetailBlock, DocsButtonItem, DocsParamItem, DocsToolSection } from './types';
 
-export function getDocsContent(language: string): DocsContent {
-  const base = enhanceDocsContent(contentMap[language] ?? contentMap['zh'], language);
+export async function loadDocsContent(language: string): Promise<DocsContent> {
+  const loader = contentLoaders[language] ?? contentLoaders.zh;
+  const { docsContent } = await loader();
+  const base = enhanceDocsContent(docsContent, language);
   const extra = getExtraTools(language);
   return {
     ...base,

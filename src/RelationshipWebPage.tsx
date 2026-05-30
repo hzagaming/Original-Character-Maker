@@ -876,7 +876,7 @@ export function RelationshipWebPage({
       </header>
 
       {toast && (
-        <div className="editor-toast" style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 2000 }}>
+        <div className="editor-toast error" style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 2000 }}>
           {toast}
         </div>
       )}

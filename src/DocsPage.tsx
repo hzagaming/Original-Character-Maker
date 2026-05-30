@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playSound } from './audioEngine';
-import { getDocsContent } from './docsContent';
+import { loadDocsContent } from './docsContent';
+import type { DocsContent } from './docsContent';
 import type { AppLanguage, SettingsState } from './types';
 
 type DocsLabels = {
@@ -98,8 +99,9 @@ export default function DocsPage({
     errors: messages.docsSectionErrors,
   };
 
-  const content = useMemo(() => getDocsContent(language), [language]);
-  const [activeToolId, setActiveToolId] = useState<string>(initialToolId && content.tools.some((t) => t.id === initialToolId) ? initialToolId : content.tools[0].id);
+  const [content, setContent] = useState<DocsContent | null>(null);
+  const [contentLoadFailed, setContentLoadFailed] = useState(false);
+  const [activeToolId, setActiveToolId] = useState<string>(initialToolId ?? 'intro');
   const [activeSection, setActiveSection] = useState<SectionId | null>(
     initialSection && SECTION_IDS.includes(initialSection as SectionId) ? (initialSection as SectionId) : 'overview',
   );
@@ -116,7 +118,42 @@ export default function DocsPage({
   }, [onMount]);
 
   useEffect(() => {
-    if (!initialErrorCode) return;
+    let cancelled = false;
+    setContent(null);
+    setContentLoadFailed(false);
+
+    loadDocsContent(language)
+      .then((nextContent) => {
+        if (cancelled) return;
+        setContent(nextContent);
+        setActiveToolId((current) => {
+          if (initialToolId && nextContent.tools.some((tool) => tool.id === initialToolId)) {
+            return initialToolId;
+          }
+          const hasDictionaryCategory = current.startsWith('dict-') && nextContent.errorDictionary.some((category) => `dict-${category.id}` === current);
+          if (
+            current === 'intro' ||
+            current === 'error-index' ||
+            hasDictionaryCategory ||
+            nextContent.tools.some((tool) => tool.id === current)
+          ) {
+            return current;
+          }
+          return nextContent.tools[0]?.id ?? 'intro';
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setContentLoadFailed(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialToolId, language]);
+
+  useEffect(() => {
+    if (!initialErrorCode || !content) return;
     const timer = setTimeout(() => {
       const el = document.getElementById(`docs-error-${initialErrorCode}`);
       if (el && contentRef.current) {
@@ -128,9 +165,10 @@ export default function DocsPage({
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [initialErrorCode, activeToolId]);
+  }, [initialErrorCode, activeToolId, content]);
 
   const allSearchableErrors = useMemo(() => {
+    if (!content) return [];
     const toolErrors = content.tools.flatMap((tool) =>
       tool.errors.map((err) => ({ ...err, toolTitle: tool.title })),
     );
@@ -159,7 +197,8 @@ export default function DocsPage({
     );
   }, [allSearchableErrors, searchQuery]);
 
-  const activeTool = content.tools.find((t) => t.id === activeToolId) ?? content.tools[0];
+  const activeTool = content?.tools.find((t) => t.id === activeToolId) ?? content?.tools[0] ?? null;
+  const activeDictionaryCategory = content?.errorDictionary.find((c) => `dict-${c.id}` === activeToolId) ?? null;
 
   const isDictionaryView = activeToolId === 'dictionary';
 
@@ -196,6 +235,7 @@ export default function DocsPage({
   }, [activeSection, activeToolId]);
 
   const allErrors = useMemo(() => {
+    if (!content) return [];
     return content.errorDictionary.flatMap((cat) => cat.errors);
   }, [content]);
 
@@ -226,6 +266,17 @@ export default function DocsPage({
         </div>
 
         <div className="docs-layout">
+          {!content ? (
+            <div className="docs-content" ref={contentRef}>
+              <article className="docs-article">
+                <h1>{contentLoadFailed ? pageTitle : messages.docsWelcomeTitle}</h1>
+                <p className="docs-dictionary-desc">
+                  {contentLoadFailed ? pageDescription : `${pageDescription}...`}
+                </p>
+              </article>
+            </div>
+          ) : (
+            <>
           {/* Sidebar */}
           <aside className="docs-sidebar">
             <div className="docs-sidebar-inner">
@@ -395,15 +446,15 @@ export default function DocsPage({
                   ))}
                 </div>
               </article>
-            ) : activeToolId.startsWith('dict-') ? (
+            ) : activeToolId.startsWith('dict-') && activeDictionaryCategory ? (
               <DictionaryView
-                category={content.errorDictionary.find((c) => `dict-${c.id}` === activeToolId)!}
+                category={activeDictionaryCategory}
                 messages={messages}
                 highlightedErrorCode={highlightedErrorCode}
               />
             ) : isIndexView ? (
               <ErrorIndexView errors={allErrors} messages={messages} highlightedErrorCode={highlightedErrorCode} />
-            ) : (
+            ) : activeTool ? (
               <article className="docs-article">
                 <h1>{activeTool.title}</h1>
 
@@ -467,8 +518,15 @@ export default function DocsPage({
                   </div>
                 </section>
               </article>
+            ) : (
+              <article className="docs-article">
+                <h1>{messages.docsWelcomeTitle}</h1>
+                <p className="docs-dictionary-desc">{pageDescription}</p>
+              </article>
             )}
           </div>
+            </>
+          )}
         </div>
       </section>
     </main>

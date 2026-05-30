@@ -395,7 +395,7 @@ Changes made in the Dev Mode Panel can corrupt app state. Always export your set
   {
     id: 'inspiration-generator',
     title: 'Inspiration Generator',
-    overview: `The Inspiration Generator produces creative prompts and character concepts using AI. It is designed to break writer\'s block by offering unexpected combinations of traits, backgrounds, and visual elements that you might not have considered.
+    overview: `The Inspiration Generator produces creative prompts and character concepts using AI. It is designed to break writer's block by offering unexpected combinations of traits, backgrounds, and visual elements that you might not have considered.
 
 [Inspiration Categories]
 - Appearance: Hair style, eye color, body type, distinguishing marks, fashion sense
@@ -550,7 +550,7 @@ const zh: DocsToolSection[] = [
       { name: '添加技能图标', description: '为卡片上的技能槽分配视觉图标。' },
     ],
     parameters: [
-      { name: '卡片模板', description: '选择卡片的整体布局和比例。', tips: '标准 TCG 适合横向人像；纵向属性适合全身 artwork。' },
+      { name: '卡片模板', description: '选择卡片的整体布局和比例。', tips: '标准 TCG 适合横向人像；纵向属性适合全身艺术作品。' },
       { name: '边框主题', description: '决定卡片边框和装饰的视觉风格。', tips: '科幻角色用金属，奇幻游侠用木质，法师用魔法，赛博格用科技。' },
       { name: '属性显示模式', description: '控制数值属性的呈现方式：纯数字、进度条或等级徽章。', tips: '进度条最便于快速比较；等级徽章在极简布局中效果很好。' },
       { name: '分辨率', description: '导出分辨率倍数：1x（标准）、2x（视网膜）、4x（印刷质量）。', tips: '2x 推荐用于社交媒体分享；4x 会产生非常大的文件。' },
@@ -729,7 +729,7 @@ const zh: DocsToolSection[] = [
       { name: '颜色格式', description: '显示格式：HEX、RGB 或 HSL。', tips: 'HEX 是网页最常见；HSL 最适合程序调整。' },
     ],
     errors: [
-      { code: 'PALETTE_IMAGE_EXTRACT_FAILED', message: '无法从图片提取主导颜色。', severity: 'error', category: '导入', location: 'ColorPaletteDesignerPage → extractFromImage', cause: '图片太小、太单色，或使用了不支持的色彩空间。', solution: '使用更大、更多彩的参考图片，或手动构建调色板。', steps: ['确认图片至少 200x200 像素', '确保包含多种不同颜色', '重试提取', '或切换到手动模式'], relatedCodes: [], prevention: '使用包含可见颜色 variety 的高质量参考图片。' },
+      { code: 'PALETTE_IMAGE_EXTRACT_FAILED', message: '无法从图片提取主导颜色。', severity: 'error', category: '导入', location: 'ColorPaletteDesignerPage → extractFromImage', cause: '图片太小、太单色，或使用了不支持的色彩空间。', solution: '使用更大、更多彩的参考图片，或手动构建调色板。', steps: ['确认图片至少 200x200 像素', '确保包含多种不同颜色', '重试提取', '或切换到手动模式'], relatedCodes: [], prevention: '使用包含可见颜色多样性 的高质量参考图片。' },
       { code: 'PALETTE_COLOR_COUNT_INVALID', message: '请求的调色板大小超出范围。', severity: 'warning', category: '验证', location: 'ColorPaletteDesignerPage → generatePalette', cause: '调色板大小设为低于 3 或高于 10。', solution: '将调色板大小调整到 3 到 10 之间。', steps: ['打开调色板设置', '将大小设为 3-10', '重新生成'], relatedCodes: [], prevention: 'UI 应强制执行此范围，但手动 JSON 导入可能绕过它。' },
       { code: 'PALETTE_EXPORT_CLIPBOARD_FAILED', message: '剪贴板写入被拒绝。', severity: 'warning', category: '导出', location: 'ColorPaletteDesignerPage → copyHex', cause: '浏览器拒绝了剪贴板访问，通常因为页面没有焦点或用户尚未与之交互。', solution: '先点击页面内部，然后重试复制操作。', steps: ['点击页面任意位置', '再次按复制 HEX 按钮'], relatedCodes: [], prevention: '剪贴板访问在大多数浏览器中需要近期的用户手势。' },
       { code: 'PALETTE_STORAGE_FULL', message: '无法保存调色板到本地存储。', severity: 'error', category: '存储', location: 'ColorPaletteDesignerPage → savePalette', cause: 'localStorage 或 IndexedDB 配额已满。', solution: '删除旧调色板或将其导出到磁盘后再保存新调色板。', steps: ['打开已保存调色板面板', '删除未使用的调色板', '重试保存'], relatedCodes: [], prevention: '定期将调色板导出为 JSON 文件并清空浏览器存储。' },
@@ -837,7 +837,7 @@ const zh: DocsToolSection[] = [
     errors: [
       { code: 'DIALOGUE_NO_CHARACTERS', message: '未配置说话者。', severity: 'error', category: '验证', location: 'DialogueGeneratorPage → generateDialogue', cause: '生成前必须至少向说话者列表添加一个角色。', solution: '点击添加说话者并从下拉菜单选择或创建角色档案。', steps: ['点击添加说话者', '从下拉菜单选择角色', '点击生成对话'], relatedCodes: [], prevention: '应用会记住您最后使用的说话者；设置一次即可复用。' },
       { code: 'DIALOGUE_GENERATION_EMPTY', message: 'LLM 返回空响应。', severity: 'warning', category: 'API', location: 'DialogueGeneratorPage → generateDialogue', cause: 'AI 模型未产生输出，通常由于过于严格的系统提示或 token 限制。', solution: '增加最大 Token 数，放宽系统提示，或切换到更强大的模型。', steps: ['将最大 Token 数增加 50%', '简化场景上下文', '重试生成'], relatedCodes: [], prevention: '保持场景上下文在 500 字以内以确保可靠生成。' },
-      { code: 'DIALOGUE_CONTEXT_TOO_LONG', message: '场景上下文超出 token 预算。', severity: 'error', category: '验证', location: 'DialogueGeneratorPage → generateDialogue', cause: '角色档案 + 场景上下文 + 系统提示的组合长度超出模型的上下文窗口。', solution: '缩短角色描述，减少说话者数量，或使用上下文窗口更大的模型。', steps: ['将每个角色档案缩减为 2-3 句话', '将说话者数量减至 2-3 个', '切换到 8k+ 上下文模型'], relatedCodes: ['DIALOGUE_GENERATION_EMPTY'], prevention: '为生成维护仅包含 essential 特征的"角色速查表"。' },
+      { code: 'DIALOGUE_CONTEXT_TOO_LONG', message: '场景上下文超出 token 预算。', severity: 'error', category: '验证', location: 'DialogueGeneratorPage → generateDialogue', cause: '角色档案 + 场景上下文 + 系统提示的组合长度超出模型的上下文窗口。', solution: '缩短角色描述，减少说话者数量，或使用上下文窗口更大的模型。', steps: ['将每个角色档案缩减为 2-3 句话', '将说话者数量减至 2-3 个', '切换到 8k+ 上下文模型'], relatedCodes: ['DIALOGUE_GENERATION_EMPTY'], prevention: '为生成维护仅包含核心特征的"角色速查表"。' },
       { code: 'DIALOGUE_EXPORT_FAILED', message: '文件下载中断。', severity: 'warning', category: '导出', location: 'DialogueGeneratorPage → exportTxt', cause: '浏览器阻止了下载，或生成的文件太大。', solution: '将对话复制到剪贴板并粘贴到文本编辑器中。', steps: ['点击复制结果', '打开文本编辑器', '粘贴并手动保存'], relatedCodes: [], prevention: '对于非常长的对话，每次导出 50 行左右。' },
     ],
   },
@@ -847,7 +847,7 @@ const zh: DocsToolSection[] = [
     overview: `灵感生成器使用 AI 产生创意提示和角色概念。它旨在通过提供你可能未曾考虑过的特质、背景和视觉元素的意外组合来打破写作障碍。
 
 [灵感类别]
-- 外貌：发型、瞳色、体型、 distinguishing marks、时尚感
+- 外貌：发型、瞳色、体型、特征标记、时尚感
 - 性格：MBTI 类型、阵营、核心美德/缺陷、语言模式
 - 背景故事：出身、关键事件、关系、秘密、目标
 - 世界观构建：阵营归属、故乡、文化传统、社会阶层
@@ -888,7 +888,7 @@ const zh: DocsToolSection[] = [
       { name: '输出语言', description: '生成文本的语言。', tips: '用目标语言生成；翻译可能在性格描述中丢失细微差别。' },
       { name: '每批最大结果数', description: '一次生成产生多少个替代概念。', tips: '浏览用 3-5 个；快速原型用 10+ 个。' },
       { name: '种子值', description: '控制可复现性的随机种子。', tips: '留空随机；输入特定数字以复现喜爱的结果。' },
-      { name: '包含图像提示', description: '启用后，附加 Stable Diffusion / Midjourney 兼容的提示语法。', tips: '如果你计划从角色概念生成视觉 artwork，请启用。' },
+      { name: '包含图像提示', description: '启用后，附加 Stable Diffusion / Midjourney 兼容的提示语法。', tips: '如果你计划从角色概念生成视觉艺术作品，请启用。' },
       { name: '成熟度过滤', description: '排除超过所选成熟度评级的概念。', tips: '一般受众设为"青少年"；"成熟"允许更黑暗的主题。' },
     ],
     errors: [
