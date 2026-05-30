@@ -43,6 +43,7 @@ const ColorPaletteDesignerPage = lazy(() => import('./ColorPaletteDesignerPage')
 const DialogueGeneratorPage = lazy(() => import('./DialogueGeneratorPage'));
 const CharacterSkillTreePage = lazy(() => import('./CharacterSkillTreePage'));
 const CharacterBattleCardPage = lazy(() => import('./CharacterBattleCardPage'));
+const SceneWriterPage = lazy(() => import('./SceneWriterPage'));
 const DocsPage = lazy(() => import('./DocsPage'));
 import {
   defaultAudioSettings,
@@ -63,7 +64,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.17.0';
+const VERSION = '1.18.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -115,6 +116,7 @@ type Messages = {
   featureDialogueGenerator: string;
   featureSkillTree: string;
   featureBattleCard: string;
+  featureSceneWriter: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -154,6 +156,7 @@ type Messages = {
   actionDialogueGenerator: string;
   actionSkillTree: string;
   actionBattleCard: string;
+  actionSceneWriter: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -293,6 +296,8 @@ type Messages = {
   pageSkillTreeDescription: string;
   pageBattleCardTitle: string;
   pageBattleCardDescription: string;
+  pageSceneWriterTitle: string;
+  pageSceneWriterDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -580,6 +585,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDialogueGenerator: '角色台词生成器',
     featureSkillTree: '角色技能树设计器',
     featureBattleCard: '角色战斗卡生成器',
+    featureSceneWriter: '场景剧本工坊',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -619,6 +625,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionDialogueGenerator: '角色台词生成',
     actionSkillTree: '技能树设计',
     actionBattleCard: '战斗卡生成',
+    actionSceneWriter: '场景剧本',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -704,10 +711,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.17.0 第十四轮深度审计：自定义音频持久化、动画速度一致性、DocsPage 稳定性与多处深层 bug 修复。',
-    announcementList1: '自定义音频持久化：修复用户每次刷新后自定义 SFX/BGM 丢失的问题——settings 保存时不再 strip Data URL，同时新增从独立 localStorage key 的 legacy 恢复逻辑。',
-    announcementList2: '动画与稳定性：PageLoadingSpinner 与 Splash overlay 的过渡动画现在正确关联 --animation-speed；ErrorBoundary z-index 提升避免被 Splash 遮挡；DocsPage 高亮 timer cleanup 移至 effect 外层防止内存泄漏。',
-    announcementList3: '代码质量：audioEngine.ts 修复 density=0 除零风险；AssetGalleryPage 移除硬编码中文分支；App.tsx 初始化 effect 使用 settingsRef 避免 stale closure；RelationshipWebPage toast z-index 提升至 modal 之上。',
+    announcementDescription: 'v1.18.0 新增场景剧本工坊：为原创角色创作情景剧本的专用工具，支持场景设定、台词与动作编辑、Markdown 导出与随机生成。',
+    announcementList1: '场景剧本工坊（Scene Writer）：全新页面，支持多场景管理、剧本行编辑（台词/动作）、出场角色管理、拖拽排序、Markdown 导出、随机场景生成器。',
+    announcementList2: 'v1.17.0 审计修复：自定义音频持久化、动画速度一致性、DocsPage 稳定性与多处深层 bug 修复已全部合入。',
+    announcementList3: '代码质量：audioEngine.ts 修复 density=0 除零风险、scheduleBeat 重启问题、ensureContext 恢复逻辑；补齐缺失音效 cooldowns；AssetGalleryPage 移除硬编码中文分支。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -762,6 +769,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSkillTreeDescription: '为原创角色设计完整的技能体系与成长路线。支持 5 种预设职业模板（战士/法师/刺客/辅助/自定义），节点式可视化编辑，属性解锁条件联动，等级分配，历史收藏与 JSON 导出。',
     pageBattleCardTitle: '角色战斗卡生成器',
     pageBattleCardDescription: '基于角色属性与技能树自动生成游戏风格战斗卡。自动计算 HP/MP/ATK/DEF/SPD/CRT 战斗数值，显示已解锁技能，支持称号生成、PNG 导出与 JSON 导出。',
+    pageSceneWriterTitle: '场景剧本工坊',
+    pageSceneWriterDescription: '为你的原创角色创作情景剧本。支持场景设定、角色出场管理、台词与动作/旁白编辑、拖拽排序、Markdown 导出，以及随机场景生成器。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -1033,6 +1042,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDialogueGenerator: 'セリフ生成器',
     featureSkillTree: 'スキルツリー設計',
     featureBattleCard: 'バトルカード',
+    featureSceneWriter: 'シーン脚本',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -1072,6 +1082,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionDialogueGenerator: 'セリフ生成器',
     actionSkillTree: 'スキルツリー設計',
     actionBattleCard: 'バトルカード',
+    actionSceneWriter: 'シーン脚本',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1157,10 +1168,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.17.0 第十四回深度監査：カスタム音声永続化、アニメーション速度の一貫性、DocsPage 安定性と複数の深層バグ修正。',
-    announcementList1: 'カスタム音声永続化：ページ更新後にカスタム SFX/BGM が失われる問題を修正——settings 保存時に Data URL を strip しないように変更し、独立した localStorage key からのレガシー復元ロジックも追加。',
-    announcementList2: 'アニメーションと安定性：PageLoadingSpinner と Splash overlay のトランジションが --animation-speed と正しく連動；ErrorBoundary の z-index を上げて Splash による隠蔽を防止；DocsPage のハイライト timer cleanup を effect 外層に移動してメモリリークを防止。',
-    announcementList3: 'コード品質：audioEngine.ts の density=0 によるゼロ除算リスクを修正；AssetGalleryPage のハードコードされた中国語分岐を削除；App.tsx の初期化 effect で settingsRef を使用して stale closure を回避；RelationshipWebPage の toast z-index を modal より上に引き上げ。',
+    announcementDescription: 'v1.18.0 シーン脚本スタジオを追加：オリジナルキャラクターのためのシナリオ脚本作成専用ツール。シーン設定、セリフ・アクション編集、Markdown 出力、ランダム生成に対応。',
+    announcementList1: 'シーン脚本スタジオ（Scene Writer）：新規ページ。複数シーン管理、脚本行編集（セリフ/アクション）、キャスト管理、ドラッグ並べ替え、Markdown 出力、ランダムシーン生成器を実装。',
+    announcementList2: 'v1.17.0 監査修正：カスタム音声永続化、アニメーション速度の一貫性、DocsPage 安定性と複数の深層バグ修正を統合。',
+    announcementList3: 'コード品質：audioEngine.ts の density=0 ゼロ除算リスク、scheduleBeat 再起動問題、ensureContext 復元ロジックを修正。欠落 cooldown を補完。AssetGalleryPage のハードコード中国語分岐を削除。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1215,6 +1226,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSkillTreeDescription: 'オリジナルキャラクターのスキル体系と成長ルートを設計。戦士/魔導士/暗殺者/サポート/カスタムの 5 種類のプリセットに対応。ノード式ビジュアルエディタ、ステータス連携の解放条件、レベル割り振り、履歴・お気に入り保存、JSON 出力をサポート。',
     pageBattleCardTitle: 'バトルカード生成',
     pageBattleCardDescription: 'キャラクターのステータスとスキルツリーから自動的にゲーム風バトルカードを生成。HP/MP/ATK/DEF/SPD/CRT の戦闘数値を自動計算し、解放済スキルを表示。称号生成、PNG 出力、JSON 出力に対応。',
+    pageSceneWriterTitle: 'シーン脚本スタジオ',
+    pageSceneWriterDescription: 'オリジナルキャラクターのためのシナリオ脚本作成ツール。シーン設定、キャスト管理、セリフとアクション/ナレーション編集、ドラッグ並べ替え、Markdown 出力、ランダムシーン生成に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1486,6 +1499,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDialogueGenerator: 'Dialogue Gen',
     featureSkillTree: 'Skill Tree',
     featureBattleCard: 'Battle Card',
+    featureSceneWriter: 'Scene Writer',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1525,6 +1539,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionDialogueGenerator: 'Dialogue Gen',
     actionSkillTree: 'Skill Tree',
     actionBattleCard: 'Battle Card',
+    actionSceneWriter: 'Scene Writer',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1610,10 +1625,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.17.0 Fourteenth-round deep audit: custom audio persistence, animation speed consistency, DocsPage stability, and multiple deep bug fixes.',
-    announcementList1: 'Custom audio persistence: fixed custom SFX/BGM being lost after every refresh — settings no longer strip Data URLs on save, plus added legacy recovery logic from separate localStorage keys.',
-    announcementList2: 'Animation & stability: PageLoadingSpinner and Splash overlay transitions now correctly respect --animation-speed; ErrorBoundary z-index raised to prevent Splash occlusion; DocsPage highlight timer cleanup moved to outer effect scope to prevent memory leaks.',
-    announcementList3: 'Code quality: fixed audioEngine.ts division-by-zero risk when density=0; removed hardcoded Chinese branches in AssetGalleryPage; App.tsx init effect uses settingsRef to avoid stale closure; RelationshipWebPage toast z-index elevated above modal layer.',
+    announcementDescription: 'v1.18.0 New Scene Writer: a dedicated tool for writing scenario scripts for original characters, featuring scene settings, dialogue/action editing, Markdown export, and random generation.',
+    announcementList1: 'Scene Writer: brand-new page supporting multi-scene management, script line editing (dialogue/action), cast management, drag-to-reorder, Markdown export, and a random scene generator.',
+    announcementList2: 'v1.17.0 audit fixes: custom audio persistence, animation speed consistency, DocsPage stability, and multiple deep bug fixes are all merged.',
+    announcementList3: 'Code quality: fixed audioEngine.ts density=0 division-by-zero risk, scheduleBeat restart issue, and ensureContext recovery logic. Added missing sound cooldowns. Removed hardcoded Chinese branches in AssetGalleryPage.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -1668,6 +1683,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSkillTreeDescription: 'Design a complete skill system and growth path for your original character. Features 5 class presets (Warrior/Mage/Assassin/Support/Custom), node-based visual editor, stat-linked unlock conditions, level allocation, favorites, history, and JSON export.',
     pageBattleCardTitle: 'Battle Card Generator',
     pageBattleCardDescription: 'Auto-generate a game-style battle card from character stats and skill tree. Calculates HP/MP/ATK/DEF/SPD/CRT combat values, displays unlocked skills, supports title generation, PNG export and JSON export.',
+    pageSceneWriterTitle: 'Scene Writer',
+    pageSceneWriterDescription: 'Write scenario scripts for your original characters. Supports scene settings, cast management, dialogue and action/narration editing, drag-to-reorder, Markdown export, and random scene generation.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1939,6 +1956,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureDialogueGenerator: 'Генератор реплик',
     featureSkillTree: 'Дерево навыков',
     featureBattleCard: 'Боевая карта',
+    featureSceneWriter: 'Сценарий сцен',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -1978,6 +1996,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionDialogueGenerator: 'Генератор реплик',
     actionSkillTree: 'Дерево навыков',
     actionBattleCard: 'Боевая карта',
+    actionSceneWriter: 'Сценарий сцен',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -2063,10 +2082,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.17.0 Четырнадцатый глубокий аудит: персистентность пользовательского аудио, согласованность скорости анимации, стабильность DocsPage и исправление множества глубинных багов.',
-    announcementList1: 'Персистентность пользовательского аудио: исправлена потеря пользовательских SFX/BGM после каждого обновления — settings больше не удаляют Data URL при сохранении, плюс добавлена логика legacy-восстановления из отдельных ключей localStorage.',
-    announcementList2: 'Анимация и стабильность: переходы PageLoadingSpinner и Splash overlay теперь корректно учитывают --animation-speed; z-index ErrorBoundary повышен для предотвращения перекрытия Splash; cleanup таймера подсветки DocsPage перемещён во внешнюю область effect для предотвращения утечек памяти.',
-    announcementList3: 'Качество кода: исправлен риск деления на ноль в audioEngine.ts при density=0; удалены жёстко закодированные китайские ветвления в AssetGalleryPage; init-effect в App.tsx использует settingsRef для избежания stale closure; z-index toast в RelationshipWebPage поднят выше модального слоя.',
+    announcementDescription: 'v1.18.0 Добавлена студия сценариев: специализированный инструмент для создания сценариев для оригинальных персонажей. Поддержка настроек сцен, редактирования реплик и действий, экспорта Markdown и случайной генерации.',
+    announcementList1: 'Студия сценариев (Scene Writer): новая страница. Реализовано управление несколькими сценами, редактирование строк сценария (реплики/действия), управление актёрским составом, сортировка перетаскиванием, экспорт Markdown и генератор случайных сцен.',
+    announcementList2: 'Исправления аудита v1.17.0: персистентность пользовательского аудио, согласованность скорости анимации, стабильность DocsPage и исправление множества глубинных багов интегрированы.',
+    announcementList3: 'Качество кода: исправлен риск деления на ноль в audioEngine.ts при density=0, проблема перезапуска scheduleBeat и логика восстановления ensureContext. Добавлены недостающие cooldowns звуков. Удалены жёстко закодированные китайские ветвления в AssetGalleryPage.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2121,6 +2140,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSkillTreeDescription: 'Создайте полную систему навыков и путь развития для вашего персонажа. 5 классовых шаблонов (воин/маг/ассасин/поддержка/свой), визуальный редактор на основе узлов, условия разблокировки по характеристикам, распределение уровней, избранное, история, экспорт JSON.',
     pageBattleCardTitle: 'Генератор боевой карты',
     pageBattleCardDescription: 'Автоматическая генерация игровой боевой карты из характеристик и дерева навыков персонажа. Рассчитывает боевые значения HP/MP/ATK/DEF/SPD/CRT, отображает разблокированные навыки, поддерживает генерацию титула, экспорт PNG и JSON.',
+    pageSceneWriterTitle: 'Студия сценариев',
+    pageSceneWriterDescription: 'Создавайте сценарии для ваших оригинальных персонажей. Поддерживает настройки сцен, управление актёрским составом, редактирование реплик и действий/повествования, перетаскивание для сортировки, экспорт Markdown и генерацию случайных сцен.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2821,6 +2842,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureDialogueGenerator: '캐릭터 대사 생성기',
     featureSkillTree: '캐릭터 스킬 트리',
     featureBattleCard: '캐릭터 배틀 카드',
+    featureSceneWriter: '장면 각본',
     actionAssetGallery: '캐릭터 에셋 갤러리',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
@@ -2832,6 +2854,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     actionDialogueGenerator: '캐릭터 대사 생성기',
     actionSkillTree: '캐릭터 스킬 트리',
     actionBattleCard: '캐릭터 배틀 카드',
+    actionSceneWriter: '장면 각본',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2868,14 +2891,16 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSkillTreeDescription: 'OC 캐릭터의 완전한 스킬 체계와 성장 루트를 설계합니다. 전사/마법사/암살자/서포터/커스텀 5가지 프리셋, 노드 기반 비주얼 에디터, 스탯 연동 해금 조건, 레벨 배분, 즐겨찾기/기록, JSON 납품하기 지원.',
     pageBattleCardTitle: '캐릭터 배틀 카드 생성기',
     pageBattleCardDescription: '캐릭터 스탯과 스킬 트리를 기반으로 게임 스타일 배틀 카드를 자동 생성합니다. HP/MP/ATK/DEF/SPD/CRT 전투 수치를 자동 계산하고, 해금된 스킬을 표시하며, 칭호 생성, PNG 납품하기, JSON 납품하기를 지원합니다.',
+    pageSceneWriterTitle: '장면 각본 공방',
+    pageSceneWriterDescription: '오리지널 캐릭터를 위한 시나리오 각본 작성 도구. 장면 설정, 캐스트 관리, 대사 및 액션/나레이션 편집, 드래그 정렬, Markdown 납품하기, 랜덤 장면 생성을 지원합니다.',
     audioPresetMute: '무음',
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.17.0 열네 번째 심층 감사: 커스텀 오디오 영구 저장、애니메이션 속도 일관성、DocsPage 안정성 및 다수의 심층 버그 수정。',
-    announcementList1: '커스텀 오디오 영구 저장: 페이지 새로고침 시 커스텀 SFX/BGM이 사라지는 문제 수정——settings 저장 시 Data URL을 제거하지 않도록 변경하고, 별도 localStorage 키에서의 레거시 복원 로직 추가。',
-    announcementList2: '애니메이션 및 안정성: PageLoadingSpinner와 Splash overlay 전환이 이제 --animation-speed를 올바르게 반영；ErrorBoundary z-index를 높여 Splash에 가려지지 않도록 개선；DocsPage 하이라이트 타이머 정리를 effect 외부 범위로 이동하여 메모리 누수 방지。',
-    announcementList3: '코드 품질: audioEngine.ts의 density=0 시 0으로 나누기 위험 수정；AssetGalleryPage의 하드코딩된 중국어 분기 제거；App.tsx 초기화 effect에서 settingsRef를 사용하여 stale closure 회피；RelationshipWebPage toast z-index를 modal 레이어 위로 상향 조정。',
+    announcementDescription: 'v1.18.0 장면 각본 공방 신규 추가: 오리지널 캐릭터를 위한 시나리오 각본 작성 전용 도구. 장면 설정、대사 및 액션 편집、Markdown 납품、랜덤 생성 지원。',
+    announcementList1: '장면 각본 공방 (Scene Writer): 신규 페이지. 다중 장면 관리、대본行 편집 (대사/액션)、캐스트 관리、드래그 정렬、Markdown 납품、랜덤 장면 생성기 구현。',
+    announcementList2: 'v1.17.0 감사 수정: 커스텀 오디오 영구 저장、애니메이션 속도 일관성、DocsPage 안정성 및 다수의 심층 버그 수정이 모두 통합됨。',
+    announcementList3: '코드 품질: audioEngine.ts의 density=0 시 0으로 나누기 위험、scheduleBeat 재시작 문제、ensureContext 복원 로직 수정. 누락된 효과음 cooldown 보완. AssetGalleryPage의 하드코딩된 중국어 분기 제거。',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3069,6 +3094,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.17.0',
+    date: '2026-05-18',
+    title: '1.17.0 第十四轮深度审计：自定义音频持久化、动画速度一致性、DocsPage 稳定性与多处深层 bug 修复',
+    summary:
+      '自定义音频 Data URL 不再被 strip，新增 legacy 恢复逻辑；PageLoadingSpinner 与 Splash 动画正确关联 --animation-speed；ErrorBoundary z-index 提升；DocsPage timer cleanup 修复；audioEngine.ts 除零风险、scheduleBeat 重启、ensureContext 恢复逻辑修复；补齐缺失 cooldowns。',
+    details: [
+      '自定义音频持久化：settings 保存时不再 strip customSfxDataUrl/customMusicDataUrl；loadInitialSettings 新增从独立 localStorage key 的 legacy 恢复逻辑。',
+      '动画与稳定性：PageLoadingSpinner spinner 动画与 Splash overlay/progress bar 过渡均使用 calc(Nms * var(--animation-speed, 1))；ErrorBoundary z-index 保持 1000，Splash 降至 100 避免遮挡。',
+      'DocsPage：高亮 timer 的 cleanup 从 setTimeout callback 内部移至 effect 外层作用域，防止组件卸载后内存泄漏。',
+      'audioEngine.ts：scheduleTick 使用 Math.max(1, preset.density * 4) 防止除零；startMusic 移除 scheduleBeat=0 防止 BGM 每次从头开始；ensureContext 重置 ctxCreationFailed 允许失败后恢复；补齐 back/modalOpen/modalClose/settingsOpen/confirm 缺失 cooldowns。',
+      '代码质量：AssetGalleryPage 硬编码中文分支替换为 messages.helpButton/messages.metricStorage；App.tsx init effect 使用 settingsRef.current 避免 stale closure；RelationshipWebPage toast z-index 提升至 500。',
+    ],
+  },
   {
     version: '1.16.0',
     date: '2026-05-18',
@@ -5261,6 +5300,12 @@ function App() {
               pageTitle={messages.pageBattleCardTitle}
               pageDescription={messages.pageBattleCardDescription}
             />
+          ) : screen === 'scene-writer' ? (
+            <SceneWriterPage
+              {...sharedPageProps}
+              pageTitle={messages.pageSceneWriterTitle}
+              pageDescription={messages.pageSceneWriterDescription}
+            />
           ) : screen === 'docs' ? (
             <DocsPage
               {...sharedPageProps}
@@ -7197,6 +7242,17 @@ function ActionIcon({
         <rect x="12" y="22" width="6" height="6" rx="1" />
         <rect x="22" y="22" width="6" height="6" rx="1" />
         <path d="M12 32h16" />
+      </>
+    ),
+    'scene-writer': (
+      <>
+        <rect x="8" y="4" width="24" height="32" rx="3" />
+        <path d="M12 10h16" />
+        <path d="M12 14h10" />
+        <path d="M12 18h14" />
+        <path d="M12 22h8" />
+        <path d="M12 28h4" />
+        <circle cx="28" cy="28" r="3" />
       </>
     ),
     docs: (

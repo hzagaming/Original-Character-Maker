@@ -25,6 +25,7 @@ export type ActionIconKind =
   | 'dialogue-generator'
   | 'skill-tree'
   | 'battle-card'
+  | 'scene-writer'
   | 'docs';
 
 export interface FeatureMeta {
@@ -270,6 +271,21 @@ export const FEATURE_REGISTRY: FeatureMeta[] = [
     pipelineTitle: 'Preview / Export',
     todoOne: '补属性自动计算与技能标签',
     todoTwo: '补战斗卡 PNG 导出',
+  },
+  {
+    id: 'scene-writer',
+    category: 'character',
+    icon: 'scene-writer',
+    labelKey: 'featureSceneWriter',
+    actionKey: 'actionSceneWriter',
+    pageTitleKey: 'pageSceneWriterTitle',
+    pageDescKey: 'pageSceneWriterDescription',
+    importable: false,
+    workspaceTitle: 'Scene Studio',
+    panelTitle: 'Script / Cast',
+    pipelineTitle: 'Preview / Export',
+    todoOne: '补场景创建与剧本行编辑',
+    todoTwo: '补剧本预览与 Markdown 导出',
   },
   // ── 世界观管理 ──
   {

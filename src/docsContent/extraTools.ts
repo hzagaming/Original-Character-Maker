@@ -449,6 +449,56 @@ Every generation uses a numeric seed. Using the same seed with the same settings
       { code: 'INSPIRATION_SEED_INVALID', message: 'Seed value is not a valid integer.', severity: 'warning', category: 'Validation', location: 'InspirationGeneratorPage → regenerateWithSeed', cause: 'The entered seed is not a whole number, or is outside the safe integer range.', solution: 'Enter a whole number between 0 and 9007199254740991.', steps: ['Clear the seed field', 'Enter a simple number like 12345', 'Click Regenerate'], relatedCodes: [], prevention: 'Only enter plain digits; avoid commas, decimals, or scientific notation.' },
     ],
   },
+  {
+    id: 'scene-writer',
+    title: 'Scene Writer',
+    overview: `The Scene Writer is a script and scenario drafting tool for original characters. It helps writers, roleplayers, and artists plan short scenes featuring their OCs by providing a structured editor for dialogue, action lines, and scene metadata.
+
+[Core Features]
+- Scene management: create, duplicate, delete, and switch between multiple scenes
+- Scene metadata: title, location, time, weather, and mood setting
+- Cast management: add character names that appear in the scene
+- Script lines: two types — Dialogue (with speaker and emotion tags) and Action/Narration
+- Drag-to-reorder: reorder script lines via drag handles
+- Random scene generator: auto-create a scene with randomized settings and sample lines
+- Markdown export: export the complete scene as formatted Markdown
+
+[Use Cases]
+- Writers: draft short stories or novel scenes with proper formatting
+- Roleplayers: prepare scenario scripts for forum or chat-based RP
+- Artists: generate scene descriptions to use as commission briefs
+- Game designers: write cutscene scripts and dialogue trees
+
+[File Format]
+Scenes are stored as JSON in localStorage under the key oc-maker.scene-writer.
+Each scene contains: id, title, location, time, weather, mood, cast (string[]), lines (array of {id, type, speaker?, emotion?, text}), createdAt, updatedAt.`,
+    buttons: [
+      { name: 'New Scene', description: 'Creates a blank scene with empty metadata and no script lines.' },
+      { name: 'Random Scene', description: 'Generates a new scene with randomized location, time, weather, mood, and sample dialogue/action lines.' },
+      { name: 'Duplicate Scene', description: 'Creates a copy of the selected scene including all metadata and lines.' },
+      { name: 'Delete Scene', description: 'Permanently removes the selected scene after confirmation.' },
+      { name: 'Add Dialogue', description: 'Inserts a new dialogue line into the script. Choose speaker from the cast list and optionally add an emotion tag.' },
+      { name: 'Add Action', description: 'Inserts a new action/narration line into the script. Use for stage directions, environmental descriptions, or internal monologue.' },
+      { name: 'Delete Line', description: 'Removes a single script line from the scene.' },
+      { name: 'Export Markdown', description: 'Copies the entire scene as formatted Markdown to the clipboard.' },
+      { name: 'Reorder Lines', description: 'Drag the handle on the left side of any line to change its position in the script.' },
+    ],
+    parameters: [
+      { name: 'Scene Title', description: 'The display name of the scene.', tips: 'Keep it short and evocative; it appears in the sidebar list.' },
+      { name: 'Location', description: 'Where the scene takes place.', tips: 'Be specific (e.g., "Ancient Plaza" rather than "Town") for richer visualization.' },
+      { name: 'Time', description: 'The time of day or narrative timing.', tips: 'Use narrative time ("Dawn", "Midnight") rather than exact clock time.' },
+      { name: 'Weather', description: 'Atmospheric conditions during the scene.', tips: 'Weather affects mood; contrast stormy weather with calm dialogue for dramatic effect.' },
+      { name: 'Mood', description: 'The emotional tone of the scene.', tips: 'Common moods: Tense, Warm, Sad, Passionate, Mysterious, Relaxed, Romantic, Suspenseful.' },
+      { name: 'Cast', description: 'The list of characters who appear in the scene.', tips: 'Add cast members before writing dialogue so the speaker dropdown is populated.' },
+      { name: 'Speaker', description: 'Which cast member delivers a dialogue line.', tips: 'Select from the cast list; empty speaker is allowed for unmarked dialogue.' },
+      { name: 'Emotion', description: 'An optional tag describing how the line is delivered.', tips: 'Examples: angry, whispering, cheerful, sarcastic, trembling.' },
+    ],
+    errors: [
+      { code: 'SCENE_WRITER_STORAGE_FULL', message: 'Browser storage quota exceeded.', severity: 'error', category: 'Storage', location: 'SceneWriterPage → writeState', cause: 'The total size of all scenes exceeds the browser localStorage limit (typically 5-10 MB).', solution: 'Delete old or large scenes, or export scenes to disk and re-import later.', steps: ['Select an old scene in the sidebar', 'Click Delete Scene', 'Confirm deletion', 'Retry your last action'], relatedCodes: [], prevention: 'Export completed scenes to Markdown files periodically rather than keeping everything in browser storage indefinitely.' },
+      { code: 'SCENE_WRITER_IMPORT_INVALID', message: 'Imported file is not valid scene data.', severity: 'error', category: 'Import', location: 'SceneWriterPage → handleImport', cause: 'The uploaded JSON file is missing the required scenes array or uses an incompatible schema.', solution: 'Only import JSON files previously exported from the Scene Writer.', steps: ['Check that the file contains a "scenes" array', 'Verify the file was created by this app', 'Re-export from the original app instance if possible'], relatedCodes: [], prevention: 'Do not manually edit exported JSON structure; use the app UI for all modifications.' },
+      { code: 'SCENE_WRITER_CAST_EMPTY', message: 'No cast members assigned when adding dialogue.', severity: 'info', category: 'Validation', location: 'SceneWriterPage → addLine', cause: 'A dialogue line was added before any cast members were defined.', solution: 'Add at least one character to the cast list, then select them as the speaker.', steps: ['Scroll to the Cast section', 'Type a character name and press Enter', 'Click Add Dialogue again'], relatedCodes: [], prevention: 'Populate the cast list immediately after creating a new scene.' },
+    ],
+  },
 ];
 
 const zh: DocsToolSection[] = [
@@ -896,6 +946,56 @@ const zh: DocsToolSection[] = [
       { code: 'INSPIRATION_API_TIMEOUT', message: 'LLM 响应超时。', severity: 'error', category: 'API', location: 'InspirationGeneratorPage → generateInspiration', cause: 'AI 模型响应时间过长，通常由于服务器负载高。', solution: '短暂等待后重试生成，或切换到更快的模型。', steps: ['等待 10-30 秒', '再次点击生成灵感'], relatedCodes: ['DIALOGUE_GENERATION_EMPTY'], prevention: '使用本地模型或较小 LLM 以获得更快、更可靠的生成。' },
       { code: 'INSPIRATION_HISTORY_FULL', message: '本地历史配额已满。', severity: 'warning', category: '存储', location: 'InspirationGeneratorPage → saveToHistory', cause: '生成历史超出浏览器存储限制。', solution: '将旧生成结果导出到磁盘并清空历史。', steps: ['点击导出提示', '保存 JSON 文件', '点击清空历史', '重试保存'], relatedCodes: [], prevention: '如果频繁生成，每周导出并清空历史。' },
       { code: 'INSPIRATION_SEED_INVALID', message: '种子值不是有效的整数。', severity: 'warning', category: '验证', location: 'InspirationGeneratorPage → regenerateWithSeed', cause: '输入的种子不是整数，或超出安全整数范围。', solution: '输入 0 到 9007199254740991 之间的整数。', steps: ['清空种子字段', '输入简单数字如 12345', '点击重新生成'], relatedCodes: [], prevention: '只输入纯数字；避免逗号、小数或科学计数法。' },
+    ],
+  },
+  {
+    id: 'scene-writer',
+    title: '场景剧本工坊',
+    overview: `场景剧本工坊是为原创角色设计的剧本与情景草稿工具。它为作者、跑团玩家和画师提供结构化编辑器，用于编写台词、动作/旁白和场景元数据，帮助规划以 OC 为主角的短场景。
+
+[核心功能]
+- 场景管理：创建、复制、删除和切换多个场景
+- 场景设定：标题、地点、时间、天气和氛围
+- 出场角色：管理出现在场景中的角色名称列表
+- 剧本行：两种类型——台词（含说话人和情绪标签）和动作/旁白
+- 拖拽排序：通过左侧拖拽手柄重新排列剧本行
+- 随机场景生成器：自动生成包含随机设定和示例台词的场景
+- Markdown 导出：将完整场景导出为格式化的 Markdown
+
+[适用场景]
+- 小说作者：以规范格式起草短篇故事或小说章节
+- 跑团玩家：为论坛或聊天室 RP 准备情景剧本
+- 画师：生成可作为约稿需求说明的场景描述
+- 游戏设计师：撰写过场动画脚本和对话树
+
+[文件格式]
+场景以 JSON 格式存储在 localStorage 的 oc-maker.scene-writer 键下。
+每个场景包含：id、title、location、time、weather、mood、cast（字符串数组）、lines（{id, type, speaker?, emotion?, text} 数组）、createdAt、updatedAt。`,
+    buttons: [
+      { name: '新建场景', description: '创建一个元数据和剧本行均为空的空白场景。' },
+      { name: '随机生成场景', description: '随机生成地点、时间、天气、氛围和示例台词/动作的新场景。' },
+      { name: '复制场景', description: '复制当前选中场景，包括所有元数据和剧本行。' },
+      { name: '删除场景', description: '经确认后永久移除选中的场景。' },
+      { name: '添加台词', description: '在剧本中插入新台词行。从出场角色列表中选择说话人，并可添加情绪标签。' },
+      { name: '添加动作', description: '在剧本中插入动作/旁白行。用于舞台指示、环境描写或内心独白。' },
+      { name: '删除行', description: '从场景中移除单条剧本行。' },
+      { name: '导出 Markdown', description: '将完整场景以格式化 Markdown 复制到剪贴板。' },
+      { name: '拖拽排序', description: '拖动任意剧本行左侧的手柄来改变其在剧本中的位置。' },
+    ],
+    parameters: [
+      { name: '场景标题', description: '场景的显示名称。', tips: '保持简短且有画面感；它会显示在侧边栏列表中。' },
+      { name: '地点', description: '场景发生的地点。', tips: '尽量具体（如"古城广场"而非"城镇"），便于构建更丰富的视觉想象。' },
+      { name: '时间', description: '一天中的时段或叙事时间点。', tips: '使用叙事时间（"黎明"、"午夜"）而非精确时钟时间。' },
+      { name: '天气', description: '场景期间的大气条件。', tips: '天气影响氛围；暴风雨配合平静对话可形成戏剧性反差。' },
+      { name: '氛围', description: '场景的情感基调。', tips: '常见氛围：紧张、温馨、悲伤、激昂、神秘、轻松、浪漫、悬疑。' },
+      { name: '出场角色', description: '场景中出现的角色列表。', tips: '在写台词前先添加出场角色，这样说话人下拉框才会有选项。' },
+      { name: '说话人', description: '某句台词由哪位角色说出。', tips: '从出场角色列表中选择；也允许留空作为未标记台词。' },
+      { name: '情绪', description: '描述台词如何演绎的可选标签。', tips: '示例：愤怒、低语、欢快、讽刺、颤抖。' },
+    ],
+    errors: [
+      { code: 'SCENE_WRITER_STORAGE_FULL', message: '浏览器存储配额已满。', severity: 'error', category: '存储', location: 'SceneWriterPage → writeState', cause: '所有场景的总大小超过了浏览器 localStorage 限制（通常 5-10 MB）。', solution: '删除旧场景或大型场景，或将场景导出到磁盘后重新导入。', steps: ['在侧边栏选择一个旧场景', '点击删除场景', '确认删除', '重试上一次操作'], relatedCodes: [], prevention: '定期将完成的场景导出为 Markdown 文件，而不是无限期地全部保存在浏览器存储中。' },
+      { code: 'SCENE_WRITER_IMPORT_INVALID', message: '导入的文件不是有效的场景数据。', severity: 'error', category: '导入', location: 'SceneWriterPage → handleImport', cause: '上传的 JSON 文件缺少必需的 scenes 数组，或使用了不兼容的 schema。', solution: '仅导入由场景剧本工坊先前导出的 JSON 文件。', steps: ['确认文件包含 "scenes" 数组', '验证文件是否由本应用创建', '如有可能，从原始应用实例重新导出'], relatedCodes: [], prevention: '不要手动修改导出的 JSON 结构；所有修改都应通过应用 UI 完成。' },
+      { code: 'SCENE_WRITER_CAST_EMPTY', message: '添加台词时还没有分配出场角色。', severity: 'info', category: '验证', location: 'SceneWriterPage → addLine', cause: '在定义任何出场角色之前就添加了台词行。', solution: '先在出场角色列表中添加至少一个角色，然后将其选为说话人。', steps: ['滚动到出场角色区域', '输入角色名并按回车', '再次点击添加台词'], relatedCodes: [], prevention: '创建新场景后立即填充出场角色列表。' },
     ],
   },
 ];
