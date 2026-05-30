@@ -64,7 +64,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.18.0';
+const VERSION = '1.18.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -711,10 +711,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.18.0 新增场景剧本工坊：为原创角色创作情景剧本的专用工具，支持场景设定、台词与动作编辑、Markdown 导出与随机生成。',
-    announcementList1: '场景剧本工坊（Scene Writer）：全新页面，支持多场景管理、剧本行编辑（台词/动作）、出场角色管理、拖拽排序、Markdown 导出、随机场景生成器。',
-    announcementList2: 'v1.17.0 审计修复：自定义音频持久化、动画速度一致性、DocsPage 稳定性与多处深层 bug 修复已全部合入。',
-    announcementList3: '代码质量：audioEngine.ts 修复 density=0 除零风险、scheduleBeat 重启问题、ensureContext 恢复逻辑；补齐缺失音效 cooldowns；AssetGalleryPage 移除硬编码中文分支。',
+    announcementDescription: 'v1.18.1 场景剧本工坊 bug 修复与体验优化：SFX 合规、可访问性、移动端适配、存储失败提示与键盘交互全面补齐。',
+    announcementList1: 'SFX 合规：为全部显式调用 playSound 的按钮补全 data-sfx-handled，彻底消除 copy/delete/line-delete 等按钮的 double-play。',
+    announcementList2: '可访问性与交互：场景列表项新增 role/tabIndex/onKeyDown/aria-label 支持键盘导航；导出模态框补全 role="dialog"/aria-modal/Escape 关闭；集成 confirmDestructiveActions 设置；自动保存失败时显示 toast 提示。',
+    announcementList3: '移动端与本地化：触摸设备上场景操作按钮始终可见；随机生成场景的角色名与情绪标签改为跟随界面语言；拖拽排序补全 dataTransfer 兼容性；移除未使用的 fileInputRef/handleImport 死代码。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -1168,10 +1168,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.18.0 シーン脚本スタジオを追加：オリジナルキャラクターのためのシナリオ脚本作成専用ツール。シーン設定、セリフ・アクション編集、Markdown 出力、ランダム生成に対応。',
-    announcementList1: 'シーン脚本スタジオ（Scene Writer）：新規ページ。複数シーン管理、脚本行編集（セリフ/アクション）、キャスト管理、ドラッグ並べ替え、Markdown 出力、ランダムシーン生成器を実装。',
-    announcementList2: 'v1.17.0 監査修正：カスタム音声永続化、アニメーション速度の一貫性、DocsPage 安定性と複数の深層バグ修正を統合。',
-    announcementList3: 'コード品質：audioEngine.ts の density=0 ゼロ除算リスク、scheduleBeat 再起動問題、ensureContext 復元ロジックを修正。欠落 cooldown を補完。AssetGalleryPage のハードコード中国語分岐を削除。',
+    announcementDescription: 'v1.18.1 シーン脚本スタジオのバグ修正と体験最適化：SFX コンプライアンス、アクセシビリティ、モバイル対応、保存失敗トースト、キーボード操作を全面補完。',
+    announcementList1: 'SFX コンプライアンス：明示的に playSound を呼ぶ全ボタンに data-sfx-handled を補完し、copy/delete/line-delete などのボタン double-play を完全に排除。',
+    announcementList2: 'アクセシビリティと操作性：シーンリスト項目に role/tabIndex/onKeyDown/aria-label を追加してキーボードナビゲーションをサポート；エクスポートモーダルに role="dialog"/aria-modal/Escape 閉じを補完；confirmDestructiveActions 設定と統合；自動保存失敗時にトースト通知を表示。',
+    announcementList3: 'モバイルとローカライズ：タッチデバイスでシーン操作ボタンを常時表示；ランダム生成シーンのキャラ名・感情タグをインターフェース言語に追随；ドラッグ並べ替えに dataTransfer 互換性を補完；未使用の fileInputRef/handleImport デッドコードを削除。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1625,10 +1625,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.18.0 New Scene Writer: a dedicated tool for writing scenario scripts for original characters, featuring scene settings, dialogue/action editing, Markdown export, and random generation.',
-    announcementList1: 'Scene Writer: brand-new page supporting multi-scene management, script line editing (dialogue/action), cast management, drag-to-reorder, Markdown export, and a random scene generator.',
-    announcementList2: 'v1.17.0 audit fixes: custom audio persistence, animation speed consistency, DocsPage stability, and multiple deep bug fixes are all merged.',
-    announcementList3: 'Code quality: fixed audioEngine.ts density=0 division-by-zero risk, scheduleBeat restart issue, and ensureContext recovery logic. Added missing sound cooldowns. Removed hardcoded Chinese branches in AssetGalleryPage.',
+    announcementDescription: 'v1.18.1 Scene Writer bug fixes and UX polish: SFX compliance, accessibility, mobile adaptation, storage failure toasts, and keyboard interactions fully addressed.',
+    announcementList1: 'SFX compliance: added data-sfx-handled to all buttons with explicit playSound calls, completely eliminating double-play on copy/delete/line-delete buttons.',
+    announcementList2: 'Accessibility & interaction: scene list items now support keyboard navigation with role/tabIndex/onKeyDown/aria-label; export modal gains role="dialog"/aria-modal/Escape-to-close; integrated confirmDestructiveActions setting; auto-save failures now show toast notifications.',
+    announcementList3: 'Mobile & localization: scene action buttons are always visible on touch devices; random scene generation uses interface language for cast names and emotion labels; drag-to-reorder now sets dataTransfer for full browser compatibility; removed unused fileInputRef/handleImport dead code.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -2082,10 +2082,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.18.0 Добавлена студия сценариев: специализированный инструмент для создания сценариев для оригинальных персонажей. Поддержка настроек сцен, редактирования реплик и действий, экспорта Markdown и случайной генерации.',
-    announcementList1: 'Студия сценариев (Scene Writer): новая страница. Реализовано управление несколькими сценами, редактирование строк сценария (реплики/действия), управление актёрским составом, сортировка перетаскиванием, экспорт Markdown и генератор случайных сцен.',
-    announcementList2: 'Исправления аудита v1.17.0: персистентность пользовательского аудио, согласованность скорости анимации, стабильность DocsPage и исправление множества глубинных багов интегрированы.',
-    announcementList3: 'Качество кода: исправлен риск деления на ноль в audioEngine.ts при density=0, проблема перезапуска scheduleBeat и логика восстановления ensureContext. Добавлены недостающие cooldowns звуков. Удалены жёстко закодированные китайские ветвления в AssetGalleryPage.',
+    announcementDescription: 'v1.18.1 Исправления багов и оптимизация студии сценариев: соответствие SFX, доступность, адаптация для мобильных устройств, уведомления об ошибках сохранения и клавиатурное взаимодействие полностью доработаны.',
+    announcementList1: 'Соответствие SFX: добавлен data-sfx-handled на все кнопки с явными вызовами playSound, полностью устранён double-play на кнопках копирования/удаления/удаления строки.',
+    announcementList2: 'Доступность и интерактивность: элементы списка сцен получили role/tabIndex/onKeyDown/aria-label для навигации с клавиатуры; модальное окно экспорта дополнено role="dialog"/aria-modal/закрытием по Escape; интегрирована настройка confirmDestructiveActions; при ошибке автосохранения отображается toast-уведомление.',
+    announcementList3: 'Мобильные устройства и локализация: кнопки действий сцен всегда видны на сенсорных устройствах; случайная генерация сцен использует язык интерфейса для имён персонажей и эмоциональных меток; перетаскивание дополнено установкой dataTransfer для совместимости; удалён неиспользуемый мёртвый код fileInputRef/handleImport.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2897,10 +2897,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.18.0 장면 각본 공방 신규 추가: 오리지널 캐릭터를 위한 시나리오 각본 작성 전용 도구. 장면 설정、대사 및 액션 편집、Markdown 납품、랜덤 생성 지원。',
-    announcementList1: '장면 각본 공방 (Scene Writer): 신규 페이지. 다중 장면 관리、대본行 편집 (대사/액션)、캐스트 관리、드래그 정렬、Markdown 납품、랜덤 장면 생성기 구현。',
-    announcementList2: 'v1.17.0 감사 수정: 커스텀 오디오 영구 저장、애니메이션 속도 일관성、DocsPage 안정성 및 다수의 심층 버그 수정이 모두 통합됨。',
-    announcementList3: '코드 품질: audioEngine.ts의 density=0 시 0으로 나누기 위험、scheduleBeat 재시작 문제、ensureContext 복원 로직 수정. 누락된 효과음 cooldown 보완. AssetGalleryPage의 하드코딩된 중국어 분기 제거。',
+    announcementDescription: 'v1.18.1 장면 각본 공방 버그 수정 및 경험 최적화: SFX 규정、접근성、모바일 대응、저장 실패 토스트、키보드 상호작용을 전면 보완。',
+    announcementList1: 'SFX 규정: 명시적 playSound 호출이 있는 모든 버튼에 data-sfx-handled를 보완하여 copy/delete/line-delete 등 버튼의 double-play를 완전히 제거。',
+    announcementList2: '접근성 및 상호작용: 장면 목록 항목에 role/tabIndex/onKeyDown/aria-label을 추가하여 키보드 내비게이션 지원；내보내기 모달에 role="dialog"/aria-modal/Escape 닫기 보완；confirmDestructiveActions 설정 통합；자동 저장 실패 시 토스트 알림 표시。',
+    announcementList3: '모바일 및 현지화: 터치 디바이스에서 장면 조작 버튼을 항상 표시；랜덤 생성 장면의 캐릭터명 및 감정 태그를 인터페이스 언어로 변경；드래그 정렬에 dataTransfer 호환성 보완；미사용 fileInputRef/handleImport 데드코드 제거。',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3094,6 +3094,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.18.0',
+    date: '2026-05-18',
+    title: '1.18.0 新增场景剧本工坊 Scene Writer',
+    summary:
+      '为原创角色创作者推出全新情景剧本写作工具。支持多场景管理、台词与动作/旁白编辑、出场角色管理、拖拽排序、Markdown 导出、随机场景生成器，以及中英日韩俄 5 语言完整支持。',
+    details: [
+      '场景剧本工坊：全新独立页面，提供结构化的剧本编辑器，支持场景元数据（标题、地点、时间、天气、氛围）和两种剧本行类型（台词/动作）。',
+      '角色管理：动态添加出场角色，台词行的说话人下拉框自动关联角色列表。',
+      '导出与生成：一键导出 Markdown 格式剧本；随机场景生成器基于模板池自动创建包含示例台词的完整场景。',
+      '系统集成：懒加载路由、全局 SFX、5 语言 i18n、暗色/亮色主题自适应、localStorage 持久化、extraTools 文档。',
+    ],
+  },
   {
     version: '1.17.0',
     date: '2026-05-18',

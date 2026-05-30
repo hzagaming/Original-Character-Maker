@@ -8542,3 +8542,56 @@ button:disabled,
     width: 100%;
   }
 }
+
+
+/* Scene Writer touch + responsive improvements */
+@media (hover: none) {
+  .scene-list-actions {
+    opacity: 1 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .scene-sidebar {
+    max-height: none;
+    padding: 12px;
+  }
+
+  .scene-sidebar-header {
+    flex-direction: column;
+  }
+
+  .scene-sidebar-header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .scene-list-item {
+    padding: 10px;
+  }
+
+  .scene-list-actions {
+    opacity: 1;
+    position: static;
+    margin-top: 6px;
+    justify-content: flex-end;
+  }
+
+  .scene-meta-card,
+  .scene-script-card {
+    padding: 12px;
+  }
+
+  .scene-script-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scene-script-actions {
+    width: 100%;
+  }
+
+  .scene-script-actions button {
+    flex: 1;
+  }
+}

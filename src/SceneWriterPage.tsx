@@ -47,6 +47,20 @@ export type SceneWriterState = {
   activeSceneId: string | null;
 };
 
+// ─── Hooks ───
+
+function useBeforeUnloadGuard(isDirty: boolean) {
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
+}
+
 // ─── Localization ───
 
 const UI_COPY: Record<string, Record<string, string>> = {
@@ -62,6 +76,9 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cast: '出场角色',
     addCast: '添加角色',
     castPlaceholder: '输入角色名',
+    defaultCastA: '主角',
+    defaultCastB: '配角A',
+    defaultCastC: '配角B',
     lines: '剧本内容',
     addDialogue: '添加台词',
     addAction: '添加动作/旁白',
@@ -96,6 +113,9 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cast: '登場キャラ',
     addCast: 'キャラ追加',
     castPlaceholder: 'キャラ名を入力',
+    defaultCastA: '主人公',
+    defaultCastB: 'サブA',
+    defaultCastC: 'サブB',
     lines: '脚本内容',
     addDialogue: 'セリフ追加',
     addAction: 'アクション/ナレ追加',
@@ -130,6 +150,9 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cast: 'Cast',
     addCast: 'Add Character',
     castPlaceholder: 'Enter character name',
+    defaultCastA: 'Protagonist',
+    defaultCastB: 'Side A',
+    defaultCastC: 'Side B',
     lines: 'Script Content',
     addDialogue: 'Add Dialogue',
     addAction: 'Add Action/Narration',
@@ -164,6 +187,9 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cast: 'Персонажи',
     addCast: 'Добавить персонажа',
     castPlaceholder: 'Введите имя',
+    defaultCastA: 'Протагонист',
+    defaultCastB: 'Второстепенный A',
+    defaultCastC: 'Второстепенный B',
     lines: 'Содержание',
     addDialogue: 'Добавить реплику',
     addAction: 'Добавить действие',
@@ -198,6 +224,9 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cast: '등장인물',
     addCast: '캐릭터 추가',
     castPlaceholder: '캐릭터명 입력',
+    defaultCastA: '주인공',
+    defaultCastB: '조연A',
+    defaultCastC: '조연B',
     lines: '대본 내용',
     addDialogue: '대사 추가',
     addAction: '액션/나레이션 추가',
@@ -308,6 +337,7 @@ function writeState(state: SceneWriterState): boolean {
 export default function SceneWriterPage({
   pageTitle,
   pageDescription,
+  settings,
   language,
   onBack,
   onOpenSettings,
@@ -319,15 +349,35 @@ export default function SceneWriterPage({
   const [exportText, setExportText] = useState('');
   const [copied, setCopied] = useState(false);
   const [draggingLineId, setDraggingLineId] = useState<string | null>(null);
+  const [saveToast, setSaveToast] = useState<string | null>(null);
   const dragOverLineIdRef = useRef<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { scenes, activeSceneId } = state;
   const activeScene = useMemo(() => scenes.find((s) => s.id === activeSceneId) ?? null, [scenes, activeSceneId]);
 
+  useBeforeUnloadGuard(scenes.length > 0);
+
   useEffect(() => {
-    writeState(state);
+    const ok = writeState(state);
+    if (!ok) {
+      setSaveToast('保存失败：浏览器存储配额已满');
+      const t = setTimeout(() => setSaveToast(null), 3000);
+      return () => clearTimeout(t);
+    }
   }, [state]);
+
+  useEffect(() => {
+    if (!showExport) return;
+    function handler(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        playSound('modalClose');
+        setShowExport(false);
+      }
+    }
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showExport]);
 
   const updateScene = useCallback((sceneId: string, updater: (s: Scene) => Scene) => {
     setState((prev) => {
@@ -354,6 +404,12 @@ export default function SceneWriterPage({
       return { ...prev, scenes: nextScenes, activeSceneId: nextActive };
     });
   }, []);
+
+  const maybeConfirm = useCallback((message: string, action: () => void) => {
+    if (!settings.others.confirmDestructiveActions || window.confirm(message)) {
+      action();
+    }
+  }, [settings.others.confirmDestructiveActions]);
 
   const duplicateScene = useCallback((scene: Scene) => {
     playSound('copySound');
@@ -399,7 +455,9 @@ export default function SceneWriterPage({
     });
   }, [updateScene]);
 
-  const handleDragStart = useCallback((lineId: string) => {
+  const handleDragStart = useCallback((e: React.DragEvent, lineId: string) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', lineId);
     setDraggingLineId(lineId);
   }, []);
 
@@ -429,7 +487,8 @@ export default function SceneWriterPage({
   const autoGenerate = useCallback(() => {
     playSound('confirm');
     const pools = getPools(language);
-    const castNames = ['主角', '配角A', '配角B'];
+    const c = getCopy(language);
+    const castNames = [c.defaultCastA, c.defaultCastB, c.defaultCastC];
     const scene: Scene = {
       id: uid(),
       title: pick(pools.title),
@@ -440,9 +499,9 @@ export default function SceneWriterPage({
       cast: [...castNames],
       lines: [
         { id: uid(), type: 'action', text: pick(pools.action) },
-        { id: uid(), type: 'dialogue', speaker: castNames[0], emotion: '严肃', text: pick(pools.dialogue) },
-        { id: uid(), type: 'action', text: '沉默在空气中蔓延。' },
-        { id: uid(), type: 'dialogue', speaker: castNames[1], emotion: '惊讶', text: pick(pools.dialogue) },
+        { id: uid(), type: 'dialogue', speaker: castNames[0], emotion: '', text: pick(pools.dialogue) },
+        { id: uid(), type: 'action', text: pick(pools.action) },
+        { id: uid(), type: 'dialogue', speaker: castNames[1], emotion: '', text: pick(pools.dialogue) },
       ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -495,21 +554,7 @@ export default function SceneWriterPage({
     }
   }, [exportText]);
 
-  const handleImport = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(String(reader.result));
-        if (Array.isArray(data.scenes)) {
-          setState((prev) => ({ ...prev, scenes: data.scenes, activeSceneId: data.scenes[0]?.id ?? null }));
-          playSound('success');
-        }
-      } catch {
-        playSound('error');
-      }
-    };
-    reader.readAsText(file);
-  }, []);
+
 
   const addCastMember = useCallback((sceneId: string, name: string) => {
     const trimmed = name.trim();
@@ -573,11 +618,17 @@ export default function SceneWriterPage({
               <div
                 key={scene.id}
                 className={`scene-list-item ${scene.id === activeSceneId ? 'active' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label={`${copy.sceneTitle}: ${scene.title || copy.newScene}`}
                 onClick={() => { playSound('buttonClick'); setState((prev) => ({ ...prev, activeSceneId: scene.id })); }}
-                draggable
-                onDragStart={() => {}}
-                onDragOver={() => {}}
-                onDrop={() => {}}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    playSound('buttonClick');
+                    setState((prev) => ({ ...prev, activeSceneId: scene.id }));
+                  }
+                }}
               >
                 <div className="scene-list-title">{scene.title || copy.newScene}</div>
                 <div className="scene-list-meta">
@@ -588,6 +639,7 @@ export default function SceneWriterPage({
                     className="icon-button"
                     type="button"
                     title={copy.copy}
+                    data-sfx-handled
                     onClick={(e) => { e.stopPropagation(); duplicateScene(scene); }}
                   >
                     📋
@@ -596,11 +648,10 @@ export default function SceneWriterPage({
                     className="icon-button danger"
                     type="button"
                     title={copy.deleteScene}
+                    data-sfx-handled
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (window.confirm(copy.deleteSceneConfirm)) {
-                        deleteScene(scene.id);
-                      }
+                      maybeConfirm(copy.deleteSceneConfirm, () => deleteScene(scene.id));
                     }}
                   >
                     🗑
@@ -720,7 +771,7 @@ export default function SceneWriterPage({
                         key={line.id}
                         className={`scene-line ${line.type} ${draggingLineId === line.id ? 'dragging' : ''}`}
                         draggable
-                        onDragStart={() => handleDragStart(line.id)}
+                        onDragStart={(e) => handleDragStart(e, line.id)}
                         onDragOver={(e) => handleDragOver(e, line.id)}
                         onDrop={() => handleDrop(activeScene.id, line.id)}
                       >
@@ -761,7 +812,8 @@ export default function SceneWriterPage({
                           className="icon-button danger"
                           type="button"
                           title={copy.deleteScene}
-                          onClick={() => deleteLine(activeScene.id, line.id)}
+                          data-sfx-handled
+                          onClick={() => maybeConfirm(copy.deleteSceneConfirm, () => deleteLine(activeScene.id, line.id))}
                         >
                           🗑
                         </button>
@@ -775,16 +827,23 @@ export default function SceneWriterPage({
         </main>
       </div>
 
+      {/* Save Toast */}
+      {saveToast && (
+        <div className="editor-toast error" style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)' }}>
+          {saveToast}
+        </div>
+      )}
+
       {/* Export Modal */}
       {showExport && (
-        <div className="modal-backdrop" onClick={() => { playSound('modalClose'); setShowExport(false); }}>
-          <div className="modal-surface" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop" role="presentation" onClick={() => { playSound('modalClose'); setShowExport(false); }}>
+          <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.exportTitle}</h3>
-              <button className="icon-button" type="button" onClick={() => { playSound('modalClose'); setShowExport(false); }}>✕</button>
+              <button className="icon-button" type="button" aria-label={copy.close} onClick={() => { playSound('modalClose'); setShowExport(false); }}>✕</button>
             </div>
             <div className="modal-body">
-              <textarea className="scene-export-textarea" readOnly rows={16} value={exportText} />
+              <textarea className="scene-export-textarea" readOnly rows={16} value={exportText} aria-label={copy.exportTitle} />
               <div className="scene-export-actions">
                 <button className="primary-button" type="button" data-sfx-handled onClick={handleCopy}>
                   {copied ? copy.copied : copy.copy}
