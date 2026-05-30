@@ -63,7 +63,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.16.0';
+const VERSION = '1.17.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -704,10 +704,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.16.0 第十三轮深度审计：SFX/BGM 全面修复、ErrorBoundary 实际挂载、用户手册补全与死代码清理。',
-    announcementList1: 'SFX/BGM 审计：修复 5 处缺失音效——FaceMakerPage 与 FeaturePage 的返回按钮、FeaturePage 的设置按钮、全局快捷键 goHome 与 openSettings 均未播放对应音效；ErrorBoundary 从「仅定义」变为真正包裹 Suspense 路由。',
-    announcementList2: 'UI/UX 与稳定性：ErrorBoundary 添加独立翻译键（5 语言），不再误用「公告」「性能提示」等不相关文案；清理 showTooltips 死设置残余；修复 extraTools 文档中的中英混杂与无效转义。',
-    announcementList3: '文档补全：用户手册大规模扩展，新增 8 个缺失模块的完整文档（asset-gallery、character-battle-card、character-skill-tree、character-stats-designer、color-palette-designer、dev-mode-panel、dialogue-generator、inspiration-generator），全部中英双语覆盖。',
+    announcementDescription: 'v1.17.0 第十四轮深度审计：自定义音频持久化、动画速度一致性、DocsPage 稳定性与多处深层 bug 修复。',
+    announcementList1: '自定义音频持久化：修复用户每次刷新后自定义 SFX/BGM 丢失的问题——settings 保存时不再 strip Data URL，同时新增从独立 localStorage key 的 legacy 恢复逻辑。',
+    announcementList2: '动画与稳定性：PageLoadingSpinner 与 Splash overlay 的过渡动画现在正确关联 --animation-speed；ErrorBoundary z-index 提升避免被 Splash 遮挡；DocsPage 高亮 timer cleanup 移至 effect 外层防止内存泄漏。',
+    announcementList3: '代码质量：audioEngine.ts 修复 density=0 除零风险；AssetGalleryPage 移除硬编码中文分支；App.tsx 初始化 effect 使用 settingsRef 避免 stale closure；RelationshipWebPage toast z-index 提升至 modal 之上。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -1157,10 +1157,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.16.0 第十三回深度監査：SFX/BGM 全面修正、ErrorBoundary 実装完了、マニュアル補完とデッドコード削除。',
-    announcementList1: 'SFX/BGM 監査：5 箇所の欠落音效を修正——FaceMakerPage と FeaturePage の戻るボタン、FeaturePage の設定ボタン、グローバルショートカット goHome と openSettings に対応音效が未再生だった；ErrorBoundary を「定義のみ」から Suspense ルートを実際にラップする形に変更。',
-    announcementList2: 'UI/UX と安定性：ErrorBoundary に独立した翻訳キーを追加（5 言語）、「お知らせ」「性能ヒント」などの不適切なフォールバックを解消；showTooltips デッド設定の残骸を削除；extraTools ドキュメントの中日混在と無効エスケープを修正。',
-    announcementList3: 'マニュアル補完：ユーザーマニュアルを大規模拡張し、8 個の欠落モジュールを完全ドキュメント化（asset-gallery、character-battle-card、character-skill-tree、character-stats-designer、color-palette-designer、dev-mode-panel、dialogue-generator、inspiration-generator）、全て中英バイリンガル対応。',
+    announcementDescription: 'v1.17.0 第十四回深度監査：カスタム音声永続化、アニメーション速度の一貫性、DocsPage 安定性と複数の深層バグ修正。',
+    announcementList1: 'カスタム音声永続化：ページ更新後にカスタム SFX/BGM が失われる問題を修正——settings 保存時に Data URL を strip しないように変更し、独立した localStorage key からのレガシー復元ロジックも追加。',
+    announcementList2: 'アニメーションと安定性：PageLoadingSpinner と Splash overlay のトランジションが --animation-speed と正しく連動；ErrorBoundary の z-index を上げて Splash による隠蔽を防止；DocsPage のハイライト timer cleanup を effect 外層に移動してメモリリークを防止。',
+    announcementList3: 'コード品質：audioEngine.ts の density=0 によるゼロ除算リスクを修正；AssetGalleryPage のハードコードされた中国語分岐を削除；App.tsx の初期化 effect で settingsRef を使用して stale closure を回避；RelationshipWebPage の toast z-index を modal より上に引き上げ。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1610,10 +1610,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.16.0 Thirteenth-round deep audit: full SFX/BGM fix, ErrorBoundary actually mounted, manual expansion, and dead-code cleanup.',
-    announcementList1: 'SFX/BGM audit: fixed 5 missing sound effects — FaceMakerPage and FeaturePage back buttons, FeaturePage settings button, and global shortcuts goHome / openSettings were silent; ErrorBoundary changed from "defined only" to actually wrapping Suspense routes.',
-    announcementList2: 'UI/UX & stability: added dedicated ErrorBoundary translation keys (5 languages), eliminating misleading fallbacks like "Announcement" and "Performance hint"; removed showTooltips dead-setting residue; fixed extraTools Chinese-English mix and invalid escape sequences.',
-    announcementList3: 'Manual expansion: massively expanded user documentation with full entries for 8 previously missing modules (asset-gallery, character-battle-card, character-skill-tree, character-stats-designer, color-palette-designer, dev-mode-panel, dialogue-generator, inspiration-generator), all covered in both English and Chinese.',
+    announcementDescription: 'v1.17.0 Fourteenth-round deep audit: custom audio persistence, animation speed consistency, DocsPage stability, and multiple deep bug fixes.',
+    announcementList1: 'Custom audio persistence: fixed custom SFX/BGM being lost after every refresh — settings no longer strip Data URLs on save, plus added legacy recovery logic from separate localStorage keys.',
+    announcementList2: 'Animation & stability: PageLoadingSpinner and Splash overlay transitions now correctly respect --animation-speed; ErrorBoundary z-index raised to prevent Splash occlusion; DocsPage highlight timer cleanup moved to outer effect scope to prevent memory leaks.',
+    announcementList3: 'Code quality: fixed audioEngine.ts division-by-zero risk when density=0; removed hardcoded Chinese branches in AssetGalleryPage; App.tsx init effect uses settingsRef to avoid stale closure; RelationshipWebPage toast z-index elevated above modal layer.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -2063,10 +2063,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.16.0 Тринадцатый глубокий аудит: полное исправление SFX/BGM, реальный монтаж ErrorBoundary, дополнение руководства и очистка мёртвого кода.',
-    announcementList1: 'Аудит SFX/BGM: исправлены 5 пропущенных звуковых эффектов — кнопки «назад» в FaceMakerPage и FeaturePage, кнопка настроек в FeaturePage, глобальные горячие клавиши goHome и openSettings не воспроизводили звук; ErrorBoundary изменён с «только определён» на реальную обёртку маршрутов Suspense.',
-    announcementList2: 'UI/UX и стабильность: добавлены независимые ключи перевода для ErrorBoundary (5 языков), устранены вводящие в заблуждение fallback-значения вроде «Объявление» и «Подсказка производительности»; удалены остатки мёртвой настройки showTooltips; исправлены смешение китайского/английского и неверные экранирования в extraTools.',
-    announcementList3: 'Дополнение руководства: масштабное расширение документации с полными записями для 8 ранее отсутствующих модулей (asset-gallery, character-battle-card, character-skill-tree, character-stats-designer, color-palette-designer, dev-mode-panel, dialogue-generator, inspiration-generator), всё на английском и китайском.',
+    announcementDescription: 'v1.17.0 Четырнадцатый глубокий аудит: персистентность пользовательского аудио, согласованность скорости анимации, стабильность DocsPage и исправление множества глубинных багов.',
+    announcementList1: 'Персистентность пользовательского аудио: исправлена потеря пользовательских SFX/BGM после каждого обновления — settings больше не удаляют Data URL при сохранении, плюс добавлена логика legacy-восстановления из отдельных ключей localStorage.',
+    announcementList2: 'Анимация и стабильность: переходы PageLoadingSpinner и Splash overlay теперь корректно учитывают --animation-speed; z-index ErrorBoundary повышен для предотвращения перекрытия Splash; cleanup таймера подсветки DocsPage перемещён во внешнюю область effect для предотвращения утечек памяти.',
+    announcementList3: 'Качество кода: исправлен риск деления на ноль в audioEngine.ts при density=0; удалены жёстко закодированные китайские ветвления в AssetGalleryPage; init-effect в App.tsx использует settingsRef для избежания stale closure; z-index toast в RelationshipWebPage поднят выше модального слоя.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2872,10 +2872,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.16.0 열세 번째 심층 감사: SFX/BGM 전면 수정、ErrorBoundary 실제 마운트、매뉴얼 보완 및 데드코드 제거。',
-    announcementList1: 'SFX/BGM 감사: 5곳의 누락된 효과음 수정——FaceMakerPage와 FeaturePage 뒤로 가기 버튼、FeaturePage 설정 버튼、전역 단축키 goHome과 openSettings에 효과음이 재생되지 않았음；ErrorBoundary를 "정의만"에서 실제로 Suspense 라우트를 감싸는 형태로 변경。',
-    announcementList2: 'UI/UX 및 안정성: ErrorBoundary에 독립 번역 키 추가(5개 언어)、"공지" "성능 힌트" 등 부적절한 fallback 제거；showTooltips 데드 설정 잔여물 제거；extraTools 문서의 한영 혼용 및 무효 이스케이프 수정。',
-    announcementList3: '매뉴얼 보완: 사용자 매뉴얼을 대규모 확장하여 기존에 없던 8개 모듈의 완전한 문서 추가(asset-gallery、character-battle-card、character-skill-tree、character-stats-designer、color-palette-designer、dev-mode-panel、dialogue-generator、inspiration-generator)、모두 영어와 중국어 병행 제공。',
+    announcementDescription: 'v1.17.0 열네 번째 심층 감사: 커스텀 오디오 영구 저장、애니메이션 속도 일관성、DocsPage 안정성 및 다수의 심층 버그 수정。',
+    announcementList1: '커스텀 오디오 영구 저장: 페이지 새로고침 시 커스텀 SFX/BGM이 사라지는 문제 수정——settings 저장 시 Data URL을 제거하지 않도록 변경하고, 별도 localStorage 키에서의 레거시 복원 로직 추가。',
+    announcementList2: '애니메이션 및 안정성: PageLoadingSpinner와 Splash overlay 전환이 이제 --animation-speed를 올바르게 반영；ErrorBoundary z-index를 높여 Splash에 가려지지 않도록 개선；DocsPage 하이라이트 타이머 정리를 effect 외부 범위로 이동하여 메모리 누수 방지。',
+    announcementList3: '코드 품질: audioEngine.ts의 density=0 시 0으로 나누기 위험 수정；AssetGalleryPage의 하드코딩된 중국어 분기 제거；App.tsx 초기화 effect에서 settingsRef를 사용하여 stale closure 회피；RelationshipWebPage toast z-index를 modal 레이어 위로 상향 조정。',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3069,6 +3069,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.16.0',
+    date: '2026-05-18',
+    title: '1.16.0 第十三轮深度审计：SFX/BGM 全面修复、ErrorBoundary 实际挂载、用户手册补全与死代码清理',
+    summary:
+      'SFX/BGM 审计修复 5 处缺失音效，ErrorBoundary 从「仅定义」变为真正包裹 Suspense 路由，新增独立翻译键，清理 showTooltips 死设置，补全 8 个缺失模块文档。',
+    details: [
+      'SFX/BGM 审计：FaceMakerPage 与 FeaturePage 返回按钮、FeaturePage 设置按钮、全局快捷键 goHome/openSettings 补上对应音效；ErrorBoundary 实际挂载包裹 Suspense 懒加载块。',
+      'UI/UX 与稳定性：ErrorBoundary 添加独立翻译键（5 语言），消除「公告」「性能提示」等误导 fallback；彻底移除 showTooltips 死设置残余；修复 extraTools 中英混杂与无效转义。',
+      '文档补全：用户手册大规模扩展，新增 asset-gallery、character-battle-card 等 8 个模块完整文档，全部中英双语覆盖。',
+    ],
+  },
   {
     version: '1.15.2',
     date: '2026-05-18',
@@ -4685,6 +4697,18 @@ function loadInitialSettings(): SettingsState {
     if (typeof nextSettings.apiCustom2ForIndexTts !== 'boolean') nextSettings.apiCustom2ForIndexTts = false;
     if (typeof nextSettings.apiCustom3ForIndexTts !== 'boolean') nextSettings.apiCustom3ForIndexTts = false;
 
+    // Recover custom audio Data URLs saved to separate keys (legacy split-storage)
+    try {
+      const savedSfx = window.localStorage.getItem('oc-maker.customSfxDataUrl');
+      if (savedSfx && !nextSettings.audio.customSfxDataUrl) {
+        nextSettings.audio.customSfxDataUrl = savedSfx;
+      }
+      const savedMusic = window.localStorage.getItem('oc-maker.customMusicDataUrl');
+      if (savedMusic && !nextSettings.audio.customMusicDataUrl) {
+        nextSettings.audio.customMusicDataUrl = savedMusic;
+      }
+    } catch { /* ignore */ }
+
     return nextSettings;
   } catch {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
@@ -4709,9 +4733,9 @@ function App() {
   useEffect(() => {
     try {
       initAudio();
-      updateAudioSettings(settings.audio);
+      updateAudioSettings(settingsRef.current.audio);
       attachAudioResumeHandler();
-      setMaxConcurrentRequests(settings.performance.maxConcurrentRequests);
+      setMaxConcurrentRequests(settingsRef.current.performance.maxConcurrentRequests);
       // Do NOT auto-start music here. BGM will begin after the first user
       // interaction via attachAudioResumeHandler, respecting browser autoplay
       // policies and avoiding surprise sound on cold load.
@@ -4848,16 +4872,20 @@ function App() {
   // Keep UI preferences local-only so the shell behaves like a desktop-style tool launcher.
   useEffect(() => {
     try {
-      // Strip large data URLs before saving to avoid localStorage quota crash
-      const stripped = {
-        ...settings,
-        audio: {
-          ...settings.audio,
-          customSfxDataUrl: null,
-          customMusicDataUrl: null,
-        },
-      };
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped));
+      // Save custom audio Data URLs to separate keys as backup (legacy split-storage)
+      const sfxUrl = settings.audio.customSfxDataUrl;
+      const musicUrl = settings.audio.customMusicDataUrl;
+      if (sfxUrl && sfxUrl.length > 0) {
+        try { window.localStorage.setItem('oc-maker.customSfxDataUrl', sfxUrl); } catch { /* ignore quota */ }
+      } else {
+        window.localStorage.removeItem('oc-maker.customSfxDataUrl');
+      }
+      if (musicUrl && musicUrl.length > 0) {
+        try { window.localStorage.setItem('oc-maker.customMusicDataUrl', musicUrl); } catch { /* ignore quota */ }
+      } else {
+        window.localStorage.removeItem('oc-maker.customMusicDataUrl');
+      }
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch {
       // Silently ignore quota errors; user can still use the app in this session
     }
@@ -5032,7 +5060,7 @@ function App() {
           backdropFilter: 'blur(12px)',
           opacity: isLoading ? 1 : 0,
           pointerEvents: isLoading ? 'auto' : 'none',
-          transition: 'opacity 600ms ease',
+          transition: 'opacity calc(600ms * var(--animation-speed, 1)) ease',
         }}
       >
         <h1
@@ -5065,7 +5093,7 @@ function App() {
 
         <div style={{ width: 'min(420px, 80vw)', marginBottom: 16 }}>
           <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${loadingProgress}%`, transition: 'width 200ms linear' }} />
+            <div className="progress-fill" style={{ width: `${loadingProgress}%`, transition: 'width calc(200ms * var(--animation-speed, 1)) linear' }} />
           </div>
         </div>
 
@@ -5169,6 +5197,8 @@ function App() {
               {...sharedPageProps}
               pageTitle={messages.pageAssetGalleryTitle}
               pageDescription={messages.pageAssetGalleryDescription}
+              helpButton={messages.helpButton}
+              metricStorage={messages.metricStorage}
               onSwitchTool={(toolId) => { playSound('pageSwitch'); setScreen(toolId as FeatureScreen); }}
             />
           ) : screen === 'relationship-web' ? (
@@ -5306,6 +5336,7 @@ function useModalEscape(onClose: () => void) {
     function handler(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         e.preventDefault();
+        playSound('modalClose');
         onCloseRef.current();
       }
     }
@@ -5381,8 +5412,8 @@ class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <div className="error-boundary-fallback">
-          <h2>{this.props.messages.errorBoundaryTitle}</h2>
-          <p>{this.props.messages.errorBoundaryDescription}</p>
+          <h2>{this.props.messages?.errorBoundaryTitle ?? 'Error'}</h2>
+          <p>{this.props.messages?.errorBoundaryDescription ?? 'Something went wrong. You can try resetting the page.'}</p>
           <button
             className="primary-button"
             type="button"
@@ -5391,7 +5422,7 @@ class ErrorBoundary extends React.Component<
               this.props.onReset();
             }}
           >
-            {this.props.messages.errorBoundaryReset}
+            {this.props.messages?.errorBoundaryReset ?? 'Reset'}
           </button>
         </div>
       );

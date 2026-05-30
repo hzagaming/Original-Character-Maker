@@ -3592,6 +3592,11 @@ input[type='range']:focus::-moz-range-thumb {
   transform: none !important;
 }
 
+.perf-no-anim .page-loading-fallback .spinner {
+  animation: none !important;
+  border: 3px solid var(--accent);
+}
+
 /* Custom scrollbar that matches the dark/light theme */
 ::-webkit-scrollbar {
   width: 10px;
@@ -4568,7 +4573,7 @@ input[type='range']:focus::-moz-range-thumb {
   font-size: 12px;
   font-weight: 600;
   backdrop-filter: blur(12px);
-  z-index: 20;
+  z-index: 500;
   animation: toastIn calc(250ms * var(--animation-speed, 1)) ease;
   white-space: nowrap;
 }
@@ -7979,7 +7984,12 @@ input[type='range']:focus::-moz-range-thumb {
   color: var(--text-main);
 }
 
-*:focus-visible {
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   outline: none;
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.5), 0 0 0 4px rgba(var(--accent-rgb), 0.18);
   border-radius: 4px;
@@ -8080,7 +8090,7 @@ button:disabled,
   padding: 40px;
   background: var(--bg);
   color: var(--text-main);
-  z-index: 1000;
+  z-index: 10000;
   text-align: center;
 }
 
@@ -8120,7 +8130,7 @@ button:disabled,
   border-radius: 50%;
   border: 3px solid var(--border);
   border-top-color: var(--accent);
-  animation: spin 1s linear infinite;
+  animation: spin calc(1s / var(--animation-speed, 1)) linear infinite;
 }
 
 .page-loading-fallback .label {

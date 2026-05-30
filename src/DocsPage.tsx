@@ -154,17 +154,20 @@ export default function DocsPage({
 
   useEffect(() => {
     if (!initialErrorCode || !content) return;
+    let removeHighlightTimer: ReturnType<typeof setTimeout> | null = null;
     const timer = setTimeout(() => {
       const el = document.getElementById(`docs-error-${initialErrorCode}`);
       if (el && contentRef.current) {
         const top = el.offsetTop - contentRef.current.offsetTop - 16;
         contentRef.current.scrollTo({ top, behavior: 'smooth' });
         setHighlightedErrorCode(initialErrorCode);
-        const removeHighlight = setTimeout(() => setHighlightedErrorCode(null), 3000);
-        return () => clearTimeout(removeHighlight);
+        removeHighlightTimer = setTimeout(() => setHighlightedErrorCode(null), 3000);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (removeHighlightTimer) clearTimeout(removeHighlightTimer);
+    };
   }, [initialErrorCode, activeToolId, content]);
 
   const allSearchableErrors = useMemo(() => {

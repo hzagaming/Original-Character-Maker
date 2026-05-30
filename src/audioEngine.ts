@@ -107,7 +107,10 @@ let currentSettings: AudioSettings = { ...defaultAudioSettings };
 let ctxCreationFailed = false;
 
 function ensureContext(): AudioContext {
-  if (!ctx && !ctxCreationFailed) {
+  // Reset failure flag on each attempt so transient errors (e.g. autoplay policy) don't
+  // permanently disable audio for the session.
+  ctxCreationFailed = false;
+  if (!ctx) {
     try {
       const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AC) {
@@ -499,14 +502,19 @@ const EVENTS: Record<SoundName, () => void> = {
 // SFX cooldown per category to prevent rapid-fire node creation
 // slider/input sounds need longer cooldowns to avoid noise during drag
 const SFX_COOLDOWNS: Record<string, number> = {
-  sliderChange: 80,
+  sliderChange: 120,
   inputFocus: 120,
   buttonHover: 90,
   cardHover: 120,
   tick: 40,
   keyPress: 40,
   pageSwitch: 300,
-  default: 16,
+  back: 150,
+  modalOpen: 80,
+  modalClose: 80,
+  settingsOpen: 80,
+  confirm: 80,
+  default: 40,
 };
 const lastSfxTimes: Record<string, number> = {};
 
@@ -1000,8 +1008,8 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
 
 /** Main scheduling tick with swing, humanization, and richer arrangement. */
 function scheduleTick(when: number, preset: MusicPresetData, pitchRatio: number, volume: number) {
-  const ticksPerBar = preset.density * 4;
-  const chordIdx = Math.floor(scheduleBeat / ticksPerBar / preset.chordDensity) % preset.progression.length;
+  const ticksPerBar = Math.max(1, preset.density * 4);
+  const chordIdx = Math.floor(scheduleBeat / ticksPerBar / Math.max(1, preset.chordDensity)) % preset.progression.length;
   const chordDegree = preset.progression[chordIdx];
   const rootFreq = scaleFreq(preset.rootMidi, chordDegree, preset.scale) * pitchRatio;
   const patIdx = scheduleBeat % preset.pattern.length;
@@ -1102,7 +1110,6 @@ export function startMusic() {
     if (beatDuration <= 0 || !isFinite(beatDuration)) return;
     const volume = (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100) * 0.1;
 
-    scheduleBeat = 0;
     humanSeed = Math.floor(Math.random() * 0x7fffffff);
     const c = ctx;
     if (c) {

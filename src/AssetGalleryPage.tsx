@@ -36,6 +36,8 @@ type SharedPageProps = {
   onOpenSettings: () => void;
   onSwitchTool?: (toolId: string) => void;
   onOpenDocs?: (toolId?: string, section?: string, errorCode?: string) => void;
+  helpButton: string;
+  metricStorage: string;
 };
 
 function useBeforeUnloadGuard(isDirty: boolean) {
@@ -482,6 +484,8 @@ export function AssetGalleryPage({
   onOpenSettings,
   onSwitchTool: _onSwitchTool,
   onOpenDocs,
+  helpButton,
+  metricStorage,
 }: SharedPageProps) {
   const copy = getCopy(language);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -819,7 +823,7 @@ export function AssetGalleryPage({
           </button>
           {onOpenDocs && (
             <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs('asset-gallery'); }}>
-              {language === 'zh' ? '帮助' : language === 'ja' ? 'ヘルプ' : language === 'ru' ? 'Справка' : language === 'ko' ? '도움말' : 'Help'}
+              {helpButton}
             </button>
           )}
         </div>
@@ -994,7 +998,7 @@ export function AssetGalleryPage({
               </div>
               <div className="metric-box">
                 <strong>{formatBytes(totalSize)}</strong>
-                <span>{language === 'zh' ? '总占用' : language === 'ja' ? '合計容量' : language === 'ru' ? 'Общий размер' : language === 'ko' ? '총 용량' : 'Total Size'}</span>
+                <span>{metricStorage}</span>
               </div>
               <div className="tool-card-divider" />
               <p className="tiny-copy">{copy.importHint}</p>
