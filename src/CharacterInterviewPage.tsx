@@ -57,7 +57,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     characterInfo: '角色简介',
     selectMode: '选择访谈模式',
     modeClassic: '经典问答',
-    modeClassicDesc: '50 个经典角色开发问题，深入挖掘角色内核',
+    modeClassicDesc: '15 个经典角色开发问题，深入挖掘角色内核',
     modeLateNight: '深夜电台',
     modeLateNightDesc: '更私人的问题，探索角色不为人知的一面',
     modeCasual: '轻松闲聊',
@@ -105,7 +105,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     characterInfo: 'キャラ紹介',
     selectMode: 'インタビューモード選択',
     modeClassic: 'クラシックQ&A',
-    modeClassicDesc: 'キャラ開発の定番50問で核心に迫る',
+    modeClassicDesc: 'キャラ開発の定番15問で核心に迫る',
     modeLateNight: '深夜ラジオ',
     modeLateNightDesc: 'よりプライベートな質問で知られざる一面を探る',
     modeCasual: 'カジュアル雑談',
@@ -153,7 +153,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     characterInfo: 'Character Info',
     selectMode: 'Select Interview Mode',
     modeClassic: 'Classic Q&A',
-    modeClassicDesc: '50 classic character development questions to dig deep',
+    modeClassicDesc: '15 classic character development questions to dig deep',
     modeLateNight: 'Late Night Radio',
     modeLateNightDesc: 'More personal questions to explore hidden sides',
     modeCasual: 'Casual Chat',
@@ -201,7 +201,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     characterInfo: 'Описание персонажа',
     selectMode: 'Выберите режим интервью',
     modeClassic: 'Классические вопросы',
-    modeClassicDesc: '50 классических вопросов для разработки персонажа',
+    modeClassicDesc: '15 классических вопросов для разработки персонажа',
     modeLateNight: 'Ночное радио',
     modeLateNightDesc: 'Более личные вопросы для изучения скрытых сторон',
     modeCasual: 'Лёгкая беседа',
@@ -249,7 +249,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     characterInfo: '캐릭터 소개',
     selectMode: '인터뷰 모드 선택',
     modeClassic: '클래식 Q&A',
-    modeClassicDesc: '캐릭터 핵심을 파고드는 50개의 클래식 질문',
+    modeClassicDesc: '캐릭터 핵심을 파고드는 15개의 클래식 질문',
     modeLateNight: '심야 라디오',
     modeLateNightDesc: '더욱 사적인 질문으로 알려지지 않은 면을 탐구',
     modeCasual: '가벼운 수다',
@@ -770,6 +770,18 @@ async function generateAiSuggestion(
   }
 }
 
+function useBeforeUnloadGuard(isDirty: boolean) {
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
+}
+
 // ─── Component ───
 export default function CharacterInterviewPage({
   settings,
@@ -793,9 +805,20 @@ export default function CharacterInterviewPage({
   const [showExport, setShowExport] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const copyTimerRef = useRef<number | null>(null);
   const saveTimerRef = useRef<number | null>(null);
   const answerRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  const mountedRef = useRef(true);
+
+  const maybeConfirm = useCallback(
+    (message: string, action: () => void) => {
+      if (!settings.others.confirmDestructiveActions || window.confirm(message)) {
+        action();
+      }
+    },
+    [settings.others.confirmDestructiveActions]
+  );
 
   const activeSession = useMemo(
     () => sessions.find((s) => s.id === activeSessionId) ?? null,
@@ -805,6 +828,22 @@ export default function CharacterInterviewPage({
   useEffect(() => {
     setAvailableChars(loadCharacters());
   }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const hasUnsaved = useMemo(() => {
+    if (showSetup) {
+      return characterName.trim().length > 0 || characterInfo.trim().length > 0;
+    }
+    if (!activeSession) return false;
+    return activeSession.qa.some((q) => q.answer.trim().length > 0);
+  }, [showSetup, characterName, characterInfo, activeSession]);
+  useBeforeUnloadGuard(hasUnsaved);
 
   useEffect(() => {
     if (saveToast) {
@@ -823,36 +862,56 @@ export default function CharacterInterviewPage({
     };
   }, []);
 
+  useEffect(() => {
+    answerRefs.current = {};
+  }, [activeSessionId]);
+
+  useEffect(() => {
+    if (!showExport && !showHistory) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showExport) setShowExport(false);
+        if (showHistory) setShowHistory(false);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showExport, showHistory]);
+
   const startInterview = useCallback(() => {
+    if (isStarting) return;
+    setIsStarting(true);
     const name = characterName.trim() || copy.untitled;
     const session = createSession(selectedMode, name, characterInfo, language);
-    setSessions((prev) => {
-      const next = [session, ...prev];
-      if (!saveSessions(next)) {
-        setSaveToast(copy.saveFailed);
-        playSound('error');
-      }
-      return next;
-    });
+    const next = [session, ...sessions];
+    if (!saveSessions(next)) {
+      setSaveToast(copy.saveFailed);
+      playSound('error');
+      setIsStarting(false);
+      return;
+    }
+    setSessions(next);
     setActiveSessionId(session.id);
     setShowSetup(false);
+    setIsStarting(false);
     playSound('confirm');
-  }, [characterName, characterInfo, selectedMode, language, copy.untitled, copy.saveFailed]);
+  }, [characterName, characterInfo, selectedMode, language, sessions, isStarting, copy.untitled, copy.saveFailed]);
 
   const updateAnswer = useCallback((sessionId: string, qaId: string, answer: string) => {
-    setSessions((prev) => {
-      const next = prev.map((s) => {
-        if (s.id !== sessionId) return s;
-        return {
-          ...s,
-          qa: s.qa.map((q) => (q.id === qaId ? { ...q, answer } : q)),
-          updatedAt: new Date().toISOString(),
-        };
-      });
-      saveSessions(next);
-      return next;
+    const next = sessions.map((s) => {
+      if (s.id !== sessionId) return s;
+      return {
+        ...s,
+        qa: s.qa.map((q) => (q.id === qaId ? { ...q, answer } : q)),
+        updatedAt: new Date().toISOString(),
+      };
     });
-  }, []);
+    setSessions(next);
+    if (!saveSessions(next)) {
+      setSaveToast(copy.saveFailed);
+      playSound('error');
+    }
+  }, [sessions, copy.saveFailed]);
 
   const handleAiSuggest = useCallback(
     async (sessionId: string, qaId: string) => {
@@ -867,12 +926,14 @@ export default function CharacterInterviewPage({
         settings.apiKey,
         settings.apiBaseUrl || 'https://api.openai.com/v1'
       );
-      setGeneratingId(null);
-      if (suggestion) {
-        updateAnswer(sessionId, qaId, suggestion);
-        playSound('success');
-      } else {
-        playSound('error');
+      if (mountedRef.current) {
+        setGeneratingId(null);
+        if (suggestion) {
+          updateAnswer(sessionId, qaId, suggestion);
+          playSound('success');
+        } else {
+          playSound('error');
+        }
       }
     },
     [sessions, settings.apiKey, settings.apiBaseUrl, updateAnswer]
@@ -914,33 +975,40 @@ export default function CharacterInterviewPage({
 
   const handleDeleteSession = useCallback(
     (id: string) => {
-      if (!window.confirm(copy.deleteConfirm)) return;
-      setSessions((prev) => {
-        const next = prev.filter((s) => s.id !== id);
-        saveSessions(next);
-        return next;
+      maybeConfirm(copy.deleteConfirm, () => {
+        const next = sessions.filter((s) => s.id !== id);
+        setSessions(next);
+        if (!saveSessions(next)) {
+          setSaveToast(copy.saveFailed);
+          playSound('error');
+        }
+        if (activeSessionId === id) {
+          setActiveSessionId(null);
+          setShowSetup(true);
+        }
+        playSound('deleteSound');
       });
-      if (activeSessionId === id) {
-        setActiveSessionId(null);
-        setShowSetup(true);
-      }
-      playSound('deleteSound');
     },
-    [activeSessionId, copy.deleteConfirm]
+    [activeSessionId, sessions, copy.deleteConfirm, copy.saveFailed, maybeConfirm]
   );
 
   const handleClearAll = useCallback(() => {
     if (!activeSession) return;
-    if (!window.confirm(copy.confirmClear)) return;
-    setSessions((prev) =>
-      prev.map((s) =>
+    maybeConfirm(copy.confirmClear, () => {
+      const next = sessions.map((s) =>
         s.id === activeSession.id
           ? { ...s, qa: s.qa.map((q) => ({ ...q, answer: '' })), updatedAt: new Date().toISOString() }
           : s
-      )
-    );
-    playSound('resetSound');
-  }, [activeSession, copy.confirmClear]);
+      );
+      setSessions(next);
+      if (!saveSessions(next)) {
+        setSaveToast(copy.saveFailed);
+        playSound('error');
+      } else {
+        playSound('resetSound');
+      }
+    });
+  }, [activeSession, sessions, copy.confirmClear, copy.saveFailed, maybeConfirm]);
 
   const handleJumpToUnanswered = useCallback(() => {
     if (!activeSession) return;
@@ -981,6 +1049,7 @@ export default function CharacterInterviewPage({
               <button
                 className="secondary-button small-button"
                 type="button"
+                aria-label={copy.settings}
                 data-sfx-handled
                 onClick={() => { playSound('buttonClick'); onOpenSettings(); }}
               >
@@ -989,6 +1058,7 @@ export default function CharacterInterviewPage({
               <button
                 className="secondary-button small-button"
                 type="button"
+                aria-label={copy.back}
                 data-sfx-handled
                 onClick={() => { playSound('back'); onBack(); }}
               >
@@ -1071,6 +1141,7 @@ export default function CharacterInterviewPage({
                 className="primary-button"
                 type="button"
                 data-sfx-handled
+                disabled={isStarting}
                 style={{ width: '100%', marginTop: 12 }}
                 onClick={startInterview}
               >
@@ -1107,7 +1178,6 @@ export default function CharacterInterviewPage({
                 <button
                   className="secondary-button small-button"
                   type="button"
-                  data-sfx-handled
                   onClick={handleJumpToUnanswered}
                 >
                   {copy.jumpToUnanswered}
@@ -1170,7 +1240,6 @@ export default function CharacterInterviewPage({
                     <button
                       className="secondary-button small-button"
                       type="button"
-                      data-sfx-handled
                       disabled={generatingId === q.id}
                       onClick={() => handleAiSuggest(activeSession.id, q.id)}
                       title={copy.aiSuggestDesc}
@@ -1203,8 +1272,7 @@ export default function CharacterInterviewPage({
                 className="icon-button modal-close"
                 type="button"
                 aria-label={copy.close}
-                data-sfx-handled
-                onClick={() => { playSound('modalClose'); setShowExport(false); }}
+                onClick={() => setShowExport(false)}
               >
                 ✕
               </button>
@@ -1239,8 +1307,7 @@ export default function CharacterInterviewPage({
                 className="icon-button modal-close"
                 type="button"
                 aria-label={copy.close}
-                data-sfx-handled
-                onClick={() => { playSound('modalClose'); setShowHistory(false); }}
+                onClick={() => setShowHistory(false)}
               >
                 ✕
               </button>
@@ -1289,7 +1356,7 @@ export default function CharacterInterviewPage({
 
       {/* Toast */}
       {saveToast && (
-        <div className="editor-toast error" style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)' }}>
+        <div className="editor-toast error" role="alert" aria-live="polite" style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)' }}>
           {saveToast}
         </div>
       )}

@@ -67,7 +67,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.20.5';
+const VERSION = '1.20.6';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -732,10 +732,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.20.5 新功能：角色访谈室。通过经典问答、深夜电台、轻松闲聊或对抗性访谈四种模式，深入挖掘原创角色的内心世界。支持从角色卡加载角色信息、AI 辅助生成回答建议，以及导出完整的访谈记录为 Markdown。',
-    announcementList1: '新功能：角色访谈室 (CharacterInterviewPage)。四种访谈模式（经典问答 15 题 / 深夜电台 15 题 / 轻松闲聊 15 题 / 对抗性访谈 15 题），支持从角色卡加载已有角色、手动输入角色信息。',
-    announcementList2: 'AI 辅助回答：当用户在设置中配置了 API Key 时，每个问题都可以一键生成基于角色信息的 AI 回答建议，帮助创作者快速填充角色声音。',
-    announcementList3: '访谈记录管理：支持保存多组访谈记录到 localStorage、历史记录浏览与删除、进度条追踪、一键跳转到未回答问题、清空全部回答、导出完整访谈记录为 Markdown。',
+    announcementDescription: 'v1.20.6 第十八轮全面审计：对角色访谈室进行全面深度审计与修复。修复 SFX 双重播放与静默按钮、localStorage 保存失败通知、清除回答不持久化、缺少页面刷新保护、AI 建议组件卸载后 setState、模态框 Escape 键关闭、缺失 aria-label、toast 可访问性、CSS 未定义变量与硬编码颜色、响应式布局等问题。',
+    announcementList1: '修复 SFX 合规问题：modal-close 按钮移除 inline playSound 防止双重播放；静默按钮（跳转未回答/AI 建议）移除 data-sfx-handled 让全局 handler 正确播放声音。',
+    announcementList2: '修复数据完整性与稳定性：清除全部回答、更新答案、删除会话现在正确检测 saveSessions 失败并显示 toast；添加 useBeforeUnloadGuard 防止意外刷新丢失进度；AI 建议添加 mounted ref 防止组件卸载后 setState；开始访谈添加防抖防止重复创建。',
+    announcementList3: '修复可访问性与样式：补全设置/返回按钮 aria-label；模态框添加 Escape 键关闭；save toast 添加 role="alert" 与 aria-live；修复 CSS 未定义变量（--panel-hover、--bg-elevated）为合法变量；修复硬编码颜色；增强触摸目标与响应式布局。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -1201,10 +1201,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.20.5 新機能：キャラインタビュー。クラシックQ&A、深夜ラジオ、カジュアル雑談、対抗的インタビューの4モードで、オリジナルキャラクターの内面を深く掘り下げます。キャラクターカードから情報を読み込み、AIによる回答案生成と、インタビュー記録のMarkdown出力に対応。',
-    announcementList1: '新機能：キャラインタビュー (CharacterInterviewPage)。4つのインタビューモード（クラシックQ&A 15問 / 深夜ラジオ 15問 / カジュアル雑談 15問 / 対抗的インタビュー 15問）。キャラクターカードから既存キャラを読み込み、手動入力も対応。',
-    announcementList2: 'AI回答補助：設定でAPI Keyを構成すると、各質問に対してキャラ情報に基づくAI回答案をワンクリックで生成し、クリエイターのキャラ声作りを支援。',
-    announcementList3: 'インタビュー記録管理：複数のインタビュー記録をlocalStorageに保存、履歴の閲覧と削除、進捗バー追跡、未回答へのジャンプ、全回答クリア、完全なインタビュー記録のMarkdown出力に対応。',
+    announcementDescription: 'v1.20.6 第十八回全面監査：キャラインタビューの全面深度監査と修正。SFX二重再生と無音ボタン、localStorage保存失敗通知、回答クリアの非永続化、ページリロード保護の欠如、AI提案のunmount後setState、モーダルのEscキー閉鎖、欠落aria-label、toastアクセシビリティ、CSS未定義変数とハードコード色、レスポンシブレイアウトなどを修正。',
+    announcementList1: 'SFXコンプライアンス修正：modal-closeボタンからinline playSoundを削除して二重再生を防止；無音ボタン（未回答ジャンプ/AI提案）からdata-sfx-handledを削除し、グローバルハンドラーが正しく音声を再生。',
+    announcementList2: 'データ完全性と安定性の修正：全回答クリア、回答更新、セッション削除でsaveSessions失敗を正しく検知してtoast表示；useBeforeUnloadGuardを追加して意図しないリロードによる進捗喪失を防止；AI提案にmounted refを追加してコンポーネントunmount後のsetStateを防止；インタビュー開始にデバウンスを追加して重複作成を防止。',
+    announcementList3: 'アクセシビリティとスタイルの修正：設定/戻るボタンにaria-labelを補完；モーダルにEscapeキー閉鎖を追加；save toastにrole="alert"とaria-liveを追加；CSS未定義変数（--panel-hover、--bg-elevated）を有効な変数に修正；ハードコード色を修正；タッチターゲットとレスポンシブレイアウトを強化。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1670,10 +1670,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.20.5 New feature: Character Interview. Deep-dive into your original character\'s inner world through Classic Q&A, Late Night Radio, Casual Chat, or Confrontational Interview. Load character info from character cards, get AI-assisted answer suggestions, and export complete interview records as Markdown.',
-    announcementList1: 'New feature: Character Interview (CharacterInterviewPage). Four interview modes (Classic Q&A 15 questions / Late Night Radio 15 / Casual Chat 15 / Confrontational Interview 15). Load existing characters from character cards or enter manually.',
-    announcementList2: 'AI-assisted answers: When an API Key is configured in settings, each question can generate an AI answer suggestion based on character info with one click, helping creators quickly find the character\'s voice.',
-    announcementList3: 'Interview record management: Save multiple interview sessions to localStorage, browse and delete history, track progress with a progress bar, jump to unanswered questions, clear all answers, and export complete interview records as Markdown.',
+    announcementDescription: 'v1.20.6 18th comprehensive audit: deep audit and fixes for Character Interview. Fixed SFX double-play and silent buttons, localStorage save-failure notifications, cleared answers not persisting, missing page-reload protection, AI suggestion setState after unmount, modal Escape-key close, missing aria-labels, toast accessibility, undefined CSS variables and hardcoded colors, responsive layout issues.',
+    announcementList1: 'Fixed SFX compliance: removed inline playSound from modal-close buttons to prevent double-play; removed data-sfx-handled from silent buttons (jump-to-unanswered / AI suggest) so the global handler plays the correct sound.',
+    announcementList2: 'Fixed data integrity and stability: clear-all-answers, update-answer, and delete-session now correctly detect saveSessions failure and show toast; added useBeforeUnloadGuard to prevent accidental reload from losing progress; added mounted ref to AI suggestion to prevent setState after unmount; added debounce to start-interview to prevent duplicate creation.',
+    announcementList3: 'Fixed accessibility and styling: added aria-labels to settings/back buttons; added Escape-key close to modals; added role="alert" and aria-live to save toast; fixed undefined CSS variables (--panel-hover, --bg-elevated) to valid variables; fixed hardcoded colors; enhanced touch targets and responsive layout.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -2139,10 +2139,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.20.5 Новая функция: Интервью с персонажем. Глубокое погружение во внутренний мир вашего оригинального персонажа через классические вопросы, ночное радио, лёгкую беседу или агрессивное интервью. Загружайте информацию о персонаже из карточек, получайте предложения ответов с помощью ИИ и экспортируйте полные записи интервью в Markdown.',
-    announcementList1: 'Новая функция: Интервью с персонажем (CharacterInterviewPage). Четыре режима интервью (классические вопросы 15 / ночное радио 15 / лёгкая беседа 15 / агрессивное интервью 15). Загружайте существующих персонажей из карточек или вводите вручную.',
-    announcementList2: 'Помощь ИИ в ответах: при настроенном API Key для каждого вопроса можно одним кликом сгенерировать предложение ответа на основе информации о персонаже, помогая автору быстро найти голос персонажа.',
-    announcementList3: 'Управление записями интервью: сохраняйте несколько сеансов в localStorage, просматривайте и удаляйте историю, отслеживайте прогресс, переходите к неотвеченным вопросам, очищайте все ответы и экспортируйте полные записи в Markdown.',
+    announcementDescription: 'v1.20.6 18-й комплексный аудит: глубокий аудит и исправления Интервью с персонажем. Исправлены двойной SFX и беззвучные кнопки, уведомления о сбоях сохранения localStorage, не сохраняющиеся очищенные ответы, отсутствие защиты от перезагрузки страницы, setState после размонтирования в AI-предложениях, закрытие модалки клавишей Escape, отсутствующие aria-labels, доступность toast, неопределённые CSS-переменные и жёстко заданные цвета, проблемы адаптивной вёрстки.',
+    announcementList1: 'Исправлено соответствие SFX: удалён inline playSound из кнопок modal-close для предотвращения двойного воспроизведения; удалён data-sfx-handled с беззвучных кнопок (переход к неотвеченным / AI-предложение), чтобы глобальный обработчик правильно воспроизводил звук.',
+    announcementList2: 'Исправлена целостность данных и стабильность: очистка всех ответов, обновление ответа и удаление сессии теперь корректно обнаруживают сбой saveSessions и показывают toast; добавлен useBeforeUnloadGuard для предотвращения потери прогресса при случайной перезагрузке; добавлен mounted ref в AI-предложение для предотвращения setState после размонтирования; добавлен дебаунс к началу интервью для предотвращения дублирования.',
+    announcementList3: 'Исправлена доступность и стили: добавлены aria-labels к кнопкам настроек/назад; добавлено закрытие модалок клавишей Escape; добавлены role="alert" и aria-live к save toast; исправлены неопределённые CSS-переменные (--panel-hover, --bg-elevated) на допустимые; исправлены жёстко заданные цвета; улучшены сенсорные цели и адаптивная вёрстка.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2968,10 +2968,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.20.5 신규 기능: 캐릭터 인터뷰. 클래식 Q&A, 심야 라디오, 가벼운 수다, 대립형 인터뷰의 4가지 모드로 오리지널 캐릭터의 남면을 깊이 파헤쳐 보세요. 캐릭터 카드에서 정보를 불러오고, AI 기반 답변 제안을 받으며, 완전한 인터뷰 기록을 Markdown으로 납볼할 수 있습니다.',
-    announcementList1: '신규 기능: 캐릭터 인터뷰 (CharacterInterviewPage). 4가지 인터뷰 모드(클래식 Q&A 15문항 / 심야 라디오 15 / 가벼운 수다 15 / 대립형 인터뷰 15). 캐릭터 카드에서 기존 캐릭터를 불러오거나 직접 입력할 수 있습니다.',
-    announcementList2: 'AI 답변 보조: 설정에서 API Key를 구성하면 각 질문에 대해 캐릭터 정보를 바탕으로 AI 답변 안을 한 번의 클릭으로 생성하여 창작자가 캐릭터의 목소리를 빠르게 찾을 수 있도록 돕습니다.',
-    announcementList3: '인터뷰 기록 관리: 여러 인터뷰 세션을 localStorage에 저장하고, 기록을 탐색 및 삭제하며, 진행률 표시줄로 추적하고, 미답변 질문으로 이동하고, 모든 답변을 지우고, 완전한 인터뷰 기록을 Markdown으로 납볼할 수 있습니다.',
+    announcementDescription: 'v1.20.6 18차 종합 감사: 캐릭터 인터뷰의 종합 심층 감사 및 수정. SFX 이중 재생 및 무음 버튼, localStorage 저장 실패 알림, 지워진 답변 미영구화, 페이지 새로고침 보호 누락, AI 제안 unmount 후 setState, 모달 Escape 키 닫기, 누락된 aria-label, toast 접근성, 정의되지 않은 CSS 변수와 하드코딩 색상, 반응형 레이아웃 문제를 수정했습니다.',
+    announcementList1: 'SFX 규정 수정: 이중 재생 방지를 위해 modal-close 버튼에서 inline playSound 제거; 무음 버튼(미답변 이동 / AI 제안)에서 data-sfx-handled 제거하여 글로벌 핸들러가 올바른 소리를 재생하도록 함.',
+    announcementList2: '데이터 무결성 및 안정성 수정: 전체 답변 지우기, 답변 업데이트, 세션 삭제가 이제 saveSessions 실패를 올바르게 감지하고 toast를 표시; useBeforeUnloadGuard를 추가하여 실수로 새로고침 시 진행 상황 손실 방지; AI 제안에 mounted ref를 추가하여 컴포넌트 unmount 후 setState 방지; 인터뷰 시작에 디바운스를 추가하여 중복 생성 방지.',
+    announcementList3: '접근성 및 스타일 수정: 설정/뒤로 버튼에 aria-label 추가; 모달에 Escape 키 닫기 추가; save toast에 role="alert" 및 aria-live 추가; 정의되지 않은 CSS 변수(--panel-hover, --bg-elevated)를 유효한 변수로 수정; 하드코딩 색상 수정; 터치 타겟 및 반응형 레이아웃 강화.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3165,6 +3165,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.20.5',
+    date: '2026-05-18',
+    title: '1.20.5 新功能：角色访谈室',
+    summary:
+      '通过经典问答、深夜电台、轻松闲聊或对抗性访谈四种模式，深入挖掘原创角色的内心世界。支持从角色卡加载角色信息、AI 辅助生成回答建议，以及导出完整的访谈记录为 Markdown。',
+    details: [
+      '新功能：角色访谈室 (CharacterInterviewPage)。四种访谈模式（经典问答 15 题 / 深夜电台 15 题 / 轻松闲聊 15 题 / 对抗性访谈 15 题），支持从角色卡加载已有角色、手动输入角色信息。',
+      'AI 辅助回答：当用户在设置中配置了 API Key 时，每个问题都可以一键生成基于角色信息的 AI 回答建议，帮助创作者快速填充角色声音。',
+      '访谈记录管理：支持保存多组访谈记录到 localStorage、历史记录浏览与删除、进度条追踪、一键跳转到未回答问题、清空全部回答、导出完整访谈记录为 Markdown。',
+    ],
+  },
   {
     version: '1.20.4',
     date: '2026-05-18',
@@ -5017,7 +5029,7 @@ function App() {
       if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
       // Skip hover sound on interactive inputs to avoid noise during slider/text adjustments
       if (target.closest('input[type="range"], input[type="text"], input[type="number"], input[type="url"], input[type="password"], textarea, select, label[for]')) return;
-      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header')) {
+      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main')) {
         lastHoverTime = now;
         playSound('buttonHover');
       } else if (target.closest('.home-card, .feature-intro-card, .tool-card, .asset-card, .template-card, .announcement-entry')) {
@@ -8086,11 +8098,6 @@ function SettingsModal({
     }
   }
 
-  function restartMusicPlayback() {
-    stopMusic();
-    startMusic();
-  }
-
   function handleUploadAudio(type: 'sfx' | 'music', file: File) {
     if (!file.type.startsWith('audio/')) return;
     const reader = new FileReader();
@@ -8116,7 +8123,10 @@ function SettingsModal({
             customMusicName: file.name,
           },
         });
-        // updateAudioSettings detects useCustomMusic change and restarts automatically
+        if (settings.audio.musicEnabled) {
+          stopMusic();
+          startMusic();
+        }
       }
     };
     reader.onerror = () => {
@@ -8146,7 +8156,10 @@ function SettingsModal({
           customMusicName: '',
         },
       });
-      // updateAudioSettings detects useCustomMusic change and restarts automatically
+      if (settings.audio.musicEnabled) {
+        stopMusic();
+        startMusic();
+      }
     }
   }
 
