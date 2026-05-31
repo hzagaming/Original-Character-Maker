@@ -26,6 +26,7 @@ export type ActionIconKind =
   | 'skill-tree'
   | 'battle-card'
   | 'scene-writer'
+  | 'character-au'
   | 'docs';
 
 export interface FeatureMeta {
@@ -286,6 +287,21 @@ export const FEATURE_REGISTRY: FeatureMeta[] = [
     pipelineTitle: 'Preview / Export',
     todoOne: '补场景创建与剧本行编辑',
     todoTwo: '补剧本预览与 Markdown 导出',
+  },
+  {
+    id: 'character-au',
+    category: 'character',
+    icon: 'character-au',
+    labelKey: 'featureCharacterAu',
+    actionKey: 'actionCharacterAu',
+    pageTitleKey: 'pageCharacterAuTitle',
+    pageDescKey: 'pageCharacterAuDescription',
+    importable: false,
+    workspaceTitle: 'AU Generator',
+    panelTitle: 'Base / Template',
+    pipelineTitle: 'Compare / Export',
+    todoOne: '补 AU 模板选择与角色属性映射',
+    todoTwo: '补原版与 AU 版本对比与导出',
   },
   // ── 世界观管理 ──
   {

@@ -499,6 +499,48 @@ Each scene contains: id, title, location, time, weather, mood, cast (string[]), 
       { code: 'SCENE_WRITER_CAST_EMPTY', message: 'No cast members assigned when adding dialogue.', severity: 'info', category: 'Validation', location: 'SceneWriterPage → addLine', cause: 'A dialogue line was added before any cast members were defined.', solution: 'Add at least one character to the cast list, then select them as the speaker.', steps: ['Scroll to the Cast section', 'Type a character name and press Enter', 'Click Add Dialogue again'], relatedCodes: [], prevention: 'Populate the cast list immediately after creating a new scene.' },
     ],
   },
+  {
+    id: 'character-au',
+    title: 'AU Generator',
+    overview: `The AU (Alternate Universe) Generator transforms your original characters into parallel universe versions. Choose from 8 preset templates covering diverse genres — from everyday modern settings to futuristic cyberpunk, medieval fantasy, post-apocalyptic wastelands, and more. Each template automatically remaps core stats, generates thematic outfit and background descriptions, and produces flavor text that captures the essence of the character in their new world.
+
+[Core Features]
+- Base character editor: name, personality description, and 6 core stats (STR/DEX/INT/CHA/VIT/LUK)
+- 8 AU templates: Modern School, Cyberpunk, Medieval, Post-Apocalypse, Magic Academy, Space Colony, Steampunk, Horror Mansion
+- Stat remapping: each template applies unique stat modifiers based on genre tropes
+- Outfit generation: randomized thematic clothing descriptions per template
+- Background generation: randomized backstory hooks that fit the AU setting
+- Flavor text: evocative one-sentence descriptions capturing the character's AU essence
+- Original vs AU comparison: side-by-side stat bars with change indicators (↑/↓/→)
+- Version tabs: manage multiple AU versions for the same base character
+- Markdown export: export any AU version as formatted Markdown with stat comparison table
+- Persistent storage: all data saved to localStorage (oc-maker.au-generator)
+
+[Use Cases]
+- Writers: explore how a character's personality plays out in different genres
+- Roleplayers: quickly generate AU versions for alternate timeline campaigns
+- Artists: get visual prompts for drawing characters in different settings
+- Game designers: prototype character variants for different game worlds`,
+    buttons: [
+      { name: 'Generate AU', description: 'Creates a new AU version of the base character using the selected template. Applies stat modifiers and generates outfit, background, and flavor text.' },
+      { name: 'Delete Version', description: 'Permanently removes the selected AU version after confirmation.' },
+      { name: 'Export Markdown', description: 'Copies the current AU version as formatted Markdown to the clipboard, including stat comparison table.' },
+      { name: 'Copy', description: 'Copies the export Markdown text to the clipboard.' },
+    ],
+    parameters: [
+      { name: 'Character Name', description: 'The name of the original character.', tips: 'Used as the base reference for all generated AU versions.' },
+      { name: 'Personality', description: 'A short description of the character\'s personality traits.', tips: 'Optional; helps contextualize the generated AU descriptions.' },
+      { name: 'Core Stats', description: 'Six attributes rated 1-100: STR (strength), DEX (dexterity), INT (intelligence), CHA (charisma), VIT (vitality), LUK (luck).', tips: 'Set baseline values before generating AU versions; modifiers will shift them up or down.' },
+      { name: 'AU Template', description: 'The parallel universe setting to apply.', tips: 'Each template has unique stat modifiers and description pools. Switch templates freely before generating.' },
+      { name: 'Outfit', description: 'Thematic clothing the character wears in this AU.', tips: 'Randomly selected from a pool of 5 descriptions per template.' },
+      { name: 'Background', description: 'Backstory hook that places the character in the AU setting.', tips: 'Randomly selected from a pool of 5 hooks per template.' },
+      { name: 'Flavor Text', description: 'An evocative one-sentence description capturing the AU essence.', tips: 'Randomly selected from a pool of 3 texts per template. Great for social media captions or commission briefs.' },
+    ],
+    errors: [
+      { code: 'AU_GENERATOR_STORAGE_FULL', message: 'Browser storage quota exceeded.', severity: 'error', category: 'Storage', location: 'AuGeneratorPage → writeState', cause: 'The total size of all AU versions exceeds the browser localStorage limit.', solution: 'Delete old AU versions or export them as Markdown files.', steps: ['Select an old version tab', 'Click the X to delete', 'Confirm deletion', 'Retry generation'], relatedCodes: [], prevention: 'Export completed AU versions as Markdown files periodically.' },
+      { code: 'AU_GENERATOR_COPY_FAILED', message: 'Failed to copy export text to clipboard.', severity: 'warning', category: 'Clipboard', location: 'AuGeneratorPage → handleCopy', cause: 'The browser clipboard API is unavailable or blocked by permissions.', solution: 'Manually select and copy the text from the export modal textarea.', steps: ['Click inside the export textarea', 'Press Ctrl+A (or Cmd+A)', 'Press Ctrl+C (or Cmd+C)'], relatedCodes: [], prevention: 'Ensure the page has clipboard permissions, or use HTTPS.' },
+    ],
+  },
 ];
 
 const zh: DocsToolSection[] = [
@@ -996,6 +1038,48 @@ const zh: DocsToolSection[] = [
       { code: 'SCENE_WRITER_STORAGE_FULL', message: '浏览器存储配额已满。', severity: 'error', category: '存储', location: 'SceneWriterPage → writeState', cause: '所有场景的总大小超过了浏览器 localStorage 限制（通常 5-10 MB）。', solution: '删除旧场景或大型场景，或将场景导出到磁盘后重新导入。', steps: ['在侧边栏选择一个旧场景', '点击删除场景', '确认删除', '重试上一次操作'], relatedCodes: [], prevention: '定期将完成的场景导出为 Markdown 文件，而不是无限期地全部保存在浏览器存储中。' },
       { code: 'SCENE_WRITER_IMPORT_INVALID', message: '导入的文件不是有效的场景数据。', severity: 'error', category: '导入', location: 'SceneWriterPage → handleImport', cause: '上传的 JSON 文件缺少必需的 scenes 数组，或使用了不兼容的 schema。', solution: '仅导入由场景剧本工坊先前导出的 JSON 文件。', steps: ['确认文件包含 "scenes" 数组', '验证文件是否由本应用创建', '如有可能，从原始应用实例重新导出'], relatedCodes: [], prevention: '不要手动修改导出的 JSON 结构；所有修改都应通过应用 UI 完成。' },
       { code: 'SCENE_WRITER_CAST_EMPTY', message: '添加台词时还没有分配出场角色。', severity: 'info', category: '验证', location: 'SceneWriterPage → addLine', cause: '在定义任何出场角色之前就添加了台词行。', solution: '先在出场角色列表中添加至少一个角色，然后将其选为说话人。', steps: ['滚动到出场角色区域', '输入角色名并按回车', '再次点击添加台词'], relatedCodes: [], prevention: '创建新场景后立即填充出场角色列表。' },
+    ],
+  },
+  {
+    id: 'character-au',
+    title: '平行宇宙工坊',
+    overview: `平行宇宙工坊（AU Generator）可以将你的原创角色变换到不同的平行宇宙设定中。从 8 种预设模板中选择——涵盖现代校园、赛博朋克、中世纪、末日废土、魔法学院、太空殖民、蒸汽朋克、恐怖洋馆等多种题材。每个模板会根据题材特色自动调整角色属性数值，生成符合世界观的服装与背景描述，并产出生动的风味文本。
+
+[核心功能]
+- 基础角色编辑器：角色名、性格描述、6 项核心属性（力量/敏捷/智力/魅力/体质/幸运）
+- 8 种 AU 模板：现代校园、赛博朋克、中世纪、末日废土、魔法学院、太空殖民、蒸汽朋克、恐怖洋馆
+- 属性重映射：每个模板根据题材特色应用独特的属性调整
+- 服装生成：每个模板包含 5 条随机服装描述
+- 背景生成：每个模板包含 5 条随机背景设定钩子
+- 风味文本：每个模板包含 3 条生动的一句话描述
+- 原版 vs AU 对比：并排属性条与变化指示器（↑/↓/→）
+- 版本标签页：为同一基础角色管理多个 AU 版本
+- Markdown 导出：将任意 AU 版本导出为带属性对比表的格式化 Markdown
+- 持久化存储：所有数据保存至 localStorage（oc-maker.au-generator）
+
+[适用场景]
+- 小说作者：探索角色在不同题材下的表现方式
+- 跑团玩家：快速生成备用时间线战役的角色变体
+- 画师：获取不同设定下的角色视觉 prompt
+- 游戏设计师：为不同游戏世界原型化角色变体`,
+    buttons: [
+      { name: '生成 AU 版本', description: '使用选中的模板为基础角色创建新的 AU 版本。应用属性调整并生成服装、背景和风味文本。' },
+      { name: '删除版本', description: '经确认后永久移除选中的 AU 版本。' },
+      { name: '导出 Markdown', description: '将当前 AU 版本以格式化 Markdown 复制到剪贴板，包含属性对比表。' },
+      { name: '复制', description: '将导出 Markdown 文本复制到剪贴板。' },
+    ],
+    parameters: [
+      { name: '角色名', description: '原角色的名称。', tips: '作为所有生成的 AU 版本的基准参考。' },
+      { name: '性格描述', description: '角色性格特质的简短描述。', tips: '可选；有助于生成的 AU 描述更具上下文一致性。' },
+      { name: '核心属性', description: '六项 1-100 的属性值：力量、敏捷、智力、魅力、体质、幸运。', tips: '在生成 AU 版本前先设定基准值；模板会根据题材特色上下调整。' },
+      { name: 'AU 模板', description: '要应用的平行宇宙设定。', tips: '每个模板都有独特的属性调整和描述池。生成前可以自由切换模板。' },
+      { name: '服装', description: '角色在该 AU 中穿着的主题化服装。', tips: '从每个模板的 5 条描述池中随机抽取。' },
+      { name: '背景', description: '将角色置于 AU 设定中的背景设定钩子。', tips: '从每个模板的 5 条钩子池中随机抽取。' },
+      { name: '风味文本', description: '一句生动的描述，捕捉角色在该 AU 中的精髓。', tips: '从每个模板的 3 条文本池中随机抽取。适合用作社交媒体配文或约稿需求。' },
+    ],
+    errors: [
+      { code: 'AU_GENERATOR_STORAGE_FULL', message: '浏览器存储配额已满。', severity: 'error', category: '存储', location: 'AuGeneratorPage → writeState', cause: '所有 AU 版本的总大小超过了浏览器 localStorage 限制。', solution: '删除旧 AU 版本或将它们导出为 Markdown 文件。', steps: ['选择一个旧版本标签', '点击 X 删除', '确认删除', '重试生成'], relatedCodes: [], prevention: '定期将完成的 AU 版本导出为 Markdown 文件。' },
+      { code: 'AU_GENERATOR_COPY_FAILED', message: '无法将导出文本复制到剪贴板。', severity: 'warning', category: '剪贴板', location: 'AuGeneratorPage → handleCopy', cause: '浏览器剪贴板 API 不可用或被权限阻止。', solution: '手动从导出模态框的文本区域中选择并复制文本。', steps: ['点击导出文本区域内部', '按 Ctrl+A（或 Cmd+A）', '按 Ctrl+C（或 Cmd+C）'], relatedCodes: [], prevention: '确保页面具有剪贴板权限，或使用 HTTPS。' },
     ],
   },
 ];
