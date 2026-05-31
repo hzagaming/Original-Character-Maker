@@ -28,6 +28,7 @@ export type ActionIconKind =
   | 'scene-writer'
   | 'character-au'
   | 'character-nemesis'
+  | 'character-interview'
   | 'docs';
 
 export interface FeatureMeta {
@@ -318,6 +319,21 @@ export const FEATURE_REGISTRY: FeatureMeta[] = [
     pipelineTitle: 'Compare / Export',
     todoOne: '补宿敌类型选择与角色属性映射',
     todoTwo: '补原版与宿敌对比与 Markdown 导出',
+  },
+  {
+    id: 'character-interview',
+    category: 'character',
+    icon: 'character-interview',
+    labelKey: 'featureCharacterInterview',
+    actionKey: 'actionCharacterInterview',
+    pageTitleKey: 'pageCharacterInterviewTitle',
+    pageDescKey: 'pageCharacterInterviewDescription',
+    importable: false,
+    workspaceTitle: 'Interview Studio',
+    panelTitle: 'Character / Mode',
+    pipelineTitle: 'Q&A / Export',
+    todoOne: '补角色选择与访谈模式',
+    todoTwo: '补问答编辑与 Markdown 导出',
   },
   // ── 世界观管理 ──
   {

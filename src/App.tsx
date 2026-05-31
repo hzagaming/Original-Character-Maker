@@ -46,6 +46,7 @@ const CharacterBattleCardPage = lazy(() => import('./CharacterBattleCardPage'));
 const SceneWriterPage = lazy(() => import('./SceneWriterPage'));
 const AuGeneratorPage = lazy(() => import('./AuGeneratorPage'));
 const CharacterNemesisPage = lazy(() => import('./CharacterNemesisPage'));
+const CharacterInterviewPage = lazy(() => import('./CharacterInterviewPage'));
 const DocsPage = lazy(() => import('./DocsPage'));
 import {
   defaultAudioSettings,
@@ -66,7 +67,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.20.4';
+const VERSION = '1.20.5';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -121,6 +122,7 @@ type Messages = {
   featureSceneWriter: string;
   featureCharacterAu: string;
   featureCharacterNemesis: string;
+  featureCharacterInterview: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -163,6 +165,7 @@ type Messages = {
   actionSceneWriter: string;
   actionCharacterAu: string;
   actionCharacterNemesis: string;
+  actionCharacterInterview: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -308,6 +311,8 @@ type Messages = {
   pageCharacterAuDescription: string;
   pageCharacterNemesisTitle: string;
   pageCharacterNemesisDescription: string;
+  pageCharacterInterviewTitle: string;
+  pageCharacterInterviewDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -598,6 +603,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureSceneWriter: '场景剧本工坊',
     featureCharacterAu: '平行宇宙工坊',
     featureCharacterNemesis: '角色宿敌工坊',
+    featureCharacterInterview: '角色访谈室',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -640,6 +646,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionSceneWriter: '场景剧本',
     actionCharacterAu: '平行宇宙',
     actionCharacterNemesis: '宿敌生成',
+    actionCharacterInterview: '角色访谈',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -725,10 +732,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.20.4 第十七轮全面审计：audioEngine 核心修复、BGM 双重重启根治、SFX 键盘无障碍增强、CSS 动画降级补全、全页面可访问性查漏补缺。',
-    announcementList1: 'audioEngine 核心修复：SFX preset ADSR 混合预设与用户设置（65%+35%）；rebuildMusicChain 不再切断正在播放的音符；Custom music 接入 Web Audio 图；Drum envelope 修复 tab 后台恢复后的时序错位；Zero-duration exponential ramp 防护。',
-    announcementList2: 'BGM/SFX 体验优化：根治 SettingsModal 中 custom music 上传/移除/激活时的双重 BGM restart；全局 SFX handler 新增 date/time/search/email/tel 输入类型；新增键盘 slider 音效（input 事件）与 Tab 焦点音效（focusin 事件）。',
-    announcementList3: 'UI/UX/可访问性：SceneWriterPage 修复导出模态框 backdrop 与关闭按钮的 SFX 双重播放，补全 9 个缺失 aria-label，空状态添加图标；AU/宿敌工坊帮助按钮添加 aria-label；workflowPages modal-overlay 添加 role="presentation"；CSS perf-no-anim 覆盖补全、editor-toast 默认背景与移动端最大宽度、标签页容器水平滚动。',
+    announcementDescription: 'v1.20.5 新功能：角色访谈室。通过经典问答、深夜电台、轻松闲聊或对抗性访谈四种模式，深入挖掘原创角色的内心世界。支持从角色卡加载角色信息、AI 辅助生成回答建议，以及导出完整的访谈记录为 Markdown。',
+    announcementList1: '新功能：角色访谈室 (CharacterInterviewPage)。四种访谈模式（经典问答 15 题 / 深夜电台 15 题 / 轻松闲聊 15 题 / 对抗性访谈 15 题），支持从角色卡加载已有角色、手动输入角色信息。',
+    announcementList2: 'AI 辅助回答：当用户在设置中配置了 API Key 时，每个问题都可以一键生成基于角色信息的 AI 回答建议，帮助创作者快速填充角色声音。',
+    announcementList3: '访谈记录管理：支持保存多组访谈记录到 localStorage、历史记录浏览与删除、进度条追踪、一键跳转到未回答问题、清空全部回答、导出完整访谈记录为 Markdown。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -789,6 +796,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterAuDescription: '为你的原创角色生成平行宇宙（AU）版本。选择 8 种预设模板（现代校园/赛博朋克/中世纪/末日废土/魔法学院/太空殖民/蒸汽朋克/恐怖洋馆），自动调整属性数值、生成服装与背景描述，支持原版与 AU 版本的属性对比和 Markdown 导出。',
     pageCharacterNemesisTitle: '角色宿敌工坊',
     pageCharacterNemesisDescription: '为你的原创角色自动生成宿敌/对立面角色。选择 5 种宿敌类型（性格反转/实力对手/黑暗镜像/衬托对比/命运宿敌），基于原角色属性自动偏移生成对立属性，同时生成称号、外貌、动机、弱点、背景、冲突场景和关系动态描述，支持原版与宿敌的属性对比和 Markdown 导出。',
+    pageCharacterInterviewTitle: '角色访谈室',
+    pageCharacterInterviewDescription: '通过经典问答、深夜电台、轻松闲聊或对抗性访谈四种模式，深入挖掘你的原创角色的内心世界。支持从角色卡加载角色信息、AI 辅助生成回答建议，以及导出完整的访谈记录为 Markdown。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -1063,6 +1072,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureSceneWriter: 'シーン脚本',
     featureCharacterAu: 'パラレルワールド',
     featureCharacterNemesis: '宿敵ジェネレータ',
+    featureCharacterInterview: 'キャラインタビュー',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -1105,6 +1115,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionSceneWriter: 'シーン脚本',
     actionCharacterAu: 'パラレル',
     actionCharacterNemesis: '宿敵生成',
+    actionCharacterInterview: 'キャラインタビュー',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1190,10 +1201,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.20.4 第十七回全面監査：audioEngine コア修正、BGM 二重再起動根治、SFX キーボードアクセシビリティ強化、CSS アニメーション降格補完、全ページアクセシビリティ改善。',
-    announcementList1: 'audioEngine コア修正：SFX preset ADSR をプリセットとユーザー設定で混合（65%+35%）。rebuildMusicChain が再生中の音符を切断しないように。Custom music を Web Audio グラフに接続。Drum envelope のタブ復帰後のタイミングずれを修正。Zero-duration exponential ramp 対策。',
-    announcementList2: 'BGM/SFX 体験最適化：SettingsModal での custom music アップロード/削除/有効化時の二重 BGM 再起動を根治。グローバル SFX ハンドラに date/time/search/email/tel 入力型を追加。キーボードスライダー効果音（input イベント）と Tab フォーカス効果音（focusin イベント）を新設。',
-    announcementList3: 'UI/UX/アクセシビリティ：SceneWriterPage のエクスポートモーダル backdrop と閉じるボタンの SFX 二重再生を修正。9 個の欠落 aria-label を補完。空状態にアイコン追加。AU/宿敵ジェネレータのヘルプボタンに aria-label 追加。workflowPages modal-overlay に role="presentation" 追加。CSS perf-no-anim カバー補完、editor-toast のデフォルト背景とモバイル最大幅、タブコンテナの水平スクロール。',
+    announcementDescription: 'v1.20.5 新機能：キャラインタビュー。クラシックQ&A、深夜ラジオ、カジュアル雑談、対抗的インタビューの4モードで、オリジナルキャラクターの内面を深く掘り下げます。キャラクターカードから情報を読み込み、AIによる回答案生成と、インタビュー記録のMarkdown出力に対応。',
+    announcementList1: '新機能：キャラインタビュー (CharacterInterviewPage)。4つのインタビューモード（クラシックQ&A 15問 / 深夜ラジオ 15問 / カジュアル雑談 15問 / 対抗的インタビュー 15問）。キャラクターカードから既存キャラを読み込み、手動入力も対応。',
+    announcementList2: 'AI回答補助：設定でAPI Keyを構成すると、各質問に対してキャラ情報に基づくAI回答案をワンクリックで生成し、クリエイターのキャラ声作りを支援。',
+    announcementList3: 'インタビュー記録管理：複数のインタビュー記録をlocalStorageに保存、履歴の閲覧と削除、進捗バー追跡、未回答へのジャンプ、全回答クリア、完全なインタビュー記録のMarkdown出力に対応。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1254,6 +1265,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterAuDescription: 'オリジナルキャラクターのパラレルワールド（AU）版を生成。8種のテンプレート（現代学園/サイバーパンク/中世/終末荒廃地/魔法学院/宇宙コロニー/スチームパンク/恐怖の洋館）から選択し、自動でステータス調整、服装と背景の説明を生成。原版とAU版のステータス比較とMarkdown出力に対応。',
     pageCharacterNemesisTitle: '宿敵ジェネレータ',
     pageCharacterNemesisDescription: 'オリジナルキャラクターの宿敵/対立面を自動生成。5種の宿敵タイプ（性格反転/実力のライバル/暗黒の鏡像/対比のフォイル/運命の宿敵）から選択し、原キャラのステータスを基に対立ステータスを自動生成。称号、外見、動機、弱点、背景、対峙シーン、関係性の説明を生成し、原版と宿敵のステータス比較とMarkdown出力に対応。',
+    pageCharacterInterviewTitle: 'キャラインタビュー',
+    pageCharacterInterviewDescription: 'クラシックQ&A、深夜ラジオ、カジュアル雑談、対抗的インタビューの4モードで、オリジナルキャラクターの内面を深く掘り下げます。キャラクターカードから情報を読み込み、AIによる回答案生成と、インタビュー記録のMarkdown出力に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1528,6 +1541,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureSceneWriter: 'Scene Writer',
     featureCharacterAu: 'AU Generator',
     featureCharacterNemesis: 'Nemesis Generator',
+    featureCharacterInterview: 'Character Interview',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1570,6 +1584,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionSceneWriter: 'Scene Writer',
     actionCharacterAu: 'AU Generator',
     actionCharacterNemesis: 'Nemesis Gen',
+    actionCharacterInterview: 'Interview',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1655,10 +1670,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.20.4 Seventeenth full audit: audioEngine core fixes, BGM double-restart eliminated, SFX keyboard accessibility boost, CSS animation fallback completeness, full-page a11y gap closure.',
-    announcementList1: 'audioEngine core fixes: SFX preset ADSR now blends preset (65%) with user settings (35%). rebuildMusicChain no longer cuts active notes. Custom music routes through the Web Audio graph. Drum envelope timing fixed after tab background recovery. Zero-duration exponential ramp guard added.',
-    announcementList2: 'BGM/SFX experience: eliminated double BGM restart when uploading/removing/activating custom music in SettingsModal. Global SFX handler now supports date/time/search/email/tel inputs. Added keyboard slider sound (input event) and Tab-focus sound (focusin event).',
-    announcementList3: 'UI/UX/a11y: SceneWriterPage fixed export modal backdrop and close button SFX double-play; added 9 missing aria-labels; empty states now have icons. AU/Nemesis help buttons get aria-label. workflowPages modal-overlay gets role="presentation". CSS perf-no-anim coverage completed, editor-toast gets default background and mobile max-width, tab containers get horizontal scrolling.',
+    announcementDescription: 'v1.20.5 New feature: Character Interview. Deep-dive into your original character\'s inner world through Classic Q&A, Late Night Radio, Casual Chat, or Confrontational Interview. Load character info from character cards, get AI-assisted answer suggestions, and export complete interview records as Markdown.',
+    announcementList1: 'New feature: Character Interview (CharacterInterviewPage). Four interview modes (Classic Q&A 15 questions / Late Night Radio 15 / Casual Chat 15 / Confrontational Interview 15). Load existing characters from character cards or enter manually.',
+    announcementList2: 'AI-assisted answers: When an API Key is configured in settings, each question can generate an AI answer suggestion based on character info with one click, helping creators quickly find the character\'s voice.',
+    announcementList3: 'Interview record management: Save multiple interview sessions to localStorage, browse and delete history, track progress with a progress bar, jump to unanswered questions, clear all answers, and export complete interview records as Markdown.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -1719,6 +1734,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterAuDescription: 'Generate Alternate Universe (AU) versions of your original characters. Choose from 8 preset templates (Modern School / Cyberpunk / Medieval / Post-Apocalypse / Magic Academy / Space Colony / Steampunk / Horror Mansion) to auto-adjust stats, generate outfit and background descriptions, with original vs AU stat comparison and Markdown export.',
     pageCharacterNemesisTitle: 'Nemesis Generator',
     pageCharacterNemesisDescription: 'Automatically generate a nemesis / opposing character for your original character. Choose from 5 nemesis types (Opposite / Rival / Dark Mirror / Foil / Fated Nemesis) to auto-generate opposing stats based on the original, plus title, appearance, motivation, weakness, background, conflict scene, and relationship dynamics. Supports original vs nemesis stat comparison and Markdown export.',
+    pageCharacterInterviewTitle: 'Character Interview',
+    pageCharacterInterviewDescription: 'Deep-dive into your original character\'s inner world through Classic Q&A, Late Night Radio, Casual Chat, or Confrontational Interview. Load character info from character cards, get AI-assisted answer suggestions, and export complete interview records as Markdown.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1993,6 +2010,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureSceneWriter: 'Сценарий сцен',
     featureCharacterAu: 'Генератор АВ',
     featureCharacterNemesis: 'Генератор врага',
+    featureCharacterInterview: 'Интервью с персонажем',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -2035,6 +2053,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionSceneWriter: 'Сценарий сцен',
     actionCharacterAu: 'АВ-генератор',
     actionCharacterNemesis: 'Генератор врага',
+    actionCharacterInterview: 'Интервью',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -2120,10 +2139,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.20.4 Полная проверка №17: исправления ядра audioEngine, устранение двойного перезапуска BGM, улучшение доступности SFX с клавиатуры, доработка fallback CSS-анимаций, устранение проблем доступности на всех страницах.',
-    announcementList1: 'Исправления ядра audioEngine: ADSR пресетов SFX теперь смешивает пресет (65%) с пользовательскими настройками (35%). rebuildMusicChain больше не обрывает играющие ноты. Custom music подключён к графу Web Audio. Исправлено смещение огибающей ударных после восстановления вкладки. Добавлена защита от zero-duration exponential ramp.',
-    announcementList2: 'BGM/SFX: устранён двойной перезапуск BGM при загрузке/удалении/активации custom music в SettingsModal. Глобальный SFX-обработчик теперь поддерживает date/time/search/email/tel. Добавлены звуки слайдера с клавиатуры (событие input) и фокуса Tab (событие focusin).',
-    announcementList3: 'UI/UX/доступность: SceneWriterPage исправлено двойное воспроизведение SFX у backdrop и кнопки закрытия модального окна экспорта; добавлено 9 недостающих aria-label; пустые состояния получили иконки. Кнопки справки AU/врага получили aria-label. workflowPages modal-overlay получил role="presentation". Завершено покрытие CSS perf-no-anim, editor-toast получил фон и мобильную max-width, контейнеры вкладок — горизонтальную прокрутку.',
+    announcementDescription: 'v1.20.5 Новая функция: Интервью с персонажем. Глубокое погружение во внутренний мир вашего оригинального персонажа через классические вопросы, ночное радио, лёгкую беседу или агрессивное интервью. Загружайте информацию о персонаже из карточек, получайте предложения ответов с помощью ИИ и экспортируйте полные записи интервью в Markdown.',
+    announcementList1: 'Новая функция: Интервью с персонажем (CharacterInterviewPage). Четыре режима интервью (классические вопросы 15 / ночное радио 15 / лёгкая беседа 15 / агрессивное интервью 15). Загружайте существующих персонажей из карточек или вводите вручную.',
+    announcementList2: 'Помощь ИИ в ответах: при настроенном API Key для каждого вопроса можно одним кликом сгенерировать предложение ответа на основе информации о персонаже, помогая автору быстро найти голос персонажа.',
+    announcementList3: 'Управление записями интервью: сохраняйте несколько сеансов в localStorage, просматривайте и удаляйте историю, отслеживайте прогресс, переходите к неотвеченным вопросам, очищайте все ответы и экспортируйте полные записи в Markdown.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2184,6 +2203,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterAuDescription: 'Генерируйте версии ваших оригинальных персонажей в альтернативных вселенных (АВ). Выбирайте из 8 шаблонов (современная школа / киберпанк / средневековье / постапокалипсис / академия магии / космическая колония / стимпанк / дом ужасов) для автоматической корректировки характеристик, генерации описаний одежды и предысторий, сравнения оригинала и АВ-версии, а также экспорта в Markdown.',
     pageCharacterNemesisTitle: 'Генератор врага',
     pageCharacterNemesisDescription: 'Автоматически создавайте врага / противоположность для вашего оригинального персонажа. Выбирайте из 5 типов врага (антипод / соперник / тёмное зеркало / контраст / судьбоносный враг) для автоматической генерации противоположных характеристик на основе оригинала, а также титула, внешности, мотивации, слабости, предыстории, сцены конфликта и динамики отношений. Поддерживает сравнение характеристик оригинала и врага, а также экспорт в Markdown.',
+    pageCharacterInterviewTitle: 'Интервью с персонажем',
+    pageCharacterInterviewDescription: 'Глубокое погружение во внутренний мир вашего оригинального персонажа через классические вопросы, ночное радио, лёгкую беседу или агрессивное интервью. Загружайте информацию о персонаже из карточек, получайте предложения ответов с помощью ИИ и экспортируйте полные записи интервью в Markdown.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2947,10 +2968,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.20.4 17차 전면 감사: audioEngine 핵심 수정, BGM 이중 재시작 근절, SFX 키보드 접근성 강화, CSS 애니메이션 폴리백 보완, 전 페이지 접근성 개선.',
-    announcementList1: 'audioEngine 핵심 수정: SFX preset ADSR을 프리셋(65%)과 사용자 설정(35%)으로 혼합합니다. rebuildMusicChain이 재생 중인 음을 끊지 않도록 수정했습니다. Custom music을 Web Audio 그래프에 연결했습니다. 탭 복귀 후 Drum envelope 타이밍 오차를 수정했습니다. Zero-duration exponential ramp 방어 로직을 추가했습니다.',
-    announcementList2: 'BGM/SFX 경험 최적화: SettingsModal에서 custom music 업로드/제거/활성화 시 발생하던 BGM 이중 재시작을 근절했습니다. 전역 SFX 핸들러에 date/time/search/email/tel 입력 유형을 추가했습니다. 키보드 슬라이더 효과음(input 이벤트)과 Tab 포커스 효과음(focusin 이벤트)을 신규 추가했습니다.',
-    announcementList3: 'UI/UX/접근성: SceneWriterPage 내보내기 모달 backdrop과 닫기 버튼의 SFX 이중 재생을 수정했습니다. 9개 누락 aria-label을 보강했습니다. 빈 상태에 아이콘을 추가했습니다. AU/숙적 공방 도움말 버튼에 aria-label을 추가했습니다. workflowPages modal-overlay에 role="presentation"을 추가했습니다. CSS perf-no-anim 커버리지를 보완하고 editor-toast에 기본 배경과 모바일 최대 너비를 추가했으며 탭 컨테이너에 가로 스크롤을 적용했습니다.',
+    announcementDescription: 'v1.20.5 신규 기능: 캐릭터 인터뷰. 클래식 Q&A, 심야 라디오, 가벼운 수다, 대립형 인터뷰의 4가지 모드로 오리지널 캐릭터의 남면을 깊이 파헤쳐 보세요. 캐릭터 카드에서 정보를 불러오고, AI 기반 답변 제안을 받으며, 완전한 인터뷰 기록을 Markdown으로 납볼할 수 있습니다.',
+    announcementList1: '신규 기능: 캐릭터 인터뷰 (CharacterInterviewPage). 4가지 인터뷰 모드(클래식 Q&A 15문항 / 심야 라디오 15 / 가벼운 수다 15 / 대립형 인터뷰 15). 캐릭터 카드에서 기존 캐릭터를 불러오거나 직접 입력할 수 있습니다.',
+    announcementList2: 'AI 답변 보조: 설정에서 API Key를 구성하면 각 질문에 대해 캐릭터 정보를 바탕으로 AI 답변 안을 한 번의 클릭으로 생성하여 창작자가 캐릭터의 목소리를 빠르게 찾을 수 있도록 돕습니다.',
+    announcementList3: '인터뷰 기록 관리: 여러 인터뷰 세션을 localStorage에 저장하고, 기록을 탐색 및 삭제하며, 진행률 표시줄로 추적하고, 미답변 질문으로 이동하고, 모든 답변을 지우고, 완전한 인터뷰 기록을 Markdown으로 납볼할 수 있습니다.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3144,6 +3165,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.20.4',
+    date: '2026-05-18',
+    title: '1.20.4 第十七轮全面审计：audioEngine 核心修复、BGM 双重重启根治、SFX 键盘无障碍增强、CSS 动画降级补全、全页面可访问性查漏补缺',
+    summary:
+      '对音频引擎进行深度修复：SFX preset ADSR 混合、rebuildMusicChain 不切断 active notes、Custom music 接入 Web Audio 图、Drum envelope 时序修复、Zero-duration ramp 防护。根治 BGM 双重重启，增强键盘无障碍体验，补全 CSS 动画降级覆盖，修复全页面可访问性缺口。',
+    details: [
+      'audioEngine 核心修复：SFX preset ADSR 混合预设(65%)与用户设置(35%)；rebuildMusicChain 不再切断正在播放的音符；Custom music 接入 Web Audio 图；Drum envelope 修复 tab 后台恢复后的时序错位；Zero-duration exponential ramp 防护。',
+      'BGM/SFX 体验优化：根治 SettingsModal 中 custom music 上传/移除/激活时的双重 BGM restart；全局 SFX handler 新增 date/time/search/email/tel 输入类型；新增键盘 slider 音效（input 事件）与 Tab 焦点音效（focusin 事件）。',
+      'UI/UX/可访问性：SceneWriterPage 修复导出模态框 backdrop 与关闭按钮的 SFX 双重播放，补全 9 个缺失 aria-label，空状态添加图标；AU/宿敌工坊帮助按钮添加 aria-label；workflowPages modal-overlay 添加 role="presentation"；CSS perf-no-anim 覆盖补全、editor-toast 默认背景与移动端最大宽度、标签页容器水平滚动。',
+    ],
+  },
   {
     version: '1.20.3',
     date: '2026-05-18',
@@ -5508,6 +5541,12 @@ function App() {
               pageTitle={messages.pageCharacterNemesisTitle}
               pageDescription={messages.pageCharacterNemesisDescription}
             />
+          ) : screen === 'character-interview' ? (
+            <CharacterInterviewPage
+              {...sharedPageProps}
+              pageTitle={messages.pageCharacterInterviewTitle}
+              pageDescription={messages.pageCharacterInterviewDescription}
+            />
           ) : screen === 'docs' ? (
             <DocsPage
               {...sharedPageProps}
@@ -7473,6 +7512,16 @@ function ActionIcon({
         <circle cx="20" cy="18" r="4" />
         <circle cx="20" cy="30" r="2" />
         <path d="M12 14h16" />
+      </>
+    ),
+    'character-interview': (
+      <>
+        <rect x="8" y="6" width="24" height="28" rx="3" />
+        <path d="M12 12h16" />
+        <path d="M12 16h10" />
+        <path d="M12 20h14" />
+        <circle cx="26" cy="26" r="3" />
+        <path d="M23 26h6" />
       </>
     ),
     docs: (
