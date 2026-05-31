@@ -45,6 +45,7 @@ const CharacterSkillTreePage = lazy(() => import('./CharacterSkillTreePage'));
 const CharacterBattleCardPage = lazy(() => import('./CharacterBattleCardPage'));
 const SceneWriterPage = lazy(() => import('./SceneWriterPage'));
 const AuGeneratorPage = lazy(() => import('./AuGeneratorPage'));
+const CharacterNemesisPage = lazy(() => import('./CharacterNemesisPage'));
 const DocsPage = lazy(() => import('./DocsPage'));
 import {
   defaultAudioSettings,
@@ -65,7 +66,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.19.0';
+const VERSION = '1.20.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -119,6 +120,7 @@ type Messages = {
   featureBattleCard: string;
   featureSceneWriter: string;
   featureCharacterAu: string;
+  featureCharacterNemesis: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -160,6 +162,7 @@ type Messages = {
   actionBattleCard: string;
   actionSceneWriter: string;
   actionCharacterAu: string;
+  actionCharacterNemesis: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -303,6 +306,8 @@ type Messages = {
   pageSceneWriterDescription: string;
   pageCharacterAuTitle: string;
   pageCharacterAuDescription: string;
+  pageCharacterNemesisTitle: string;
+  pageCharacterNemesisDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -592,6 +597,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureBattleCard: '角色战斗卡生成器',
     featureSceneWriter: '场景剧本工坊',
     featureCharacterAu: '平行宇宙工坊',
+    featureCharacterNemesis: '角色宿敌工坊',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -633,6 +639,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionBattleCard: '战斗卡生成',
     actionSceneWriter: '场景剧本',
     actionCharacterAu: '平行宇宙',
+    actionCharacterNemesis: '宿敌生成',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -718,10 +725,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.19.0 全新功能「平行宇宙工坊」上线：为你的原创角色生成 8 种 AU 版本，支持属性对比与 Markdown 导出。',
-    announcementList1: '平行宇宙工坊：输入基础角色信息，从 8 种预设模板（现代校园/赛博朋克/中世纪/末日废土/魔法学院/太空殖民/蒸汽朋克/恐怖洋馆）中生成 AU 版本，自动调整属性、生成服装与背景描述。',
-    announcementList2: '原版 vs AU 对比：并排属性条可视化对比，带 ↑/↓/→ 变化指示器；支持多版本标签页管理与 Markdown 导出。',
-    announcementList3: '可访问性与代码质量：版本关闭按钮补全 role/tabIndex/aria-label/键盘支持；集成 confirmDestructiveActions 设置；修复数字输入 NaN 导致的异常显示。',
+    announcementDescription: 'v1.20.0 全新功能「角色宿敌工坊」上线：为你的原创角色自动生成 5 种宿敌类型，支持属性对比、冲突场景与 Markdown 导出。',
+    announcementList1: '角色宿敌工坊：输入基础角色信息，从 5 种宿敌类型（性格反转/实力对手/黑暗镜像/衬托对比/命运宿敌）中生成对立角色，自动偏移属性、生成称号/外貌/动机/弱点/背景/冲突场景/关系动态。',
+    announcementList2: '原版 vs 宿敌对比：并排属性条可视化对比，带 ↑/↓/→ 变化指示器；支持多宿敌标签页管理与 Markdown 导出。',
+    announcementList3: '系统架构：新增 types.ts 共享类型 CoreStat/BaseCharacter，AU 工坊与宿敌工坊共用基础角色模型；5 语言完整本地化；可访问性与 SFX 全覆盖。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -780,6 +787,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSceneWriterDescription: '为你的原创角色创作情景剧本。支持场景设定、角色出场管理、台词与动作/旁白编辑、拖拽排序、Markdown 导出，以及随机场景生成器。',
     pageCharacterAuTitle: '平行宇宙工坊',
     pageCharacterAuDescription: '为你的原创角色生成平行宇宙（AU）版本。选择 8 种预设模板（现代校园/赛博朋克/中世纪/末日废土/魔法学院/太空殖民/蒸汽朋克/恐怖洋馆），自动调整属性数值、生成服装与背景描述，支持原版与 AU 版本的属性对比和 Markdown 导出。',
+    pageCharacterNemesisTitle: '角色宿敌工坊',
+    pageCharacterNemesisDescription: '为你的原创角色自动生成宿敌/对立面角色。选择 5 种宿敌类型（性格反转/实力对手/黑暗镜像/衬托对比/命运宿敌），基于原角色属性自动偏移生成对立属性，同时生成称号、外貌、动机、弱点、背景、冲突场景和关系动态描述，支持原版与宿敌的属性对比和 Markdown 导出。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -1053,6 +1062,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureBattleCard: 'バトルカード',
     featureSceneWriter: 'シーン脚本',
     featureCharacterAu: 'パラレルワールド',
+    featureCharacterNemesis: '宿敵ジェネレータ',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -1094,6 +1104,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionBattleCard: 'バトルカード',
     actionSceneWriter: 'シーン脚本',
     actionCharacterAu: 'パラレル',
+    actionCharacterNemesis: '宿敵生成',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1179,10 +1190,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.19.0 新機能「パラレルワールドスタジオ」リリース：オリジナルキャラクターの 8 種類の AU 版を生成し、ステータス比較と Markdown 出力に対応。',
-    announcementList1: 'パラレルワールドスタジオ：ベース情報を入力し、8 種のテンプレート（現代学園/サイバーパンク/中世/終末荒廃地/魔法学院/宇宙コロニー/スチームパンク/恐怖の洋館）から AU 版を生成。ステータス自動調整、服装と背景の説明を生成。',
-    announcementList2: '原版 vs AU 比較：並列ステータスバーで可視化比較、↑/↓/→ 変化インジケーター付き；複数バージョンのタブ管理と Markdown 出力に対応。',
-    announcementList3: 'アクセシビリティとコード品質：バージョン閉じるボタンに role/tabIndex/aria-label/キーボード対応を追加；confirmDestructiveActions 設定を統合；数値入力 NaN による異常表示を修正。',
+    announcementDescription: 'v1.20.0 新機能「宿敵ジェネレータ」リリース：オリジナルキャラクターの 5 種類の宿敵を自動生成し、ステータス比較、対峙シーンと Markdown 出力に対応。',
+    announcementList1: '宿敵ジェネレータ：ベース情報を入力し、5 種の宿敵タイプ（性格反転/実力のライバル/暗黒の鏡像/対比のフォイル/運命の宿敵）から対立キャラクターを生成。ステータス自動偏移、称号/外見/動機/弱点/背景/対峙シーン/関係性を生成。',
+    announcementList2: '原版 vs 宿敵比較：並列ステータスバーで可視化比較、↑/↓/→ 変化インジケーター付き；複数宿敵のタブ管理と Markdown 出力に対応。',
+    announcementList3: 'システムアーキテクチャ：types.ts に共有型 CoreStat/BaseCharacter を追加、AU スタジオと宿敵ジェネレータがベースキャラモデルを共有；5 言語完全ローカライズ；アクセシビリティと SFX フルカバー。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1241,6 +1252,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSceneWriterDescription: 'オリジナルキャラクターのためのシナリオ脚本作成ツール。シーン設定、キャスト管理、セリフとアクション/ナレーション編集、ドラッグ並べ替え、Markdown 出力、ランダムシーン生成に対応。',
     pageCharacterAuTitle: 'パラレルワールドスタジオ',
     pageCharacterAuDescription: 'オリジナルキャラクターのパラレルワールド（AU）版を生成。8種のテンプレート（現代学園/サイバーパンク/中世/終末荒廃地/魔法学院/宇宙コロニー/スチームパンク/恐怖の洋館）から選択し、自動でステータス調整、服装と背景の説明を生成。原版とAU版のステータス比較とMarkdown出力に対応。',
+    pageCharacterNemesisTitle: '宿敵ジェネレータ',
+    pageCharacterNemesisDescription: 'オリジナルキャラクターの宿敵/対立面を自動生成。5種の宿敵タイプ（性格反転/実力のライバル/暗黒の鏡像/対比のフォイル/運命の宿敵）から選択し、原キャラのステータスを基に対立ステータスを自動生成。称号、外見、動機、弱点、背景、対峙シーン、関係性の説明を生成し、原版と宿敵のステータス比較とMarkdown出力に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1514,6 +1527,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureBattleCard: 'Battle Card',
     featureSceneWriter: 'Scene Writer',
     featureCharacterAu: 'AU Generator',
+    featureCharacterNemesis: 'Nemesis Generator',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1555,6 +1569,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionBattleCard: 'Battle Card',
     actionSceneWriter: 'Scene Writer',
     actionCharacterAu: 'AU Generator',
+    actionCharacterNemesis: 'Nemesis Gen',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1640,10 +1655,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.19.0 New feature "AU Generator" launched: generate 8 Alternate Universe versions of your OC with stat comparison and Markdown export.',
-    announcementList1: 'AU Generator: enter base character info and generate AU versions from 8 preset templates (Modern School / Cyberpunk / Medieval / Post-Apocalypse / Magic Academy / Space Colony / Steampunk / Horror Mansion) with auto-adjusted stats, outfit and background descriptions.',
-    announcementList2: 'Original vs AU comparison: side-by-side stat bar visualization with ↑/↓/→ change indicators; supports multi-version tab management and Markdown export.',
-    announcementList3: 'Accessibility & code quality: version close buttons now have role/tabIndex/aria-label/keyboard support; integrated confirmDestructiveActions setting; fixed NaN input causing abnormal display in number fields.',
+    announcementDescription: 'v1.20.0 New feature "Nemesis Generator" launched: automatically generate 5 nemesis types for your OC with stat comparison, conflict scenes and Markdown export.',
+    announcementList1: 'Nemesis Generator: enter base character info and generate opposing characters from 5 nemesis types (Opposite / Rival / Dark Mirror / Foil / Fated Nemesis) with auto-offset stats, plus title, appearance, motivation, weakness, background, conflict scene and relationship dynamics.',
+    announcementList2: 'Original vs Nemesis comparison: side-by-side stat bar visualization with ↑/↓/→ change indicators; supports multi-nemesis tab management and Markdown export.',
+    announcementList3: 'System architecture: added shared types CoreStat/BaseCharacter to types.ts, enabling AU Generator and Nemesis Generator to share the base character model; full 5-language localization; accessibility and SFX full coverage.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -1702,6 +1717,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSceneWriterDescription: 'Write scenario scripts for your original characters. Supports scene settings, cast management, dialogue and action/narration editing, drag-to-reorder, Markdown export, and random scene generation.',
     pageCharacterAuTitle: 'AU Generator',
     pageCharacterAuDescription: 'Generate Alternate Universe (AU) versions of your original characters. Choose from 8 preset templates (Modern School / Cyberpunk / Medieval / Post-Apocalypse / Magic Academy / Space Colony / Steampunk / Horror Mansion) to auto-adjust stats, generate outfit and background descriptions, with original vs AU stat comparison and Markdown export.',
+    pageCharacterNemesisTitle: 'Nemesis Generator',
+    pageCharacterNemesisDescription: 'Automatically generate a nemesis / opposing character for your original character. Choose from 5 nemesis types (Opposite / Rival / Dark Mirror / Foil / Fated Nemesis) to auto-generate opposing stats based on the original, plus title, appearance, motivation, weakness, background, conflict scene, and relationship dynamics. Supports original vs nemesis stat comparison and Markdown export.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -1975,6 +1992,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureBattleCard: 'Боевая карта',
     featureSceneWriter: 'Сценарий сцен',
     featureCharacterAu: 'Генератор АВ',
+    featureCharacterNemesis: 'Генератор врага',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -2016,6 +2034,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionBattleCard: 'Боевая карта',
     actionSceneWriter: 'Сценарий сцен',
     actionCharacterAu: 'АВ-генератор',
+    actionCharacterNemesis: 'Генератор врага',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -2101,10 +2120,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.19.0 Новая функция «Генератор АВ»: создавайте 8 версий ваших персонажей в альтернативных вселенных с сравнением характеристик и экспортом в Markdown.',
-    announcementList1: 'Генератор АВ: введите базовую информацию персонажа и генерируйте АВ-версии из 8 шаблонов (современная школа / киберпанк / средневековье / постапокалипсис / академия магии / космическая колония / стимпанк / дом ужасов) с автоматической корректировкой характеристик, описанием одежды и предысторий.',
-    announcementList2: 'Сравнение оригинала и АВ: визуальное сравнение характеристик с индикаторами изменений ↑/↓/→; поддержка управления несколькими версиями через вкладки и экспорт в Markdown.',
-    announcementList3: 'Доступность и качество кода: кнопки закрытия версий получили role/tabIndex/aria-label/поддержку клавиатуры; интегрирована настройка confirmDestructiveActions; исправлено отображение NaN при числовом вводе.',
+    announcementDescription: 'v1.20.0 Новая функция «Генератор врага»: автоматически создавайте 5 типов врагов для вашего персонажа с сравнением характеристик, сценами конфликта и экспортом в Markdown.',
+    announcementList1: 'Генератор врага: введите базовую информацию персонажа и создавайте противоположных персонажей из 5 типов врага (антипод / соперник / тёмное зеркало / контраст / судьбоносный враг) с автоматически смещёнными характеристиками, а также титулом, внешностью, мотивацией, слабостью, предысторией, сценой конфликта и динамикой отношений.',
+    announcementList2: 'Сравнение оригинала и врага: визуальное сравнение характеристик с индикаторами изменений ↑/↓/→; поддержка управления несколькими врагами через вкладки и экспорт в Markdown.',
+    announcementList3: 'Системная архитектура: добавлены общие типы CoreStat/BaseCharacter в types.ts, позволяющие Генератору АВ и Генератору врага совместно использовать базовую модель персонажа; полная 5-язычная локализация; полное покрытие доступностью и SFX.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2163,6 +2182,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageSceneWriterDescription: 'Создавайте сценарии для ваших оригинальных персонажей. Поддерживает настройки сцен, управление актёрским составом, редактирование реплик и действий/повествования, перетаскивание для сортировки, экспорт Markdown и генерацию случайных сцен.',
     pageCharacterAuTitle: 'Генератор альтернативных вселенных',
     pageCharacterAuDescription: 'Генерируйте версии ваших оригинальных персонажей в альтернативных вселенных (АВ). Выбирайте из 8 шаблонов (современная школа / киберпанк / средневековье / постапокалипсис / академия магии / космическая колония / стимпанк / дом ужасов) для автоматической корректировки характеристик, генерации описаний одежды и предысторий, сравнения оригинала и АВ-версии, а также экспорта в Markdown.',
+    pageCharacterNemesisTitle: 'Генератор врага',
+    pageCharacterNemesisDescription: 'Автоматически создавайте врага / противоположность для вашего оригинального персонажа. Выбирайте из 5 типов врага (антипод / соперник / тёмное зеркало / контраст / судьбоносный враг) для автоматической генерации противоположных характеристик на основе оригинала, а также титула, внешности, мотивации, слабости, предыстории, сцены конфликта и динамики отношений. Поддерживает сравнение характеристик оригинала и врага, а также экспорт в Markdown.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2865,6 +2886,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureBattleCard: '캐릭터 배틀 카드',
     featureSceneWriter: '장면 각본',
     featureCharacterAu: '평행 우주 공방',
+    featureCharacterNemesis: '宿敵 생성 공방',
     actionAssetGallery: '캐릭터 에셋 갤러리',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
@@ -2878,6 +2900,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     actionBattleCard: '캐릭터 배틀 카드',
     actionSceneWriter: '장면 각본',
     actionCharacterAu: '평행 우주',
+    actionCharacterNemesis: '宿敵 생성',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2918,14 +2941,16 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageSceneWriterDescription: '오리지널 캐릭터를 위한 시나리오 각본 작성 도구. 장면 설정, 캐스트 관리, 대사 및 액션/나레이션 편집, 드래그 정렬, Markdown 납품하기, 랜덤 장면 생성을 지원합니다.',
     pageCharacterAuTitle: '평행 우주 공방',
     pageCharacterAuDescription: '오리지널 캐릭터의 평행 우주(AU) 버전을 생성합니다. 8가지 프리셋 템플릿(현대 학원/사이버펑크/중세/종말 황무지/마법 학원/우주 식민지/스팀펑크/공포의 저택) 중 선택하여 스탯 자동 조정, 의상 및 배경 설명 생성, 원판과 AU 버전의 스탯 비교 및 Markdown 납품하기를 지원합니다.',
+    pageCharacterNemesisTitle: '宿敵 생성 공방',
+    pageCharacterNemesisDescription: '오리지널 캐릭터의 宿敵/대립 캐릭터를 자동 생성합니다. 5가지 宿敵 타입(성격 반전/실력 라이벌/어두운 거울/대조의 포일/울명의 宿敵) 중 선택하여 원래 캐릭터의 스탯을 기반으로 대립 스탯을 자동 생성하고, 칭호, 외모, 동기, 약점, 배경, 대립 장면, 관계성 설명을 생성합니다. 원판과 宿敵의 스탯 비교 및 Markdown 납품하기를 지원합니다.',
     audioPresetMute: '무음',
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.19.0 신기능「평행 우주 공방」출시: OC 캐릭터의 8가지 AU 버전을 생성하고 스탯 비교 및 Markdown 납품하기를 지원합니다。',
-    announcementList1: '평행 우주 공방: 베이스 정보를 입력하고 8가지 프리셋 템플릿(현대 학원/사이버펑크/중세/종말 황무지/마법 학원/우주 식민지/스팀펑크/공포의 저택)에서 AU 버전을 생성합니다. 스탯 자동 조정, 의상 및 배경 설명 생성。',
-    announcementList2: '원판 vs AU 비교: 나란히 배치된 스탯 바 시각화 비교, ↑/↓/→ 변화 지시자 포함；다중 버전 탭 관리 및 Markdown 납품하기 지원。',
-    announcementList3: '접근성 및 코드 품질: 버전 닫기 버튼에 role/tabIndex/aria-label/키보드 지원 추가；confirmDestructiveActions 설정 통합；숫자 입력 NaN으로 인한 비정상 표시 수정。',
+    announcementDescription: 'v1.20.0 신기능「宿敵 생성 공방」출시: OC 캐릭터의 5가지 宿敵 타입을 자동 생성하고 스탯 비교, 대립 장면 및 Markdown 납품하기를 지원합니다。',
+    announcementList1: '宿敵 생성 공방: 베이스 정보를 입력하고 5가지 宿敵 타입(성격 반전/실력 라이벌/어두운 거울/대조의 포일/운명의 宿敵)에서 대립 캐릭터를 생성합니다. 스탯 자동偏移, 칭호/외모/동기/약점/배경/대립 장면/관계성 생성。',
+    announcementList2: '원판 vs 宿敵 비교: 나란히 배치된 스탯 바 시각화 비교, ↑/↓/→ 변화 지시자 포함；다중 宿敵 탭 관리 및 Markdown 납품하기 지원。',
+    announcementList3: '시스템 아키텍처: types.ts에 공유 타입 CoreStat/BaseCharacter 추가, AU 공방과 宿敵 생성 공방이 베이스 캐릭터 모델을 공유；5개 언어 완전 현지화；접근성 및 SFX 전체 커버。',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -5362,6 +5387,12 @@ function App() {
               pageTitle={messages.pageCharacterAuTitle}
               pageDescription={messages.pageCharacterAuDescription}
             />
+          ) : screen === 'character-nemesis' ? (
+            <CharacterNemesisPage
+              {...sharedPageProps}
+              pageTitle={messages.pageCharacterNemesisTitle}
+              pageDescription={messages.pageCharacterNemesisDescription}
+            />
           ) : screen === 'docs' ? (
             <DocsPage
               {...sharedPageProps}
@@ -7318,6 +7349,15 @@ function ActionIcon({
         <path d="M20 14v12" />
         <path d="M16 10h8" />
         <path d="M16 30h8" />
+      </>
+    ),
+    'character-nemesis': (
+      <>
+        <path d="M20 8l-8 24" />
+        <path d="M20 8l8 24" />
+        <circle cx="20" cy="18" r="4" />
+        <circle cx="20" cy="30" r="2" />
+        <path d="M12 14h16" />
       </>
     ),
     docs: (

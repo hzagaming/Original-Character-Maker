@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { playSound } from './audioEngine';
-import type { AppLanguage, SettingsState } from './types';
+import type { AppLanguage, BaseCharacter, CoreStat, SettingsState } from './types';
 
 // ─── Types ───
 
@@ -27,13 +27,7 @@ function useMaybeConfirm(settings: SettingsState) {
   }, [settings.others.confirmDestructiveActions]);
 }
 
-export type CoreStat = 'str' | 'dex' | 'int' | 'cha' | 'vit' | 'luk';
 
-export type BaseCharacter = {
-  name: string;
-  personality: string;
-  stats: Record<CoreStat, number>;
-};
 
 export type AuTemplateId =
   | 'modern-school'

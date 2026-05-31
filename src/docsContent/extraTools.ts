@@ -541,6 +541,57 @@ Each scene contains: id, title, location, time, weather, mood, cast (string[]), 
       { code: 'AU_GENERATOR_COPY_FAILED', message: 'Failed to copy export text to clipboard.', severity: 'warning', category: 'Clipboard', location: 'AuGeneratorPage → handleCopy', cause: 'The browser clipboard API is unavailable or blocked by permissions.', solution: 'Manually select and copy the text from the export modal textarea.', steps: ['Click inside the export textarea', 'Press Ctrl+A (or Cmd+A)', 'Press Ctrl+C (or Cmd+C)'], relatedCodes: [], prevention: 'Ensure the page has clipboard permissions, or use HTTPS.' },
     ],
   },
+  {
+    id: 'character-nemesis',
+    title: 'Nemesis Generator',
+    overview: `The Nemesis Generator creates opposing characters for your original characters. Unlike the AU Generator which transforms the same character into different universes, the Nemesis Generator creates entirely new characters who serve as antagonists, rivals, dark mirrors, foils, or fated enemies. Each nemesis type applies a unique stat offset pattern and generates a complete profile including title, appearance, motivation, weakness, background, conflict scene, and relationship dynamics.
+
+[Core Features]
+- Base character editor: name, personality description, and 6 core stats (STR/DEX/INT/CHA/VIT/LUK)
+- 5 nemesis types: Opposite (polar reverse), Rival (near-equal competitor), Dark Mirror (same stats, fallen), Foil (complementary contrast), Nemesis (fated intertwined)
+- Stat offset: each type applies unique stat modifiers based on narrative tropes
+- Name generation: prefix/suffix transformation from the original character\'s name
+- Title generation: thematic titles per nemesis type
+- Appearance: randomized thematic physical descriptions
+- Motivation: what drives the nemesis against the original
+- Weakness: the nemesis\'s fatal flaw
+- Background: backstory hook connecting to the original
+- Conflict scene: a dramatic confrontation scenario
+- Relationship dynamics: how the two characters interact
+- Original vs nemesis comparison: side-by-side stat bars with change indicators (↑/↓/→)
+- Tab management: save and switch between multiple nemeses for the same original
+- Markdown export: export any nemesis as formatted Markdown with full profile
+- Persistent storage: all data saved to localStorage (oc-maker.nemesis-generator)
+
+[Use Cases]
+- Writers: create compelling antagonists with built-in dramatic tension
+- Roleplayers: generate rivals and enemies for campaigns
+- Artists: get visual and descriptive prompts for drawing opposing characters
+- Game designers: prototype boss characters and rival NPCs`,
+    buttons: [
+      { name: 'Generate Nemesis', description: 'Creates a new nemesis character for the base character using the selected type. Applies stat offsets and generates name, title, appearance, motivation, weakness, background, conflict scene, and relationship text.' },
+      { name: 'Delete Nemesis', description: 'Permanently removes the selected nemesis after confirmation.' },
+      { name: 'Export Markdown', description: 'Copies the current nemesis as formatted Markdown to the clipboard, including the full profile and stat comparison table.' },
+      { name: 'Copy', description: 'Copies the export Markdown text to the clipboard.' },
+    ],
+    parameters: [
+      { name: 'Character Name', description: 'The name of the original character.', tips: 'Used as the base for nemesis name generation (prefixes/suffixes).' },
+      { name: 'Personality', description: 'A short description of the character\'s personality traits.', tips: 'Optional; provides context for understanding the generated nemesis dynamics.' },
+      { name: 'Core Stats', description: 'Six attributes rated 1-100: STR (strength), DEX (dexterity), INT (intelligence), CHA (charisma), VIT (vitality), LUK (luck).', tips: 'Set baseline values before generating nemeses; offsets will shift them up or down.' },
+      { name: 'Nemesis Type', description: 'The narrative relationship between original and nemesis.', tips: 'Each type has unique stat offsets and description pools. Opposite reverses stats; Rival stays near-equal; Dark Mirror corrupts the same stats; Foil complements; Nemesis intertwines fates.' },
+      { name: 'Title', description: 'A thematic title for the nemesis character.', tips: 'Randomly selected from a pool of 5 titles per type.' },
+      { name: 'Appearance', description: 'Physical description of the nemesis.', tips: 'Randomly selected from a pool of 5 descriptions per type.' },
+      { name: 'Motivation', description: 'What drives the nemesis to oppose the original.', tips: 'Randomly selected from a pool of 5 motivations per type.' },
+      { name: 'Weakness', description: 'The nemesis\'s fatal flaw or vulnerability.', tips: 'Randomly selected from a pool of 5 weaknesses per type.' },
+      { name: 'Background', description: 'Backstory hook explaining the nemesis\'s origin and connection to the original.', tips: 'Randomly selected from a pool of 5 backgrounds per type.' },
+      { name: 'Conflict Scene', description: 'A dramatic scenario where original and nemesis confront each other.', tips: 'Randomly selected from a pool of 5 scenes per type. Great for storyboarding or writing prompts.' },
+      { name: 'Relationship', description: 'How the two characters dynamically interact.', tips: 'Randomly selected from a pool of 5 relationship descriptions per type.' },
+    ],
+    errors: [
+      { code: 'NEMESIS_STORAGE_FULL', message: 'Browser storage quota exceeded.', severity: 'error', category: 'Storage', location: 'CharacterNemesisPage → writeState', cause: 'The total size of all nemeses exceeds the browser localStorage limit.', solution: 'Delete old nemeses or export them as Markdown files.', steps: ['Select an old nemesis tab', 'Click the X to delete', 'Confirm deletion', 'Retry generation'], relatedCodes: [], prevention: 'Export completed nemeses as Markdown files periodically.' },
+      { code: 'NEMESIS_COPY_FAILED', message: 'Failed to copy export text to clipboard.', severity: 'warning', category: 'Clipboard', location: 'CharacterNemesisPage → handleCopy', cause: 'The browser clipboard API is unavailable or blocked by permissions.', solution: 'Manually select and copy the text from the export modal textarea.', steps: ['Click inside the export textarea', 'Press Ctrl+A (or Cmd+A)', 'Press Ctrl+C (or Cmd+C)'], relatedCodes: [], prevention: 'Ensure the page has clipboard permissions, or use HTTPS.' },
+    ],
+  },
 ];
 
 const zh: DocsToolSection[] = [
@@ -1080,6 +1131,57 @@ const zh: DocsToolSection[] = [
     errors: [
       { code: 'AU_GENERATOR_STORAGE_FULL', message: '浏览器存储配额已满。', severity: 'error', category: '存储', location: 'AuGeneratorPage → writeState', cause: '所有 AU 版本的总大小超过了浏览器 localStorage 限制。', solution: '删除旧 AU 版本或将它们导出为 Markdown 文件。', steps: ['选择一个旧版本标签', '点击 X 删除', '确认删除', '重试生成'], relatedCodes: [], prevention: '定期将完成的 AU 版本导出为 Markdown 文件。' },
       { code: 'AU_GENERATOR_COPY_FAILED', message: '无法将导出文本复制到剪贴板。', severity: 'warning', category: '剪贴板', location: 'AuGeneratorPage → handleCopy', cause: '浏览器剪贴板 API 不可用或被权限阻止。', solution: '手动从导出模态框的文本区域中选择并复制文本。', steps: ['点击导出文本区域内部', '按 Ctrl+A（或 Cmd+A）', '按 Ctrl+C（或 Cmd+C）'], relatedCodes: [], prevention: '确保页面具有剪贴板权限，或使用 HTTPS。' },
+    ],
+  },
+  {
+    id: 'character-nemesis',
+    title: '角色宿敌工坊',
+    overview: `角色宿敌工坊为你的原创角色创造对立面角色。与平行宇宙工坊（将同一角色变换到不同世界）不同，宿敌工坊创造的是全新的角色——他们作为反派、对手、黑暗镜像、衬托对比或命运宿敌而存在。每种宿敌类型应用独特的属性偏移模式，并生成完整的角色档案，包括称号、外貌、动机、弱点、背景、冲突场景和关系动态。
+
+[核心功能]
+- 基础角色编辑器：角色名、性格描述、6 项核心属性（力量/敏捷/智力/魅力/体质/幸运）
+- 5 种宿敌类型：性格反转（极性逆转）、实力对手（实力接近的竞争者）、黑暗镜像（同样属性却堕落）、衬托对比（互补形成对照）、命运宿敌（命运交织）
+- 属性偏移：每种类型根据叙事特色应用独特的属性调整
+- 名字生成：基于原角色名进行前缀/后缀变换
+- 称号生成：每种宿敌类型的主题化称号
+- 外貌：随机主题化外貌描述
+- 动机：驱动宿敌与原角色对立的原因
+- 弱点：宿敌的致命缺陷
+- 背景：与原角色相关联的背景设定钩子
+- 冲突场景：戏剧性的对峙场景
+- 关系动态：两个角色如何互动
+- 原版 vs 宿敌对比：并排属性条与变化指示器（↑/↓/→）
+- 标签页管理：为同一基础角色保存和切换多个宿敌
+- Markdown 导出：将任意宿敌导出为包含完整档案的格式化 Markdown
+- 持久化存储：所有数据保存至 localStorage（oc-maker.nemesis-generator）
+
+[适用场景]
+- 小说作者：创造具有内在戏剧张力的引人入胜的反派
+- 跑团玩家：为战役生成对手和敌人
+- 画师：获取绘制对立角色的视觉和描述性 prompt
+- 游戏设计师：原型化 Boss 角色和 rival NPC`,
+    buttons: [
+      { name: '生成宿敌', description: '使用选中的类型为基础角色创建新的宿敌角色。应用属性偏移并生成名字、称号、外貌、动机、弱点、背景、冲突场景和关系文本。' },
+      { name: '删除宿敌', description: '经确认后永久移除选中的宿敌。' },
+      { name: '导出 Markdown', description: '将当前宿敌以格式化 Markdown 复制到剪贴板，包含完整档案和属性对比表。' },
+      { name: '复制', description: '将导出 Markdown 文本复制到剪贴板。' },
+    ],
+    parameters: [
+      { name: '角色名', description: '原角色的名称。', tips: '作为宿敌名字生成的基础（前缀/后缀变换）。' },
+      { name: '性格描述', description: '角色性格特质的简短描述。', tips: '可选；为理解生成的宿敌动态提供上下文。' },
+      { name: '核心属性', description: '六项 1-100 的属性值：力量、敏捷、智力、魅力、体质、幸运。', tips: '在生成宿敌前先设定基准值；偏移会上下调整。' },
+      { name: '宿敌类型', description: '原版与宿敌之间的叙事关系。', tips: '每种类型都有独特的属性偏移和描述池。性格反转逆转属性；实力对手保持接近；黑暗镜像腐化同样属性；衬托对比互补；命运宿敌交织命运。' },
+      { name: '称号', description: '宿敌角色的主题化称号。', tips: '从每个类型的 5 条称号池中随机抽取。' },
+      { name: '外貌', description: '宿敌的外貌描述。', tips: '从每个类型的 5 条描述池中随机抽取。' },
+      { name: '动机', description: '驱动宿敌与原角色对立的原因。', tips: '从每个类型的 5 条动机池中随机抽取。' },
+      { name: '弱点', description: '宿敌的致命缺陷或脆弱点。', tips: '从每个类型的 5 条弱点池中随机抽取。' },
+      { name: '背景', description: '解释宿敌起源及与原角色关联的背景设定钩子。', tips: '从每个类型的 5 条背景池中随机抽取。' },
+      { name: '冲突场景', description: '原版与宿敌对峙的戏剧性场景。', tips: '从每个类型的 5 条场景池中随机抽取。适合用作分镜或写作 prompt。' },
+      { name: '关系动态', description: '两个角色如何动态互动。', tips: '从每个类型的 5 条关系描述池中随机抽取。' },
+    ],
+    errors: [
+      { code: 'NEMESIS_STORAGE_FULL', message: '浏览器存储配额已满。', severity: 'error', category: '存储', location: 'CharacterNemesisPage → writeState', cause: '所有宿敌的总大小超过了浏览器 localStorage 限制。', solution: '删除旧宿敌或将它们导出为 Markdown 文件。', steps: ['选择一个旧宿敌标签', '点击 X 删除', '确认删除', '重试生成'], relatedCodes: [], prevention: '定期将完成的宿敌导出为 Markdown 文件。' },
+      { code: 'NEMESIS_COPY_FAILED', message: '无法将导出文本复制到剪贴板。', severity: 'warning', category: '剪贴板', location: 'CharacterNemesisPage → handleCopy', cause: '浏览器剪贴板 API 不可用或被权限阻止。', solution: '手动从导出模态框的文本区域中选择并复制文本。', steps: ['点击导出文本区域内部', '按 Ctrl+A（或 Cmd+A）', '按 Ctrl+C（或 Cmd+C）'], relatedCodes: [], prevention: '确保页面具有剪贴板权限，或使用 HTTPS。' },
     ],
   },
 ];

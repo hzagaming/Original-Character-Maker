@@ -27,6 +27,7 @@ export type ActionIconKind =
   | 'battle-card'
   | 'scene-writer'
   | 'character-au'
+  | 'character-nemesis'
   | 'docs';
 
 export interface FeatureMeta {
@@ -302,6 +303,21 @@ export const FEATURE_REGISTRY: FeatureMeta[] = [
     pipelineTitle: 'Compare / Export',
     todoOne: '补 AU 模板选择与角色属性映射',
     todoTwo: '补原版与 AU 版本对比与导出',
+  },
+  {
+    id: 'character-nemesis',
+    category: 'character',
+    icon: 'character-nemesis',
+    labelKey: 'featureCharacterNemesis',
+    actionKey: 'actionCharacterNemesis',
+    pageTitleKey: 'pageCharacterNemesisTitle',
+    pageDescKey: 'pageCharacterNemesisDescription',
+    importable: false,
+    workspaceTitle: 'Nemesis Generator',
+    panelTitle: 'Base / Nemesis Type',
+    pipelineTitle: 'Compare / Export',
+    todoOne: '补宿敌类型选择与角色属性映射',
+    todoTwo: '补原版与宿敌对比与 Markdown 导出',
   },
   // ── 世界观管理 ──
   {
