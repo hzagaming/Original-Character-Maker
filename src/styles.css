@@ -3645,9 +3645,33 @@ input[type='range']:focus::-moz-range-thumb {
 
 /* Modals also rely on keyframe animations for entrance; ensure they stay usable */
 .perf-no-anim .modal-backdrop,
-.perf-no-anim .modal-surface {
+.perf-no-anim .modal-surface,
+.perf-no-anim .modal-overlay {
   opacity: 1 !important;
   transform: none !important;
+}
+
+/* Elements that start invisible and rely on animation to appear must be forced visible */
+.perf-no-anim .editor-toast,
+.perf-no-anim .toast-enter {
+  opacity: 1 !important;
+  transform: translateX(-50%) !important;
+  animation: none !important;
+}
+
+.perf-no-anim .page-transition-wrapper.pt-enabled > * {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+.perf-no-anim .skeleton-shimmer {
+  animation: none !important;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.perf-no-anim .rel-node.source .rel-node-avatar {
+  animation: none !important;
 }
 
 .perf-no-glass .modal-backdrop,
@@ -4576,6 +4600,12 @@ input[type='range']:focus::-moz-range-thumb {
   z-index: 500;
   animation: toastIn calc(250ms * var(--animation-speed, 1)) ease;
   white-space: nowrap;
+  background: var(--panel-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  max-width: calc(100vw - 48px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .editor-toast.success {
   background: rgba(40, 160, 80, 0.85);
@@ -8701,7 +8731,9 @@ button:disabled,
 .au-version-tabs {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
   border-bottom: 1px solid rgba(100, 180, 255, 0.1);
   padding-bottom: 8px;
 }
@@ -9045,7 +9077,9 @@ button:disabled,
 .nemesis-tabs {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
   border-bottom: 1px solid rgba(100, 180, 255, 0.1);
   padding-bottom: 8px;
 }

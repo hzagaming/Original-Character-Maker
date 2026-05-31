@@ -162,8 +162,13 @@ function now() {
 function rebuildMusicChain() {
   if (!musicLimiter || !masterGain || !ctx) return;
   try {
-    musicLimiter.disconnect();
+    // Disconnect old chain without breaking active notes connected to musicLimiter
     if (musicReverbNode) {
+      // musicLimiter is connected to dry + convolver inputs; disconnect those
+      const convolver = musicReverbNode.nodes[0];
+      const dry = musicReverbNode.nodes[1];
+      try { musicLimiter.disconnect(convolver); } catch { /* ignore */ }
+      try { musicLimiter.disconnect(dry); } catch { /* ignore */ }
       musicReverbNode.nodes.forEach((n) => {
         try { n.disconnect(); } catch { /* ignore */ }
       });
@@ -171,6 +176,9 @@ function rebuildMusicChain() {
         try { musicReverbNode.convolver.buffer = null; } catch { /* ignore */ }
       }
       musicReverbNode = null;
+    } else {
+      // No reverb was active; disconnect musicLimiter from masterGain only
+      try { musicLimiter.disconnect(masterGain); } catch { /* ignore */ }
     }
   } catch { /* ignore */ }
   const reverbAmount = currentSettings.musicReverb / 100;
@@ -278,20 +286,25 @@ function synthesize(params: {
 
   const pitchRatio = Math.pow(2, (currentSettings.sfxPitch + pitch) / 1200);
   const durScale = currentSettings.sfxDurationScale / 100;
-  const actualDuration = duration * durScale;
+  const actualDuration = Math.max(0.001, duration * durScale);
   const detuneTotal = preset.detune + currentSettings.sfxDetune;
   const filterFreq = Math.min(currentSettings.sfxFilterFreq * preset.filterFreqBase / 5000, c.sampleRate / 2);
   const reverbWet = currentSettings.sfxReverb / 100;
 
-  // Pre-calc ADSR before any oscillator creation (fixes TDZ + bounds)
-  const userAtk = Math.min(500, Math.max(0, currentSettings.sfxAttack)) / 1000;
-  const userDec = Math.min(1000, Math.max(0, currentSettings.sfxDecay)) / 1000;
-  const userSus = Math.max(0, Math.min(100, currentSettings.sfxSustain)) / 100;
-  const userRel = Math.min(2000, Math.max(0, currentSettings.sfxRelease)) / 1000;
-  const releaseTime = Math.max(preset.release, userRel);
+  // Pre-calc ADSR: blend preset character (65%) with user fine-tuning (35%)
+  const userAtkSec = Math.min(500, Math.max(0, currentSettings.sfxAttack)) / 1000;
+  const userDecSec = Math.min(1000, Math.max(0, currentSettings.sfxDecay)) / 1000;
+  const userSusFrac = Math.max(0, Math.min(100, currentSettings.sfxSustain)) / 100;
+  const userRelSec = Math.min(2000, Math.max(0, currentSettings.sfxRelease)) / 1000;
+  const atk = preset.attack * 0.65 + userAtkSec * 0.35;
+  const dec = preset.decay * 0.65 + userDecSec * 0.35;
+  const sus = preset.sustain * 0.65 + userSusFrac * 0.35;
+  const rel = preset.release * 0.65 + userRelSec * 0.35;
+  const releaseTime = Math.max(preset.release, rel);
 
   const freqs = chord ? chord.map((f) => f * pitchRatio) : [baseFreq * pitchRatio];
   const nodesToCleanup: AudioNode[] = [];
+  let reverbConvolver: ConvolverNode | null = null;
 
   try {
   const rootGain = c.createGain();
@@ -362,12 +375,16 @@ function synthesize(params: {
     nodesToCleanup.push(noiseSrc, noiseFilter, noiseGain);
   }
 
-  // ADSR envelope on rootGain (user-advanced overrides preset defaults)
+  // ADSR envelope on rootGain (blended preset + user settings)
+  const atkTime = Math.max(0.0001, Math.min(atk, actualDuration * 0.2));
+  const decTime = Math.max(0.0001, Math.min(dec, actualDuration * 0.6 - atkTime));
+  const susLevel = Math.max(0.001, Math.min(sus, 1));
+  const relTime = Math.max(0.0001, rel);
   rootGain.gain.setValueAtTime(0, when);
-  rootGain.gain.linearRampToValueAtTime(1, when + Math.min(userAtk, actualDuration * 0.2));
-  rootGain.gain.exponentialRampToValueAtTime(Math.max(userSus, 0.001), when + Math.min(userAtk + userDec, actualDuration * 0.6));
-  rootGain.gain.setValueAtTime(Math.max(userSus, 0.001), when + actualDuration);
-  rootGain.gain.exponentialRampToValueAtTime(0.0001, when + actualDuration + userRel);
+  rootGain.gain.linearRampToValueAtTime(1, when + atkTime);
+  rootGain.gain.exponentialRampToValueAtTime(susLevel, when + atkTime + decTime);
+  rootGain.gain.setValueAtTime(susLevel, when + actualDuration);
+  rootGain.gain.exponentialRampToValueAtTime(0.0001, when + actualDuration + relTime);
 
   let output: AudioNode = rootGain;
   // user pan
@@ -379,7 +396,6 @@ function synthesize(params: {
     output = panner;
     nodesToCleanup.push(panner);
   }
-  let reverbConvolver: ConvolverNode | null = null;
   if (reverbWet > 0) {
     const reverb = createReverbMix(output, 1 - reverbWet * 0.5, reverbWet * 0.5, 1.5);
     output = reverb.mix;
@@ -388,7 +404,7 @@ function synthesize(params: {
   }
   output.connect(sfxGain!);
 
-  const cleanupDelay = actualDuration + Math.max(preset.release, userRel) + 0.5;
+  const cleanupDelay = actualDuration + Math.max(preset.release, relTime) + 0.5;
   setTimeout(() => {
     try {
       if (!ctx || ctx.state === 'closed') return;
@@ -402,6 +418,7 @@ function synthesize(params: {
   }, cleanupDelay * 1000);
   } catch {
     try { nodesToCleanup.forEach((n) => n.disconnect()); } catch {}
+    try { if (reverbConvolver) reverbConvolver.buffer = null; } catch {}
   }
 }
 
@@ -586,16 +603,18 @@ export function applyAudioPreset(preset: 'mute' | 'feedbackOnly' | 'bgmOnly' | '
 }
 
 export function isAudioBlocked(): boolean {
-  return ctxCreationFailed || (!!ctx && ctx.state === 'suspended');
+  return ctxCreationFailed || (!!ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted'));
 }
 
 // ─── Custom audio file support ───
 let customSfxAudio: HTMLAudioElement | null = null;
 let customMusicAudio: HTMLAudioElement | null = null;
+let customMusicSource: MediaElementAudioSourceNode | null = null;
 let customSfxUrl: string | null = null;
 let customMusicUrl: string | null = null;
 
 export function setCustomSfx(dataUrl: string | null) {
+  if (customSfxUrl === dataUrl) return;
   if (customSfxAudio) {
     customSfxAudio.pause();
     customSfxAudio.src = '';
@@ -614,20 +633,32 @@ export function setCustomSfx(dataUrl: string | null) {
 }
 
 export function setCustomMusic(dataUrl: string | null) {
+  if (customMusicUrl === dataUrl) return;
   if (customMusicAudio) {
     customMusicAudio.pause();
     customMusicAudio.src = '';
     customMusicAudio.load();
     customMusicAudio = null;
   }
+  if (customMusicSource) {
+    try { customMusicSource.disconnect(); } catch { /* ignore */ }
+    customMusicSource = null;
+  }
   if (customMusicUrl && customMusicUrl.startsWith('blob:')) {
     URL.revokeObjectURL(customMusicUrl);
   }
   customMusicUrl = dataUrl;
   if (dataUrl) {
-    customMusicAudio = new Audio(dataUrl);
-    customMusicAudio.loop = true;
-    customMusicAudio.volume = currentSettings.musicEnabled ? (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100) : 0;
+    try {
+      const c = ensureContext();
+      customMusicAudio = new Audio(dataUrl);
+      customMusicAudio.loop = true;
+      customMusicSource = c.createMediaElementSource(customMusicAudio);
+      customMusicSource.connect(musicGain!);
+    } catch {
+      customMusicAudio = null;
+      customMusicSource = null;
+    }
   }
   currentSettings = { ...currentSettings, useCustomMusic: !!dataUrl, customMusicDataUrl: dataUrl };
 }
@@ -886,14 +917,15 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
     if (type === 'kick') {
       const stopTime = when + 0.2;
       if (stopTime <= c.currentTime) return;
+      const t = Math.max(when, c.currentTime);
       // Body: deep sine sweep
       const bodyOsc = c.createOscillator();
       bodyOsc.type = 'sine';
-      bodyOsc.frequency.setValueAtTime(180, when);
-      bodyOsc.frequency.exponentialRampToValueAtTime(45, when + 0.14);
+      bodyOsc.frequency.setValueAtTime(180, t);
+      bodyOsc.frequency.exponentialRampToValueAtTime(45, t + 0.14);
       const bodyGain = c.createGain();
-      bodyGain.gain.setValueAtTime(volume * 0.85, when);
-      bodyGain.gain.exponentialRampToValueAtTime(0.001, when + 0.18);
+      bodyGain.gain.setValueAtTime(volume * 0.85, t);
+      bodyGain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
 
       // Click: short high-frequency burst for attack definition
       const clickSize = Math.floor(c.sampleRate * 0.006);
@@ -907,8 +939,8 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       clickFilter.frequency.value = 3500;
       clickFilter.Q.value = 1.2;
       const clickGain = c.createGain();
-      clickGain.gain.setValueAtTime(volume * 0.35, when);
-      clickGain.gain.exponentialRampToValueAtTime(0.001, when + 0.015);
+      clickGain.gain.setValueAtTime(volume * 0.35, t);
+      clickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
 
       bodyOsc.connect(bodyGain);
       bodyGain.connect(mg);
@@ -916,7 +948,6 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       clickFilter.connect(clickGain);
       clickGain.connect(mg);
 
-      const t = Math.max(when, c.currentTime);
       bodyOsc.start(t);
       bodyOsc.stop(stopTime);
       clickSrc.start(t);
@@ -931,14 +962,15 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
     } else if (type === 'snare') {
       const stopTime = when + 0.18;
       if (stopTime <= c.currentTime) return;
+      const t = Math.max(when, c.currentTime);
       // Tone: triangle with snap envelope
       const toneOsc = c.createOscillator();
       toneOsc.type = 'triangle';
-      toneOsc.frequency.setValueAtTime(220, when);
-      toneOsc.frequency.exponentialRampToValueAtTime(160, when + 0.04);
+      toneOsc.frequency.setValueAtTime(220, t);
+      toneOsc.frequency.exponentialRampToValueAtTime(160, t + 0.04);
       const toneGain = c.createGain();
-      toneGain.gain.setValueAtTime(volume * 0.25, when);
-      toneGain.gain.exponentialRampToValueAtTime(0.001, when + 0.08);
+      toneGain.gain.setValueAtTime(volume * 0.25, t);
+      toneGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
 
       // Noise: filtered with longer decay
       const noiseSize = Math.floor(c.sampleRate * 0.14);
@@ -952,8 +984,8 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       noiseFilter.frequency.value = 1400;
       noiseFilter.Q.value = 0.8;
       const noiseGain = c.createGain();
-      noiseGain.gain.setValueAtTime(volume * 0.45, when);
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, when + 0.14);
+      noiseGain.gain.setValueAtTime(volume * 0.45, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
 
       toneOsc.connect(toneGain);
       toneGain.connect(mg);
@@ -961,7 +993,6 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       noiseFilter.connect(noiseGain);
       noiseGain.connect(mg);
 
-      const t = Math.max(when, c.currentTime);
       toneOsc.start(t);
       toneOsc.stop(stopTime);
       noise.start(t);
@@ -976,6 +1007,7 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
     } else if (type === 'hihat') {
       const stopTime = when + 0.06;
       if (stopTime <= c.currentTime) return;
+      const t = Math.max(when, c.currentTime);
       // Metallic noise: high bandpass + shorter decay
       const bufferSize = Math.floor(c.sampleRate * 0.04);
       const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
@@ -988,13 +1020,12 @@ function scheduleDrum(when: number, type: 'kick' | 'snare' | 'hihat', volume: nu
       filter.frequency.value = 8000;
       filter.Q.value = 0.5;
       const gain = c.createGain();
-      gain.gain.setValueAtTime(volume * 0.18, when);
-      gain.gain.exponentialRampToValueAtTime(0.001, when + 0.04);
+      gain.gain.setValueAtTime(volume * 0.18, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
 
       noise.connect(filter);
       filter.connect(gain);
       gain.connect(mg);
-      const t = Math.max(when, c.currentTime);
       noise.start(t);
       noise.stop(stopTime);
 
@@ -1095,7 +1126,7 @@ export function startMusic() {
     if (currentSettings.useCustomMusic && customMusicAudio) {
       if (customMusicAudio.paused) {
         customMusicAudio.currentTime = 0;
-        customMusicAudio.volume = (currentSettings.musicVolume / 100) * (currentSettings.masterVolume / 100);
+        // Volume is controlled by the Web Audio graph (musicGain), not the element
         customMusicAudio.play().catch(() => {});
       }
       return;

@@ -98,6 +98,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     statSame: '→',
     exportText: '导出文本',
     close: '关闭',
+    help: '帮助',
     untitledScene: '未命名角色',
     copied: '已复制',
     copy: '复制',
@@ -133,6 +134,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     statSame: '→',
     exportText: 'テキスト出力',
     close: '閉じる',
+    help: 'ヘルプ',
     untitledScene: '無名キャラ',
     copied: 'コピー完了',
     copy: 'コピー',
@@ -168,6 +170,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     statSame: '→',
     exportText: 'Export Text',
     close: 'Close',
+    help: 'Help',
     untitledScene: 'Unnamed Character',
     copied: 'Copied',
     copy: 'Copy',
@@ -203,6 +206,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     statSame: '→',
     exportText: 'Экспорт текста',
     close: 'Закрыть',
+    help: 'Справка',
     untitledScene: 'Безымянный персонаж',
     copied: 'Скопировано',
     copy: 'Копировать',
@@ -238,6 +242,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     statSame: '→',
     exportText: '텍스트 내보내기',
     close: '닫기',
+    help: '도움말',
     untitledScene: '이름 없는 캐릭터',
     copied: '복사됨',
     copy: '복사',
@@ -750,7 +755,7 @@ export default function AuGeneratorPage({
         </div>
         <div className="page-header-actions">
           {onOpenDocs && (
-            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs('character-au'); }}>
+            <button className="secondary-button small-button" type="button" aria-label={copy.help} data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs('character-au'); }}>
               ?
             </button>
           )}

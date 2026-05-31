@@ -4037,7 +4037,7 @@ function TagPickerModal({
   if (!open) return null;
 
   return createPortal(
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="modal-overlay" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <section className="modal-card modal-card-wide" style={{ maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
         <h2>{title}</h2>
         <input

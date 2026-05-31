@@ -66,7 +66,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.20.3';
+const VERSION = '1.20.4';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -725,10 +725,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.20.3 总体阻塞修复：修复公告语法导致的构建失败、版本号不同步、AU/宿敌工坊嵌套按钮与保存保护缺口，并重新检查 UI/UX/SFX/BGM 关键链路。',
-    announcementList1: '运行修复：App VERSION、package 与 package-lock 统一到 1.20.3；修复韩文公告缺失逗号导致的 TypeScript 构建中断；旧版 v1.20.2 公告移入历史公告。',
-    announcementList2: 'UI/UX/SFX 修复：AU 与宿敌标签页改为合法 tab + close button 结构，关闭按钮补 data-sfx-handled，滑块补 aria-label，复制反馈定时器卸载清理。',
-    announcementList3: '数据稳定性：AU 与宿敌工坊新增 localStorage 读档校验、保存失败 toast、刷新离站保护；宿敌导出补齐 ↑/↓/→ 变化箭头，并清理韩/日文本地化漏翻。',
+    announcementDescription: 'v1.20.4 第十七轮全面审计：audioEngine 核心修复、BGM 双重重启根治、SFX 键盘无障碍增强、CSS 动画降级补全、全页面可访问性查漏补缺。',
+    announcementList1: 'audioEngine 核心修复：SFX preset ADSR 混合预设与用户设置（65%+35%）；rebuildMusicChain 不再切断正在播放的音符；Custom music 接入 Web Audio 图；Drum envelope 修复 tab 后台恢复后的时序错位；Zero-duration exponential ramp 防护。',
+    announcementList2: 'BGM/SFX 体验优化：根治 SettingsModal 中 custom music 上传/移除/激活时的双重 BGM restart；全局 SFX handler 新增 date/time/search/email/tel 输入类型；新增键盘 slider 音效（input 事件）与 Tab 焦点音效（focusin 事件）。',
+    announcementList3: 'UI/UX/可访问性：SceneWriterPage 修复导出模态框 backdrop 与关闭按钮的 SFX 双重播放，补全 9 个缺失 aria-label，空状态添加图标；AU/宿敌工坊帮助按钮添加 aria-label；workflowPages modal-overlay 添加 role="presentation"；CSS perf-no-anim 覆盖补全、editor-toast 默认背景与移动端最大宽度、标签页容器水平滚动。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -1190,10 +1190,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.20.3 総合ブロッカー修正：お知らせ文法によるビルド失敗、バージョン不一致、AU/宿敵ジェネレータのネストボタンと保存保護の欠落を修正し、UI/UX/SFX/BGM の主要経路を再点検しました。',
-    announcementList1: '実行修正：App VERSION、package、package-lock を 1.20.3 に統一。韓国語お知らせのカンマ欠落による TypeScript ビルド停止を修正。旧 v1.20.2 お知らせを履歴へ移動。',
-    announcementList2: 'UI/UX/SFX 修正：AU と宿敵タブを正しい tab + close button 構造へ変更。閉じるボタンに data-sfx-handled を追加し、スライダーに aria-label を補完。コピー表示タイマーをアンマウント時に解放。',
-    announcementList3: 'データ安定性：AU と宿敵ジェネレータに localStorage 読み込み検証、保存失敗 toast、更新/離脱保護を追加。宿敵エクスポートの ↑/↓/→ 変化矢印を補完し、韓国語/日本語の翻訳漏れを修正。',
+    announcementDescription: 'v1.20.4 第十七回全面監査：audioEngine コア修正、BGM 二重再起動根治、SFX キーボードアクセシビリティ強化、CSS アニメーション降格補完、全ページアクセシビリティ改善。',
+    announcementList1: 'audioEngine コア修正：SFX preset ADSR をプリセットとユーザー設定で混合（65%+35%）。rebuildMusicChain が再生中の音符を切断しないように。Custom music を Web Audio グラフに接続。Drum envelope のタブ復帰後のタイミングずれを修正。Zero-duration exponential ramp 対策。',
+    announcementList2: 'BGM/SFX 体験最適化：SettingsModal での custom music アップロード/削除/有効化時の二重 BGM 再起動を根治。グローバル SFX ハンドラに date/time/search/email/tel 入力型を追加。キーボードスライダー効果音（input イベント）と Tab フォーカス効果音（focusin イベント）を新設。',
+    announcementList3: 'UI/UX/アクセシビリティ：SceneWriterPage のエクスポートモーダル backdrop と閉じるボタンの SFX 二重再生を修正。9 個の欠落 aria-label を補完。空状態にアイコン追加。AU/宿敵ジェネレータのヘルプボタンに aria-label 追加。workflowPages modal-overlay に role="presentation" 追加。CSS perf-no-anim カバー補完、editor-toast のデフォルト背景とモバイル最大幅、タブコンテナの水平スクロール。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1655,10 +1655,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.20.3 Full blocker pass: fixed the announcement syntax build break, version mismatch, AU/Nemesis nested buttons, missing save protection, and rechecked key UI/UX/SFX/BGM paths.',
-    announcementList1: 'Runtime fixes: App VERSION, package, and package-lock now all read 1.20.3; fixed the Korean announcement missing comma that stopped TypeScript builds; moved the v1.20.2 announcement into history.',
-    announcementList2: 'UI/UX/SFX fixes: AU and Nemesis tabs now use valid tab + close button structure; close buttons are marked data-sfx-handled; sliders have aria-labels; copy feedback timers clean up on unmount.',
-    announcementList3: 'Data stability: AU and Nemesis pages now validate localStorage restore data, show save-failure toasts, guard refresh/leave, restore missing ↑/↓/→ export arrows, and clean Korean/Japanese localization leaks.',
+    announcementDescription: 'v1.20.4 Seventeenth full audit: audioEngine core fixes, BGM double-restart eliminated, SFX keyboard accessibility boost, CSS animation fallback completeness, full-page a11y gap closure.',
+    announcementList1: 'audioEngine core fixes: SFX preset ADSR now blends preset (65%) with user settings (35%). rebuildMusicChain no longer cuts active notes. Custom music routes through the Web Audio graph. Drum envelope timing fixed after tab background recovery. Zero-duration exponential ramp guard added.',
+    announcementList2: 'BGM/SFX experience: eliminated double BGM restart when uploading/removing/activating custom music in SettingsModal. Global SFX handler now supports date/time/search/email/tel inputs. Added keyboard slider sound (input event) and Tab-focus sound (focusin event).',
+    announcementList3: 'UI/UX/a11y: SceneWriterPage fixed export modal backdrop and close button SFX double-play; added 9 missing aria-labels; empty states now have icons. AU/Nemesis help buttons get aria-label. workflowPages modal-overlay gets role="presentation". CSS perf-no-anim coverage completed, editor-toast gets default background and mobile max-width, tab containers get horizontal scrolling.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -2120,10 +2120,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.20.3 Полная проверка блокеров: исправлены ошибка сборки из-за синтаксиса объявления, рассинхрон версии, вложенные кнопки AU/врага, нехватка защиты сохранения, а также перепроверены ключевые цепочки UI/UX/SFX/BGM.',
-    announcementList1: 'Исправления запуска: App VERSION, package и package-lock теперь 1.20.3; исправлена пропущенная запятая в корейском объявлении, из-за которой падала TypeScript-сборка; объявление v1.20.2 перенесено в историю.',
-    announcementList2: 'Исправления UI/UX/SFX: вкладки AU и врага переведены на корректную структуру tab + close button; кнопки закрытия помечены data-sfx-handled; ползунки получили aria-label; таймер статуса копирования очищается при размонтировании.',
-    announcementList3: 'Стабильность данных: страницы AU и врага проверяют данные localStorage при восстановлении, показывают toast при ошибке сохранения, защищают от обновления/ухода, возвращают стрелки ↑/↓/→ в экспорт и чистят утечки локализации.',
+    announcementDescription: 'v1.20.4 Полная проверка №17: исправления ядра audioEngine, устранение двойного перезапуска BGM, улучшение доступности SFX с клавиатуры, доработка fallback CSS-анимаций, устранение проблем доступности на всех страницах.',
+    announcementList1: 'Исправления ядра audioEngine: ADSR пресетов SFX теперь смешивает пресет (65%) с пользовательскими настройками (35%). rebuildMusicChain больше не обрывает играющие ноты. Custom music подключён к графу Web Audio. Исправлено смещение огибающей ударных после восстановления вкладки. Добавлена защита от zero-duration exponential ramp.',
+    announcementList2: 'BGM/SFX: устранён двойной перезапуск BGM при загрузке/удалении/активации custom music в SettingsModal. Глобальный SFX-обработчик теперь поддерживает date/time/search/email/tel. Добавлены звуки слайдера с клавиатуры (событие input) и фокуса Tab (событие focusin).',
+    announcementList3: 'UI/UX/доступность: SceneWriterPage исправлено двойное воспроизведение SFX у backdrop и кнопки закрытия модального окна экспорта; добавлено 9 недостающих aria-label; пустые состояния получили иконки. Кнопки справки AU/врага получили aria-label. workflowPages modal-overlay получил role="presentation". Завершено покрытие CSS perf-no-anim, editor-toast получил фон и мобильную max-width, контейнеры вкладок — горизонтальную прокрутку.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2947,10 +2947,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.20.3 전체 차단 이슈 수정: 공지 문법으로 인한 빌드 실패, 버전 불일치, AU/숙적 공방의 중첩 버튼과 저장 보호 누락을 수정하고 UI/UX/SFX/BGM 핵심 경로를 다시 점검했습니다.',
-    announcementList1: '실행 수정: App VERSION, package, package-lock을 모두 1.20.3으로 통일했습니다. TypeScript 빌드를 중단시키던 한국어 공지의 누락 쉼표를 수정하고, v1.20.2 공지는 기록으로 이동했습니다.',
-    announcementList2: 'UI/UX/SFX 수정: AU와 숙적 탭을 올바른 tab + close button 구조로 변경했습니다. 닫기 버튼에 data-sfx-handled를 추가하고, 슬라이더에 aria-label을 보강했으며, 복사 피드백 타이머를 언마운트 시 정리합니다.',
-    announcementList3: '데이터 안정성: AU와 숙적 공방에 localStorage 복원 데이터 검증, 저장 실패 toast, 새로고침/이탈 보호를 추가했습니다. 숙적 내보내기의 ↑/↓/→ 변화 화살표를 복구하고 한/일 현지화 누락을 정리했습니다.',
+    announcementDescription: 'v1.20.4 17차 전면 감사: audioEngine 핵심 수정, BGM 이중 재시작 근절, SFX 키보드 접근성 강화, CSS 애니메이션 폴리백 보완, 전 페이지 접근성 개선.',
+    announcementList1: 'audioEngine 핵심 수정: SFX preset ADSR을 프리셋(65%)과 사용자 설정(35%)으로 혼합합니다. rebuildMusicChain이 재생 중인 음을 끊지 않도록 수정했습니다. Custom music을 Web Audio 그래프에 연결했습니다. 탭 복귀 후 Drum envelope 타이밍 오차를 수정했습니다. Zero-duration exponential ramp 방어 로직을 추가했습니다.',
+    announcementList2: 'BGM/SFX 경험 최적화: SettingsModal에서 custom music 업로드/제거/활성화 시 발생하던 BGM 이중 재시작을 근절했습니다. 전역 SFX 핸들러에 date/time/search/email/tel 입력 유형을 추가했습니다. 키보드 슬라이더 효과음(input 이벤트)과 Tab 포커스 효과음(focusin 이벤트)을 신규 추가했습니다.',
+    announcementList3: 'UI/UX/접근성: SceneWriterPage 내보내기 모달 backdrop과 닫기 버튼의 SFX 이중 재생을 수정했습니다. 9개 누락 aria-label을 보강했습니다. 빈 상태에 아이콘을 추가했습니다. AU/숙적 공방 도움말 버튼에 aria-label을 추가했습니다. workflowPages modal-overlay에 role="presentation"을 추가했습니다. CSS perf-no-anim 커버리지를 보완하고 editor-toast에 기본 배경과 모바일 최대 너비를 추가했으며 탭 컨테이너에 가로 스크롤을 적용했습니다.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3144,6 +3144,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.20.3',
+    date: '2026-05-18',
+    title: '1.20.3 总体阻塞修复：版本同步、嵌套按钮、保存保护',
+    summary:
+      '修复韩文公告缺失逗号导致的 TypeScript 构建中断，统一 VERSION/package/package-lock 到 1.20.3，重构 AU/宿敌工坊标签页为合法结构，补全关闭按钮 data-sfx-handled、滑块 aria-label、localStorage 失败 toast、useBeforeUnloadGuard 与数据校验。',
+    details: [
+      '构建修复：韩文公告缺失逗号导致 TypeScript 构建中断；VERSION、package.json、package-lock.json 统一提升到 1.20.3。',
+      'UI/UX/SFX：AU/宿敌工坊标签页重构为合法 tab + close button 兄弟结构；关闭按钮补 data-sfx-handled；滑块补 aria-label；modal-backdrop 移除 inline playSound 防止双重播放。',
+      '稳定性：新增 useBeforeUnloadGuard、localStorage 读档校验（normalizeStats/normalizeBaseCharacter）、保存失败 toast（saveFailed 5 语言）、定时器卸载清理。',
+      '本地化：宿敌工坊补齐 statUp/statDown/statSame 翻译键；全面清理韩文 CJK 混用。',
+    ],
+  },
   {
     version: '1.20.2',
     date: '2026-05-18',
@@ -5069,8 +5082,11 @@ function App() {
         return;
       }
 
-      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], input[type="color"], input[type="url"], input[type="password"], select, textarea, label[for], .announcement-entry');
+      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], input[type="color"], input[type="url"], input[type="password"], input[type="date"], input[type="time"], input[type="search"], input[type="email"], input[type="tel"], select, textarea, label[for], .announcement-entry');
       if (!el) return;
+
+      // Skip label clicks — the associated input will fire its own click event with the correct sound
+      if (el.tagName === 'LABEL') return;
 
       // Skip elements that have their own explicit sound handling (avoids double-play)
       if (el.classList.contains('collapsible-toggle') || el.classList.contains('toolbar-group-header') || el.classList.contains('tool-card-header')) return;
@@ -5082,8 +5098,10 @@ function App() {
       const isConfirm = el.classList.contains('primary-button');
       const isSlider = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'range';
       const isCheckbox = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'checkbox';
-      const isTextInput = el.tagName === 'INPUT' && ['text', 'number', 'url', 'password'].includes((el as HTMLInputElement).type);
+      const isTextInput = el.tagName === 'INPUT' && ['text', 'number', 'url', 'password', 'search', 'email', 'tel'].includes((el as HTMLInputElement).type);
       const isColorInput = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'color';
+      const isDateInput = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'date';
+      const isTimeInput = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'time';
       const isTextarea = el.tagName === 'TEXTAREA';
       const isSelect = el.tagName === 'SELECT';
       const isToggleChipEl = el.classList.contains('toggle-chip');
@@ -5108,6 +5126,10 @@ function App() {
         playSound('select');
       } else if (isColorInput) {
         playSound('colorPick');
+      } else if (isDateInput) {
+        playSound('datePick');
+      } else if (isTimeInput) {
+        playSound('timePick');
       } else if (isTextInput || isTextarea) {
         playSound('inputFocus');
       } else if (isBack) {
@@ -5125,6 +5147,50 @@ function App() {
     // Use capture phase so that modal stopPropagation() does not block sound events
     document.addEventListener('click', handler, true);
     return () => document.removeEventListener('click', handler, true);
+  }, [settings.audio.sfxEnabled, settings.audio.soundOnInteract]);
+
+  // Keyboard slider sound: arrow keys on range inputs fire 'input', not 'click'
+  useEffect(() => {
+    if (!settings.audio.sfxEnabled || !settings.audio.soundOnInteract) return;
+    let lastSliderTime = 0;
+    const SLIDER_THROTTLE_MS = 80;
+    const handler = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (!target || target.tagName !== 'INPUT' || (target as HTMLInputElement).type !== 'range') return;
+      const now = performance.now();
+      if (now - lastSliderTime < SLIDER_THROTTLE_MS) return;
+      lastSliderTime = now;
+      playSound('sliderChange');
+    };
+    document.addEventListener('input', handler, true);
+    return () => document.removeEventListener('input', handler, true);
+  }, [settings.audio.sfxEnabled, settings.audio.soundOnInteract]);
+
+  // Tab-focus sound for keyboard navigation
+  useEffect(() => {
+    if (!settings.audio.sfxEnabled || !settings.audio.soundOnInteract) return;
+    let lastFocusTime = 0;
+    const FOCUS_THROTTLE_MS = 120;
+    const handler = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      // Only sound on focus that is not from a click (keyboard navigation)
+      if ((e as unknown as { relatedTarget?: Element }).relatedTarget == null) return;
+      const isInteractive =
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
+        target.tagName === 'INPUT' ||
+        target.tagName === 'SELECT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.closest('[role="button"], [role="tab"], .choice-chip, .settings-tab, .action-tile');
+      if (!isInteractive) return;
+      const now = performance.now();
+      if (now - lastFocusTime < FOCUS_THROTTLE_MS) return;
+      lastFocusTime = now;
+      playSound('inputFocus');
+    };
+    document.addEventListener('focusin', handler, true);
+    return () => document.removeEventListener('focusin', handler, true);
   }, [settings.audio.sfxEnabled, settings.audio.soundOnInteract]);
 
   const messages = localizedMessages[settings.language];
@@ -8001,7 +8067,7 @@ function SettingsModal({
             customMusicName: file.name,
           },
         });
-        restartMusicPlayback();
+        // updateAudioSettings detects useCustomMusic change and restarts automatically
       }
     };
     reader.onerror = () => {
@@ -8031,7 +8097,7 @@ function SettingsModal({
           customMusicName: '',
         },
       });
-      restartMusicPlayback();
+      // updateAudioSettings detects useCustomMusic change and restarts automatically
     }
   }
 
@@ -8484,7 +8550,7 @@ function SettingsModal({
                   </div>
                   {settings.audio.customMusicDataUrl && (
                     <div className="chip-row" style={{ marginTop: 8 }}>
-                      <button className={`choice-chip ${settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { setCustomMusic(settings.audio.customMusicDataUrl); onUpdate({ audio: { ...settings.audio, useCustomMusic: true } }); restartMusicPlayback(); }}>{messages.audioCustomActive}</button>
+                      <button className={`choice-chip ${settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { setCustomMusic(settings.audio.customMusicDataUrl); onUpdate({ audio: { ...settings.audio, useCustomMusic: true } }); }}>{messages.audioCustomActive}</button>
                       <button className={`choice-chip ${!settings.audio.useCustomMusic ? 'active' : ''}`} type="button" onClick={() => { onUpdate({ audio: { ...settings.audio, useCustomMusic: false } }); }}>{messages.toggleOff}</button>
                     </div>
                   )}

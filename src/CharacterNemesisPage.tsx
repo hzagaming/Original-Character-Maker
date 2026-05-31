@@ -75,6 +75,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     emptyNemeses: '暂无宿敌，输入基础角色信息后点击生成',
     exportText: '导出文本',
     close: '关闭',
+    help: '帮助',
     copied: '已复制',
     copy: '复制',
     untitled: '未命名角色',
@@ -117,6 +118,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     emptyNemeses: 'まだ宿敵がありません。ベース情報を入力して生成してください。',
     exportText: 'テキスト出力',
     close: '閉じる',
+    help: 'ヘルプ',
     copied: 'コピー完了',
     copy: 'コピー',
     untitled: '無名キャラ',
@@ -159,6 +161,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     emptyNemeses: 'No nemeses yet. Enter base info and click generate.',
     exportText: 'Export Text',
     close: 'Close',
+    help: 'Help',
     copied: 'Copied',
     copy: 'Copy',
     untitled: 'Unnamed Character',
@@ -201,6 +204,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     emptyNemeses: 'Пока нет врагов. Введите базовую информацию и нажмите «Создать».',
     exportText: 'Экспорт текста',
     close: 'Закрыть',
+    help: 'Справка',
     copied: 'Скопировано',
     copy: 'Копировать',
     untitled: 'Безымянный персонаж',
@@ -243,6 +247,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     emptyNemeses: '아직 숙적이 없습니다. 베이스 정보를 입력하고 생성하세요.',
     exportText: '텍스트 내보내기',
     close: '닫기',
+    help: '도움말',
     copied: '복사됨',
     copy: '복사',
     untitled: '이름 없는 캐릭터',
@@ -890,7 +895,7 @@ export default function CharacterNemesisPage({
         </div>
         <div className="page-header-actions">
           {onOpenDocs && (
-            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs('character-nemesis'); }}>
+            <button className="secondary-button small-button" type="button" aria-label={copy.help} data-sfx-handled onClick={() => { playSound('buttonClick'); onOpenDocs('character-nemesis'); }}>
               ?
             </button>
           )}
@@ -1124,7 +1129,7 @@ export default function CharacterNemesisPage({
 
       {/* Save Toast */}
       {saveToast && (
-        <div className="editor-toast" role="alert" aria-live="polite">
+        <div className="editor-toast error" role="alert" aria-live="polite">
           {saveToast}
         </div>
       )}

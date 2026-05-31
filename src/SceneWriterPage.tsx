@@ -104,6 +104,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     close: '关闭',
     sceneSettings: '场景设定',
     scriptEditor: '剧本编辑',
+    remove: '移除',
   },
   ja: {
     newScene: '新規シーン',
@@ -145,6 +146,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     close: '閉じる',
     sceneSettings: 'シーン設定',
     scriptEditor: '脚本編集',
+    remove: '削除',
   },
   en: {
     newScene: 'New Scene',
@@ -186,6 +188,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     close: 'Close',
     sceneSettings: 'Scene Settings',
     scriptEditor: 'Script Editor',
+    remove: 'Remove',
   },
   ru: {
     newScene: 'Новая сцена',
@@ -227,6 +230,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     close: 'Закрыть',
     sceneSettings: 'Настройки сцены',
     scriptEditor: 'Редактор сценария',
+    remove: 'Удалить',
   },
   ko: {
     newScene: '새 장면',
@@ -268,6 +272,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     close: '닫기',
     sceneSettings: '장면 설정',
     scriptEditor: '대본 편집기',
+    remove: '삭제',
   },
 };
 
@@ -632,7 +637,7 @@ export default function SceneWriterPage({
 
           <div className="scene-list">
             {scenes.length === 0 && (
-              <div className="scene-empty">{copy.emptyScene}</div>
+              <div className="scene-empty"><span className="scene-empty-icon">🎬</span><p>{copy.emptyScene}</p></div>
             )}
             {scenes.map((scene) => (
               <div
@@ -660,6 +665,7 @@ export default function SceneWriterPage({
                     className="icon-button"
                     type="button"
                     title={copy.copy}
+                    aria-label={copy.copy}
                     data-sfx-handled
                     onClick={(e) => { e.stopPropagation(); duplicateScene(scene); }}
                   >
@@ -669,6 +675,7 @@ export default function SceneWriterPage({
                     className="icon-button danger"
                     type="button"
                     title={copy.deleteScene}
+                    aria-label={copy.deleteScene}
                     data-sfx-handled
                     onClick={(e) => {
                       e.stopPropagation();
@@ -704,6 +711,7 @@ export default function SceneWriterPage({
                     className="scene-input"
                     type="text"
                     placeholder={copy.sceneTitle}
+                    aria-label={copy.sceneTitle}
                     value={activeScene.title}
                     onChange={(e) => updateScene(activeScene.id, (s) => ({ ...s, title: e.target.value }))}
                   />
@@ -711,6 +719,7 @@ export default function SceneWriterPage({
                     className="scene-input"
                     type="text"
                     placeholder={copy.location}
+                    aria-label={copy.location}
                     value={activeScene.location}
                     onChange={(e) => updateScene(activeScene.id, (s) => ({ ...s, location: e.target.value }))}
                   />
@@ -718,6 +727,7 @@ export default function SceneWriterPage({
                     className="scene-input"
                     type="text"
                     placeholder={copy.time}
+                    aria-label={copy.time}
                     value={activeScene.time}
                     onChange={(e) => updateScene(activeScene.id, (s) => ({ ...s, time: e.target.value }))}
                   />
@@ -725,6 +735,7 @@ export default function SceneWriterPage({
                     className="scene-input"
                     type="text"
                     placeholder={copy.weather}
+                    aria-label={copy.weather}
                     value={activeScene.weather}
                     onChange={(e) => updateScene(activeScene.id, (s) => ({ ...s, weather: e.target.value }))}
                   />
@@ -732,6 +743,7 @@ export default function SceneWriterPage({
                     className="scene-input"
                     type="text"
                     placeholder={copy.mood}
+                    aria-label={copy.mood}
                     value={activeScene.mood}
                     onChange={(e) => updateScene(activeScene.id, (s) => ({ ...s, mood: e.target.value }))}
                   />
@@ -744,13 +756,14 @@ export default function SceneWriterPage({
                     {activeScene.cast.map((member) => (
                       <span key={member} className="scene-cast-chip">
                         {member}
-                        <button type="button" className="scene-cast-remove" onClick={() => removeCastMember(activeScene.id, member)}>×</button>
+                        <button type="button" className="scene-cast-remove" aria-label={copy.remove} onClick={() => removeCastMember(activeScene.id, member)}>×</button>
                       </span>
                     ))}
                     <input
                       className="scene-cast-input"
                       type="text"
                       placeholder={copy.castPlaceholder}
+                      aria-label={copy.castPlaceholder}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           addCastMember(activeScene.id, (e.target as HTMLInputElement).value);
@@ -784,7 +797,7 @@ export default function SceneWriterPage({
                 </div>
 
                 {activeScene.lines.length === 0 ? (
-                  <div className="scene-empty-lines">{copy.emptyLines}</div>
+                  <div className="scene-empty-lines"><span className="scene-empty-icon">📝</span><p>{copy.emptyLines}</p></div>
                 ) : (
                   <div className="scene-lines">
                     {activeScene.lines.map((line, index) => (
@@ -815,6 +828,7 @@ export default function SceneWriterPage({
                               className="scene-input emotion"
                               type="text"
                               placeholder={copy.emotion}
+                              aria-label={copy.emotion}
                               value={line.emotion || ''}
                               onChange={(e) => updateLine(activeScene.id, line.id, { emotion: e.target.value })}
                             />
@@ -833,6 +847,7 @@ export default function SceneWriterPage({
                           className="icon-button danger"
                           type="button"
                           title={copy.deleteScene}
+                          aria-label={copy.deleteScene}
                           data-sfx-handled
                           onClick={() => maybeConfirm(copy.deleteSceneConfirm, () => deleteLine(activeScene.id, line.id))}
                         >
@@ -857,11 +872,11 @@ export default function SceneWriterPage({
 
       {/* Export Modal */}
       {showExport && (
-        <div className="modal-backdrop" role="presentation" onClick={() => { playSound('modalClose'); setShowExport(false); }}>
+        <div className="modal-backdrop" role="presentation" onClick={() => { setShowExport(false); }}>
           <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.exportTitle}</h3>
-              <button className="icon-button" type="button" aria-label={copy.close} onClick={() => { playSound('modalClose'); setShowExport(false); }}>✕</button>
+              <button className="icon-button modal-close" type="button" aria-label={copy.close} data-sfx-handled onClick={() => { playSound('modalClose'); setShowExport(false); }}>✕</button>
             </div>
             <div className="modal-body">
               <textarea className="scene-export-textarea" readOnly rows={16} value={exportText} aria-label={copy.exportTitle} />
