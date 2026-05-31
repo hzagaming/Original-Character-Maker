@@ -744,12 +744,19 @@ export default function AuGeneratorPage({
                   className={`choice-chip ${selectedTemplate === t.id ? 'active' : ''}`}
                   type="button"
                   data-sfx-handled
+                  title={t.description[language] ?? t.description.en}
                   onClick={() => { playSound('select'); setSelectedTemplate(t.id); }}
                 >
                   {t.name[language] ?? t.name.en}
                 </button>
               ))}
             </div>
+            {(() => {
+              const td = getTemplate(selectedTemplate);
+              return td ? (
+                <p className="nemesis-type-description">{td.description[language] ?? td.description.en}</p>
+              ) : null;
+            })()}
             <button className="primary-button" type="button" data-sfx-handled onClick={generate} style={{ marginTop: 12, width: '100%' }}>
               ✦ {copy.generate}
             </button>
