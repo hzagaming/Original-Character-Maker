@@ -8706,8 +8706,14 @@ button:disabled,
   padding-bottom: 8px;
 }
 
-.au-version-tab {
+.au-tab-item,
+.nemesis-tab-item {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.au-version-tab {
   padding: 6px 24px 6px 12px;
   background: rgba(14, 26, 42, 0.5);
   border: 1px solid rgba(100, 180, 255, 0.12);
@@ -8716,6 +8722,22 @@ button:disabled,
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.au-version-tab-main,
+.nemesis-tab-main {
+  display: block;
+  max-width: 180px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .au-version-tab:hover {
@@ -8740,6 +8762,9 @@ button:disabled,
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 10px;
   color: #64748b;
   border-radius: 4px;
@@ -9026,7 +9051,6 @@ button:disabled,
 }
 
 .nemesis-tab {
-  position: relative;
   padding: 6px 24px 6px 12px;
   background: rgba(14, 26, 42, 0.5);
   border: 1px solid rgba(100, 180, 255, 0.12);
@@ -9059,6 +9083,9 @@ button:disabled,
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 10px;
   color: #64748b;
   border-radius: 4px;
