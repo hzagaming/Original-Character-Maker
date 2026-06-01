@@ -753,7 +753,7 @@ async function generateAiSuggestion(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-5.4',
+        model: 'gpt-4',
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: prompt },

@@ -69,7 +69,7 @@ export type BaseCharacter = {
   stats: Record<CoreStat, number>;
 };
 
-export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'character-gif' | 'index-tts' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'skill-tree' | 'battle-card' | 'scene-writer' | 'character-au' | 'character-nemesis' | 'character-interview' | 'docs';
+export type FeatureScreen = 'home' | 'face-maker' | 'style-transfer' | 'character-gif' | 'index-tts' | 'prompt-suite' | 'llm-hub' | 'tts-export' | 'paper2gal' | 'image-converter' | 'audio-editor' | 'audio-converter' | 'asset-gallery' | 'relationship-web' | 'character-card' | 'character-chronicle' | 'world-encyclopedia' | 'inspiration-generator' | 'character-stats' | 'color-palette' | 'dialogue-generator' | 'skill-tree' | 'battle-card' | 'scene-writer' | 'character-au' | 'character-nemesis' | 'character-interview' | 'character-arc' | 'docs';
 export type SettingsTab = 'style' | 'language' | 'audio' | 'animation' | 'performance' | 'api' | 'llm' | 'shortcuts' | 'others' | 'announcement' | 'about';
 export type StartModalStep = 'root' | null;
 

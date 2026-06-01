@@ -47,6 +47,7 @@ const SceneWriterPage = lazy(() => import('./SceneWriterPage'));
 const AuGeneratorPage = lazy(() => import('./AuGeneratorPage'));
 const CharacterNemesisPage = lazy(() => import('./CharacterNemesisPage'));
 const CharacterInterviewPage = lazy(() => import('./CharacterInterviewPage'));
+const CharacterArcPage = lazy(() => import('./CharacterArcPage'));
 const DocsPage = lazy(() => import('./DocsPage'));
 import {
   defaultAudioSettings,
@@ -67,7 +68,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.20.6';
+const VERSION = '1.21.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -123,6 +124,7 @@ type Messages = {
   featureCharacterAu: string;
   featureCharacterNemesis: string;
   featureCharacterInterview: string;
+  featureCharacterArc: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -166,6 +168,7 @@ type Messages = {
   actionCharacterAu: string;
   actionCharacterNemesis: string;
   actionCharacterInterview: string;
+  actionCharacterArc: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -313,6 +316,8 @@ type Messages = {
   pageCharacterNemesisDescription: string;
   pageCharacterInterviewTitle: string;
   pageCharacterInterviewDescription: string;
+  pageCharacterArcTitle: string;
+  pageCharacterArcDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -604,6 +609,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterAu: '平行宇宙工坊',
     featureCharacterNemesis: '角色宿敌工坊',
     featureCharacterInterview: '角色访谈室',
+    featureCharacterArc: '角色成长弧线',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -647,6 +653,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterAu: '平行宇宙',
     actionCharacterNemesis: '宿敌生成',
     actionCharacterInterview: '角色访谈',
+    actionCharacterArc: '成长弧线',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -732,10 +739,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.20.6 第十八轮全面审计：对角色访谈室进行全面深度审计与修复。修复 SFX 双重播放与静默按钮、localStorage 保存失败通知、清除回答不持久化、缺少页面刷新保护、AI 建议组件卸载后 setState、模态框 Escape 键关闭、缺失 aria-label、toast 可访问性、CSS 未定义变量与硬编码颜色、响应式布局等问题。',
-    announcementList1: '修复 SFX 合规问题：modal-close 按钮移除 inline playSound 防止双重播放；静默按钮（跳转未回答/AI 建议）移除 data-sfx-handled 让全局 handler 正确播放声音。',
-    announcementList2: '修复数据完整性与稳定性：清除全部回答、更新答案、删除会话现在正确检测 saveSessions 失败并显示 toast；添加 useBeforeUnloadGuard 防止意外刷新丢失进度；AI 建议添加 mounted ref 防止组件卸载后 setState；开始访谈添加防抖防止重复创建。',
-    announcementList3: '修复可访问性与样式：补全设置/返回按钮 aria-label；模态框添加 Escape 键关闭；save toast 添加 role="alert" 与 aria-live；修复 CSS 未定义变量（--panel-hover、--bg-elevated）为合法变量；修复硬编码颜色；增强触摸目标与响应式布局。',
+    announcementDescription: 'v1.21.0 新功能：角色成长弧线规划器。为你的原创角色规划完整的成长弧线，支持积极成长、堕落、平坦与蜕变四种弧线类型，分阶段记录角色的信念、缺陷、目标、关键事件与情绪变化。支持从角色卡加载角色、AI 辅助生成阶段建议，以及导出完整弧线为 Markdown。',
+    announcementList1: '新功能：角色成长弧线 (CharacterArcPage)。四种弧线类型（积极成长 / 堕落 / 平坦 / 蜕变），每种包含 5 个预设阶段，支持从角色卡加载已有角色、手动输入角色信息。',
+    announcementList2: 'AI 辅助阶段建议：当用户在设置中配置了 API Key 时，每个阶段都可以一键生成基于角色信息的 AI 内容建议，帮助创作者快速填充角色成长轨迹。',
+    announcementList3: '弧线管理：支持保存多组弧线记录到 localStorage、历史记录浏览与删除、进度条追踪、阶段上移/下移/删除、清空全部阶段内容、导出完整弧线为 Markdown。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -798,6 +805,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterNemesisDescription: '为你的原创角色自动生成宿敌/对立面角色。选择 5 种宿敌类型（性格反转/实力对手/黑暗镜像/衬托对比/命运宿敌），基于原角色属性自动偏移生成对立属性，同时生成称号、外貌、动机、弱点、背景、冲突场景和关系动态描述，支持原版与宿敌的属性对比和 Markdown 导出。',
     pageCharacterInterviewTitle: '角色访谈室',
     pageCharacterInterviewDescription: '通过经典问答、深夜电台、轻松闲聊或对抗性访谈四种模式，深入挖掘你的原创角色的内心世界。支持从角色卡加载角色信息、AI 辅助生成回答建议，以及导出完整的访谈记录为 Markdown。',
+    pageCharacterArcTitle: '角色成长弧线',
+    pageCharacterArcDescription: '为你的原创角色规划完整的成长弧线。支持积极成长、堕落、平坦与蜕变四种弧线类型，分阶段记录角色的信念、缺陷、目标、关键事件与情绪变化。支持从角色卡加载角色、AI 辅助生成阶段建议，以及导出完整弧线为 Markdown。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -1073,6 +1082,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterAu: 'パラレルワールド',
     featureCharacterNemesis: '宿敵ジェネレータ',
     featureCharacterInterview: 'キャラインタビュー',
+    featureCharacterArc: 'キャラ成長アーク',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -1116,6 +1126,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterAu: 'パラレル',
     actionCharacterNemesis: '宿敵生成',
     actionCharacterInterview: 'キャラインタビュー',
+    actionCharacterArc: '成長アーク',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1201,10 +1212,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.20.6 第十八回全面監査：キャラインタビューの全面深度監査と修正。SFX二重再生と無音ボタン、localStorage保存失敗通知、回答クリアの非永続化、ページリロード保護の欠如、AI提案のunmount後setState、モーダルのEscキー閉鎖、欠落aria-label、toastアクセシビリティ、CSS未定義変数とハードコード色、レスポンシブレイアウトなどを修正。',
-    announcementList1: 'SFXコンプライアンス修正：modal-closeボタンからinline playSoundを削除して二重再生を防止；無音ボタン（未回答ジャンプ/AI提案）からdata-sfx-handledを削除し、グローバルハンドラーが正しく音声を再生。',
-    announcementList2: 'データ完全性と安定性の修正：全回答クリア、回答更新、セッション削除でsaveSessions失敗を正しく検知してtoast表示；useBeforeUnloadGuardを追加して意図しないリロードによる進捗喪失を防止；AI提案にmounted refを追加してコンポーネントunmount後のsetStateを防止；インタビュー開始にデバウンスを追加して重複作成を防止。',
-    announcementList3: 'アクセシビリティとスタイルの修正：設定/戻るボタンにaria-labelを補完；モーダルにEscapeキー閉鎖を追加；save toastにrole="alert"とaria-liveを追加；CSS未定義変数（--panel-hover、--bg-elevated）を有効な変数に修正；ハードコード色を修正；タッチターゲットとレスポンシブレイアウトを強化。',
+    announcementDescription: 'v1.21.0 新機能：キャラ成長アークプランナー。オリジナルキャラクターの完全な成長アークを計画します。ポジティブ成長・堕落・フラット・変容の4タイプに対応し、各ステージでキャラの信念、欠点、目標、重要イベント、感情変化を記録。キャラクターカードから読み込み、AIによるステージ案生成と、完全なアークのMarkdown出力に対応。',
+    announcementList1: '新機能：キャラ成長アーク (CharacterArcPage)。4つのアークタイプ（ポジティブ成長/堕落/フラット/変容）に対応し、各タイプに5つのプリセットステージを含む。キャラクターカードから既存キャラを読み込み、手動入力も対応。',
+    announcementList2: 'AIステージ案補助：設定でAPI Keyを構成すると、各ステージに対してキャラ情報に基づくAI内容案をワンクリックで生成し、クリエイターのキャラ成長軌道の構築を支援。',
+    announcementList3: 'アーク管理：複数のアーク記録をlocalStorageに保存、履歴の閲覧と削除、進捗バー追跡、ステージの上移動/下移動/削除、全ステージ内容クリア、完全なアークのMarkdown出力に対応。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1267,6 +1278,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterNemesisDescription: 'オリジナルキャラクターの宿敵/対立面を自動生成。5種の宿敵タイプ（性格反転/実力のライバル/暗黒の鏡像/対比のフォイル/運命の宿敵）から選択し、原キャラのステータスを基に対立ステータスを自動生成。称号、外見、動機、弱点、背景、対峙シーン、関係性の説明を生成し、原版と宿敵のステータス比較とMarkdown出力に対応。',
     pageCharacterInterviewTitle: 'キャラインタビュー',
     pageCharacterInterviewDescription: 'クラシックQ&A、深夜ラジオ、カジュアル雑談、対抗的インタビューの4モードで、オリジナルキャラクターの内面を深く掘り下げます。キャラクターカードから情報を読み込み、AIによる回答案生成と、インタビュー記録のMarkdown出力に対応。',
+    pageCharacterArcTitle: 'キャラ成長アーク',
+    pageCharacterArcDescription: 'オリジナルキャラクターの完全な成長アークを計画します。ポジティブ成長・堕落・フラット・変容の4タイプに対応し、各ステージでキャラの信念、欠点、目標、重要イベント、感情変化を記録。キャラクターカードから読み込み、AIによるステージ案生成と、完全なアークのMarkdown出力に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1542,6 +1555,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterAu: 'AU Generator',
     featureCharacterNemesis: 'Nemesis Generator',
     featureCharacterInterview: 'Character Interview',
+    featureCharacterArc: 'Character Arc',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1585,6 +1599,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterAu: 'AU Generator',
     actionCharacterNemesis: 'Nemesis Gen',
     actionCharacterInterview: 'Interview',
+    actionCharacterArc: 'Arc',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1670,10 +1685,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.20.6 18th comprehensive audit: deep audit and fixes for Character Interview. Fixed SFX double-play and silent buttons, localStorage save-failure notifications, cleared answers not persisting, missing page-reload protection, AI suggestion setState after unmount, modal Escape-key close, missing aria-labels, toast accessibility, undefined CSS variables and hardcoded colors, responsive layout issues.',
-    announcementList1: 'Fixed SFX compliance: removed inline playSound from modal-close buttons to prevent double-play; removed data-sfx-handled from silent buttons (jump-to-unanswered / AI suggest) so the global handler plays the correct sound.',
-    announcementList2: 'Fixed data integrity and stability: clear-all-answers, update-answer, and delete-session now correctly detect saveSessions failure and show toast; added useBeforeUnloadGuard to prevent accidental reload from losing progress; added mounted ref to AI suggestion to prevent setState after unmount; added debounce to start-interview to prevent duplicate creation.',
-    announcementList3: 'Fixed accessibility and styling: added aria-labels to settings/back buttons; added Escape-key close to modals; added role="alert" and aria-live to save toast; fixed undefined CSS variables (--panel-hover, --bg-elevated) to valid variables; fixed hardcoded colors; enhanced touch targets and responsive layout.',
+    announcementDescription: 'v1.21.0 New feature: Character Arc Planner. Plan a complete character arc for your original character. Supports four arc types: Positive Growth, Fall, Flat, and Transformation. Record beliefs, flaws, goals, key events, and emotional shifts stage by stage. Load character info from character cards, get AI-assisted stage suggestions, and export the complete arc as Markdown.',
+    announcementList1: 'New feature: Character Arc (CharacterArcPage). Four arc types (Positive Growth / Fall / Flat / Transformation), each with 5 preset stages. Load existing characters from character cards or enter manually.',
+    announcementList2: 'AI-assisted stage suggestions: When an API Key is configured in settings, each stage can generate an AI content suggestion based on character info with one click, helping creators quickly build the character\'s growth trajectory.',
+    announcementList3: 'Arc management: Save multiple arc records to localStorage, browse and delete history, track progress with a progress bar, move stages up/down, delete stages, clear all stage content, and export the complete arc as Markdown.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -1736,6 +1751,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterNemesisDescription: 'Automatically generate a nemesis / opposing character for your original character. Choose from 5 nemesis types (Opposite / Rival / Dark Mirror / Foil / Fated Nemesis) to auto-generate opposing stats based on the original, plus title, appearance, motivation, weakness, background, conflict scene, and relationship dynamics. Supports original vs nemesis stat comparison and Markdown export.',
     pageCharacterInterviewTitle: 'Character Interview',
     pageCharacterInterviewDescription: 'Deep-dive into your original character\'s inner world through Classic Q&A, Late Night Radio, Casual Chat, or Confrontational Interview. Load character info from character cards, get AI-assisted answer suggestions, and export complete interview records as Markdown.',
+    pageCharacterArcTitle: 'Character Arc',
+    pageCharacterArcDescription: 'Plan a complete character arc for your original character. Supports four arc types: Positive Growth, Fall, Flat, and Transformation. Record beliefs, flaws, goals, key events, and emotional shifts stage by stage. Load character info from character cards, get AI-assisted stage suggestions, and export the complete arc as Markdown.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -2011,6 +2028,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterAu: 'Генератор АВ',
     featureCharacterNemesis: 'Генератор врага',
     featureCharacterInterview: 'Интервью с персонажем',
+    featureCharacterArc: 'Дуга развития персонажа',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -2054,6 +2072,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterAu: 'АВ-генератор',
     actionCharacterNemesis: 'Генератор врага',
     actionCharacterInterview: 'Интервью',
+    actionCharacterArc: 'Дуга развития',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -2139,10 +2158,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.20.6 18-й комплексный аудит: глубокий аудит и исправления Интервью с персонажем. Исправлены двойной SFX и беззвучные кнопки, уведомления о сбоях сохранения localStorage, не сохраняющиеся очищенные ответы, отсутствие защиты от перезагрузки страницы, setState после размонтирования в AI-предложениях, закрытие модалки клавишей Escape, отсутствующие aria-labels, доступность toast, неопределённые CSS-переменные и жёстко заданные цвета, проблемы адаптивной вёрстки.',
-    announcementList1: 'Исправлено соответствие SFX: удалён inline playSound из кнопок modal-close для предотвращения двойного воспроизведения; удалён data-sfx-handled с беззвучных кнопок (переход к неотвеченным / AI-предложение), чтобы глобальный обработчик правильно воспроизводил звук.',
-    announcementList2: 'Исправлена целостность данных и стабильность: очистка всех ответов, обновление ответа и удаление сессии теперь корректно обнаруживают сбой saveSessions и показывают toast; добавлен useBeforeUnloadGuard для предотвращения потери прогресса при случайной перезагрузке; добавлен mounted ref в AI-предложение для предотвращения setState после размонтирования; добавлен дебаунс к началу интервью для предотвращения дублирования.',
-    announcementList3: 'Исправлена доступность и стили: добавлены aria-labels к кнопкам настроек/назад; добавлено закрытие модалок клавишей Escape; добавлены role="alert" и aria-live к save toast; исправлены неопределённые CSS-переменные (--panel-hover, --bg-elevated) на допустимые; исправлены жёстко заданные цвета; улучшены сенсорные цели и адаптивная вёрстка.',
+    announcementDescription: 'v1.21.0 Новая функция: Планировщик дуги развития персонажа. Спланируйте полную дугу развития для вашего оригинального персонажа. Поддерживает четыре типа дуг: позитивный рост, падение, плоская и трансформация. Записывайте убеждения, недостатки, цели, ключевые события и эмоциональные сдвиги поэтапно. Загружайте информацию о персонаже из карточек, получайте предложения содержания этапов с помощью ИИ и экспортируйте полную дугу в Markdown.',
+    announcementList1: 'Новая функция: Дуга развития персонажа (CharacterArcPage). Четыре типа дуг (позитивный рост / падение / плоская / трансформация), каждый с 5 предустановленными этапами. Загружайте существующих персонажей из карточек или вводите вручную.',
+    announcementList2: 'AI-помощь в содержании этапов: при настроенном API Key для каждого этапа можно одним кликом сгенерировать предложение содержания на основе информации о персонаже, помогая автору быстро построить траекторию роста персонажа.',
+    announcementList3: 'Управление дугами: сохраняйте несколько записей дуг в localStorage, просматривайте и удаляйте историю, отслеживайте прогресс с помощью индикатора, перемещайте этапы вверх/вниз, удаляйте этапы, очищайте содержимое всех этапов и экспортируйте полную дугу в Markdown.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2205,6 +2224,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterNemesisDescription: 'Автоматически создавайте врага / противоположность для вашего оригинального персонажа. Выбирайте из 5 типов врага (антипод / соперник / тёмное зеркало / контраст / судьбоносный враг) для автоматической генерации противоположных характеристик на основе оригинала, а также титула, внешности, мотивации, слабости, предыстории, сцены конфликта и динамики отношений. Поддерживает сравнение характеристик оригинала и врага, а также экспорт в Markdown.',
     pageCharacterInterviewTitle: 'Интервью с персонажем',
     pageCharacterInterviewDescription: 'Глубокое погружение во внутренний мир вашего оригинального персонажа через классические вопросы, ночное радио, лёгкую беседу или агрессивное интервью. Загружайте информацию о персонаже из карточек, получайте предложения ответов с помощью ИИ и экспортируйте полные записи интервью в Markdown.',
+    pageCharacterArcTitle: 'Дуга развития персонажа',
+    pageCharacterArcDescription: 'Спланируйте полную дугу развития для вашего оригинального персонажа. Поддерживает четыре типа дуг: позитивный рост, падение, плоская и трансформация. Записывайте убеждения, недостатки, цели, ключевые события и эмоциональные сдвиги поэтапно. Загружайте информацию о персонаже из карточек, получайте предложения содержания этапов с помощью ИИ и экспортируйте полную дугу в Markdown.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2909,6 +2930,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureCharacterAu: '평행 우주 공방',
     featureCharacterNemesis: '숙적 생성 공방',
     actionAssetGallery: '캐릭터 에셋 갤러리',
+    featureCharacterArc: '캐릭터 성장 아크',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
@@ -2922,6 +2944,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     actionSceneWriter: '장면 각본',
     actionCharacterAu: '평행 우주',
     actionCharacterNemesis: '숙적 생성',
+    actionCharacterArc: '성장 아크',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2964,14 +2987,16 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageCharacterAuDescription: '오리지널 캐릭터의 평행 우주(AU) 버전을 생성합니다. 8가지 프리셋 템플릿(현대 학원/사이버펑크/중세/종말 황무지/마법 학원/우주 식민지/스팀펑크/공포의 저택) 중 선택하여 스탯 자동 조정, 의상 및 배경 설명 생성, 원판과 AU 버전의 스탯 비교 및 Markdown 납품하기를 지원합니다.',
     pageCharacterNemesisTitle: '숙적 생성 공방',
     pageCharacterNemesisDescription: '오리지널 캐릭터의 숙적/대립 캐릭터를 자동 생성합니다. 5가지 숙적 타입(성격 반전/실력 라이벌/어두운 거울/대조의 포일/운명의 숙적) 중 선택하여 원래 캐릭터의 스탯을 기반으로 대립 스탯을 자동 생성하고, 칭호, 외모, 동기, 약점, 배경, 대립 장면, 관계성 설명을 생성합니다. 원판과 숙적의 스탯 비교 및 Markdown 내보내기를 지원합니다.',
+    pageCharacterArcTitle: '캐릭터 성장 아크',
+    pageCharacterArcDescription: '오리지널 캐릭터의 완전한 성장 아크를 계획합니다. 긍정적 성장, 타락, 플랫, 변신의 4가지 아크 타입을 지원하며, 단계별로 캐릭터의 신념, 결점, 목표, 핵심 사건, 감정 변화를 기록합니다. 캐릭터 카드에서 정보를 불러오고, AI 보조 단계 제안을 받으며, 완전한 아크를 Markdown으로 납품할 수 있습니다.',
     audioPresetMute: '무음',
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.20.6 18차 종합 감사: 캐릭터 인터뷰의 종합 심층 감사 및 수정. SFX 이중 재생 및 무음 버튼, localStorage 저장 실패 알림, 지워진 답변 미영구화, 페이지 새로고침 보호 누락, AI 제안 unmount 후 setState, 모달 Escape 키 닫기, 누락된 aria-label, toast 접근성, 정의되지 않은 CSS 변수와 하드코딩 색상, 반응형 레이아웃 문제를 수정했습니다.',
-    announcementList1: 'SFX 규정 수정: 이중 재생 방지를 위해 modal-close 버튼에서 inline playSound 제거; 무음 버튼(미답변 이동 / AI 제안)에서 data-sfx-handled 제거하여 글로벌 핸들러가 올바른 소리를 재생하도록 함.',
-    announcementList2: '데이터 무결성 및 안정성 수정: 전체 답변 지우기, 답변 업데이트, 세션 삭제가 이제 saveSessions 실패를 올바르게 감지하고 toast를 표시; useBeforeUnloadGuard를 추가하여 실수로 새로고침 시 진행 상황 손실 방지; AI 제안에 mounted ref를 추가하여 컴포넌트 unmount 후 setState 방지; 인터뷰 시작에 디바운스를 추가하여 중복 생성 방지.',
-    announcementList3: '접근성 및 스타일 수정: 설정/뒤로 버튼에 aria-label 추가; 모달에 Escape 키 닫기 추가; save toast에 role="alert" 및 aria-live 추가; 정의되지 않은 CSS 변수(--panel-hover, --bg-elevated)를 유효한 변수로 수정; 하드코딩 색상 수정; 터치 타겟 및 반응형 레이아웃 강화.',
+    announcementDescription: 'v1.21.0 신규 기능: 캐릭터 성장 아크 플래너. 오리지널 캐릭터의 완전한 성장 아크를 계획합니다. 긍정적 성장, 타락, 플랫, 변신의 4가지 아크 타입을 지원하며, 단계별로 캐릭터의 신념, 결점, 목표, 핵심 사건, 감정 변화를 기록합니다. 캐릭터 카드에서 정보를 불러오고, AI 보조 단계 제안을 받으며, 완전한 아크를 Markdown으로 납품할 수 있습니다.',
+    announcementList1: '신규 기능: 캐릭터 성장 아크 (CharacterArcPage). 4가지 아크 타입(긍정적 성장/타락/플랫/변신)에 대응하며, 각 타입에 5개의 프리셋 단계를 포함합니다. 캐릭터 카드에서 기존 캐릭터를 불러오거나 직접 입력할 수 있습니다.',
+    announcementList2: 'AI 단계 제안 보조: 설정에서 API Key를 구성하면 각 단계에 대해 캐릭터 정보를 바탕으로 AI 내용 제안을 한 번의 클릭으로 생성하여 창작자가 캐릭터의 성장 궤적을 빠르게 구축할 수 있도록 돕습니다.',
+    announcementList3: '아크 관리: 여러 아크 기록을 localStorage에 저장하고, 기록을 탐색 및 삭제하며, 진행률 표시줄로 추적하고, 단계를 위/아래로 이동 및 삭제하고, 모든 단계 내용을 지우고, 완전한 아크를 Markdown으로 납품할 수 있습니다.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3165,6 +3190,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.20.6',
+    date: '2026-05-18',
+    title: '1.20.6 第十八轮全面审计：角色访谈室 UI/UX/SFX/BGM/可访问性/数据完整性深度修复',
+    summary:
+      '对角色访谈室进行全面深度审计与修复。修复 SFX 双重播放与静默按钮、localStorage 保存失败通知、清除回答不持久化、缺少页面刷新保护、AI 建议组件卸载后 setState、模态框 Escape 键关闭、缺失 aria-label、toast 可访问性、CSS 未定义变量与硬编码颜色、响应式布局等问题。',
+    details: [
+      '修复 SFX 合规问题：modal-close 按钮移除 inline playSound 防止双重播放；静默按钮（跳转未回答/AI 建议）移除 data-sfx-handled 让全局 handler 正确播放声音。',
+      '修复数据完整性与稳定性：清除全部回答、更新答案、删除会话现在正确检测 saveSessions 失败并显示 toast；添加 useBeforeUnloadGuard 防止意外刷新丢失进度；AI 建议添加 mounted ref 防止组件卸载后 setState；开始访谈添加防抖防止重复创建。',
+      '修复可访问性与样式：补全设置/返回按钮 aria-label；模态框添加 Escape 键关闭；save toast 添加 role="alert" 与 aria-live；修复 CSS 未定义变量（--panel-hover、--bg-elevated）为合法变量；修复硬编码颜色；增强触摸目标与响应式布局。',
+    ],
+  },
   {
     version: '1.20.5',
     date: '2026-05-18',
@@ -5029,7 +5066,7 @@ function App() {
       if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
       // Skip hover sound on interactive inputs to avoid noise during slider/text adjustments
       if (target.closest('input[type="range"], input[type="text"], input[type="number"], input[type="url"], input[type="password"], textarea, select, label[for]')) return;
-      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main')) {
+      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main, .arc-type-card, .arc-history-main')) {
         lastHoverTime = now;
         playSound('buttonHover');
       } else if (target.closest('.home-card, .feature-intro-card, .tool-card, .asset-card, .template-card, .announcement-entry')) {
@@ -5558,6 +5595,12 @@ function App() {
               {...sharedPageProps}
               pageTitle={messages.pageCharacterInterviewTitle}
               pageDescription={messages.pageCharacterInterviewDescription}
+            />
+          ) : screen === 'character-arc' ? (
+            <CharacterArcPage
+              {...sharedPageProps}
+              pageTitle={messages.pageCharacterArcTitle}
+              pageDescription={messages.pageCharacterArcDescription}
             />
           ) : screen === 'docs' ? (
             <DocsPage
@@ -7534,6 +7577,14 @@ function ActionIcon({
         <path d="M12 20h14" />
         <circle cx="26" cy="26" r="3" />
         <path d="M23 26h6" />
+      </>
+    ),
+    'character-arc': (
+      <>
+        <path d="M8 32c4-8 8-12 12-12s8 4 12 12" />
+        <circle cx="20" cy="14" r="4" />
+        <path d="M14 22c2-2 4-3 6-3s4 1 6 3" />
+        <path d="M20 8v4" />
       </>
     ),
     docs: (

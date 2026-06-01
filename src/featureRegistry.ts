@@ -29,6 +29,7 @@ export type ActionIconKind =
   | 'character-au'
   | 'character-nemesis'
   | 'character-interview'
+  | 'character-arc'
   | 'docs';
 
 export interface FeatureMeta {
@@ -334,6 +335,21 @@ export const FEATURE_REGISTRY: FeatureMeta[] = [
     pipelineTitle: 'Q&A / Export',
     todoOne: '补角色选择与访谈模式',
     todoTwo: '补问答编辑与 Markdown 导出',
+  },
+  {
+    id: 'character-arc',
+    category: 'character',
+    icon: 'character-arc',
+    labelKey: 'featureCharacterArc',
+    actionKey: 'actionCharacterArc',
+    pageTitleKey: 'pageCharacterArcTitle',
+    pageDescKey: 'pageCharacterArcDescription',
+    importable: false,
+    workspaceTitle: 'Arc Planner',
+    panelTitle: 'Arc / Stage',
+    pipelineTitle: 'Timeline / Export',
+    todoOne: '补弧线类型选择与阶段编辑',
+    todoTwo: '补时间线可视化与 Markdown 导出',
   },
   // ── 世界观管理 ──
   {
