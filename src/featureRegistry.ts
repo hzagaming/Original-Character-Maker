@@ -30,6 +30,7 @@ export type ActionIconKind =
   | 'character-nemesis'
   | 'character-interview'
   | 'character-arc'
+  | 'character-tarot'
   | 'docs';
 
 export interface FeatureMeta {
@@ -350,6 +351,21 @@ export const FEATURE_REGISTRY: FeatureMeta[] = [
     pipelineTitle: 'Timeline / Export',
     todoOne: '补弧线类型选择与阶段编辑',
     todoTwo: '补时间线可视化与 Markdown 导出',
+  },
+  {
+    id: 'character-tarot',
+    category: 'character',
+    icon: 'character-tarot',
+    labelKey: 'featureCharacterTarot',
+    actionKey: 'actionCharacterTarot',
+    pageTitleKey: 'pageCharacterTarotTitle',
+    pageDescKey: 'pageCharacterTarotDescription',
+    importable: false,
+    workspaceTitle: 'Tarot Studio',
+    panelTitle: 'Character / Spread',
+    pipelineTitle: 'Reading / Export',
+    todoOne: '补角色选择与牌阵配置',
+    todoTwo: '补占卜解读与 Markdown 导出',
   },
   // ── 世界观管理 ──
   {

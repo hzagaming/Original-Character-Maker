@@ -48,6 +48,7 @@ const AuGeneratorPage = lazy(() => import('./AuGeneratorPage'));
 const CharacterNemesisPage = lazy(() => import('./CharacterNemesisPage'));
 const CharacterInterviewPage = lazy(() => import('./CharacterInterviewPage'));
 const CharacterArcPage = lazy(() => import('./CharacterArcPage'));
+const CharacterTarotPage = lazy(() => import('./CharacterTarotPage'));
 const DocsPage = lazy(() => import('./DocsPage'));
 import {
   defaultAudioSettings,
@@ -68,7 +69,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.21.1';
+const VERSION = '1.22.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -125,6 +126,7 @@ type Messages = {
   featureCharacterNemesis: string;
   featureCharacterInterview: string;
   featureCharacterArc: string;
+  featureCharacterTarot: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -169,6 +171,7 @@ type Messages = {
   actionCharacterNemesis: string;
   actionCharacterInterview: string;
   actionCharacterArc: string;
+  actionCharacterTarot: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -318,6 +321,8 @@ type Messages = {
   pageCharacterInterviewDescription: string;
   pageCharacterArcTitle: string;
   pageCharacterArcDescription: string;
+  pageCharacterTarotTitle: string;
+  pageCharacterTarotDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -610,6 +615,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterNemesis: '角色宿敌工坊',
     featureCharacterInterview: '角色访谈室',
     featureCharacterArc: '角色成长弧线',
+    featureCharacterTarot: '角色塔罗',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -654,6 +660,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterNemesis: '宿敌生成',
     actionCharacterInterview: '角色访谈',
     actionCharacterArc: '成长弧线',
+    actionCharacterTarot: '塔罗占卜',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -739,10 +746,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.21.1 全面审计修复：角色成长弧线与角色访谈室深度修复。修复删除阶段双重音效、未保存状态误报、AI建议失败无提示、空阶段列表缺失文本、剪贴板复制失败处理、输入框长度限制、历史记录弧线类型本地化、进度条ARIA补全、Escape事件冒泡、数据保存失败回滚等 20+ 项问题。',
-    announcementList1: 'CharacterArcPage：修复删除阶段双重音效；修复 hasUnsaved 误报（打开已有弧线不再提示未保存）；AI建议失败增加可视化提示；空阶段列表补充本地化文本；历史记录弧线类型改为本地化显示。',
-    announcementList2: 'CharacterInterviewPage：修复 updateAnswer/handleDeleteSession/handleClearAll 在 localStorage 保存失败时的数据不一致问题；剪贴板复制失败增加错误提示；返回新建访谈时自动清空角色信息；Escape 键关闭弹窗时阻止事件冒泡。',
-    announcementList3: '样式与可访问性：新增 .icon-button 与 .icon-button.danger 样式；arc-stage-header 增加 flex-wrap 响应式支持；所有输入框增加 maxLength 限制；进度条补全 aria-valuemin；模态框关闭按钮补全 data-sfx-handled 标记。',
+    announcementDescription: 'v1.22.0 新功能：角色塔罗占卜。为你的原创角色抽取22张大阿卡纳塔罗牌，通过单张牌、过去·现在·未来、角色五维分析三种经典牌阵，获得剧情灵感与角色心理洞察。支持卡牌翻转动画、AI辅助深度解读、占卜历史管理与 Markdown 导出。',
+    announcementList1: '新功能：角色塔罗占卜 (CharacterTarotPage)。22张大阿卡纳牌数据库，三种牌阵（单张牌 / 过去·现在·未来 / 角色五维分析），支持卡牌翻转动画、正逆位判定。',
+    announcementList2: 'AI 深度解读：基于角色设定生成 300-500 字的塔罗深度解读文章，将牌面含义与角色背景紧密结合，提供有洞察力的剧情建议。',
+    announcementList3: '占卜管理：支持保存多组占卜记录到 localStorage、历史记录浏览与加载、删除与清空、导出完整占卜记录为 Markdown。支持从角色卡加载角色信息。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -807,6 +814,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterInterviewDescription: '通过经典问答、深夜电台、轻松闲聊或对抗性访谈四种模式，深入挖掘你的原创角色的内心世界。支持从角色卡加载角色信息、AI 辅助生成回答建议，以及导出完整的访谈记录为 Markdown。',
     pageCharacterArcTitle: '角色成长弧线',
     pageCharacterArcDescription: '为你的原创角色规划完整的成长弧线。支持积极成长、堕落、平坦与蜕变四种弧线类型，分阶段记录角色的信念、缺陷、目标、关键事件与情绪变化。支持从角色卡加载角色、AI 辅助生成阶段建议，以及导出完整弧线为 Markdown。',
+    pageCharacterTarotTitle: '角色塔罗',
+    pageCharacterTarotDescription: '为你的原创角色抽取塔罗牌，获得剧情灵感与角色心理洞察。支持22张大阿卡纳牌、三种经典牌阵，以及AI辅助深度解读。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -1083,6 +1092,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterNemesis: '宿敵ジェネレータ',
     featureCharacterInterview: 'キャラインタビュー',
     featureCharacterArc: 'キャラ成長アーク',
+    featureCharacterTarot: 'キャラタロット',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -1127,6 +1137,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterNemesis: '宿敵生成',
     actionCharacterInterview: 'キャラインタビュー',
     actionCharacterArc: '成長アーク',
+    actionCharacterTarot: 'タロット占い',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1212,10 +1223,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.21.1 総合監査修正：キャラ成長アークとキャラインタビューの深度修正。ステージ削除の二重音響、未保存状態の誤検知、AI提案失敗の通知なし、空ステージリストのテキスト欠落、クリップボード失敗処理、入力文字数制限、履歴アークタイプのローカライズ、プログレスバーARIA補完、Escapeイベント伝播阻止、データ保存失敗ロールバックなど20+項目を修正。',
-    announcementList1: 'CharacterArcPage：ステージ削除の二重音響を修正；hasUnsavedの誤検知を修正（既存アークを開いても未保存と表示されない）；AI提案失敗時に視覚的フィードバックを追加；空ステージリストにローカライズテキストを追加；履歴のアークタイプをローカライズ表示に変更。',
-    announcementList2: 'CharacterInterviewPage：updateAnswer/handleDeleteSession/handleClearAll の localStorage 保存失敗時のデータ不整合を修正；クリップボードコピー失敗時にエラー通知を追加；新規インタビューに戻る際にキャラ情報を自動クリア；Escape キーでモーダルを閉じる際にイベント伝播を阻止。',
-    announcementList3: 'スタイルとアクセシビリティ：.icon-button と .icon-button.danger スタイルを追加；arc-stage-header に flex-wrap レスポンシブ対応を追加；すべての入力欄に maxLength 制限を追加；プログレスバーに aria-valuemin を補完；モーダル閉じるボタンに data-sfx-handled マークを補完。',
+    announcementDescription: 'v1.22.0 新機能：キャラタロット占い。オリジナルキャラクターに22枚の大アルカナタロットを引き、一枚引き·過去·現在·未来·キャラ五面分析の3種類のクラシックスプレッドで、プロットのインスピレーションと心理洞察を得ます。カードフリップアニメーション、AI深層解釈、占い履歴管理とMarkdown出力に対応。',
+    announcementList1: '新機能：キャラタロット (CharacterTarotPage)。22枚の大アルカナカードデータベース、3種類のスプレッド（一枚引き / 過去·現在·未来 / キャラ五面分析）、カードフリップアニメーションと正逆位置判定に対応。',
+    announcementList2: 'AI 深層解釈：キャラクター設定に基づいて300-500字の深層タロット解釈文章を生成し、カードの意味とキャラの背景を緊密に結びつけて、洞察に満ちたプロット提案を提供します。',
+    announcementList3: '占い管理：複数の占い記録を localStorage に保存、履歴の閲覧と読み込み、削除とクリア、完全な占い記録の Markdown 出力に対応。キャラクターカードからキャラ情報を読み込み可能。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1280,6 +1291,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterInterviewDescription: 'クラシックQ&A、深夜ラジオ、カジュアル雑談、対抗的インタビューの4モードで、オリジナルキャラクターの内面を深く掘り下げます。キャラクターカードから情報を読み込み、AIによる回答案生成と、インタビュー記録のMarkdown出力に対応。',
     pageCharacterArcTitle: 'キャラ成長アーク',
     pageCharacterArcDescription: 'オリジナルキャラクターの完全な成長アークを計画します。ポジティブ成長・堕落・フラット・変容の4タイプに対応し、各ステージでキャラの信念、欠点、目標、重要イベント、感情変化を記録。キャラクターカードから読み込み、AIによるステージ案生成と、完全なアークのMarkdown出力に対応。',
+    pageCharacterTarotTitle: 'キャラタロット',
+    pageCharacterTarotDescription: 'オリジナルキャラクターにタロットを引き、プロットのインスピレーションと心理洞察を得ます。22枚の大アルカナ、3種類のクラシックスプレッド、AIによる深層解釈に対応。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1556,6 +1569,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterNemesis: 'Nemesis Generator',
     featureCharacterInterview: 'Character Interview',
     featureCharacterArc: 'Character Arc',
+    featureCharacterTarot: 'Character Tarot',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1600,6 +1614,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterNemesis: 'Nemesis Gen',
     actionCharacterInterview: 'Interview',
     actionCharacterArc: 'Arc',
+    actionCharacterTarot: 'Tarot',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1685,10 +1700,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.21.1 Comprehensive audit fixes: Deep fixes for Character Arc and Character Interview. Fixed double delete SFX, false-positive unsaved state, silent AI suggestion failure, missing empty stage list text, clipboard copy failure handling, input maxLength limits, localized arcType in history, progressbar ARIA completion, Escape event propagation, data save failure rollback, and 20+ other issues.',
-    announcementList1: 'CharacterArcPage: Fixed double deleteSound on stage delete; fixed hasUnsaved false positives (opening existing arcs no longer triggers unsaved warning); added visual feedback for AI suggestion failure; added localized text to empty stage list; changed history arcType to localized display.',
-    announcementList2: 'CharacterInterviewPage: Fixed data inconsistency in updateAnswer/handleDeleteSession/handleClearAll when localStorage save fails; added error toast for clipboard copy failure; auto-clear character info when returning to new interview; stop Escape event propagation when closing modals.',
-    announcementList3: 'Styles & accessibility: Added .icon-button and .icon-button.danger styles; added flex-wrap responsive support to arc-stage-header; added maxLength limits to all inputs; completed progressbar aria-valuemin; added data-sfx-handled markers to modal close buttons.',
+    announcementDescription: 'v1.22.0 New feature: Character Tarot. Draw from 22 Major Arcana tarot cards for your original character. Three classic spreads (Single Card / Past·Present·Future / Five-Dimension Analysis) provide plot inspiration and psychological insight. Features card flip animation, AI-assisted deep readings, reading history management, and Markdown export.',
+    announcementList1: 'New feature: Character Tarot (CharacterTarotPage). 22 Major Arcana card database, three spreads (Single Card / Past·Present·Future / Five-Dimension Analysis), with card flip animation and upright/reversed position detection.',
+    announcementList2: 'AI Deep Reading: Generates a 300-500 word deep tarot interpretation based on character settings, tightly weaving card meanings with the character\'s background to provide insightful plot suggestions.',
+    announcementList3: 'Reading management: Save multiple reading records to localStorage, browse and load history, delete and clear, export complete reading records as Markdown. Supports loading character info from character cards.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -1753,6 +1768,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterInterviewDescription: 'Deep-dive into your original character\'s inner world through Classic Q&A, Late Night Radio, Casual Chat, or Confrontational Interview. Load character info from character cards, get AI-assisted answer suggestions, and export complete interview records as Markdown.',
     pageCharacterArcTitle: 'Character Arc',
     pageCharacterArcDescription: 'Plan a complete character arc for your original character. Supports four arc types: Positive Growth, Fall, Flat, and Transformation. Record beliefs, flaws, goals, key events, and emotional shifts stage by stage. Load character info from character cards, get AI-assisted stage suggestions, and export the complete arc as Markdown.',
+    pageCharacterTarotTitle: 'Character Tarot',
+    pageCharacterTarotDescription: 'Draw tarot cards for your original character to gain plot inspiration and psychological insight. Features 22 Major Arcana cards, three classic spreads, and AI-assisted deep readings.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -2029,6 +2046,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterNemesis: 'Генератор врага',
     featureCharacterInterview: 'Интервью с персонажем',
     featureCharacterArc: 'Дуга развития персонажа',
+    featureCharacterTarot: 'Таро Персонажа',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -2073,6 +2091,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterNemesis: 'Генератор врага',
     actionCharacterInterview: 'Интервью',
     actionCharacterArc: 'Дуга развития',
+    actionCharacterTarot: 'Таро',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -2158,10 +2177,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.21.1 Комплексное исправление по аудиту: глубокие исправления для дуги развития и интервью персонажа. Исправлено двойное звук удаления, ложноположительное несохраненное состояние, бесшумный сбой AI-предложений, отсутствие текста в пустом списке этапов, обработка ошибок копирования в буфер, ограничение длины ввода, локализация типа дуги в истории, дополнение ARIA прогресс-бара, распространение события Escape, откат при сбое сохранения данных и 20+ других проблем.',
-    announcementList1: 'CharacterArcPage: исправлено двойное звук удаления этапа; исправлены ложные срабатывания hasUnsaved (открытие существующих дуг больше не вызывает предупреждение); добавлена визуальная обратная связь при сбое AI-предложения; добавлен локализованный текст в пустой список этапов; тип дуги в истории изменен на локализованный.',
-    announcementList2: 'CharacterInterviewPage: исправлено несоответствие данных в updateAnswer/handleDeleteSession/handleClearAll при сбое сохранения в localStorage; добавлено уведомление об ошибке при сбое копирования в буфер; автоматическая очистка информации о персонаже при возврате к новому интервью; остановка распространения события Escape при закрытии модальных окон.',
-    announcementList3: 'Стили и доступность: добавлены стили .icon-button и .icon-button.danger; добавлена адаптивная поддержка flex-wrap для arc-stage-header; добавлены ограничения maxLength для всех полей ввода; дополнен aria-valuemin для прогресс-бара; добавлены маркеры data-sfx-handled для кнопок закрытия модальных окон.',
+    announcementDescription: 'v1.22.0 Новая функция: Таро Персонажа. Вытяните карты из 22 Старших Арканов для вашего оригинального персонажа. Три классических расклада (Одна карта / Прошлое·Настоящее·Будущее / Пятимерный анализ) дают вдохновение для сюжета и психологический инсайт. Анимация переворота карт, глубокое AI-толкование, управление историей гаданий и экспорт в Markdown.',
+    announcementList1: 'Новая функция: Таро Персонажа (CharacterTarotPage). База данных из 22 карт Старших Арканов, три расклада (Одна карта / Прошлое·Настоящее·Будущее / Пятимерный анализ), с анимацией переворота карт и определением прямого/перевернутого положения.',
+    announcementList2: 'AI-Толкование: Генерирует глубокое таро-толкование объемом 300-500 слов на основе данных персонажа, тесно связывая значения карт с предысторией персонажа для получения проницательных сюжетных предложений.',
+    announcementList3: 'Управление гаданиями: сохраняйте несколько записей гаданий в localStorage, просматривайте и загружайте историю, удаляйте и очищайте, экспортируйте полные записи гаданий в Markdown. Поддерживает загрузку информации о персонаже из карточек.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2226,6 +2245,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterInterviewDescription: 'Глубокое погружение во внутренний мир вашего оригинального персонажа через классические вопросы, ночное радио, лёгкую беседу или агрессивное интервью. Загружайте информацию о персонаже из карточек, получайте предложения ответов с помощью ИИ и экспортируйте полные записи интервью в Markdown.',
     pageCharacterArcTitle: 'Дуга развития персонажа',
     pageCharacterArcDescription: 'Спланируйте полную дугу развития для вашего оригинального персонажа. Поддерживает четыре типа дуг: позитивный рост, падение, плоская и трансформация. Записывайте убеждения, недостатки, цели, ключевые события и эмоциональные сдвиги поэтапно. Загружайте информацию о персонаже из карточек, получайте предложения содержания этапов с помощью ИИ и экспортируйте полную дугу в Markdown.',
+    pageCharacterTarotTitle: 'Таро Персонажа',
+    pageCharacterTarotDescription: 'Вытяните карты таро для вашего оригинального персонажа, чтобы получить вдохновение для сюжета и психологический инсайт. 22 карты Старших Арканов, три классических расклада и глубокое AI-толкование.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -2945,6 +2966,7 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     actionCharacterAu: '평행 우주',
     actionCharacterNemesis: '숙적 생성',
     actionCharacterArc: '성장 아크',
+    actionCharacterTarot: '타로 점',
     actionAudioEditor: '오디오 편집기',
     actionAudioConverter: '오디오 변환기',
     backHome: '홈으로',
@@ -2989,14 +3011,16 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageCharacterNemesisDescription: '오리지널 캐릭터의 숙적/대립 캐릭터를 자동 생성합니다. 5가지 숙적 타입(성격 반전/실력 라이벌/어두운 거울/대조의 포일/운명의 숙적) 중 선택하여 원래 캐릭터의 스탯을 기반으로 대립 스탯을 자동 생성하고, 칭호, 외모, 동기, 약점, 배경, 대립 장면, 관계성 설명을 생성합니다. 원판과 숙적의 스탯 비교 및 Markdown 내보내기를 지원합니다.',
     pageCharacterArcTitle: '캐릭터 성장 아크',
     pageCharacterArcDescription: '오리지널 캐릭터의 완전한 성장 아크를 계획합니다. 긍정적 성장, 타락, 플랫, 변신의 4가지 아크 타입을 지원하며, 단계별로 캐릭터의 신념, 결점, 목표, 핵심 사건, 감정 변화를 기록합니다. 캐릭터 카드에서 정보를 불러오고, AI 보조 단계 제안을 받으며, 완전한 아크를 Markdown으로 납품할 수 있습니다.',
+    pageCharacterTarotTitle: '캐릭터 타로',
+    pageCharacterTarotDescription: '오리지널 캐릭터를 위한 타로 카드를 뽑아 플롯 영감과 심리적 통찰을 얻습니다. 22장의 대阿尔卡纳, 3가지 클래식 스프레드, AI 보조 심층 해석을 지원합니다.',
     audioPresetMute: '무음',
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.21.1 종합 감사 수정: 캐릭터 성장 아크와 캐릭터 인터뷰의 심층 수정. 단계 삭제 이중 음향, 미저장 상태 오탐, AI 제안 실패 무음, 빈 단계 목록 텍스트 누락, 클립보드 복사 실패 처리, 입력 길이 제한, 기록 아크 타입 현지화, 진행률 표시줄 ARIA 보완, Escape 이벤트 전파, 데이터 저장 실패 롤백 등 20+ 항목 수정.',
-    announcementList1: 'CharacterArcPage: 단계 삭제 이중 음향 수정; hasUnsaved 오탐 수정(기존 아크 열기 시 미저장 경고 미발생); AI 제안 실패 시 시각적 피드백 추가; 빈 단계 목록에 현지화 텍스트 추가; 기록 아크 타입을 현지화 표시로 변경.',
-    announcementList2: 'CharacterInterviewPage: updateAnswer/handleDeleteSession/handleClearAll의 localStorage 저장 실패 시 데이터 불일치 수정; 클립보드 복사 실패 시 오류 알림 추가; 새 인터뷰로 돌아갈 때 캐릭터 정보 자동 지우기; 모달 닫기 시 Escape 이벤트 전파 중단.',
-    announcementList3: '스타일 및 접근성: .icon-button 및 .icon-button.danger 스타일 추가; arc-stage-header에 flex-wrap 반응형 지원 추가; 모든 입력 필드에 maxLength 제한 추가; 진행률 표시줄 aria-valuemin 보완; 모달 닫기 버튼에 data-sfx-handled 마커 보완.',
+    announcementDescription: 'v1.22.0 신규 기능: 캐릭터 타로 점. 오리지널 캐릭터를 위한 22장의 대阿尔卡纳 타로 카드를 뽑습니다. 한 장 / 과거·현재·미래 / 5차원 분석의 3가지 클래식 스프레드로 플롯 영감과 심리적 통찰을 얻습니다. 카드 뒤집기 애니메이션, AI 보조 심층 해석, 점 기록 관리 및 Markdown 납품을 지원합니다.',
+    announcementList1: '신규 기능: 캐릭터 타로 (CharacterTarotPage). 22장의 대阿尔卡纳 카드 데이터베이스, 3가지 스프레드(한 장 / 과거·현재·미래 / 5차원 분석), 카드 뒤집기 애니메이션과 정위치/역위치 판정을 지원합니다.',
+    announcementList2: 'AI 심층 해석: 캐릭터 설정을 바탕으로 300-500자의 심층 타로 해석 문장을 생성하여 카드의 의미와 캐릭터의 배경을 글밀하게 엮어 통찰력 있는 플롯 제안을 제공합니다.',
+    announcementList3: '점 관리: 여러 점 기록을 localStorage에 저장하고, 기록을 탐색 및 불러오기, 삭제 및 지우기, 완전한 점 기록을 Markdown으로 납품할 수 있습니다. 캐릭터 카드에서 캐릭터 정보를 불러오기를 지원합니다.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3190,6 +3214,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.21.1',
+    date: '2026-05-18',
+    title: '1.21.1 第十九轮全面审计：角色成长弧线与角色访谈室深度修复',
+    summary:
+      '对 CharacterArcPage 和 CharacterInterviewPage 进行全面深度审计与修复。修复删除阶段双重音效、未保存状态误报、AI建议失败无提示、空阶段列表缺失文本、剪贴板复制失败处理、输入框长度限制、历史记录弧线类型本地化、进度条ARIA补全、Escape事件冒泡、数据保存失败回滚等 20+ 项问题。',
+    details: [
+      'CharacterArcPage：修复删除阶段双重音效；修复 hasUnsaved 误报；AI建议失败增加可视化提示；空阶段列表补充本地化文本；历史记录弧线类型改为本地化显示。',
+      'CharacterInterviewPage：修复 updateAnswer/handleDeleteSession/handleClearAll 在 localStorage 保存失败时的数据不一致问题；剪贴板复制失败增加错误提示；返回新建访谈时自动清空角色信息；Escape 键关闭弹窗时阻止事件冒泡。',
+      '样式与可访问性：新增 .icon-button 与 .icon-button.danger 样式；arc-stage-header 增加 flex-wrap 响应式支持；所有输入框增加 maxLength 限制；进度条补全 aria-valuemin；模态框关闭按钮补全 data-sfx-handled 标记。',
+    ],
+  },
   {
     version: '1.21.0',
     date: '2026-05-18',
@@ -5614,6 +5650,12 @@ function App() {
               pageTitle={messages.pageCharacterArcTitle}
               pageDescription={messages.pageCharacterArcDescription}
             />
+          ) : screen === 'character-tarot' ? (
+            <CharacterTarotPage
+              {...sharedPageProps}
+              pageTitle={messages.pageCharacterTarotTitle}
+              pageDescription={messages.pageCharacterTarotDescription}
+            />
           ) : screen === 'docs' ? (
             <DocsPage
               {...sharedPageProps}
@@ -7597,6 +7639,13 @@ function ActionIcon({
         <circle cx="20" cy="14" r="4" />
         <path d="M14 22c2-2 4-3 6-3s4 1 6 3" />
         <path d="M20 8v4" />
+      </>
+    ),
+    'character-tarot': (
+      <>
+        <rect x="10" y="6" width="20" height="28" rx="2" ry="2" />
+        <path d="M15 14h10M15 20h10M15 26h6" />
+        <circle cx="23" cy="26" r="2" />
       </>
     ),
     docs: (
