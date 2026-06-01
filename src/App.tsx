@@ -68,7 +68,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.21.0';
+const VERSION = '1.21.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -739,10 +739,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.21.0 新功能：角色成长弧线规划器。为你的原创角色规划完整的成长弧线，支持积极成长、堕落、平坦与蜕变四种弧线类型，分阶段记录角色的信念、缺陷、目标、关键事件与情绪变化。支持从角色卡加载角色、AI 辅助生成阶段建议，以及导出完整弧线为 Markdown。',
-    announcementList1: '新功能：角色成长弧线 (CharacterArcPage)。四种弧线类型（积极成长 / 堕落 / 平坦 / 蜕变），每种包含 5 个预设阶段，支持从角色卡加载已有角色、手动输入角色信息。',
-    announcementList2: 'AI 辅助阶段建议：当用户在设置中配置了 API Key 时，每个阶段都可以一键生成基于角色信息的 AI 内容建议，帮助创作者快速填充角色成长轨迹。',
-    announcementList3: '弧线管理：支持保存多组弧线记录到 localStorage、历史记录浏览与删除、进度条追踪、阶段上移/下移/删除、清空全部阶段内容、导出完整弧线为 Markdown。',
+    announcementDescription: 'v1.21.1 全面审计修复：角色成长弧线与角色访谈室深度修复。修复删除阶段双重音效、未保存状态误报、AI建议失败无提示、空阶段列表缺失文本、剪贴板复制失败处理、输入框长度限制、历史记录弧线类型本地化、进度条ARIA补全、Escape事件冒泡、数据保存失败回滚等 20+ 项问题。',
+    announcementList1: 'CharacterArcPage：修复删除阶段双重音效；修复 hasUnsaved 误报（打开已有弧线不再提示未保存）；AI建议失败增加可视化提示；空阶段列表补充本地化文本；历史记录弧线类型改为本地化显示。',
+    announcementList2: 'CharacterInterviewPage：修复 updateAnswer/handleDeleteSession/handleClearAll 在 localStorage 保存失败时的数据不一致问题；剪贴板复制失败增加错误提示；返回新建访谈时自动清空角色信息；Escape 键关闭弹窗时阻止事件冒泡。',
+    announcementList3: '样式与可访问性：新增 .icon-button 与 .icon-button.danger 样式；arc-stage-header 增加 flex-wrap 响应式支持；所有输入框增加 maxLength 限制；进度条补全 aria-valuemin；模态框关闭按钮补全 data-sfx-handled 标记。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -1212,10 +1212,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.21.0 新機能：キャラ成長アークプランナー。オリジナルキャラクターの完全な成長アークを計画します。ポジティブ成長・堕落・フラット・変容の4タイプに対応し、各ステージでキャラの信念、欠点、目標、重要イベント、感情変化を記録。キャラクターカードから読み込み、AIによるステージ案生成と、完全なアークのMarkdown出力に対応。',
-    announcementList1: '新機能：キャラ成長アーク (CharacterArcPage)。4つのアークタイプ（ポジティブ成長/堕落/フラット/変容）に対応し、各タイプに5つのプリセットステージを含む。キャラクターカードから既存キャラを読み込み、手動入力も対応。',
-    announcementList2: 'AIステージ案補助：設定でAPI Keyを構成すると、各ステージに対してキャラ情報に基づくAI内容案をワンクリックで生成し、クリエイターのキャラ成長軌道の構築を支援。',
-    announcementList3: 'アーク管理：複数のアーク記録をlocalStorageに保存、履歴の閲覧と削除、進捗バー追跡、ステージの上移動/下移動/削除、全ステージ内容クリア、完全なアークのMarkdown出力に対応。',
+    announcementDescription: 'v1.21.1 総合監査修正：キャラ成長アークとキャラインタビューの深度修正。ステージ削除の二重音響、未保存状態の誤検知、AI提案失敗の通知なし、空ステージリストのテキスト欠落、クリップボード失敗処理、入力文字数制限、履歴アークタイプのローカライズ、プログレスバーARIA補完、Escapeイベント伝播阻止、データ保存失敗ロールバックなど20+項目を修正。',
+    announcementList1: 'CharacterArcPage：ステージ削除の二重音響を修正；hasUnsavedの誤検知を修正（既存アークを開いても未保存と表示されない）；AI提案失敗時に視覚的フィードバックを追加；空ステージリストにローカライズテキストを追加；履歴のアークタイプをローカライズ表示に変更。',
+    announcementList2: 'CharacterInterviewPage：updateAnswer/handleDeleteSession/handleClearAll の localStorage 保存失敗時のデータ不整合を修正；クリップボードコピー失敗時にエラー通知を追加；新規インタビューに戻る際にキャラ情報を自動クリア；Escape キーでモーダルを閉じる際にイベント伝播を阻止。',
+    announcementList3: 'スタイルとアクセシビリティ：.icon-button と .icon-button.danger スタイルを追加；arc-stage-header に flex-wrap レスポンシブ対応を追加；すべての入力欄に maxLength 制限を追加；プログレスバーに aria-valuemin を補完；モーダル閉じるボタンに data-sfx-handled マークを補完。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1685,10 +1685,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.21.0 New feature: Character Arc Planner. Plan a complete character arc for your original character. Supports four arc types: Positive Growth, Fall, Flat, and Transformation. Record beliefs, flaws, goals, key events, and emotional shifts stage by stage. Load character info from character cards, get AI-assisted stage suggestions, and export the complete arc as Markdown.',
-    announcementList1: 'New feature: Character Arc (CharacterArcPage). Four arc types (Positive Growth / Fall / Flat / Transformation), each with 5 preset stages. Load existing characters from character cards or enter manually.',
-    announcementList2: 'AI-assisted stage suggestions: When an API Key is configured in settings, each stage can generate an AI content suggestion based on character info with one click, helping creators quickly build the character\'s growth trajectory.',
-    announcementList3: 'Arc management: Save multiple arc records to localStorage, browse and delete history, track progress with a progress bar, move stages up/down, delete stages, clear all stage content, and export the complete arc as Markdown.',
+    announcementDescription: 'v1.21.1 Comprehensive audit fixes: Deep fixes for Character Arc and Character Interview. Fixed double delete SFX, false-positive unsaved state, silent AI suggestion failure, missing empty stage list text, clipboard copy failure handling, input maxLength limits, localized arcType in history, progressbar ARIA completion, Escape event propagation, data save failure rollback, and 20+ other issues.',
+    announcementList1: 'CharacterArcPage: Fixed double deleteSound on stage delete; fixed hasUnsaved false positives (opening existing arcs no longer triggers unsaved warning); added visual feedback for AI suggestion failure; added localized text to empty stage list; changed history arcType to localized display.',
+    announcementList2: 'CharacterInterviewPage: Fixed data inconsistency in updateAnswer/handleDeleteSession/handleClearAll when localStorage save fails; added error toast for clipboard copy failure; auto-clear character info when returning to new interview; stop Escape event propagation when closing modals.',
+    announcementList3: 'Styles & accessibility: Added .icon-button and .icon-button.danger styles; added flex-wrap responsive support to arc-stage-header; added maxLength limits to all inputs; completed progressbar aria-valuemin; added data-sfx-handled markers to modal close buttons.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -2158,10 +2158,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.21.0 Новая функция: Планировщик дуги развития персонажа. Спланируйте полную дугу развития для вашего оригинального персонажа. Поддерживает четыре типа дуг: позитивный рост, падение, плоская и трансформация. Записывайте убеждения, недостатки, цели, ключевые события и эмоциональные сдвиги поэтапно. Загружайте информацию о персонаже из карточек, получайте предложения содержания этапов с помощью ИИ и экспортируйте полную дугу в Markdown.',
-    announcementList1: 'Новая функция: Дуга развития персонажа (CharacterArcPage). Четыре типа дуг (позитивный рост / падение / плоская / трансформация), каждый с 5 предустановленными этапами. Загружайте существующих персонажей из карточек или вводите вручную.',
-    announcementList2: 'AI-помощь в содержании этапов: при настроенном API Key для каждого этапа можно одним кликом сгенерировать предложение содержания на основе информации о персонаже, помогая автору быстро построить траекторию роста персонажа.',
-    announcementList3: 'Управление дугами: сохраняйте несколько записей дуг в localStorage, просматривайте и удаляйте историю, отслеживайте прогресс с помощью индикатора, перемещайте этапы вверх/вниз, удаляйте этапы, очищайте содержимое всех этапов и экспортируйте полную дугу в Markdown.',
+    announcementDescription: 'v1.21.1 Комплексное исправление по аудиту: глубокие исправления для дуги развития и интервью персонажа. Исправлено двойное звук удаления, ложноположительное несохраненное состояние, бесшумный сбой AI-предложений, отсутствие текста в пустом списке этапов, обработка ошибок копирования в буфер, ограничение длины ввода, локализация типа дуги в истории, дополнение ARIA прогресс-бара, распространение события Escape, откат при сбое сохранения данных и 20+ других проблем.',
+    announcementList1: 'CharacterArcPage: исправлено двойное звук удаления этапа; исправлены ложные срабатывания hasUnsaved (открытие существующих дуг больше не вызывает предупреждение); добавлена визуальная обратная связь при сбое AI-предложения; добавлен локализованный текст в пустой список этапов; тип дуги в истории изменен на локализованный.',
+    announcementList2: 'CharacterInterviewPage: исправлено несоответствие данных в updateAnswer/handleDeleteSession/handleClearAll при сбое сохранения в localStorage; добавлено уведомление об ошибке при сбое копирования в буфер; автоматическая очистка информации о персонаже при возврате к новому интервью; остановка распространения события Escape при закрытии модальных окон.',
+    announcementList3: 'Стили и доступность: добавлены стили .icon-button и .icon-button.danger; добавлена адаптивная поддержка flex-wrap для arc-stage-header; добавлены ограничения maxLength для всех полей ввода; дополнен aria-valuemin для прогресс-бара; добавлены маркеры data-sfx-handled для кнопок закрытия модальных окон.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2993,10 +2993,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.21.0 신규 기능: 캐릭터 성장 아크 플래너. 오리지널 캐릭터의 완전한 성장 아크를 계획합니다. 긍정적 성장, 타락, 플랫, 변신의 4가지 아크 타입을 지원하며, 단계별로 캐릭터의 신념, 결점, 목표, 핵심 사건, 감정 변화를 기록합니다. 캐릭터 카드에서 정보를 불러오고, AI 보조 단계 제안을 받으며, 완전한 아크를 Markdown으로 납품할 수 있습니다.',
-    announcementList1: '신규 기능: 캐릭터 성장 아크 (CharacterArcPage). 4가지 아크 타입(긍정적 성장/타락/플랫/변신)에 대응하며, 각 타입에 5개의 프리셋 단계를 포함합니다. 캐릭터 카드에서 기존 캐릭터를 불러오거나 직접 입력할 수 있습니다.',
-    announcementList2: 'AI 단계 제안 보조: 설정에서 API Key를 구성하면 각 단계에 대해 캐릭터 정보를 바탕으로 AI 내용 제안을 한 번의 클릭으로 생성하여 창작자가 캐릭터의 성장 궤적을 빠르게 구축할 수 있도록 돕습니다.',
-    announcementList3: '아크 관리: 여러 아크 기록을 localStorage에 저장하고, 기록을 탐색 및 삭제하며, 진행률 표시줄로 추적하고, 단계를 위/아래로 이동 및 삭제하고, 모든 단계 내용을 지우고, 완전한 아크를 Markdown으로 납품할 수 있습니다.',
+    announcementDescription: 'v1.21.1 종합 감사 수정: 캐릭터 성장 아크와 캐릭터 인터뷰의 심층 수정. 단계 삭제 이중 음향, 미저장 상태 오탐, AI 제안 실패 무음, 빈 단계 목록 텍스트 누락, 클립보드 복사 실패 처리, 입력 길이 제한, 기록 아크 타입 현지화, 진행률 표시줄 ARIA 보완, Escape 이벤트 전파, 데이터 저장 실패 롤백 등 20+ 항목 수정.',
+    announcementList1: 'CharacterArcPage: 단계 삭제 이중 음향 수정; hasUnsaved 오탐 수정(기존 아크 열기 시 미저장 경고 미발생); AI 제안 실패 시 시각적 피드백 추가; 빈 단계 목록에 현지화 텍스트 추가; 기록 아크 타입을 현지화 표시로 변경.',
+    announcementList2: 'CharacterInterviewPage: updateAnswer/handleDeleteSession/handleClearAll의 localStorage 저장 실패 시 데이터 불일치 수정; 클립보드 복사 실패 시 오류 알림 추가; 새 인터뷰로 돌아갈 때 캐릭터 정보 자동 지우기; 모달 닫기 시 Escape 이벤트 전파 중단.',
+    announcementList3: '스타일 및 접근성: .icon-button 및 .icon-button.danger 스타일 추가; arc-stage-header에 flex-wrap 반응형 지원 추가; 모든 입력 필드에 maxLength 제한 추가; 진행률 표시줄 aria-valuemin 보완; 모달 닫기 버튼에 data-sfx-handled 마커 보완.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3190,6 +3190,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.21.0',
+    date: '2026-05-18',
+    title: '1.21.0 新功能：角色成长弧线规划器',
+    summary:
+      '为你的原创角色规划完整的成长弧线，支持积极成长、堕落、平坦与蜕变四种弧线类型，分阶段记录角色的信念、缺陷、目标、关键事件与情绪变化。支持从角色卡加载角色、AI 辅助生成阶段建议，以及导出完整弧线为 Markdown。',
+    details: [
+      '新功能：角色成长弧线 (CharacterArcPage)。四种弧线类型（积极成长 / 堕落 / 平坦 / 蜕变），每种包含 5 个预设阶段，支持从角色卡加载已有角色、手动输入角色信息。',
+      'AI 辅助阶段建议：当用户在设置中配置了 API Key 时，每个阶段都可以一键生成基于角色信息的 AI 内容建议，帮助创作者快速填充角色成长轨迹。',
+      '弧线管理：支持保存多组弧线记录到 localStorage、历史记录浏览与删除、进度条追踪、阶段上移/下移/删除、清空全部阶段内容、导出完整弧线为 Markdown。',
+    ],
+  },
   {
     version: '1.20.6',
     date: '2026-05-18',

@@ -642,6 +642,37 @@ a {
   border-radius: 12px;
 }
 
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 150ms ease, transform 120ms ease, border-color 150ms ease;
+}
+
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.icon-button:active {
+  transform: scale(0.96);
+}
+
+.icon-button.danger {
+  color: var(--danger, #ef476f);
+  border-color: rgba(239, 71, 111, 0.3);
+  background: rgba(239, 71, 111, 0.08);
+}
+
+.icon-button.danger:hover {
+  background: rgba(239, 71, 111, 0.15);
+  border-color: rgba(239, 71, 111, 0.5);
+}
+
 .primary-button {
   color: #ffffff;
   background: rgba(var(--accent-rgb), 0.92);
@@ -8523,6 +8554,7 @@ button:disabled,
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .arc-stage-num {

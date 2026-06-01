@@ -80,6 +80,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: '导出 Markdown',
     copy: '复制',
     copied: '已复制',
+    copyFailed: '复制失败，请手动复制',
     close: '关闭',
     emptyArcList: '暂无成长弧线',
     emptyStageList: '暂无阶段，点击上方按钮添加',
@@ -102,6 +103,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     useApiKey: '使用 API Key 生成更精准的阶段建议',
     aiSuggest: 'AI 建议',
     aiSuggestDesc: '基于角色信息生成阶段内容建议',
+    aiSuggestFailed: 'AI 建议生成失败，请检查 API 设置或稍后重试',
     generating: '生成中…',
     stageCount: '阶段',
     completed: '已完成',
@@ -137,6 +139,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Markdown出力',
     copy: 'コピー',
     copied: 'コピー完了',
+    copyFailed: 'コピーに失敗しました。手動でコピーしてください。',
     close: '閉じる',
     emptyArcList: '成長アークはありません',
     emptyStageList: 'ステージがありません。上のボタンで追加してください。',
@@ -159,6 +162,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     useApiKey: 'API Key を使ってより正確なステージ案を生成',
     aiSuggest: 'AI提案',
     aiSuggestDesc: 'キャラ情報からステージ内容案を生成',
+    aiSuggestFailed: 'AI提案の生成に失敗しました。API設定を確認するか、後で再試行してください。',
     generating: '生成中…',
     stageCount: 'ステージ',
     completed: '完了',
@@ -194,6 +198,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Export Markdown',
     copy: 'Copy',
     copied: 'Copied',
+    copyFailed: 'Copy failed. Please copy manually.',
     close: 'Close',
     emptyArcList: 'No character arcs yet',
     emptyStageList: 'No stages yet. Click the button above to add one.',
@@ -216,6 +221,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     useApiKey: 'Use API Key for more accurate stage suggestions',
     aiSuggest: 'AI Suggest',
     aiSuggestDesc: 'Generate stage content suggestions based on character info',
+    aiSuggestFailed: 'AI suggestion failed. Please check API settings or try again later.',
     generating: 'Generating…',
     stageCount: 'Stage',
     completed: 'Completed',
@@ -251,6 +257,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Экспорт в Markdown',
     copy: 'Копировать',
     copied: 'Скопировано',
+    copyFailed: 'Не удалось скопировать. Скопируйте вручную.',
     close: 'Закрыть',
     emptyArcList: 'Дуг развития пока нет',
     emptyStageList: 'Этапов пока нет. Нажмите кнопку выше, чтобы добавить.',
@@ -273,6 +280,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     useApiKey: 'Используйте API Key для более точных предложений',
     aiSuggest: 'Предложение ИИ',
     aiSuggestDesc: 'Сгенерировать варианты содержания этапа на основе информации о персонаже',
+    aiSuggestFailed: 'Не удалось сгенерировать предложение ИИ. Проверьте настройки API или повторите попытку позже.',
     generating: 'Генерация…',
     stageCount: 'Этап',
     completed: 'Завершено',
@@ -308,6 +316,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Markdown 납볼',
     copy: '복사',
     copied: '복사 완료',
+    copyFailed: '복사 실패. 수동으로 복사해 주세요.',
     close: '닫기',
     emptyArcList: '성장 아크가 없습니다',
     emptyStageList: '단계가 없습니다. 위 버튼을 클릭하여 추가하세요.',
@@ -330,6 +339,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     useApiKey: 'API Key를 사용하여 더 정확한 단계 제안 생성',
     aiSuggest: 'AI 제안',
     aiSuggestDesc: '캐릭터 정보를 바탕으로 단계 내용 제안 생성',
+    aiSuggestFailed: 'AI 제안 생성에 실패했습니다. API 설정을 확인하거나 나중에 다시 시도하세요.',
     generating: '생성 중…',
     stageCount: '단계',
     completed: '완료',
@@ -447,7 +457,7 @@ function loadCharacters(): { name: string; info: string }[] {
     const raw = window.localStorage.getItem('oc-maker.character-card');
     if (!raw) return [];
     const data = JSON.parse(raw) as unknown;
-    if (!data || typeof data !== 'object') return [];
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return [];
     const card = data as CardData;
     const infoParts: string[] = [];
     if (card.bio) infoParts.push(card.bio);
@@ -558,6 +568,7 @@ export default function CharacterArcPage({
   const copyTimerRef = useRef<number | null>(null);
   const saveTimerRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
+  const savedSnapshotRef = useRef<string>(JSON.stringify(loadArcs()));
 
   const maybeConfirm = useCallback(
     (message: string, action: () => void) => {
@@ -568,7 +579,25 @@ export default function CharacterArcPage({
     [settings.others.confirmDestructiveActions]
   );
 
+  const persistArcs = useCallback((next: CharacterArc[]): boolean => {
+    const ok = saveArcs(next);
+    if (ok) {
+      savedSnapshotRef.current = JSON.stringify(next);
+    }
+    return ok;
+  }, []);
+
   const activeArc = useMemo(() => arcs.find((a) => a.id === activeArcId) ?? null, [arcs, activeArcId]);
+
+  const getArcTypeLabel = useCallback((type: ArcType) => {
+    switch (type) {
+      case 'positive': return copy.typePositive;
+      case 'negative': return copy.typeNegative;
+      case 'flat': return copy.typeFlat;
+      case 'transformation': return copy.typeTransformation;
+      default: return type;
+    }
+  }, [copy.typePositive, copy.typeNegative, copy.typeFlat, copy.typeTransformation]);
 
   useEffect(() => {
     setAvailableChars(loadCharacters());
@@ -585,11 +614,8 @@ export default function CharacterArcPage({
     if (showSetup) {
       return arcName.trim().length > 0 || characterName.trim().length > 0 || theme.trim().length > 0;
     }
-    if (!activeArc) return false;
-    return activeArc.stages.some((s) =>
-      [s.title, s.description, s.beliefs, s.flaws, s.goals, s.events, s.emotionalState].some((v) => v.trim().length > 0)
-    );
-  }, [showSetup, arcName, characterName, theme, activeArc]);
+    return JSON.stringify(arcs) !== savedSnapshotRef.current;
+  }, [showSetup, arcName, characterName, theme, arcs]);
   useBeforeUnloadGuard(hasUnsaved);
 
   useEffect(() => {
@@ -613,6 +639,7 @@ export default function CharacterArcPage({
     if (!showExport && !showHistory) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        e.stopPropagation();
         if (showExport) setShowExport(false);
         if (showHistory) setShowHistory(false);
       }
@@ -627,7 +654,7 @@ export default function CharacterArcPage({
     const name = arcName.trim() || copy.untitled;
     const arc = createArc(selectedType, name, characterName, theme);
     const next = [arc, ...arcs];
-    if (!saveArcs(next)) {
+    if (!persistArcs(next)) {
       setSaveToast(copy.saveFailed);
       playSound('error');
       setIsCreating(false);
@@ -651,7 +678,7 @@ export default function CharacterArcPage({
         };
       });
       setArcs(next);
-      if (!saveArcs(next)) {
+      if (!persistArcs(next)) {
         setSaveToast(copy.saveFailed);
         playSound('error');
       }
@@ -679,6 +706,7 @@ export default function CharacterArcPage({
           updateStage(arcId, stageId, 'description', suggestion);
           playSound('success');
         } else {
+          setSaveToast(copy.aiSuggestFailed);
           playSound('error');
         }
       }
@@ -718,21 +746,27 @@ export default function CharacterArcPage({
 
   const handleCopy = useCallback(() => {
     if (!activeArc) return;
-    navigator.clipboard.writeText(exportMarkdown(activeArc)).then(() => {
-      if (!mountedRef.current) return;
-      setCopied(true);
-      playSound('copySound');
-      if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
-    });
-  }, [activeArc, exportMarkdown]);
+    navigator.clipboard.writeText(exportMarkdown(activeArc))
+      .then(() => {
+        if (!mountedRef.current) return;
+        setCopied(true);
+        playSound('copySound');
+        if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        if (!mountedRef.current) return;
+        setSaveToast(copy.copyFailed);
+        playSound('error');
+      });
+  }, [activeArc, exportMarkdown, copy.copyFailed]);
 
   const handleDeleteArc = useCallback(
     (id: string) => {
       maybeConfirm(copy.deleteConfirm, () => {
         const next = arcs.filter((a) => a.id !== id);
         setArcs(next);
-        if (!saveArcs(next)) {
+        if (!persistArcs(next)) {
           setSaveToast(copy.saveFailed);
           playSound('error');
         }
@@ -767,7 +801,7 @@ export default function CharacterArcPage({
           : a
       );
       setArcs(next);
-      if (!saveArcs(next)) {
+      if (!persistArcs(next)) {
         setSaveToast(copy.saveFailed);
         playSound('error');
       } else {
@@ -790,7 +824,7 @@ export default function CharacterArcPage({
       };
     });
     setArcs(next);
-    if (!saveArcs(next)) {
+    if (!persistArcs(next)) {
       setSaveToast(copy.saveFailed);
       playSound('error');
     } else {
@@ -811,7 +845,7 @@ export default function CharacterArcPage({
           };
         });
         setArcs(next);
-        if (!saveArcs(next)) {
+        if (!persistArcs(next)) {
           setSaveToast(copy.saveFailed);
           playSound('error');
         } else {
@@ -838,7 +872,7 @@ export default function CharacterArcPage({
         return { ...a, stages, updatedAt: new Date().toISOString() };
       });
       setArcs(next);
-      if (!saveArcs(next)) {
+      if (!persistArcs(next)) {
         setSaveToast(copy.saveFailed);
         playSound('error');
       } else {
@@ -926,6 +960,7 @@ export default function CharacterArcPage({
                   type="text"
                   placeholder={copy.characterName}
                   aria-label={copy.characterName}
+                  maxLength={100}
                   value={characterName}
                   onChange={(e) => setCharacterName(e.target.value)}
                 />
@@ -936,6 +971,7 @@ export default function CharacterArcPage({
                 type="text"
                 placeholder={copy.arcName}
                 aria-label={copy.arcName}
+                maxLength={100}
                 value={arcName}
                 onChange={(e) => setArcName(e.target.value)}
                 style={{ marginTop: 8 }}
@@ -946,6 +982,7 @@ export default function CharacterArcPage({
                 type="text"
                 placeholder={copy.theme}
                 aria-label={copy.theme}
+                maxLength={200}
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
                 style={{ marginTop: 8 }}
@@ -1006,7 +1043,7 @@ export default function CharacterArcPage({
               <p className="muted-copy" style={{ marginBottom: 12 }}>
                 {copy.progress}: {completedCount}/{totalCount}
               </p>
-              <div className="arc-progress-bar" role="progressbar" aria-valuenow={completedCount} aria-valuemax={totalCount} aria-label={copy.progress}>
+              <div className="arc-progress-bar" role="progressbar" aria-valuenow={completedCount} aria-valuemin={0} aria-valuemax={totalCount} aria-label={copy.progress}>
                 <div
                   className="arc-progress-fill"
                   style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
@@ -1057,6 +1094,7 @@ export default function CharacterArcPage({
             {activeArc.stages.length === 0 ? (
               <div className="scene-empty-state">
                 <div className="scene-empty-icon" aria-hidden="true">📈</div>
+                <p className="muted-copy">{copy.emptyStageList}</p>
               </div>
             ) : (
             activeArc.stages.map((stage, idx) => (
@@ -1067,6 +1105,7 @@ export default function CharacterArcPage({
                     className="arc-stage-title-input"
                     type="text"
                     aria-label={`${copy.stageTitle} ${idx + 1}`}
+                    maxLength={100}
                     value={stage.title}
                     onChange={(e) => updateStage(activeArc.id, stage.id, 'title', e.target.value)}
                   />
@@ -1098,7 +1137,7 @@ export default function CharacterArcPage({
                       type="button"
                       aria-label={copy.deleteStage}
                       data-sfx-handled
-                      onClick={() => { playSound('deleteSound'); handleDeleteStage(stage.id); }}
+                      onClick={() => handleDeleteStage(stage.id)}
                     >
                       ✕
                     </button>
@@ -1109,6 +1148,7 @@ export default function CharacterArcPage({
                   rows={3}
                   placeholder={copy.stageDescription}
                   aria-label={`${copy.stageDescription} ${idx + 1}`}
+                  maxLength={5000}
                   value={stage.description}
                   onChange={(e) => updateStage(activeArc.id, stage.id, 'description', e.target.value)}
                 />
@@ -1118,6 +1158,7 @@ export default function CharacterArcPage({
                     type="text"
                     placeholder={copy.beliefs}
                     aria-label={`${copy.beliefs} ${idx + 1}`}
+                    maxLength={500}
                     value={stage.beliefs}
                     onChange={(e) => updateStage(activeArc.id, stage.id, 'beliefs', e.target.value)}
                   />
@@ -1126,6 +1167,7 @@ export default function CharacterArcPage({
                     type="text"
                     placeholder={copy.flaws}
                     aria-label={`${copy.flaws} ${idx + 1}`}
+                    maxLength={500}
                     value={stage.flaws}
                     onChange={(e) => updateStage(activeArc.id, stage.id, 'flaws', e.target.value)}
                   />
@@ -1134,6 +1176,7 @@ export default function CharacterArcPage({
                     type="text"
                     placeholder={copy.goals}
                     aria-label={`${copy.goals} ${idx + 1}`}
+                    maxLength={500}
                     value={stage.goals}
                     onChange={(e) => updateStage(activeArc.id, stage.id, 'goals', e.target.value)}
                   />
@@ -1142,6 +1185,7 @@ export default function CharacterArcPage({
                     type="text"
                     placeholder={copy.events}
                     aria-label={`${copy.events} ${idx + 1}`}
+                    maxLength={500}
                     value={stage.events}
                     onChange={(e) => updateStage(activeArc.id, stage.id, 'events', e.target.value)}
                   />
@@ -1150,6 +1194,7 @@ export default function CharacterArcPage({
                     type="text"
                     placeholder={copy.emotionalState}
                     aria-label={`${copy.emotionalState} ${idx + 1}`}
+                    maxLength={500}
                     value={stage.emotionalState}
                     onChange={(e) => updateStage(activeArc.id, stage.id, 'emotionalState', e.target.value)}
                   />
@@ -1188,7 +1233,7 @@ export default function CharacterArcPage({
           <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.exportTitle}</h3>
-              <button className="icon-button modal-close" type="button" aria-label={copy.close} onClick={() => setShowExport(false)}>
+              <button className="icon-button modal-close" type="button" aria-label={copy.close} data-sfx-handled onClick={() => setShowExport(false)}>
                 ✕
               </button>
             </div>
@@ -1213,7 +1258,7 @@ export default function CharacterArcPage({
           <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.history} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.history}</h3>
-              <button className="icon-button modal-close" type="button" aria-label={copy.close} onClick={() => setShowHistory(false)}>
+              <button className="icon-button modal-close" type="button" aria-label={copy.close} data-sfx-handled onClick={() => setShowHistory(false)}>
                 ✕
               </button>
             </div>
@@ -1237,7 +1282,7 @@ export default function CharacterArcPage({
                       >
                         <div className="arc-history-name">{a.name}</div>
                         <div className="arc-history-meta">
-                          {a.arcType} · {a.stages.filter((s) => s.description.trim()).length}/{a.stages.length} · {new Date(a.updatedAt).toLocaleDateString()}
+                          {getArcTypeLabel(a.arcType)} · {a.stages.filter((s) => s.description.trim()).length}/{a.stages.length} · {new Date(a.updatedAt).toLocaleDateString()}
                         </div>
                       </button>
                       <button

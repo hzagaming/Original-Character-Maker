@@ -75,6 +75,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: '导出 Markdown',
     copy: '复制',
     copied: '已复制',
+    copyFailed: '复制失败，请手动复制',
     close: '关闭',
     emptyAnswer: '（尚未回答）',
     progress: '进度',
@@ -123,6 +124,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Markdown出力',
     copy: 'コピー',
     copied: 'コピー完了',
+    copyFailed: 'コピーに失敗しました。手動でコピーしてください。',
     close: '閉じる',
     emptyAnswer: '（未回答）',
     progress: '進捗',
@@ -171,6 +173,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Export Markdown',
     copy: 'Copy',
     copied: 'Copied',
+    copyFailed: 'Copy failed. Please copy manually.',
     close: 'Close',
     emptyAnswer: '(Not answered yet)',
     progress: 'Progress',
@@ -219,6 +222,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Экспорт в Markdown',
     copy: 'Копировать',
     copied: 'Скопировано',
+    copyFailed: 'Не удалось скопировать. Скопируйте вручную.',
     close: 'Закрыть',
     emptyAnswer: '(Пока без ответа)',
     progress: 'Прогресс',
@@ -267,6 +271,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     exportMarkdown: 'Markdown 내보내기',
     copy: '복사',
     copied: '복사 완료',
+    copyFailed: '복사 실패. 수동으로 복사해 주세요.',
     close: '닫기',
     emptyAnswer: '(아직 답변 없음)',
     progress: '진행률',
@@ -870,6 +875,7 @@ export default function CharacterInterviewPage({
     if (!showExport && !showHistory) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        e.stopPropagation();
         if (showExport) setShowExport(false);
         if (showHistory) setShowHistory(false);
       }
@@ -898,6 +904,7 @@ export default function CharacterInterviewPage({
   }, [characterName, characterInfo, selectedMode, language, sessions, isStarting, copy.untitled, copy.saveFailed]);
 
   const updateAnswer = useCallback((sessionId: string, qaId: string, answer: string) => {
+    const prev = sessions;
     const next = sessions.map((s) => {
       if (s.id !== sessionId) return s;
       return {
@@ -908,6 +915,7 @@ export default function CharacterInterviewPage({
     });
     setSessions(next);
     if (!saveSessions(next)) {
+      setSessions(prev);
       setSaveToast(copy.saveFailed);
       playSound('error');
     }
@@ -965,26 +973,34 @@ export default function CharacterInterviewPage({
 
   const handleCopy = useCallback(() => {
     if (!activeSession) return;
-    navigator.clipboard.writeText(exportMarkdown(activeSession)).then(() => {
-      setCopied(true);
-      playSound('copySound');
-      if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
-    });
-  }, [activeSession, exportMarkdown]);
+    navigator.clipboard.writeText(exportMarkdown(activeSession))
+      .then(() => {
+        setCopied(true);
+        playSound('copySound');
+        if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        setSaveToast(copy.copyFailed);
+        playSound('error');
+      });
+  }, [activeSession, exportMarkdown, copy.copyFailed]);
 
   const handleDeleteSession = useCallback(
     (id: string) => {
       maybeConfirm(copy.deleteConfirm, () => {
         const next = sessions.filter((s) => s.id !== id);
-        setSessions(next);
         if (!saveSessions(next)) {
           setSaveToast(copy.saveFailed);
           playSound('error');
+          return;
         }
+        setSessions(next);
         if (activeSessionId === id) {
           setActiveSessionId(null);
           setShowSetup(true);
+          setCharacterName('');
+          setCharacterInfo('');
         }
         playSound('deleteSound');
       });
@@ -1000,13 +1016,13 @@ export default function CharacterInterviewPage({
           ? { ...s, qa: s.qa.map((q) => ({ ...q, answer: '' })), updatedAt: new Date().toISOString() }
           : s
       );
-      setSessions(next);
       if (!saveSessions(next)) {
         setSaveToast(copy.saveFailed);
         playSound('error');
-      } else {
-        playSound('resetSound');
+        return;
       }
+      setSessions(next);
+      playSound('resetSound');
     });
   }, [activeSession, sessions, copy.confirmClear, copy.saveFailed, maybeConfirm]);
 
@@ -1207,6 +1223,8 @@ export default function CharacterInterviewPage({
                   playSound('back');
                   setShowSetup(true);
                   setActiveSessionId(null);
+                  setCharacterName('');
+                  setCharacterInfo('');
                 }}
               >
                 {copy.newInterview}
