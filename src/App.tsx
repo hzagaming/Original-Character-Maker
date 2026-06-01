@@ -69,7 +69,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.22.0';
+const VERSION = '1.22.1';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -746,10 +746,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.22.0 新功能：角色塔罗占卜。为你的原创角色抽取22张大阿卡纳塔罗牌，通过单张牌、过去·现在·未来、角色五维分析三种经典牌阵，获得剧情灵感与角色心理洞察。支持卡牌翻转动画、AI辅助深度解读、占卜历史管理与 Markdown 导出。',
-    announcementList1: '新功能：角色塔罗占卜 (CharacterTarotPage)。22张大阿卡纳牌数据库，三种牌阵（单张牌 / 过去·现在·未来 / 角色五维分析），支持卡牌翻转动画、正逆位判定。',
-    announcementList2: 'AI 深度解读：基于角色设定生成 300-500 字的塔罗深度解读文章，将牌面含义与角色背景紧密结合，提供有洞察力的剧情建议。',
-    announcementList3: '占卜管理：支持保存多组占卜记录到 localStorage、历史记录浏览与加载、删除与清空、导出完整占卜记录为 Markdown。支持从角色卡加载角色信息。',
+    announcementDescription: 'v1.22.1 修复：角色塔罗占卜全面优化。修复 AI prompt 硬编码中文、模型名硬编码 gpt-4、未保存状态误报、抽牌定时器泄漏、导出按钮缺失、保存按钮文案 hack、API Key 提示未本地化、翻牌音效不当、移动端卡牌尺寸等 10+ 项问题。',
+    announcementList1: 'AI 解读优化：修复 prompt 硬编码中文问题，改为英文基础指令 + 用户语言牌名；修复模型名硬编码 gpt-4，现在使用用户在设置中配置的模型；支持 temperature 和 maxTokens 自定义。',
+    announcementList2: '交互与状态修复：修复 hasUnsaved 保存后仍误报问题；修复抽牌定时器未清理导致的内存泄漏；修复导出按钮缺失（现在未保存的占卜也可直接导出）；修复保存按钮使用 saveFailed 判断语言的 hack；修复翻牌音效从 cardHover 改为 select。',
+    announcementList3: '样式与可访问性：修复 API Key 缺失提示硬编码中文；新增日期本地化键；优化移动端卡牌尺寸（640px 以下自适应缩小）；App.tsx 全局 SFX handler 补全 tarot 元素覆盖。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -1223,10 +1223,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.22.0 新機能：キャラタロット占い。オリジナルキャラクターに22枚の大アルカナタロットを引き、一枚引き·過去·現在·未来·キャラ五面分析の3種類のクラシックスプレッドで、プロットのインスピレーションと心理洞察を得ます。カードフリップアニメーション、AI深層解釈、占い履歴管理とMarkdown出力に対応。',
-    announcementList1: '新機能：キャラタロット (CharacterTarotPage)。22枚の大アルカナカードデータベース、3種類のスプレッド（一枚引き / 過去·現在·未来 / キャラ五面分析）、カードフリップアニメーションと正逆位置判定に対応。',
-    announcementList2: 'AI 深層解釈：キャラクター設定に基づいて300-500字の深層タロット解釈文章を生成し、カードの意味とキャラの背景を緊密に結びつけて、洞察に満ちたプロット提案を提供します。',
-    announcementList3: '占い管理：複数の占い記録を localStorage に保存、履歴の閲覧と読み込み、削除とクリア、完全な占い記録の Markdown 出力に対応。キャラクターカードからキャラ情報を読み込み可能。',
+    announcementDescription: 'v1.22.1 修正：キャラタロット占いの全面最適化。AIプロンプトの中国語ハードコーディング、モデル名のgpt-4固定、未保存状態の誤検知、抽選タイマーリーク、出力ボタン欠落、保存ボタン文案ハック、API Key未ローカライズ、カードめくり音響不適切、モバイルカードサイズなど10+項目を修正。',
+    announcementList1: 'AI解釈の最適化：プロンプトの中国語ハードコーディングを修正し、英語ベース指令 + ユーザ言語のカード名に変更；モデル名のgpt-4固定を修正し、ユーザー設定のモデルを使用；temperature と maxTokens のカスタマイズをサポート。',
+    announcementList2: 'インタラクションと状態修正：hasUnsaved の保存後誤検知を修正；抽選タイマーの未解放によるメモリリークを修正；出力ボタン欠落を修正（未保存の占いも直接出力可能）；保存ボタンの saveFailed 言語判定ハックを修正；カードめくり音響を cardHover から select に変更。',
+    announcementList3: 'スタイルとアクセシビリティ：API Key 欠如提示の中国語ハードコーディングを修正；日付ローカライズキーを追加；モバイルカードサイズを最適化（640px 以下で自動縮小）；App.tsx グローバル SFX ハンドラに tarot 要素を追加。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1700,10 +1700,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.22.0 New feature: Character Tarot. Draw from 22 Major Arcana tarot cards for your original character. Three classic spreads (Single Card / Past·Present·Future / Five-Dimension Analysis) provide plot inspiration and psychological insight. Features card flip animation, AI-assisted deep readings, reading history management, and Markdown export.',
-    announcementList1: 'New feature: Character Tarot (CharacterTarotPage). 22 Major Arcana card database, three spreads (Single Card / Past·Present·Future / Five-Dimension Analysis), with card flip animation and upright/reversed position detection.',
-    announcementList2: 'AI Deep Reading: Generates a 300-500 word deep tarot interpretation based on character settings, tightly weaving card meanings with the character\'s background to provide insightful plot suggestions.',
-    announcementList3: 'Reading management: Save multiple reading records to localStorage, browse and load history, delete and clear, export complete reading records as Markdown. Supports loading character info from character cards.',
+    announcementDescription: 'v1.22.1 Fixes: Character Tarot comprehensive optimization. Fixed AI prompt hardcoded Chinese, hardcoded gpt-4 model name, false-positive unsaved state, draw timer leak, missing export button, save button label hack, unlocalized API Key hint, inappropriate flip sound, mobile card sizing, and 10+ other issues.',
+    announcementList1: 'AI Reading Optimization: Fixed hardcoded Chinese in prompt, changed to English-based instructions with user-language card names; fixed hardcoded gpt-4 model name, now uses the model configured in user settings; supports custom temperature and maxTokens.',
+    announcementList2: 'Interaction & State Fixes: Fixed hasUnsaved false positive after saving; fixed draw timer leak causing memory issues; fixed missing export button (unsaved readings can now be exported directly); fixed save button using saveFailed to detect language; changed flip sound from cardHover to select.',
+    announcementList3: 'Styles & Accessibility: Fixed hardcoded Chinese API Key hint; added localized date key; optimized mobile card sizing (auto-shrink below 640px); App.tsx global SFX handler now covers tarot elements.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -2177,10 +2177,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.22.0 Новая функция: Таро Персонажа. Вытяните карты из 22 Старших Арканов для вашего оригинального персонажа. Три классических расклада (Одна карта / Прошлое·Настоящее·Будущее / Пятимерный анализ) дают вдохновение для сюжета и психологический инсайт. Анимация переворота карт, глубокое AI-толкование, управление историей гаданий и экспорт в Markdown.',
-    announcementList1: 'Новая функция: Таро Персонажа (CharacterTarotPage). База данных из 22 карт Старших Арканов, три расклада (Одна карта / Прошлое·Настоящее·Будущее / Пятимерный анализ), с анимацией переворота карт и определением прямого/перевернутого положения.',
-    announcementList2: 'AI-Толкование: Генерирует глубокое таро-толкование объемом 300-500 слов на основе данных персонажа, тесно связывая значения карт с предысторией персонажа для получения проницательных сюжетных предложений.',
-    announcementList3: 'Управление гаданиями: сохраняйте несколько записей гаданий в localStorage, просматривайте и загружайте историю, удаляйте и очищайте, экспортируйте полные записи гаданий в Markdown. Поддерживает загрузку информации о персонаже из карточек.',
+    announcementDescription: 'v1.22.1 Исправления: Комплексная оптимизация Таро Персонажа. Исправлены жёстко заданный китайский язык в AI-промпте, фиксированное имя модели gpt-4, ложноположительное несохранённое состояние, утечка таймера розыгрыша, отсутствие кнопки экспорта, хак с определением языка кнопки сохранения, нелокализованная подсказка API Key, неподходящий звук переворота карт, размер карт на мобильных устройствах и 10+ других проблем.',
+    announcementList1: 'Оптимизация AI-толкования: Исправлен жёстко заданный китайский язык в промпте, изменено на англоязычные инструкции с названиями карт на языке пользователя; исправлено фиксированное имя модели gpt-4, теперь используется модель из настроек пользователя; поддержка настройки temperature и maxTokens.',
+    announcementList2: 'Исправления взаимодействия и состояния: Исправлена ложная сработка hasUnsaved после сохранения; исправлена утечка таймера розыгрыша; исправлено отсутствие кнопки экспорта (несохранённые гадания теперь можно экспортировать напрямую); исправлен хак с определением языка кнопки сохранения; изменён звук переворота карт с cardHover на select.',
+    announcementList3: 'Стили и доступность: Исправлена жёстко заданная китайская подсказка об отсутствии API Key; добавлен локализованный ключ даты; оптимизирован размер карт на мобильных устройствах (автоматическое уменьшение ниже 640px); глобальный SFX-обработчик App.tsx теперь охватывает элементы tarot.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2950,8 +2950,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     featureSceneWriter: '장면 각본',
     featureCharacterAu: '평행 우주 공방',
     featureCharacterNemesis: '숙적 생성 공방',
-    actionAssetGallery: '캐릭터 에셋 갤러리',
+    featureCharacterInterview: '캐릭터 인터뷰',
     featureCharacterArc: '캐릭터 성장 아크',
+    featureCharacterTarot: '캐릭터 타로',
+    actionAssetGallery: '캐릭터 에셋 갤러리',
     actionRelationshipWeb: '캐릭터 관계망',
     actionCharacterCard: '캐릭터 설정 카드',
     actionCharacterChronicle: '캐릭터 연대기',
@@ -3017,10 +3019,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.22.0 신규 기능: 캐릭터 타로 점. 오리지널 캐릭터를 위한 22장의 대阿尔卡纳 타로 카드를 뽑습니다. 한 장 / 과거·현재·미래 / 5차원 분석의 3가지 클래식 스프레드로 플롯 영감과 심리적 통찰을 얻습니다. 카드 뒤집기 애니메이션, AI 보조 심층 해석, 점 기록 관리 및 Markdown 납품을 지원합니다.',
-    announcementList1: '신규 기능: 캐릭터 타로 (CharacterTarotPage). 22장의 대阿尔卡纳 카드 데이터베이스, 3가지 스프레드(한 장 / 과거·현재·미래 / 5차원 분석), 카드 뒤집기 애니메이션과 정위치/역위치 판정을 지원합니다.',
-    announcementList2: 'AI 심층 해석: 캐릭터 설정을 바탕으로 300-500자의 심층 타로 해석 문장을 생성하여 카드의 의미와 캐릭터의 배경을 글밀하게 엮어 통찰력 있는 플롯 제안을 제공합니다.',
-    announcementList3: '점 관리: 여러 점 기록을 localStorage에 저장하고, 기록을 탐색 및 불러오기, 삭제 및 지우기, 완전한 점 기록을 Markdown으로 납품할 수 있습니다. 캐릭터 카드에서 캐릭터 정보를 불러오기를 지원합니다.',
+    announcementDescription: 'v1.22.1 수정: 캐릭터 타로 점의 전면 최적화. AI 프롬프트 중국어 하드코딩, 모델명 gpt-4 고정, 미저장 상태 오탐, 추첨 타이머 누수, 출력 버튼 누락, 저장 버튼 문장 해킹, API Key 미현지화, 카드 뒤집기 음향 부적절, 모바일 카드 크기 등 10+ 항목을 수정했습니다.',
+    announcementList1: 'AI 해석 최적화: 프롬프트 중국어 하드코딩을 수정하여 영어 기반 지시 + 사용자 언어 카드명으로 변경; 모델명 gpt-4 고정을 수정하여 사용자 설정 모델을 사용; temperature 및 maxTokens 사용자 정의를 지원합니다.',
+    announcementList2: '상호작용 및 상태 수정: 저장 후 hasUnsaved 오탐을 수정; 추첨 타이머 미해제로 인한 메모리 누수를 수정; 출력 버튼 누락을 수정(미저장 점도 직접 출력 가능); 저장 버튼의 saveFailed 언어 판정 해킹을 수정; 카드 뒤집기 음향을 cardHover에서 select로 변경.',
+    announcementList3: '스타일 및 접근성: API Key 부재 알림의 중국어 하드코딩을 수정; 날짜 현지화 키를 추가; 모바일 카드 크기를 최적화(640px 이하에서 자동 축소); App.tsx 글로벌 SFX 핸들러에 타로 요소를 추가합니다.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3214,6 +3216,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.22.0',
+    date: '2026-05-18',
+    title: '1.22.0 新功能：角色塔罗占卜',
+    summary:
+      '为你的原创角色抽取22张大阿卡纳塔罗牌，通过单张牌、过去·现在·未来、角色五维分析三种经典牌阵，获得剧情灵感与角色心理洞察。支持卡牌翻转动画、AI辅助深度解读、占卜历史管理与 Markdown 导出。',
+    details: [
+      '新功能：角色塔罗占卜 (CharacterTarotPage)。22张大阿卡纳牌数据库，三种牌阵（单张牌 / 过去·现在·未来 / 角色五维分析），支持卡牌翻转动画、正逆位判定。',
+      'AI 深度解读：基于角色设定生成 300-500 字的塔罗深度解读文章，将牌面含义与角色背景紧密结合，提供有洞察力的剧情建议。',
+      '占卜管理：支持保存多组占卜记录到 localStorage、历史记录浏览与加载、删除与清空、导出完整占卜记录为 Markdown。支持从角色卡加载角色信息。',
+    ],
+  },
   {
     version: '1.21.1',
     date: '2026-05-18',
@@ -5114,7 +5128,7 @@ function App() {
       if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
       // Skip hover sound on interactive inputs to avoid noise during slider/text adjustments
       if (target.closest('input[type="range"], input[type="text"], input[type="number"], input[type="url"], input[type="password"], textarea, select, label[for]')) return;
-      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main, .arc-type-card, .arc-history-main')) {
+      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main, .arc-type-card, .arc-history-main, .tarot-spread-card, .tarot-history-main')) {
         lastHoverTime = now;
         playSound('buttonHover');
       } else if (target.closest('.home-card, .feature-intro-card, .tool-card, .asset-card, .template-card, .announcement-entry')) {
@@ -5212,7 +5226,7 @@ function App() {
         return;
       }
 
-      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], input[type="color"], input[type="url"], input[type="password"], input[type="date"], input[type="time"], input[type="search"], input[type="email"], input[type="tel"], select, textarea, label[for], .announcement-entry');
+      const el = target.closest('button, a, [role="button"], .choice-chip, .palette-chip, .asset-card, .tool-dot, .workflow-entry-button, .toolbar-button, .toggle-chip, .settings-tab, .modal-close, .link-list a, .back-link, .action-tile, .primary-button, .secondary-button, .tarot-spread-card, .tarot-card, .tarot-history-main, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"], input[type="text"], input[type="number"], input[type="color"], input[type="url"], input[type="password"], input[type="date"], input[type="time"], input[type="search"], input[type="email"], input[type="tel"], select, textarea, label[for], .announcement-entry');
       if (!el) return;
 
       // Skip label clicks — the associated input will fire its own click event with the correct sound

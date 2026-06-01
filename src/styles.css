@@ -8686,6 +8686,19 @@ button:disabled,
   }
 }
 
+@media (max-width: 640px) {
+  .tarot-card {
+    width: 120px;
+    height: 195px;
+  }
+  .tarot-card-name {
+    font-size: 0.85rem;
+  }
+  .tarot-card-meaning {
+    -webkit-line-clamp: 3;
+  }
+}
+
 .tarot-section {
   margin-bottom: 18px;
 }

@@ -121,8 +121,11 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cardPosition9: '命运结局',
     flipCard: '翻牌',
     readingFor: '为 {name} 占卜',
+    date: '日期',
     drawAgain: '再抽一次',
     newReading: '新占卜',
+    saveReading: '保存占卜',
+    apiKeyRequired: '请配置 API Key 以使用 AI 解读',
   },
   ja: {
     back: '戻る',
@@ -172,8 +175,11 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cardPosition9: '運命結末',
     flipCard: 'カードをひっくり返す',
     readingFor: '{name} の占い',
+    date: '日付',
     drawAgain: 'もう一度',
     newReading: '新規占い',
+    saveReading: '占いを保存',
+    apiKeyRequired: 'AI解釈を使用するにはAPI Keyを設定してください',
   },
   en: {
     back: 'Back',
@@ -223,8 +229,11 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cardPosition9: 'Final Destiny',
     flipCard: 'Flip Card',
     readingFor: 'Reading for {name}',
+    date: 'Date',
     drawAgain: 'Draw Again',
     newReading: 'New Reading',
+    saveReading: 'Save Reading',
+    apiKeyRequired: 'Configure an API Key to use AI interpretation',
   },
   ru: {
     back: 'Назад',
@@ -274,8 +283,11 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cardPosition9: 'Финальная судьба',
     flipCard: 'Перевернуть карту',
     readingFor: 'Гадание для {name}',
+    date: 'Дата',
     drawAgain: 'Ещё раз',
     newReading: 'Новое гадание',
+    saveReading: 'Сохранить гадание',
+    apiKeyRequired: 'Настройте API Key для использования AI-толкования',
   },
   ko: {
     back: '뒤로',
@@ -325,8 +337,11 @@ const UI_COPY: Record<string, Record<string, string>> = {
     cardPosition9: '운명 결말',
     flipCard: '카드 뒤집기',
     readingFor: '{name}의 점',
+    date: '날짜',
     drawAgain: '다시 뽑기',
     newReading: '새 점',
+    saveReading: '점 저장',
+    apiKeyRequired: 'AI 해석을 사용하려면 API Key를 설정하세요',
   },
 };
 
@@ -453,34 +468,39 @@ function useBeforeUnloadGuard(isDirty: boolean) {
 async function generateAiInterpretation(
   characterInfo: string,
   cards: DrawnCard[],
-  spread: SpreadType,
+  spreadLabel: string,
+  uprightLabel: string,
+  reversedLabel: string,
   apiKey: string,
   apiBase: string,
   language: AppLanguage,
+  model: string,
+  temperature: number,
+  maxTokens: number,
 ): Promise<string> {
-  const langMap: Record<string, string> = { zh: '中文', ja: '日本語', en: 'English', ru: 'Русский', ko: '한국어' };
+  const langMap: Record<string, string> = { zh: 'Chinese', ja: 'Japanese', en: 'English', ru: 'Russian', ko: 'Korean' };
   const lang = langMap[language] || 'English';
-  const spreadDesc = spread === 'single' ? '单张牌' : spread === 'three' ? '过去·现在·未来' : '角色五维分析';
   const cardsDesc = cards.map((c, i) => {
-    const pos = c.position === 'upright' ? '正位' : '逆位';
-    return `${i + 1}. ${c.card.nameZh} (${pos}) - ${c.position === 'upright' ? c.card.meaningUpright : c.card.meaningReversed}`;
+    const pos = c.position === 'upright' ? uprightLabel : reversedLabel;
+    const name = getCardName(c.card, language);
+    return `${i + 1}. ${name} (${pos}) - ${c.position === 'upright' ? c.card.meaningUpright : c.card.meaningReversed}`;
   }).join('\n');
-  const prompt = `你是一位塔罗大师。请用${lang}为以下角色进行一次深度塔罗解读。
+  const prompt = `You are a master tarot reader. Please perform a deep tarot reading for the following character in ${lang}.
 
-角色信息：
-${characterInfo || '无名角色'}
+Character Information:
+${characterInfo || 'Unnamed Character'}
 
-牌阵：${spreadDesc}
-抽到的牌：
+Spread: ${spreadLabel}
+Drawn Cards:
 ${cardsDesc}
 
-请生成一段 300-500 字的深度解读，将塔罗牌的含义与角色的设定紧密结合，提供有洞察力的分析。不要列出牌面解释，而是写一段连贯的、富有文学性的解读文章。`;
+Please generate a 300-500 word deep interpretation that weaves the tarot meanings with the character's background, providing insightful plot suggestions. Write in a coherent, literary style.`;
 
   try {
     const res = await fetch(`${apiBase}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: prompt }], temperature: 0.8, max_tokens: 800 }),
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature, max_tokens: maxTokens }),
     });
     if (!res.ok) return '';
     const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
@@ -519,6 +539,8 @@ export default function CharacterTarotPage({
   const mountedRef = useRef(true);
   const copyTimerRef = useRef<number | null>(null);
   const saveTimerRef = useRef<number | null>(null);
+  const drawTimerRef = useRef<number | null>(null);
+  const savedInterpretationRef = useRef('');
 
   const maybeConfirm = useCallback(
     (message: string, action: () => void) => {
@@ -558,6 +580,7 @@ export default function CharacterTarotPage({
     return () => {
       if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
       if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+      if (drawTimerRef.current) window.clearTimeout(drawTimerRef.current);
     };
   }, []);
 
@@ -575,7 +598,9 @@ export default function CharacterTarotPage({
   }, [showExport, showHistory]);
 
   const hasUnsaved = useMemo(() => {
-    return currentCards !== null && interpretation.trim().length > 0;
+    if (currentCards === null) return false;
+    if (interpretation.trim().length === 0) return false;
+    return interpretation !== savedInterpretationRef.current;
   }, [currentCards, interpretation]);
   useBeforeUnloadGuard(hasUnsaved);
 
@@ -587,7 +612,8 @@ export default function CharacterTarotPage({
     setActiveReadingId(null);
     playSound('buttonClick');
     // Simulate draw delay for suspense
-    window.setTimeout(() => {
+    if (drawTimerRef.current) window.clearTimeout(drawTimerRef.current);
+    drawTimerRef.current = window.setTimeout(() => {
       if (!mountedRef.current) return;
       const cards = drawCards(selectedSpread);
       setCurrentCards(cards);
@@ -603,7 +629,7 @@ export default function CharacterTarotPage({
         next.delete(index);
       } else {
         next.add(index);
-        playSound('cardHover');
+        playSound('select');
       }
       return next;
     });
@@ -612,13 +638,19 @@ export default function CharacterTarotPage({
   const handleAiInterpret = useCallback(async () => {
     if (!currentCards || isGenerating) return;
     setIsGenerating(true);
+    const spreadLabel = copy[selectedSpread === 'single' ? 'spreadSingle' : selectedSpread === 'three' ? 'spreadThree' : 'spreadFive'];
     const result = await generateAiInterpretation(
       characterName + '\n' + characterInfo,
       currentCards,
-      selectedSpread,
+      spreadLabel,
+      copy.upright,
+      copy.reversed,
       settings.apiKey,
       settings.apiBaseUrl || 'https://api.openai.com/v1',
-      language
+      language,
+      settings.llm?.model || 'gpt-4',
+      settings.llm?.temperature ?? 0.8,
+      settings.llm?.maxTokens ?? 800,
     );
     if (mountedRef.current) {
       setIsGenerating(false);
@@ -649,6 +681,7 @@ export default function CharacterTarotPage({
     } else {
       playSound('confirm');
       setActiveReadingId(reading.id);
+      savedInterpretationRef.current = interpretation;
     }
   }, [currentCards, characterName, selectedSpread, interpretation, readings, persistReadings, copy.saveFailed, copy.emptyName]);
 
@@ -689,6 +722,7 @@ export default function CharacterTarotPage({
     setSelectedSpread(reading.spreadType);
     setCurrentCards(reading.cards);
     setInterpretation(reading.interpretation);
+    savedInterpretationRef.current = reading.interpretation;
     setFlippedCards(new Set(reading.cards.map((c) => c.index)));
     setShowHistory(false);
     playSound('select');
@@ -697,6 +731,7 @@ export default function CharacterTarotPage({
   const handleNewReading = useCallback(() => {
     setCurrentCards(null);
     setInterpretation('');
+    savedInterpretationRef.current = '';
     setFlippedCards(new Set());
     setActiveReadingId(null);
     setCharacterName('');
@@ -710,7 +745,7 @@ export default function CharacterTarotPage({
       '',
       `**${copy.spreadType}:** ${reading.spreadType === 'single' ? copy.spreadSingle : reading.spreadType === 'three' ? copy.spreadThree : copy.spreadFive}`,
       `**${copy.characterName}:** ${reading.characterName}`,
-      `**Date:** ${new Date(reading.createdAt).toLocaleDateString()}`,
+      `**${copy.date}:** ${new Date(reading.createdAt).toLocaleDateString()}`,
       '',
       '---',
       '',
@@ -732,10 +767,8 @@ export default function CharacterTarotPage({
   }, [copy, language]);
 
   const handleCopy = useCallback(() => {
-    if (!activeReadingId) return;
-    const reading = readings.find((r) => r.id === activeReadingId);
-    if (!reading) return;
-    navigator.clipboard.writeText(exportMarkdown(reading))
+    if (!activeReading) return;
+    navigator.clipboard.writeText(exportMarkdown(activeReading))
       .then(() => {
         setCopied(true);
         playSound('copySound');
@@ -748,7 +781,20 @@ export default function CharacterTarotPage({
       });
   }, [activeReadingId, readings, exportMarkdown, copy.copyFailed]);
 
-  const activeReading = useMemo(() => readings.find((r) => r.id === activeReadingId) ?? null, [readings, activeReadingId]);
+  const activeReading = useMemo(() => {
+    if (activeReadingId) {
+      return readings.find((r) => r.id === activeReadingId) ?? null;
+    }
+    if (!currentCards) return null;
+    return {
+      id: 'current',
+      characterName: characterName.trim() || copy.emptyName,
+      spreadType: selectedSpread,
+      cards: currentCards,
+      interpretation,
+      createdAt: new Date().toISOString(),
+    };
+  }, [readings, activeReadingId, currentCards, characterName, selectedSpread, interpretation, copy.emptyName]);
   const positionLabels = getPositionLabels(selectedSpread);
 
   return (
@@ -926,14 +972,22 @@ export default function CharacterTarotPage({
                       </button>
                     )}
                     <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleSaveReading}>
-                      {copy.saveFailed === '保存失败' ? '保存' : 'Save'}
+                      {copy.saveReading}
+                    </button>
+                    <button
+                      className="secondary-button small-button"
+                      type="button"
+                      data-sfx-handled
+                      onClick={() => { playSound('buttonClick'); setShowExport(true); }}
+                    >
+                      {copy.exportMarkdown}
                     </button>
                   </div>
                 </div>
                 {interpretation ? (
                   <div className="tarot-interpretation-text">{interpretation}</div>
                 ) : (
-                  <p className="muted-copy">{settings.apiKey ? copy.aiInterpretDesc : '请配置 API Key 以使用 AI 解读'}</p>
+                  <p className="muted-copy">{settings.apiKey ? copy.aiInterpretDesc : copy.apiKeyRequired}</p>
                 )}
               </div>
             )}
