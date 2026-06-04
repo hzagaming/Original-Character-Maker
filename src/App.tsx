@@ -69,7 +69,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.22.4';
+const VERSION = '1.22.5';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -746,8 +746,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.22.4 修复：第四轮深度审计。修复 SettingsModal 内嵌对话框 ESC 穿透、三页多弹窗 ESC 层级冲突、Arc 持久化失败无回滚、全局快捷键弹窗期间仍可触发、移动端弹窗缺少基础样式、触摸目标不足、Tarot 五牌阵小屏溢出等 10+ 项问题。',
-    announcementList1: 'ESC 与弹窗层级隔离：SettingsModal 内嵌 Confirm/Preset 对话框新增 capture-phase ESC handler；Tarot/Arc/Interview 双弹窗改为 topModalRef 层级追踪，ESC 只关闭最后打开的弹窗。',
+    announcementDescription: 'v1.22.5 发布前总检：补充 v1.22.2/v1.22.3 历史公告，修复多语言公告本地化混用。',
+    announcementList1: '公告历史补全：将 v1.22.2（第二轮全面深度审计）和 v1.22.3（严重级仓库审计）的完整公告移入 announcementHistory，消除历史公告断层。',
     announcementList2: 'Arc + Interview 深度修复：Arc 删除弧线失败时阻止后续 deleteSound 双重播放；updateStage 先持久化再更新 state，失败时自动回滚；Interview hasUnsaved 在 activeSession 状态下不再永久阻止页面离开；handleCopy 添加 mountedRef 卸载守卫；两页 AI suggest 均改为从 settings.llm 读取 model/temperature/maxTokens。',
     announcementList3: 'CSS 与 SFX 补全：Tarot 3D 翻转补充 transform-style: preserve-3d 与 will-change: transform；history-main 补充 min-width: 0 防止 flex 溢出；640px 移动端断点补全 padding/gap/字号缩放；badge 颜色改用 --success/--danger CSS 变量；App.tsx hover handler 补全 .tarot-card 覆盖；Korean 描述移除混入的中文字符。',
     errorBoundaryTitle: '出错了',
@@ -1223,9 +1223,9 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.22.4 修正：第4回深度監査。SettingsModal 内嵌ダイアログの ESC 貫通、3ページ複数モーダルの ESC 階層競合、Arc 永続化失敗時のロールバック欠如、モーダル中のグローバルショートカット発動、モバイルモーダルの基本スタイル欠如、タッチターゲット不足、Tarot 5枚スプレッドの小画面オーバーフローなど 10+ 項目を修正。',
-    announcementList1: 'ESC とモーダル階層の分離：SettingsModal 内嵌ダイアログに capture-phase ESC handler を追加；Tarot/Arc/Interview の二重モーダルを topModalRef 階層追跡に変更し、ESC は最後に開いたモーダルのみを閉じる。',
-    announcementList2: 'Arc + Interview 深度修正：Arc のアーク削除失敗時に後続の deleteSound 双重播放を阻止；updateStage は先に持久化してから state を更新し、失敗時は自動ロールバック；Interview の hasUnsaved を activeSession 時に永久離脱阻止しないよう修正；handleCopy に mountedRef アンマウントガードを追加；両ページの AI suggest を settings.llm から model/temperature/maxTokens を読み込むように変更。',
+    announcementDescription: 'v1.22.5 リリース前総検：v1.22.2/v1.22.3 過去公告を補完し、多言語公告のローカライズ混在を修正。',
+    announcementList1: '公告履歴の補完：v1.22.2 と v1.22.3 の完全な公告を announcementHistory に移行し、歴史公告の欠落を解消。',
+    announcementList2: 'Arc + Interview 深度修正：Arc のアーク削除失敗時に後続の deleteSound 二重再生を阻止；updateStage は先に持久化してから state を更新し、失敗時は自動ロールバック；Interview の hasUnsaved を activeSession 時に永久離脱阻止しないよう修正；handleCopy に mountedRef アンマウントガードを追加；両ページの AI suggest を settings.llm から model/temperature/maxTokens を読み込むように変更。',
     announcementList3: 'CSS と SFX 補完：Tarot 3D フリップに transform-style: preserve-3d と will-change: transform を追加；history-main に min-width: 0 を追加して flex 溢出を防止；640px モバイルブレークポイントに padding/gap/フォントサイズ縮小を補完；badge カラーを --success/--danger CSS 変数に変更；App.tsx hover handler に .tarot-card カバーを補完；Korean 説明から混入した中国語文字を除去。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
@@ -1700,8 +1700,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.22.4 Fixes: Fourth deep audit. Fixed SettingsModal inner dialog ESC穿透, three-page multi-modal ESC layer conflicts, Arc persistence failure without rollback, global shortcuts firing while modal open, mobile modal missing base styles, insufficient touch targets, Tarot five-card spread overflow on small screens, and 10+ other issues.',
-    announcementList1: 'ESC and Modal Layer Isolation: Added capture-phase ESC handler to SettingsModal inner dialogs; Tarot/Arc/Interview dual modals switched to topModalRef layer tracking so ESC only closes the most recently opened modal.',
+    announcementDescription: 'v1.22.5 Pre-release check: Backfilled v1.22.2/v1.22.3 announcement history, fixed multilingual announcement localization mix-ups.',
+    announcementList1: 'Announcement history backfill: Moved full v1.22.2 and v1.22.3 announcements into announcementHistory, eliminating the history gap.',
     announcementList2: 'Arc + Interview Deep Fixes: Arc delete arc now blocks subsequent deleteSound double-play on failure; updateStage persists first then updates state, with automatic rollback on failure; Interview hasUnsaved no longer permanently blocks page leave in activeSession state; added mountedRef unmount guard to handleCopy; both pages\' AI suggest now read model/temperature/maxTokens from settings.llm.',
     announcementList3: 'CSS & SFX Completion: Added transform-style: preserve-3d and will-change: transform to Tarot 3D flip; added min-width: 0 to history-main to prevent flex overflow; completed 640px mobile breakpoint with padding/gap/font-size scaling; switched badge colors to --success/--danger CSS variables; added .tarot-card coverage to App.tsx hover handler; removed mixed Chinese characters from Korean description.',
     errorBoundaryTitle: 'Error',
@@ -2177,8 +2177,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.22.4 Исправления: Четвёртый глубокий аудит. Исправлено проникновение ESC внутренних диалогов SettingsModal, конфликты уровней ESC множественных модальных окон на трёх страницах, отсутствие отката при ошибке персистентности Arc, срабатывание глобальных горячих клавиш при открытом модальном окне, отсутствие базовых стилей мобильных модалей, недостаточные сенсорные цели, переполнение пятикарточного спреда Tarot на маленьких экранах и 10+ других проблем.',
-    announcementList1: 'Изоляция ESC и уровней модальных окон: Добавлен capture-phase ESC handler для внутренних диалогов SettingsModal; двойные модальные окна Tarot/Arc/Interview переключены на отслеживание уровня topModalRef, ESC закрывает только последнее открытое окно.',
+    announcementDescription: 'v1.22.5 Предрелизная проверка: Дополнена история объявлений v1.22.2/v1.22.3, исправлены смешения локализации многоязычных объявлений.',
+    announcementList1: 'Дополнение истории объявлений: Полные объявления v1.22.2 и v1.22.3 перенесены в announcementHistory, устранён разрыв в истории.',
     announcementList2: 'Глубокие исправления Arc + Interview: Arc при ошибке удаления дуги теперь блокирует последующий двойной deleteSound; updateStage сначала сохраняет, затем обновляет state, с автоматическим откатом при ошибке; Interview hasUnsaved больше не блокирует уход со страницы в состоянии activeSession; добавлена защита размонтирования mountedRef в handleCopy; AI suggest обеих страниц теперь читает model/temperature/maxTokens из settings.llm.',
     announcementList3: 'Завершение CSS и SFX: Добавлены transform-style: preserve-3d и will-change: transform для 3D-переворота Tarot; добавлен min-width: 0 в history-main для предотвращения flex-переполнения; завершена мобильная точка останова 640px с масштабированием padding/gap/размера шрифта; цвета badge переключены на CSS-переменные --success/--danger; добавлено покрытие .tarot-card в hover-обработчик App.tsx; удалены смешанные китайские символы из корейского описания.',
     errorBoundaryTitle: 'Ошибка',
@@ -3019,8 +3019,8 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.22.4 수정: 4차 심층 감사. SettingsModal 내장 대화상자 ESC 관통, 3페이지 다중 모달 ESC 계층 충돌, Arc 영속화 실패 시 롤백 없음, 모달 중 전역 단축키 발동, 모바일 모달 기본 스타일 부재, 터치 타겟 부족, 타로 5장 스프레드 소형 화면 오버플로우 등 10+ 항목 수정.',
-    announcementList1: 'ESC 및 모달 계층 분리: SettingsModal 내장 대화상자에 capture-phase ESC 핸들러 추가; Tarot/Arc/Interview 이중 모달을 topModalRef 계층 추적으로 변경하여 ESC가 마지막으로 열린 모달만 닫도록 함.',
+    announcementDescription: 'v1.22.5 출시 전 총검사: v1.22.2/v1.22.3 과거 공지를 보충하고, 다국어 공지 현지화 혼용을 수정.',
+    announcementList1: '공지 이력 보충: v1.22.2 및 v1.22.3의 전체 공지를 announcementHistory로 이동하여 이력 공백을 제거.',
     announcementList2: '아크 + 인터뷰 심층 수정: 아크 아크 삭제 실패 시 후속 deleteSound 이중 재생을 차단; updateStage는 먼저 지속화한 후 state를 업데이트하고, 실패 시 자동 롤백; 인터뷰 hasUnsaved가 activeSession 상태에서 페이지 이탈을 영구 차단하지 않도록 수정; handleCopy에 mountedRef 마운트 해제 가드 추가; 두 페이지의 AI suggest가 settings.llm에서 model/temperature/maxTokens를 읽도록 변경.',
     announcementList3: 'CSS 및 SFX 보완: 타로 3D 플립에 transform-style: preserve-3d 및 will-change: transform 추가; history-main에 min-width: 0을 추가하여 flex 오버플로 방지; 640px 모바일 브레이크포인트에 padding/gap/글자 크기 축소 보완; badge 색상을 --success/--danger CSS 변수로 변경; App.tsx hover handler에 .tarot-card 커버리지 보완; 한국어 설명에서 혼입된 중국어 문자를 제거.',
     errorBoundaryTitle: '오류',
@@ -3217,6 +3217,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 
 const announcementHistory = [
   {
+    version: '1.22.5',
+    date: '2026-05-18',
+    title: '1.22.5 发布前总检：公告历史补全与多语言本地化修复',
+    summary:
+      '补充 v1.22.2 和 v1.22.3 缺失的历史公告，修复英文/日文公告中的中文本地化混用，统一版本号同步。',
+    details: [
+      '公告历史补全：将 v1.22.2（第二轮全面深度审计）和 v1.22.3（严重级仓库审计）的完整公告移入 announcementHistory，消除历史公告断层。',
+      '多语言本地化修复：修复英文 announcementDescription 中的中文混用（ESC穿透 → ESC leaking through）；修复日文公告中的中文混用（内嵌 → ネストされた、双重播放 → 二重再生）。',
+      '版本号同步：package.json / package-lock.json / App.tsx VERSION 统一升级为 1.22.5。',
+    ],
+  },
+  {
     version: '1.22.4',
     date: '2026-05-18',
     title: '1.22.4 第四轮深度审计：ESC 层级隔离、持久化回滚、移动端弹窗样式、全局快捷键防护',
@@ -3228,6 +3240,32 @@ const announcementHistory = [
       '全局快捷键防护：App.tsx handleKeyDown 新增 document.querySelector([role="dialog"][aria-modal="true"]) 检查，任何弹窗打开时禁用 Alt+S/Alt+H 等全局快捷键。',
       '移动端样式修复：三页 export/history 弹窗补全 .modal-card 基础样式（background、border-radius、width、max-height）；.icon-button 添加 min-width/min-height: 44px 满足 WCAG 触摸目标；新增 .page-header-row CSS 定义；Tarot 新增 520px 断点缩小卡牌尺寸防止五牌阵溢出。',
       'SFX/可访问性补全：FaceMaker zoom 按钮 aria-label 从 messages 修正为 copy；App.tsx 全局 SFX handler 新增 slider 输入类型覆盖。',
+    ],
+  },
+  {
+    version: '1.22.3',
+    date: '2026-05-18',
+    title: '1.22.3 严重级仓库审计：版本号同步、并发控制补全、启动链路验证',
+    summary:
+      '统一 package.json / package-lock.json / App.tsx VERSION 版本号；workflowPages.tsx fetchWithTimeout 接入 fetchWithConcurrency 并发控制；验证 npm run build 零 TypeScript 错误；验证后端启动与 /api/health 健康检查；验证 start.cmd 启动链路完整。',
+    details: [
+      '版本同步：修复 package.json、package-lock.json、App.tsx VERSION 三者版本号不一致问题。',
+      '并发控制补全：workflowPages.tsx 重型工作流页面 API 调用全部接入 fetchWithConcurrency，防止并发请求堆积导致后端过载。',
+      '启动链路验证：后端 server/src/index.js 启动正常，/api/health 与 /health 均返回 ok；start.cmd 启动脚本前后端依赖检查、端口探测、健康检查链路完整。',
+    ],
+  },
+  {
+    version: '1.22.2',
+    date: '2026-05-18',
+    title: '1.22.2 第二轮全面深度审计修复',
+    summary:
+      '修复 Tarot 保存后 hasUnsaved 误报、保存按钮无防抖、抽牌/切牌阵后未重置快照、AI 生成期间可误操作；修复 Arc 删除弧线双重音效、updateStage 保存失败不回滚、AI 参数硬编码；修复 Interview hasUnsaved 永久阻止离开、handleCopy 无卸载守卫、AI 参数硬编码；补全 CSS 3D 翻转、flex 溢出、移动端断点、主题颜色变量；补全 hover SFX 覆盖。',
+    details: [
+      'Tarot 核心修复：hasUnsaved 移除 useMemo 缓存缺陷，改为直接计算；handleDraw 与切换牌阵时正确重置 savedInterpretationRef；保存按钮新增 isSaving 防抖与 disabled；AI 生成期间禁用 Save/Export 防止误操作。',
+      'Arc 核心修复：修复 handleDeleteArc 保存失败时仍播放 deleteSound 的双重 SFX bug；修复 updateStage 先更新 state 后持久化导致的保存失败不回滚；AI suggest 参数化（从 settings.llm 读取 model/temp/maxTokens）；新建弧线时重置 arcName/characterName/theme。',
+      'Interview 核心修复：修复 hasUnsaved 在 activeSession 状态下永久阻止页面离开；handleCopy 添加 mountedRef 卸载守卫；AI suggest 参数化。',
+      '样式与可访问性：Tarot 3D 翻转补充 transform-style: preserve-3d 与 will-change: transform；history 列表补充 min-width: 0 防止 flex 溢出；640px 移动端断点补全 padding/gap/字号缩放；badge 颜色改用 CSS 变量；icon-button.danger 改用 rgba 变量。',
+      '本地化与 SFX：App.tsx hover SFX handler 补全 tarot-card 覆盖；韩文公告描述清理混入的中文字符。',
     ],
   },
   {
