@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { usePageToast, PageToast } from './components/PageToast';
-import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, getApiForFeature, getEffectiveApiBase, getProbeLog, requiresHostedApiBase } from './apiConfig';
+import { buildApiHeaders, buildApiUrl, detectWorkflowApiBaseIssue, ensureLocalApiProbed, fetchWithConcurrency, getApiForFeature, getEffectiveApiBase, getProbeLog, requiresHostedApiBase } from './apiConfig';
 import { playSound } from './audioEngine';
 import { generateCutoutPngBlob, type ExpressionName } from './frontendCutout';
 import type { AppLanguage, FeatureScreen, SettingsState, ShortcutAction, TransferError } from './types';
@@ -3616,7 +3616,7 @@ async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, ti
     timeoutMs,
   );
   try {
-    const response = await fetch(input, { ...init, signal: controller.signal });
+    const response = await fetchWithConcurrency(input, { ...init, signal: controller.signal });
     return response;
   } finally {
     window.clearTimeout(id);
