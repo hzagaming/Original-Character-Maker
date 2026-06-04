@@ -590,13 +590,20 @@ export default function CharacterTarotPage({
     };
   }, []);
 
+  const topModalRef = useRef<'export' | 'history' | null>(null);
+  useEffect(() => {
+    if (showExport) topModalRef.current = 'export';
+    else if (showHistory) topModalRef.current = 'history';
+    else topModalRef.current = null;
+  }, [showExport, showHistory]);
+
   useEffect(() => {
     if (!showExport && !showHistory) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        if (showExport) setShowExport(false);
-        if (showHistory) setShowHistory(false);
+        if (topModalRef.current === 'export') setShowExport(false);
+        else if (topModalRef.current === 'history') setShowHistory(false);
       }
     };
     document.addEventListener('keydown', handler);
@@ -910,7 +917,7 @@ export default function CharacterTarotPage({
                 {copy.newReading}
               </button>
             )}
-            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('buttonClick'); setShowHistory(true); }}>
+            <button className="secondary-button small-button" type="button" data-sfx-handled onClick={() => { playSound('modalOpen'); setShowHistory(true); }}>
               {copy.history} ({readings.length})
             </button>
           </div>
@@ -941,7 +948,7 @@ export default function CharacterTarotPage({
                       onClick={() => handleFlipCard(i)}
                     >
                       <div className="tarot-card-face tarot-card-back">
-                        <div className="tarot-card-back-pattern">✦</div>
+                        <div className="tarot-card-back-pattern" aria-hidden="true">✦</div>
                       </div>
                       <div className="tarot-card-face tarot-card-front">
                         <div className="tarot-card-number">{drawn.card.id}</div>
@@ -984,7 +991,7 @@ export default function CharacterTarotPage({
                       className="secondary-button small-button"
                       type="button"
                       data-sfx-handled
-                      onClick={() => { playSound('buttonClick'); setShowExport(true); }}
+                      onClick={() => { playSound('modalOpen'); setShowExport(true); }}
                       disabled={isGenerating}
                     >
                       {copy.exportMarkdown}
@@ -1005,7 +1012,7 @@ export default function CharacterTarotPage({
       {/* History Modal */}
       {showHistory && (
         <div className="modal-backdrop" role="presentation" onClick={() => setShowHistory(false)}>
-          <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.history} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-card modal-surface" role="dialog" aria-modal="true" aria-label={copy.history} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.history}</h3>
               <button className="icon-button modal-close" type="button" aria-label={copy.close} data-sfx-handled onClick={() => setShowHistory(false)}>
@@ -1056,7 +1063,7 @@ export default function CharacterTarotPage({
       {/* Export Modal */}
       {showExport && activeReading && (
         <div className="modal-backdrop" role="presentation" onClick={() => setShowExport(false)}>
-          <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-card modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.exportTitle}</h3>
               <button className="icon-button modal-close" type="button" aria-label={copy.close} data-sfx-handled onClick={() => setShowExport(false)}>

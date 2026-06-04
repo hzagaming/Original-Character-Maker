@@ -638,13 +638,20 @@ export default function CharacterArcPage({
     };
   }, []);
 
+  const topModalRef = useRef<'export' | 'history' | null>(null);
+  useEffect(() => {
+    if (showExport) topModalRef.current = 'export';
+    else if (showHistory) topModalRef.current = 'history';
+    else topModalRef.current = null;
+  }, [showExport, showHistory]);
+
   useEffect(() => {
     if (!showExport && !showHistory) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        if (showExport) setShowExport(false);
-        if (showHistory) setShowHistory(false);
+        if (topModalRef.current === 'export') setShowExport(false);
+        else if (topModalRef.current === 'history') setShowHistory(false);
       }
     };
     document.addEventListener('keydown', handler);
@@ -772,12 +779,12 @@ export default function CharacterArcPage({
     (id: string) => {
       maybeConfirm(copy.deleteConfirm, () => {
         const next = arcs.filter((a) => a.id !== id);
-        setArcs(next);
         if (!persistArcs(next)) {
           setSaveToast(copy.saveFailed);
           playSound('error');
           return;
         }
+        setArcs(next);
         if (activeArcId === id) {
           setActiveArcId(null);
           setShowSetup(true);
@@ -808,13 +815,13 @@ export default function CharacterArcPage({
             }
           : a
       );
-      setArcs(next);
       if (!persistArcs(next)) {
         setSaveToast(copy.saveFailed);
         playSound('error');
-      } else {
-        playSound('resetSound');
+        return;
       }
+      setArcs(next);
+      playSound('resetSound');
     });
   }, [activeArc, arcs, copy.confirmClear, copy.saveFailed, maybeConfirm]);
 
@@ -1037,7 +1044,7 @@ export default function CharacterArcPage({
                   type="button"
                   data-sfx-handled
                   style={{ width: '100%', marginTop: 8 }}
-                  onClick={() => { playSound('buttonClick'); setShowHistory(true); }}
+                  onClick={() => { playSound('modalOpen'); setShowHistory(true); }}
                 >
                   {copy.history} ({arcs.length})
                 </button>
@@ -1073,7 +1080,7 @@ export default function CharacterArcPage({
                   className="secondary-button small-button"
                   type="button"
                   data-sfx-handled
-                  onClick={() => { playSound('buttonClick'); setShowExport(true); }}
+                  onClick={() => { playSound('modalOpen'); setShowExport(true); }}
                 >
                   {copy.exportMarkdown}
                 </button>
@@ -1241,7 +1248,7 @@ export default function CharacterArcPage({
       {/* Export Modal */}
       {showExport && activeArc && (
         <div className="modal-backdrop" role="presentation" onClick={() => setShowExport(false)}>
-          <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-card modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.exportTitle}</h3>
               <button className="icon-button modal-close" type="button" aria-label={copy.close} data-sfx-handled onClick={() => setShowExport(false)}>
@@ -1266,7 +1273,7 @@ export default function CharacterArcPage({
       {/* History Modal */}
       {showHistory && (
         <div className="modal-backdrop" role="presentation" onClick={() => setShowHistory(false)}>
-          <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.history} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-card modal-surface" role="dialog" aria-modal="true" aria-label={copy.history} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.history}</h3>
               <button className="icon-button modal-close" type="button" aria-label={copy.close} data-sfx-handled onClick={() => setShowHistory(false)}>

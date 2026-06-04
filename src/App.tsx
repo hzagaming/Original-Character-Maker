@@ -69,7 +69,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.22.2';
+const VERSION = '1.22.4';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -746,8 +746,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.22.2 修复：第二轮全面深度审计。修复 Tarot 保存后 hasUnsaved 仍误报、保存按钮无防抖、抽牌/切牌阵后未重置快照、AI 生成期间可误操作；修复 Arc 删除弧线双重音效、updateStage 保存失败不回滚、AI 参数硬编码；修复 Interview hasUnsaved 永久阻止离开、handleCopy 无卸载守卫、AI 参数硬编码；补全 CSS 3D 翻转、flex 溢出、移动端断点、主题颜色变量；补全 hover SFX 覆盖。',
-    announcementList1: 'Tarot 核心修复：hasUnsaved 移除 useMemo 缓存缺陷，改为直接计算；handleDraw 与切换牌阵时正确重置 savedInterpretationRef；保存按钮新增 isSaving 防抖与 disabled；AI 生成期间禁用 Save/Export 防止误操作。',
+    announcementDescription: 'v1.22.4 修复：第四轮深度审计。修复 SettingsModal 内嵌对话框 ESC 穿透、三页多弹窗 ESC 层级冲突、Arc 持久化失败无回滚、全局快捷键弹窗期间仍可触发、移动端弹窗缺少基础样式、触摸目标不足、Tarot 五牌阵小屏溢出等 10+ 项问题。',
+    announcementList1: 'ESC 与弹窗层级隔离：SettingsModal 内嵌 Confirm/Preset 对话框新增 capture-phase ESC handler；Tarot/Arc/Interview 双弹窗改为 topModalRef 层级追踪，ESC 只关闭最后打开的弹窗。',
     announcementList2: 'Arc + Interview 深度修复：Arc 删除弧线失败时阻止后续 deleteSound 双重播放；updateStage 先持久化再更新 state，失败时自动回滚；Interview hasUnsaved 在 activeSession 状态下不再永久阻止页面离开；handleCopy 添加 mountedRef 卸载守卫；两页 AI suggest 均改为从 settings.llm 读取 model/temperature/maxTokens。',
     announcementList3: 'CSS 与 SFX 补全：Tarot 3D 翻转补充 transform-style: preserve-3d 与 will-change: transform；history-main 补充 min-width: 0 防止 flex 溢出；640px 移动端断点补全 padding/gap/字号缩放；badge 颜色改用 --success/--danger CSS 变量；App.tsx hover handler 补全 .tarot-card 覆盖；Korean 描述移除混入的中文字符。',
     errorBoundaryTitle: '出错了',
@@ -1223,8 +1223,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.22.2 修正：第2回全面深度監査。Tarot の保存後 hasUnsaved 誤検知、保存ボタンの連打防止、抽選/スプレッド切替後のスナップショット未リセット、AI生成中の誤操作；Arc のアーク削除双重音效、updateStage 保存失敗時のロールバック欠如、AIパラメータ固定；Interview の hasUnsaved による永久離脱阻止、handleCopy のアンマウントガード欠如、AIパラメータ固定；CSS 3D フリップ、flex 溢出、モバイルブレークポイント、テーマカラー変数；hover SFX カバー補完を修正。',
-    announcementList1: 'Tarot 核心修正：hasUnsaved の useMemo キャッシュ欠陥を除去し直接計算に変更；handleDraw とスプレッド切替時に savedInterpretationRef を正しくリセット；保存ボタンに isSaving 連打防止と disabled を追加；AI 生成中は Save/Export を無効化し誤操作を防止。',
+    announcementDescription: 'v1.22.4 修正：第4回深度監査。SettingsModal 内嵌ダイアログの ESC 貫通、3ページ複数モーダルの ESC 階層競合、Arc 永続化失敗時のロールバック欠如、モーダル中のグローバルショートカット発動、モバイルモーダルの基本スタイル欠如、タッチターゲット不足、Tarot 5枚スプレッドの小画面オーバーフローなど 10+ 項目を修正。',
+    announcementList1: 'ESC とモーダル階層の分離：SettingsModal 内嵌ダイアログに capture-phase ESC handler を追加；Tarot/Arc/Interview の二重モーダルを topModalRef 階層追跡に変更し、ESC は最後に開いたモーダルのみを閉じる。',
     announcementList2: 'Arc + Interview 深度修正：Arc のアーク削除失敗時に後続の deleteSound 双重播放を阻止；updateStage は先に持久化してから state を更新し、失敗時は自動ロールバック；Interview の hasUnsaved を activeSession 時に永久離脱阻止しないよう修正；handleCopy に mountedRef アンマウントガードを追加；両ページの AI suggest を settings.llm から model/temperature/maxTokens を読み込むように変更。',
     announcementList3: 'CSS と SFX 補完：Tarot 3D フリップに transform-style: preserve-3d と will-change: transform を追加；history-main に min-width: 0 を追加して flex 溢出を防止；640px モバイルブレークポイントに padding/gap/フォントサイズ縮小を補完；badge カラーを --success/--danger CSS 変数に変更；App.tsx hover handler に .tarot-card カバーを補完；Korean 説明から混入した中国語文字を除去。',
     errorBoundaryTitle: 'エラーが発生しました',
@@ -1700,8 +1700,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.22.2 Fixes: Second comprehensive deep audit. Fixed Tarot hasUnsaved false positive after save, save button missing debounce, draw/spread-switch snapshot not reset, AI generation accidental operations; Arc delete arc double SFX, updateStage no rollback on save failure, AI parameter hardcoding; Interview hasUnsaved permanently blocking leave, handleCopy missing unmount guard, AI parameter hardcoding; CSS 3D flip, flex overflow, mobile breakpoint, theme color variables; hover SFX coverage completion.',
-    announcementList1: 'Tarot Core Fixes: Removed useMemo caching defect in hasUnsaved, switched to direct calculation; correctly reset savedInterpretationRef on handleDraw and spread switch; added isSaving debounce and disabled to save button; disabled Save/Export during AI generation to prevent accidental operations.',
+    announcementDescription: 'v1.22.4 Fixes: Fourth deep audit. Fixed SettingsModal inner dialog ESC穿透, three-page multi-modal ESC layer conflicts, Arc persistence failure without rollback, global shortcuts firing while modal open, mobile modal missing base styles, insufficient touch targets, Tarot five-card spread overflow on small screens, and 10+ other issues.',
+    announcementList1: 'ESC and Modal Layer Isolation: Added capture-phase ESC handler to SettingsModal inner dialogs; Tarot/Arc/Interview dual modals switched to topModalRef layer tracking so ESC only closes the most recently opened modal.',
     announcementList2: 'Arc + Interview Deep Fixes: Arc delete arc now blocks subsequent deleteSound double-play on failure; updateStage persists first then updates state, with automatic rollback on failure; Interview hasUnsaved no longer permanently blocks page leave in activeSession state; added mountedRef unmount guard to handleCopy; both pages\' AI suggest now read model/temperature/maxTokens from settings.llm.',
     announcementList3: 'CSS & SFX Completion: Added transform-style: preserve-3d and will-change: transform to Tarot 3D flip; added min-width: 0 to history-main to prevent flex overflow; completed 640px mobile breakpoint with padding/gap/font-size scaling; switched badge colors to --success/--danger CSS variables; added .tarot-card coverage to App.tsx hover handler; removed mixed Chinese characters from Korean description.',
     errorBoundaryTitle: 'Error',
@@ -2177,8 +2177,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.22.2 Исправления: Второй комплексный глубокий аудит. Исправлены ложноположительное hasUnsaved Tarot после сохранения, отсутствие антиблока кнопки сохранения, сброс снимка после розыгрыша/переключения спреда, случайные операции при генерации ИИ; Arc двойной SFX удаления дуги, отсутствие отката updateStage при ошибке сохранения, жёсткое кодирование параметров ИИ; Interview hasUnsaved навсегда блокирует уход, отсутствие защиты размонтирования handleCopy, жёсткое кодирование параметров ИИ; CSS 3D-переворот, flex-переполнение, мобильная точка останова, переменные цвета темы; завершение покрытия hover SFX.',
-    announcementList1: 'Основные исправления Tarot: Устранён дефект кэширования useMemo в hasUnsaved, переключено на прямое вычисление; корректный сброс savedInterpretationRef при розыгрыше и переключении спреда; добавлена защита от повторного нажатия isSaving и disabled для кнопки сохранения; отключены Save/Export во время генерации ИИ для предотвращения случайных операций.',
+    announcementDescription: 'v1.22.4 Исправления: Четвёртый глубокий аудит. Исправлено проникновение ESC внутренних диалогов SettingsModal, конфликты уровней ESC множественных модальных окон на трёх страницах, отсутствие отката при ошибке персистентности Arc, срабатывание глобальных горячих клавиш при открытом модальном окне, отсутствие базовых стилей мобильных модалей, недостаточные сенсорные цели, переполнение пятикарточного спреда Tarot на маленьких экранах и 10+ других проблем.',
+    announcementList1: 'Изоляция ESC и уровней модальных окон: Добавлен capture-phase ESC handler для внутренних диалогов SettingsModal; двойные модальные окна Tarot/Arc/Interview переключены на отслеживание уровня topModalRef, ESC закрывает только последнее открытое окно.',
     announcementList2: 'Глубокие исправления Arc + Interview: Arc при ошибке удаления дуги теперь блокирует последующий двойной deleteSound; updateStage сначала сохраняет, затем обновляет state, с автоматическим откатом при ошибке; Interview hasUnsaved больше не блокирует уход со страницы в состоянии activeSession; добавлена защита размонтирования mountedRef в handleCopy; AI suggest обеих страниц теперь читает model/temperature/maxTokens из settings.llm.',
     announcementList3: 'Завершение CSS и SFX: Добавлены transform-style: preserve-3d и will-change: transform для 3D-переворота Tarot; добавлен min-width: 0 в history-main для предотвращения flex-переполнения; завершена мобильная точка останова 640px с масштабированием padding/gap/размера шрифта; цвета badge переключены на CSS-переменные --success/--danger; добавлено покрытие .tarot-card в hover-обработчик App.tsx; удалены смешанные китайские символы из корейского описания.',
     errorBoundaryTitle: 'Ошибка',
@@ -3019,8 +3019,8 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.22.2 수정: 2차 전면 심층 감사. 타로 저장 후 hasUnsaved 오탐, 저장 버튼 연속 클릭 방지 없음, 추첨/스프레드 전환 후 스냅샷 미초기화, AI 생성 중 오동작; 아크 아크 삭제 이중 SFX, updateStage 저장 실패 시 롤백 없음, AI 매개변수 하드코딩; 인터뷰 hasUnsaved 영구 이탈 차단, handleCopy 마운트 해제 가드 없음, AI 매개변수 하드코딩; CSS 3D 플립, flex 오버플로, 모바일 브레이크포인트, 테마 색상 변수; hover SFX 커버리지 보완을 수정했습니다.',
-    announcementList1: '타로 핵심 수정: hasUnsaved의 useMemo 캐싱 결함을 제거하고 직접 계산으로 변경; handleDraw 및 스프레드 전환 시 savedInterpretationRef를 올바르게 초기화; 저장 버튼에 isSaving 연속 클릭 방지 및 disabled 추가; AI 생성 중 Save/Export를 비활성화하여 오동작 방지.',
+    announcementDescription: 'v1.22.4 수정: 4차 심층 감사. SettingsModal 내장 대화상자 ESC 관통, 3페이지 다중 모달 ESC 계층 충돌, Arc 영속화 실패 시 롤백 없음, 모달 중 전역 단축키 발동, 모바일 모달 기본 스타일 부재, 터치 타겟 부족, 타로 5장 스프레드 소형 화면 오버플로우 등 10+ 항목 수정.',
+    announcementList1: 'ESC 및 모달 계층 분리: SettingsModal 내장 대화상자에 capture-phase ESC 핸들러 추가; Tarot/Arc/Interview 이중 모달을 topModalRef 계층 추적으로 변경하여 ESC가 마지막으로 열린 모달만 닫도록 함.',
     announcementList2: '아크 + 인터뷰 심층 수정: 아크 아크 삭제 실패 시 후속 deleteSound 이중 재생을 차단; updateStage는 먼저 지속화한 후 state를 업데이트하고, 실패 시 자동 롤백; 인터뷰 hasUnsaved가 activeSession 상태에서 페이지 이탈을 영구 차단하지 않도록 수정; handleCopy에 mountedRef 마운트 해제 가드 추가; 두 페이지의 AI suggest가 settings.llm에서 model/temperature/maxTokens를 읽도록 변경.',
     announcementList3: 'CSS 및 SFX 보완: 타로 3D 플립에 transform-style: preserve-3d 및 will-change: transform 추가; history-main에 min-width: 0을 추가하여 flex 오버플로 방지; 640px 모바일 브레이크포인트에 padding/gap/글자 크기 축소 보완; badge 색상을 --success/--danger CSS 변수로 변경; App.tsx hover handler에 .tarot-card 커버리지 보완; 한국어 설명에서 혼입된 중국어 문자를 제거.',
     errorBoundaryTitle: '오류',
@@ -3216,6 +3216,20 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.22.4',
+    date: '2026-05-18',
+    title: '1.22.4 第四轮深度审计：ESC 层级隔离、持久化回滚、移动端弹窗样式、全局快捷键防护',
+    summary:
+      '修复 SettingsModal 内嵌对话框 ESC 穿透、三页多弹窗 ESC 层级冲突、Arc 持久化失败无回滚、全局快捷键弹窗期间仍可触发、移动端弹窗缺少基础样式、触摸目标不足、Tarot 五牌阵小屏溢出等 10+ 项问题。',
+    details: [
+      'ESC 与弹窗层级隔离：SettingsModal 内嵌 Confirm/Preset 对话框新增 capture-phase ESC handler，阻止 Escape 穿透关闭外层设置面板。Tarot/Arc/Interview 的 Export/History 双弹窗改为 topModalRef 层级追踪，ESC 只关闭最后打开的弹窗。',
+      '数据持久化一致性：ArcPage handleDeleteArc 与 handleClearAll 改为先 persistArcs 后 setArcs，失败时自动回滚 UI 状态，与 updateStage 模式统一。',
+      '全局快捷键防护：App.tsx handleKeyDown 新增 document.querySelector([role="dialog"][aria-modal="true"]) 检查，任何弹窗打开时禁用 Alt+S/Alt+H 等全局快捷键。',
+      '移动端样式修复：三页 export/history 弹窗补全 .modal-card 基础样式（background、border-radius、width、max-height）；.icon-button 添加 min-width/min-height: 44px 满足 WCAG 触摸目标；新增 .page-header-row CSS 定义；Tarot 新增 520px 断点缩小卡牌尺寸防止五牌阵溢出。',
+      'SFX/可访问性补全：FaceMaker zoom 按钮 aria-label 从 messages 修正为 copy；App.tsx 全局 SFX handler 新增 slider 输入类型覆盖。',
+    ],
+  },
   {
     version: '1.22.1',
     date: '2026-05-18',
@@ -5160,6 +5174,10 @@ function App() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      // Skip if any modal is open
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) {
+        return;
+      }
       // Skip if user is typing in an input/textarea/select
       const target = event.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable) {
@@ -5972,6 +5990,8 @@ type FaceMakerCopy = {
   export: string;
   importConfig: string;
   workboard: string;
+  zoomIn: string;
+  zoomOut: string;
   assetHairTitle: string;
   assetEyesTitle: string;
   assetBrowTitle: string;
@@ -6050,6 +6070,8 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     export: '导出',
     importConfig: '导入配置',
     workboard: '工作画板',
+    zoomIn: '放大',
+    zoomOut: '缩小',
     assetHairTitle: '发型',
     assetEyesTitle: '眼型',
     assetBrowTitle: '眉型',
@@ -6126,6 +6148,8 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     export: '書き出し',
     importConfig: '設定をインポート',
     workboard: '作業ボード',
+    zoomIn: 'ズームイン',
+    zoomOut: 'ズームアウト',
     assetHairTitle: '髪型',
     assetEyesTitle: '目元',
     assetBrowTitle: '眉',
@@ -6202,6 +6226,8 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     export: 'Export',
     importConfig: 'Import Config',
     workboard: 'Workbench',
+    zoomIn: 'Zoom In',
+    zoomOut: 'Zoom Out',
     assetHairTitle: 'Hair',
     assetEyesTitle: 'Eyes',
     assetBrowTitle: 'Brows',
@@ -6278,6 +6304,8 @@ const faceMakerCopy: Record<BaseLanguage, FaceMakerCopy> = {
     export: 'Экспорт',
     importConfig: 'Импорт конфигурации',
     workboard: 'Рабочее поле',
+    zoomIn: 'Приблизить',
+    zoomOut: 'Отдалить',
     assetHairTitle: 'Причёски',
     assetEyesTitle: 'Глаза',
     assetBrowTitle: 'Брови',
@@ -6975,9 +7003,9 @@ function FaceMakerPage({
               <span>{copy.workboard}</span>
               <div className="stage-toolbar-actions">
                 <div className="zoom-control">
-                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }} data-sfx-handled>-</button>
+                  <button className="zoom-btn" type="button" aria-label={copy.zoomOut} onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10)); }} data-sfx-handled>-</button>
                   <span className="zoom-value">{Math.round(stageZoom * 100)}%</span>
-                  <button className="zoom-btn" type="button" onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }} data-sfx-handled>+</button>
+                  <button className="zoom-btn" type="button" aria-label={copy.zoomIn} onClick={() => { playSound('buttonClick'); setStageZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10)); }} data-sfx-handled>+</button>
                   <button className="zoom-btn reset-zoom" type="button" title={copy.resetView} aria-label={copy.resetView} onClick={() => { playSound('buttonClick'); setStageZoom(1); setStageBackground('checkerboard'); setShowReference(false); setShowOverlay(false); }} data-sfx-handled>⟲</button>
                 </div>
                 <div className="bg-switcher">
@@ -7129,7 +7157,7 @@ function FaceMakerPage({
               </div>
             </div>
             {toast && (
-              <div className={`editor-toast ${toast.type}`}>
+              <div className={`editor-toast ${toast.type}`} role="alert" aria-live="polite">
                 {toast.message}
               </div>
             )}
@@ -8184,6 +8212,26 @@ function SettingsModal({
     name: string;
   }>({ open: false, slot: 0, name: '' });
 
+  // Inner modal ESC isolation — uses capture phase to intercept Escape before outer modal
+  const innerModalRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const isOpen = confirmDialog.open || presetDialog.open;
+    if (!isOpen) return;
+    function handler(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.stopImmediatePropagation();
+        playSound('modalClose');
+        if (confirmDialog.open) {
+          setConfirmDialog((d) => ({ ...d, open: false }));
+        } else if (presetDialog.open) {
+          setPresetDialog({ open: false, slot: 0, name: '' });
+        }
+      }
+    }
+    document.addEventListener('keydown', handler, true);
+    return () => document.removeEventListener('keydown', handler, true);
+  }, [confirmDialog.open, presetDialog.open]);
+
   const selectedAnnouncement =
     announcementHistory.find((item) => item.version === selectedAnnouncementVersion) ?? announcementHistory[0];
 
@@ -8361,12 +8409,14 @@ function SettingsModal({
         <h2 className="settings-title">{messages.settingsTitle}</h2>
 
         <div className="settings-layout">
-          <aside className="settings-sidebar">
+          <aside className="settings-sidebar" role="tablist" aria-label={messages.settingsTitle}>
             {tabs.map((item) => (
               <button
                 key={item.key}
                 className={`settings-tab ${tab === item.key ? 'active' : ''}`}
                 type="button"
+                role="tab"
+                aria-selected={tab === item.key}
                 onClick={() => setTab(item.key)}
               >
                 {item.label}

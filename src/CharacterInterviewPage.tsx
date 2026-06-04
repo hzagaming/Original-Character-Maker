@@ -873,13 +873,20 @@ export default function CharacterInterviewPage({
     answerRefs.current = {};
   }, [activeSessionId]);
 
+  const topModalRef = useRef<'export' | 'history' | null>(null);
+  useEffect(() => {
+    if (showExport) topModalRef.current = 'export';
+    else if (showHistory) topModalRef.current = 'history';
+    else topModalRef.current = null;
+  }, [showExport, showHistory]);
+
   useEffect(() => {
     if (!showExport && !showHistory) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        if (showExport) setShowExport(false);
-        if (showHistory) setShowHistory(false);
+        if (topModalRef.current === 'export') setShowExport(false);
+        else if (topModalRef.current === 'history') setShowHistory(false);
       }
     };
     document.addEventListener('keydown', handler);
@@ -1177,7 +1184,7 @@ export default function CharacterInterviewPage({
                   type="button"
                   data-sfx-handled
                   style={{ width: '100%', marginTop: 8 }}
-                  onClick={() => { playSound('buttonClick'); setShowHistory(true); }}
+                  onClick={() => { playSound('modalOpen'); setShowHistory(true); }}
                 >
                   {copy.history} ({sessions.length})
                 </button>
@@ -1191,7 +1198,7 @@ export default function CharacterInterviewPage({
               <p className="muted-copy" style={{ marginBottom: 12 }}>
                 {copy.progress}: {answeredCount}/{totalCount}
               </p>
-              <div className="interview-progress-bar">
+              <div className="interview-progress-bar" role="progressbar" aria-valuenow={answeredCount} aria-valuemin={0} aria-valuemax={totalCount} aria-label={copy.progress}>
                 <div
                   className="interview-progress-fill"
                   style={{ width: `${totalCount > 0 ? (answeredCount / totalCount) * 100 : 0}%` }}
@@ -1217,7 +1224,7 @@ export default function CharacterInterviewPage({
                   className="secondary-button small-button"
                   type="button"
                   data-sfx-handled
-                  onClick={() => { playSound('buttonClick'); setShowExport(true); }}
+                  onClick={() => { playSound('modalOpen'); setShowExport(true); }}
                 >
                   {copy.exportMarkdown}
                 </button>
@@ -1281,7 +1288,7 @@ export default function CharacterInterviewPage({
           </div>
         ) : (
           <div className="scene-empty-state">
-            <div className="scene-empty-icon">🎙️</div>
+            <div className="scene-empty-icon" aria-hidden="true">🎙️</div>
             <p>{copy.noHistory}</p>
           </div>
         )}
@@ -1290,7 +1297,7 @@ export default function CharacterInterviewPage({
       {/* Export Modal */}
       {showExport && activeSession && (
         <div className="modal-backdrop" role="presentation" onClick={() => setShowExport(false)}>
-          <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-card modal-surface" role="dialog" aria-modal="true" aria-label={copy.exportTitle} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.exportTitle}</h3>
               <button
@@ -1325,7 +1332,7 @@ export default function CharacterInterviewPage({
       {/* History Modal */}
       {showHistory && (
         <div className="modal-backdrop" role="presentation" onClick={() => setShowHistory(false)}>
-          <div className="modal-surface" role="dialog" aria-modal="true" aria-label={copy.history} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-card modal-surface" role="dialog" aria-modal="true" aria-label={copy.history} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{copy.history}</h3>
               <button
