@@ -125,6 +125,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     drawAgain: '再抽一次',
     newReading: '新占卜',
     saveReading: '保存占卜',
+    saving: '保存中…',
     apiKeyRequired: '请配置 API Key 以使用 AI 解读',
   },
   ja: {
@@ -179,6 +180,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     drawAgain: 'もう一度',
     newReading: '新規占い',
     saveReading: '占いを保存',
+    saving: '保存中…',
     apiKeyRequired: 'AI解釈を使用するにはAPI Keyを設定してください',
   },
   en: {
@@ -233,6 +235,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     drawAgain: 'Draw Again',
     newReading: 'New Reading',
     saveReading: 'Save Reading',
+    saving: 'Saving…',
     apiKeyRequired: 'Configure an API Key to use AI interpretation',
   },
   ru: {
@@ -287,6 +290,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     drawAgain: 'Ещё раз',
     newReading: 'Новое гадание',
     saveReading: 'Сохранить гадание',
+    saving: 'Сохранение…',
     apiKeyRequired: 'Настройте API Key для использования AI-толкования',
   },
   ko: {
@@ -341,6 +345,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
     drawAgain: '다시 뽑기',
     newReading: '새 점',
     saveReading: '점 저장',
+    saving: '저장 중…',
     apiKeyRequired: 'AI 해석을 사용하려면 API Key를 설정하세요',
   },
 };
@@ -530,6 +535,7 @@ export default function CharacterTarotPage({
   const [interpretation, setInterpretation] = useState('');
   const [isDrawing, setIsDrawing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [saveToast, setSaveToast] = useState('');
@@ -597,11 +603,7 @@ export default function CharacterTarotPage({
     return () => document.removeEventListener('keydown', handler);
   }, [showExport, showHistory]);
 
-  const hasUnsaved = useMemo(() => {
-    if (currentCards === null) return false;
-    if (interpretation.trim().length === 0) return false;
-    return interpretation !== savedInterpretationRef.current;
-  }, [currentCards, interpretation]);
+  const hasUnsaved = currentCards !== null && interpretation.trim().length > 0 && interpretation !== savedInterpretationRef.current;
   useBeforeUnloadGuard(hasUnsaved);
 
   const handleDraw = useCallback(() => {
@@ -609,6 +611,7 @@ export default function CharacterTarotPage({
     setIsDrawing(true);
     setFlippedCards(new Set());
     setInterpretation('');
+    savedInterpretationRef.current = '';
     setActiveReadingId(null);
     playSound('buttonClick');
     // Simulate draw delay for suspense
@@ -665,7 +668,8 @@ export default function CharacterTarotPage({
   }, [currentCards, isGenerating, characterName, characterInfo, selectedSpread, settings.apiKey, settings.apiBaseUrl, language, copy.saveFailed]);
 
   const handleSaveReading = useCallback(() => {
-    if (!currentCards) return;
+    if (!currentCards || isSaving) return;
+    setIsSaving(true);
     const reading: TarotReading = {
       id: uid(),
       characterName: characterName.trim() || copy.emptyName,
@@ -683,7 +687,8 @@ export default function CharacterTarotPage({
       setActiveReadingId(reading.id);
       savedInterpretationRef.current = interpretation;
     }
-  }, [currentCards, characterName, selectedSpread, interpretation, readings, persistReadings, copy.saveFailed, copy.emptyName]);
+    setIsSaving(false);
+  }, [currentCards, isSaving, characterName, selectedSpread, interpretation, readings, persistReadings, copy.saveFailed, copy.emptyName]);
 
   const handleDeleteReading = useCallback((id: string) => {
     maybeConfirm(copy.deleteConfirm, () => {
@@ -884,6 +889,7 @@ export default function CharacterTarotPage({
                     setCurrentCards(null);
                     setFlippedCards(new Set());
                     setInterpretation('');
+                    savedInterpretationRef.current = '';
                     setActiveReadingId(null);
                   }}
                 >
@@ -971,14 +977,15 @@ export default function CharacterTarotPage({
                         {isGenerating ? copy.generating : copy.aiInterpret}
                       </button>
                     )}
-                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleSaveReading}>
-                      {copy.saveReading}
+                    <button className="secondary-button small-button" type="button" data-sfx-handled onClick={handleSaveReading} disabled={isSaving || isGenerating}>
+                      {isSaving ? copy.saving : copy.saveReading}
                     </button>
                     <button
                       className="secondary-button small-button"
                       type="button"
                       data-sfx-handled
                       onClick={() => { playSound('buttonClick'); setShowExport(true); }}
+                      disabled={isGenerating}
                     >
                       {copy.exportMarkdown}
                     </button>

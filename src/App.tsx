@@ -69,7 +69,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.22.1';
+const VERSION = '1.22.2';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -746,10 +746,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.22.1 修复：角色塔罗占卜全面优化。修复 AI prompt 硬编码中文、模型名硬编码 gpt-4、未保存状态误报、抽牌定时器泄漏、导出按钮缺失、保存按钮文案 hack、API Key 提示未本地化、翻牌音效不当、移动端卡牌尺寸等 10+ 项问题。',
-    announcementList1: 'AI 解读优化：修复 prompt 硬编码中文问题，改为英文基础指令 + 用户语言牌名；修复模型名硬编码 gpt-4，现在使用用户在设置中配置的模型；支持 temperature 和 maxTokens 自定义。',
-    announcementList2: '交互与状态修复：修复 hasUnsaved 保存后仍误报问题；修复抽牌定时器未清理导致的内存泄漏；修复导出按钮缺失（现在未保存的占卜也可直接导出）；修复保存按钮使用 saveFailed 判断语言的 hack；修复翻牌音效从 cardHover 改为 select。',
-    announcementList3: '样式与可访问性：修复 API Key 缺失提示硬编码中文；新增日期本地化键；优化移动端卡牌尺寸（640px 以下自适应缩小）；App.tsx 全局 SFX handler 补全 tarot 元素覆盖。',
+    announcementDescription: 'v1.22.2 修复：第二轮全面深度审计。修复 Tarot 保存后 hasUnsaved 仍误报、保存按钮无防抖、抽牌/切牌阵后未重置快照、AI 生成期间可误操作；修复 Arc 删除弧线双重音效、updateStage 保存失败不回滚、AI 参数硬编码；修复 Interview hasUnsaved 永久阻止离开、handleCopy 无卸载守卫、AI 参数硬编码；补全 CSS 3D 翻转、flex 溢出、移动端断点、主题颜色变量；补全 hover SFX 覆盖。',
+    announcementList1: 'Tarot 核心修复：hasUnsaved 移除 useMemo 缓存缺陷，改为直接计算；handleDraw 与切换牌阵时正确重置 savedInterpretationRef；保存按钮新增 isSaving 防抖与 disabled；AI 生成期间禁用 Save/Export 防止误操作。',
+    announcementList2: 'Arc + Interview 深度修复：Arc 删除弧线失败时阻止后续 deleteSound 双重播放；updateStage 先持久化再更新 state，失败时自动回滚；Interview hasUnsaved 在 activeSession 状态下不再永久阻止页面离开；handleCopy 添加 mountedRef 卸载守卫；两页 AI suggest 均改为从 settings.llm 读取 model/temperature/maxTokens。',
+    announcementList3: 'CSS 与 SFX 补全：Tarot 3D 翻转补充 transform-style: preserve-3d 与 will-change: transform；history-main 补充 min-width: 0 防止 flex 溢出；640px 移动端断点补全 padding/gap/字号缩放；badge 颜色改用 --success/--danger CSS 变量；App.tsx hover handler 补全 .tarot-card 覆盖；Korean 描述移除混入的中文字符。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -1223,10 +1223,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.22.1 修正：キャラタロット占いの全面最適化。AIプロンプトの中国語ハードコーディング、モデル名のgpt-4固定、未保存状態の誤検知、抽選タイマーリーク、出力ボタン欠落、保存ボタン文案ハック、API Key未ローカライズ、カードめくり音響不適切、モバイルカードサイズなど10+項目を修正。',
-    announcementList1: 'AI解釈の最適化：プロンプトの中国語ハードコーディングを修正し、英語ベース指令 + ユーザ言語のカード名に変更；モデル名のgpt-4固定を修正し、ユーザー設定のモデルを使用；temperature と maxTokens のカスタマイズをサポート。',
-    announcementList2: 'インタラクションと状態修正：hasUnsaved の保存後誤検知を修正；抽選タイマーの未解放によるメモリリークを修正；出力ボタン欠落を修正（未保存の占いも直接出力可能）；保存ボタンの saveFailed 言語判定ハックを修正；カードめくり音響を cardHover から select に変更。',
-    announcementList3: 'スタイルとアクセシビリティ：API Key 欠如提示の中国語ハードコーディングを修正；日付ローカライズキーを追加；モバイルカードサイズを最適化（640px 以下で自動縮小）；App.tsx グローバル SFX ハンドラに tarot 要素を追加。',
+    announcementDescription: 'v1.22.2 修正：第2回全面深度監査。Tarot の保存後 hasUnsaved 誤検知、保存ボタンの連打防止、抽選/スプレッド切替後のスナップショット未リセット、AI生成中の誤操作；Arc のアーク削除双重音效、updateStage 保存失敗時のロールバック欠如、AIパラメータ固定；Interview の hasUnsaved による永久離脱阻止、handleCopy のアンマウントガード欠如、AIパラメータ固定；CSS 3D フリップ、flex 溢出、モバイルブレークポイント、テーマカラー変数；hover SFX カバー補完を修正。',
+    announcementList1: 'Tarot 核心修正：hasUnsaved の useMemo キャッシュ欠陥を除去し直接計算に変更；handleDraw とスプレッド切替時に savedInterpretationRef を正しくリセット；保存ボタンに isSaving 連打防止と disabled を追加；AI 生成中は Save/Export を無効化し誤操作を防止。',
+    announcementList2: 'Arc + Interview 深度修正：Arc のアーク削除失敗時に後続の deleteSound 双重播放を阻止；updateStage は先に持久化してから state を更新し、失敗時は自動ロールバック；Interview の hasUnsaved を activeSession 時に永久離脱阻止しないよう修正；handleCopy に mountedRef アンマウントガードを追加；両ページの AI suggest を settings.llm から model/temperature/maxTokens を読み込むように変更。',
+    announcementList3: 'CSS と SFX 補完：Tarot 3D フリップに transform-style: preserve-3d と will-change: transform を追加；history-main に min-width: 0 を追加して flex 溢出を防止；640px モバイルブレークポイントに padding/gap/フォントサイズ縮小を補完；badge カラーを --success/--danger CSS 変数に変更；App.tsx hover handler に .tarot-card カバーを補完；Korean 説明から混入した中国語文字を除去。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1700,10 +1700,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.22.1 Fixes: Character Tarot comprehensive optimization. Fixed AI prompt hardcoded Chinese, hardcoded gpt-4 model name, false-positive unsaved state, draw timer leak, missing export button, save button label hack, unlocalized API Key hint, inappropriate flip sound, mobile card sizing, and 10+ other issues.',
-    announcementList1: 'AI Reading Optimization: Fixed hardcoded Chinese in prompt, changed to English-based instructions with user-language card names; fixed hardcoded gpt-4 model name, now uses the model configured in user settings; supports custom temperature and maxTokens.',
-    announcementList2: 'Interaction & State Fixes: Fixed hasUnsaved false positive after saving; fixed draw timer leak causing memory issues; fixed missing export button (unsaved readings can now be exported directly); fixed save button using saveFailed to detect language; changed flip sound from cardHover to select.',
-    announcementList3: 'Styles & Accessibility: Fixed hardcoded Chinese API Key hint; added localized date key; optimized mobile card sizing (auto-shrink below 640px); App.tsx global SFX handler now covers tarot elements.',
+    announcementDescription: 'v1.22.2 Fixes: Second comprehensive deep audit. Fixed Tarot hasUnsaved false positive after save, save button missing debounce, draw/spread-switch snapshot not reset, AI generation accidental operations; Arc delete arc double SFX, updateStage no rollback on save failure, AI parameter hardcoding; Interview hasUnsaved permanently blocking leave, handleCopy missing unmount guard, AI parameter hardcoding; CSS 3D flip, flex overflow, mobile breakpoint, theme color variables; hover SFX coverage completion.',
+    announcementList1: 'Tarot Core Fixes: Removed useMemo caching defect in hasUnsaved, switched to direct calculation; correctly reset savedInterpretationRef on handleDraw and spread switch; added isSaving debounce and disabled to save button; disabled Save/Export during AI generation to prevent accidental operations.',
+    announcementList2: 'Arc + Interview Deep Fixes: Arc delete arc now blocks subsequent deleteSound double-play on failure; updateStage persists first then updates state, with automatic rollback on failure; Interview hasUnsaved no longer permanently blocks page leave in activeSession state; added mountedRef unmount guard to handleCopy; both pages\' AI suggest now read model/temperature/maxTokens from settings.llm.',
+    announcementList3: 'CSS & SFX Completion: Added transform-style: preserve-3d and will-change: transform to Tarot 3D flip; added min-width: 0 to history-main to prevent flex overflow; completed 640px mobile breakpoint with padding/gap/font-size scaling; switched badge colors to --success/--danger CSS variables; added .tarot-card coverage to App.tsx hover handler; removed mixed Chinese characters from Korean description.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -2177,10 +2177,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.22.1 Исправления: Комплексная оптимизация Таро Персонажа. Исправлены жёстко заданный китайский язык в AI-промпте, фиксированное имя модели gpt-4, ложноположительное несохранённое состояние, утечка таймера розыгрыша, отсутствие кнопки экспорта, хак с определением языка кнопки сохранения, нелокализованная подсказка API Key, неподходящий звук переворота карт, размер карт на мобильных устройствах и 10+ других проблем.',
-    announcementList1: 'Оптимизация AI-толкования: Исправлен жёстко заданный китайский язык в промпте, изменено на англоязычные инструкции с названиями карт на языке пользователя; исправлено фиксированное имя модели gpt-4, теперь используется модель из настроек пользователя; поддержка настройки temperature и maxTokens.',
-    announcementList2: 'Исправления взаимодействия и состояния: Исправлена ложная сработка hasUnsaved после сохранения; исправлена утечка таймера розыгрыша; исправлено отсутствие кнопки экспорта (несохранённые гадания теперь можно экспортировать напрямую); исправлен хак с определением языка кнопки сохранения; изменён звук переворота карт с cardHover на select.',
-    announcementList3: 'Стили и доступность: Исправлена жёстко заданная китайская подсказка об отсутствии API Key; добавлен локализованный ключ даты; оптимизирован размер карт на мобильных устройствах (автоматическое уменьшение ниже 640px); глобальный SFX-обработчик App.tsx теперь охватывает элементы tarot.',
+    announcementDescription: 'v1.22.2 Исправления: Второй комплексный глубокий аудит. Исправлены ложноположительное hasUnsaved Tarot после сохранения, отсутствие антиблока кнопки сохранения, сброс снимка после розыгрыша/переключения спреда, случайные операции при генерации ИИ; Arc двойной SFX удаления дуги, отсутствие отката updateStage при ошибке сохранения, жёсткое кодирование параметров ИИ; Interview hasUnsaved навсегда блокирует уход, отсутствие защиты размонтирования handleCopy, жёсткое кодирование параметров ИИ; CSS 3D-переворот, flex-переполнение, мобильная точка останова, переменные цвета темы; завершение покрытия hover SFX.',
+    announcementList1: 'Основные исправления Tarot: Устранён дефект кэширования useMemo в hasUnsaved, переключено на прямое вычисление; корректный сброс savedInterpretationRef при розыгрыше и переключении спреда; добавлена защита от повторного нажатия isSaving и disabled для кнопки сохранения; отключены Save/Export во время генерации ИИ для предотвращения случайных операций.',
+    announcementList2: 'Глубокие исправления Arc + Interview: Arc при ошибке удаления дуги теперь блокирует последующий двойной deleteSound; updateStage сначала сохраняет, затем обновляет state, с автоматическим откатом при ошибке; Interview hasUnsaved больше не блокирует уход со страницы в состоянии activeSession; добавлена защита размонтирования mountedRef в handleCopy; AI suggest обеих страниц теперь читает model/temperature/maxTokens из settings.llm.',
+    announcementList3: 'Завершение CSS и SFX: Добавлены transform-style: preserve-3d и will-change: transform для 3D-переворота Tarot; добавлен min-width: 0 в history-main для предотвращения flex-переполнения; завершена мобильная точка останова 640px с масштабированием padding/gap/размера шрифта; цвета badge переключены на CSS-переменные --success/--danger; добавлено покрытие .tarot-card в hover-обработчик App.tsx; удалены смешанные китайские символы из корейского описания.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -3014,15 +3014,15 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     pageCharacterArcTitle: '캐릭터 성장 아크',
     pageCharacterArcDescription: '오리지널 캐릭터의 완전한 성장 아크를 계획합니다. 긍정적 성장, 타락, 플랫, 변신의 4가지 아크 타입을 지원하며, 단계별로 캐릭터의 신념, 결점, 목표, 핵심 사건, 감정 변화를 기록합니다. 캐릭터 카드에서 정보를 불러오고, AI 보조 단계 제안을 받으며, 완전한 아크를 Markdown으로 납품할 수 있습니다.',
     pageCharacterTarotTitle: '캐릭터 타로',
-    pageCharacterTarotDescription: '오리지널 캐릭터를 위한 타로 카드를 뽑아 플롯 영감과 심리적 통찰을 얻습니다. 22장의 대阿尔卡纳, 3가지 클래식 스프레드, AI 보조 심층 해석을 지원합니다.',
+    pageCharacterTarotDescription: '오리지널 캐릭터를 위한 타로 카드를 뽑아 플롯 영감과 심리적 통찰을 얻습니다. 22장의 대아르칸나, 3가지 클래식 스프레드, AI 보조 심층 해석을 지원합니다.',
     audioPresetMute: '무음',
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.22.1 수정: 캐릭터 타로 점의 전면 최적화. AI 프롬프트 중국어 하드코딩, 모델명 gpt-4 고정, 미저장 상태 오탐, 추첨 타이머 누수, 출력 버튼 누락, 저장 버튼 문장 해킹, API Key 미현지화, 카드 뒤집기 음향 부적절, 모바일 카드 크기 등 10+ 항목을 수정했습니다.',
-    announcementList1: 'AI 해석 최적화: 프롬프트 중국어 하드코딩을 수정하여 영어 기반 지시 + 사용자 언어 카드명으로 변경; 모델명 gpt-4 고정을 수정하여 사용자 설정 모델을 사용; temperature 및 maxTokens 사용자 정의를 지원합니다.',
-    announcementList2: '상호작용 및 상태 수정: 저장 후 hasUnsaved 오탐을 수정; 추첨 타이머 미해제로 인한 메모리 누수를 수정; 출력 버튼 누락을 수정(미저장 점도 직접 출력 가능); 저장 버튼의 saveFailed 언어 판정 해킹을 수정; 카드 뒤집기 음향을 cardHover에서 select로 변경.',
-    announcementList3: '스타일 및 접근성: API Key 부재 알림의 중국어 하드코딩을 수정; 날짜 현지화 키를 추가; 모바일 카드 크기를 최적화(640px 이하에서 자동 축소); App.tsx 글로벌 SFX 핸들러에 타로 요소를 추가합니다.',
+    announcementDescription: 'v1.22.2 수정: 2차 전면 심층 감사. 타로 저장 후 hasUnsaved 오탐, 저장 버튼 연속 클릭 방지 없음, 추첨/스프레드 전환 후 스냅샷 미초기화, AI 생성 중 오동작; 아크 아크 삭제 이중 SFX, updateStage 저장 실패 시 롤백 없음, AI 매개변수 하드코딩; 인터뷰 hasUnsaved 영구 이탈 차단, handleCopy 마운트 해제 가드 없음, AI 매개변수 하드코딩; CSS 3D 플립, flex 오버플로, 모바일 브레이크포인트, 테마 색상 변수; hover SFX 커버리지 보완을 수정했습니다.',
+    announcementList1: '타로 핵심 수정: hasUnsaved의 useMemo 캐싱 결함을 제거하고 직접 계산으로 변경; handleDraw 및 스프레드 전환 시 savedInterpretationRef를 올바르게 초기화; 저장 버튼에 isSaving 연속 클릭 방지 및 disabled 추가; AI 생성 중 Save/Export를 비활성화하여 오동작 방지.',
+    announcementList2: '아크 + 인터뷰 심층 수정: 아크 아크 삭제 실패 시 후속 deleteSound 이중 재생을 차단; updateStage는 먼저 지속화한 후 state를 업데이트하고, 실패 시 자동 롤백; 인터뷰 hasUnsaved가 activeSession 상태에서 페이지 이탈을 영구 차단하지 않도록 수정; handleCopy에 mountedRef 마운트 해제 가드 추가; 두 페이지의 AI suggest가 settings.llm에서 model/temperature/maxTokens를 읽도록 변경.',
+    announcementList3: 'CSS 및 SFX 보완: 타로 3D 플립에 transform-style: preserve-3d 및 will-change: transform 추가; history-main에 min-width: 0을 추가하여 flex 오버플로 방지; 640px 모바일 브레이크포인트에 padding/gap/글자 크기 축소 보완; badge 색상을 --success/--danger CSS 변수로 변경; App.tsx hover handler에 .tarot-card 커버리지 보완; 한국어 설명에서 혼입된 중국어 문자를 제거.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3216,6 +3216,18 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.22.1',
+    date: '2026-05-18',
+    title: '1.22.1 修复：角色塔罗占卜全面优化',
+    summary:
+      '修复 AI prompt 硬编码中文、模型名硬编码 gpt-4、未保存状态误报、抽牌定时器泄漏、导出按钮缺失、保存按钮文案 hack、API Key 提示未本地化、翻牌音效不当、移动端卡牌尺寸等 10+ 项问题。',
+    details: [
+      'AI 解读优化：修复 prompt 硬编码中文问题，改为英文基础指令 + 用户语言牌名；修复模型名硬编码 gpt-4，现在使用用户在设置中配置的模型；支持 temperature 和 maxTokens 自定义。',
+      '交互与状态修复：修复 hasUnsaved 保存后仍误报问题；修复抽牌定时器未清理导致的内存泄漏；修复导出按钮缺失（现在未保存的占卜也可直接导出）；修复保存按钮使用 saveFailed 判断语言的 hack；修复翻牌音效从 cardHover 改为 select。',
+      '样式与可访问性：修复 API Key 缺失提示硬编码中文；新增日期本地化键；优化移动端卡牌尺寸（640px 以下自适应缩小）；App.tsx 全局 SFX handler 补全 tarot 元素覆盖。',
+    ],
+  },
   {
     version: '1.22.0',
     date: '2026-05-18',
@@ -5128,7 +5140,7 @@ function App() {
       if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
       // Skip hover sound on interactive inputs to avoid noise during slider/text adjustments
       if (target.closest('input[type="range"], input[type="text"], input[type="number"], input[type="url"], input[type="password"], textarea, select, label[for]')) return;
-      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main, .arc-type-card, .arc-history-main, .tarot-spread-card, .tarot-history-main')) {
+      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main, .arc-type-card, .arc-history-main, .tarot-spread-card, .tarot-card, .tarot-history-main')) {
         lastHoverTime = now;
         playSound('buttonHover');
       } else if (target.closest('.home-card, .feature-intro-card, .tool-card, .asset-card, .template-card, .announcement-entry')) {

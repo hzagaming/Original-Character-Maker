@@ -745,7 +745,10 @@ async function generateAiSuggestion(
   characterInfo: string,
   question: string,
   apiKey: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  model: string,
+  temperature: number,
+  maxTokens: number,
 ): Promise<string> {
   const system =
     'You are an expert character writer. Given a character\'s background info and an interview question, write a compelling in-character response (1-3 sentences, in the same language as the question). Stay true to the character\'s voice and personality.';
@@ -758,13 +761,13 @@ async function generateAiSuggestion(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model,
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.85,
-        max_tokens: 120,
+        temperature,
+        max_tokens: maxTokens,
       }),
     });
     if (!res.ok) throw new Error('API error');
@@ -845,9 +848,8 @@ export default function CharacterInterviewPage({
     if (showSetup) {
       return characterName.trim().length > 0 || characterInfo.trim().length > 0;
     }
-    if (!activeSession) return false;
-    return activeSession.qa.some((q) => q.answer.trim().length > 0);
-  }, [showSetup, characterName, characterInfo, activeSession]);
+    return false;
+  }, [showSetup, characterName, characterInfo]);
   useBeforeUnloadGuard(hasUnsaved);
 
   useEffect(() => {
@@ -932,7 +934,10 @@ export default function CharacterInterviewPage({
         session.characterInfo,
         qa.question,
         settings.apiKey,
-        settings.apiBaseUrl || 'https://api.openai.com/v1'
+        settings.apiBaseUrl || 'https://api.openai.com/v1',
+        settings.llm?.model || 'gpt-4',
+        settings.llm?.temperature ?? 0.85,
+        settings.llm?.maxTokens ?? 120,
       );
       if (mountedRef.current) {
         setGeneratingId(null);
@@ -975,12 +980,14 @@ export default function CharacterInterviewPage({
     if (!activeSession) return;
     navigator.clipboard.writeText(exportMarkdown(activeSession))
       .then(() => {
+        if (!mountedRef.current) return;
         setCopied(true);
         playSound('copySound');
         if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
         copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
       })
       .catch(() => {
+        if (!mountedRef.current) return;
         setSaveToast(copy.copyFailed);
         playSound('error');
       });

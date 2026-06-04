@@ -498,7 +498,10 @@ async function generateAiSuggestion(
   stageTitle: string,
   arcType: string,
   apiKey: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  model: string,
+  temperature: number,
+  maxTokens: number,
 ): Promise<string> {
   const system =
     'You are an expert character development writer. Given a character\'s background info, an arc stage title, and arc type, write a compelling stage description (2-4 sentences, in the same language as the stage title). Focus on the character\'s internal journey, conflicts, and emotional shifts.';
@@ -511,13 +514,13 @@ async function generateAiSuggestion(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model,
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.85,
-        max_tokens: 150,
+        temperature,
+        max_tokens: maxTokens,
       }),
     });
     if (!res.ok) throw new Error('API error');
@@ -677,11 +680,12 @@ export default function CharacterArcPage({
           updatedAt: new Date().toISOString(),
         };
       });
-      setArcs(next);
       if (!persistArcs(next)) {
         setSaveToast(copy.saveFailed);
         playSound('error');
+        return;
       }
+      setArcs(next);
     },
     [arcs, copy.saveFailed]
   );
@@ -698,7 +702,10 @@ export default function CharacterArcPage({
         stage.title,
         arc.arcType,
         settings.apiKey,
-        settings.apiBaseUrl || 'https://api.openai.com/v1'
+        settings.apiBaseUrl || 'https://api.openai.com/v1',
+        settings.llm?.model || 'gpt-4',
+        settings.llm?.temperature ?? 0.85,
+        settings.llm?.maxTokens ?? 150,
       );
       if (mountedRef.current) {
         setGeneratingId(null);
@@ -769,6 +776,7 @@ export default function CharacterArcPage({
         if (!persistArcs(next)) {
           setSaveToast(copy.saveFailed);
           playSound('error');
+          return;
         }
         if (activeArcId === id) {
           setActiveArcId(null);
@@ -1078,6 +1086,9 @@ export default function CharacterArcPage({
                   playSound('back');
                   setShowSetup(true);
                   setActiveArcId(null);
+                  setArcName('');
+                  setCharacterName('');
+                  setTheme('');
                 }}
               >
                 {copy.newArc}
@@ -1206,7 +1217,7 @@ export default function CharacterArcPage({
                       type="button"
                       disabled={generatingId !== null}
                       data-sfx-handled
-                      onClick={() => handleAiSuggest(activeArc.id, stage.id)}
+                      onClick={() => { playSound('buttonClick'); handleAiSuggest(activeArc.id, stage.id); }}
                       title={copy.aiSuggestDesc}
                     >
                       {generatingId === stage.id ? copy.generating : copy.aiSuggest}

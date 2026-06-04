@@ -664,13 +664,13 @@ a {
 
 .icon-button.danger {
   color: var(--danger, #ef476f);
-  border-color: rgba(239, 71, 111, 0.3);
-  background: rgba(239, 71, 111, 0.08);
+  border-color: rgba(var(--danger-rgb), 0.3);
+  background: rgba(var(--danger-rgb), 0.08);
 }
 
 .icon-button.danger:hover {
-  background: rgba(239, 71, 111, 0.15);
-  border-color: rgba(239, 71, 111, 0.5);
+  background: rgba(var(--danger-rgb), 0.15);
+  border-color: rgba(var(--danger-rgb), 0.5);
 }
 
 .primary-button {
@@ -8407,6 +8407,7 @@ button:disabled,
   text-align: left;
   color: inherit;
   padding: 4px 0;
+  min-width: 0;
   min-height: 44px;
 }
 
@@ -8691,11 +8692,30 @@ button:disabled,
     width: 120px;
     height: 195px;
   }
+  .tarot-card-back-pattern {
+    font-size: 2rem;
+  }
   .tarot-card-name {
     font-size: 0.85rem;
   }
   .tarot-card-meaning {
     -webkit-line-clamp: 3;
+  }
+  .tarot-cards-grid {
+    gap: 8px;
+    padding: 10px;
+  }
+  .tarot-reading-area {
+    gap: 12px;
+  }
+  .tarot-interpretation-area {
+    padding: 12px;
+  }
+  .tarot-interpretation-text {
+    font-size: 0.85rem;
+  }
+  .tarot-spread-card {
+    padding: 10px 12px;
   }
 }
 
@@ -8764,17 +8784,7 @@ button:disabled,
   padding: 20px;
 }
 
-.tarot-cards-grid.spread-single {
-  justify-content: center;
-}
 
-.tarot-cards-grid.spread-three {
-  justify-content: center;
-}
-
-.tarot-cards-grid.spread-five {
-  justify-content: center;
-}
 
 .tarot-card-wrapper {
   display: flex;
@@ -8794,6 +8804,7 @@ button:disabled,
   width: 160px;
   height: 260px;
   perspective: 800px;
+  transform-style: preserve-3d;
   border: none;
   background: none;
   cursor: pointer;
@@ -8813,6 +8824,7 @@ button:disabled,
   align-items: center;
   justify-content: center;
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
   padding: 14px;
   box-sizing: border-box;
 }
@@ -8863,13 +8875,13 @@ button:disabled,
 }
 
 .tarot-card-position-badge.upright {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
+  background: rgba(var(--success-rgb), 0.15);
+  color: var(--success);
 }
 
 .tarot-card-position-badge.reversed {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: rgba(var(--danger-rgb), 0.15);
+  color: var(--danger);
 }
 
 .tarot-card-meaning {
@@ -8940,6 +8952,8 @@ button:disabled,
   text-align: left;
   cursor: pointer;
   padding: 0;
+  min-width: 0;
+  min-height: 44px;
 }
 
 .tarot-history-name {
