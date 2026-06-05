@@ -778,21 +778,6 @@ export default function CharacterTarotPage({
     return lines.join('\n');
   }, [copy, language]);
 
-  const handleCopy = useCallback(() => {
-    if (!activeReading) return;
-    navigator.clipboard.writeText(exportMarkdown(activeReading))
-      .then(() => {
-        setCopied(true);
-        playSound('copySound');
-        if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
-        copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => {
-        setSaveToast(copy.copyFailed);
-        playSound('error');
-      });
-  }, [activeReadingId, readings, exportMarkdown, copy.copyFailed]);
-
   const activeReading = useMemo(() => {
     if (activeReadingId) {
       return readings.find((r) => r.id === activeReadingId) ?? null;
@@ -807,6 +792,21 @@ export default function CharacterTarotPage({
       createdAt: new Date().toISOString(),
     };
   }, [readings, activeReadingId, currentCards, characterName, selectedSpread, interpretation, copy.emptyName]);
+
+  const handleCopy = useCallback(() => {
+    if (!activeReading) return;
+    navigator.clipboard.writeText(exportMarkdown(activeReading))
+      .then(() => {
+        setCopied(true);
+        playSound('copySound');
+        if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        setSaveToast(copy.copyFailed);
+        playSound('error');
+      });
+  }, [activeReading, exportMarkdown, copy.copyFailed]);
   const positionLabels = getPositionLabels(selectedSpread);
 
   return (

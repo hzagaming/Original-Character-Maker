@@ -838,13 +838,13 @@ export default function CharacterArcPage({
         updatedAt: new Date().toISOString(),
       };
     });
-    setArcs(next);
     if (!persistArcs(next)) {
       setSaveToast(copy.saveFailed);
       playSound('error');
-    } else {
-      playSound('confirm');
+      return;
     }
+    setArcs(next);
+    playSound('confirm');
   }, [activeArc, arcs, copy.stageCount, copy.saveFailed]);
 
   const handleDeleteStage = useCallback(
@@ -859,13 +859,13 @@ export default function CharacterArcPage({
             updatedAt: new Date().toISOString(),
           };
         });
-        setArcs(next);
         if (!persistArcs(next)) {
           setSaveToast(copy.saveFailed);
           playSound('error');
-        } else {
-          playSound('deleteSound');
+          return;
         }
+        setArcs(next);
+        playSound('deleteSound');
       });
     },
     [activeArc, arcs, copy.deleteConfirm, copy.saveFailed, maybeConfirm]
@@ -886,13 +886,13 @@ export default function CharacterArcPage({
         stages[newIdx] = temp;
         return { ...a, stages, updatedAt: new Date().toISOString() };
       });
-      setArcs(next);
       if (!persistArcs(next)) {
         setSaveToast(copy.saveFailed);
         playSound('error');
-      } else {
-        playSound('select');
+        return;
       }
+      setArcs(next);
+      playSound('select');
     },
     [activeArc, arcs, copy.saveFailed]
   );

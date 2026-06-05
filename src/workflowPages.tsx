@@ -4030,15 +4030,19 @@ function TagPickerModal({
   copy: UiCopySet;
 }) {
   const [filter, setFilter] = useState('');
+  const cardRef = useRef<HTMLElement>(null);
   const filtered = filter.trim()
     ? categories.map((c) => ({ ...c, tags: c.tags.filter((t) => t.toLowerCase().includes(filter.toLowerCase())) })).filter((c) => c.tags.length > 0)
     : categories.map((c) => ({ ...c, tags: [...c.tags] }));
+
+  useModalEscape(onClose);
+  useModalFocus(cardRef, open);
 
   if (!open) return null;
 
   return createPortal(
     <div className="modal-overlay" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <section className="modal-card modal-card-wide" style={{ maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+      <section ref={cardRef} className="modal-card modal-card-wide" role="dialog" aria-modal="true" style={{ maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
         <h2>{title}</h2>
         <input
           className="settings-input"
@@ -4069,7 +4073,7 @@ function TagPickerModal({
           ))}
         </div>
         <div className="confirm-actions" style={{ marginTop: 12 }}>
-          <button className="secondary-button" type="button" onClick={onClose}>
+          <button className="secondary-button modal-close" type="button" aria-label={copy.tagPicker.close} onClick={onClose}>
             {copy.tagPicker.close}
           </button>
           <button className="primary-button" type="button" onClick={onApply}>

@@ -59,6 +59,7 @@ a {
   --text-main: #eef4fb;
   --text-primary: #eef4fb;
   --text-secondary: #9fb2c6;
+  --text-disabled: #64798f;
   --text: var(--text-main);
   --muted: #9fb2c6;
   --surface: var(--panel-soft);
@@ -69,6 +70,7 @@ a {
   --danger-rgb: 239, 71, 111;
   --success: #86efac;
   --success-rgb: 134, 239, 172;
+  --text-on-accent: #ffffff;
   --overlay-backdrop: rgba(0, 0, 0, 0.6);
   position: relative;
   min-height: 100vh;
@@ -676,7 +678,7 @@ a {
 }
 
 .primary-button {
-  color: #ffffff;
+  color: var(--text-on-accent);
   background: rgba(var(--accent-rgb), 0.92);
   box-shadow: var(--button-shadow);
 }
@@ -2429,8 +2431,8 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .zoom-btn {
-  width: 22px;
-  height: 22px;
+  width: 44px;
+  height: 44px;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
@@ -5659,8 +5661,8 @@ input[type='range']:focus::-moz-range-thumb {
 }
 
 .asset-action-btn {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.04);
@@ -6943,8 +6945,8 @@ input[type='range']:focus::-moz-range-thumb {
   position: absolute;
   top: 8px;
   right: 10px;
-  width: 24px;
-  height: 24px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: transparent;
@@ -8263,6 +8265,7 @@ button:disabled,
   gap: 4px;
   padding: 10px 12px;
   border-radius: 10px;
+  min-height: 44px;
   border: 1px solid var(--border);
   background: var(--panel);
   cursor: pointer;
@@ -8425,6 +8428,7 @@ button:disabled,
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-main);
+  overflow-wrap: break-word;
 }
 
 .interview-history-meta {
@@ -8486,6 +8490,7 @@ button:disabled,
   text-align: left;
   padding: 10px 12px;
   border-radius: 10px;
+  min-height: 44px;
   border: 1px solid var(--border);
   background: var(--panel);
   cursor: pointer;
@@ -8673,6 +8678,7 @@ button:disabled,
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-main);
+  overflow-wrap: break-word;
 }
 
 .arc-history-meta {
@@ -8716,7 +8722,7 @@ button:disabled,
     padding: 10px;
   }
   .tarot-reading-area {
-    gap: 12px;
+    gap: 8px;
   }
   .tarot-interpretation-area {
     padding: 12px;
@@ -8997,6 +9003,7 @@ button:disabled,
 .tarot-history-name {
   font-weight: 600;
   font-size: 0.9rem;
+  overflow-wrap: break-word;
 }
 
 .tarot-history-meta {

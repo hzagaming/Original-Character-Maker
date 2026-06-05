@@ -913,7 +913,6 @@ export default function CharacterInterviewPage({
   }, [characterName, characterInfo, selectedMode, language, sessions, isStarting, copy.untitled, copy.saveFailed]);
 
   const updateAnswer = useCallback((sessionId: string, qaId: string, answer: string) => {
-    const prev = sessions;
     const next = sessions.map((s) => {
       if (s.id !== sessionId) return s;
       return {
@@ -922,12 +921,12 @@ export default function CharacterInterviewPage({
         updatedAt: new Date().toISOString(),
       };
     });
-    setSessions(next);
     if (!saveSessions(next)) {
-      setSessions(prev);
       setSaveToast(copy.saveFailed);
       playSound('error');
+      return;
     }
+    setSessions(next);
   }, [sessions, copy.saveFailed]);
 
   const handleAiSuggest = useCallback(
@@ -952,6 +951,7 @@ export default function CharacterInterviewPage({
           updateAnswer(sessionId, qaId, suggestion);
           playSound('success');
         } else {
+          setSaveToast(copy.aiSuggestFailed);
           playSound('error');
         }
       }
@@ -1304,6 +1304,7 @@ export default function CharacterInterviewPage({
                 className="icon-button modal-close"
                 type="button"
                 aria-label={copy.close}
+                data-sfx-handled
                 onClick={() => setShowExport(false)}
               >
                 ✕
@@ -1339,6 +1340,7 @@ export default function CharacterInterviewPage({
                 className="icon-button modal-close"
                 type="button"
                 aria-label={copy.close}
+                data-sfx-handled
                 onClick={() => setShowHistory(false)}
               >
                 ✕

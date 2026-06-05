@@ -69,7 +69,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.22.5';
+const VERSION = '1.22.6';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -746,8 +746,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.22.5 发布前总检：补充 v1.22.2/v1.22.3 历史公告，修复多语言公告本地化混用。',
-    announcementList1: '公告历史补全：将 v1.22.2（第二轮全面深度审计）和 v1.22.3（严重级仓库审计）的完整公告移入 announcementHistory，消除历史公告断层。',
+    announcementDescription: 'v1.22.6 第五轮深度审计：持久化一致性修复、SFX/BGM 根治、可访问性与触摸目标全面加固。',
+    announcementList1: 'ArcPage/Tarot/Interview 持久化一致性：修复 5 处先 setState 后 persist 导致的数据不一致与回滚失败问题；Tarot handleCopy 消除闭包陈旧；Interview AI suggest 失败补 toast。',
     announcementList2: 'Arc + Interview 深度修复：Arc 删除弧线失败时阻止后续 deleteSound 双重播放；updateStage 先持久化再更新 state，失败时自动回滚；Interview hasUnsaved 在 activeSession 状态下不再永久阻止页面离开；handleCopy 添加 mountedRef 卸载守卫；两页 AI suggest 均改为从 settings.llm 读取 model/temperature/maxTokens。',
     announcementList3: 'CSS 与 SFX 补全：Tarot 3D 翻转补充 transform-style: preserve-3d 与 will-change: transform；history-main 补充 min-width: 0 防止 flex 溢出；640px 移动端断点补全 padding/gap/字号缩放；badge 颜色改用 --success/--danger CSS 变量；App.tsx hover handler 补全 .tarot-card 覆盖；Korean 描述移除混入的中文字符。',
     errorBoundaryTitle: '出错了',
@@ -1223,8 +1223,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.22.5 リリース前総検：v1.22.2/v1.22.3 過去公告を補完し、多言語公告のローカライズ混在を修正。',
-    announcementList1: '公告履歴の補完：v1.22.2 と v1.22.3 の完全な公告を announcementHistory に移行し、歴史公告の欠落を解消。',
+    announcementDescription: 'v1.22.6 第5回深度監査：永続化一致性の修正、SFX/BGM の根治、アクセシビリティとタッチターゲットの全面強化。',
+    announcementList1: 'ArcPage/Tarot/Interview の永続化一致性：5 箇所の setState 先・persist 後によるデータ不整合とロールバック失敗を修正；Tarot handleCopy のクロージャ陳旧を解消；Interview AI suggest 失敗時に toast を追加。',
     announcementList2: 'Arc + Interview 深度修正：Arc のアーク削除失敗時に後続の deleteSound 二重再生を阻止；updateStage は先に持久化してから state を更新し、失敗時は自動ロールバック；Interview の hasUnsaved を activeSession 時に永久離脱阻止しないよう修正；handleCopy に mountedRef アンマウントガードを追加；両ページの AI suggest を settings.llm から model/temperature/maxTokens を読み込むように変更。',
     announcementList3: 'CSS と SFX 補完：Tarot 3D フリップに transform-style: preserve-3d と will-change: transform を追加；history-main に min-width: 0 を追加して flex 溢出を防止；640px モバイルブレークポイントに padding/gap/フォントサイズ縮小を補完；badge カラーを --success/--danger CSS 変数に変更；App.tsx hover handler に .tarot-card カバーを補完；Korean 説明から混入した中国語文字を除去。',
     errorBoundaryTitle: 'エラーが発生しました',
@@ -1700,8 +1700,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.22.5 Pre-release check: Backfilled v1.22.2/v1.22.3 announcement history, fixed multilingual announcement localization mix-ups.',
-    announcementList1: 'Announcement history backfill: Moved full v1.22.2 and v1.22.3 announcements into announcementHistory, eliminating the history gap.',
+    announcementDescription: 'v1.22.6 Fifth deep audit: Persistence consistency fixes, SFX/BGM hardening, accessibility and touch target comprehensive reinforcement.',
+    announcementList1: 'ArcPage/Tarot/Interview persistence consistency: Fixed 5 locations of setState-before-persist causing data inconsistency and rollback failures; eliminated Tarot handleCopy stale closure; added toast for Interview AI suggest failures.',
     announcementList2: 'Arc + Interview Deep Fixes: Arc delete arc now blocks subsequent deleteSound double-play on failure; updateStage persists first then updates state, with automatic rollback on failure; Interview hasUnsaved no longer permanently blocks page leave in activeSession state; added mountedRef unmount guard to handleCopy; both pages\' AI suggest now read model/temperature/maxTokens from settings.llm.',
     announcementList3: 'CSS & SFX Completion: Added transform-style: preserve-3d and will-change: transform to Tarot 3D flip; added min-width: 0 to history-main to prevent flex overflow; completed 640px mobile breakpoint with padding/gap/font-size scaling; switched badge colors to --success/--danger CSS variables; added .tarot-card coverage to App.tsx hover handler; removed mixed Chinese characters from Korean description.',
     errorBoundaryTitle: 'Error',
@@ -2177,8 +2177,8 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.22.5 Предрелизная проверка: Дополнена история объявлений v1.22.2/v1.22.3, исправлены смешения локализации многоязычных объявлений.',
-    announcementList1: 'Дополнение истории объявлений: Полные объявления v1.22.2 и v1.22.3 перенесены в announcementHistory, устранён разрыв в истории.',
+    announcementDescription: 'v1.22.6 Пятый глубокий аудит: исправления согласованности персистентности, укрепление SFX/BGM, комплексное усиление доступности и сенсорных целей.',
+    announcementList1: 'Согласованность персистентности ArcPage/Tarot/Interview: исправлены 5 мест с setState до persist, вызывавших рассогласование данных и отказы отката; устранено устаревание замыкания Tarot handleCopy; добавлен toast при неудаче Interview AI suggest.',
     announcementList2: 'Глубокие исправления Arc + Interview: Arc при ошибке удаления дуги теперь блокирует последующий двойной deleteSound; updateStage сначала сохраняет, затем обновляет state, с автоматическим откатом при ошибке; Interview hasUnsaved больше не блокирует уход со страницы в состоянии activeSession; добавлена защита размонтирования mountedRef в handleCopy; AI suggest обеих страниц теперь читает model/temperature/maxTokens из settings.llm.',
     announcementList3: 'Завершение CSS и SFX: Добавлены transform-style: preserve-3d и will-change: transform для 3D-переворота Tarot; добавлен min-width: 0 в history-main для предотвращения flex-переполнения; завершена мобильная точка останова 640px с масштабированием padding/gap/размера шрифта; цвета badge переключены на CSS-переменные --success/--danger; добавлено покрытие .tarot-card в hover-обработчик App.tsx; удалены смешанные китайские символы из корейского описания.',
     errorBoundaryTitle: 'Ошибка',
@@ -3019,8 +3019,8 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.22.5 출시 전 총검사: v1.22.2/v1.22.3 과거 공지를 보충하고, 다국어 공지 현지화 혼용을 수정.',
-    announcementList1: '공지 이력 보충: v1.22.2 및 v1.22.3의 전체 공지를 announcementHistory로 이동하여 이력 공백을 제거.',
+    announcementDescription: 'v1.22.6 5차 심층 감사: 영속화 일관성 수정, SFX/BGM 근본 치료, 접근성 및 터치 타겟 전면 강화.',
+    announcementList1: 'ArcPage/Tarot/Interview 영속화 일관성: setState 우선·persist 나중으로 인한 5곳의 데이터 불일치 및 롤백 실패 수정; Tarot handleCopy 클로저 오래됨 제거; Interview AI suggest 실패 시 toast 추가.',
     announcementList2: '아크 + 인터뷰 심층 수정: 아크 아크 삭제 실패 시 후속 deleteSound 이중 재생을 차단; updateStage는 먼저 지속화한 후 state를 업데이트하고, 실패 시 자동 롤백; 인터뷰 hasUnsaved가 activeSession 상태에서 페이지 이탈을 영구 차단하지 않도록 수정; handleCopy에 mountedRef 마운트 해제 가드 추가; 두 페이지의 AI suggest가 settings.llm에서 model/temperature/maxTokens를 읽도록 변경.',
     announcementList3: 'CSS 및 SFX 보완: 타로 3D 플립에 transform-style: preserve-3d 및 will-change: transform 추가; history-main에 min-width: 0을 추가하여 flex 오버플로 방지; 640px 모바일 브레이크포인트에 padding/gap/글자 크기 축소 보완; badge 색상을 --success/--danger CSS 변수로 변경; App.tsx hover handler에 .tarot-card 커버리지 보완; 한국어 설명에서 혼입된 중국어 문자를 제거.',
     errorBoundaryTitle: '오류',
@@ -3216,6 +3216,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.22.6',
+    date: '2026-05-18',
+    title: '1.22.6 第五轮深度审计：持久化一致性修复、SFX/BGM 根治、可访问性与触摸目标全面加固',
+    summary:
+      '修复 ArcPage/Tarot/Interview 5 处持久化顺序错误导致的数据不一致；消除 Tarot handleCopy 闭包陈旧与 Interview 回滚 bailout 风险；根治 App.tsx BGM 双重 restart 与 SFX 双重播放；补全 TagPickerModal 可访问性；全面扩大触摸目标、补全 CSS 变量、加固响应式布局。',
+    details: [
+      '持久化一致性：ArcPage handleAddStage/handleDeleteStage/handleMoveStage 改为先 persistArcs 后 setArcs；Interview updateAnswer 改为先 saveSessions 后 setSessions，消除 React bailout 回滚风险；Tarot handleCopy 添加 activeReading 依赖消除闭包陈旧。',
+      'SFX/BGM 根治：移除 App.tsx custom music 上传/移除时的冗余 stopMusic/startMusic（updateAudioSettings 已内部处理）；修复首页按钮/工作台入口/音频预设试听的双重播放；补全 hover handler 的 .workflow-entry-button；FaceMaker 快捷键增加弹窗隔离。',
+      '可访问性与弹窗：workflowPages.tsx TagPickerModal 补全 role="dialog" aria-modal="true"、useModalEscape/useModalFocus、modal-close 语义；App.tsx useModalFocus 增加 unmount 焦点归还；SettingsModal/StartModal/ImportModal requestClose 添加定时器清理；路由切换时统一清理弹窗状态。',
+      'UI/UX 与样式：zoom-btn/asset-action-btn/ch-event-delete 扩大至 44×44px；新增 --text-disabled/--text-on-accent CSS 变量；history 名称添加 overflow-wrap；interview-mode-card/arc-type-card 添加 min-height: 44px；tarot-reading-area 520px 断点 gap 缩小；SettingsModal 内嵌对话框 z-index 提升。',
+    ],
+  },
   {
     version: '1.22.5',
     date: '2026-05-18',
@@ -5131,7 +5144,7 @@ function App() {
         if (settingsRef.current.audio.musicEnabled) {
           try { stopMusic(); } catch { /* ignore */ }
         }
-      } else {
+      } else if (settingsRef.current.audio.musicEnabled) {
         try { startMusic(); } catch { /* ignore */ }
       }
     };
@@ -5192,7 +5205,7 @@ function App() {
       if (now - lastHoverTime < HOVER_THROTTLE_MS) return;
       // Skip hover sound on interactive inputs to avoid noise during slider/text adjustments
       if (target.closest('input[type="range"], input[type="text"], input[type="number"], input[type="url"], input[type="password"], textarea, select, label[for]')) return;
-      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main, .arc-type-card, .arc-history-main, .tarot-spread-card, .tarot-card, .tarot-history-main')) {
+      if (target.closest('.primary-button, .secondary-button, .choice-chip, .settings-tab, .action-tile, .back-link, .tool-dot, .collapsible-toggle, .tool-card-header, .toolbar-group-header, .interview-mode-card, .interview-history-main, .arc-type-card, .arc-history-main, .tarot-spread-card, .tarot-card, .tarot-history-main, .workflow-entry-button')) {
         lastHoverTime = now;
         playSound('buttonHover');
       } else if (target.closest('.home-card, .feature-intro-card, .tool-card, .asset-card, .template-card, .announcement-entry')) {
@@ -5456,6 +5469,8 @@ function App() {
     playSound('pageSwitch');
     setScreen(nextScreen);
     setModalStep(null);
+    setImportOpen(false);
+    setIsSettingsOpen(false);
   }
 
   function openSettings(tab: SettingsTab = 'style') {
@@ -5476,6 +5491,9 @@ function App() {
     onNavigate: (screen: Exclude<FeatureScreen, 'home'>) => {
       playSound('pageSwitch');
       setScreen(screen);
+      setModalStep(null);
+      setImportOpen(false);
+      setIsSettingsOpen(false);
     },
     onOpenDocs: (toolId?: string, section?: string, errorCode?: string) => {
       playSound('pageSwitch');
@@ -5840,6 +5858,13 @@ function useModalFocus(cardRef: React.RefObject<HTMLElement>, isOpen: boolean) {
     }, MODAL_CLOSE_MS + 60);
     return () => window.clearTimeout(id);
   }, [isOpen, cardRef]);
+
+  // Fallback: return focus on unmount even if isOpen was hardcoded true
+  useEffect(() => {
+    return () => {
+      triggerRef.current?.focus();
+    };
+  }, []);
 }
 
 function GlobalFooterBar({ version, messages }: { version: string; messages: Messages }) {
@@ -5951,7 +5976,7 @@ function HomeScreen({
               <li>{messages.announcementList3}</li>
             </ul>
             <div className="workflow-actions home-announcement-actions">
-              <button className="secondary-button" type="button" onClick={onOpenAnnouncementArchive}>
+              <button className="secondary-button" type="button" data-sfx-handled onClick={onOpenAnnouncementArchive}>
                 {messages.announcementHistoryButton}
               </button>
             </div>
@@ -5981,6 +6006,7 @@ function HomeScreen({
                           key={feature.id}
                           className="workflow-item compact workflow-entry-button"
                           type="button"
+                          data-sfx-handled
                           onClick={() => onNavigate(feature.id)}
                         >
                           <ActionIcon kind={feature.icon} />
@@ -5994,13 +6020,13 @@ function HomeScreen({
             </div>
 
             <div className="workflow-actions">
-              <button className="primary-button giant-button workflow-action-button" type="button" onClick={onOpenStart}>
+              <button className="primary-button giant-button workflow-action-button" type="button" data-sfx-handled onClick={onOpenStart}>
                 {messages.startButton}
               </button>
-              <button className="secondary-button giant-button workflow-action-button" type="button" onClick={onOpenSettings}>
+              <button className="secondary-button giant-button workflow-action-button" type="button" data-sfx-handled onClick={onOpenSettings}>
                 {messages.settingsButton}
               </button>
-              <button className="secondary-button giant-button workflow-action-button" type="button" onClick={onOpenImport}>
+              <button className="secondary-button giant-button workflow-action-button" type="button" data-sfx-handled onClick={onOpenImport}>
                 {messages.importTitle}
               </button>
             </div>
@@ -6657,6 +6683,9 @@ function FaceMakerPage({
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) {
+        return;
+      }
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable) {
         return;
@@ -7783,6 +7812,7 @@ function StartModal({
 
   function requestClose() {
     setIsClosing(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(onClose, MODAL_CLOSE_MS);
   }
 
@@ -7867,6 +7897,7 @@ function ImportModal({
 
   function requestClose() {
     setIsClosing(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => {
       setIsClosing(false);
       onClose();
@@ -8251,7 +8282,6 @@ function SettingsModal({
   }>({ open: false, slot: 0, name: '' });
 
   // Inner modal ESC isolation — uses capture phase to intercept Escape before outer modal
-  const innerModalRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const isOpen = confirmDialog.open || presetDialog.open;
     if (!isOpen) return;
@@ -8279,6 +8309,7 @@ function SettingsModal({
 
   function requestClose() {
     setIsClosing(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(onClose, MODAL_CLOSE_MS);
   }
 
@@ -8347,10 +8378,6 @@ function SettingsModal({
             customMusicName: file.name,
           },
         });
-        if (settings.audio.musicEnabled) {
-          stopMusic();
-          startMusic();
-        }
       }
     };
     reader.onerror = () => {
@@ -8380,10 +8407,6 @@ function SettingsModal({
           customMusicName: '',
         },
       });
-      if (settings.audio.musicEnabled) {
-        stopMusic();
-        startMusic();
-      }
     }
   }
 
@@ -8746,6 +8769,7 @@ function SettingsModal({
                         key={item.name}
                         className="palette-chip"
                         type="button"
+                        data-sfx-handled
                         onClick={() => previewSound(item.name)}
                       >
                         {messages.audioPreview} {item.label}
@@ -9425,7 +9449,7 @@ function SettingsModal({
 
             {/* Confirm Dialog */}
             {confirmDialog.open && (
-              <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, zIndex: 100 }} role="presentation" onClick={() => setConfirmDialog((d) => ({ ...d, open: false }))}>
+              <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, zIndex: 430 }} role="presentation" onClick={() => setConfirmDialog((d) => ({ ...d, open: false }))}>
                 <section className="modal-card modal-surface" style={{ maxWidth: 420, margin: 'auto', position: 'relative', top: '30%' }} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
                   <h3 style={{ marginBottom: 12 }}>{confirmDialog.title}</h3>
                   <p className="muted-copy" style={{ marginBottom: 20 }}>
@@ -9441,7 +9465,7 @@ function SettingsModal({
 
             {/* Preset Save Dialog */}
             {presetDialog.open && (
-              <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, zIndex: 100 }} role="presentation" onClick={() => setPresetDialog({ open: false, slot: 0, name: '' })}>
+              <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, zIndex: 430 }} role="presentation" onClick={() => setPresetDialog({ open: false, slot: 0, name: '' })}>
                 <section className="modal-card modal-surface" style={{ maxWidth: 420, margin: 'auto', position: 'relative', top: '30%' }} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
                   <h3 style={{ marginBottom: 12 }}>{messages.styleSavePreset}</h3>
                   <p className="muted-copy" style={{ marginBottom: 12 }}>
