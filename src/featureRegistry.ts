@@ -31,6 +31,7 @@ export type ActionIconKind =
   | 'character-interview'
   | 'character-arc'
   | 'character-tarot'
+  | 'reference-sheet'
   | 'docs';
 
 export interface FeatureMeta {
@@ -366,6 +367,21 @@ export const FEATURE_REGISTRY: FeatureMeta[] = [
     pipelineTitle: 'Reading / Export',
     todoOne: '补角色选择与牌阵配置',
     todoTwo: '补占卜解读与 Markdown 导出',
+  },
+  {
+    id: 'reference-sheet',
+    category: 'character',
+    icon: 'reference-sheet',
+    labelKey: 'featureReferenceSheet',
+    actionKey: 'actionReferenceSheet',
+    pageTitleKey: 'pageReferenceSheetTitle',
+    pageDescKey: 'pageReferenceSheetDescription',
+    importable: false,
+    workspaceTitle: 'Reference Sheet Studio',
+    panelTitle: 'Images / Colors / Notes',
+    pipelineTitle: 'Preview / Export',
+    todoOne: '补模板选择、图片上传与配色编辑',
+    todoTwo: '补参考表预览与 PNG 导出',
   },
   // ── 世界观管理 ──
   {

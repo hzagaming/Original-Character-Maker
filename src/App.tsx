@@ -50,6 +50,7 @@ const CharacterInterviewPage = lazy(() => import('./CharacterInterviewPage'));
 const CharacterArcPage = lazy(() => import('./CharacterArcPage'));
 const CharacterTarotPage = lazy(() => import('./CharacterTarotPage'));
 const DocsPage = lazy(() => import('./DocsPage'));
+const ReferenceSheetPage = lazy(() => import('./ReferenceSheetPage'));
 import {
   defaultAudioSettings,
   attachAudioResumeHandler,
@@ -69,7 +70,7 @@ import {
   isAudioBlocked,
 } from './audioEngine';
 
-const VERSION = '1.22.6';
+const VERSION = '1.23.0';
 const STORAGE_KEY = 'oc-maker.settings';
 const MODAL_CLOSE_MS = 220;
 
@@ -127,6 +128,7 @@ type Messages = {
   featureCharacterInterview: string;
   featureCharacterArc: string;
   featureCharacterTarot: string;
+  featureReferenceSheet: string;
   featureDocs: string;
   backHome: string;
   openSettings: string;
@@ -172,6 +174,7 @@ type Messages = {
   actionCharacterInterview: string;
   actionCharacterArc: string;
   actionCharacterTarot: string;
+  actionReferenceSheet: string;
   actionBack: string;
   importTitle: string;
   importDescription: string;
@@ -323,6 +326,8 @@ type Messages = {
   pageCharacterArcDescription: string;
   pageCharacterTarotTitle: string;
   pageCharacterTarotDescription: string;
+  pageReferenceSheetTitle: string;
+  pageReferenceSheetDescription: string;
   pageDocsTitle: string;
   pageDocsDescription: string;
   docsNavIntro: string;
@@ -616,6 +621,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterInterview: '角色访谈室',
     featureCharacterArc: '角色成长弧线',
     featureCharacterTarot: '角色塔罗',
+    featureReferenceSheet: '角色参考表',
     featureDocs: '用户手册',
     backHome: '返回首页',
     openSettings: '打开设置',
@@ -661,6 +667,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterInterview: '角色访谈',
     actionCharacterArc: '成长弧线',
     actionCharacterTarot: '塔罗占卜',
+    actionReferenceSheet: '参考表',
     actionBack: '返回上一级',
     importTitle: '导入配置',
     importDescription: '选择工具并导入之前导出的 JSON 配置文件。',
@@ -746,10 +753,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: '常用本地端口',
     announcementTitle: '公告',
     announcementHistoryButton: '查看往期公告',
-    announcementDescription: 'v1.22.6 第五轮深度审计：持久化一致性修复、SFX/BGM 根治、可访问性与触摸目标全面加固。',
-    announcementList1: 'ArcPage/Tarot/Interview 持久化一致性：修复 5 处先 setState 后 persist 导致的数据不一致与回滚失败问题；Tarot handleCopy 消除闭包陈旧；Interview AI suggest 失败补 toast。',
-    announcementList2: 'Arc + Interview 深度修复：Arc 删除弧线失败时阻止后续 deleteSound 双重播放；updateStage 先持久化再更新 state，失败时自动回滚；Interview hasUnsaved 在 activeSession 状态下不再永久阻止页面离开；handleCopy 添加 mountedRef 卸载守卫；两页 AI suggest 均改为从 settings.llm 读取 model/temperature/maxTokens。',
-    announcementList3: 'CSS 与 SFX 补全：Tarot 3D 翻转补充 transform-style: preserve-3d 与 will-change: transform；history-main 补充 min-width: 0 防止 flex 溢出；640px 移动端断点补全 padding/gap/字号缩放；badge 颜色改用 --success/--danger CSS 变量；App.tsx hover handler 补全 .tarot-card 覆盖；Korean 描述移除混入的中文字符。',
+    announcementDescription: 'v1.23.0 新增角色参考表生成器：将立绘、配色、细节标注整合为专业参考表，支持标准/配色/展示三种模板，一键导出 PNG。',
+    announcementList1: '新增角色参考表（Reference Sheet）：支持拖拽上传主立绘与细节图，编辑 6 色配色板与文字标注；三种布局模板（标准版大立绘+配色+标注、配色版大色块+头像、展示版多图网格）。',
+    announcementList2: '导出与持久化：基于 html-to-image 2 倍分辨率导出透明/纯色背景 PNG；所有配置自动保存到 localStorage；刷新后 blob URL 自动过滤防止 broken image。',
+    announcementList3: 'SFX 与无障碍：全部交互按钮通过 data-sfx-handled 正确对接全局音效系统；支持 4 语言本地化（中/日/英/俄）；返回/设置/模板切换/图片上传/导出/重置音效全覆盖。',
     errorBoundaryTitle: '出错了',
     errorBoundaryDescription: '页面遇到了问题，您可以尝试重置页面。',
     errorBoundaryReset: '重置页面',
@@ -816,6 +823,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterArcDescription: '为你的原创角色规划完整的成长弧线。支持积极成长、堕落、平坦与蜕变四种弧线类型，分阶段记录角色的信念、缺陷、目标、关键事件与情绪变化。支持从角色卡加载角色、AI 辅助生成阶段建议，以及导出完整弧线为 Markdown。',
     pageCharacterTarotTitle: '角色塔罗',
     pageCharacterTarotDescription: '为你的原创角色抽取塔罗牌，获得剧情灵感与角色心理洞察。支持22张大阿卡纳牌、三种经典牌阵，以及AI辅助深度解读。',
+    pageReferenceSheetTitle: '角色参考表',
+    pageReferenceSheetDescription: '将角色的立绘、配色、细节标注整合为专业的参考表。支持三种布局模板，拖拽上传图片，编辑配色与标注，一键导出 PNG，方便约稿时提供给画师或自用归档。',
     pageDocsTitle: '用户手册',
     pageDocsDescription: '查看全部工具的详细使用说明、按钮功能、参数解释和常见报错解决方法。',
     docsNavIntro: '欢迎使用',
@@ -1093,6 +1102,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterInterview: 'キャラインタビュー',
     featureCharacterArc: 'キャラ成長アーク',
     featureCharacterTarot: 'キャラタロット',
+    featureReferenceSheet: 'キャラ参考表',
     featureDocs: 'ユーザーマニュアル',
     backHome: 'ホームへ戻る',
     openSettings: '設定を開く',
@@ -1138,6 +1148,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterInterview: 'キャラインタビュー',
     actionCharacterArc: '成長アーク',
     actionCharacterTarot: 'タロット占い',
+    actionReferenceSheet: '参考表',
     actionBack: '戻る',
     importTitle: '設定をインポート',
     importDescription: 'ツールを選択して、以前エクスポートした JSON 設定ファイルをインポートします。',
@@ -1223,10 +1234,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'よく使うローカルポート',
     announcementTitle: 'お知らせ',
     announcementHistoryButton: '過去のお知らせを見る',
-    announcementDescription: 'v1.22.6 第5回深度監査：永続化一致性の修正、SFX/BGM の根治、アクセシビリティとタッチターゲットの全面強化。',
-    announcementList1: 'ArcPage/Tarot/Interview の永続化一致性：5 箇所の setState 先・persist 後によるデータ不整合とロールバック失敗を修正；Tarot handleCopy のクロージャ陳旧を解消；Interview AI suggest 失敗時に toast を追加。',
-    announcementList2: 'Arc + Interview 深度修正：Arc のアーク削除失敗時に後続の deleteSound 二重再生を阻止；updateStage は先に持久化してから state を更新し、失敗時は自動ロールバック；Interview の hasUnsaved を activeSession 時に永久離脱阻止しないよう修正；handleCopy に mountedRef アンマウントガードを追加；両ページの AI suggest を settings.llm から model/temperature/maxTokens を読み込むように変更。',
-    announcementList3: 'CSS と SFX 補完：Tarot 3D フリップに transform-style: preserve-3d と will-change: transform を追加；history-main に min-width: 0 を追加して flex 溢出を防止；640px モバイルブレークポイントに padding/gap/フォントサイズ縮小を補完；badge カラーを --success/--danger CSS 変数に変更；App.tsx hover handler に .tarot-card カバーを補完；Korean 説明から混入した中国語文字を除去。',
+    announcementDescription: 'v1.23.0 キャラ参考表ジェネレーターを追加：立ち絵、配色、詳細注釈をプロの参考表にまとめ、3種類のテンプレートに対応し、PNG をワンクリックでエクスポート。',
+    announcementList1: 'キャラ参考表（Reference Sheet）を新規追加：主立ち絵と詳細画像のドラッグ＆ドロップアップロード、6 色配色板とテキスト注釈の編集に対応。3 種類のレイアウトテンプレート（スタンダード、パレット、ショーケース）。',
+    announcementList2: 'エクスポートと永続化：html-to-image で 2 倍解像度の PNG をエクスポート；すべての設定は localStorage に自動保存；リロード後は blob URL を自動フィルタリングして破損画像を防止。',
+    announcementList3: 'SFX とアクセシビリティ：すべてのインタラクティブボタンが data-sfx-handled でグローバルサウンドシステムに正しく接続；4 言語ローカライズ（中/日/英/俄）に対応；戻る/設定/テンプレート切替/画像アップロード/エクスポート/リセットの SFX を完全カバー。',
     errorBoundaryTitle: 'エラーが発生しました',
     errorBoundaryDescription: 'ページで問題が発生しました。リセットしてみてください。',
     errorBoundaryReset: 'ページをリセット',
@@ -1293,6 +1304,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterArcDescription: 'オリジナルキャラクターの完全な成長アークを計画します。ポジティブ成長・堕落・フラット・変容の4タイプに対応し、各ステージでキャラの信念、欠点、目標、重要イベント、感情変化を記録。キャラクターカードから読み込み、AIによるステージ案生成と、完全なアークのMarkdown出力に対応。',
     pageCharacterTarotTitle: 'キャラタロット',
     pageCharacterTarotDescription: 'オリジナルキャラクターにタロットを引き、プロットのインスピレーションと心理洞察を得ます。22枚の大アルカナ、3種類のクラシックスプレッド、AIによる深層解釈に対応。',
+    pageReferenceSheetTitle: 'キャラ参考表',
+    pageReferenceSheetDescription: 'キャラクターの立ち絵、配色、詳細注釈をプロの参考表にまとめます。3種類のレイアウトテンプレートに対応し、ドラッグ＆ドロップで画像をアップロード。配色と注釈を編集し、ワンクリックでPNGをエクスポートできます。',
     pageDocsTitle: 'ユーザーマニュアル',
     pageDocsDescription: 'すべてのツールの詳細な使い方、ボタン機能、パラメータ説明、一般的なエラーと解決方法を確認できます。',
     docsNavIntro: 'ようこそ',
@@ -1570,6 +1583,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterInterview: 'Character Interview',
     featureCharacterArc: 'Character Arc',
     featureCharacterTarot: 'Character Tarot',
+    featureReferenceSheet: 'Reference Sheet',
     featureDocs: 'User Manual',
     backHome: 'Back home',
     openSettings: 'Open settings',
@@ -1615,6 +1629,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterInterview: 'Interview',
     actionCharacterArc: 'Arc',
     actionCharacterTarot: 'Tarot',
+    actionReferenceSheet: 'Ref Sheet',
     actionBack: 'Back',
     importTitle: 'Import Config',
     importDescription: 'Select a tool and import a previously exported JSON configuration file.',
@@ -1700,10 +1715,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Common Local Ports',
     announcementTitle: 'Announcement',
     announcementHistoryButton: 'View past announcements',
-    announcementDescription: 'v1.22.6 Fifth deep audit: Persistence consistency fixes, SFX/BGM hardening, accessibility and touch target comprehensive reinforcement.',
-    announcementList1: 'ArcPage/Tarot/Interview persistence consistency: Fixed 5 locations of setState-before-persist causing data inconsistency and rollback failures; eliminated Tarot handleCopy stale closure; added toast for Interview AI suggest failures.',
-    announcementList2: 'Arc + Interview Deep Fixes: Arc delete arc now blocks subsequent deleteSound double-play on failure; updateStage persists first then updates state, with automatic rollback on failure; Interview hasUnsaved no longer permanently blocks page leave in activeSession state; added mountedRef unmount guard to handleCopy; both pages\' AI suggest now read model/temperature/maxTokens from settings.llm.',
-    announcementList3: 'CSS & SFX Completion: Added transform-style: preserve-3d and will-change: transform to Tarot 3D flip; added min-width: 0 to history-main to prevent flex overflow; completed 640px mobile breakpoint with padding/gap/font-size scaling; switched badge colors to --success/--danger CSS variables; added .tarot-card coverage to App.tsx hover handler; removed mixed Chinese characters from Korean description.',
+    announcementDescription: 'v1.23.0 adds Character Reference Sheet: combine illustrations, color palettes, and detail notes into a professional reference sheet with three templates and one-click PNG export.',
+    announcementList1: 'New Reference Sheet tool: drag-and-drop upload for main illustration and detail images; edit 6-color palette and text notes; three layout templates (Standard, Palette, Showcase).',
+    announcementList2: 'Export and persistence: 2× resolution PNG export via html-to-image; all settings auto-saved to localStorage; blob URLs automatically filtered on reload to prevent broken images.',
+    announcementList3: 'SFX and accessibility: all interactive buttons correctly wired to the global sound system via data-sfx-handled; full 4-language localization (ZH/JA/EN/RU); complete SFX coverage for back/settings/template-switch/image-upload/export/reset.',
     errorBoundaryTitle: 'Error',
     errorBoundaryDescription: 'Something went wrong. You can try resetting the page.',
     errorBoundaryReset: 'Reset Page',
@@ -1770,6 +1785,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterArcDescription: 'Plan a complete character arc for your original character. Supports four arc types: Positive Growth, Fall, Flat, and Transformation. Record beliefs, flaws, goals, key events, and emotional shifts stage by stage. Load character info from character cards, get AI-assisted stage suggestions, and export the complete arc as Markdown.',
     pageCharacterTarotTitle: 'Character Tarot',
     pageCharacterTarotDescription: 'Draw tarot cards for your original character to gain plot inspiration and psychological insight. Features 22 Major Arcana cards, three classic spreads, and AI-assisted deep readings.',
+    pageReferenceSheetTitle: 'Reference Sheet',
+    pageReferenceSheetDescription: 'Combine character illustrations, color palettes, and detail notes into a professional reference sheet. Supports three layout templates, drag-and-drop image upload, editable colors and notes, and one-click PNG export for commissions or personal archives.',
     pageDocsTitle: 'User Manual',
     pageDocsDescription: 'View detailed documentation for all tools: button functions, parameter explanations, and common errors with solutions.',
     docsNavIntro: 'Welcome',
@@ -2047,6 +2064,7 @@ const translations: Record<BaseLanguage, Messages> = {
     featureCharacterInterview: 'Интервью с персонажем',
     featureCharacterArc: 'Дуга развития персонажа',
     featureCharacterTarot: 'Таро Персонажа',
+    featureReferenceSheet: 'Референс-таблица',
     featureDocs: 'Руководство пользователя',
     backHome: 'На главную',
     openSettings: 'Открыть настройки',
@@ -2092,6 +2110,7 @@ const translations: Record<BaseLanguage, Messages> = {
     actionCharacterInterview: 'Интервью',
     actionCharacterArc: 'Дуга развития',
     actionCharacterTarot: 'Таро',
+    actionReferenceSheet: 'Реф-таблица',
     actionBack: 'Назад',
     importTitle: 'Импорт конфигурации',
     importDescription: 'Выберите инструмент и импортируйте ранее экспортированный JSON-файл конфигурации.',
@@ -2177,10 +2196,10 @@ const translations: Record<BaseLanguage, Messages> = {
     apiQuickPorts: 'Часто используемые порты',
     announcementTitle: 'Объявление',
     announcementHistoryButton: 'Смотреть прошлые объявления',
-    announcementDescription: 'v1.22.6 Пятый глубокий аудит: исправления согласованности персистентности, укрепление SFX/BGM, комплексное усиление доступности и сенсорных целей.',
-    announcementList1: 'Согласованность персистентности ArcPage/Tarot/Interview: исправлены 5 мест с setState до persist, вызывавших рассогласование данных и отказы отката; устранено устаревание замыкания Tarot handleCopy; добавлен toast при неудаче Interview AI suggest.',
-    announcementList2: 'Глубокие исправления Arc + Interview: Arc при ошибке удаления дуги теперь блокирует последующий двойной deleteSound; updateStage сначала сохраняет, затем обновляет state, с автоматическим откатом при ошибке; Interview hasUnsaved больше не блокирует уход со страницы в состоянии activeSession; добавлена защита размонтирования mountedRef в handleCopy; AI suggest обеих страниц теперь читает model/temperature/maxTokens из settings.llm.',
-    announcementList3: 'Завершение CSS и SFX: Добавлены transform-style: preserve-3d и will-change: transform для 3D-переворота Tarot; добавлен min-width: 0 в history-main для предотвращения flex-переполнения; завершена мобильная точка останова 640px с масштабированием padding/gap/размера шрифта; цвета badge переключены на CSS-переменные --success/--danger; добавлено покрытие .tarot-card в hover-обработчик App.tsx; удалены смешанные китайские символы из корейского описания.',
+    announcementDescription: 'v1.23.0 добавлена Референс-таблица персонажа: объединение иллюстраций, цветовых палитр и детальных заметок в профессиональную таблицу с тремя шаблонами и экспортом PNG в один клик.',
+    announcementList1: 'Новый инструмент Reference Sheet: загрузка основного арта и детальных изображений перетаскиванием; редактирование 6-цветовой палитры и текстовых заметок; три шаблона макета (Стандарт, Палитра, Витрина).',
+    announcementList2: 'Экспорт и персистентность: экспорт PNG с 2× разрешением через html-to-image; все настройки автоматически сохраняются в localStorage; blob URL автоматически фильтруются при перезагрузке для предотвращения повреждённых изображений.',
+    announcementList3: 'SFX и доступность: все интерактивные кнопки корректно подключены к глобальной звуковой системе через data-sfx-handled; полная локализация на 4 языка (КИТ/ЯП/АНГЛ/РУС); полное покрытие SFX для назад/настройки/переключения шаблона/загрузки изображения/экспорта/сброса.',
     errorBoundaryTitle: 'Ошибка',
     errorBoundaryDescription: 'Что-то пошло не так. Попробуйте сбросить страницу.',
     errorBoundaryReset: 'Сбросить страницу',
@@ -2247,6 +2266,8 @@ const translations: Record<BaseLanguage, Messages> = {
     pageCharacterArcDescription: 'Спланируйте полную дугу развития для вашего оригинального персонажа. Поддерживает четыре типа дуг: позитивный рост, падение, плоская и трансформация. Записывайте убеждения, недостатки, цели, ключевые события и эмоциональные сдвиги поэтапно. Загружайте информацию о персонаже из карточек, получайте предложения содержания этапов с помощью ИИ и экспортируйте полную дугу в Markdown.',
     pageCharacterTarotTitle: 'Таро Персонажа',
     pageCharacterTarotDescription: 'Вытяните карты таро для вашего оригинального персонажа, чтобы получить вдохновение для сюжета и психологический инсайт. 22 карты Старших Арканов, три классических расклада и глубокое AI-толкование.',
+    pageReferenceSheetTitle: 'Референс-таблица',
+    pageReferenceSheetDescription: 'Объедините иллюстрации персонажа, цветовые палитры и детальные заметки в профессиональную референс-таблицу. Поддерживает три шаблона макета, загрузку изображений перетаскиванием, редактирование цветов и заметок, а также экспорт PNG в один клик для заказов художникам или личного архива.',
     pageDocsTitle: 'Руководство пользователя',
     pageDocsDescription: 'Просмотрите подробную документацию по всем инструментам: функции кнопок, объяснение параметров и распространённые ошибки с решениями.',
     docsNavIntro: 'Добро пожаловать',
@@ -3019,10 +3040,10 @@ const localizedMessages: Record<AppLanguage, Messages> = {
     audioPresetFeedback: '피드백만',
     audioPresetBgm: 'BGM만',
     audioPresetQuiet: '조용한 모드',
-    announcementDescription: 'v1.22.6 5차 심층 감사: 영속화 일관성 수정, SFX/BGM 근본 치료, 접근성 및 터치 타겟 전면 강화.',
-    announcementList1: 'ArcPage/Tarot/Interview 영속화 일관성: setState 우선·persist 나중으로 인한 5곳의 데이터 불일치 및 롤백 실패 수정; Tarot handleCopy 클로저 오래됨 제거; Interview AI suggest 실패 시 toast 추가.',
-    announcementList2: '아크 + 인터뷰 심층 수정: 아크 아크 삭제 실패 시 후속 deleteSound 이중 재생을 차단; updateStage는 먼저 지속화한 후 state를 업데이트하고, 실패 시 자동 롤백; 인터뷰 hasUnsaved가 activeSession 상태에서 페이지 이탈을 영구 차단하지 않도록 수정; handleCopy에 mountedRef 마운트 해제 가드 추가; 두 페이지의 AI suggest가 settings.llm에서 model/temperature/maxTokens를 읽도록 변경.',
-    announcementList3: 'CSS 및 SFX 보완: 타로 3D 플립에 transform-style: preserve-3d 및 will-change: transform 추가; history-main에 min-width: 0을 추가하여 flex 오버플로 방지; 640px 모바일 브레이크포인트에 padding/gap/글자 크기 축소 보완; badge 색상을 --success/--danger CSS 변수로 변경; App.tsx hover handler에 .tarot-card 커버리지 보완; 한국어 설명에서 혼입된 중국어 문자를 제거.',
+    announcementDescription: 'v1.23.0 캐릭터 참고표 생성기 추가: 전신/배색/세부 주석을 프로페셔널한 참고표로 통합, 3가지 템플릿 지원 및 PNG 원클릭 낮추.',
+    announcementList1: '캐릭터 참고표(Reference Sheet) 신규 추가: 메인 전신과 세부 이미지 드래그앤드롭 업로드; 6색 배색 팔레트 및 텍스트 주석 편집. 3가지 레이아웃 템플릿(스탠다드/팔레트/쇼케이스).',
+    announcementList2: '낮추 및 영속화: html-to-image로 2배 해상도 PNG 낮추; 모든 설정은 localStorage에 자동 저장; 새로고침 후 blob URL을 자동 필터링하여 깨진 이미지 방지.',
+    announcementList3: 'SFX 및 접근성: 모든 인터랙티브 버튼이 data-sfx-handled로 글로벌 사운드 시스템에 정확히 연결; 4언어 로컬라이제이션(중/일/영/러) 지원; 뒤로/설정/템플릿 전환/이미지 업로드/낮추/초기화 SFX 완전 커버.',
     errorBoundaryTitle: '오류',
     errorBoundaryDescription: '페이지에 문제가 발생했습니다. 페이지를 재설정해 보세요.',
     errorBoundaryReset: '페이지 재설정',
@@ -3216,6 +3237,19 @@ const localizedMessages: Record<AppLanguage, Messages> = {
 };
 
 const announcementHistory = [
+  {
+    version: '1.23.0',
+    date: '2026-06-09',
+    title: '1.23.0 新增角色参考表生成器：立绘/配色/标注一键整合为专业参考表',
+    summary:
+      '全新角色参考表（Reference Sheet）工具上线。支持拖拽上传主立绘与细节图，编辑 6 色配色板与文字标注，三种布局模板（标准/配色/展示），2 倍分辨率 PNG 一键导出。全部交互通过 data-sfx-handled 对接全局音效，支持中/日/英/俄 4 语言本地化。',
+    details: [
+      '新增角色参考表生成器：支持主立绘 + 最多 4 张细节图拖拽上传；可编辑 6 色配色板（色名 + HEX）与最多 6 条文字标注；三种布局模板（标准版大立绘+配色+标注、配色版大色块+头像、展示版多图网格+立绘）。',
+      '导出与持久化：基于 html-to-image 以 2 倍分辨率导出 PNG，背景色自动适配深色/浅色主题；所有配置自动保存到 localStorage；刷新页面后自动过滤失效 blob URL，防止 broken image。',
+      'SFX 与无障碍合规：全部交互按钮（返回、设置、模板切换、图片上传/更换/移除、配色编辑、标注增删、导出、重置）均通过 data-sfx-handled 正确对接全局音效系统，消除双重播放；支持 4 语言完整本地化。',
+      '工程集成：新增 types.ts FeatureScreen、featureRegistry.ts ActionIcon/FeatureMeta、App.tsx 路由/翻译（4 语言）/ActionIcon SVG/StartModal 入口/HomeScreen 工作流列表；零 TypeScript 编译错误。',
+    ],
+  },
   {
     version: '1.22.6',
     date: '2026-05-18',
@@ -5756,6 +5790,12 @@ function App() {
               pageTitle={messages.pageCharacterTarotTitle}
               pageDescription={messages.pageCharacterTarotDescription}
             />
+          ) : screen === 'reference-sheet' ? (
+            <ReferenceSheetPage
+              {...sharedPageProps}
+              pageTitle={messages.pageReferenceSheetTitle}
+              pageDescription={messages.pageReferenceSheetDescription}
+            />
           ) : screen === 'docs' ? (
             <DocsPage
               {...sharedPageProps}
@@ -7767,6 +7807,15 @@ function ActionIcon({
         <rect x="10" y="6" width="20" height="28" rx="2" ry="2" />
         <path d="M15 14h10M15 20h10M15 26h6" />
         <circle cx="23" cy="26" r="2" />
+      </>
+    ),
+    'reference-sheet': (
+      <>
+        <rect x="6" y="6" width="14" height="18" rx="2" />
+        <rect x="22" y="6" width="12" height="10" rx="2" />
+        <rect x="22" y="20" width="12" height="14" rx="2" />
+        <circle cx="13" cy="24" r="4" />
+        <path d="M6 32h14" />
       </>
     ),
     docs: (
